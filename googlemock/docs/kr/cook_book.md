@@ -1315,11 +1315,11 @@ using ::testing::_;
 
 `RetiresOnSaturation()`을 사용해서 #2번 expectation이 1회 호출된 이후에는 retire되도록 구현했습니다. 이제 `Log(WARNING, _, "File too large.")`가 2회 호출되면 #2번 expectation을 건너뛰고 #1번 expectation으로 넘어갑니다. 왜냐하면 #2번은 retire되어 inactive상태로 변경되었고 gMock의 고려대상에서 제외되었기 때문입니다.
 
-### Action 사용하기 ##
+### Action 사용하기 ###
 
 #### Mock Method에서 참조타입 반환하기 ####
 
-만약 mock function이 참조타입을 반환해야 한다면 `Return()` 대신 `ReturnRef()` 를 써야 합니다.
+만약 mock function이 참조타입을 반환해야 한다면 `Return()` 대신 `ReturnRef()`를 써야합니다.
 
 ```cpp
 using ::testing::ReturnRef;
@@ -1338,9 +1338,9 @@ class MockFoo : public Foo {
 
 #### Mock Method에서 Live Value 반환하기 ####
 
-`Return(x)`는 해당 소스코드가 수행될 때 `x`의 복사본을 만들어서 미리 저장해둡니다. 따라서 `x`가 변수라고 해도 반환값은 고정됩니다. 즉, 미리 복사해놓은 값만 계속 반환하게 됩니다. 그러나 사용자는 이러한 고정값 대신 `x` 의 _live_ value를 원할때가 있습니다. 여기서 live value란 `x` 변수에 현재 저장되어 있는 값을 사용한다는 의미입니다. 즉 action 생성시점에 그 반환값을 결정하지 말고 실제로 mock method가 호출되는 시점에 `x`에 저장되어 있는 값을 반환받고 싶은 경우입니다.
+`Return(x)`는 해당 소스코드가 수행될 때 `x`의 복사본을 만들어서 미리 저장해둡니다. 따라서 `x`가 변수라고 해도 반환하는 값은 이미 고정되어 버립니다. 이렇게 미리 복사해 놓은 똑같은 값을 계속 반환하기를 원하지 않는다면 어떻게 해야 할까요? 이렇게 변수에 저장된 값을 동작으로 반영해서 반환하는 것을 *live value*라고 부릅니다. 즉, live value란 mock method가 호출되는 시점에 `x`라는 변수에 저장되어 있는 값을 반환값으로 사용한다는 의미입니다.
 
-Mock function이 참조타입을 반환하게 하려면 `ReturnRef(x)`를 사용하면 됩니다. 그러나 `ReturnRef(x)`는 mock function의 return type이 실제로 참조일 때만 사용할 수 있습니다. 그럼 값을 반환하는 mock function가 live value를 반환하도록 하려면 어떻게 해야 할까요? 
+이전에 배웠던 것처럼 mock function이 참조타입을 반환하게 하는 `ReturnRef(x)`를 사용하면 되긴 하지만, `ReturnRef(x)`는 mock function의 return type이 실제로 참조일 때만 사용할 수 있습니다. 그럼 값을 반환하는 mock function에 live value를 사용하려면 어떻게 해야 할까요? 
 
 `ByRef()`를 사용하면 될까요?
 
@@ -1361,7 +1361,7 @@ class MockFoo : public Foo {
   EXPECT_EQ(42, foo.GetValue());
 ```
 
-아쉽지만, 위의 코드는 원하는대로 동작하지 않습니다. 아래의 failure message와 함께 테스트는 실패할 것입니다.
+아쉽지만, 위 코드는 원하는대로 동작하지 않습니다. 아래의 failure message와 함께 테스트는 실패할 것입니다.
 
 ```bash
 Value of: foo.GetValue()
@@ -1369,9 +1369,9 @@ Value of: foo.GetValue()
 Expected: 42
 ```
 
-그 이유는 `foo.GetValue()`의 반환값이 (mock method가 실제로 호출되는 시점의 `value`가 아니라) `Return(value)`라는 action이 수행되는 시점의 `value`로 정해지기 때문입니다. 이러한 결정은 `value`가 어떤 임시객체의 참조이거나 하는 위험한 상황을 대비하기 위한 것입니다. 결과적으로 `ByRef(x)`는 `const int&`가 아니라 `int`타입의 값으로 고정되어 버립니다. 그렇기 때문에 `Return(ByRef(x))`는 항상 `0`을 반환하고 위의 테스트가 실패하는 것입니다.
+그 이유는 `foo.GetValue()`의 반환값이 (mock method가 실제로 호출되는 시점의 `value`가 아니라) `Return(value)`라는 action이 수행되는 시점의 `value`로 정해지기 때문입니다. 이러한 결정은 `value`가 어떤 임시객체의 참조이거나 하는 위험한 상황을 대비하기 위한 것입니다. 해제된 임시객체를 가리키는 것은 언제나 위험합니다. 결과적으로 `ByRef(x)`는 `const int&`가 아니라 `int` 타입의 값으로 고정되어 버립니다. 그렇기 때문에 `Return(ByRef(x))`는 항상 `0`을 반환하게 되고 위의 테스트는 실패합니다.
 
-위의 상황에서는 `ReturnPointee(pointer)`를 사용해야 합니다. 이제 `foo.GetValue()`는 자신이 실제로 호출되는 시점에 `pointer`에 저장된 값을 반환할 것입니다. 여기서 `pointer`에 저장된 값은 action생성시점에 고정되는 것이 아니고 그 값이 변화할 수 있으므로 live value라고 부릅니다.
+위의 상황에서는 `ReturnPointee(pointer)`를 사용해야만 `foo.GetValue()`의 호출시점에 `pointer`에 저장된 값을 반환할 것입니다. 여기서 `pointer`에 저장된 값은 action 생성시점에 고정되는 것이 아니며 그 값이 달라질 수 있으므로 live value라고 부를 수 있습니다.
 
 ```cpp
 using testing::ReturnPointee;
@@ -1386,7 +1386,7 @@ using testing::ReturnPointee;
 
 #### Action 조합하기 ####
 
-Mock function이 호출될 때, 1개 이상의 action을 수행하려면 어떻게 해야 할까요? `DoAll()`을 사용하면 여러개의 action을 모두 수행할 수 있습니다. 또한, 해당 mock function의 반환값으로는 마지막에 오는 action의 반환값을 사용한다는 점도 기억하기 바랍니다.
+Mock function이 호출될 때, 1개 이상의 action을 수행하려면 어떻게 해야 할까요? `DoAll()`을 사용하면 여러개의 action을 모두 수행할 수 있습니다. 또한, 해당 mock function의 반환값으로는 마지막 action의 반환값을 사용한다는 점도 기억하기 바랍니다.
 
 ```cpp
 using ::testing::_;
@@ -1406,7 +1406,7 @@ class MockFoo : public Foo {
 
 #### 복잡한 argument 검증하기
 
-Argument가 여러개이고 각각의 기대사항이 복잡한 mock method가 있다고 가정해 보겠습니다. 이런 경우에 각각의 argument의 기대사항이 다르다면(cardinality가 서로 다른경우 등) expectation을 지정하기가 쉽지 않습니다. 또한, 테스트가 실패했을때도 어느 것이 잘못된 것인지 구분하기가 어려울 수 있습니다.
+Argument가 여러개이고 각각의 기대사항이 복잡한 mock method가 있다고 가정해 보겠습니다. 이런 경우에 각 argument의 기대사항이 다르다면(cardinality가 서로 다른경우 등) expectation을 지정하기가 쉽지 않습니다. 게다가 테스트가 실패한다면 어느 것이 잘못된 것인지 구분하기 어려울 것입니다.
 
 ```c++
   // Not ideal: this could fail because of a problem with arg1 or arg2, or maybe
@@ -1414,7 +1414,7 @@ Argument가 여러개이고 각각의 기대사항이 복잡한 mock method가 �
   EXPECT_CALL(foo, SendValues(_, ElementsAre(1, 4, 4, 7), EqualsProto( ... )));
 ```
 
-위와 같은 코드는 테스트가 실패했을 때, 어떤 부분에서 문제가 발생했는지 파악하기가 어렵습니다. 이럴 때에는 각각의 argument를 저장한 다음에 따로 검증하는 방법을 사용하면 좋습니다. 
+위 코드는 테스트가 실패했을 때, 어떤 부분에서 문제가 발생했는지 파악하기가 어렵습니다. 이럴 때에는 각각의 argument를 별도의 변수에 저장한 다음에 검증하면 도움이 됩니다.
 
 ```c++
   EXPECT_CALL(foo, SendValues)
