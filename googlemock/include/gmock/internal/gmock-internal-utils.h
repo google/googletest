@@ -402,8 +402,8 @@ class StlContainerView {
 
   static const_reference ConstReference(const RawContainer& container) {
     // Ensures that RawContainer is not a const type.
-    testing::StaticAssertTypeEq<RawContainer,
-        GTEST_REMOVE_CONST_(RawContainer)>();
+    testing::StaticAssertTypeEq<
+        RawContainer, typename std::remove_const<RawContainer>::type>();
     return container;
   }
   static type Copy(const RawContainer& container) { return container; }
@@ -413,7 +413,7 @@ class StlContainerView {
 template <typename Element, size_t N>
 class StlContainerView<Element[N]> {
  public:
-  typedef GTEST_REMOVE_CONST_(Element) RawElement;
+  typedef typename std::remove_const<Element>::type RawElement;
   typedef internal::NativeArray<RawElement> type;
   // NativeArray<T> can represent a native array either by value or by
   // reference (selected by a constructor argument), so 'const type'
@@ -437,8 +437,8 @@ class StlContainerView<Element[N]> {
 template <typename ElementPointer, typename Size>
 class StlContainerView< ::std::tuple<ElementPointer, Size> > {
  public:
-  typedef GTEST_REMOVE_CONST_(
-      typename internal::PointeeOf<ElementPointer>::type) RawElement;
+  typedef typename std::remove_const<
+      typename internal::PointeeOf<ElementPointer>::type>::type RawElement;
   typedef internal::NativeArray<RawElement> type;
   typedef const type const_reference;
 
