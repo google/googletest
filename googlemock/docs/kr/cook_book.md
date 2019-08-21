@@ -2985,7 +2985,7 @@ ACTION_P(Plus, a) { ... }
 ACTION_P2(Plus, a, b) { ... }
 ```
 
-#### ACTION 으로 전달되는 인수나 파라미터의 타입을 제한하기 ####
+#### ACTION으로 전달되는 인수나 파라미터의 타입을 제한하기 ####
 
 최대한 간결하고 재사용성을 높이기 위해서 `ACTION*` macro는 mock function의 argument type과 action parameter를 요구하지 않습니다. 대신, compiler가 그런 타입을 추론할 수 있도록 구현해 두었습니다.
 
