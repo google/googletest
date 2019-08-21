@@ -769,7 +769,7 @@ using ::testing::Return;
 
 #### Argument 간의 관계 비교하기 ####
 
-지금까지는 argument 하나하나에 대한 matcher 사용법을 주로 다뤘습니다. 그럼 "첫번째 argument가 두번째 argument보다 작아야 된다." 와 같이 argument 간의 관계를 비교하고 싶은 경우에는 어떻게 해야할까요? 이런 경우에는 `With()` 를 사용하면 원하는 조건을 비교할 수 있습니다.
+지금까지는 argument 하나하나에 대한 matcher 사용법을 주로 다뤘습니다. 그럼 "첫번째 argument가 두번째 argument보다 작아야 된다."와 같이 argument 간의 관계를 비교하고 싶은 경우에는 어떻게 해야할까요? 이런 경우에는 `With()` 를 사용하면 원하는 조건을 비교할 수 있습니다.
 
 ```cpp
 using ::testing::_;
@@ -782,11 +782,11 @@ using ::testing::Lt;
 
 위의 코드는 `InRange()`의 첫번째 argument가 `0`이 아니면서 두번째 argument보다 작아야함을 의미합니다.
 
-`With(m)` 내부의 `m`은 `Matcher<::testing::tuple<A1, ..., An>>`타입이며 여기서 `A1`, ..., `An`은 function argument 들을 의미합니다.
+`With(m)` 내부의 `m`은 `Matcher<::testing::tuple<A1, ..., An>>`타입이며 여기서 `A1`, ..., `An`은 function argument들을 의미합니다.
 
-`With()` 내부에 `m`대신에 `AllArgs(m)`이라고 구현하는 것도 가능합니다. 물론, 동작자체는 동일하지만 `.With(Lt())`보다 `.With(AllArgs(Lt()))`이 더 명시적으로 표현하는 방법입니다.
+`With()` 내부에 `m` 대신에 `AllArgs(m)`이라고 구현하는 것도 가능합니다. 물론, 동작자체는 동일하지만 `.With(Lt())`보다 `.With(AllArgs(Lt()))`이 더 명시적으로 표현하는 방법입니다.
 
-`Args<k1, ..., kn>(m)` 을 사용하면 비교하고 싶은 argument만 골라서(tuple형태로) 비교할 수도 있습니다. 아래 예제를 보겠습니다.
+`Args<k1, ..., kn>(m)`을 사용하면 비교하고 싶은 argument만 골라서(tuple형태로) 비교할 수도 있습니다. 아래 예제를 보겠습니다.
 
 ```cpp
 using ::testing::_;
@@ -798,7 +798,7 @@ using ::testing::Lt;
       .With(AllOf(Args<0, 1>(Lt()), Args<1, 2>(Lt())));
 ```
 
-위 코드는 `Blah()`가 argument 3개(`x`, `y`, `z`)를 전달받았을 때, `x < y < z` 를 만족해야 함을 의미합니다.
+위 코드는 `Blah()`가 argument 3개(`x`, `y`, `z`)를 전달받았을 때, `x < y < z`를 만족해야 함을 의미합니다.
 
 `With`를 쉽게 사용하기 위해서 gMock의 일부 matcher들은 2-tuples 타입을 지원하고 있습니다. 위 예제의 `Lt()`도 그 중 하나입니다. 2-tuples를 지원하는 matcher의 전체목록은 [여기](cheat_sheet.md#multi-argument-matchers)를 참조하시기 바랍니다.
 
@@ -863,9 +863,9 @@ using ::testing::StartsWith;
 
 코드에서 예측가능한 것처럼 `Foo()`, `Bar()`, `Baz()`는 아래 내용들을 검증하게 됩니다.
 
-- `Foo()` 가 `"Hello"`로 시작하는 문자열을 반환하는지 검증합니다.
-- `Bar()` 가 정규식 `"Line \\d+"`과 매칭되는 값을 반환하는지 검증합니다.
-- `Baz()` 가 [5,10] 범위내의 값을 반환하는지 검증합니다.
+- `Foo()`가 `"Hello"`로 시작하는 문자열을 반환하는지 검증합니다.
+- `Bar()`가 정규식 `"Line \\d+"`과 매칭되는 값을 반환하는지 검증합니다.
+- `Baz()`가 [5,10] 범위내의 값을 반환하는지 검증합니다.
 
 이러한 macro의 좋은 점은 소스코드가 *말(영어)처럼 자연스럽게 읽혀진다*는 것입니다. 또한, 동일한 방법으로 failure message도 이해하기 쉽게 출력됩니다. 예를 들어 `Foo()`의 `EXPECT_THAT()`이 실패하면 아래와 같은 message가 출력됩니다.
 
@@ -879,7 +879,7 @@ Expected: starts with "Hello"
 
 #### Predicate를 Matcher처럼 사용하기 ####
 
-gMock은 다양한 built-in matcher들을 제공하고 있습니다. 그럼에도 사용자가 필요로 하는 모든 경우를 만족하지는 못할 것입니다. 그럴 때에는 unary predicate function 또는 functor를 matcher처럼 사용하는 것도 가능합니다. 이를 위해서는 `Truly()`로 predicate를 감싸기만 하면 됩니다.
+gMock은 다양한 built-in matcher들을 제공하고 있습니다. 그럼에도 사용자가 필요로 하는 모든 경우를 만족하지는 못할 것입니다. 이처럼 새로운 matcher가 필요한 경우에는 unary predicate function 또는 functor를 matcher처럼 사용하는 것도 가능합니다. 이를 위해서는 `Truly()`로 predicate를 감싸기만 하면 됩니다.
 
 ```cpp
 using ::testing::Truly;
@@ -890,13 +890,13 @@ int IsEven(int n) { return (n % 2) == 0 ? 1 : 0; }
   EXPECT_CALL(foo, Bar(Truly(IsEven)));
 ```
 
-또한, predicate function(functor)이 꼭 `bool`타입을 반환하지 않아도 됩니다. 반환타입은 조건문 `if (condition)`에 사용할 수 있는 타입이기만 하면 됩니다.
+또한, predicate function(functor)이 꼭 `bool` 타입을 반환하지 않아도 됩니다. 반환타입은 조건문 `if (condition)`에 사용할 수 있는 타입이기만 하면 됩니다.
 
 #### 복사가 안되는 argument를 비교하기 ####
 
 사용자가 `EXPECT_CALL(mock_obj, Foo(bar))`라고 구현했다면, gMock은 `Foo()`의 argument로 전달된 `bar`의 복사본을 만들고 내부적으로 저장해 둡니다. 그랬다가 추후에 `Foo()`가 실제로 호출되면 미리 저장해둔 `bar`의 복사본을 사용하는 것입니다. 이렇게 동작하는 이유는 `EXPECT_CALL()`이 호출되고 난 후에 `bar`의 값이 변경되는 문제를 방지하기 위한 것입니다. `Eq(bar)`, `Le(bar)`와 같은 다른 matcher를 사용하는 경우에도 동일한 방식이 적용됩니다.
 
-그런데 여기서 `bar`의 복사가 불가능하다면 어떻게 해야 할까요? (예를 들어 copy constructor가 없다거나) 첫번째 해결방법은 자체적으로 matcher function을 구현하여 `Truly()`와 함께 사용하는 것입니다. 두번째 해결방법은 `EXPECT_CALL()`이 호출된 이후에는 `bar`가 수정되지 않을 것임을 gMock에게 알려주는 것입니다. 그렇게 되면 gMock은 `bar`의 복사본 대신에 참조(주소)를 저장하게 됩니다. 아래와 같이 하면 됩니다.
+그런데 여기서 `bar`의 복사가 불가능하다면 어떻게 해야 할까요?(예를 들어 copy constructor가 없다거나) 첫번째 해결방법은 자체적으로 matcher function을 구현하여 `Truly()`와 함께 사용하는 것입니다. 두번째 해결방법은 `EXPECT_CALL`이 호출된 이후에는 `bar`가 수정되지 않을 것임을 gMock에게 알려주는 것입니다. 그렇게 되면 gMock은 `bar`의 복사본 대신에 참조(주소)를 저장하게 됩니다. 아래와 같이 하면 됩니다.
 
 ```cpp
 using ::testing::ByRef;
@@ -914,13 +914,13 @@ Remember: 위와 같이 참조형태(`ByRef`)로 전달한 후에 `bar`를 수�
 
 #### Object Member 비교하기 ####
 
-Mock function의 argument로 object가 전달되면 어떻게 해야 할까요? Object로 전달되는 argument를 비교하기 위해 object 전체를 비교하는 것은 좋은 방법이 아닐 것입니다. 즉, 특정한 member variable만 비교하고 싶은 경우를 의미합니다. 이런 경우에는 Field()` 또는 `Property()`를 사용하세요. 사용방법은 아래와 같습니다.
+Mock function의 argument로 object가 전달되면 어떻게 해야 할까요? Object로 전달되는 argument를 비교하기 위해 object 전체를 비교하는 것은 좋은 방법이 아닐 것입니다. 그럼 특정한 member variable만 비교하려면 어떻게 해야 할까요? 이런 경우에는 Field()` 또는 `Property()`를 사용하세요. 사용방법은 아래와 같습니다.
 
 ```cpp
 Field(&Foo::bar, m)
 ```
 
-`Field()`는 `Foo`객체의 `bar`라는 member variable이 matcher `m`을 만족하는지 비교합니다.
+`Field()`는 `Foo` 객체의 `bar`라는 member variable이 matcher `m`을 만족하는지 비교합니다.
 
 ```cpp
 Property(&Foo::baz, m)
@@ -937,7 +937,7 @@ Property(&Foo::baz, m)
 
 유의할 점은 `Property(&Foo::baz, ...)`에서 사용한 `baz()`는 argument가 없는 `const` function으로 선언되어야 한다는 점입니다.
 
-또한, `Field()`와 `Property()`는 object를 가리키는 포인터도 비교할 수 있습니다. 아래 예제를 확인하세요.
+더불어 `Field()`와 `Property()`는 object를 가리키는 포인터도 비교할 수 있습니다. 아래 예제를 보겠습니다.
 
 ```cpp
 using ::testing::Field;
@@ -946,13 +946,13 @@ using ::testing::Ge;
 Field(&Foo::number, Ge(3))
 ```
 
-위 표현은 `p`라는 포인터가 전달되면 `p->number >= 3`이라는 비교를 수행하게 됩니다. 만약, `p`가 `NULL`이라면 항상 실패하게 됩니다.
+위 코드는 `p`라는 포인터가 전달되면 `p->number >= 3`이라는 비교를 수행하게 됩니다.(`p`가 `NULL`이라면 항상 실패하게 됩니다.)
 
 만약, 1개 이상의 member variable을 비교하고 싶다면 어떻게 하면 될까요? 기존처럼 `AllOf()`를 사용하면 됩니다.
 
 #### 포인터가 가리키는 값을 비교하기 ####
 
-C++에서는 포인터 타입의 function argument 사용이 가능합니다. 이를 위해서 `IsNull()`, `NotNull()` 과 같은 matcher와 포인터를 위한 matcher들이 다수 준비되어 있습니다. 만약, 포인터 자체를 비교하는 것이 아니라 포인터가 가리키는 값을 비교하려면 어떻게 하면 될까요? 그런 경우에는 `Pointee(m)` matcher를 사용하면 됩니다.
+C++에서는 포인터를 argument로 사용하는 것도 당연히 가능합니다. 이를 위해서 gMock은 `IsNull()`, `NotNull()`과 같은 포인터용 matcher들을 다수 제공하고 있습니다. 그럼 포인터 자체를 비교하는 것이 아니라 포인터가 가리키는 값을 비교하려면 어떻게 하면 될까요? 그런 경우에는 `Pointee(m)` matcher를 사용하면 됩니다.
 
 아래 예제의 `Pointee(m)`은 포인터가 가리키는 값을 비교하는데 사용합니다.
 
@@ -975,18 +975,17 @@ using ::testing::Pointee;
   AllOf(NotNull(), Pointee(m))
 ```
 
-즉, `NULL` 포인터가 테스트 프로그램을 비정상 종료시킬 염려는 하지 않아도 됩니다.
+이처럼 `NULL`을 자동으로 확인해주기 때문에 `NULL` 포인터가 테스트 프로그램을 비정상 종료시키는 문제는 염려하지 않아도 됩니다.
 
 또한, `Pointee()`는 raw pointer뿐만 아니라 smart pointer(`linked_ptr`, `shared_ptr`, `scoped_ptr` 등)를 사용하는 경우에도 잘 동작합니다.
 
 그럼 포인터를 가리키는 포인터를 어떨까요? 추측해 보십시오. 네, `Pointee()`는 여러번 중첩해서 사용할 수 있습니다. 예를 들어 `Pointee(Pointee(Lt(3)))`라는 코드의 의미는 포인터가 가리키는 포인터가 가리키는 값이 3보다 작거나 같은지 비교합니다.
 
-
 #### Object Property 테스트하기 ####
 
-Argument로 object가 전달되었을 때, 해당 object의 property를 검증하고 싶은 경우가 있을 것입니다. 그러나 그러한 경우를 위한 matcher는 아직 없으므로 필요한 경우에는 직접 정의해야 합니다. 여기서는 이처럼 matcher를 직접 구현하려 할 때 일반 function을 구현하는 것처럼 빠르게 구현하는 방법을 설명합니다.
+Argument로 object가 전달되었을 때, 해당 object의 property를 검증하고 싶은 경우가 있을 것입니다. 그러나 그러한 경우를 위한 matcher는 아직 없으므로 필요한 경우에는 직접 정의해야 합니다. 여기서는 이처럼 matcher를 직접 구현해야 할 때 일반 function을 구현하는 것처럼 빠르게 구현하는 방법을 설명합니다.
 
-일단, `Foo`타입의 argument를 갖는 mock function이 있다고 가정합니다. 그리고 `Foo`타입은 `int bar()`와  `int baz()`라는 function을 가지고 있습니다. 이 때, `bar()`, `baz()`라는 function 2개의 반환값을 더한 값(`bar()` + `baz()`) 이 기대한 값을 만족하는지 구현하고 싶습니다. 어떻게 하면 될까요? 아래 예제를 참조하세요.
+일단, `Foo` class를 argument를 갖는 mock function이 있다고 가정합니다. 그리고 `Foo`는 `int bar()`와 `int baz()`라는 method를 가지고 있습니다. 이 때, `bar()`, `baz()`라는 method 2개의 반환값을 더한 값(`bar()` + `baz()`)이 기대한 바를 만족하는지 구현하고 싶습니다. 어떻게 하면 될까요? 아래 예제를 참조하세요.
 
 ```cpp
 using ::testing::Matcher;
@@ -1024,11 +1023,11 @@ Matcher<const Foo&> BarPlusBazEq(int expected_sum) {
 
 #### Container 비교하기 ####
 
-STL container(list, vector, map 등)를 비교하려면 어떻게 해야 할까요? 일단, C++ STL containter 대부분은 `==` 연산자를 제공하기 때문에 간단하게 `Eq(expected_container)`를 사용해도 됩니다. 여기서 `expected_container`는 argument로 로 전달되기를 바라는 기대값 container 입니다.
+STL container(list, vector, map 등)를 비교하려면 어떻게 해야 할까요? 일단, C++ STL containter 대부분은 `==` 연산자를 제공하기 때문에 간단하게 `Eq(expected_container)`를 사용해도 됩니다. 여기서 `expected_container`는 argument로 전달되기를 바라는 기대값 container입니다.
 
-여기에 더해서 좀 더 유연성 있게 비교하고 싶을 수도 있습니다. 예를 들면 "첫번째 argument는 완전히 같아야 하고 두번째 argument는 어떤 값이든 괜찮다"와 같은 경우가 있을 수 있습니다. 이러한 비교를 구현할 때, container에 포함된 element 자체가 그렇게 많지 않다면 expected container를 선언하는 것 자체가 조금 귀찮은 일이 되기도 합니다.
+여기에 더해서 좀 더 유연하게 비교하고 싶을 수도 있습니다. 예를 들면 "첫번째 argument는 완전히 같아야 하고 두번째 argument는 어떤 값이든 괜찮다"와 같은 경우가 있을 수 있습니다. 이러한 비교를 구현할 때, container에 포함된 element 자체가 그렇게 많지 않다면 expected container를 선언하는 것 자체가 조금 귀찮은 일이 되기도 합니다.
 
-이런 경우를 위해서 `ElementsAre()` 및 `UnorderedElementsAre()`이라는 matcher를 제공하고 있습니다. 먼저 `ElementAre()`의 사용예제는 아래와 같습니다.
+gMock은 이런 경우를 위해서 `ElementsAre()` 및 `UnorderedElementsAre()`이라는 matcher를 제공하고 있습니다. 먼저 `ElementAre()`의 사용예제는 아래와 같습니다.
 
 ```cpp
 using ::testing::_;
@@ -1058,7 +1057,7 @@ using ::testing::UnorderedElementsAre;
 
 위의 matcher도 역시 container가 4개의 element를 가져야 함을 의미합니다. 다만 element들의 순서는 관계가 없고 조건을 만족하는 element 4개가 있는지만 확인합니다.
 
-`ElementsAre()`과 `UnorderedElementsAre()`는 argument의 개수가 0~10개까지만 사용할 수 있도록 overloaded되어 있습니다. 따라서 container의 element가 10개 이상이라면 위와 같은 방법으로는 비교할 수 없습니다. 이 때에는 C-style 배열을 사용해서 expected container(elements들)를 지정하는 것도 가능합니다.
+`ElementsAre()`과 `UnorderedElementsAre()`는 argument의 개수가 0~10개까지만 사용할 수 있도록 overloaded되어 있습니다. 따라서 container의 element가 10개 이상이라면 위와 같은 방법으로는 비교할 수 없습니다. 이 때에는 C-style 배열을 사용해서 expected container(elements들)를 지정하는 것이 좋습니다.
 
 ```cpp
 using ::testing::ElementsAreArray;
@@ -1072,7 +1071,7 @@ using ::testing::ElementsAreArray;
   EXPECT_CALL(mock, Foo(ElementsAreArray(expected_vector2)));
 ```
 
-배열의 크기가 compile time에 정해지지 않은 상황이라면 배열크기 정보를 같이 전달해야 합니다. 아래 예제에서`ElementAreArray()`의 두번째 argument로 전달된 `count`가 바로 배열크기를 가리킵니다.
+배열의 크기가 compile time에 정해지지 않은 상황이라면 배열크기를 같이 전달해야 합니다. 아래 예제에서 `ElementAreArray()`의 두번째 argument로 전달된 `count`가 바로 배열크기를 가리킵니다.
 
 ```cpp
 using ::testing::ElementsAreArray;
@@ -1084,14 +1083,14 @@ using ::testing::ElementsAreArray;
 
 **Tips:**
 
-  * `ElementsAre*()`은 STL iterator pattern(`const_iterator` 타입을 제공하고 `begin(), end()`를 지원하는 것 등)에 부합하는 container라면 *어떤 것*에도 적용할 수 있습니다. 이것은 사용자가 만든 container타입도 STL iterator pattern에 부합한다면 사용할 수 있음을 의미합니다.
+  * `ElementsAre*()`은 STL iterator pattern(`const_iterator` 타입을 제공하고 `begin(), end()`를 지원하는 것)에 부합하는 container라면 *어떤 것*에도 적용할 수 있습니다. 이것은 곧 사용자가 만든 container타입도 STL iterator pattern에 부합한다면 사용할 수 있음을 의미합니다.
   * `ElementsAre*()`을 중첩해서 사용할 수도 있습니다 즉, 중첩된 container에 대해서도 동작합니다.
   * 만약, container가 참조형식이 아니라 포인터로 전달되는 경우라고 해도 `Pointee(ElementsAre*(...))`라고 써주기만 하면 됩니다.
   * `ElementAre*` 계열은 element 간의 *순서가 중요할 때* 사용해야 합니다. 따라서 `hash_map`과 같이 순서가 정해지지 않은 container에 대해서는 사용하면 안됩니다.
 
 #### Matcher 공유하기 ####
 
-gMock의 matcher는 내부적으로 ref-count 방식을 사용하는 포인터로 구현되어 있습니다. 이러한 구조를 통해서 matcher를 복사할 때는 포인터만 복사하면 되므로 매우 빠르게 동작합니다. 또한, ref-count 방식이므로 마지막으로 가리키는 포인터가 사라지면 matcher는 삭제될 것입니다.
+gMock의 matcher는 내부적으로 ref-count 방식을 사용하는 포인터로 구현되어 있습니다. 이러한 구조를 통해서 matcher를 복사할 때는 포인터만 복사하면 되므로 매우 빠르게 동작합니다. 또한 ref-count 방식이므로 마지막으로 가리키는 포인터가 사라지면 해당 matcher object도 삭제됩니다.
 
 자, 이제 복잡한 matcher를 하나 구현했다면 이것을 복사해서 재사용하면 됩니다. 코드를 복사할 필요 없이 matcher타입 변수에 matcher를 저장하고 필요할 때마다 가져다 쓰면 됩니다. 아래 예제를 참고하세요.
 
@@ -1109,33 +1108,33 @@ using ::testing::Matcher;
 
 WARNING: gMock은 언제 얼마나 많은 matcher가 실행될지 미리 알지 못합니다. 따라서 모든 matcher는 *순수하게 기능적인 동작*만 해야합니다. 즉, 프로그램 내의 다른 부분을 수정하면 안됩니다. 더불어 결과를 만들어낼 때 프로그램 내의 다른 부분으로부터 영향을 받아서도 안됩니다. 오직 matcher로 전달되는 parameter, argument, 및 내부변수만 가지고 결과를 만들어내야 합니다. Parameter나 argument가 참조 혹은 포인터 타입인 경우에는 수정하지 않도록 주의해야 합니다.
 
-이 내용은 standard matcher이든 custom matcher이든 관계없이 모두 충족해야 하는 요구사항입니다. 같은 맥락에서 matcher는 내부적으로 mock function을 호출해서도 안됩니다. 왜냐하면 mock object와 gMock에 어떠한 수정도 가해서는 안됩니다.
+이 내용은 standard matcher이든 custom matcher이든 관계없이 모두 충족해야 하는 요구사항입니다. 같은 맥락에서 matcher는 내부적으로 mock function을 호출해서도 안됩니다. 왜냐하면 mock object와 gMock에 어떠한 수정도 가해서는 안되기 때문입니다.
 
 ### Expectation 설정하기 ##
 
-#### ON_CALL, EXPECT_CALL 구분하고 사용하는 방법 ####
+#### ON_CALL, EXPECT_CALL을 구분하고 사용하는 방법 ####
 
 gMock의 `ON_CALL`은 아마도 자주 사용되는 기능은 아닐 것입니다.
 
-알다시피 mock object의 행위를 지정하는 방법은 2가지가 있습니다. `ON_CALL`, `EXPECT_CALL`이 그것입니다. 그럼 2개의 다른점은 무엇일까요? 먼저 `ON_CALL`은 mock method가 호출되었을 때 어떤 행위를 해야하는지는 지정할 수 있지만 *expectation*은 지정할 수 없습니다. 다음으로 `EXPECT_CALL`은 행위를 지정할 수도 있고 더불어 expectation도 지정할 수 있습니다. *예를 들어서 mock method로 어떤 argument가 전달되어야 하는지, 몇 번 호출되어야 하는지, mock method간의 호출순서는 어떠한지 등입니다.*
+알다시피 mock object의 행위를 지정하는 방법은 2가지가 있습니다. `ON_CALL`, `EXPECT_CALL`이 그것입니다. 그럼 2개의 다른점은 무엇일까요? 먼저 `ON_CALL`은 mock method가 호출되었을 때 어떤 행위를 해야하는지는 지정할 수 있지만 *expectation*은 지정할 수 없습니다. 다음으로 `EXPECT_CALL`은 행위를 지정하는 것에 더해서 expectation도 지정할 수 있습니다. *예를 들어서 mock method로 어떤 argument가 전달되어야 하는지, 몇 번 호출되어야 하는지, mock method 간의 호출순서는 어떠한지 등입니다.*
 
-그럼 "`EXPECT_CALL`이 제공하는 기능이 더 많으므로 `ON_CALL`보다 좋다"라고 하면 될까요? 물론 아닙니다. 왜냐하면 `EXPECT_CALL`은 테스트 대상의 행위에 어찌됐든 제약을 계속해서 추가하는 것입니다. 여기서 우리는 제약사항이 필요한 것보다 많은 상황이 부족한 상황보다 오히려 더 나쁜 것으로 봐야한다는 것입니다.
+그럼 "`EXPECT_CALL`이 제공하는 기능이 더 많으므로 `EXPECT_CALL`이 `ON_CALL`보다 좋다"라고 하면 될까요? 물론 아닙니다. 왜냐하면 `EXPECT_CALL`은 테스트 대상의 행위에 어찌됐든 제약을 계속해서 추가하는 것입니다. 여기서 우리는 제약사항이 필요한 것보다 많은 상황이 부족한 상황보다 오히려 더 나쁜 것으로 봐야한다는 점이 중요합니다.
 
 약간 직관에 반하는 이야기이기도 합니다. 왜 더 많이 검증하는 것이 더 적게 검증하는 것보다 나쁜 걸까요?
 
-정답은 테스트가 *무엇을* 검증해야 하는가에 있습니다. **좋은 테스트는 코드의 상호작용을 검증해야 합니다.** 테스트가 너무 과도한 제약사항을 가지게 되면 구현을 자유롭게 할 수 없게 됩니다. 그 결과로 인해 코드의 상호작용, 즉 인터페이스를 망가트리지 않음에도 불구하고 refactoring이나 optimization을 자유롭게 할 수 없다면 큰 문제가 되는 것입니다. 심지어는 어떤 수정사항이 테스트에 실패하긴 하지만 그 외에는 아무런 문제가 없는 경우도 발생하게 됩니다. 또 그로 인해 테스트에 실패한 이유를 디버깅하고 해결하기 위해 의미없는 시간을 뺏기게 될 것입니다.
+정답은 테스트가 *무엇을* 검증해야 하는가에 있습니다. **좋은 테스트는 코드의 상호작용을 검증해야 합니다.** 테스트가 너무 과도한 제약사항을 가지게 되면 구현을 자유롭게 할 수 없게 됩니다. 그러한 제약사항으로 인해 인터페이스(모듈간의 interaction)를 망가트리지 않음에도 불구하고 refactoring이나 optimization을 자유롭게 할 수 없다면 큰 문제가 되는 것입니다. 심지어는 어떤 수정사항이 테스트에서 실패하는 것을 제외하고는 아무런 문제가 없는 경우도 발생하게 됩니다. 그로 인해 테스트에 실패한 이유를 디버깅하고 해결하기 위해 의미없는 시간을 허비하게 될 것입니다.
 
-1개의 테스트로 많은 것을 검증하려고 하면 안됩니다. **1개 테스트로는 1개만 검증하는 것이 좋은 습관입니다.** 그렇게 해야만 bug가 발생해도 1~2개의 테스트에서만 문제가 될 것입니다. 그렇지 않고 여러개의 테스트가 한 번에 잘못되면 디버깅하기가 훨씬 어려워 집니다. 또한, 테스트의 이름을 통해서 무엇을 검증하려 하는지 자세히 표현하는 것도 좋은 습관입니다. 그렇게 해야 log만 보고도 어떤 문제인지 예측할 수 있습니다.
+1개의 테스트로 많은 것을 검증하려고 하면 안됩니다. **1개 테스트로는 1개만 검증하는 것이 좋은 습관입니다.** 그렇게 해야만 bug가 발생해도 1~2개의 테스트에서만 문제가 될 것입니다. 그렇지 않고 여러개의 테스트가 한 번에 잘못되면 디버깅하기가 훨씬 어려워집니다. 또한, 테스트의 이름을 통해서 무엇을 검증하려 하는지 자세히 표현하는 것도 좋은 습관입니다. 그렇게 해야 log만 보고도 어떤 문제인지 예측할 수 있습니다.
 
-이제부터는 `ON_CALL`을 먼저 사용하고, 실제로 필요할 때만 `EXPECT_CALL`을 사용하시기 바랍니다. 예를 들어 test fixture에 여러개의 `ON_CALL`을 구현할 수도 있습니다. 그렇게 되면 모든 `TEST_F()`가 동일한 설정을 공유하도록 할 수 있습니다. 이렇게 `ON_CALL`을 통해 기본적인 설정을 공유한 다음에 개별 `TEST_F()`에는 조심스럽게 `EXPECT_CALL`을 적용하기 바랍니다. 이렇게 하면 개별 `TEST_F()` 각각에 많은 `EXPEC_CALL`을 사용하는 것보다 훨씬 유연한 테스트가 될 것입니다. 또한, 테스트의 목적도 명확하게 표현할 수 있기 때문에 가독성 및 유지보수성도 향상될 것입니다.
+이제부터는 `ON_CALL`을 먼저 사용하고, 실제로 필요할 때만 `EXPECT_CALL`을 사용하시기 바랍니다. 예를 들어 test fixture에 여러개의 `ON_CALL`을 구현할 수도 있습니다. 그렇게 되면 모든 `TEST_F()`가 동일한 설정을 공유하도록 할 수 있습니다. 이렇게 `ON_CALL`을 통해 기본적인 설정을 공유한 다음에 개별 `TEST_F()`에는 조심스럽게 `EXPECT_CALL`을 적용하기 바랍니다. 이러한 전략은 각각의 `TEST_F()`에 많은 `EXPEC_CALL`을 사용하는 것보다 훨씬 유연한 테스트로 만들어 줄 것입니다. 또한, 테스트의 목적도 명확하게 표현할 수 있기 때문에 가독성 및 유지보수성도 향상될 것입니다.
 
-만약, `EXPECT_CALL`을 사용하은 mock function들이 너무 많은 "Uninteresting mock function call"을 발생시켜 문제가 된다면 `NiceMock`을 사용하기 바랍니다. 또는 문제가 되는 mock function에 대해 `EXPECT_CALL(....).Times(AnyNumber())`를 사용하는 것도 괜찮습니다. 단지 warning message를 없애기 위한 목적으로 너무 상세한 `EXPECT_CALL(....)`을 작성해서는 안 됩니다. 그렇게 하면 유지보수가 힘들어집니다.
+만약, `EXPECT_CALL`을 사용하는 mock function들이 너무 많은 "Uninteresting mock function call"을 발생시켜서 문제가 된다면 `NiceMock`을 사용하기 바랍니다. 또는 문제가 되는 mock function에 대해 `EXPECT_CALL(....).Times(AnyNumber())`를 사용하는 것도 괜찮습니다. 단지 warning message를 없애기 위한 목적으로 너무 상세한 `EXPECT_CALL(....)`을 작성해서는 안 됩니다. 그렇게 하면 유지보수가 힘들어집니다.
 
 #### Uninteresting Call 무시하기 ####
 
-만약, 어떤 mock method가 호출되는것에 관심이 없다면 별다른 설정을 하지 않으면 됩니다. 그런 상황에서 해당 mock method가 호출되면 gMock은 test program을 계속 진행하기 위한 목적으로 default action을 자동적으로 수행합니다. 만약 이러한 default action이 원하는 방향과 다르다면 default action을 변경할 수도 있습니다. 이를 위해서는 `ON_CALL`을 이용해도 되고 `DefaultValue<T>::Set()`을 overriding해도 됩니다. (뒤에서 다시 설명합니다.)
+만약, 어떤 mock method가 호출되는것에 관심이 없다면 별다른 설정을 하지 않으면 됩니다. 그런 상황에서 해당 mock method가 호출되면 gMock은 test program을 계속 진행하기 위한 목적으로 default action을 자동적으로 수행합니다. 만약 이러한 default action이 원하는 방향과 다르다면 default action을 변경할 수도 있습니다. 이를 위해서는 `ON_CALL`을 이용해도 되고 `DefaultValue<T>::Set()`을 overriding해도 됩니다.(뒤에서 다시 설명합니다.)
 
-이렇게 `ON_CALL`을 사용한 default action 설정과 대비하여 다시 한 번 기억해야 할 부분은 `EXPECT_CALL`은 사용하는 순간부터 해당 mock method에 (엄격한) expectation을 설정하는 것이며 그러한 expectation이 만족하지 않으면 test error를 발생시킨다는 것입니다.
+이렇게 `ON_CALL`을 사용한 default action 설정과 대비하여 다시 한 번 기억해야 할 부분은 `EXPECT_CALL`은 사용하는 순간부터 해당 mock method에 (더 엄격한) expectation을 설정하는 것이며 그러한 expectation이 만족하지 않으면 test failure를 발생한다는 것입니다.
 
 #### Unexpected Call 허용하지 않기 ####
 
@@ -1148,7 +1147,7 @@ using ::testing::_;
       .Times(0);
 ```
 
-동일한 mock method에 대해서 어떤 방식의 호출은 허용하고, 나머지는 허용하지 않으려면 여러개의 `EXPECT_CALL`을 사용하면 됩니다.
+동일한 mock method에 대해서 어떤 방식의 호출은 허용하고, 나머지는 허용하지 않으려면 `EXPECT_CALL`을  여러개 사용하면 됩니다.
 
 ```cpp
 using ::testing::AnyNumber;
@@ -1159,23 +1158,23 @@ using ::testing::Gt;
       .Times(AnyNumber());
 ```
 
-만약 `foo.Bar()`가 호출되었는데 위의 코드에서 설정한 2개의 `EXPECT_CALL`중  어느 것도 만족하지 않는다면 해당 테스트는 실패하게 됩니다.
+만약 `foo.Bar()`가 호출되었는데 위의 코드에서 설정한 2개의 `EXPECT_CALL` 중에서 어느 것도 만족하지 않았다면 해당 테스트는 실패하게 됩니다.
 
 #### Uninteresting vs Unexpected 를 구분하자 ####
 
-gMock에서 _uninteresting_ 호출과 _unexpected_ 호출은 서로 다른 개념입니다. 매우 다릅니다.
+gMock에서 *uninteresting* 호출과 *unexpected*호출은 서로 다른 개념입니다. 매우 다릅니다.
 
-먼저, `x.Y(...)`이 **uninteresting** 이라는 의미는 `EXPECT_CALL(x, Y(....))`이 하나도 없음을 뜻합니다. 쉽게 말해서 테스트에서 해당 mock function이 어떻게 되든 신경쓰지 않겠다는 의미입니다.
+먼저, `x.Y(...)`이 **uninteresting**이라는 의미는 `EXPECT_CALL(x, Y(....))`이 하나도 없음을 뜻합니다. 쉽게 말해서 테스트에서 해당 mock function이 어떻게 되든 신경쓰지 않겠다는 의미입니다.
 
-다음으로 `x.Y(...)`이 **unexpected** 라는 의미는 해당 함수에 대해 `EXPECT_CALL(x, Y(...))`을 사용하고 있지만, 실제로 `x.Y(...)`가 호출되었을 때, expectation을 만족하는 `EXPECT_CALL(x. Y(...))`을 찾지 못했음을 의미합니다. 즉, 해당 mock function이 기대한 대로 사용되지 않았기 때문에 해당 테스트의 결과는 실패가 됩니다.
+다음으로 `x.Y(...)`이 **unexpected**라는 의미는 해당 함수에 대해 `EXPECT_CALL(x, Y(...))`을 사용하고 있지만, 실제로 `x.Y(...)`가 호출되었을 때, expectation을 만족하는 `EXPECT_CALL(x. Y(...))`을 찾지 못했음을 의미합니다. 즉, 해당 mock function이 기대한 대로 사용되지 않았기 때문에 해당 테스트의 결과는 실패가 됩니다.
 
 **unexpected call이 발생한 테스트는 항상 실패로 판정됩니다.** 왜냐하면 이것은 곧 mock function에 대한 expectation과 실제 코드의 동작이 다름을 의미하기 때문입니다.
 
-반대로 (기본모드의) **uninteresting call은 테스트 실패를 의미하지 않습니다.** 왜냐하면 테스트에서 해당 mock function의 동작을 정의한 적이 없기 때문입니다. gMock은 아무런 expectation도 설정되지 않은 mock function은 어떻게 수행되더라도 괜찮다고 판단합니다. 대신 언젠가 문제가 *될 수도 있음을* 알리기 위해 warning을 출력해 줍니다. (예를 들어 테스트를 구현하다가`EXPECT_CALL`을 실수로 빠트렸을 수도 있습니다.)
+반대로 (기본모드naggy에서) **uninteresting call은 테스트 실패를 의미하지 않습니다.** 왜냐하면 테스트에서 해당 mock function의 동작을 정의한 적이 없기 때문입니다. gMock은 아무런 expectation도 설정되지 않은 mock function은 어떻게 수행되더라도 괜찮다고 판단합니다. 대신 언젠가 문제가 *될 수도 있음을* 알리기 위해 warning을 출력해 줍니다. 왜냐하면 예를 들어서 사용자가 테스트를 구현하다가 `EXPECT_CALL`을 실수로 빠트렸을 수도 있기 때문입니다.
 
-gMock에서 `NiceMock`과 `StrictMock`은 mock class를 "nice" 또는 "strict"로 만들어 줍니다. 이것이 uninteresting call 과 unexpected call 에 어떤 영향을 미칠까요?
+gMock에서 `NiceMock`과 `StrictMock`은 mock class를 "nice" 또는 "strict"로 만들어 줍니다. 이것이 uninteresting call과 unexpected call에 어떤 영향을 미칠까요?
 
-**Nice mock**은 uninteresting call warning을 없애 줍니다. 기본모드에 비해 출력물이 변하긴 하지만 테스트 결과 측면에서 달라지는 점은 없습니다. 즉, 기본모드에서 실패라면 nice mock에서도 실패인 것입니다.
+**Nice mock**은 uninteresting call warning을 없애 줍니다. 기본모드에 비해 출력물에 차이는 있지만 테스트 결과 측면에서 달라지는 점은 없습니다. 즉, 기본모드에서 실패라면 nice mock에서도 실패인 것입니다.
 
 **Strict mock**은 uninteresting call warning을 error로 간주합니다. 따라서 기본모드에서 성공하는 테스트라도 실패할 수 있게 됩니다. 즉, 테스트 결과가 달라질 수 있습니다.
 
@@ -1194,7 +1193,7 @@ TEST(...) {
 
 위의 `EXPECT_CALL`은 `GetDomainOwner()`의 argument로 `"google.com"`을 전달받기를 기대합니다. 따라서 `GetDomainOnwer("yahoo.com")`라는 내용으로 호출되면 이것은 unexpected call이고 테스트는 실패합니다. 즉, `NiceMock`을 사용했다고 하더라도 unexpected call로 인한 실패는 동일하게 실패라는 것입니다.
 
-그러면 `GetDomainOnwer()`가 어떤 argument를 전달받더라도 테스트가 실패하지 않게 하려면 어떻게 하면 될까요? 이런 경우에는 "catch all" 목적의 `EXPECT_CALL` 을 추가하는 것이 일반적입니다.  `_` 와 `AnyNumber()`를 사용해서 구현합니다.
+그러면 `GetDomainOnwer()`가 어떤 argument를 전달받더라도 테스트가 실패하지 않게 하려면 어떻게 하면 될까요? 이런 경우에는 "catch all" 목적의 `EXPECT_CALL`을 추가하는 것이 일반적입니다. `_` 와 `AnyNumber()`를 사용해서 구현합니다.
 
 ```cpp
   EXPECT_CALL(mock_registry, GetDomainOwner(_))
@@ -1207,13 +1206,13 @@ TEST(...) {
 
 한가지 주의할 점은 이렇게 동일한 mock function에 대해 여러개의 `EXPECT_CALL`을 사용하면 소스코드 상에서 나중에 오는 것과 먼저 비교한다는 것입니다. 즉, 위의 코드에서는 `GetDomainOwner()`에 대한 호출이 발생하면 `GetDomainOwner("google.com")`와 먼저 비교해보고 이것을 만족하지 않으면 다음으로 `GetDomainOwner(_)`와의 비교를 수행하게 됩니다.
 
-Uninteresting call, nice mock, strict mock 에 대한 더 자세한 내용은 ["The Nice, the Strict, and the Naggy"](cook_book.md#nice-모드-strict-모드-naggy-모드-naggy-잔소리가-심한)를 참조하세요.
+Uninteresting call, nice mock, strict mock에 대한 더 자세한 내용은 ["The Nice, the Strict, and the Naggy"](cook_book.md#nice-모드-strict-모드-naggy-모드-naggy-잔소리가-심한)를 참조하세요.
 
 #### 함수의 호출순서 지정하기 ####
 
-하나의 mock function에 대해 여러개의 `EXPECT_CALL`를 사용했을 때, `EXPECT_CALL`을 비교하는 순서가 있다고 바로 위에서 얘기했습니다. 그러나 이렇게 만족하는 `EXPECT_CALL`을 찾는 과정에서 순서가 있다고 해서 해당 mock function이 특정한 호출순서가 가진다고 말할 수는 없습니다. 예를 들어 어떤 mock function에 2개의 `EXPECT_CALL`을 설정했다면 기대를 만족하는 `EXPECT_CALL`은 첫번째 일수도 있고, 두번째 일수도 있습니다. 단지 두번째 것을 먼저 비교해보는 것 뿐이죠. 다시 말하면 비교순서는 정해져 있지만 호출순서는 아직 지정하지 않은 것입니다.
+하나의 mock function에 대해 여러개의 `EXPECT_CALL`을 사용했을 때, `EXPECT_CALL`을 비교하는 순서가 있다고 바로 위에서 얘기했습니다. 그러나 이렇게 만족하는 `EXPECT_CALL`을 탐색하는 과정에 순서가 있다고 해서 해당 mock function이 특정한 호출순서가 가진다고 말할 수는 없습니다. 예를 들어 어떤 mock function에 2개의 `EXPECT_CALL`을 설정했다면 기대를 만족하는 `EXPECT_CALL`은 첫번째 일수도 있고, 두번째 일수도 있습니다. 단지 두번째 것을 먼저 비교해보는 것 뿐이죠. 다시 말하면 비교순서는 정해져 있지만 호출순서는 아직 지정하지 않은 것입니다.
 
-그럼 이러한 호출순서를 명확히 지정하고 싶다면 어떻게 해야할까요? 이를 위해서는 아래코드와 같이  해당하는 `EXPECT_CALL()`들을 모아서 새로운 block에 넣고 상단에 `InSequence`라는 타입의 변수를 선언하면 됩니다.
+그러면 호출순서를 명확히 지정하고 싶다면 어떻게 해야할까요? 이를 위해서는 아래 예제와 같이 해당하는 `EXPECT_CALL()`들을 모아서 새로운 block에 넣고 상단에 `InSequence`라는 타입의 변수를 선언하면 됩니다.
 
 ```cpp
 using ::testing::_;
@@ -1229,21 +1228,21 @@ using ::testing::InSequence;
   }
 ```
 
-위 코드는 `foo.DoThis(5)`가 제일 먼저 호출되고, 그 다음에 `foo.DoThat()`, `foo.DoThis()`가 호출되기를 기대하는 코드입니다. 실제로 `foo.DoThis()`의 argument로 `6`이 전달되면 `DoThis(5)`를 만족하지 않기 때문에 테스트가 실패합니다. 즉, 현재 호출순서에 있는 `EXPECT_CALL`이 기대를 만족하지 않는다고 해서 기대를 만족하는 다른 `EXPECT_CALL`이 있는지 찾거나 하지 않습니다. 여기서 한가지 유의할 점은 기존에는 소스코드상에서 하단에 있는 `EXPECT_CALL`을 먼저 비교했지만,  `InSequence`를 사용하는 상황에서는 위에서부터 순서대로 비교한다는 점입니다.
+위 코드는 `foo.DoThis(5)`가 제일 먼저 호출되고 그 다음에 `foo.DoThat(_)`, `foo.DoThis(6)`이 순서대로 호출되기를 기대하는 코드입니다. 만약 `foo.DoThis()`를 처음 호출할때 argument로 `6`이 전달되면 `DoThis(5)`를 만족하지 않기 때문에 테스트가 실패합니다. 즉, 현재 호출순서에 있는 `EXPECT_CALL`이 기대를 만족하지 않는다고 해서 기대를 만족하는 다른 `EXPECT_CALL`이 있는지 찾거나 하지 않습니다. 여기서 한가지 유의할 점은 기존에는 단순히 만족하는 `EXPECT_CALL`을 탐색할 때는 소스코드상에서 하단에 있는 `EXPECT_CALL`부터 먼저 비교했지만, `InSequence`를 사용하는 상황에서는 위에서부터 순서대로 진행한다는 점입니다.
 
 #### 함수의 호출순서를 부분부분 지정하기 ####
 
-`InSequence`는 function들의 호출순서를 일렬로 지정합니다. 이에 더해서 function에 부분적인 순서를 지정하는 것도 가능합니다. 예를 들어 `A`가 `B`와`C`보다 먼저 호출되기를 바라는 것과 동시에 `B`와 `C`간에는 호출순서를 지정하고 싶지 않을 수도 있습니다. 이러한 상황에서 `InSequence`를 사용하면 원하는 것에 비해 많은 제약을 지정하기 때문에 적합하지 않습니다.
+`InSequence`는 function의 호출순서를 일렬로 지정합니다. 이에 더해서 여러 function에 다양한 순서를 지정하는 것도 가능합니다. 예를 들어 `A`가 `B`와 `C`보다 먼저 호출되기를 바라는 것과 동시에 `B`와 `C`간에는 호출순서를 지정하고 싶지 않을 수도 있습니다. 기존처럼 `InSequence`를 사용하는 것은 원하는 것에 비해 많은 제약을 지정하는 것이기 때문에 적합하지 않습니다.
 
-gMock은 부분적인 호출순서를 지원하기 위해서 DAG(directed acyclic graph)를 적용했습니다. 이를 사용하기 위한 몇 가지 방법이 있는데 먼저 `EXPECT_CALL`에 [After](cheat_sheet.md#the-after-clause)를 붙여서 사용하는 것이 한가지 방법입니다.
+gMock은 이렇게 부분적인 호출순서를 지원하기 위해서 DAG(directed acyclic graph)를 적용했습니다. 이를 사용하기 위한 몇 가지 방법이 있는데 먼저 `EXPECT_CALL`에 [After](cheat_sheet.md#the-after-clause)를 붙여서 사용하는 것이 한가지 방법입니다.
 
-또 다른 방법은 `InSequence()`를 사용하는 것입니다. (위에서 설명한 `InSequence` class가 아닙니다.) 이 개념은 jMock 2에서 가져왔습니다. `After()`보다는 유연성이 떨어지긴 하지만 길고 연속된 함수호출을 지정할 때 편리합니다. 왜냐하면 하나의 호출흐름 안에 있는 `EXPECT_CALL`들은 별도의 이름을 가질 필요가 없기 때문입니다. 아래에 계속해서 `InSequence()`의 동작방식을 설명하겠습니다.
+또 다른 방법은 `InSequence()`를 사용하는 것입니다.(위에서 설명한 `InSequence` class와는 다릅니다.) 이 개념은 jMock 2에서 가져왔습니다. `After()`보다는 유연성이 떨어지긴 하지만 길고 연속된 함수호출을 지정할 때 편리합니다. 왜냐하면 하나의 호출흐름 안에 있는 `EXPECT_CALL`들은 별도의 이름을 가질 필요가 없기 때문입니다. 아래에 계속해서 `InSequence()`의 동작방식을 설명하겠습니다.
 
-`EXPECT_CALL()`을 graph 자료구조의 node라고 가정해봅시다. 그럼 node A 에서 node B로 가는 edge를 추가함으로 DAG가 하나 만들어집니다. 이 때, 해당 DAG의 의미는 A가 B보다 먼저 호출되어야 함을 뜻합니다. 이렇게 DAG에서 직접적으로 연결되는 edge를 "sequence"라고 부릅니다. 여기서 하나의 sequence에는 또 다시 내부적으로 DAG를 구성할 수 있습니다. 이렇게 내부적으로 구성된 DAG는 자신이 가지고 있는 `EXPECT_CALL()`들의 호출순서 정보와 함께 바깥의 DAG를 만드는데 영향을 주는 `EXPECT_CALL()`도 알고 있어야 합니다.
+`EXPECT_CALL()`을 graph 자료구조의 node라고 가정해봅시다. 그럼 node A에서 node B로 가는 edge를 추가함으로 DAG가 하나 만들어집니다. 이 때, 해당 DAG의 의미는 A가 B보다 먼저 호출되어야 함을 뜻합니다. 이렇게 DAG에서 직접적으로 연결되는 edge를 "sequence"라고 부릅니다. 여기서 하나의 sequence에는 또 다시 내부적으로 DAG를 구성할 수 있습니다. 이렇게 내부적으로 구성된 DAG는 자신이 가지고 있는 `EXPECT_CALL()`들의 호출순서 정보와 함께 바깥의 DAG를 만드는데 영향을 주는 `EXPECT_CALL()`도 알고 있어야 합니다.
 
 이러한 부분적인 호출순서를 실제로 구현하려면 2가지만 알면 됩니다. 먼저 DAG의 edge(sequence)를 의미하는 `Sequence` object를 정의합니다. 다음으로 DAG의 node(`EXPECT_CALL`)가 어느 `Sequence`에 속하는지 알려주는 것입니다. 
 
-여기서 같은 `Sequence`에 속하는 `EXPECT_CALL`들은 소스코드상에서 위-아래로, 즉 작성된 순서대로 호출되어야 합니다.
+이제 같은 `Sequence`에 속하는 `EXPECT_CALL`들은 소스코드상에서 위-아래로, 즉 작성된 순서대로 호출되어야 합니다.
 
 ```cpp
 using ::testing::Sequence;
@@ -1274,7 +1273,7 @@ using ::testing::Sequence;
 
 #### Expectation의 active/inactive 설정하기 ####
 
-어떤 mock method가 호출되어 만족하는 expectation(`EXPECT_CALL`)을 찾을 때, gMock은 active 상태인 expectation에 대해서만 이러한 작업을 수행합니다. Expectation들이 처음 생성되어 호출되기 전에는 기본적으로 active상태라고 보면 됩니다. 그러다가 자신보다 나중에 호출되어야 할 함수가 호출되는 시점에 inactive 상태가 됩니다. (이렇게 inactive 상태가 되는 것을 _retires_라고도 부릅니다.) 
+어떤 mock method가 호출되어 만족하는 expectation(`EXPECT_CALL`)을 찾을 때, gMock은 active 상태인 expectation에 대해서만 이러한 작업을 수행합니다. Expectation들이 처음 생성되어 호출되기 전에는 기본적으로 active상태라고 보면 됩니다. 그러다가 자신보다 나중에 호출되어야 할 함수가 호출되는 시점에 inactive 상태가 됩니다. 이렇게 inactive 상태가 되는 것을 *retires*라고 부릅니다.
 
 ```cpp
 using ::testing::_;
@@ -1293,7 +1292,7 @@ using ::testing::Sequence;
 
 위의 코드는 `log.Log()`에 대해 #1, #2, #3 순서로 호출순서를 지정하고 있습니다. 따라서 `log.Log()`의 expectation #1번은 얼마든지 호출될 수 있지만, #2번 또는 #3번이 호출되는 순간 retire 됩니다. 왜냐하면 자신보다 나중에 호출되어야 할 expectation이 매칭되었기 때문입니다. 따라서 그 이후에 `log.Log()`에 "File too large."`라는 argument가 전달되면 테스트는 실패하게 될 것입니다.
 
-아래와 같은 방법으로 expectation을 구현하면 자동으로 retire되지 않는다는 점도 기억하기 바랍니다.
+아래와 같은 방법으로 `Seqeunce`없이 일반적인 방법으로 구현한 expectation들은 자동으로 retire되지 않는다는 점도 기억하기 바랍니다.
 
 ```cpp
 using ::testing::_;
@@ -1302,9 +1301,9 @@ using ::testing::_;
   EXPECT_CALL(log, Log(WARNING, _, "File too large."));     // #2
 ```
 
-위의 코드는 `"File too large."`라는 argument가 한 번만 전달되기를 바라면서 작성한 테스트코드입니다. `log.Log(WARNING, _, "File too large.")`라고 한 번 호출되었다면 문제가 없습니다. 그러나 두번째도 동일한 argument가 전달되면 테스트는 실패합니다. 왜냐하면 두번째 호출도 #2번 expectation을 사용하게 되는데 #2번 expectation은 1회만 호출되기를 기대하는 코드이기 때문입니다. (여기서 cardinality가 생략되어 있으므로 이는 곧 `Times(1)`을 의미합니다.)
+위의 코드는 `"File too large."`라는 argument가 한 번만 전달되기를 바라면서 작성한 테스트코드입니다. `log.Log(WARNING, _, "File too large.")`라고 한 번 호출되었다면 문제가 없습니다. 그러나 두번째도 동일한 argument가 전달되면 테스트는 실패합니다. 왜냐하면 두번째 호출도 #2번 expectation을 사용하게 되는데 #2번 expectation은 1회만 호출되기를 기대하는 코드이기 때문입니다. 왜냐하면 cardinality가 생략되어 있으므로 이는 곧 `Times(1)`을 의미하기 때문입니다.
 
-이러한 문제를 피하기 위해서는 expectation을 직접 retire시켜야 합니다. 즉, 원하는 횟수만큼은 충족(saturation)되었으니 retire시키라는 내용을 구현하면 됩니다.
+이러한 문제를 피하기 위해서는 expectation을 직접 retire시켜야 합니다. 즉, 원하는 cardinality가 충족(saturation)되었으니 retire시키라는 내용을 추가하면 됩니다.
 
 ```cpp
 using ::testing::_;
