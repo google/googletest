@@ -391,7 +391,7 @@ EXPECT_THAT(actual_foos, Pointwise(FooEq(), expected_foos));
 
 #### Returning a Value
 
-| Matcher | Description |
+| Action  | Description |
 |:--------|:------------|
 |`Return()`|Mock function은 `void` 타입을 반환하면서 종료합니다.|
 |`Return(value)`|Mock function은 `value`를 반환하면서 종료합니다. 만약, mock function의 본래 return type과 `value`의 타입이 서로 다르다면, value의 타입을 선택하게 됩니다.|
@@ -404,7 +404,7 @@ EXPECT_THAT(actual_foos, Pointwise(FooEq(), expected_foos));
 
 #### Side Effects
 
-| Matcher | Description |
+| Action  | Description |
 |:--------|:------------|
 |`Assign(&variable, value)`|`value`를 variable에 저장합니다.|
 |`DeleteArg<N>()`| `N`번째(0부터 시작) argument를 delete합니다. 따라서 해당 argument는 pointer 형태입니다. |
@@ -419,7 +419,7 @@ EXPECT_THAT(actual_foos, Pointwise(FooEq(), expected_foos));
 
 #### Callable(Function, Functor, Lambda, Callback)을 Action처럼 사용하기
 
-| Matcher | Description |
+| Action  | Description |
 |:--------|:------------|
 |`Invoke(f)`|`f`를 호출합니다. mock function이 전달받은 argument를 `f`에 그대로 전달합니다.|
 |`Invoke(object_pointer, &class::method)`|`class::method`를 호출합니다. mock function이 전달받은 argument를 `class:method`에 그대로 전달합니다.|
@@ -460,7 +460,7 @@ InvokeArgument<2>(5, string("Hi"), ByRef(foo))
 
 #### Default Action
 
-| Matcher | Description |
+| Action  | Description |
 |:--------|:------------|
 |`DoDefault()`|Default action을 수행합니다. Built-in default action 또는 `ON_CALL()`을 통해 사용자가 정의한 default action을 실행합니다.|
 
@@ -468,7 +468,7 @@ InvokeArgument<2>(5, string("Hi"), ByRef(foo))
 
 #### Composite Actions
 
-| Matcher                        | Description                                                  |
+| Action                         | Description                                                  |
 | :----------------------------- | :----------------------------------------------------------- |
 | `DoAll(a1, a2, ..., an)`       | `a1`부터 `an`까지 모든 action을 수행합니다. 전체의 반환값은 `an`의 반환값을 사용합니다. 나머지 action들은 `void`를 반환해야만 합니다. |
 | `IgnoreResult(a)`              | Action `a`를 수행하고 그 반환값은 무시합니다. 단, `a`의 return type은 `void`가 되면 안 됩니다. |
@@ -478,7 +478,7 @@ InvokeArgument<2>(5, string("Hi"), ByRef(foo))
 
 #### Defining Actions
 
-| Matcher                                       | Description                                                  |
+| Action                                        | Description                                                  |
 | :-------------------------------------------- | :----------------------------------------------------------- |
 | `ACTION(Sum) { return arg0 + arg1; }`         | mock function의 첫번째, 두번째 argument의 합을 반환하는 `Sum()`이라는 action을 정의한 것입니다. |
 | `ACTION_P(Plus, n) { return arg0 + n; }`      | mock function의 첫번째 argument에 `n`만큼 더한 값을 반환하는 `Plus(n)`이라는 action을 정의한 것입니다. |
@@ -490,8 +490,8 @@ InvokeArgument<2>(5, string("Hi"), ByRef(foo))
 
 Cardinalities는 mock function의 호출횟수를 명세하는데 사용합니다. 주로 `Times()`와 함께 사용합니다.
 
-| Matcher | Description |
-|:--------|:------------|
+| Cardinality | Description |
+|:------------|:------------|
 |`AnyNumber()`|호출되는 횟수에 제한이 없습니다.|
 |`AtLeast(n)`|적어도 `n`회 이상 호출되어야 합니다.|
 |`AtMost(n)`|많아도 `n`회를 넘겨서는 안됩니다.|
