@@ -4,8 +4,24 @@
 
 **Note:** gMock은 소스코드상에 `testing` 이라는 namespace에 구현되어 있습니다. 따라서 gMock에 구현된 `foo`라는 기능을 사용하고자 한다면 `using testing:Foo` 와 같이 namespace를 명시해서 사용해야 합니다. 이 문서에는 예제코드를 간단하게 작성하기 위해서 `using`을 사용하지 않은 코드도 종종 있긴 하지만 사용자가 구현할 때는 `using`을 꼭 사용해야 합니다.
 
-
 ### Mock Class 만들기 ###
+
+사실 mock class를 정의하는 방법은 일반적인 C++ class를 정의하는 방법과 동일합니다. 다만, class 내부에 mock method를 정의할 때는 `MOCK_METHOD`라는 macro를 사용해야 합니다. 이 macro를 사용해야만 mock method로 사용할 수 있습니다. 또한, macro는 3개 또는 4개의 parameter를 전달받을 수 있습니다. 아래 예제와 함께 자세히 설명하도록 하겠습니다.
+
+```cpp
+class MyMock {
+ public:
+  MOCK_METHOD(ReturnType, MethodName, (Args...));
+  MOCK_METHOD(ReturnType, MethodName, (Args...), (Specs...));
+};
+```
+
+처음 3개 parameter에는 mocking하려는 대상 method의 signature 정보만 그대로 써주면 됩니다. 마지막 4번째 parameter에는 대상 mock method의 특성을 적어줘야 합니다. 여기서 특성이라 함은 아래와 같은 정보를 의미합니다.
+
+*   **`const`** - mock method를 `const`로 선언합니다. 대상 method가 `const` method 일 때 사용하면 됩니다.
+*   **`override`** - mock method를 `override`로 선언합니다. 대상 method가 `virtual` method 일 때 사용하면 됩니다.
+*   **`noexcept`** - mock method를 `noexcept`로 선언합니다. 대상 method가 `noexcept` method 일 때 사용하면 됩니다.
+*   **`Calltype(...)`** - mock method의 call type을 지정합니다. Windows 환경에서 주로 사용합니다.(예: `STDMETHODCALLTYPE`)
 
 #### Comma(`,`)를 문제없이 사용하는 방법
 
