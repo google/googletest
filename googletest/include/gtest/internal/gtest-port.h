@@ -72,8 +72,6 @@
 //                              is/isn't available.
 //   GTEST_HAS_EXCEPTIONS     - Define it to 1/0 to indicate that exceptions
 //                              are enabled.
-//   GTEST_HAS_POSIX_RE       - Define it to 1/0 to indicate that POSIX regular
-//                              expressions are/aren't available.
 //   GTEST_HAS_PTHREAD        - Define it to 1/0 to indicate that <pthread.h>
 //                              is/isn't available.
 //   GTEST_HAS_RTTI           - Define it to 1/0 to indicate that RTTI is/isn't
@@ -167,12 +165,6 @@
 //   GTEST_HAS_TYPED_TEST   - typed tests
 //   GTEST_HAS_TYPED_TEST_P - type-parameterized tests
 //   GTEST_IS_THREADSAFE    - Google Test is thread-safe.
-//   GOOGLETEST_CM0007 DO NOT DELETE
-//   GTEST_USES_POSIX_RE    - enhanced POSIX regex is used. Do not confuse with
-//                            GTEST_HAS_POSIX_RE (see above) which users can
-//                            define themselves.
-//   GTEST_USES_SIMPLE_RE   - our own simple regex is used;
-//                            the above RE\b(s) are mutually exclusive.
 
 // Misc public macros
 // ------------------
@@ -216,12 +208,6 @@
 //   Mutex, MutexLock, ThreadLocal, GetThreadCount()
 //                            - synchronization primitives.
 //
-// Regular expressions:
-//   RE             - a simple regular expression class using the POSIX
-//                    Extended Regular Expression syntax on UNIX-like platforms
-//                    GOOGLETEST_CM0008 DO NOT DELETE
-//                    or a reduced regular exception syntax on other
-//                    platforms, including Windows.
 // Logging:
 //   GTEST_LOG_()   - logs messages at the specified severity level.
 //   LogToStderr()  - directs all log messages to stderr.
@@ -371,44 +357,6 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 // Used to define __ANDROID_API__ matching the target NDK API level.
 #  include <android/api-level.h>  // NOLINT
 #endif
-
-// Defines this to true if and only if Google Test can use POSIX regular
-// expressions.
-#ifndef GTEST_HAS_POSIX_RE
-# if GTEST_OS_LINUX_ANDROID
-// On Android, <regex.h> is only available starting with Gingerbread.
-#  define GTEST_HAS_POSIX_RE (__ANDROID_API__ >= 9)
-# else
-#  define GTEST_HAS_POSIX_RE (!GTEST_OS_WINDOWS)
-# endif
-#endif
-
-#if GTEST_USES_PCRE
-// The appropriate headers have already been included.
-
-#elif GTEST_HAS_POSIX_RE
-
-// On some platforms, <regex.h> needs someone to define size_t, and
-// won't compile otherwise.  We can #include it here as we already
-// included <stdlib.h>, which is guaranteed to define size_t through
-// <stddef.h>.
-# include <regex.h>  // NOLINT
-
-# define GTEST_USES_POSIX_RE 1
-
-#elif GTEST_OS_WINDOWS
-
-// <regex.h> is not available on Windows.  Use our own simple regex
-// implementation instead.
-# define GTEST_USES_SIMPLE_RE 1
-
-#else
-
-// <regex.h> may not be available on this platform.  Use our own
-// simple regex implementation instead.
-# define GTEST_USES_SIMPLE_RE 1
-
-#endif  // GTEST_USES_PCRE
 
 #ifndef GTEST_HAS_EXCEPTIONS
 // The user didn't tell us whether exceptions are enabled, so we need
@@ -877,62 +825,6 @@ class Secret;
 // A helper for suppressing warnings on constant condition.  It just
 // returns 'condition'.
 GTEST_API_ bool IsTrue(bool condition);
-
-// Defines RE.
-
-#if GTEST_USES_PCRE
-// if used, PCRE is injected by custom/gtest-port.h
-#elif GTEST_USES_POSIX_RE || GTEST_USES_SIMPLE_RE
-
-// A simple C++ wrapper for <regex.h>.  It uses the POSIX Extended
-// Regular Expression syntax.
-class GTEST_API_ RE {
- public:
-  // A copy constructor is required by the Standard to initialize object
-  // references from r-values.
-  RE(const RE& other) { Init(other.pattern()); }
-
-  // Constructs an RE from a string.
-  RE(const ::std::string& regex) { Init(regex.c_str()); }  // NOLINT
-
-  RE(const char* regex) { Init(regex); }  // NOLINT
-  ~RE();
-
-  // Returns the string representation of the regex.
-  const char* pattern() const { return pattern_; }
-
-  // FullMatch(str, re) returns true if and only if regular expression re
-  // matches the entire str.
-  // PartialMatch(str, re) returns true if and only if regular expression re
-  // matches a substring of str (including str itself).
-  static bool FullMatch(const ::std::string& str, const RE& re) {
-    return FullMatch(str.c_str(), re);
-  }
-  static bool PartialMatch(const ::std::string& str, const RE& re) {
-    return PartialMatch(str.c_str(), re);
-  }
-
-  static bool FullMatch(const char* str, const RE& re);
-  static bool PartialMatch(const char* str, const RE& re);
-
- private:
-  void Init(const char* regex);
-  const char* pattern_;
-  bool is_valid_;
-
-# if GTEST_USES_POSIX_RE
-
-  regex_t full_regex_;     // For FullMatch().
-  regex_t partial_regex_;  // For PartialMatch().
-
-# else  // GTEST_USES_SIMPLE_RE
-
-  const char* full_pattern_;  // For FullMatch();
-
-# endif
-};
-
-#endif  // GTEST_USES_PCRE
 
 // Formats a source file path and a line number as they would appear
 // in an error message from the compiler used to compile this code.

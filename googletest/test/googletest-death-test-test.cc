@@ -322,8 +322,6 @@ TEST_F(TestForDeathTest, SingleStatement) {
     EXPECT_DEATH(_exit(1), "") << 1 << 2 << 3;
 }
 
-# if GTEST_USES_PCRE
-
 void DieWithEmbeddedNul() {
   fprintf(stderr, "Hello%cmy null world.\n", '\0');
   fflush(stderr);
@@ -336,8 +334,6 @@ TEST_F(TestForDeathTest, EmbeddedNulInMessage) {
   EXPECT_DEATH(DieWithEmbeddedNul(), "my null world");
   ASSERT_DEATH(DieWithEmbeddedNul(), "my null world");
 }
-
-# endif  // GTEST_USES_PCRE
 
 // Tests that death test macros expand to code which interacts well with switch
 // statements.
@@ -508,25 +504,14 @@ TEST_F(TestForDeathTest, GlobalFunction) {
   EXPECT_DEATH(GlobalFunction(), "GlobalFunction");
 }
 
-// Tests that any value convertible to an RE works as a second
+// Tests that any value convertible to a Regex works as a second
 // argument to EXPECT_DEATH.
-TEST_F(TestForDeathTest, AcceptsAnythingConvertibleToRE) {
+TEST_F(TestForDeathTest, AcceptsAnythingConvertibleToRegex) {
   static const char regex_c_str[] = "GlobalFunction";
   EXPECT_DEATH(GlobalFunction(), regex_c_str);
 
-  const testing::internal::RE regex(regex_c_str);
+  const testing::Regex regex(regex_c_str);
   EXPECT_DEATH(GlobalFunction(), regex);
-
-# if !GTEST_USES_PCRE
-
-  const ::std::string regex_std_str(regex_c_str);
-  EXPECT_DEATH(GlobalFunction(), regex_std_str);
-
-  // This one is tricky; a temporary pointer into another temporary.  Reference
-  // lifetime extension of the pointer is not sufficient.
-  EXPECT_DEATH(GlobalFunction(), ::std::string(regex_c_str).c_str());
-
-# endif  // !GTEST_USES_PCRE
 }
 
 // Tests that a non-void function can be used in a death test.

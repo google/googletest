@@ -41,8 +41,10 @@
 
 #include <memory>
 #include <ostream>
+#include <regex>
 #include <string>
 #include <type_traits>
+#include <utility>
 
 #include "gtest/gtest-printers.h"
 #include "gtest/internal/gtest-internal.h"
@@ -514,6 +516,21 @@ inline PolymorphicMatcher<Impl> MakePolymorphicMatcher(const Impl& impl) {
   return PolymorphicMatcher<Impl>(impl);
 }
 
+class Regex {
+ public:
+  explicit Regex(std::string str_pattern)
+      : regex_(str_pattern), pattern_(std::move(str_pattern)) {}
+  Regex(std::string str_pattern, std::regex::flag_type flags)
+      : regex_(str_pattern, flags), pattern_(std::move(str_pattern)) {}
+
+  explicit operator const std::regex&() const { return regex_; }
+  const std::string& pattern() const { return pattern_; }
+
+ private:
+  std::regex regex_;
+  std::string pattern_;
+};
+
 namespace internal {
 // Implements a matcher that compares a given value with a
 // pre-supplied value using one of the ==, <=, <, etc, operators.  The
@@ -621,8 +638,8 @@ using StringLike = T;
 // T can be converted to a string.
 class MatchesRegexMatcher {
  public:
-  MatchesRegexMatcher(const RE* regex, bool full_match)
-      : regex_(regex), full_match_(full_match) {}
+  MatchesRegexMatcher(Regex regex, bool full_match)
+      : regex_(std::move(regex)), full_match_(full_match) {}
 
 #if GTEST_INTERNAL_HAS_STRING_VIEW
   bool MatchAndExplain(const internal::StringView& s,
@@ -649,23 +666,24 @@ class MatchesRegexMatcher {
   bool MatchAndExplain(const MatcheeStringType& s,
                        MatchResultListener* /* listener */) const {
     const std::string& s2(s);
-    return full_match_ ? RE::FullMatch(s2, *regex_)
-                       : RE::PartialMatch(s2, *regex_);
+    auto& regex = static_cast<const std::regex&>(regex_);
+    return full_match_ ? std::regex_match(s2, regex)
+                       : std::regex_search(s2, regex);
   }
 
   void DescribeTo(::std::ostream* os) const {
     *os << (full_match_ ? "matches" : "contains") << " regular expression ";
-    UniversalPrinter<std::string>::Print(regex_->pattern(), os);
+    UniversalPrinter<std::string>::Print(regex_.pattern(), os);
   }
 
   void DescribeNegationTo(::std::ostream* os) const {
     *os << "doesn't " << (full_match_ ? "match" : "contain")
         << " regular expression ";
-    UniversalPrinter<std::string>::Print(regex_->pattern(), os);
+    UniversalPrinter<std::string>::Print(regex_.pattern(), os);
   }
 
  private:
-  const std::shared_ptr<const RE> regex_;
+  const Regex regex_;
   const bool full_match_;
 };
 }  // namespace internal
@@ -673,25 +691,27 @@ class MatchesRegexMatcher {
 // Matches a string that fully matches regular expression 'regex'.
 // The matcher takes ownership of 'regex'.
 inline PolymorphicMatcher<internal::MatchesRegexMatcher> MatchesRegex(
-    const internal::RE* regex) {
-  return MakePolymorphicMatcher(internal::MatchesRegexMatcher(regex, true));
+    Regex regex) {
+  return MakePolymorphicMatcher(
+      internal::MatchesRegexMatcher(std::move(regex), true));
 }
 template <typename T = std::string>
 PolymorphicMatcher<internal::MatchesRegexMatcher> MatchesRegex(
     const internal::StringLike<T>& regex) {
-  return MatchesRegex(new internal::RE(std::string(regex)));
+  return MatchesRegex(Regex(std::string(regex)));
 }
 
 // Matches a string that contains regular expression 'regex'.
 // The matcher takes ownership of 'regex'.
 inline PolymorphicMatcher<internal::MatchesRegexMatcher> ContainsRegex(
-    const internal::RE* regex) {
-  return MakePolymorphicMatcher(internal::MatchesRegexMatcher(regex, false));
+    Regex regex) {
+  return MakePolymorphicMatcher(
+      internal::MatchesRegexMatcher(std::move(regex), false));
 }
 template <typename T = std::string>
 PolymorphicMatcher<internal::MatchesRegexMatcher> ContainsRegex(
     const internal::StringLike<T>& regex) {
-  return ContainsRegex(new internal::RE(std::string(regex)));
+  return ContainsRegex(Regex(std::string(regex)));
 }
 
 // Creates a polymorphic matcher that matches anything equal to x.

@@ -644,11 +644,11 @@ Fatal assertion                                  | Nonfatal assertion           
 where `statement` is a statement that is expected to cause the process to die,
 `predicate` is a function or function object that evaluates an integer exit
 status, and `matcher` is either a gMock matcher matching a `const std::string&`
-or a (Perl) regular expression - either of which is matched against the stderr
-output of `statement`. For legacy reasons, a bare string (i.e. with no matcher)
-is interpreted as `ContainsRegex(str)`, **not** `Eq(str)`. Note that `statement`
-can be *any valid statement* (including *compound statement*) and doesn't have
-to be an expression.
+or a [GTest regular expression](#regular-expression-syntax) - either of which
+is matched against the stderr output of `statement`. For legacy reasons,
+a bare string (i.e. with no matcher) is interpreted as `ContainsRegex(str)`,
+**not** `Eq(str)`. Note that `statement` can be *any valid statement* (including
+*compound statement*) and doesn't have to be an expression.
 
 As usual, the `ASSERT` variants abort the current test function, while the
 `EXPECT` variants do not.
@@ -753,46 +753,28 @@ TEST_F(FooDeathTest, DoesThat) {
 
 ### Regular Expression Syntax
 
-On POSIX systems (e.g. Linux, Cygwin, and Mac), googletest uses the
-[POSIX extended regular expression](http://www.opengroup.org/onlinepubs/009695399/basedefs/xbd_chap09.html#tag_09_04)
-syntax. To learn about this syntax, you may want to read this
-[Wikipedia entry](http://en.wikipedia.org/wiki/Regular_expression#POSIX_Extended_Regular_Expressions).
+GoogleTest defines its own `Regex`, which is a wrapper upon `std::regex`.
+It assists GTest matchers at printing error messages on matcher failure.
 
-On Windows, googletest uses its own simple regular expression implementation. It
-lacks many features. For example, we don't support union (`"x|y"`), grouping
-(`"(xy)"`), brackets (`"[xy]"`), and repetition count (`"x{5,7}"`), among
-others. Below is what we do support (`A` denotes a literal character, period
-(`.`), or a single `\\ ` escape sequence; `x` and `y` denote regular
-expressions.):
+To define a `Regex` object you may write
+```c++
+std::string pattern = "Doskozzza";
+auto regex = ::testing::Regex(std::move(pattern)); // moving for efficiency
+```
 
-Expression | Meaning
----------- | --------------------------------------------------------------
-`c`        | matches any literal character `c`
-`\\d`      | matches any decimal digit
-`\\D`      | matches any character that's not a decimal digit
-`\\f`      | matches `\f`
-`\\n`      | matches `\n`
-`\\r`      | matches `\r`
-`\\s`      | matches any ASCII whitespace, including `\n`
-`\\S`      | matches any character that's not a whitespace
-`\\t`      | matches `\t`
-`\\v`      | matches `\v`
-`\\w`      | matches any letter, `_`, or decimal digit
-`\\W`      | matches any character that `\\w` doesn't match
-`\\c`      | matches any literal character `c`, which must be a punctuation
-`.`        | matches any single character except `\n`
-`A?`       | matches 0 or 1 occurrences of `A`
-`A*`       | matches 0 or many occurrences of `A`
-`A+`       | matches 1 or many occurrences of `A`
-`^`        | matches the beginning of a string (not that of each line)
-`$`        | matches the end of a string (not that of each line)
-`xy`       | matches `x` followed by `y`
+The above code passes the requested regex pattern to the underlying
+`std::regex` object. The default grammar is the *Modified ECMA Script*
+that the
+[constructor of std::regex](https://en.cppreference.com/w/cpp/regex/basic_regex/basic_regex)
+provides as a default flag upon construction.
 
-To help you determine which capability is available on your system, googletest
-defines macros to govern which regular expression it is using. The macros are:
-`GTEST_USES_SIMPLE_RE=1` or `GTEST_USES_POSIX_RE=1`. If you want your death
-tests to work in all cases, you can either `#if` on these macros or use the more
-limited syntax only.
+It is possible though to manipulate syntax options by passing custom flags
+to GTest `Regex`.
+```c++
+std::string pattern = "I (love|adore) unit tests";
+constexpr auto flags = std::regex::icase | std::regex::egrep;
+auto regex = ::testing::Regex(std::move(pattern), flags);
+```
 
 ### How It Works
 

@@ -165,16 +165,14 @@ GTEST_API_ bool ExitedUnsuccessfully(int exit_status);
 // A string passed to EXPECT_DEATH (etc.) is caught by one of these overloads
 // and interpreted as a regex (rather than an Eq matcher) for legacy
 // compatibility.
-inline Matcher<const ::std::string&> MakeDeathTestMatcher(
-    ::testing::internal::RE regex) {
-  return ContainsRegex(regex.pattern());
+inline Matcher<const ::std::string&> MakeDeathTestMatcher(Regex regex) {
+  return ContainsRegex(std::move(regex));
 }
 inline Matcher<const ::std::string&> MakeDeathTestMatcher(const char* regex) {
   return ContainsRegex(regex);
 }
-inline Matcher<const ::std::string&> MakeDeathTestMatcher(
-    const ::std::string& regex) {
-  return ContainsRegex(regex);
+inline Matcher<const ::std::string&> MakeDeathTestMatcher(std::string regex) {
+  return ContainsRegex(std::move(regex));
 }
 
 // If a Matcher<const ::std::string&> is passed to EXPECT_DEATH (etc.), it's

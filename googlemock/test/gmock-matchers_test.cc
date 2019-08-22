@@ -84,6 +84,7 @@ using std::pair;
 using std::set;
 using std::stringstream;
 using std::vector;
+using testing::Regex;
 using testing::internal::DummyMatchResultListener;
 using testing::internal::ElementMatcherPair;
 using testing::internal::ElementMatcherPairs;
@@ -93,7 +94,6 @@ using testing::internal::FormatMatcherDescription;
 using testing::internal::IsReadableTypeName;
 using testing::internal::MatchMatrix;
 using testing::internal::PredicateFormatterFromMatcher;
-using testing::internal::RE;
 using testing::internal::StreamMatchResultListener;
 using testing::internal::Strings;
 
@@ -1048,6 +1048,27 @@ TEST(NeTest, CanDescribeSelf) {
   EXPECT_EQ("isn't equal to 5", Describe(m));
 }
 
+TEST(RegexTest, KnowsItsPatternAfterConstruction) {
+  const std::string pattern = "9{2} Luftballons";
+  const Regex regex(pattern);
+
+  EXPECT_EQ(regex.pattern(), pattern);
+}
+
+TEST(RegexTest, InitializesWithCustomFlags) {
+  constexpr auto flags = std::regex::icase | std::regex::egrep;
+  const Regex regex("You're nut!", flags);
+
+  EXPECT_EQ(static_cast<const std::regex>(regex).flags(), flags);
+}
+
+TEST(RegexTest, DefaultsItsGrammarToECMAScript) {
+  constexpr auto default_flag = std::regex::ECMAScript;
+  const Regex regex("You're crazy in the coconut!", default_flag);
+
+  EXPECT_EQ(static_cast<const std::regex>(regex).flags(), default_flag);
+}
+
 class MoveOnly {
  public:
   explicit MoveOnly(int i) : i_(i) {}
@@ -1724,7 +1745,7 @@ TEST(MatchesRegexTest, MatchesStringMatchingGivenRegex) {
   EXPECT_TRUE(m1.Matches("abcz"));
   EXPECT_FALSE(m1.Matches(nullptr));
 
-  const Matcher<const std::string&> m2 = MatchesRegex(new RE("a.*z"));
+  const Matcher<const std::string&> m2 = MatchesRegex(Regex("a.*z"));
   EXPECT_TRUE(m2.Matches("azbz"));
   EXPECT_FALSE(m2.Matches("az1"));
   EXPECT_FALSE(m2.Matches("1az"));
@@ -1746,11 +1767,11 @@ TEST(MatchesRegexTest, CanDescribeSelf) {
   Matcher<const std::string> m1 = MatchesRegex(std::string("Hi.*"));
   EXPECT_EQ("matches regular expression \"Hi.*\"", Describe(m1));
 
-  Matcher<const char*> m2 = MatchesRegex(new RE("a.*"));
+  Matcher<const char*> m2 = MatchesRegex(Regex("a.*"));
   EXPECT_EQ("matches regular expression \"a.*\"", Describe(m2));
 
 #if GTEST_INTERNAL_HAS_STRING_VIEW
-  Matcher<const internal::StringView> m3 = MatchesRegex(new RE("0.*"));
+  Matcher<const internal::StringView> m3 = MatchesRegex(Regex("0.*"));
   EXPECT_EQ("matches regular expression \"0.*\"", Describe(m3));
 #endif  // GTEST_INTERNAL_HAS_STRING_VIEW
 }
@@ -1763,14 +1784,14 @@ TEST(ContainsRegexTest, MatchesStringContainingGivenRegex) {
   EXPECT_TRUE(m1.Matches("0abcz1"));
   EXPECT_FALSE(m1.Matches(nullptr));
 
-  const Matcher<const std::string&> m2 = ContainsRegex(new RE("a.*z"));
+  const Matcher<const std::string&> m2 = ContainsRegex(Regex("a.*z"));
   EXPECT_TRUE(m2.Matches("azbz"));
   EXPECT_TRUE(m2.Matches("az1"));
   EXPECT_FALSE(m2.Matches("1a"));
 
 #if GTEST_INTERNAL_HAS_STRING_VIEW
   const Matcher<const internal::StringView&> m3 =
-      ContainsRegex(new RE("a.*z"));
+      ContainsRegex(Regex("a.*z"));
   EXPECT_TRUE(m3.Matches(internal::StringView("azbz")));
   EXPECT_TRUE(m3.Matches(internal::StringView("az1")));
   EXPECT_FALSE(m3.Matches(internal::StringView("1a")));
@@ -1786,11 +1807,11 @@ TEST(ContainsRegexTest, CanDescribeSelf) {
   Matcher<const std::string> m1 = ContainsRegex("Hi.*");
   EXPECT_EQ("contains regular expression \"Hi.*\"", Describe(m1));
 
-  Matcher<const char*> m2 = ContainsRegex(new RE("a.*"));
+  Matcher<const char*> m2 = ContainsRegex(Regex("a.*"));
   EXPECT_EQ("contains regular expression \"a.*\"", Describe(m2));
 
 #if GTEST_INTERNAL_HAS_STRING_VIEW
-  Matcher<const internal::StringView> m3 = ContainsRegex(new RE("0.*"));
+  Matcher<const internal::StringView> m3 = ContainsRegex(Regex("0.*"));
   EXPECT_EQ("contains regular expression \"0.*\"", Describe(m3));
 #endif  // GTEST_INTERNAL_HAS_STRING_VIEW
 }
