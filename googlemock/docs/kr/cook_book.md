@@ -1631,13 +1631,13 @@ using ::testing::Return;
 테스트를 구현하다 보면 gMock에서 제공하는 built-in action만으로는 뭔가 부족한 상황이 발생할 수 있습니다. 이런 경우에는 기존에 사용하던 function, functor, `std::function`, lambda 등을 마치 action처럼 사용하는 것도 가능합니다. 이를 위한 구현방법은 아래 예제에 있습니다.
 
 ```cpp
-using ::testing::_;
-using ::testing::Invoke;
+using ::testing::_; using ::testing::Invoke;
 
 class MockFoo : public Foo {
  public:
   MOCK_METHOD(int, Sum, (int x, int y), (override));
-  MOCK_METHOD(bool, ComplexJob, (int x), (override)); };
+  MOCK_METHOD(bool, ComplexJob, (int x), (override));
+};
 
 int CalculateSum(int x, int y) { return x + y; }
 int Sum3(int x, int y, int z) { return x + y + z; }
@@ -1647,20 +1647,20 @@ class Helper {
   bool ComplexJob(int x);
 };
 
-... 
-  MockFoo foo; 
-  Helper helper; 
-  EXPECT_CALL(foo, Sum(_, ))
+...
+  MockFoo foo;
+  Helper helper;
+  EXPECT_CALL(foo, Sum(_, _))
       .WillOnce(&CalculateSum)
       .WillRepeatedly(Invoke(NewPermanentCallback(Sum3, 1)));
-  EXPECT_CALL(foo, ComplexJob())
+  EXPECT_CALL(foo, ComplexJob(_))
       .WillOnce(Invoke(&helper, &Helper::ComplexJob));
       .WillRepeatedly([](int x) { return x > 0; });
 
-  foo.Sum(5, 6); // Invokes CalculateSum(5, 6).
-  foo.Sum(2, 3); // Invokes Sum3(1, 2, 3). 
-  foo.ComplexJob(10); // Invokes helper.ComplexJob(10). 
-  foo.ComplexJob(-1); // Invokes the inline lambda.
+  foo.Sum(5, 6);         // Invokes CalculateSum(5, 6).
+  foo.Sum(2, 3);         // Invokes Sum3(1, 2, 3).
+  foo.ComplexJob(10);    // Invokes helper.ComplexJob(10).
+  foo.ComplexJob(-1);    // Invokes the inline lambda.
 ```
 
 여기서 한가지 유의할 점은 fucntion type을 어느정도 지켜줘야 한다는 것입니다.(Mock function의 signature와 완벽히 동일하지는 않더라도 *compatible*해야 합니다.) 즉, 양쪽의 argument와 return type이 암시적으로 형변환 가능해야 합니다. 여기서 타입을 좀 더 엄격하게 검사하지 않는 이유는 사용자가 이 기능을 유연하게 사용할 수 있도록 도와주기 위함입니다. 또한, gMock이 엄격한 타입검사를 하지 않기 때문에 사용자 스스로 확인하여 암시적인 형변환이 발생해도 안전하다고 판단되는 경우에만 사용해야 한다는 점도 기억하시기 바랍니다.
@@ -1668,7 +1668,7 @@ class Helper {
 **Note: lambda를 action으로 사용할 때**
 
 *   Callback의 소유권은 action에 있으며 따라서 action이 삭제될 때, callback도 삭제됩니다.
-*   만약 사용하려는 callback이 `C`라는 base callback type을 상속받았다면 overloading 문제를 해결하기 위해 base callback type으로 casting해줘야 합니다. 아래 예제코드를 확인하세요.
+*   만약 사용하려는 callback이 `C`라는 base callback type을 상속받았다면 overloading 문제를 해결하기 위해 base callback type으로 casting 해줘야 합니다. 아래 예제코드를 확인하세요.
 
 ```c++
 using ::testing::Invoke;
@@ -1681,9 +1681,10 @@ using ::testing::Invoke;
  ...
  Invoke(implicit_cast<Closure*>(done)) ...;  // The cast is necessary.
 ```
-#### Argument개수가 더 많은 Function/Functor/Lambda를 Action으로 사용하기
 
-현재까지는 mock function에 `Invoke()`를 사용하기 위해서 argument의 개수가 같은 function, functor, lambda만을 사용했습니다. 만약 function, functor, labmda 등의 argument가 mock function보다 많으면 어떻게 해야할까요? 이런 경우에는 pre-bound argument를 위한 callback을 사용합니다. 아래 예제를 확인하세요.
+#### Argument 개수가 더 많은 Function/Functor/Lambda를 Action으로 사용하기
+
+현재까지는 mock function에 `Invoke()`를 사용하기 위해서 argument의 개수가 동일한 function, functor, lambda만을 주로 다뤄왔습니다. 만약 function, functor, labmda 등의 argument가 mock function보다 많으면 어떻게 해야할까요? 이런 경우에는 `NewPermanentCallback`를 사용해서 부족한 argument를 미리(pre-bound) 지정할 수 있습니다. 아래 예제는 `SignOfSum()`의 첫번째 argument `x`에 `5`라는 값을 지정하는 방법을 보여줍니다.
 
 ```c++
 using ::testing::Invoke;
@@ -1709,11 +1710,11 @@ TEST_F(FooTest, Test) {
 
 #### Agument 없는 Function/Functor/Lambda를 Action으로 사용하기 ####
 
-`Invoke()`는 복잡한 action을 구현해야 할 때 매우 유용합니다. 특히, `Invoke()`는 mock function으로 전달된 argument들을 연결된 function이나 functor로 그래도 전달해주기 때문에 mock function과 동일한 context 위에서 원하는 동작을 구현할 수 있게 해줍니다.
+`Invoke()`는 복잡한 action을 구현해야 할 때 매우 유용합니다. 특히, mock function으로 전달된 argument들을 연결된 function이나 functor로 그대로 전달해주기 때문에 mock function과 동일한 context를 사용할 수 있도록 도와줍니다.
 
-그럼 function, functor와 mock function의 signature가 서로 다르고 compatible하지 않다면 어떻게 해야될까요? 현재까지 배운내용을 사용해서 구현하려면 mock function과 signature가 compatible한 wrapper function을 먼저 만들고 그것을 `Invoke()`를 통해 호출합니다. 그 다음에 wrapper function 내부에서 function, functor를 호출하도록 구현합니다. 네, 당연히 반복적이고 귀찮은 일입니다.
+그럼 function, functor와 mock function의 signature가 서로 다르고 compatible하지 않다면 어떻게 해야될까요? 현재까지 배운내용만 가지고 구현하려면 mock function과 signature가 compatible한 wrapper function을 새로 만들고 그것을 `Invoke()`를 통해 호출하면 될 것입니다. 그 다음에 wrapper function 내부에서 function, functor를 호출하도록 구현하면 됩니다.
 
-gMock은 이러한 반복적인 작업을 대신 해줍니다. 이 때에는 `InvokeWithoutArgs()`를 사용하면 됩니다. 기본적인 동작은 `Invoke()`와 동일하지만 mock function의 argument를 전달하지 않는다는 부분만 다릅니다. 아래에 예제가 있습니다.
+그러나 위의 작업은 반복적이고 귀찮은 일입니다. gMock은 이러한 반복적인 작업을 대신 해줍니다. 이 때에는 `InvokeWithoutArgs()`를 사용하면 됩니다. 기본적인 동작은 `Invoke()`와 동일하지만 mock function의 argument를 전달하지 않는다는 부분만 다릅니다. 아래에 예제가 있습니다.
 
 ```cpp
 using ::testing::_;
