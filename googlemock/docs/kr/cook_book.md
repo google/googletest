@@ -1445,9 +1445,9 @@ class MockMutator : public Mutator {
       .WillOnce(SetArgPointee<1>(5));
 ```
 
-위의 예제에서 `mutator.Mutate()`가 호출되면, 두번째 argument인 `value`라는 포인터가 가리키는 값이 `5`로 변경될 것입니다. `SetArgPointee<1>(5)`에서 `<1>`은 두번째 argument인 `value`를 의미합니다. (`<0>`부터 시작이기 때문에 `<1>`이 두번째 argument입니다.)
+위와 같이 구현한 후에 `mutator.Mutate()`가 실제로 호출되면, 두번째 argument인 `value`가 가리키는 값이 `5`로 변경될 것입니다. 왜냐하면 `SetArgPointee<1>(5)`에서 `<1>`은 두번째 argument인 `value`를 의미하기 때문입니다. (`<0>`부터 시작이기 때문에 `<1>`이 두번째 argument입니다.)
 
-`SetArgPointee()`는 전달해야 할 값의 복사본을 내부적으로 미리 만들어 둡니다. 이를 통해서 값이나 영역이 변경됨으로 인한 문제를 예방할 수 있습니다. 다만, 이를 위해서는 해당 타입이 copy constructor와 assgignment operator를 지원해야 합니다.
+`SetArgPointee()`는 전달해야 할 값(여기서는 `5`)의 복사본을 내부적으로 미리 만들어 둡니다. 위에서도 설명했듯이 그렇게 해야만 값이나 영역이 변경됨으로 인한 문제를 예방할 수 있기 때문입니다. 다만, 이를 위해서는 해당 타입이 copy constructor와 assignment operator를 지원해야 합니다.
 
 Mock method에 `SetArgPointee()`를 사용함과 동시에 반환값도 지정하고 싶다면 `DoAll()`을 사용해서 `SetArgPointee()`와 `Return()`을 묶어 주기만 하면 됩니다. 예제코드는 아래와 같습니다.
 
@@ -1468,9 +1468,7 @@ class MockMutator : public Mutator {
                       Return(true)));
 ```
 
-여기서 `ReturnOKWith()`를 사용하면 `SetArgPointee()`가 제공하는 값을 override하는 것도 가능합니다.
-
-Argument가 배열형식인 경우에도 변경할 수 있습니다. 이 때는 `SetArrayArgument<N>(first, last)`를 사용하면 됩니다. 이 action은 배열의 [first, last) 구간에 있는 값들을 전달된 N번째(0부터 시작) argument에 복사합니다.
+Argument가 배열인 경우에는 `SetArrayArgument<N>(first, last)`를 사용하시기 바랍니다. 이 action은 [first, last) 구간에 있는 값들은 전달받은 N번째 argument(배열)에 복사해줍니다.
 
 ```cpp
 using ::testing::NotNull;
@@ -1510,9 +1508,9 @@ class MockRolodex : public Rolodex {
       .WillOnce(SetArrayArgument<0>(names.begin(), names.end()));
 ```
 
-#### Mock Object 의 동작을 프로그램에 상태에 따라 변화시키기 ####
+#### Mock Object의 동작을 프로그램에 상태에 따라 변화시키기 ####
 
-Mock object의 동작이 프로그램의 상태에 따라 달라지기를 원한다면, `::testing::InSequence`를 사용하면 됩니다.
+Mock object의 동작을 프로그램의 상태에 따라 변화시키길 원한다면 `::testing::InSequence`를 사용하면 됩니다. 아래에 예제가 있습니다.
 
 ```cpp
 using ::testing::InSequence;
@@ -1530,9 +1528,9 @@ using ::testing::Return;
   my_mock.FlushIfDirty();
 ```
 
-위 코드에서 `my_mock.IsDirty()`는 몇 번 호출되는지에 관계없이(`WillRepeatedly` 사용) `true`를 반환합니다. 하지만 그러다가 `my_mock.Flush()`가 호출되면 다음 expectation으로 넘어가게 되고 이제는 `false`를 반복해서 반환할 것입니다. 즉, `Flush()`의 호출여부에 따라 동작이 달라집니다.
+위 코드에서 첫번째 `my_mock.IsDirty()`는 몇 번 호출되는지에 관계없이(`WillRepeatedly`) 계속해서 `true`를 반환합니다. 그러다가 `my_mock.Flush()`가 호출되면 첫번째 `my_mock.IsDirty()`는 자동으로 retire됩니다. 따라서 `my_mock.Flush()`가 호출된 후의 `my_mock.IsDirty()`는 계속해서 `false`를 반환할 것입니다. 즉, `my_mock.Flush()`가 호출됨으로써 프로그램 상태에 어떠한 변화가 생겼으며 그러한 상태변화에 따라 `my_mock.IsDirty()`의 동작을 달라지게 구현한 예제로 볼 수 있습니다.
 
-좀 더 복잡한 구조를 가지는 프로그램에서는 변수를 사용해서 mock method로 전달되는 값을 저장하고 다시 그것을 반환하도록 하는 방법도 유용할 것입니다.
+좀 더 복잡한 구조를 가지는 프로그램에서는 변수를 사용해서 mock method 로 전달되는 값을 저장하고 다시 그것을 반환하도록 하는 방법도 유용할 것입니다.
 
 ```cpp
 using ::testing::_;
@@ -1553,9 +1551,9 @@ ACTION_P(ReturnPointee, p) { return *p; }
 
 #### Return Type의 Default Value 변경하기 ####
 
-사용자가 어떤 mock method의 반환값을 별도로 지정하지 않은 경우에는 해당타입에 대한 C++ built-in default value가 반환됩니다. 물론, 이러한 값은 대부분의 경우에 `0`일 것입니다. 이와 더불어 C++ 11 이상부터는 mock method의 return type이 default constructor를 가지고 있는 경우, `0`이 아니라 default constructor를 통해 생성된 값을 반환합니다. 물론, default value가 적절하지 않은 상황이라면 사용자가 자유롭게 `Return()`과 같은 action을 통해 다른 동작을 지정하면 됩니다.
+사용자가 어떤 mock method의 반환값을 별도로 지정하지 않은 경우에는 해당타입에 대한 C++ built-in default value가 반환됩니다. 아시다시피 이러한 값은 대부분의 경우에 `0`일 확률이 큽니다. 더불어 C++ 11 이상 버전에 대해서는 mock method의 return type이 default constructor를 가지고 있는 경우에는 `0`이 아니라 default constructor를 통해 생성된 값을 반환해줍니다. 이처럼 gMock은 사용자가 mock method의 반환값을 직접 지정하지 않더라도 default value를 최대한 찾아서 반환해줌으로써 테스트가 중단되지 않고 진행될 수 있도록 도와줍니다.
 
-여기서는 이러한 default value 자체를 바꾸는 방법을 공유합니다. (gMock이 특정타입의 default value를 판단할 수 없는 경우 이것을 직접 명세해야할 경우가 발생할 수도 있습니다) 이를 위해서는 `::testing ::DefaultValue`라는 template class를 사용하면 됩니다.
+이제 여기서는 default value 자체를 변경하는 방법에 대해 공유하려 합니다. 이러한 기능이 필요한 이유는 default vaule가 사용자가 원하는 것과는 다를 수 있으며 gMock이 특정타입의 default value를 판단할 수 없는 경우에는 사용자가 직접 구현해서 제공해야하기 때문입니다. 아래 예제와 같이 `::testing ::DefaultValue`라는 template class를 사용하면 default value를 변경할 수 있습니다.
 
 ```cpp
 using ::testing::DefaultValue;
@@ -1583,7 +1581,7 @@ class MockFoo : public Foo {
   DefaultValue<Bar>::Clear();
 ```
 
-다만, 위와 같이 default value를 직접 변경하는 것은 test program의 가독성을 저하시키기 때문에 신중하게 고민해서 사용하기 바랍니다. 또는 `Set()`을 사용한 후에 `Clear()`를 같이 사용함으로써 default value를 변경했다가 다시 기존 default value로 바꾸는 것도 좋은 방법입니다.
+사실 default value를 직접 변경하는 것은 test program의 가독성을 저하시키기 때문에 주의해서 사용해야 합니다. 위 예제는 그러한 문제를 해결하기 위해서 `Set()`과 `Clear()`를 함께 사용한 코드입니다. 즉, default value를 변경하여 사용했다가 다시 원래대로 복구시키기 때문에 다른 곳에 끼치는 영향이 거의 없습니다.
 
 #### Default Action을 상황에 따라 변화시키기 ####
 
@@ -1610,11 +1608,11 @@ using ::testing::Return;
   foo.Sign(0);   // This should return 0.
 ```
 
-동일한 mock method에 대해서 `ON_CALL()`을 여러개 사용하면 코드상에서 나중에 오는 것부터 먼저 비교하게 됩니다. 즉, 밑에서 위 방향으로 하나씩 비교하면서 expectation을 만족하는 `ON_CALL`이 있는지 찾게 됩니다. 이러한 비교순서는 mock object의 constructor나 test fixture에서 적용한 expectation의 우선순위가 개별 `TEST()`에서 지정한 expectation의 우선순위보다 낮아지도록 만듭니다. 쉽게 말하면 동일한 이름의 지역변수와 전역변수가 있을 때, 지역변수가 먼저 선택되는 것과 같습니다.
+동일한 mock method에 대해서 `ON_CALL()`을 여러개 사용하면 코드상에서 나중에 오는 것부터 먼저 탐색하게 됩니다. 즉, 밑에서 위 방향으로 하나씩 비교하면서 원하는 `ON_CALL`이 있는지 찾게 됩니다. 이러한 비교순서는 mock object의 constructor나 test fixture에서 적용한 `ON_CALL()`의 우선순위가 개별 `TEST()`에서 지정한 `ON_CALL()`의 우선순위보다 낮아지도록 만듭니다. 쉽게 말하면 동일한 이름의 지역변수와 전역변수가 있을 때, 지역변수가 먼저 선택되는 것과 같습니다.
 
 #### Functions/Functors/Lambda를 Action으로 사용하기 ####
 
-gMock에서 제공되는 built-in action만으로는 부족한 경우도 있을 것입니다. 이런 경우에는 기존에 사용하던 function, functor, `std::function`, lambda 등을 action처럼 사용하는 것도 가능합니다. 아래 예제를 참조하세요.
+테스트를 구현하다 보면 gMock에서 제공하는 built-in action만으로는 뭔가 부족한 상황이 발생할 수 있습니다. 이런 경우에는 기존에 사용하던 function, functor, `std::function`, lambda 등을 마치 action처럼 사용하는 것도 가능합니다. 이를 위한 구현방법은 아래 예제에 있습니다.
 
 ```cpp
 using ::testing::_;
@@ -1649,7 +1647,7 @@ class Helper {
   foo.ComplexJob(-1); // Invokes the inline lambda.
 ```
 
-한가지 유의할 점은 fucntion type을 어느정도 지켜줘야 한다는 것입니다. Mock function의 signature와 완벽히 동일하지는 않더라도 _compatible_해야 합니다. 즉, 양쪽의 argument와 return type이 암시적으로 형변환 가능해야 합니다. 이렇듯 타입을 엄격하게 *검사하지는 않기 때문에* 좀 더 유연하게 이 기능을 사용할 수 있을 것입니다. 물론, 사용자 스스로 안전하다고 판단한 경우에만 사용해야 함은 당연합니다.
+여기서 한가지 유의할 점은 fucntion type을 어느정도 지켜줘야 한다는 것입니다.(Mock function의 signature와 완벽히 동일하지는 않더라도 *compatible*해야 합니다.) 즉, 양쪽의 argument와 return type이 암시적으로 형변환 가능해야 합니다. 여기서 타입을 좀 더 엄격하게 검사하지 않는 이유는 사용자가 이 기능을 유연하게 사용할 수 있도록 도와주기 위함입니다. 또한, gMock이 엄격한 타입검사를 하지 않기 때문에 사용자 스스로 확인하여 암시적인 형변환이 발생해도 안전하다고 판단되는 경우에만 사용해야 한다는 점도 기억하시기 바랍니다.
 
 **Note: lambda를 action으로 사용할 때**
 
