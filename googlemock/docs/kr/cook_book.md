@@ -418,7 +418,7 @@ ON_CALL(factory, DoMakeTurtle)
 
 어떤 방법이든 찬성과 반대의견을 잘 따져보는 것은 중요합니다. 다만, 여기서 설명한 interface를 사용하는 기술은 다양한 상황에서 적용가능하며 Java community에서 긴 시간에 걸쳐 효율성이 입증된 방법임을 말씀드립니다.
 
-#### Fake class에 위임하기 ####
+#### Fake Class에 위임하기 ####
 
 어떤 interface를 위한 fake class를 구현해서 테스트를 비롯한 다양한 용도로 사용하는 개발자들이 많이 있습니다. 이렇게 이미 fake class를 잘 사용하고 있는 경우에 굳이 mock class를 새로 만들 필요가 있을까요? 사실 정답은 없으며 상황에 따라 사용자가 선택해야 합니다. 다만, gMock의 좋은 점은 mock class를 통해서 기존에 사용하던 fake class도 사용할 수 있다는 것입니다. 즉, mock class는 fake class를 포함할 수 있습니다.
 
@@ -506,7 +506,7 @@ Mock, fake가 함께 나타날 때, bad sign을 찾아내는 예제를 하나 �
 
 위의 상황은 `System` class가 너무 많은 역할을 가지고 있음을 보여주는 예입니다. 이런 경우에는 `System` class의 역할을 분리해서 `FileOps`, `IOOps`라는 interface 2개로 분리하는 것도 좋은 방법입니다. 그렇게 되면 분리된 `IOOps` interface만 mocking하여 테스트할 수 있습니다.
 
-#### Real Class 위임하기 ####
+#### Real Class에 위임하기 ####
 
 테스트를 위해 testing double(mock, fake, stub, spy 등)을 사용할 떄의 문제는 동작이 real object와 달라질 수 있다는 것입니다. 물론 negative test를 위해서 일부러 다르게 만들기도 하지만, 때로는 실수로 인해 동작이 달라지기도 합니다. 후자의 경우라면 bug를 잡아내지 못하고 제품을 출시하는 것과 같은 문제가 발생하기도 합니다.
 
@@ -2481,7 +2481,7 @@ Emacs에서 `M-x google-complie` 명령을 통해 테스트를 구현하고 실�
 
 ### Extending gMock  ###
 
-#### 새로운 Matcher를 빠르게 구현하기 ####
+#### 새로운 Matcher 구현하기 ####
 
 WARNING: gMock은 matcher가 언제 몇 번 호출될지를 보장하지 않습니다. 따라서 모든 matcher는 순수하게 기능적인 동작만 수행하도록 구현해야 합니다. 즉, 프로그램 내의 다른 정보에 대한 side effect나 의존성을 가지면 안된다는 것입니다. 자세한 내용은 [여기](cook_book.md#matcher는-부수효과side-effect를-가지면-안됩니다)를 참조하세요.
 
@@ -2560,7 +2560,7 @@ MATCHER(IsDivisibleBy7, "") {
 
 **Notes:** `arg_type`은 matcher를 사용하는 context 혹은 compiler에 따라서 달라질 수도 있지만 사용자가 신경 쓸 필요는 없습니다. 이것은 matcher를 polymorphic하게 사용하기 위해 선택된 동작방식입니다. 예를 들어 `IsDivisibleBy7()`과 같은 예제에서 `(arg % 7)`을 계산하고 그 결과를 `bool`타입으로 반환할 수만 있다면 `arg_type`은 어떤 타입이 되더라도 괜찮습니다. 즉, (암시적인 형변환까지 포함해서) `%`연산을 수행할 수 있는 타입이라면 모두 사용할 수 있는 matcher가 만들어지는 것입니다. 예제코드의 `Bar(IsDivisibleBy7())`를 보면, `Bar()`라는 method는 `int`타입 argument를 전달받고 있기 때문에 `arg_type`도 역시 `int`로 결정됩니다. 이 때, argument가 `unsigned long`이라고 해도 문제가 없는 것입니다. 단지 `arg_type`이 `unsigned long`가 되는 것 뿐입니다.
 
-#### 새로운 Parameterized Matcher를 빠르게 구현하기 ####
+#### 새로운 Parameterized Matcher 구현하기 ####
 
 Matcher 자체적으로 parameter를 가지길 원할 수도 있습니다. 본격적인 설명에 앞서 matcher에서 사용하는 argument와 parameter라는 용어를 구분할 필요가 있습니다. 먼저, argument란 mock function으로부터 matcher로 전달되는 값들을 의미합니다. 그러나 parameter는 matcher 자신이 스스로 관리하고 사용하려는 목적의 값들을 의미합니다. 즉, mock function과는 직접적인 연관이 없습니다. 여기서는  matcher가 parameter를 사용하려면 어떻게 구현해야 하는지 소개합니다. 기본적으로는 아래 macro를 사용하게 됩니다.
 
@@ -2849,7 +2849,7 @@ Cardinality EvenNumber() {
       .Times(EvenNumber());
 ```
 
-#### 새로운 Action을 빠르게 구현하기
+#### 새로운 Action 구현하기
 
 Built-in action만으로 부족하다고 느끼는 사용자가 있다면 action을 직접 구현하는 것도 어렵지 않습니다. Action의 signature와 매칭되는 functor class를 정의하면 됩니다. (template도 가능합니다.)
 
@@ -2876,7 +2876,7 @@ struct MultiplyBy {
 // EXPECT_CALL(...).WillOnce(MultiplyBy{7});
 ```
 
-##### Legacy : 새로운 Action를 빠르게 구현하기 #####
+##### Legacy : 새로운 Action 구현하기 #####
 
 C++11 이전에는 functor를 기반으로 한 action을 지move-only원하지 않았으며 주로 `ACTION*`이라는 macro를 통해서 action을 정의할 수 있었습니다. 다만, 이제는 새로운 기능으로 대부분 대체되었습니다. 물론 사용할 수는 있지만 언젠가 compile error가 발생할 수도 있으며 되도록이면 새로운 방법을 사용하기를 권장합니다. 대체된 기능이긴 하지만 `ACTION*` macro의 사용자를 위해 관련 내용을 공유합니다.
 
@@ -2937,7 +2937,7 @@ int DoSomething(bool flag, int* ptr);
 | `return_type`          | the type `int`                          |
 | `function_type`        | the type `int(bool, int*)`              |
 
-##### Legacy : 새로운  Parameterized Action을  빠르게 구현하기 #####
+##### Legacy : 새로운 Parameterized Action 구현하기 #####
 
 Action이 parameter를 받을 수 있도록 구현해야 할 필요도 있을 것입니다. 이를 위해서 `ACTION_P*` 계열 매크로를 제공하고 있습니다.
 
@@ -3006,7 +3006,7 @@ ACTION_P(Bar, param) {
 ```
 위의 코드는 첫번째 argument의 타입을 의미하는 `arg1_type`를 통해서 action의 시작부분에서 타입을 확인하고 있습니다. 이를 위해서 `StaticAssertTypeEq`라는 googletest의 타입비교 기능을 사용할 수 있습니다. (compile time에 비교를 수행합니다.)
 
-#### 새로운 Action Template을 빠르게 구현하기 ####
+#### 새로운 Action Template 구현하기 ####
 
 Action을 정의할 때, action으로 전달되는 parameter의 타입을 값으로부터 추론하기 어려운 경우가 있습니다. 이런 경우에는 template parameter을 통해 명시적으로 parameter의 타입을 지정해야 합니다. `ACTION_TEMPLATE()`이 이러한 기능을 지원합니다. 이름에서 알 수 있듯이 `ACTION()`과 `ACTION_P*()`의 확장판이라고 생각하면 됩니다.
 
