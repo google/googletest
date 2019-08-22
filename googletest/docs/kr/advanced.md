@@ -258,9 +258,9 @@ b and c (4 and 10) are not mutually prime, as they have a common divisor 2.
 
 ### Floating-Point 비교하기
 
-2개의 floating-point 값이 정확히 같다고 판정하는 것은 반올림 이슈가 있기 때문에 언제나 까다로운 문제입니다. 따라서 기존에 사용하던 `ASSERT_EQ`로는 정확한 답을 얻을 수 없습니다. 또한, floating-point 값의 범위가 크다면 오차범위를 고정(single fixed error bound)하기 보다는 상대적인 오차범위(fixed relative error bound)를 사용하는 것이 정밀도 측면에서는 더 좋은 선택입니다.
+반올림 이슈로 인해서 2개의 floating-point 값이 정확히 같다고 판정하는 것은 언제나 까다로운 문제입니다. 기존에 사용하던 `ASSERT_EQ`로는 정확한 답을 얻을 수 없을 것입니다. 또한, floating-point는 값의 범위가 큰 경우가 많기 때문에 고정 오차범위보다는 상대 오차범위를 사용하는 것이 정밀도 측면에서 더 좋은 선택입니다. 고정 오차범위가 더 좋은 경우는 `0`과 같은지 비교할 때 뿐입니다.
 
-결론적으로 floating-point를 비교하기 위해서는 오차범위를 신중하게 선택해야 합니다. Googletest는 오차범위 단위로 ULPs를 기본적으로 사용하고 있으며 그 범위는 4 ULP's입니다.(ULPs에 대한 자세한 설명은 [여기](https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/)를 참조하기 바랍니다.) 만약, 직접 오차범위를 지정하기가 꺼려진다면 googletest의 기본설정을 사용하기를 추천합니다. 물론, 기본설정 오차범위를 이용하는 macro와 사용자가 오차범위를 지정할 수 있는 macro를 둘 다 제공하므로 주어진 상황에 맞게 사용할 수 있습니다. 
+결론적으로 floating-point를 비교하기 위해서는 오차범위를 신중하게 선택해야 합니다. Googletest는 오차범위 단위로 ULPs를 기본적으로 사용하고 있으며 그 범위는 4 ULP's입니다.(ULPs에 대한 자세한 설명은 [여기](https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/)를 참조하기 바랍니다.) 만약, 직접 오차범위를 지정하기가 꺼려진다면 googletest의 기본설정을 사용하기를 추천합니다. 물론, 기본설정 오차범위를 이용하는 macro와 사용자가 오차범위를 지정할 수 있는 macro를 둘 다 제공하므로 주어진 상황에 맞게 사용할 수 있습니다.
 
 #### Floating-Point Macros
 
