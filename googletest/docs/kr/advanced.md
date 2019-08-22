@@ -258,9 +258,9 @@ b and c (4 and 10) are not mutually prime, as they have a common divisor 2.
 
 ### Floating-Point 비교하기
 
-Floating-point를 비교하는 것은 까다로운 문제입니다. 반올림 이슈가 있기 때문에 2개의 floating-point 값이 정확히 같다고 판정하는 것은 언제나 쉽지 않으며 기존의 `ASSERT_EQ`로는 정확한 답을 얻을 수 없습니다. 또한, floating-point 값의 범위가 크다면 오차범위를 고정(single fixed error bound)하기 보다는 상대적인 오차범위(fixed relative error bound)를 사용하는 것이 정밀도 측면에서 더 좋습니다.
+2개의 floating-point 값이 정확히 같다고 판정하는 것은 반올림 이슈가 있기 때문에 언제나 까다로운 문제입니다. 따라서 기존에 사용하던 `ASSERT_EQ`로는 정확한 답을 얻을 수 없습니다. 또한, floating-point 값의 범위가 크다면 오차범위를 고정(single fixed error bound)하기 보다는 상대적인 오차범위(fixed relative error bound)를 사용하는 것이 정밀도 측면에서는 더 좋은 선택입니다.
 
-이렇듯 floating-point를 정확히 비교하기 위해서는 오차범위를 신중하게 선택해야 합니다. 만약, 사용자가 직접 오차범위를 지정하기 싫다면 googletest의 기본설정인 ULPs(Units in the Last Place)를 그대로 사용하는 것을 추천합니다. ULPs에 대한 자세한 설명은 [여기](https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/)를 참조하기 바랍니다.
+결론적으로 floating-point를 비교하기 위해서는 오차범위를 신중하게 선택해야 합니다. Googletest는 오차범위 단위로 ULPs를 기본적으로 사용하고 있으며 그 범위는 4 ULP's입니다.(ULPs에 대한 자세한 설명은 [여기](https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/)를 참조하기 바랍니다.) 만약, 직접 오차범위를 지정하기가 꺼려진다면 googletest의 기본설정을 사용하기를 추천합니다. 물론, 기본설정 오차범위를 이용하는 macro와 사용자가 오차범위를 지정할 수 있는 macro를 둘 다 제공하므로 주어진 상황에 맞게 사용할 수 있습니다. 
 
 #### Floating-Point Macros
 
@@ -269,9 +269,9 @@ Floating-point를 비교하는 것은 까다로운 문제입니다. 반올림 �
 | `ASSERT_FLOAT_EQ(val1, val2);`  | `EXPECT_FLOAT_EQ(val1, val2);`  | the two `float` values are almost equal  |
 | `ASSERT_DOUBLE_EQ(val1, val2);` | `EXPECT_DOUBLE_EQ(val1, val2);` | the two `double` values are almost equal |
 
-위 표에서 "almost equal"이란, 2개의 값이 4 ULP's 오차범위 내에서 같음을 의미합니다.
+위 표에서 "almost equal"이란, googletest 기본설정에 따라 2개의 값이 오차범위 4 ULP's 내에서 같음을 의미합니다.
 
-만약, 오차범위를 직접 지정하고 싶다면 아래와 같은 assertion을 사용하기 바랍니다.
+만약, 사용자가 오차범위를 직접 지정하고 싶다면 아래의 assertion을 사용하기 바랍니다.
 
 | Fatal assertion                       | Nonfatal assertion                    | Verifies                                                     |
 | ------------------------------------- | ------------------------------------- | ------------------------------------------------------------ |
@@ -279,7 +279,7 @@ Floating-point를 비교하는 것은 까다로운 문제입니다. 반올림 �
 
 #### Floating-Point Predicate-Format Functions
 
-Floating-point 연산자들을 더 다양하게 만들어서 제공할 수도 있지만 macro가 너무 많아지는 것도 좋지 않습니다. 따라서 googletest는 predicate-formatter assertion을 floating-piont에도 사용할 수 있도록 했습니다. 사용방법은 기존과 동일하며 첫번째 argument에 `FloatLE`, `DoubleLE`와 같은 floating-point 관련 function을 전달한다는 점만 다릅니다.
+Floating-point 연산자들을 더 다양하게 만들어서 제공할 수도 있지만 macro가 너무 많아지는 것도 좋지 않습니다. 대신에 predicate-formatter assertion을 floating-piont에도 사용할 수 있도록 했습니다. 사용방법은 기존과 동일하며 첫번째 argument에 `FloatLE`, `DoubleLE`와 같은 floating-point 관련 function을 전달한다는 점만 다릅니다.
 
 ```c++
 EXPECT_PRED_FORMAT2(::testing::FloatLE, val1, val2);
