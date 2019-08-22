@@ -158,7 +158,7 @@ TEST_F(FooTest, Baz) { ... }
 
 ## "void value not ignored as it ought to be"라는 compile error가 발생합니다. 이게 무슨 뜻인가요?
 
-아마도 `ASSERT_*()`에 return type이 `void`가 아닌 function을 사용했을 확률이 큽니다. `ASSERT_*()`는 `void`를 반환하는 function에만 사용할 수 있으며 그 이유는 googletest가 expception disabled이기 때문입니다. [여기](advanced.md#assertion을-사용가능한-곳)에서 보다 자세한 내용을 확인할 수 있습니다.
+아마도 return type이 `void`가 아닌 function 내부에서 `ASSERT_*()`를 사용했을 확률이 큽니다. `ASSERT_*()`는 `void`를 반환하는 function에만 사용할 수 있으며 그 이유는 googletest가 expception disabled이기 때문입니다. [여기](advanced.md#assertion을-사용가능한-곳)에서 보다 자세한 내용을 확인할 수 있습니다.
 
 ## Hang, seg-fault 등이 발생하면서 death test가 잘 동작하지 않습니다. 어떻게 해야할까요?
 
