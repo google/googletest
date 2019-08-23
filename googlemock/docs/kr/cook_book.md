@@ -2617,7 +2617,7 @@ MATCHER_P(HasAbsoluteValue, value, "") { return abs(arg) == value; }
 
 `MATCHER_P`의 `statements`를 구현할 때는 parameter의 타입을 참조하는 것도 가능합니다. 예를 들어 `value`라는 parameter의 타입을 확인하려면 `value_type`을 사용하면 됩니다.
 
-gMock은 parameter를 여러개 사용하기 위한 macro도 지원합니다. 각 macro의 이름은 `MATCHER_P2`, `MATCHER_P3`, ... 와 같습니다. 단, `MATCHER_P10`까지만 지원하기 때문에 최대로 사용할 수 있는 paratmeter의 개수는 10개입니다.
+또한, gMock은 parameter를 여러개 사용하기 위한 macro도 지원합니다. 각 macro의 이름은 `MATCHER_P2`, `MATCHER_P3`, ... 와 같습니다. 단, `MATCHER_P10`까지만 지원하기 때문에 최대로 사용할 수 있는 paratmeter의 개수는 10개입니다.
 
 ```cpp
 MATCHER_Pk(name, param_1, ..., param_k, description_string) { statements; }
