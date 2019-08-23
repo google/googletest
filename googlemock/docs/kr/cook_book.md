@@ -2063,11 +2063,11 @@ Note: 이 예제의 단점도 있습니다. 만약 expectation이 만족하지 �
 
 #### Method가 Move-Only Type을 사용할 때의 Mocking 방법 ####
 
-C++11 에서 *move-only-type*이 소개되었습니다. Move-only-type이란 이동은 가능하지만 복사는 불가능한 객체를 의미합니다. C++의 `std::unique_ptr<T>`가 대표적인 예입니다.
+C++11에서 *move-only-type*이 소개되었습니다. Move-only-type이란 이동은 가능하지만 복사는 불가능한 객체를 의미합니다. C++의 `std::unique_ptr<T>`가 대표적인 예입니다.
 
 이러한 move-only-type을 반환하는 함수를 mocking하는 것은 사실 좀 어렵습니다. 그러나 역시 불가능한 것은 아닙니다. 다만, 이에 대한 해결방법이 2017년 4월에 gMock에 추가되었기 때문에 그보다 예전버전을 사용하고 있다면 [Legacy workarounds for move-only types](cook_book.md#legacy--move-only-type-해결방법)를 참조하기를 바랍니다.
 
-먼저 우리가 가상의 프로젝트를 하나 진행하고 있다고 해봅시다. 프로젝트는 누군가 "buzzes"라고 불리는 짦은글을 작성하고 공유할 수 있게 해주는 프로젝트입니다. 프로젝트에서는 아래와 같은 타입들을 정의하고 사용하고 있습니다.
+먼저 가상의 프로젝트를 하나 진행하고 있다고 해봅시다. 이 프로젝트는 사람들이 "buzzes"라고 불리는 짧은 글을 작성하고 공유할 수 있게 해주는 프로젝트입니다. 이를 위해서 아래와 같은 타입들을 정의하고 사용하고 있습니다.
 
 ```cpp
 enum class AccessLevel { kInternal, kPublic };
@@ -2087,9 +2087,9 @@ class Buzzer {
 };
 ```
 
-간단히 설명하면 `Buzz` object는 작성하고 있는 글을 의미하는데 `Buzzer` interface를 상속받고 구체화한 class가 `Buzz` object를 사용하는 주체가 될 것입니다. `Buzzer`의 method들은 return type과 argument type에 `unique_ptr<Buzz>`를 사용하고 있습니다. 그럼 이제 `Buzzer`를 mocking해 봅시다.
+간단히 설명하면 `Buzz` object는 작성하고 있는 글을 의미합니다. 다음으로 `Buzzer`라는 interface를 상속받고 구체화한 class는 앞에서 말한 `Buzz` object를 사용하는 주체가 될 것입니다. 마지막으로 `Buzzer`의 method들은 return type 또는 argument type에 `unique_ptr<Buzz>`를 사용하고 있습니다. 네, 그럼 이제 `Buzzer`를 mocking 해보겠습니다.
 
-먼저, move-only-type을 반환하는 method를 mocking할 때도 `MOCK_METHOD`를 사용합니다.
+먼저, `Buzzer` interface를 상속받는 mock class를 만들겠습니다. Move-only-type을 반환하는 method를 mocking할 때도 `MOCK_METHOD`를 사용하는 점은 동일합니다.
 
 ```cpp
 class MockBuzzer : public Buzzer {
@@ -2100,15 +2100,15 @@ class MockBuzzer : public Buzzer {
 };
 ```
 
-위와 같이 mock class를 정의했으며 이제 사용할 차례입니다. 아래에 `MockBuzzer` class 의 객체 `mock_buzzer_`를 생성했습니다.
+위와 같이 mock class를 정의했다면 이제 사용할 차례입니다. 위에서 정의한 `MockBuzzer` class의 object를 하나 생성합니다.
 
 ```c++
   MockBuzzer mock_buzzer_;
 ```
 
-다음으로 `unique_ptr<Buzz>`를 반환하는 `MakeBuzz()`에 expectation을 설정하려면 어떻게 해야 할까요?
+이제, mock method에 expectation을 설정할 차례인데요. 예를 들어 `unique_ptr<Buzz>`를 반환하는 `MakeBuzz()`에는 expectation을 어떻게 설정해야 할까요?
 
-지금까지 해왔던 것처럼 `.WillOnce()`, `.WillRepeatedly()`를 사용해서 expectation을 지정하면 됩니다. 물론 action을 따로 연결하지 않는다면 default action이 수행될 것입니다. `unique_ptr<>`를 반환하기 위한 default action은 default constructor를 사용해 object를 생성해주는 것입니다. 따라서 별도의 action을 연결하지 않는다면 `nullptr`을 가리키는 `unique_ptr` object가 반환될 것입니다. 
+사실 지금까지 해왔던 것과 동일하게 `.WillOnce()`, `.WillRepeatedly()`를 사용하면 됩니다. 또한, action을 따로 연결하지 않는다면 default action이 수행되는 것도 같습니다. 여기서 `unique_ptr<>`를 반환하기 위한 default action은 default constructor를 사용해 object를 생성해주는 것이기 때문에 별도의 action을 연결하지 않는다면 `nullptr`을 가리키는 `unique_ptr` object가 반환될 것입니다. 
 
 ```cpp
   // Use the default action.
@@ -2118,7 +2118,7 @@ class MockBuzzer : public Buzzer {
   EXPECT_EQ(nullptr, mock_buzzer_.MakeBuzz("hello"))
 ```
 
-만약, default action을 변경하고 싶다면 [Setting Default Actions](cheat_sheet.md#default-action-설정하기)를 참조하세요.
+이러한 default action을 변경하고 싶다면 [Setting Default Actions](cheat_sheet.md#default-action-설정하기)를 참조하세요.
 
 `Return(ByMove(...))`를 사용하면 특정한 move-only-type 값을 반환하도록 지정할 수도 있습니다.
 
@@ -2131,11 +2131,11 @@ class MockBuzzer : public Buzzer {
   EXPECT_NE(nullptr, mock_buzzer_.MakeBuzz("world"));
 ```
 
-`ByMove()`가 없다면 당연히 compile error가 발생할 것입니다.
+Move-only-type 타입을 반환할 때, `ByMove()`를 사용하지 않는다면 당연하게도 compile error가 발생합니다.
 
-여기서 문제입니다, `Return(ByMove(...))` action이 한 번 이상 수행될 수 있을까요? 예를 들면 `WillRepeatedly(Return(ByMove(...)));` 와 같이 사용하는 것이 가능할까요? 해당 action이 한 번 수행되면 해당 값은 mock fuction을 호출한 caller쪽으로 이동하게 됩니다. 즉, mock function이 다시 호출되서 action을 수행하려고 해도 이동해야할 값이 이미 없어진 상태가 됩니다. 이러한 상황은 runtime error를 발생시킵니다. 결론적으로 `Return(ByMove(...))`는 한 번만 호출될 수 있습니다.
+여기서 문제입니다, `Return(ByMove(...))` action이 한 번 이상 수행될 수 있을까요? 예를 들면 `WillRepeatedly(Return(ByMove(...)));`와 같이 사용하는 것이 가능할까요? 결론부터 말하면 안됩니다. `Return(ByMove(...))`는 한 번만 호출될 수 있습니다. 왜냐하면 해당 action이 처음 한 번 수행되면 해당 값은 mock function을 호출한 caller쪽으로 이동하게 됩니다. 따라서 mock function과 action이 다시 호출되었을 때는 이동해야 할 값이 이미 없어진 상태이기 때문에 runtime error가 발생할 것입니다.
 
-여기서 lambda 혹은 callable object를 사용하면 더 다양한 활용이 가능합니다. 특히, move-only-type에 대해서도 `WillRepeatedly`를 사용할 수 있습니다. 아래는 그러한 예제코드입니다.
+Lambda 혹은 callable object를 사용하면 위와 같은 문제를 해결할 수 있습니다. 즉, move-only-type에 대해서도 `WillRepeatedly`를 사용할 수 있습니다. 관련 예제코드가 아래에 있습니다.
 
 ```cpp
   EXPECT_CALL(mock_buzzer_, MakeBuzz("x"))
@@ -2147,7 +2147,7 @@ class MockBuzzer : public Buzzer {
   EXPECT_NE(nullptr, mock_buzzer_.MakeBuzz("x"));
 ```
 
-`Return(ByMove(...))`로는 불가능한 일이 가능해졌습니다. 이제 `mock_buzzer`가 호출될 때마다 새로운 `unique_ptr<Buzz>`가 생성되고 반환될 것입니다.
+위 코드는 lambda를 사용함으로써 `Return(ByMove(...))`로는 불가능했던 일을 가능하게 했습니다. 이제 `mock_buzzer`가 호출될 때마다 새로운 `unique_ptr<Buzz>`가 생성되고 반환될 것입니다.
 
 지금까지 move-only-type을 반환하는 방법에 대해서 배웠습니다. 그럼 move-only argument를 전달 받으려면 어떻게 해야할까요? 정답은 대부분의 경우에 별도의 조치를 취하지 않아도 잘 동작한다는 것입니다. 혹시나 문제가 되는 부분이 있다고 해도 compile error를 통해 미리 확인할 수 있을 것입니다. `Return`, [lambda, functor](cook_book.md#functionsfunctorslambda를-action으로-사용하기)도 언제든 사용할 수 있습니다.
 
@@ -2169,9 +2169,9 @@ class MockBuzzer : public Buzzer {
 
 ##### Legacy : move-only type 해결방법
 
-Move-only argument를 지원하는 기능은 2017년 4월에 gMock에 추가되었습니다
+Move-only argument를 지원하는 기능은 2017년 4월에 gMock에 추가되었습니다. 따라서 그보다 예전 gMock을 사용하고 있는 사용자는 아래와 같은 방법을 사용하시기 바랍니다. (사실 더 이상 필요하지는 않지만 참조용으로 남겨둔 내용입니다.)
 
-그보다 오래된 코드를 사용하고 있다면 아래와 같은 방법을 사용해야 할 것입니다. (사실 더 이상 필요하지는 않지만 참조용으로 남겨둔 내용입니다.)
+아래 예제는 move-only argument를 전달받는 `SharedBuzz()`라는 method를 mocking하는 코드입니다. 이를 위해서는 `SharedBuzz()`의 역할을 대신 수행하기 위한 method를 추가해야 합니다. 즉, 아래 코드의 `DoShareBuzz()`입니다. 그런 후에 `ShareBuzz()` 대신에 `DoShareBuzz()`를 mocking 하면 됩니다.
 
 ```cpp
 class MockBuzzer : public Buzzer {
@@ -2183,7 +2183,7 @@ class MockBuzzer : public Buzzer {
 };
 ```
 
-해결방법은 move-only argument를 전달받는 `SharedBuzz()`의 역할을 위임하기 위한 `DoShareBuzz()`를 새로 추가하는 것입니다. 그런 다음에 `ShareBuzz()` 대신에 `DoShareBuzz`를 mocking 하면 됩니다.
+아래 예제는 위의 mock class를 사용하는 코드입니다.
 
 ```cpp
   MockBuzzer mock_buzzer_;
@@ -2195,15 +2195,13 @@ class MockBuzzer : public Buzzer {
   mock_buzzer_.ShareBuzz(MakeUnique<Buzz>(AccessLevel::kInternal), 0);
 ```
 
-
-
 #### 컴파일을 빠르게 하기 ####
 
-동의할지는 모르겠지만, mock class를 컴파일하는 시간의 대부분은 constructor와 destructor를 만드는데 사용됩니다. 왜냐하면 constructor나 destructor에서 expectation을 검증하는 것과 같이 중요한 일들을 수행하기 때문입니다. 더 나아가서 mock method의 signature가 여러가지 타입에 대응해야 한다면 당연히 constructor나 destructor도 각각의 타입에 대해 생성될 것입니다. 결과적으로 다양한 타입을 사용하는 다수의 method를 mocking해야할 때, 컴파일 속도가 느려질 수도 있습니다.
+모든 사람이 동의할지는 모르겠지만, mock class를 컴파일하는 시간의 대부분은 constructor와 destructor를 만드는데 사용됩니다. 왜냐하면 constructor나 destructor에서 expectation 검증과 같은 중요한 일들을 수행하기 때문이기도 하고 더 직접적으로는 mock method가 여러가지 타입에 대응해야 한다면 constructor나 destructor도 각각의 타입에 대해 컴파일되기 때문입니다. 결과적으로 다양한 타입을 사용하는 method가 많을수록 컴파일 속도가 느려질 확률이 큽니다.
 
-사용자가 컴파일 속도가 느려서 문제를 겪고 있다면, 이러한 mock class의 constructor와 destructor의 정의를 class body 밖으로 빼내서 별도의 `.cpp`파일에 구현하는 것이 좋은 방법입니다. 이렇게 하면 mock class가 여러파일에 분리되어 있더라도 각각의 constructor와 destructor는 한번만 생성되기 때문에 컴파일 속도가 빨라질 것입니다.
+만약 사용자가 컴파일 속도로 인해 어려움을 겪고 있다면 mock class의 constructor와 destructor에 구현된 내용을 class body 밖으로 빼내서 별도의 `.cpp` 파일로 이동시키는 것도 괜찮은 옵션 중 하나입니다. 이렇게 하면 mock class가 정의된 헤더파일을 여러 곳에서 `#include` 하더라도 속도가 느려지지 않습니다. 즉, constructor와 destructor가 한 번만 컴파일되기 때문에 그 속도도 빨라질 것입니다.
 
-이러한 주장을 예제로 확인해 보겠습니다.
+아래에서 관련 예제들을 확인하도록 하겠습니다.
 
 ```cpp
 // File mock_foo.h.
@@ -2222,7 +2220,7 @@ class MockFoo : public Foo {
 
 먼저 위의 코드는 개선사항을 적용하기 전입니다. Class에 constructor와 destructor가 없기 때문에 컴파일러가 직접 생성해줘야 하며 이를 위해 많은 컴파일 시간이 소모됩니다. 
 
-반면에 아래 코드는 constructor와 destructor를 직접 선언한 후에 정의(구현)는 하지 않았습니다.
+반면에 아래 코드는 constructor와 destructor를 직접 선언했지만 정의(구현)는 하지 않았습니다.
 
 ```cpp
 // File mock_foo.h.
@@ -2238,7 +2236,9 @@ class MockFoo : public Foo {
   ... more mock methods ...
 };
 ```
-이제 constructor와 destructor에 대한 정의는 별도 파일인 `mock_foo.cpp`에 구현합니다.
+
+그런 후에 constructor와 destructor의 정의를 `mock_foo.cpp`라는 별도 파일에 구현하면 컴파일속도를 개선할 수 있습니다.
+
 ```cpp
 // File mock_foo.cc.
 #include "path/to/mock_foo.h"
@@ -2252,11 +2252,11 @@ MockFoo::~MockFoo() {}
 
 #### 검증을 바로 수행하기 ####
 
-Mock object는 자신이 소멸되는 시점에 연관된 모든 expectation에 대한 검증을 수행하고 성공이나 실패를 알려줍니다. 이런 동작방식을 채택함으로서 사용자가 expectation을 검증할 직접 구현할 필요가 없어졌습니다. 그러나 이러한 동작은 mock object가 파괴되지 않는다면 또 문제가 될 수 있습니다.
+Mock object는 자신이 소멸되는 시점에 연관된 모든 expectation의 수행결과를 종합하여 알려줍니다. 이런 방식을 통해 사용자가 직접 모든 expectation이 만족되었는지 확인해야하는 수고를 덜어줍니다. 다만 이것은 어디까지나 mock object가 정상적으로 소멸된다는 가정하에서 의미가 있는 내용입니다.
 
-Mock object가 소멸되지 않는다면 어떤일이 발생할까요? 어떤 bug로 인해서 mock object가 소멸되지 않았다고 가정해봅시다. 그렇다면 검증도 일어나지 않게 되니 실제로 문제가 되는 bug들도 발견하지 못하고 넘어갈 수 있습니다.
+만약, mock object가 소멸되지 않는다면 어떤일이 발생할까요? 알 수 없는 bug로 인해서 mock object가 소멸되지 않았다고 가정해봅시다. 그렇게 되면 실제로 문제가 발생했는데도 이를 눈치채지 못하고 넘어갈 수가 있습니다.
 
-이러한 문제를 완화시키기 위해서는 heap checker를 사용하는 것이 좋습니다. Heap checker는 mock object의 소멸여부를 알려주는 역할을 수행합니다. 다만, 사실 heap checker의 구현도 100% 완벽하다고는 할 수 없습니다. 이러한 이유로 gMock은 사용자가 직접 검증을 수행할 수 있는 방법을 제공하고 있습니다. `Mock::VerifyAndClearExpectations(&mock_object)`를 사용하면 됩니다.
+이러한 문제를 완화시키기 위해서 heap checker를 사용하는 것도 좋은 방법입니다. Heap checker는 mock object의 소멸여부를 알려주는 역할을 수행합니다. 다만, 사실 heap checker의 구현도 100% 완벽하지는 않기 때문에 gMock은 사용자가 직접 검증을 수행할 수 있는 방법을 제공하고 있습니다. 이런 경우에는 `Mock::VerifyAndClearExpectations(&mock_object)`를 사용하시기 바랍니다.
 
 ```cpp
 TEST(MyServerTest, ProcessesRequest) {
@@ -2276,11 +2276,11 @@ TEST(MyServerTest, ProcessesRequest) {
 }  // server is destroyed when it goes out of scope here.
 ```
 
-**Tip:** `Mock::VerifyAndClearExpectations()`은 검증의 성공여부를 `bool`타입으로 반환하여 알려줍니다. 따라서 해당 mock object의 검증결과를 `ASSERT_TRUE()`계열을 통해서 다시 확인하는 것도 가능합니다.
+**Tip:** `Mock::VerifyAndClearExpectations()`은 검증의 성공여부를 `bool` 타입으로 반환합니다. 따라서 해당 mock object의 검증결과를 `ASSERT_TRUE()`를 통해서 다시 확인하는 것도 가능합니다.
 
 #### Check Point 사용하기 ####
 
-어떤 mock object에 설정한 다양한 내용들을 "reset"하고 싶을 때도 있습니다. 그러한 시점을 "check point"라고 부릅니다. 즉 현재까지 설정된 모든 expectation에 대한 검증을 수행해 버리고 새로운 expectation을 다시 지정하는 것입니다. 이러한 방법은 mock object가 "phases" 개념 위에서 동작하도록 만들어 줍니다. 즉, 단계별로 검증해야 할 항목들을 나누는 것이 가능해집니다.
+어떤 mock object에 설정한 다양한 내용들을 "reset" 하고 싶을 때도 있습니다. 그러한 시점을 "check point"라고 부릅니다. 즉 현재까지 설정된 모든 expectation에 대한 검증을 수행해 버리고 새로운 expectation을 다시 지정하는 것입니다. 이러한 방법은 mock object가 "phases" 개념 위에서 동작하도록 만들어 줍니다. 즉, 단계별로 검증해야 할 항목들을 나누는 것이 가능해집니다.
 
 가능한 예상 시나리오는 먼저 `SetUp()`에서 1차적인 검증을 수행한 후에 개별 `TEST_F`를 정의할 때는 `SetUp()`에서 사용한 기존의 expectation을 초기화하고 새롭게 지정하는 것입니다.
 
