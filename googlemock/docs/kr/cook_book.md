@@ -2886,7 +2886,7 @@ Cardinality EvenNumber() {
 
 #### 새로운 Action 구현하기
 
-Built-in action만으로 부족하다고 느끼는 사용자가 있다면 action을 직접 구현하는 것도 어렵지 않습니다. Action의 signature와 매칭되는 functor class를 정의하면 됩니다.(template도 가능합니다.) 그렇게 action을 구현한 예제가 아래에 있습니다.
+Built-in action만으로 부족하다고 느끼는 사용자가 있다면 action을 직접 구현하는 것도 어렵지 않습니다. Action의 signature와 매칭되는 functor class를 정의하면 됩니다.(template도 가능합니다.) 간단한 action을 구현예제를 아래에서 확인하세요.
 
 ```c++
 struct Increment {
