@@ -227,7 +227,6 @@ using testing::TestProperty;
 using testing::TestResult;
 using testing::TimeInMillis;
 using testing::UnitTest;
-using testing::internal::AddReference;
 using testing::internal::AlwaysFalse;
 using testing::internal::AlwaysTrue;
 using testing::internal::AppendUserMessage;
@@ -7148,30 +7147,6 @@ TEST(RemoveReferenceToConstTest, Works) {
   TestGTestRemoveReferenceAndConst<char, const char>();
   TestGTestRemoveReferenceAndConst<char, const char&>();
   TestGTestRemoveReferenceAndConst<const char*, const char*>();
-}
-
-// Tests that AddReference does not affect reference types.
-TEST(AddReferenceTest, DoesNotAffectReferenceType) {
-  CompileAssertTypesEqual<int&, AddReference<int&>::type>();
-  CompileAssertTypesEqual<const char&, AddReference<const char&>::type>();
-}
-
-// Tests that AddReference adds reference to non-reference types.
-TEST(AddReferenceTest, AddsReference) {
-  CompileAssertTypesEqual<int&, AddReference<int>::type>();
-  CompileAssertTypesEqual<const char&, AddReference<const char>::type>();
-}
-
-// Tests GTEST_ADD_REFERENCE_.
-
-template <typename T1, typename T2>
-void TestGTestAddReference() {
-  CompileAssertTypesEqual<T1, GTEST_ADD_REFERENCE_(T2)>();
-}
-
-TEST(AddReferenceTest, MacroVersion) {
-  TestGTestAddReference<int&, int>();
-  TestGTestAddReference<const char&, const char&>();
 }
 
 // Tests GTEST_REFERENCE_TO_CONST_.
