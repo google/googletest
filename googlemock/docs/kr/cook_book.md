@@ -47,7 +47,7 @@ class MockFoo {
 };
 ```
 
-이 해결방법은 첫번째 argument, 세번째 arguemnt를 명확히 표현하기 위해 괄호를 사용했습니다. 각각은 mocking 대상(`GetPair()`, `CheckMap()`)의 return type과 argument type을 의미합니다. 물론 C++에서 return type, argument type을 괄호로 감싸는 것은 적법하지 않지만, `MOCK_METHOD` macro는 파싱하고 나서 괄호를 제거하기 때문에 문제가 없습니다.
+이 해결방법은 첫번째 argument, 세번째 argument를 명확히 표현하기 위해 괄호를 사용했습니다. 각각은 mocking 대상(`GetPair()`, `CheckMap()`)의 return type과 argument type을 의미합니다. 물론 C++에서 return type, argument type을 괄호로 감싸는 것은 적법하지 않지만, `MOCK_METHOD` macro는 파싱하고 나서 괄호를 제거하기 때문에 문제가 없습니다.
 
 해결방법 2 - alias 사용하기
 
