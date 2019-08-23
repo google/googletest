@@ -2495,11 +2495,11 @@ Emacs에서 `M-x google-complie` 명령을 통해 테스트를 구현하고 실�
 
 이제 `M-m`을 눌러서 빌드를 시작하고, `M-up` / `M-down`을 눌러서 error 간에 이동할 수 있습니다. 더불어 빌드할 때마다 테스트도 같이 수행하고 싶다면 `M-m` 명령의 build command 설정부분에 `foo_test.run` 혹은 `runtests`라는 내용을 추가하시기 바랍니다.
 
-### Extending gMock  ###
+### Extending gMock ###
 
 #### 새로운 Matcher 구현하기 ####
 
-WARNING: gMock은 matcher가 언제 몇 번 호출될지를 보장하지 않습니다. 따라서 모든 matcher는 순수하게 기능적인 동작만 수행하도록 구현해야 합니다. 즉, 프로그램 내의 다른 정보에 대한 side effect나 의존성을 가지면 안된다는 것입니다. 자세한 내용은 [여기](cook_book.md#matcher는-부수효과side-effect를-가지면-안됩니다)를 참조하세요.
+WARNING: gMock은 matcher가 언제 몇 번 호출될지를 보장하지 않습니다. 따라서 모든 matcher는 순수하게 기능적인 동작만 수행하도록 구현해야 합니다. 즉, 프로그램 내의 다른 정보에 대한 side effect나 의존성을 가지면 안된다는 것입니다. 이와 관련된 내용은 [여기](cook_book.md#matcher는-부수효과side-effect를-가지면-안됩니다)에서 좀 더 자세하게 설명하고 있습니다.
 
 gMock이 제공하는 `MATCHER*` macro는 사용자가 새로운 matcher를 만들 수 있도록 도와줍니다. 기본적인 문법은 아래와 같습니다.
 
@@ -2507,21 +2507,25 @@ gMock이 제공하는 `MATCHER*` macro는 사용자가 새로운 matcher를 만�
 MATCHER(name, description_string_expression) { statements; }
 ```
 
-위의 매크로는 `statements`를 실행하는 matcher를 만들어 줍니다. 이렇게 생성된 matcher는 성공,실패를 알려야 하기 떄문에 항상 `bool`값을 반환합니다. `statements`를 구현할 때는 특수 argument들을 사용할 수 있습니다. 그 중에서도 `arg`, `arg_type`은 mock function에서 matcher로 전달되는 argument와 argument type을 의미합니다.
+위 macro는 `statements`를 실행하는 matcher를 만들어 줍니다. 이렇게 생성된 matcher는 성공, 실패를 알려야 하기 때문에 항상 `bool`값을 반환합니다. 또한 macro에 전달하는 `statements`에는 특수 argument들도 사용할 수 있습니다. 예를 들어 `arg`, `arg_type`은 각각 mock function에서 matcher로 전달되는 argument와 argument type을 의미합니다.
 
-`description_string_expression`은 `string` 타입으로서 matcher가 무엇을 해야하는지 알려주는 용도로 사용되며 같은 내용이 failure message를 출력할때도 사용됩니다. 이 부분을 구현할 때 `negation`이라고 불리우는 `bool`타입의 특수 argument를 참조할 수 있는데 이것은 matcher의 성공, 실패 여부에 따라 관련정보를 다르게 출력하기 위한 용도로 주로 사용합니다. 아래쪽에서 관련예제와 함께 다시 설명하겠습니다.
+`description_string_expression`은 `string` 타입으로서 matcher가 무엇을 해야하는지 알려주는 용도로 사용되며 그 내용이 failure message를 출력할 때도 역시 사용됩니다. 더불어 이 부분을 구현할 때 `negation`이라는 `bool` 타입의 특수 argument를 사용할 수 있는데 이것은 matcher의 성공, 실패 여부에 따라 관련정보를 다르게 출력하기 위한 용도로 주로 사용합니다. 아래에서 관련예제와 함께 다시 설명하겠습니다.
 
-사용편의성을 위해서 `description_string_expression`에는 (`""`)와 같이 빈 문자열도 사용 가능합니다. 이 때에는 `name`을 조금 변경해서 description으로 대체로 사용합니다.
+사용편의성을 위해서 `description_string_expression`에는 (`""`)와 같이 빈 문자열도 사용 가능합니다. 만약 이렇게 (`""`)를 사용하면 gMock은 `name`을 조금 변경하여 description을 대체해줍니다.
 
 아래에 간단한 matcher를 정의한 예제가 있습니다.
+
 ```cpp
 MATCHER(IsDivisibleBy7, "") { return (arg % 7) == 0; }
 ```
+
 이렇게 정의된 matcher는 built-in matcher을 사용하듯이 동일한 방법으로 사용하면 됩니다.
+
 ```cpp
   // Expects mock_foo.Bar(n) to be called where n is divisible by 7.
   EXPECT_CALL(mock_foo, Bar(IsDivisibleBy7()));
 ```
+
 `EXPECT_THAT`을 사용하는 것도 가능합니다.
 
 ```cpp
@@ -2531,7 +2535,9 @@ MATCHER(IsDivisibleBy7, "") { return (arg % 7) == 0; }
   EXPECT_THAT(some_expression, IsDivisibleBy7());
   EXPECT_THAT(some_other_expression, Not(IsDivisibleBy7()));
 ```
-위 assertion들이 실패하면, failure message도 아래처럼 출력될 것입니다.
+
+위 assertion들이 실패하면, 아래와 같은 failure message가 출력될 것입니다.
+
 ```bash
   Value of: some_expression
   Expected: is divisible by 7
@@ -2541,9 +2547,10 @@ MATCHER(IsDivisibleBy7, "") { return (arg % 7) == 0; }
   Expected: not (is divisible by 7)
     Actual: 21
 ```
+
 Expected 부분에서 볼 수 있는 `"is divisible by 7"`과 `"not (is divisible by 7)"`은 matcher의 이름인 `IsDivisibleBy7`이라는 이름을 통해서 자동적으로 생성되는 내용입니다.
 
-만약, 자동으로 생성되는 출력문에 만족하지 못하는 경우에는 `description_string_expression` 재정의하면 됩니다. 이 때 바로 `negation`을 사용할 수 있습니다. 아래 예제가 있습니다.
+만약, 자동으로 생성되는 출력문에 만족하지 못하는 경우에는 위에서 설명한 것처럼 `description_string_expression`를 사용자가 재정의하면 됩니다. 이 때 바로 `negation`을 사용할 수 있습니다. 아래 예제가 있습니다.
 
 ```cpp
 MATCHER(IsDivisibleBy7,
@@ -2572,28 +2579,32 @@ MATCHER(IsDivisibleBy7, "") {
     Actual: 27 (the remainder is 6)
 ```
 
-`result_listener`는 사용자에게 도움을 주는 내용이라면 무엇이든 출력해도 상관 없습니다. 다만, 한 가지 기억해야 할 점은 매칭이 성공이라면 왜 성공했는지에 대한 정보까지 알려줘야 유용하다는 것입니다. 이것은 해당 matcher가 `Not()`과 함께 사용되었을 때 특히 유용합니다. 마지막으로 argument가 가지고 있는 값을 출력하는 부분은 gMock에 이미 구현되어 있으므로 따로 구현하지 않아도 됩니다.
+`result_listener`는 사용자에게 도움을 주는 내용이라면 무엇이든 출력해도 상관 없습니다. 다만, 한 가지 기억해야 할 점은 매칭이 성공이라면 왜 성공했는지에 대한 정보까지 알려줘야 유용하다는 것입니다. 특히 해당 matcher가 `Not()`과 함께 사용되었을 때 도움이 될 것입니다. 마지막으로 argument의 값을 출력하는 부분은 gMock에 이미 구현되어 있으므로 따로 구현하지 않아도 됩니다.
 
-**Notes:** `arg_type`은 matcher를 사용하는 context 혹은 compiler에 따라서 달라질 수도 있지만 사용자가 신경 쓸 필요는 없습니다. 이것은 matcher를 polymorphic하게 사용하기 위해 선택된 동작방식입니다. 예를 들어 `IsDivisibleBy7()`과 같은 예제에서 `(arg % 7)`을 계산하고 그 결과를 `bool`타입으로 반환할 수만 있다면 `arg_type`은 어떤 타입이 되더라도 괜찮습니다. 즉, (암시적인 형변환까지 포함해서) `%`연산을 수행할 수 있는 타입이라면 모두 사용할 수 있는 matcher가 만들어지는 것입니다. 예제코드의 `Bar(IsDivisibleBy7())`를 보면, `Bar()`라는 method는 `int`타입 argument를 전달받고 있기 때문에 `arg_type`도 역시 `int`로 결정됩니다. 이 때, argument가 `unsigned long`이라고 해도 문제가 없는 것입니다. 단지 `arg_type`이 `unsigned long`가 되는 것 뿐입니다.
+**Notes:** `arg_type`은 matcher를 사용하는 context 혹은 compiler에 따라서 달라질 수 있긴 하지만 사용자가 특별히 신경 쓸 필요는 없습니다. 이러한 동작방식은 matcher를 polymorphic하게 사용하기 위해 채택되었습니다. 예를 들어 `IsDivisibleBy7()`과 같은 예제에서 `(arg % 7)`을 계산하고 그 결과를 `bool` 타입으로 반환할 수만 있다면 `arg_type`은 어떤 타입이 되더라도 괜찮습니다. 이를 통해서 (암시적인 형변환까지 포함해서) `%` 연산을 수행할 수 있는 타입이라면 모두 사용할 수 있는 matcher가 만들어지는 것입니다. 예제코드의 `Bar(IsDivisibleBy7())`를 보면, `Bar()`라는 method는 `int` 타입 argument를 전달받고 있기 때문에 `arg_type`도 역시 `int`로 결정됩니다. 이 때, argument가 `unsigned long`이라고 해도 문제가 없는 것입니다. 단지 `arg_type`이 `unsigned long`가 되는 것 뿐입니다.
 
 #### 새로운 Parameterized Matcher 구현하기 ####
 
-Matcher 자체적으로 parameter를 가지길 원할 수도 있습니다. 본격적인 설명에 앞서 matcher에서 사용하는 argument와 parameter라는 용어를 구분할 필요가 있습니다. 먼저, argument란 mock function으로부터 matcher로 전달되는 값들을 의미합니다. 그러나 parameter는 matcher 자신이 스스로 관리하고 사용하려는 목적의 값들을 의미합니다. 즉, mock function과는 직접적인 연관이 없습니다. 여기서는  matcher가 parameter를 사용하려면 어떻게 구현해야 하는지 소개합니다. 기본적으로는 아래 macro를 사용하게 됩니다.
+Matcher 자체적으로 parameter를 가지길 원할 수도 있습니다. 본격적인 설명에 앞서 matcher에서 사용하는 argument와 parameter라는 용어를 구분할 필요가 있습니다. 먼저, argument란 mock function으로부터 matcher로 전달되는 값들을 의미합니다. 그러나 parameter는 matcher 자신이 스스로 관리하고 사용하려는 목적의 값들을 의미합니다. 즉, parameter는 mock function과 직접적인 연관은 없습니다. 여기서는 matcher에 parameter를 사용하려면 어떻게 구현해야 하는지 소개합니다. 그 시작은 아래의 macro입니다.
 
 ```cpp
 MATCHER_P(name, param_name, description_string) { statements; }
 ```
-위 macro를 보면 `description_string`에는 string expression를 전달할 수 있습니다. `""`도 역시 사용 가능합니다. 더불어 `description_string`을 구현할 때는 `negation`, `param_name`과 같은 특수 argument를 사용하는 것도 가능합니다.
 
-먼저, `MATHCER_P`를 사용해 간단한 parameterized matcher를 구현한 예제입니다.
+위의 `MATCHER_P`를 보면 `description_string`에는 string를 전달할 수 있습니다. `""`도 역시 사용 가능합니다. 더불어 `description_string`을 구현할 때는 `negation`, `param_name`과 같은 특수 argument를 사용하는 것도 가능합니다.
+
+아래는 `MATHCER_P`를 사용해 간단한 parameterized matcher를 구현한 예제입니다.
+
 ```cpp
 MATCHER_P(HasAbsoluteValue, value, "") { return abs(arg) == value; }
 ```
+
 이렇게 정의된 `HasAbsoluteValue`라는 matcher는 기존의 matcher처럼 사용하기만 하면 됩니다. 
 
 ```cpp
   EXPECT_THAT(Blah("a"), HasAbsoluteValue(n));
 ```
+
 여기서 `10`이라는 값이 바로 matcher로 전달되는 parameter이며 parameter name(`param_name`)이 `value`가 되는 것입니다. 실행하면 아래와 같은 출력문을 확인할 수 있습니다.
 
 ```bash
@@ -2604,17 +2615,18 @@ MATCHER_P(HasAbsoluteValue, value, "") { return abs(arg) == value; }
 
 출력문의 Expected 부분에 matcher description과 parameter가 함께 출력되는 것을 볼 수 있습니다. 이렇게 출력되는 결과를 통해서 사용자가 문제를 이해하게 쉽게 도와주고 있습니다.
 
-`MATCHER_P`의 `statements`를 구현할 때는 parameter의 타입을 참조하는 것도 가능합니다. 예를 들어 위에서 `value`라는 parameter의 타입을 확인하려면 `value_type`을 사용하면 됩니다.
+`MATCHER_P`의 `statements`를 구현할 때는 parameter의 타입을 참조하는 것도 가능합니다. 예를 들어 `value`라는 parameter의 타입을 확인하려면 `value_type`을 사용하면 됩니다.
 
-gMock은 parameter를 여러개 사용하고 싶은 경우를 위한 macro도 지원합니다. 각 macro의 이름은 `MATCHER_P2`, `MATCHER_P3`, ... 과 같습니다. 단, `MATCHER_P10`까지만 지원하기 때문에 최대로 사용할 수 있는 paratmeter의 개수는 10개입니다.
+gMock은 parameter를 여러개 사용하기 위한 macro도 지원합니다. 각 macro의 이름은 `MATCHER_P2`, `MATCHER_P3`, ... 와 같습니다. 단, `MATCHER_P10`까지만 지원하기 때문에 최대로 사용할 수 있는 paratmeter의 개수는 10개입니다.
 
 ```cpp
 MATCHER_Pk(name, param_1, ..., param_k, description_string) { statements; }
 ```
 
-위에서 `description_string`은 matcher의 **instance** 마다 다를 수 있음을 기억하기 바랍니다. 위에서 얘기했듯이 `description_string`이 `param_name`을 참조하기 때문에 `param_name`의 값에 따라 출력되는 내용이 달라질 수 있다는 의미입니다. 또한, `description_string`에서 parameter를 참조하여 출력하는 방식을 직접 구현할 수도 있습니다.
+위에서 `description_string`은 matcher의 **instance**마다 다를 수 있음을 기억하기 바랍니다. 위에서 얘기했듯이 `description_string`이 `param_name`을 참조하기 때문에 `param_name`의 값에 따라 출력되는 내용이 달라질 수 있다는 의미입니다. 또한, `description_string`에서 parameter를 참조하여 출력하는 방식을 직접 구현할 수도 있습니다.
 
 예제를 보겠습니다.
+
 ```cpp
 using ::testing::PrintToString;
 MATCHER_P2(InClosedRange, low, hi,
@@ -2625,39 +2637,46 @@ MATCHER_P2(InClosedRange, low, hi,
 ...
 EXPECT_THAT(3, InClosedRange(4, 6));
 ```
+
 위의 코드는 `low`, `hi`라는 2개의 `param_name`을 사용하고 있으며 `description_string`에서 이것들을 참조하고 있습니다. 추가로 `negation`도 참조가능함을 볼 수 있습니다. (`negation`의미가 *부정*이기 때문에 값이 `false`일 때가 곧 매칭 성공을 의미한다는 것에 주의하기 바랍니다.)
+
 ```bash
   Expected: is in range [4, 6]
 ```
 
-만약, 위와 같이 `description_string`을 직접 제공하지 않고, `""`를 전달한다면 출력문의 Expected 부분을 자동으로 출력해 줍니다. 이 때에는 matcher name을 단어별로 먼저 출력하고 다음으로 parameter에 저장된 값을 출력해 줍니다.
+만약, 위와 같이 `description_string`을 직접 제공하지 않고, `""`를 전달한다면 gMock이 출력문의 Expected 부분을 자동으로 출력해 줍니다. 이 때에는 matcher name을 단어별로 먼저 출력하고 다음으로 parameter에 저장된 값을 출력해 줍니다.
 
 ```cpp
   MATCHER_P2(InClosedRange, low, hi, "") { ... }
   ...
   EXPECT_THAT(3, InClosedRange(4, 6));
 ```
-결과적으로 위와 같이 description_string에 `""`를 전달해서 만든 matcher는 아래와 같은 출력문을 보여줄 것입니다. 이렇듯 출력문의 가독성을 높이기 위해서라도 matcher name을 신중하게 작성할 필요가 있습니다.
+
+위와 같이 `description_string`에 `""`를 전달해서 만든 matcher는 아래와 같은 출력문을 보여줍니다. 이렇게 출력물에 matcher name을 이용하기 때문에 사용자들은 matcher name을 신중하게 고민해서 작성할 필요가 있습니다.
+
 ```bash
   Expected: in closed range (4, 6)
 ```
 
-마무리하면 `MATCHER_Pk ` macro는 parameter의 개수에 따라 아래와 같이 일반화된 형태로 나타낼수 있습니다.
+`MATCHER_Pk` macro는 parameter의 개수에 따라 아래와 같이 일반화된 형태로 표현할 수 있습니다.
+
 ```cpp
 MATCHER_Pk(Foo, p1, ..., pk, description_string) { ... }
 ```
+
 단, 위의 macro는 축약형이며 실제로는 아래와 같은 모습이긴 합니다.
+
 ```cpp
 template <typename p1_type, ..., typename pk_type>
 FooMatcherPk<p1_type, ..., pk_type>
 Foo(p1_type p1, ..., pk_type pk) { ... }
 ```
 
-즉, 바로 위의 예제에서 정의된 matcher를 `Foo(v1, .., vk)`라는 사용한다고 가정하면 이 떄, `v1`, ... , `vk`의 타입은 일반적인 template function의 동작방식과 같이 compiler에 의해 추론됩니다. 만약, 이러한 타입추론이 불편한 경우에는 명시적으로 직접 지정해도 괜찮습니다. 예를 들면 `Foo<long, bool>(5, false)` 와 같이 구현하기만 하면 됩니다. 다만, 이것은 어디까지나 parameter type에 대한 얘기이며 argument type(`arg_type`)은 matcher를 사용하는 context에 따라 달라지게 됩니다.
+바로 위 예제에서 정의된 matcher를 `Foo(v1, .., vk)`와 같이 구현해서 사용한다고 해봅시다. 이 때, `v1`, ... , `vk`의 타입은 일반적인 template function의 동작방식처럼 compiler에 의해 추론되는데요. 만약, 이러한 타입추론이 불편한 경우에는 명시적으로 직접 지정해도 괜찮습니다. 예를 들면 `Foo<long, bool>(5, false)`와 같이 구현하면 됩니다. 다만, 이것은 어디까지나 parameter type에 대한 얘기이며 argument type(`arg_type`)은 matcher를 사용하는 context에 따라 달라지게 됩니다. Parameter와 argument를 확실히 구별하시기 바랍니다.
 
-`Foo(p1, ..., pk)`와 같은 matcher의 결과를 반환할 떄는 `FooMatcherPk<p1_type, ..., pk_type>`을 사용해야 합니다. 이런 구현은 여러개의 matcher를 묶어서 사용할 떄 유용합니다. 단, parameter가 없거나 한 개만 있는 matcher는 조금 다르게 구현합니다. 예를 들어 parameter가 없는 matcher `Foo()`가 있다면 이것을 반환할때는 `FooMatcher`라는 타입으로 반환해야 합니다. 더불어 `Foo(p)`와 같이 parameter가 1개 있는 경우에는 `FooMatcherP<p_type>`라는 타입으로 반환하면 됩니다.
+`Foo(p1, ..., pk)`와 같은 matcher의 결과를 반환할 때는 `FooMatcherPk<p1_type, ..., pk_type>`을 사용해야 합니다. 이런 구현은 여러개의 matcher를 묶어서 사용할 떄 유용합니다. 단, parameter가 없거나 한 개만 있는 matcher는 조금 다르게 구현합니다. 예를 들어 parameter가 없는 matcher `Foo()`가 있다면 이것을 반환할때는 `FooMatcher`라는 타입으로 반환해야 합니다. 더불어 `Foo(p)`와 같이 parameter가 1개 있는 경우에는 `FooMatcherP<p_type>`라는 타입으로 반환하면 됩니다.
 
-Matcher template을 참조타입 parameter로 초기화할 수도 있지만, 포인터 타입을 사용하는 것이 가독성 측면에서 더 좋습니다. 왜냐하면 참조타입으로 전달하게 되면 failure message가 출력되었을 때, 가리키는 대상의 주소는 볼 수 없고 값만 볼 수 있기 때문입니다. 
+Matcher template을 참조타입 parameter로 초기화할 수도 있지만, 포인터 타입을 사용하는 것이 가독성 측면에서 더 좋습니다. 왜냐하면 참조타입으로 전달하게 되면 failure message가 출력되었을 때 가리키는 대상의 주소는 볼 수 없고 값만 볼 수 있기 때문입니다. 
 
 마지막으로 이미 눈치챘겠지만 matcher는 parameter의 개수에 따라 overloaded function으로 확장됩니다.
 
@@ -2666,11 +2685,11 @@ MATCHER_P(Blah, a, description_string_1) { ... }
 MATCHER_P2(Blah, a, b, description_string_2) { ... }
 ```
 
-지금까지 배운 내용을 보면 `MATCHER*` 매크로를 사용하는 것이 편리하고 유용한 방법인 것은 맞습니다. 하지만 matcher와 같은 새로운 기능을 구현해야 할 때, 가능한 여러가지 방법들을 고민해보고 적절한 방법을 선택하기 바랍니다. 특히, 다음에 설명하는 `MatcherInterface`, `MakePolymorphicMatcher()`도 괜찮을 방법들입니다. 물론 `MATCHER*`에 비해서 해야할 일이 늘어나긴 하지만 좀 더 세밀한 작업도 가능합니다. 예를 들어 타입지정을 다양하게 조절할 수 있고, compile error message가 좀 더 깔끔해집니다. 또한, matcher를 parameter 개수 뿐만 아니라 parameter 타입에 의해서 overload 할 수 있게 도와줍니다.
+네, 상당히 많은 내용을 다뤘는데요. 지금까지 배운 것처럼 `MATCHER*` macro를 이용하면 빠르고 편리하게 사용자만의 matcher를 만들 수 있을 것입니다. 주의할 점은 새로운 matcher를 구현하는 방법이 `MATCHER*`만 있는 것은 아니라는 점입니다. 이렇게 새로운 기능을 구현해야 할 때는 가능한 여러가지 방법들을 고민해보고 적절한 방법을 선택하는 것이 중요합니다. 특히, 바로 다음에 설명하는 `MatcherInterface`, `MakePolymorphicMatcher()`도 꽤 괜찮은 방법들입니다. 물론 `MATCHER*`에 비해서 해야할 일이 많긴 하지만 그와 동시에 좀 더 세밀한 작업도 가능합니다. 예를 들어 타입지정을 다양하게 조절할 수도 있고 compile error message도 좀 더 깔끔합니다. 마지막으로 matcher를 parameter 개수 뿐만 아니라 parameter 타입에 대해서도 overload 할 수 있게 도와줄 것입니다.
 
 #### 새로운 Monomorphic Matcher 구현하기 ####
 
-gMock에서 제공하는 `::testing::MatcherInterface<T>`를 상속받고 구현하면 `T`타입의 argument를 받는 matcher를 만들 수 있습니다. 이렇게 만들어진 matcher는 2가지 일을 가능하게 합니다. 먼저, argument type(`T`)과 argument value를 같이 검사할 수 있게 됩니다. 다음으로는 출력문을 자유롭게 구현할 수 있습니다. 즉, expectation을 만족하지 못했을 때 error message에 어떤 값들을 비교했는지와 같은 정보를 보다 상세히 알려줄 수 있습니다.
+gMock에서 제공하는 `::testing::MatcherInterface<T>`를 상속받고 구현하면 `T` 타입의 argument를 전달받는 matcher를 만들 수 있습니다. 이렇게 만들어진 matcher는 2가지 일을 가능하게 합니다. 먼저, argument type(`T`)과 argument value를 같이 검사할 수 있습니다. 다음으로는 출력문을 자유롭게 구현할 수 있습니다. 즉, expectation을 만족하지 못했을 때 어떤 값들을 비교했는지와 같은 정보를 보다 상세히 알려줄 수 있습니다.
 
 이를 위한 interface인 `MatcherInterface<T>`는 아래처럼 선언되어 있습니다.
 
@@ -2692,7 +2711,7 @@ class MatcherInterface {
  public:
   virtual ~MatcherInterface();
 
-  // Returns true iff the matcher matches x; also explains the match
+  // Returns true if the matcher matches x; also explains the match
   // result to 'listener'.
   virtual bool MatchAndExplain(T x, MatchResultListener* listener) const = 0;
 
@@ -2706,7 +2725,7 @@ class MatcherInterface {
 
 새로운 matcher를 만들고 싶은데 `Truly()`가 맘에 들지 않나요? (`Truly()`는 function이나 functor를 matcher로 변환해주는 기능입니다.) `Truly()`가 생성해주는 출력문으로 부족한가요? 앞으로는 2단계만 거치면 원하는 matcher를 좀 더 자유롭게 만들 수 있습니다. 첫번째 단계는 `MatcherInteface<T>`를 상속받아 구현하는 것이고 두번째 단계는 해당 matcher의 instance를 생성하기 위한 factory function을 정의하는 것입니다. 여기서 두번째 단계는 matcher를 편리하게 사용하기 위해 필요한 것이지 꼭 해야하는 것도 아닙니다.
 
-그럼 예제를 보겠습니다. 아래코드는 어떤 `int`타입 값이 7로 나누어 떨어지는지 검사하는 matcher를 구현한 것입니다.
+그럼 예제를 보겠습니다. 아래코드는 어떤 `int` 타입 값이 7로 나누어 떨어지는지 검사하는 matcher를 구현한 것입니다.
 
 ```cpp
 using ::testing::MakeMatcher;
@@ -2765,7 +2784,7 @@ Expected: is divisible by 7
 
 #### 새로운 Polymorphic Matcher 구현하기 ####
 
-새로운 matcher를 만드는 방법들을 계속 배웠습니다. 하지만 문제는 `MakeMatcher()`를 통해 만들었던 matcher들은 한가지 타입에만 사용이 가능하다는 것입니다. `Eq(x)`처럼 어떤 타입에도 사용가능한(`==`연산자가 구현되어 있는) matcher는 어떻게 만들 수 있을까요? 이제부터는 _polymorphic_ matcher를 정의함으로써 다양한 타입에 사용가능한 matcher를 만들어 보도록 하겠습니다. 관련 기술들이 `"testing/base/public/gmock-matchers.h"`에 구현되어 있으나 내용이 조금 어려울 수 있습니다.
+새로운 matcher를 만드는 방법들을 계속 배웠습니다. 하지만 문제는 `MakeMatcher()`를 통해 만들었던 matcher들은 한가지 타입에만 사용이 가능하다는 것입니다. `Eq(x)`처럼 어떤 타입에도 사용가능한(`==`연산자가 구현되어 있는) matcher는 어떻게 만들 수 있을까요? 이제부터는 *polymorphic* matcher를 정의함으로써 다양한 타입에도 사용가능한 matcher를 만들어 보도록 하겠습니다. 관련 기술들이 `"testing/base/public/gmock-matchers.h"`에 구현되어 있으나 내용이 조금 어려울 수 있습니다.
 
 가장 쉬운 방법은 `MakePolymorphicMatcher()`를 사용하는 것입니다. 아래에 나오는 `NotNull()`이라는 polymorphic matcher 예제를 참조하시기 바랍니다.
 
@@ -2808,13 +2827,13 @@ PolymorphicMatcher<NotNullMatcher> NotNull() {
   EXPECT_CALL(foo, Bar(NotNull()));  // The argument must be a non-NULL pointer.
 ```
 
-**Note:** polymorphic matcher class를 구현할 때는 `MatcherInterface`를 비롯해 어떤 class도 상속받지 않습니다. (monomorphic matcher와 다른 점입니다.) 그리고 method를 virtual method로 선언할 필요도 없습니다.
+**Note:** polymorphic matcher class를 구현할 때는 `MatcherInterface`를 비롯해 어떤 class도 상속받지 않습니다.(monomorphic matcher와 다른 점입니다.) 그리고 method를 virtual method로 선언할 필요도 없습니다.
 
 그럼에도 monomorphic matcher처럼 `MatchAndExplain()`의 argument인 `listener`를 통해 출력문 내용을 추가하는 것도 가능합니다.
 
 #### 새로운 Cardinality 구현하기 ####
 
-Cardinality(호출횟수)는 `Times()`와 함께 사용되며 gMock에 mock function이 몇 번 호출되기를 기대하는지 알려주기 위한 용도로 사용합니다. 다만, 꼭 정확한 횟수를 지정해야 하는 것은 아닙니다. 예를 들어 `AtLeast(5)` 또는 `Between(2, 4)`와 같이 특정범위를 지정하는 cardinality도 제공하고 있습니다. 
+Cardinality(호출횟수)는 `Times()`와 함께 사용되며 gMock에 mock function이 몇 번 호출되기를 기대하는지 알려주는 용도로 사용합니다. 다만, 꼭 정확한 횟수를 지정해야 하는 것은 아닙니다. 예를 들어 `AtLeast(5)` 또는 `Between(2, 4)`와 같이 특정범위를 지정하는 cardinality도 제공하고 있습니다. 
 
 혹시, 기본제공되는 built-in cardinality가 부족하다고 생각된다면 직접 정의하는 것도 가능합니다. 이를 위해서는 `testing` namespace에 있는 아래 interface를 구현하면 됩니다.
 
@@ -2867,7 +2886,7 @@ Cardinality EvenNumber() {
 
 #### 새로운 Action 구현하기
 
-Built-in action만으로 부족하다고 느끼는 사용자가 있다면 action을 직접 구현하는 것도 어렵지 않습니다. Action의 signature와 매칭되는 functor class를 정의하면 됩니다. (template도 가능합니다.)
+Built-in action만으로 부족하다고 느끼는 사용자가 있다면 action을 직접 구현하는 것도 어렵지 않습니다. Action의 signature와 매칭되는 functor class를 정의하면 됩니다.(template도 가능합니다.) 그렇게 action을 구현한 예제가 아래에 있습니다.
 
 ```c++
 struct Increment {
@@ -2894,26 +2913,30 @@ struct MultiplyBy {
 
 ##### Legacy : 새로운 Action 구현하기 #####
 
-C++11 이전에는 functor를 기반으로 한 action을 지move-only원하지 않았으며 주로 `ACTION*`이라는 macro를 통해서 action을 정의할 수 있었습니다. 다만, 이제는 새로운 기능으로 대부분 대체되었습니다. 물론 사용할 수는 있지만 언젠가 compile error가 발생할 수도 있으며 되도록이면 새로운 방법을 사용하기를 권장합니다. 대체된 기능이긴 하지만 `ACTION*` macro의 사용자를 위해 관련 내용을 공유합니다.
+C++11 이전에는 functor를 기반으로 한 action을 지원하지 않았으며 주로 `ACTION*`이라는 macro를 통해서 action을 정의할 수 있었습니다. 다만, 이제는 새로운 기능으로 대부분 대체되었습니다. 물론 현재도 사용할 수는 있지만 언젠가 compile error가 발생할 수도 있으며 되도록이면 새로운 방법을 사용하기를 권장합니다. 비록 지금은 대체된 기능이긴 하지만 관련 내용을 공유합니다.
 
 먼저, `ACTION*` macro는 아래와 같은 모습을 가지고 있습니다.
 
 ```cpp
 ACTION(name) { statements; }
 ```
-어떤 namespace 내에서 (class, function 내부는 안됩니다) 위의 macro를 사용하면, `name`이라는 이름을 가지면서 `statement`코드를 수행하는 action을 생성해줍니다. 여기서 `statement`의 반환값은 곧 action의 반환값이 됩니다. 또한, `statement`를 구현할 때, mock function의 argument를 참조할 수도 있습니다. 이를 위해서 gMock에서는 mock function의 K번째 인수라는 의미로 `argK`를 제공하고 있습니다. 예를 들어 아래와 같습니다.
+
+어떤 namespace 내에서 (class, function 내부는 안됩니다) 위의 macro를 사용하면, `name` 이라는 이름을 가지면서 `statements` 코드를 수행하는 action을 생성해줍니다. 여기서 `statements`의 반환값은 곧 action의 반환값이 됩니다. 또한, `statements`를 구현할 때 mock function의 argument를 참조할 수도 있습니다. 이를 위해서 gMock에서는 mock function의 K번째 인수라는 의미로 `argK`라는 특수 argument를 제공하고 있습니다. 아래에 예제코드가 있습니다.
 
 ```cpp
 ACTION(IncrementArg1) { return ++(*arg1); }
 ```
+
 이렇게 정의된 action은 built-in action과 동일한 방식으로 사용하면 됩니다.
+
 ```cpp
 ... WillOnce(IncrementArg1());
 ```
 
-여기서는 mock function으로부터 전달되는 argument type을 따로 명세하지는 않고 있습니다. 그렇지만 어떤 타입이 전달되든지 코드는 type-safe 합니다. 왜냐하면 예제와 같은 코드는 `*arg1`가 `++` 연산자를 지원하지 않는다면 compile error가 발생할 것이기 때문입니다. 또한 `++(*arg1)`이라는 코드가 mock function의 return type과 맞지 않아도 compile error가 발생할 것입니다.
+여기서는 mock function으로부터 전달되는 argument type을 따로 명세하지는 않고 있습니다. 그렇지만 어떤 타입이 전달되든지 코드는 type-safe 합니다. 왜냐하면 예제와 같은 코드는 `*arg1`가 `++` 연산자를 지원하지 않는다면 compile error를 발생시켜주기 때문입니다. 또한 `++(*arg1)`이라는 코드가 mock function의 return type과 맞지 않아도 compile error가 발생할 것입니다.
 
 또 다른 예제를 보면 좀 더 익숙해 질 것입니다.
+
 ```cpp
 ACTION(Foo) {
   (*arg2)(5);
@@ -2922,6 +2945,7 @@ ACTION(Foo) {
   return arg0;
 }
 ```
+
 위 코드는 먼저 `Foo()`라는 action을 정의합니다. `Foo`는 mock function의 2번째 argument를 받아서 호출합니다. 여기서 2번째 argument는 function pointer이기 때문에 호출이 가능합니다. 계속해서 `Blah()`를 호출하고 1번째 argument에는 0을 대입합니다. 그리고 마지막으로 0번째 argument인 `arg0`을 반환합니다.
 
 `ACTION` macro를 좀 더 편리하게 사용하기 위해서 아래와 같은 pre-defined symbol을 알아두면 편리합니다. 이들은 action statement 안에서 자유롭게 사용할 수 있습니다.
@@ -2935,12 +2959,13 @@ ACTION(Foo) {
 | `return_type`      | The return type of the mock function                          |
 | `function_type`    | The type of the mock function                                 |
 
-아래와 같은 mock function을 위한 action을 구현할 때
+예를 들어 아래와 같은 mock function을 위한 action을 구현한다고 해봅시다.
 
 ```cpp
 int DoSomething(bool flag, int* ptr);
 ```
-`ACTION` macro의 `statement`에서 사용가능한 pre-defined symbol들과 그 값은 아래와 같습니다.
+
+그러면 `ACTION` macro의 `statement`에서 사용가능한 pre-defined symbol들과 그 값은 아래와 같습니다.
 
 | **Pre-defined Symbol** | **Is Bound To**                         |
 | :--------------------- | :-------------------------------------- |
@@ -2955,28 +2980,30 @@ int DoSomething(bool flag, int* ptr);
 
 ##### Legacy : 새로운 Parameterized Action 구현하기 #####
 
-Action이 parameter를 받을 수 있도록 구현해야 할 필요도 있을 것입니다. 이를 위해서 `ACTION_P*` 계열 매크로를 제공하고 있습니다.
+Action macro가 parameter를 받을 수 있도록 구현해야 할 필요도 있을 것입니다. 이를 위해서 `ACTION_P*` 계열 macro를 제공하고 있습니다.
 
 ```cpp
 ACTION_P(name, param) { statements; }
 ```
 
 사용방법은 아래와 같습니다.
+
 ```cpp
 ACTION_P(Add, n) { return arg0 + n; }
 ```
+
 이제 `Add`라는 action이 parameter를 전달받을 수 있게 되었습니다.
+
 ```cpp
 // Returns argument #0 + 5.
 ... WillOnce(Add(5));
 ```
 
-인수(_argument_)라는 용어와 parameter가 조금 헷갈릴 수 있습니다. 정리하자면 인수는 mock function이 전달받는 것들입니다. 필요에 따라 action으로 전달할 수도 있고, 안하는 것도 가능한 경우입니다. 다음으로 parameter는 mock function에서 전달되는게 아니라 테스트코드에서 action으로 직접 전달되는 것들을 의미합니다.
+*argument*와 *parameter*가 여전히 헷갈릴 수 있습니다. 다시 한 번 정리하면 argument는 mock function이 전달받는 것들입니다. 필요에 따라 action으로 전달할 수도 있고, 안하는 것도 가능한 경우입니다. 반면에 parameter는 mock function에서 전달되는게 아니라 테스트코드에서 action으로 직접 전달되는 것들을 의미합니다.
 
-사용자가 parameter type을 직접 제공할 필요는 없습니다. 예를 들어서 사용자가 `ACTION_P*` 계열을 이용해 `param`이라는 parameter를 정의했다면 `param`의 타입은 컴파일러에 의해 추론되며 이렇게 추론된 것을 다시 gMock에서 `param_type`이라는 명칭으로 제공하여 사용자가 사용할 수 있도록 합니다. 위에서 `ACTION_P(Add, n)` 이라고 구현한 코드에서 `n`의 타입은 컴파일러와 gMock에 의해 `n_type`이라는 변수로 사용자에게 제공됩니다.
+사용자가 parameter type을 직접 제공할 필요는 없습니다. 예를 들어서 사용자가 `ACTION_P*` 계열을 이용해 `param`이라는 parameter를 정의했다면 `param`의 타입은 compiler에 의해 추론되며 이렇게 추론된 것을 다시 gMock에서 `param_type`이라는 명칭으로 제공하여 사용자가 사용할 수 있도록 합니다. 위와 같이 `ACTION_P(Add, n)`라고 구현한 코드에서 `n`의 타입은 compiler와 gMock에 의해 `n_type`이라는 변수로 사용자에게 제공됩니다.
 
-
-또한, `ACTION_P2`, `ACTION_P3`와 같이 parameter의 개수에 따라 다른 매크로를 사용할 수 있습니다.
+또한, `ACTION_P2`, `ACTION_P3`와 같이 parameter의 개수에 따라 다른 macro를 사용할 수 있습니다.
 
 ```cpp
 ACTION_P2(ReturnDistanceTo, x, y) {
@@ -2985,25 +3012,27 @@ ACTION_P2(ReturnDistanceTo, x, y) {
   return sqrt(dx*dx + dy*dy);
 }
 ```
+
 위에서 정의한 action은 아래처럼 사용하면 됩니다.
+
 ```cpp
 ... WillOnce(ReturnDistanceTo(5.0, 26.5));
 ```
 
-즉, action을 생성을 돕는 가장 기본매크로인 `ACTION`은 parameter의 개수가 하나도 없는 parameterized action 이라고 봐도 무방할 것입니다.
+즉, action을 생성을 돕는 가장 기본 macro인 `ACTION`은 parameter의 개수가 하나도 없는 parameterized action이라고 봐도 무방할 것입니다.
 
-이렇게 parameterized action은 내부적으로 overloaded function이 된다는 점도 알아두시기 바랍니다.
+더불어 parameterized action은 내부적으로 overloaded function이 된다는 점도 알아두시기 바랍니다.
 
 ```cpp
 ACTION_P(Plus, a) { ... }
 ACTION_P2(Plus, a, b) { ... }
 ```
 
-#### ACTION으로 전달되는 인수나 파라미터의 타입을 제한하기 ####
+#### ACTION으로 전달되는 argument나 parameter의 타입을 제한하기 ####
 
 최대한 간결하고 재사용성을 높이기 위해서 `ACTION*` macro는 mock function의 argument type과 action parameter를 요구하지 않습니다. 대신, compiler가 그런 타입을 추론할 수 있도록 구현해 두었습니다.
 
-다만, 모호한 경우 등을 대비해 argument type을 명시적으로 표현하는 방법도 제공하고 있습니다. 아래 예제를 확인하세요.
+다만, 모호한 경우 등을 대비해 argument type을 명시적으로 표현하는 방법도 제공하고 있습니다. 아래 예제를 보겠습니다.
 
 ```cpp
 ACTION(Foo) {
@@ -3020,11 +3049,12 @@ ACTION_P(Bar, param) {
   bool flag = param;
 }
 ```
+
 위의 코드는 첫번째 argument의 타입을 의미하는 `arg1_type`를 통해서 action의 시작부분에서 타입을 확인하고 있습니다. 이를 위해서 `StaticAssertTypeEq`라는 googletest의 타입비교 기능을 사용할 수 있습니다. (compile time에 비교를 수행합니다.)
 
 #### 새로운 Action Template 구현하기 ####
 
-Action을 정의할 때, action으로 전달되는 parameter의 타입을 값으로부터 추론하기 어려운 경우가 있습니다. 이런 경우에는 template parameter을 통해 명시적으로 parameter의 타입을 지정해야 합니다. `ACTION_TEMPLATE()`이 이러한 기능을 지원합니다. 이름에서 알 수 있듯이 `ACTION()`과 `ACTION_P*()`의 확장판이라고 생각하면 됩니다.
+Action을 정의할 때, action으로 전달되는 parameter의 타입을 추론하기 어려운 경우가 있습니다. 이런 경우에는 template parameter을 통해 명시적으로 parameter의 타입을 지정해야 합니다. gMock의 `ACTION_TEMPLATE()`은 이러한 기능을 지원합니다. 이름에서 알 수 있듯이 `ACTION()`과 `ACTION_P*()`의 확장판이라고 생각하면 됩니다.
 
 ```cpp
 ACTION_TEMPLATE(ActionName,
@@ -3032,9 +3062,9 @@ ACTION_TEMPLATE(ActionName,
                 AND_n_VALUE_PARAMS(p1, ..., p_n)) { statements; }
 ```
 
-이 macro를 통해 생성되는 action은 _m_개의 template parameter와 _n_개의 value parameter를 전달 받습니다. 여기서 _m_의 범위는 1~10까지이고, _n_의 범위는 0~10까지로 약간 다름에 유의하십시오. 다음으로 `name_i`는 i번째 template parameter를 의미하며 `kind_i`는 곧 해당 template parameter의 타입을 의미합니다. `p_i`는 i번째 value parameter이며 이미 말한것처럼 `p_i`의 타입은 compiler에 의해 추론될 것이기 때문에 `kind_i`처럼 명시적으로 적는 부분은 없습니다.
+이 macro를 통해 생성되는 action은 *m*개의 template parameter와 *n*개의 value parameter를 전달 받습니다. 여기서 *m*의 범위는 1~10까지이고 *n*의 범위는 0~10까지이기 때문에 약간 다르다는 점에 유의하십시오. 다음으로 `name_i`는 i번째 template parameter를 의미하며 `kind_i`는 곧 해당 template parameter의 타입을 의미합니다. `p_i`는 i번째 value parameter이며 이미 말한것처럼 `p_i`의 타입은 compiler에 의해 추론될 것이기 때문에 `kind_i`처럼 명시적으로 적는 부분은 없습니다.
 
-예제를 보겠습니다.
+그럼 예제를 보겠습니다.
 
 ```cpp
 // DuplicateArg<k, T>(output) converts the k-th argument of the mock
@@ -3047,12 +3077,13 @@ ACTION_TEMPLATE(DuplicateArg,
 }
 ```
 
-이제 위에서 만든 action template을 사용하려면, 아래처럼 instance를 생성하면 됩니다.
+위에서 만든 action template을 사용하려면, 아래처럼 instance를 생성하면 됩니다.
 
 ```cpp
 ActionName<t1, ..., t_m>(v1, ..., v_n)
 ```
- `t`는 template argument이고 `v`는 value argument 입니다.
+
+`t`는 template argument이고 `v`는 value argument 입니다.
 
 ```cpp
 using ::testing::_;
@@ -3061,12 +3092,13 @@ using ::testing::_;
   EXPECT_CALL(mock, Foo).WillOnce(DuplicateArg<1, unsigned char>(&n));
 ```
 
-Value argument의 타입은 compiler가 추론한다고 말했지만, 만약 value argument의 타입도 명시적으로 지정하고 싶은 사용자가 있다면 아래와 같이 template argument에 관련내용을 추가할 수 있습니다.
+Value argument의 타입은 compiler가 추론한다고 말했지만, 만약 value argument의 타입도 명시적으로 지정하고 싶은 사용자가 있다면 아래와 같이 template argument에 관련내용을 직접 추가하는 것도 가능합니다.
 
 ```cpp
 ActionName<t1, ..., t_m, u1, ..., u_k>(v1, ..., v_n)
 ```
-`u_i`는 `v_i`의 타입을 의미합니다. (예상되는 타입)
+
+`u_i`는 `v_i`의 타입을 의미합니다.(예상되는 타입)
 
 `ACTION_TEMPLATE`과 `ACTION / ACTION_P*`는 value parameter의 개수에 따라서 overloading 될 것입니다.
 
@@ -3081,7 +3113,7 @@ ActionName<t1, ..., t_m, u1, ..., u_k>(v1, ..., v_n)
 
 #### ACTION Object의 타입 확인하기 ####
 
-만약, `ACTION` object를 반환하는 function을 구현하려 한다면, 해당 `ACTION` object의 타입을 알아야만 합니다. 이러한 타입은 어떤 macro를 사용했는지에 따라 달라집니다. 다행히도 그 규칙은 비교적 간단하며 아래 표에서 확인할 수 있습니다.
+만약, `ACTION` object를 반환하는 function을 구현하려 한다면, 해당 `ACTION` object의 타입을 알아야만 합니다. 이러한 타입은 어떤 macro를 사용했는지에 따라 달라지긴 하지만 다행히도 그 규칙은 비교적 간단하며 아래 표에서 확인할 수 있습니다.
 
 | **Given Definition**                                         | **Expression**                             | **Has Type**                           |
 | :----------------------------------------------------------- | :----------------------------------------- | :------------------------------------- |
@@ -3097,7 +3129,7 @@ ActionName<t1, ..., t_m, u1, ..., u_k>(v1, ..., v_n)
 
 #### 새로운 Monomorphic Action 구현하기 ####
 
-`ACTION*` macro는 편리하지만, 사용하기에 적절하지 않은 경우도 있습니다. 왜냐하면`ACTION*` macro를 사용하면 mock function argument와 action parameter를 직접적으로 지정할 수가 없습니다. 이런 이유로 인해 compile error가 발생하기도 하며 사용자를 혼란스럽게 합니다. 또한, `ACTION*` macro만 가지고는 action을 overloading 하기가 상당히 까다롭습니다. (할 수는 있지만)
+`ACTION*` macro는 편리하지만, 사용하기에 적절하지 않은 경우도 있습니다. 왜냐하면 `ACTION*` macro를 사용하면 mock function argument와 action parameter를 직접적으로 지정할 수가 없습니다. 이런 이유로 인해 compile error가 발생하기도 하며 사용자를 혼란스럽게 합니다. 또한, `ACTION*` macro만 가지고는 action을 overloading 하기가 상당히 까다롭습니다. (할 수는 있지만)
 
 이런 상황에서는 `::testing::ActionInterface<F>`를 사용하는 것도 괜찮은 방법입니다. 여기서 `F`는 action을 사용하게 될 mock function의 function type입니다. 아래 예제를 통해 확인하세요.
 
@@ -3171,7 +3203,7 @@ class ReturnSecondArgumentAction {
 };
 ```
 
-위의 class는 monomorphic action과는 다르게 어떤 class로부터도 상속받지 않았습니다. 여기서 중요한 점은 `Perform()`이라는 template method는 꼭 구현해야 한다는 것입니다. `Perform()`은 mock function의 argument를 전부 모아서 tuple 형태의 변수 **하나**로 전달받게 됩니다. 그런 다음 action의 결과를 반환합니다. 이 function는 `const`로 만들어도 되고 꼭 아니어도 괜찮습니다. 다만 template argument들을 잘 맞춰줘야 합니다. 즉, `R`이 mock function의 return type이고 `args`가 mock function의 argument들일 때, `Perform<R>(args)`이라는 명령으로 호출될 수 있어야 합니다.
+위의 class는 monomorphic action과는 다르게 어떤 class로부터도 상속받지 않았습니다. 또한, 중요한 점은 `Perform()`이라는 template method는 꼭 구현해야 한다는 것입니다. `Perform()`은 mock function의 argument를 전부 모아서 tuple 형태의 변수 **하나**로 전달받게 됩니다. 그런 다음 action의 결과를 반환합니다. 이 function은 `const`로 만들어도 되고 꼭 아니어도 괜찮습니다. 다만 template argument들을 잘 맞춰줘야 합니다. 즉, `R`이 mock function의 return type이고 `args`가 mock function의 argument들일 때, `Perform<R>(args)`이라는 명령으로 호출될 수 있어야 합니다.
 
 이제 `MakePolymorphicAction()`을 통해서 바로 위에서 만든 class를 polymorphic action으로 사용할 것입니다. 이름이 좀 일반적이니 적절하게 wrapper로 감싸주면 사용하기가 더 편리할 것입니다. 아래처럼 해줍니다.
 
@@ -3207,17 +3239,17 @@ class MockFoo : public Foo {
 
 #### gMock이 사용자타입 정보도 출력 가능하게 만들기 ####
 
-gMock은 uninteresting call이나 unexpected call이 발생하면 해당 mock function으로 전달된 argument와 stack trace 정보를 출력해 줍니다. 마찬가지로 `EXPECT_THAT`, `EXPECT_EQ`과 같은 macro도 assertion 실패 시에 관련 정보를 출력해 줍니다. googletest와 gMock은 user-extensible value printer를 통해 이러한 동작을 구현하고 있습니다.
+gMock은 uninteresting call이나 unexpected call이 발생하면 해당 mock function으로 전달된 argument와 stack trace 정보를 출력해 줍니다. 마찬가지로 `EXPECT_THAT`, `EXPECT_EQ`과 같은 macro도 assertion 실패 시에 관련 정보를 출력해 줍니다. Googletest와 gMock은 user-extensible value printer를 통해 이러한 동작을 구현하고 있습니다.
 
-다만, 위의 printer가 출력할 수 있는 대상은 built-in C++ type, array,  STL container, 그리고 `<<` 연산자를 정의한 타입들만 해당됩니다. 다시말하면 그 외의 사용자정의 타입들은 관련정보를 출력할 수 없으며 단순히 byte dump만 출력하도록 구현되어 있습니다. 이러한 문제를 개선하려면 [googletests`s advanced guide](../../../googletest/docs/kr/advanced.md#googletest의-디버깅정보-출력방식-변경하기)를 참고하여 더 많은 정보를 출력할 수 있도록 변경할 수 있습니다.
+다만, 위의 printer가 출력할 수 있는 대상은 built-in C++ type, array,  STL container, 그리고 `<<` 연산자를 정의한 타입들만 해당됩니다. 다시 말하면 그 외의 사용자정의 타입들은 관련정보를 출력할 수 없으며 단순히 byte dump만 출력하도록 구현되어 있습니다. 이러한 문제를 개선하려면 [googletests`s advanced guide](../../../googletest/docs/kr/advanced.md#googletest의-디버깅정보-출력방식-변경하기)를 참고하여 더 많은 정보를 출력할 수 있도록 변경할 수 있습니다.
 
 ### Useful Mocks Created Using gMock
 
 #### std::function Mocking하기
 
-C++11부터는 general function type으로 `std::function`을 사용할 수 있게 되었습니다. 또한, general function type은 callback agrument에 사용해도 좋기 때문에 많은 개발자들이 사용하고 있습니다. 이렇게 callback argument로 사용할 때 pointer형태로 주고받게 되면 mocking하기가 약간 까다로운 부분이 있었는데, 이제는 그런 두려움을 가지지 않아도 됩니다. gMock의 `MockFunction`을 사용하면 이러한 어려움을 극복할 수 있습니다.
+C++11 부터는 general function type으로 `std::function`을 사용할 수 있게 되었습니다. 또한, general function type은 callback agrument에 사용하는 것도 가능하기 때문에 많은 개발자들이 즐겨 사용하고 있습니다. 이처럼 callback argument를 전달할 때 pointer 타입으로 전달하게 되면 mocking하기가 약간 까다로운 부분이 있었는데, 이제는 그런 두려움을 가지지 않아도 됩니다. gMock의 `MockFunction`을 사용하면 이러한 어려움을 극복할 수 있습니다.
 
-먼저, `MockFunction<R(T1, .., Tn)>`은 `Call()`이라는 mock method를 가지고 있습니다.
+먼저 `MockFunction<R(T1, .., Tn)>`은 `Call()`이라는 mock method를 가지고 있습니다.
 
 ```c++
   R Call(T1, ..., Tn);
@@ -3250,6 +3282,6 @@ TEST(FooTest, RunsCallbackWithBarArgument) {
 }
 ```
 
-`AsStdFunction()`를 통해서 생성한 function object는 `mock_function`의 proxy일 뿐입니다. 따라서 여러번 생성한다고 해서 별도의 expectation을 새로 만드는 것이 아님을 유의하시기 바랍니다. Proxy가 아무리 여러번 생성되어도 결국엔 `EXPECT_CALL(mock_function, Call("bar")).WillOnce(Return(1));`을 사용하게 됩니다.
+`AsStdFunction()`를 통해서 생성한 function object는 `mock_function`의 proxy일 뿐입니다. 따라서 여러번 생성한다고 해도 별도의 expectation을 새로 만드는 것이 아님을 유의하시기 바랍니다. Proxy가 아무리 여러번 생성되어도 결국엔 `EXPECT_CALL(mock_function, Call("bar")).WillOnce(Return(1));`을 사용하게 됩니다.
 
-C++의 `std::function`에는 argument 개수에 제한이 없지만 `MockFunction`은 10개로 제한하고 있다는 점도 유의하시기 바랍니다.
+마지막으로 C++의 `std::function`에는 argument 개수에 제한이 없지만 `MockFunction`은 10개로 제한하고 있다는 점도 유의하시기 바랍니다.
