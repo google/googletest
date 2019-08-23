@@ -2638,7 +2638,7 @@ MATCHER_P2(InClosedRange, low, hi,
 EXPECT_THAT(3, InClosedRange(4, 6));
 ```
 
-위의 코드는 `low`, `hi`라는 2개의 `param_name`을 사용하고 있으며 `description_string`에서 이것들을 참조하고 있습니다. 추가로 `negation`도 참조가능함을 볼 수 있습니다. (`negation`의미가 *부정*이기 때문에 값이 `false`일 때가 곧 매칭 성공을 의미한다는 것에 주의하기 바랍니다.)
+위의 코드는 `low`, `hi`라는 2개의 `param_name`을 사용하고 있으며 `description_string`에서 이것들을 참조하고 있습니다. 추가로 `negation`도 참조가능함을 볼 수 있는데요, `negation`의 의미가 *부정*이기 때문에 값이 `false`일 때가 곧 매칭 성공을 의미한다는 점은 주의하기 바랍니다.
 
 ```bash
   Expected: is in range [4, 6]
