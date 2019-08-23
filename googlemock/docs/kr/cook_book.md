@@ -2623,7 +2623,7 @@ MATCHER_P(HasAbsoluteValue, value, "") { return abs(arg) == value; }
 MATCHER_Pk(name, param_1, ..., param_k, description_string) { statements; }
 ```
 
-위에서 `description_string`은 matcher의 **instance**마다 다를 수 있음을 기억하기 바랍니다. 위에서 얘기했듯이 `description_string`이 `param_name`을 참조하기 때문에 `param_name`의 값에 따라 출력되는 내용이 달라질 수 있다는 의미입니다. 또한, `description_string`에서 parameter를 참조하여 출력하는 방식을 직접 구현할 수도 있습니다.
+위에서 `description_string`은 matcher의 **instance**마다 다를 수 있음을 기억하기 바랍니다. 위에서 얘기했듯이 `description_string`이 `param_name`을 참조하기 때문에 `param_name`의 값에 따라 출력되는 내용이 달라질 수 있다는 의미입니다. 그리고 필요하다면 `description_string`에서 parameter를 참조하여 출력하는 방식을 직접 구현할 수도 있습니다.
 
 예제를 보겠습니다.
 
