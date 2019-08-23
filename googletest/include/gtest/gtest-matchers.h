@@ -300,7 +300,7 @@ class MatcherBase {
   template <typename U>
   explicit MatcherBase(
       const MatcherInterface<U>* impl,
-      typename internal::EnableIf<!std::is_same<U, const U&>::value>::type* =
+      typename std::enable_if<!std::is_same<U, const U&>::value>::type* =
           nullptr)
       : impl_(new internal::MatcherInterfaceAdapter<U>(impl)) {}
 
@@ -336,7 +336,7 @@ class Matcher : public internal::MatcherBase<T> {
   template <typename U>
   explicit Matcher(
       const MatcherInterface<U>* impl,
-      typename internal::EnableIf<!std::is_same<U, const U&>::value>::type* =
+      typename std::enable_if<!std::is_same<U, const U&>::value>::type* =
           nullptr)
       : internal::MatcherBase<T>(impl) {}
 
