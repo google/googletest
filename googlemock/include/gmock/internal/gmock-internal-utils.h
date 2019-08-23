@@ -479,19 +479,8 @@ struct BooleanConstant {};
 // reduce code size.
 GTEST_API_ void IllegalDoDefault(const char* file, int line);
 
-// Helper types for Apply() below.
-template <size_t... Is> struct int_pack { typedef int_pack type; };
-
-template <class Pack, size_t I> struct append;
-template <size_t... Is, size_t I>
-struct append<int_pack<Is...>, I> : int_pack<Is..., I> {};
-
-template <size_t C>
-struct make_int_pack : append<typename make_int_pack<C - 1>::type, C - 1> {};
-template <> struct make_int_pack<0> : int_pack<> {};
-
 template <typename F, typename Tuple, size_t... Idx>
-auto ApplyImpl(F&& f, Tuple&& args, int_pack<Idx...>) -> decltype(
+auto ApplyImpl(F&& f, Tuple&& args, IndexSequence<Idx...>) -> decltype(
     std::forward<F>(f)(std::get<Idx>(std::forward<Tuple>(args))...)) {
   return std::forward<F>(f)(std::get<Idx>(std::forward<Tuple>(args))...);
 }
@@ -500,9 +489,9 @@ auto ApplyImpl(F&& f, Tuple&& args, int_pack<Idx...>) -> decltype(
 template <typename F, typename Tuple>
 auto Apply(F&& f, Tuple&& args)
     -> decltype(ApplyImpl(std::forward<F>(f), std::forward<Tuple>(args),
-                          make_int_pack<std::tuple_size<Tuple>::value>())) {
+                          MakeIndexSequence<std::tuple_size<Tuple>::value>())) {
   return ApplyImpl(std::forward<F>(f), std::forward<Tuple>(args),
-                   make_int_pack<std::tuple_size<Tuple>::value>());
+                   MakeIndexSequence<std::tuple_size<Tuple>::value>());
 }
 
 // Template struct Function<F>, where F must be a function type, contains
