@@ -1740,7 +1740,7 @@ bool Job2(int n, char c) { ... }
 
 #### Mock Function에 전달된 Callable Argument를 호출하기 ####
 
-Mock function의 argument로 fuction pointer, functor가 전달되는 경우도 있을 것입니다. 즉, "callable" 타입이 argument로 전달되는 경우입니다. 아래에 예제가 있습니다.
+Mock function의 argument로 fuction pointer, functor가 전달되는 경우도 있을 것입니다. 즉, "callable" 타입이 argument로 전달되는 경우입니다. 아래 예제를 보시기 바랍니다.
 
 ```cpp
 class MockFoo : public Foo {
@@ -1750,7 +1750,7 @@ class MockFoo : public Foo {
 };
 ```
 
-위와 같이 전달된 callable argument를 호출하고 싶다면 어떻게 하면 될까요? 아래코드의 `WillOnce(...)`에 사용할 action은 직접 구현해야 할까요?
+위와 같이 전달된 callable argument를 호출하고 싶다면 어떻게 하면 될까요? 아래코드의 `WillOnce(...)`에는 어떤 action을 사용해야 할까요?
 
 ```cpp
 using ::testing::_;
@@ -1762,7 +1762,7 @@ using ::testing::_;
       // second argument DoThis() receives.
 ```
 
-NOTE: C++에 lambda가 적용되기 전에 작성된 legacy documentation임을 밝힙니다.
+NOTE: 이 내용자체는 C++에 lambda가 적용되기 전에 작성된 legacy documentation임을 미리 밝힙니다.
 
 (Lambda가 없다고 가정해도) callable argument를 호출하기 위한 action을 직접 구현할 필요는 없습니다. gMock은 이를 위한 action도 이미 제공하고 있습니다.
 
@@ -1770,7 +1770,7 @@ NOTE: C++에 lambda가 적용되기 전에 작성된 legacy documentation임을 
 InvokeArgument<N>(arg_1, arg_2, ..., arg_m)
 ```
 
-`InvokeArgument<N>(arg1, arg2, ..., arg_m)`이라는 action은 mock function의 N번째 argument로 전달된 callable을 호출해줍니다. 게다가 callable에 argument (`arg_1`, `arg_2`, ..., `arg_m`)를 전달하는 것도 가능합니다.
+`InvokeArgument<N>(arg1, arg2, ..., arg_m)`라는 action은 mock function의 N번째 argument로 전달된 callable을 호출해줍니다. 게다가 callable에 argument를 전달하는 것도 가능합니다.
 
 아래는 관련내용이 추가된 코드입니다.
 
@@ -1805,7 +1805,7 @@ using ::testing::InvokeArgument;
       // will be passed to the callback.
 ```
 
-Callable에 참조형식 argument를 전달할 때, `ByRef()`를 사용하지 않으면 어떻게 될까요? 그런 경우에는 `InvokeArgument()`가 해당 argument의 *복사본을 만들고 다시 그 복사본의 참조를 전달하게 됩니다* 이러한 동작방식은 argument가 temporary value일 때 상당히 유용하며 gMock이 temporary value의 복사본을 만들어서 관리하고 있기 때문에 안전성도 보장됩니다. 아래코드는 이러한 temporary value가 사용된 예제입니다.
+Callable에 참조형식 argument를 전달할 때, `ByRef()`를 사용하지 않으면 어떻게 될까요? 그런 경우에는 `InvokeArgument()`가 해당 argument의 *복사본을 만들고 다시 그 복사본의 참조를 전달하게 됩니다.* 이러한 동작방식은 argument가 temporary value일 때 상당히 유용하며 gMock이 temporary value의 복사본을 만들어서 관리하고 있기 때문에 안전성도 보장됩니다. 아래는 이러한 temporary value가 사용된 예제입니다.
 
 ```cpp
   ...
@@ -1826,9 +1826,9 @@ Callable에 참조형식 argument를 전달할 때, `ByRef()`를 사용하지 �
       // are kept inside the InvokeArgument action.
 ```
 
-#### Action's Result 무시하기 ####
+#### Action의 반환값 무시하기 ####
 
-모두 그런것은 아니지만,  `Return`, `Invoke`와 같은 action은 무언가를 반환할 수 있습니다. 그러나 이러한 기능이 불편한 경우가 있습니다. 예를 들어 mock function의 return type이 void일 때는 void가 아닌 다른 것을 반환하는 action을 사용할 수 없기 때문입니다. 또는 반환값이 있는 action을 `DoAll()`의 중간에 두고 싶을 수도 있습니다. (반환값이 있는 action은 원래`DoAll()`의 마지막에 와야합니다.) 이런 상황이 발생하면 `IgnoreResult()`를 사용하기 바랍니다.
+모두 그런것은 아니지만 `Return`, `Invoke`와 같은 action은 무언가를 반환할 수 있습니다. 그러나 이러한 기능이 오히려 불편한 경우도 있습니다. 왜냐하면 mock function의 return type이 void일 때는 void가 아닌 다른 것을 반환하는 action은 사용할 수 없기 때문입니다. 또는 반환값이 있는 action을 `DoAll()`의 중간에 두고 싶을 수도 있습니다.(반환값이 있는 action은 원래 `DoAll()`의 마지막에 와야합니다.) Googletest는 이러한 상황에 대한 해결방법을 제공하고 있습니다. 이처럼 action의 반환값을 무시해야 하는 상황이 발생하면 `IgnoreResult()`을 사용할 수 있는데요. 아래 예제에서 확인하시기 바랍니다.
 
 ```cpp
 using ::testing::_;
@@ -1858,11 +1858,11 @@ class MockFoo : public Foo {
                       Return(true)));
 ```
 
-당연한 이야기지만 `IgnoreResult()`를 return type이 이미 `void`인 action에는 사용하면 안 됩니다.
+당연한 이야기지만 `IgnoreResult()`를 return type이 `void`인 action에는 사용하면 안 됩니다.
 
-#### Action의 Argument를 선택하기 ####
+#### Action의 Argument 선택하기 ####
 
-Argument가 7개인 mock function `Foo()`가 있고 여기다가 직접 구현한 action을 연결하려 합니다. 그런데 action은 3개의 argument만 받도록 구현되어 있습니다. 어떻게 해야할까요?
+Argument가 7개인 mock function `Foo()`가 있고 여기에 직접 구현한 action을 연결하려 합니다. 그런데 action은 3개의 argument만 받도록 이미 구현되어 있다면 어떻게 해야할까요? 현재까지 파악된 방법으로는 아래처럼 구현할 수 밖에 없습니다.
 
 ```cpp
 using ::testing::_;
@@ -1881,7 +1881,7 @@ bool IsVisibleInQuadrant1(bool visible, int x, int y) {
       .WillOnce(Invoke(IsVisibleInQuadrant1));  // Uh, won't compile. :-(
 ```
 
-위 코드는 당연히 컴파일이 안 될 것입니다. 이 문제를 해결하기 위해서는 먼저 `Foo()`와 동일한 signature를 갖는 "adaptor"를 하나 구현해서 `Invoke()`가 호출할 수 있도록 만들어줘야 합니다.
+네, 위 코드는 당연히 컴파일이 안 될 것입니다. 이 문제를 해결하기 위해서는 먼저 `Foo()`와 동일한 signature를 갖는 "adaptor"를 하나 구현해서 `Invoke()`가 호출할 수 있도록 만들어줘야 합니다.
 
 ```cpp
 using ::testing::_;
@@ -1897,15 +1897,15 @@ bool MyIsVisibleInQuadrant1(bool visible, const string& name, int x, int y,
       .WillOnce(Invoke(MyIsVisibleInQuadrant1));  // Now it works.
 ```
 
-이제 문제없이 동작할 것입니다. 그런데 보기에는 좀 안 좋습니다.
+이제 문제없이 동작할 것입니다. 다만, 중복코드가 좀 있어서 미관상 아름답지는 않습니다.
 
-gMock에서 제공하는 *action adaptor*를 사용하면 훨씬 쉽고 간결하게 구현할 수 있습니다. Adaptor를 구현하는데에 많은 시간을 쓰지 않아도 됩니다.
+이런 경우에는 gMock에서 제공하는 *action adaptor*를 사용하면 훨씬 쉽고 간결한 구현이 가능합니다. 사용자가 직접 adaptor를 구현하지 않아도 됩니다.
 
 ```cpp
 WithArgs<N1, N2, ..., Nk>(action)
 ```
 
-`WithArgs`을 사용하면 괄호안의 내부 `action`을 호출해줍니다. (`WithArgs`자체도 action이므로 구분하기 위해 내부 `action`이라고 했습니다.) 이를 통해 mock function으로 전달된 argument들 중에서 필요한 것만 골라서 내부 `action`을 호출할 수 있습니다.
+위 코드와 같이 `WithArgs`는 괄호안에 있는 내부 `action`을 호출해줍니다.(`WithArgs`자체도 action이므로 구분하기 위해 내부 `action`이라고 했습니다.) 이를 통해 mock function으로 전달된 argument 중에서 필요한 것만 골라서 내부 `action`을 호출할 수 있습니다. 아래는 처음 코드에 `WithArgs`가 적용된 결과입니다.
 
 ```cpp
 using ::testing::_;
@@ -1917,25 +1917,25 @@ using ::testing::WithArgs;
       // No need to define your own adaptor.
 ```
 
-아래처럼 유사한 기능들도 제공합니다.
+관련해서는 몇 가지 유사한 기능들도 아래와 같이 제공하고 있습니다.
 
 - `WithoutArgs(action)`는 내부 `action`이 argument를 받지 않을 때 사용합니다.
-- `WithArg<N>(action)`은 내부 `action`이 argument를 1개만 받을 때 사용합니다. (`Args`에서 `s`가 빠졌습니다)
+- `WithArg<N>(action)`는 내부 `action`이 argument를 1개만 받을 때 사용합니다. (`Args`에서 `s`가 빠졌습니다)
 
-이름에서 유추할 수 있듯이 `InvokeWithoutArgs(...)`이라는 action은 `WithoutArgs(Invoke(...))`와 동일한 동작을 하며 보기좋게 만들어 제공하는 것 뿐입니다.
+이름에서도 유추할 수 있듯이 `InvokeWithoutArgs(...)`라는 action은 `WithoutArgs(Invoke(...))`와 동일한 동작을 하며 보기 좋게 만들어 제공하는 것 뿐입니다.
 
-몇가지 사용팁을 소개합니다.
+그럼 마지막으로 몇가지 사용팁을 소개합니다.
 
-- `WithArgs`에서 사용하는 내부 action에는 `Invoke()`가 아닌 action을 사용해도 괜찮습니다.
+- `WithArgs`에서 사용하는 내부 action에는 `Invoke()`가 아닌 다른 action을 사용해도 괜찮습니다.
 - 특정 argument를 반복해서 사용할 수도 있습니다. 예를 들어 `WithArgs<2, 3, 3, 5>(....)`와 같이 index=`3`인 argument를 여러번 전달해도 됩니다.
 - argument들의 순서를 바꿔서 내부 action을 호출하는 것도 가능합니다. 예를 들어 `WithArgs<3, 2, 1>(...)`과 같이 전달해도 됩니다.
-- 선택한 argument type과 내부 action의 argument type이 정확히 같지는 않아도 됩니다. 암시적인 변환이 가능하다면 동작합니다. 예를 들어 mock function으로 전달된 `int` type argument는 action의 `double` type argument에 잘 전달될 것입니다.
+- 선택한 argument type과 내부 action의 argument type이 정확히 같지는 않아도 됩니다. 암시적인 형변환이 가능하다면 동작합니다. 예를 들어 mock function으로 전달된 argument가 `int` 타입이라면 이것을 action의 `double` 타입 argument에 전달해도 문제없이 잘 동작합니다.
 
 #### 관심없는 Argument 무시하기 ####
 
 [Action의 Argument를 선택하기](cook_book.md#action의-argument를-선택하기)에서 mock function이 action으로 argument를 전달하게 하는 방법을 배웠습니다. 이 때, `WithArgs<...>()`를 사용함에 있어서 한가지 단점은 테스트를 구현하는 사람이 조금 귀찮을 수 있다는 것입니다.
 
-만약, `Invoke*()`에 사용할 function, functor, lambda를 구현하고 있는 중이라면 `Unused`를 사용해서 `WithArgs`를 대체하는 것도 괜찮습니다. `Unused`는 해당 argument는 사용하지 않을 것이라고 명시적으로 표현하는 것이기 때문에 굳이 `WithArgs`를 사용하지 않아도 mock function과 내부 action을 연결할 수 있습니다. 이것의 장점은 소스코드가 깔끔해지고 argument가 변경에 대해서도 쉽고 빠르게 대응할 수 있습니다. 마지막으로 action의 재사용성도 증대됩니다. 그럼 예제코드를 보겠습니다.
+만약, `Invoke*()`와 함께 사용할 function(functor, lambda)을 지금 현재 구현하고 있다면 `WithArgs` 대신에 `Unused`를 사용하는 것도 좋은 옵션이 될 것입니다. `Unused`는 해당 argument는 사용하지 않을 것이라고 명시적으로 표현하는 것이기 때문에 굳이 `WithArgs`를 사용하지 않아도 mock function과 내부 action을 연결할 수 있습니다. 이것의 장점이라면 아무래도 소스코드가 깔끔해지고 argument 변경에 대해서도 쉽고 빠르게 대응할 수 있다는 것입니다. 물론 action의 재사용성도 좋아질 것입니다. 그럼 예제코드를 보겠습니다.
 
 ```cpp
  public:
@@ -1944,7 +1944,7 @@ using ::testing::WithArgs;
   MOCK_METHOD(double, Bar, (int index, double x, double y), (override));
 ```
 
-위 코드와 같이 첫번째 argument만 다른 2개의 mock function에 action을 연결하려면 어떻게 해야 할까요? 지금까지 배운 내용을 사용하면 2개의 action을 각각 정의하고 `Invoke`와 연결해야 합니다. 즉, 아래처럼 구현해야 합니다.
+위 코드의 `Foo()`와 `Bar()`은 첫번째 argument만 다릅니다. 이 2개의 mock function에 동일한 동작을 하는 action을 연결하려면 어떻게 해야 할까요? 지금까지 배운 내용으로는 2개의 서로 다른 action을 정의해서 `Invoke`와 연결해줘야 합니다. 즉, 아래처럼 구현해야 했습니다.
 
 ```cpp
 using ::testing::_;
@@ -1963,7 +1963,7 @@ double DistanceToOriginWithIndex(int index, double x, double y) {
       .WillOnce(Invoke(DistanceToOriginWithIndex));
 ```
 
-그러나 `Unused`를 사용하면 action은 1개만 정의해도 됩니다.
+이 때, `Unused`를 사용하면 1개의 action만 구현해도 2개의 mock function에 대응할 수 있습니다. 관련 소스코드는 아래와 같습니다.
 
 ```cpp
 using ::testing::_;
@@ -1984,7 +1984,7 @@ double DistanceToOrigin(Unused, double x, double y) {
 
 gMock에서 matcher는 내부적으로 ref-counted 포인터를 사용하기 때문에 여러 곳에서 공유하기가 편리하다는 내용을 위에서 설명했습니다. Action도 마찬가지입니다. 내부적으로 ref-counted 포인터를 사용하기 때문에 효율적으로 공유될 수 있습니다. 즉, 동일한 action object를 여러곳에서 참조하고 있다면 마지막 참조자가 없어질 때에 action object도 실제로 소멸될 것입니다.
 
-따라서 복잡한 action을 재사용할 필요가 있다면 매번 새롭게 만들기보다 재사용 가능하도록 구현하는 것이 좋습니다. gMock에서는 action을 복사하는 것도 가능하므로 매우 효율적일 것입니다. 물론 해당 action이 별도의 내부적인 상태를 갖지 않는 경우에만 자유롭게 재사용이 가능할 것입니다. 예를 들어 아래와 같은 `set_flag` action은 내부적으로는 어떠한 상태로 갖지 않으므로 반복해서 사용해도 문제가 없습니다.
+따라서 복잡한 action을 재사용할 필요가 있다면 매번 새롭게 만들기보다 재사용 가능하도록 구현하는 것이 좋습니다. gMock에서는 action을 복사하는 것도 가능하므로 많은 도움이 될 것입니다. 물론 해당 action이 별도의 내부적인 상태를 갖지 않는 경우에만 자유롭게 재사용이 가능할 것입니다. 예를 들어 아래와 같은 `set_flag` action은 내부적으로는 어떠한 상태로 갖지 않으므로 반복해서 사용해도 문제가 없습니다.
 
 ```cpp
 using ::testing::Action;
@@ -1997,7 +1997,7 @@ using ::testing::SetArgPointee;
   ... use set_flag in .WillOnce() and .WillRepeatedly() .....
 ```
 
-그러나, action이 스스로 상태를 정의하고 관리하는 경우에는 공유할 때 주의해야 합니다. 예를 들어서 `IncrementCounter(init)`라는 action factory가 있다고 하겠습니다. 이 factory는 `init`이라는 argument로 전달된 값을 통해 내부변수를 초기화하고 그 변수에 다시 +1 하여 반환하는 action을 생성해줍니다. 아래에 2가지 예제코드는 `IncrementCounter(init)`이라는 action의 공유여부에 따라 결과값이 달리지는 것을 보여줍니다.
+그러나 action이 스스로 상태를 정의하고 관리하는 경우에는 공유할 때 주의해야 합니다. 예를 들어서 `IncrementCounter(init)`이라는 action factory가 있다고 하겠습니다. 이 factory는 `init`이라는 argument로 전달된 값을 통해 내부변수를 초기화하고 그 변수에 다시 +1 하여 반환하는 action을 생성해줍니다. 아래의 2가지 예제코드를 통해 `IncrementCounter(init)`이라는 action의 공유여부에 따라 결과값이 달라지는 상황을 공유합니다.
 
 ```cpp
   EXPECT_CALL(foo, DoThis())
@@ -2010,7 +2010,7 @@ using ::testing::SetArgPointee;
                  // counter than Bar()'s.
 ```
 
-먼저, 위의 코드는 action을 공유하지 않는 코드입니다. 즉, `DoThis()`와 `DoThat()`은 서로 다른 `IncrementCounter()`를 갖게 됩니다. 2개 mock function에서 사용하는 action이 독립적인 상태를 유지하기 때문에 1,2,1이 출력됩니다. 반면에 아래 코드는 `DoThis()`와 `DoThat()`이 `IncrementCounter()`를 공유합니다. 즉, action 내부변수도 공유하기 때문에 `0`으로 초기화한 후에 차례대로 1,2,3 이 출력될 것입니다. 이처럼 공유여부에 따라 action의 수행결과가 달라질 수 있기 때문에 사용하는 목적에 따라 주의해서 구현해야 합니다.
+먼저 위의 코드는 action을 공유하지 않는 코드입니다. 즉, `DoThis()`와 `DoThat()`은 서로 다른 `IncrementCounter()`를 갖게 됩니다. 2개 mock function에서 사용하는 action이 독립적인 상태를 유지하기 때문에 1,2,1 이 출력됩니다. 반면에 아래 코드는 `DoThis()`와 `DoThat()`이 `IncrementCounter()`를 공유합니다. 따라서 action의 내부변수도 공유하기 때문에 `0`으로 초기화한 후에 차례대로 1,2,3 이 출력될 것입니다. 이처럼 공유여부에 따라 action의 수행결과가 달라질 수 있기 때문에 사용하는 목적에 따라 주의해서 구현해야 합니다.
 
 ```cpp
   Action<int()> increment = IncrementCounter(0);
@@ -2026,7 +2026,7 @@ using ::testing::SetArgPointee;
 
 #### 비동기적인 동작을 검증하기
 
-비동기적인 동작을 검증하는 것은 gMock을 사용하면서 자주 겪게되는 어려움 중에 하나입니다. EventQueue라는 class가 하나 있고 이를 위한 interface인 EventDispatcher도 있다고 가정해 보겠습니다. EventQueue class는 말 그대로 전달된 event에 대응하는 동작을 수행해주는 class입니다. 단, 이 class가 별도의 thread를 생성해서 코드를 수행한다면 이를 어떻게 검증할 수 있을까요? `sleep()`을 적절히 조절해서 event가 전달되기를 기다려야 할까요? 가능한 방법이긴 하지만`sleep()`을 사용하면 테스트의 동작이 non-deterministic하게 됩니다. 이런 상황에서 제일 좋은 방법은 gMock action와 notification object를 조합하는 것입니다. 이를 통해 비동기적인 동작을 동기적으로 변경할 수 있습니다. 아래 예제코드가 있습니다.
+비동기적인 동작을 검증하는 것은 gMock을 사용하면서 자주 겪게되는 어려움 중에 하나입니다. EventQueue라는 class가 하나 있고 이를 위한 interface인 EventDispatcher도 있다고 가정해 보겠습니다. EventQueue class는 말 그대로 전달된 event에 대응하는 동작을 수행해주는 class입니다. 이 때, EventQueue class가 별도의 thread를 생성해서 코드를 수행한다면 이를 어떻게 검증할 수 있을까요? `sleep()`을 적절히 조절해서 event가 전달되기를 기다려야 할까요? 물론 가능한 방법이긴 하지만 `sleep()`을 사용하면 테스트의 동작이 non-deterministic하게 됩니다. 이런 상황에서 제일 좋은 방법은 gMock action과 notification object를 조합하는 것입니다. 이를 통해 비동기적인 동작을 동기적으로 변경할 수 있습니다. 아래 예제코드가 있습니다.
 
 ```c++
 using ::testing::DoAll;
@@ -2055,20 +2055,19 @@ TEST(EventQueueTest, EnqueueEventTest) {
 }
 ```
 
-위의 코드는 일반적인 gMock expectation의 구현방법과 크게 다르지 않지만 `Notification`이라는 object와 이를 사용하는 action이 하나 추가되었습니다. 내용은 `kEventId`가 `DispatchEvent()`로 전달되면 테스트가 성공하는 것입니다. 기존에는 `sleep()`을 통해서 얼마간 기다렸다가 `kEventId`가 전달되었는지 확인했다면 여기서는 `Notification::WaitForNotification()`을 호출해서 실제로 전달되는 시점을 확인할 수 있게 했습니다. 즉, 비동기적인 호출이 완료되기를 기다렸다가 안전하게 테스트를 종료할 수 있습니다.
+위의 코드는 일반적인 gMock expectation의 구현방법과 크게 다르지 않지만 `Notification`이라는 object와 이를 사용하는 action이 하나 추가되었습니다. 내용은 `kEventId`가 `DispatchEvent()`로 전달되면 테스트가 성공하는 것입니다. 기존에는 `sleep()`을 통해서 얼마간 기다렸다가 `kEventId`가 전달되었는지 확인했다면 여기서는 `Notification::WaitForNotification()`을 호출해서 실제로 전달되는 시점을 확인할 수 있게 했습니다. 즉, 비동기적인 호출이 완료되기를 기다렸다가 안전하게 테스트를 종료할 수 있습니다.(`Notification` class는 `gtest-port.h`, `gtest-port.cc`에 구현되어 있습니다.)
 
 Note: 이 예제의 단점도 있습니다. 만약 expectation이 만족하지 않으면 테스트가 영원히 끝나지 않기 때문입니다. 언젠가는 타임아웃이 발생하고 실패로 판정되긴 하겠지만 무작정 기다리는 것은 테스트 수행시간을 늘어나게 하며 디버깅도 어렵게 합니다. 이러한 문제를 해결하기 위해서 `WaitForNotificationWithTimeout(ms)`를 사용하면 얼마간의 시간동안만 기다렸다가 타임아웃을 발생시킬 수 있습니다.
-
 
 ### gMock의 다양한 사용법 ###
 
 #### Method가 Move-Only Type을 사용할 때의 Mocking 방법 ####
 
-C++11 에서 _move-only-type_ 이 소개되었습니다. Move-only-type이란 이동은 가능하지만 복사는 불가능한 객체를 의미합니다. C++ 의 `std::unique_ptr<T>`가 대표적인 예입니다.
+C++11 에서 *move-only-type*이 소개되었습니다. Move-only-type이란 이동은 가능하지만 복사는 불가능한 객체를 의미합니다. C++의 `std::unique_ptr<T>`가 대표적인 예입니다.
 
-이러한 move-only-type 을 반환하는 함수를 mocking하는 것은 사실 좀 어렵습니다. 그러나 역시 불가능한 것은 아닙니다. 다만, 이에대한 해결방법이 2017년 4월에 gMock에 추가되었으므로 예전버전을 사용하고 있다면 [Legacy workarounds for move-only types](cook_book.md#legacy--move-only-type-해결방법)를 참조하기를 바랍니다.
+이러한 move-only-type을 반환하는 함수를 mocking하는 것은 사실 좀 어렵습니다. 그러나 역시 불가능한 것은 아닙니다. 다만, 이에 대한 해결방법이 2017년 4월에 gMock에 추가되었기 때문에 그보다 예전버전을 사용하고 있다면 [Legacy workarounds for move-only types](cook_book.md#legacy--move-only-type-해결방법)를 참조하기를 바랍니다.
 
-가상의 프로젝트를 진행하고 있다고 해봅시다. 그 프로젝트는 누군가 "buzzes"라고 불리는 짦은글을 작성하고 공유할 수 있게 해주는 프로젝트입니다. 프로젝트에서는 아래와 같은 타입들을 정의하고 사용하고 있습니다.
+먼저 우리가 가상의 프로젝트를 하나 진행하고 있다고 해봅시다. 프로젝트는 누군가 "buzzes"라고 불리는 짦은글을 작성하고 공유할 수 있게 해주는 프로젝트입니다. 프로젝트에서는 아래와 같은 타입들을 정의하고 사용하고 있습니다.
 
 ```cpp
 enum class AccessLevel { kInternal, kPublic };
@@ -2104,7 +2103,7 @@ class MockBuzzer : public Buzzer {
 위와 같이 mock class를 정의했으며 이제 사용할 차례입니다. 아래에 `MockBuzzer` class 의 객체 `mock_buzzer_`를 생성했습니다.
 
 ```c++
-    MockBuzzer mock_buzzer_;
+  MockBuzzer mock_buzzer_;
 ```
 
 다음으로 `unique_ptr<Buzz>`를 반환하는 `MakeBuzz()`에 expectation을 설정하려면 어떻게 해야 할까요?
@@ -2116,7 +2115,7 @@ class MockBuzzer : public Buzzer {
   EXPECT_CALL(mock_buzzer_, MakeBuzz("hello"));
 
   // Triggers the previous EXPECT_CALL.
-  EXPECT_EQ(nullptr, mock_buzzer_.MakeBuzz("hello"));
+  EXPECT_EQ(nullptr, mock_buzzer_.MakeBuzz("hello"))
 ```
 
 만약, default action을 변경하고 싶다면 [Setting Default Actions](cheat_sheet.md#default-action-설정하기)를 참조하세요.
