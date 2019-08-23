@@ -2280,13 +2280,13 @@ TEST(MyServerTest, ProcessesRequest) {
 
 #### Check Point 사용하기 ####
 
-어떤 mock object에 설정한 다양한 내용들을 "reset" 하고 싶을 때도 있습니다. 그러한 시점을 "check point"라고 부릅니다. 즉 현재까지 설정된 모든 expectation에 대한 검증을 수행해 버리고 새로운 expectation을 다시 지정하는 것입니다. 이러한 방법은 mock object가 "phases" 개념 위에서 동작하도록 만들어 줍니다. 즉, 단계별로 검증해야 할 항목들을 나누는 것이 가능해집니다.
+어떤 mock object에 설정한 다양한 내용들을 "reset" 하고 싶을 때도 있습니다. 그러한 시점을 "check point"라고 부릅니다. 즉, 설정된 expectation들이 만족되었는지 한 차례 확인한 후에 다시 새로운 expectation들을 지정하는 것입니다. 이러한 방법은 mock object가 "phases" 개념 위에서 동작하도록 만들어 줍니다. 쉽게 말해서 단계별로 검증해야 할 항목들을 분류하는 것이 가능해집니다.
 
-가능한 예상 시나리오는 먼저 `SetUp()`에서 1차적인 검증을 수행한 후에 개별 `TEST_F`를 정의할 때는 `SetUp()`에서 사용한 기존의 expectation을 초기화하고 새롭게 지정하는 것입니다.
+가능한 예상 시나리오는 먼저 `SetUp()`에서 1차적인 검증을 수행한 후에 개별 `TEST_F`를 정의할 때는 `SetUp()`에서 사용한 기존의 expectation들을 초기화하고 새롭게 지정하는 것입니다.
 
 위에서 확인한 것처럼 `Mock::VerifyAndClearExpectations()`함수는 호출되는 시점에 바로 검증을 수행하므로 이러한 경우에 사용하기 적합합니다. 혹시, `ON_CALL()`을 사용해서 default action을 지정했다가 특정시점에 변경하는 방법을 사용하고 있다면 `Mock::VerifyAndClear(&mock_object)`를 사용하기를 추천합니다. 이 함수는 `Mock::VerfiyAndClearExpectations(&mock_object)`와 동일한 동작을 함과 동시에 추가적으로 `ON_CALL()`을 통해 설정한 내용도 초기화 해주기 때문입니다.
 
-또 다른 방법은 expectation을 sequence안에 두는 것입니다. 그런 다음 가짜 "check-point"를 만들어서 검증하려는 함수의 호출순서를 강제화하기 위해 사용할 수 있습니다. 예를 들어 아래코드를 검증한다고 해봅시다.
+또 다른 방법은 expectation을 sequence안에 두는 것입니다. 그런 다음 dummy "check-point"를 만들어서 검증하려는 함수의 호출순서를 강제화하기 위해 사용할 수 있습니다. 예를 들어 아래코드를 검증한다고 해봅시다.
 
 ```cpp
   Foo(1);
@@ -2294,14 +2294,14 @@ TEST(MyServerTest, ProcessesRequest) {
   Foo(3);
 ```
 
-여기서 검증하려는 내용은 `Foo(1)`과 `Foo(3)`이 `mock.Bar("a")`를 호출해야 한다는 것과 `Foo(2)`는 아무것도 호출하지 않기를 바란다는 것입니다. 이제 아래처럼 구현하면 됩니다.
+위의 function들을 통해서 검증하려는 것은 `Foo(1)`과 `Foo(3)`이 `mock.Bar("a")`를 호출해야 한다는 것과 `Foo(2)`는 아무것도 호출하지 않기를 바란다는 것입니다. 이제 아래처럼 구현하면 됩니다.
 
 ```cpp
 using ::testing::MockFunction;
 
 TEST(FooTest, InvokesBarCorrectly) {
   MyMock mock;
-  // Class MockFunction<F> has exactly one mock method.  It is named
+  // Class MockFunction<F> has exactly one mock method. It is named
   // Call() and has type F.
   MockFunction<void(string check_point_name)> check;
   {
@@ -2322,11 +2322,11 @@ TEST(FooTest, InvokesBarCorrectly) {
 
 위의 expectation은 첫번째 `Bar("a")`가 check point "1" 이전에 수행되기를 기대하고 두번째 `Bar("a")`는 check point "2" 이후에 수행되기를 기대합니다. check point "1" 과 check point "2" 사이에는 `Bar("a")` 가 호출되면 안됩니다. 이렇게 명시적으로 check point를 만들어서 `Bar("a")`가 3개의 `Foo()` 호출 중 어느것에 매칭되어야 하는지 표현할 수 있습니다.
 
-#### Destructor Mocking 하기 ####
+#### Destructor Mocking하기 ####
 
-때떄로 mock object가 원하는 시간에 소멸되기를 바랄 수 있습니다. 예를 들어 mock object가 `bar->A()`와 `bar->B()`가 호출되는 중간에 소멸되기를 기대하는 것입니다. Mock function이 호출되는 순서에 대해서는 이미 배웠기 때문에 destructor를 mocking하는 방법만 배우면 구현할 수 있을 것입니다.
+때때로 mock object가 원하는 시점에 딱 소멸되기를 바랄 수 있습니다. 이를 위해서는 destructor가 언제 호출되는지 확인하는 것이 가장 좋은 방법일 것입니다. 그럼 mock object가 `bar->A()`, `bar->B()` 호출의 중간시점에 소멸되기를 기대한다고 해보겠습니다. Mock function이 호출되는 순서에 대해서는 이미 배웠기 때문에 destructor를 mocking하는 방법만 배우면 구현할 수 있을 것입니다.
 
-한 가지만 제외하면 그다지 어렵지 않습니다. 먼저 destructor는 일반적인 함수와는 문법부터 좀 다릅니다. 따라서 `MOCK_METHOD` 매크로를 사용할 수 없습니다.
+한 가지만 제외하면 그다지 어렵지 않습니다. 먼저 destructor는 일반적인 함수와는 문법이 좀 다릅니다. 따라서 `MOCK_METHOD`를 사용할 수가 없습니다.
 
 ```cpp
 MOCK_METHOD(void, ~MockFoo, ());  // Won't compile!
@@ -2361,28 +2361,28 @@ class MockFoo : public Foo {
 
 #### gMock과 Thread 사용하기 ####
 
-사실 **unit** test는 single-threaded context에 구현하는 것이 제일 좋은 방법이긴 합니다. 그렇게 해야 race condition과 dead lock을 피할 수 있고, 디버깅하기가 훨씬 쉽기 때문입니다.
+사실 **unit** test는 single-threaded context에 구현하는 것이 제일 좋습니다. 그렇게 해야 race condition과 deadlock을 피할 수 있고, 디버깅하기가 훨씬 쉽기 때문입니다.
 
-그러나 실제로 많은 프로그램은 multi-threaded context로 구현되어 있고, 이를 위한 테스트도 필요하게 됩니다. gMock은 관련한 테스트 방법들도 제공하고 있습니다.
+그러나 실제로 많은 프로그램은 multi-threaded context로 구현되어 있고 이를 위한 테스트도 필요한 것이 사실입니다. gMock은 관련한 테스트 방법들도 제공하고 있습니다.
 
-Mock을 사용하는 과정을 떠올려 봅시다.
+먼저 Mock을 사용하는 과정을 떠올려 봅시다.
 
 1. `foo`라는 mock object를 생성합니다.
-2. `ON_CALL()`과 `EXPECT_CALL()`을 이용해서 `foo`의 method들에 기대하는 내용(default action, expectation)을 지정합니다.
-3. 테스트 대상코드가 `foo`의 method들을 실제로 호출합니다.
+2. `ON_CALL()` 또는 `EXPECT_CALL()`을 이용해서 `foo`의 method들에 기대하는 내용(default action, expectation)을 지정합니다.
+3. 테스트 대상코드가 `foo`의 method를 실제로 호출합니다.
 4. (선택사항) 검증하고 mock을 초기화합니다.
 5. Mock을 직접 소멸시키거나 테스트 대상코드에서 소멸시키도록 합니다. 이제 destructor가 검증을 수행하게 됩니다.
 
-이렇게 mock을 사용하는 5단계를 진행하면서 아래 규칙들만 잘 지킨다면 thread를 적용하는데도 문제가 없을 것입니다.
+이러한 다섯 단계를 진행하는 과정에서 아래 규칙들만 잘 지켜진다면 multi-threads를 적용하는데도 큰 무리는 없습니다.
 
-- 테스트 코드는 하나의 thread에서 시작합니다. (테스트 대상코드는 아닐수도 있지만)
-- Mock 사용과정 - 1단계에서 동기화도구(lock 종류)는 사용하지 않습니다.
-- Mock 사용과정 - 2단계, 5단계를 수행할때는 다른 thread가 `foo`에 접근하지 못하도록 합니다.
-- Mock 사용과정 - 3단계, 4단계는 원하는 환경으로 수행할 수 있습니다. (single thread 혹은 multiple threads) gMock이 내부적으로 동기화 해주기 때문에 테스트코드에서 필요한 것이 아니라면 굳이 직접 동기화를 구현할 필요는 없습니다.
+- 테스트 코드는 하나의 thread에서 시작합니다.(테스트 대상코드는 아닐수도 있지만)
+- 위 1단계에서 동기화도구(lock 종류)는 사용하지 않습니다.
+- 위 2단계, 5단계를 수행할 때, 다른 thread가 `foo`에 접근하지 못하도록 합니다.
+- 위 3단계, 4단계는 원하는 환경으로 수행할 수 있습니다.(single thread 혹은 multi-threads) gMock이 내부적으로 동기화 해주기 때문에 테스트코드에서 필요한 것이 아니라면 굳이 직접 동기화를 구현할 필요는 없습니다.
 
-만약 이러한 규칙을 어긴다면 미정의 동작이 발생하며 문제가 됩니다. 예를 들어 위의 2단계처럼 `foo`의 어떤 method에 대해 expectation을 설정하고 있을 때, 다른 thread가 해당 method를 호출하면 문제가 발생하게 됩니다. 그러한 부분을 주의하시기 바랍니다.
+규칙 위반에 대해서는 미정의 동작이기 때문에 문제가 발생할 수 있습니다. 예를 들어 `foo`의 어떤 method에 대해 expectation을 설정하고 있을 때, 다른 thread가 해당 method를 호출하면 안됩니다. Multi-threaded context에서는 이러한 내용들을 항상 주의하시기 바랍니다.
 
-gMock은 어떤 mock function의 action이 해당 mock function을 호출한 thread와 동일한 thread에서 수행되는 것을 보장합니다.
+다음으로 gMock은 어떤 mock function의 action이 해당 mock function을 호출한 thread와 동일한 thread에서 수행되는 것을 보장합니다. 아래 예제를 보겠습니다.
 
 ```cpp
   EXPECT_CALL(mock, Foo(1))
@@ -2391,25 +2391,25 @@ gMock은 어떤 mock function의 action이 해당 mock function을 호출한 thr
       .WillOnce(action2);
 ```
 
-즉, 위의 코드에서 `Foo(1)`이 thread - #1에서 호출되고 `Foo(2)`가 thread - #2에서 호출된다면  `action1`은 thread - #1 수행되고 `action2`는 thread - #2에서 수행된다는 의미입니다.
+위의 코드에서 `Foo(1)`이 thread #1에서 호출되고 `Foo(2)`가 thread #2에서 호출된다면 `action1`은 thread #1에서 수행되고 `action2`는 thread #2에서 수행됨이 보장됩니다.
 
-gMock은 같은 sequence에 속한 action들이 서로 다른 thread에서 수행되는 것을 *허용하지 않습니다.* 만약 그렇게 되면 action들간에 협력이 필요한 경우에 deadlock을 유발할 수도 있기 때문입니다. 이것은 곧 위 예제의 `action1`과 `action2`에는 sequence가 사용되지 않았기 때문에 서로 다른 thread에서 수행해도 된다는 것을 의미합니다. 단, 사용자의 구현 과정에서 발생하는 동기화 문제들에 대해서는 직접 동기화 로직을 추가하고 thread-safe로 만들어야 합니다.
+gMock은 같은 sequence에 속한 action들이 서로 다른 thread에서 수행되는 것을 *허용하지 않습니다.* 만약 그렇게 되면 action간에 협력이 필요한 경우에 deadlock을 유발할 수도 있기 때문입니다. 반대로 생각하면 위 예제의 `action1`과 `action2`에는 sequence를 사용하지 않았기 때문에 서로 다른 thread에서 수행해도 된다는 것을 의미하기도 합니다. 이러한 내용들과는 별개로 사용자의 구현 과정에서 발생하는 동기화 문제들에 대해서는 사용자가 직접 동기화 로직을 추가하고 thread-safe로 만들어줘야 합니다.
 
-다음으로 `DefaultValue<T>`를 사용하면 현재 test program에서 살아있는 모든 mock object에 영향을 준다는 것입니다. 따라서 multiple threads 환경이거나 수행중인 action이 있을 때는 사용하지 않는 것이 좋습니다.
+마지막으로 `DefaultValue<T>`를 사용하면 현재 test program에서 살아있는 모든 mock object에 영향을 준다는 것입니다. 따라서 multiple threads 환경이거나 수행중인 action이 있을 때는 사용하지 않는 것이 좋습니다.
 
 #### gMock이 출력할 정보의 양 조절하기 ####
 
-gMock은 잠재적으로 error 가능성이 있는 부분에 대해서는 warning message를 출력해 줍니다. 대표적인 예로 uninteresting call 이 있습니다. 즉, expectation이 없는 mock function에 대해서 error로 여기지는 않지만 사용자가 실수했을 수도 있다는 것을 알리기 위해 warning message로 알려주게 되는 것입니다. 이 때, 해당 uninteresting function에 전달된 argument와 return value 등의 정보를 출력해줌으로써 사용자는 이것이 실제로 문제인지 아닌지 다시 한 번 검토해 볼 수 있게 됩니다.
+gMock은 잠재적으로 error 가능성이 있는 부분에 대해 warning message를 출력해 줍니다. 대표적인 예로 uninteresting call이 있습니다. 즉, expectation이 없는 mock function에 대해서 error로 여기지는 않지만 사용자가 실수했을 수도 있음을 알리기 위해 warning message로 알려주는 것입니다. 이 때, 해당 uninteresting function에 전달된 argument와 return value 등의 정보를 출력해줌으로써 사용자는 이것이 실제로 문제인지 아닌지 다시 한 번 검토해 볼 수 있습니다.
 
-만약, 현재 테스트코드에 문제가 없다고 생각되는 순간이 오면 이와 같은 정보가 달갑지 않을 것입니다. 반대로 테스트코드를 디버깅하고 있거나 테스트대상의 동작을 공부하는 중이라면 그러한 정보가 많을 수록 좋을 것입니다. 결론부터 말하면 사람마다 필요한 정보의 양의 다르다는 것입니다.
+만약, 현재 테스트코드에 문제가 없다고 생각되는 순간이 오면 이와 같은 정보가 달갑지 않을 것입니다. 출력물이 지저분해지기 때문이죠. 하지만 반대로 테스트코드를 디버깅하고 있거나 googletest를 통해 테스트대상의 동작을 공부하는 중이라면 그러한 정보가 많을 수록 좋을 것입니다. 쉽게 말해서 사람마다 필요한 정보의 양의 다르다는 것입니다.
 
-gMock에서는 이러한 정보의 양을 조절하는 방법을 제공합니다. 실행시점에 `--gmock_verbose=LEVEL` 이라는 flag를 사용하면 됩니다. 여기서 `LEVEL`에는 3개의 값을 지정할 수 있습니다.
+따라서 gMock은 이러한 정보의 양을 조절하는 방법을 제공합니다. 실행시점에 `--gmock_verbose=LEVEL`이라는 flag를 사용하면 됩니다. 여기서 `LEVEL`에는 3개의 값을 지정할 수 있습니다.
 
 - `info`: gMock은 warning, error등의 모든 정보를 최대한 자세하게 출력합니다. 또한, `ON_CALL/EXPECT_CALL` 사용에 대한 log도 출력해 줍니다.
-- `warning`: gMock은 warning, error를 출력해 줍니다. 단, 그 내용이 `info`모드보다 자세하지는 않습니다. 현재 gMock의 기본설정입니다.
+- `warning`: gMock은 warning, error를 출력해 줍니다. 단, 그 내용이 `info` 모드보다 자세하지는 않습니다. 현재 gMock의 기본설정입니다.
 - `error`: gMock은 error만 출력해줍니다.
 
-아래와 같은 변수를 수정해서 flag와 동일한 기능을 적용할 수 있습니다.
+Flag 외에 코드에서 아래와 같은 변수를 수정해도 동일한 기능을 적용할 수 있습니다.
 
 ```cpp
   ::testing::FLAGS_gmock_verbose = "error";
@@ -2419,11 +2419,11 @@ gMock에서는 이러한 정보의 양을 조절하는 방법을 제공합니다
 
 #### Mock 호출을 자세하게 들여다보기 ####
 
-gMock은 mock function에 지정한 expectation이 만족되지 않으면 이를 알려줍니다. 그러나 왜 그런 문제가 발생했는지가 궁금한 사용자도 있을 것입니다. 예를 들어 matcher를 사용할 때 어떤 오타가 있었는지, `EXPECT_CALL`의 순서가 틀렸는지, 테스트 대상코드에 문제가 있었는지 등등, 어떻게 하면 이런 내용을 알아낼 수 있을까요?
+gMock은 mock function에 지정한 expectation이 만족되지 않으면 이를 알려줍니다. 그러나 왜 그런 문제가 발생했는지가 궁금한 사용자도 있을 것입니다. 예를 들어 matcher를 사용할 때 어떤 오타가 있었는지? `EXPECT_CALL`의 순서가 틀렸는지? 혹은 테스트 대상코드에 문제가 있었는지? 등등이 있을텐데요. 어떻게 하면 이런 내용을 알아낼 수 있을까요?
 
-마치 X-ray를 보듯이 모든 `EXPECT_CALL`과 mock method 호출에 대해서 추적할 수 있다면 좋지 않을까요? 각각의 호출에 대해서 실제 전달된 argument를 알고 싶나요? 또한 어떤 `EXPECT_CALL`과 비교되었는지도 알고 싶을 수 있습니다.
+마치 X-ray를 보듯이 모든 `EXPECT_CALL`과 mock method 호출을 추적할 수 있다면 좋지 않을까요? 각각의 호출에서 실제 전달된 argument도 궁금하고 어떤 `EXPECT_CALL`과 매칭되었는지도 궁금합니다. 어떻게 해야할까요?
 
-`--gmock_verbose=info` flag를 사용하면 이러한 X-ray를 사용할 수 있습니다. 아래에 예제를 보시죠.
+`--gmock_verbose=info` flag를 통해서 테스트코드에도 X-ray를 사용할 수 있습니다. 아래의 코드를 먼저 보겠습니다.
 
 ```cpp
 #include "gmock/gmock.h"
@@ -2448,7 +2448,7 @@ TEST(Foo, Bar) {
 }
 ```
 
-위 test program을 `--gmock_verbose=info` flag와 함께 실행하면 아래와 같은 정보가 출력될 것입니다.
+이제 위 test program을 `--gmock_verbose=info` flag와 함께 실행하면 아래와 같은 정보가 출력될 것입니다.
 
 ```bash
 [ RUN       ] Foo.Bar
@@ -2477,13 +2477,13 @@ Actual function call count doesn't match EXPECT_CALL(mock, F("c", HasSubstr("d")
 [  FAILED  ] Foo.Bar
 ```
 
-만약, 3번째 `EXPECT_CALL`의 `"c"`가 원래 `"a"`를 쓰려다가 잘못 쓴 오타라고 해봅시다. 즉, `mock.F("a", "good")`호출은 원래 3번째 `EXPECT_CALL`과 매칭되었어야 합니다. 이제 위에 출력된 정보를 다시 보면 `mock.F("a", "good")`이 첫번째 `EXPECT_CALL`과 매칭되어 문제가 됐음을 알 수 있고, 빠르게 오타를 수정하게 될 것입니다.
+여기서 3번째 `EXPECT_CALL`의 `"c"`가 원래 `"a"`를 쓰려다가 잘못 쓴 오타라고 가정해봅시다. 즉, `mock.F("a", "good")`라는 호출은 원래 3번째 `EXPECT_CALL`과 매칭되었어야 합니다. 이제 위에 출력된 정보를 보면 `mock.F("a", "good")`이 첫번째 `EXPECT_CALL`과 매칭되어 문제가 됐음을 바로 알 수 있습니다. 기존에는 불가능했던 일입니다.
 
-Mock call trace은 보고싶지만 stack trace는 보고 싶지 않다면, test program을 실행할 때 flag를 2개를 조합해서(`--gmock_verbose=info --gtest_stack_trace_depth=0`) 실행하면 됩니다.
+만약, mock call trace은 보고싶지만 stack trace는 보고 싶지 않다면 test program을 실행할 때 flag 2개를 조합(`--gmock_verbose=info --gtest_stack_trace_depth=0`)하여 실행하시기 바랍니다.
 
 #### Emacs에서 테스트 실행하기 ####
 
-Emacs에서 `M-x google-complie` 명령을 통해 테스트를 구현하고 실행하는 사용자들은 googletest, gMock error가 발생했을 때, 관련 소스파일의 위치가 강조되어 출력되는걸 볼 수 있습니다. 그 때, 강조된 부분에서 `<Enter>`를 누르면 바로 해당 위치로 이동하게 될 것입니다. 또는 `C-x`를 누르게 되면 다음 error 위치로 바로 이동할 수 있습니다.
+Emacs에서 `M-x google-complie` 명령을 통해 테스트를 구현하고 실행하는 사용자들은 googletest 혹은 gMock error가 발생했을 때, 관련 소스파일의 위치가 강조되어 출력되는걸 볼 수 있습니다. 그 때, 강조된 부분에서 `<Enter>`를 누르면 바로 해당 위치로 이동하게 될 것입니다. 그리고 `C-x`를 누르게 되면 다음 error 위치로 바로 이동할 수 있습니다.
 
 `~/.emacs` 파일에 아래 내용을 추가하면 좀 더 편리하게 사용할 수 있습니다.
 
@@ -2493,7 +2493,7 @@ Emacs에서 `M-x google-complie` 명령을 통해 테스트를 구현하고 실�
 (global-set-key [M-up]  '(lambda () (interactive) (next-error -1)))
 ```
 
-이제 `M-m`을 눌러서 빌드를 시작하고, `M-up` / `M-down`을 눌러서 error간에 이동할 수 있습니다. 더불어서 빌드할 때마다 테스트도 같이 수행하고 싶다면 `M-m`명령의 build command 설정부분에 `foo_test.run` 혹은 `runtests`라는 내용을 추가하면 됩니다.
+이제 `M-m`을 눌러서 빌드를 시작하고, `M-up` / `M-down`을 눌러서 error 간에 이동할 수 있습니다. 더불어 빌드할 때마다 테스트도 같이 수행하고 싶다면 `M-m` 명령의 build command 설정부분에 `foo_test.run` 혹은 `runtests`라는 내용을 추가하시기 바랍니다.
 
 ### Extending gMock  ###
 
