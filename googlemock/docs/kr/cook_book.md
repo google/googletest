@@ -6,7 +6,7 @@
 
 ### Mock Class 만들기 ###
 
-사실 mock class를 정의하는 방법은 일반적인 C++ class를 정의하는 방법과 동일합니다. 다만, class 내부에 mock method를 정의할 때는 `MOCK_METHOD`라는 macro를 사용해야 합니다. 이 macro를 사용해야만 mock method로 사용할 수 있습니다. 또한, macro는 3개 또는 4개의 parameter를 전달받을 수 있습니다. 아래 예제와 함께 자세히 설명하도록 하겠습니다.
+사실 mock class를 정의하는 방법은 일반적인 C++ class를 정의하는 방법과 다르지 않습니다. 다만, class 내부에서 mock method를 정의할 때는 `MOCK_METHOD`라는 macro를 사용해야 합니다. 이 macro를 사용해야만 mock method로서 사용할 수 있습니다. 물론, mock class 안에서 mock method가 아니라 일반 method를 정의할 때는 macro를 사용하지 않아도 됩니다. Macro는 3개 또는 4개의 parameter를 전달받을 수 있습니다. 아래 예제를 보시기 바랍니다.
 
 ```cpp
 class MyMock {
