@@ -2581,7 +2581,7 @@ MATCHER(IsDivisibleBy7, "") {
 
 `result_listener`는 사용자에게 도움을 주는 내용이라면 무엇이든 출력해도 상관 없습니다. 다만, 한 가지 기억해야 할 점은 매칭이 성공이라면 왜 성공했는지에 대한 정보까지 알려줘야 유용하다는 것입니다. 특히 해당 matcher가 `Not()`과 함께 사용되었을 때 도움이 될 것입니다. 마지막으로 argument의 값을 출력하는 부분은 gMock에 이미 구현되어 있으므로 따로 구현하지 않아도 됩니다.
 
-**Notes:** `arg_type`은 matcher를 사용하는 context 혹은 compiler에 따라서 달라질 수 있긴 하지만 사용자가 특별히 신경 쓸 필요는 없습니다. 이러한 동작방식은 matcher를 polymorphic하게 사용하기 위해 채택되었습니다. 예를 들어 `IsDivisibleBy7()`과 같은 예제에서 `(arg % 7)`을 계산하고 그 결과를 `bool` 타입으로 반환할 수만 있다면 `arg_type`은 어떤 타입이 되더라도 괜찮습니다. 이를 통해서 (암시적인 형변환까지 포함해서) `%` 연산을 수행할 수 있는 타입이라면 모두 사용할 수 있는 matcher가 만들어지는 것입니다. 예제코드의 `Bar(IsDivisibleBy7())`를 보면, `Bar()`라는 method는 `int` 타입 argument를 전달받고 있기 때문에 `arg_type`도 역시 `int`로 결정됩니다. 이 때, argument가 `unsigned long`이라고 해도 문제가 없는 것입니다. 단지 `arg_type`이 `unsigned long`가 되는 것 뿐입니다.
+**Notes:** `arg_type`은 matcher를 사용하는 context 혹은 compiler에 따라서 달라질 수 있긴 하지만 사용자가 특별히 신경 쓸 필요는 없습니다. 이러한 동작방식은 matcher를 polymorphic하게 사용하기 위해 채택되었습니다. 예를 들어 `IsDivisibleBy7()`과 같은 예제에서 `(arg % 7)`을 계산하고 그 결과를 `bool` 타입으로 반환할 수만 있다면 `arg_type`은 어떤 타입이 되더라도 괜찮습니다. 이를 통해서 (암시적인 형변환까지 포함해서) `%` 연산을 수행할 수 있는 타입이라면 모두 사용할 수 있는 matcher가 만들어지는 것입니다. 예제코드의 `Bar(IsDivisibleBy7())`를 보면, `Bar()`라는 method는 `int` 타입 argument를 전달받고 있기 때문에 `arg_type`도 역시 `int`로 결정됩니다. 이 때, argument가 `unsigned long`이라고 해도 문제가 없는 것입니다. 단지 `arg_type`이 `unsigned long`이 되는 것 뿐입니다.
 
 #### 새로운 Parameterized Matcher 구현하기 ####
 
