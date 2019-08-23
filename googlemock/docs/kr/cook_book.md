@@ -930,7 +930,7 @@ Remember: 위와 같이 참조형태(`ByRef`)로 전달한 후에 `bar`를 수�
 
 #### Object Member 비교하기 ####
 
-Mock function의 argument로 object가 전달되면 어떻게 해야 할까요? Object로 전달되는 argument를 비교하기 위해 object 전체를 비교하는 것은 좋은 방법이 아닐 것입니다. 그럼 특정한 member variable만 비교하려면 어떻게 해야 할까요? 이런 경우에는 Field()` 또는 `Property()`를 사용하세요. 사용방법은 아래와 같습니다.
+Mock function의 argument로 object가 전달되면 어떻게 해야 할까요? Object로 전달되는 argument를 비교하기 위해 object 전체를 비교하는 것은 좋은 방법이 아닐 것입니다. 그럼 특정한 member variable만 비교하려면 어떻게 해야 할까요? 이런 경우에는 `Field()` 또는 `Property()`를 사용하세요. 사용방법은 아래와 같습니다.
 
 ```cpp
 Field(&Foo::bar, m)
