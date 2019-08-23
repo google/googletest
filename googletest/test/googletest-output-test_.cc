@@ -816,9 +816,9 @@ class TypedTestNames {
  public:
   template <typename T>
   static std::string GetName(int i) {
-    if (testing::internal::IsSame<T, char>::value)
+    if (std::is_same<T, char>::value)
       return std::string("char") + ::testing::PrintToString(i);
-    if (testing::internal::IsSame<T, int>::value)
+    if (std::is_same<T, int>::value)
       return std::string("int") + ::testing::PrintToString(i);
   }
 };
@@ -857,10 +857,10 @@ class TypedTestPNames {
  public:
   template <typename T>
   static std::string GetName(int i) {
-    if (testing::internal::IsSame<T, unsigned char>::value) {
+    if (std::is_same<T, unsigned char>::value) {
       return std::string("unsignedChar") + ::testing::PrintToString(i);
     }
-    if (testing::internal::IsSame<T, unsigned int>::value) {
+    if (std::is_same<T, unsigned int>::value) {
       return std::string("unsignedInt") + ::testing::PrintToString(i);
     }
   }

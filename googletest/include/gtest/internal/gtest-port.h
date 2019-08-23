@@ -869,16 +869,6 @@ struct StaticAssertTypeEqHelper<T, T> {
   enum { value = true };
 };
 
-// Same as std::is_same<>.
-template <typename T, typename U>
-struct IsSame {
-  enum { value = false };
-};
-template <typename T>
-struct IsSame<T, T> {
-  enum { value = true };
-};
-
 // Evaluates to the number of elements in 'array'.
 #define GTEST_ARRAY_SIZE_(array) (sizeof(array) / sizeof(array[0]))
 
@@ -1923,12 +1913,6 @@ GTEST_API_ size_t GetThreadCount();
 
 template <bool B>
 using bool_constant = std::integral_constant<bool, B>;
-
-template <typename T, typename U>
-struct is_same : public std::false_type {};
-
-template <typename T>
-struct is_same<T, T> : public std::true_type {};
 
 template <typename Iterator>
 struct IteratorTraits {

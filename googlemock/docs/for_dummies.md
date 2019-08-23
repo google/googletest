@@ -375,7 +375,7 @@ In the above examples, `100` and `50` are also matchers; implicitly, they are
 the same as `Eq(100)` and `Eq(50)`, which specify that the argument must be
 equal (using `operator==`) to the matcher argument. There are many
 [built-in matchers](#MatcherList) for common types (as well as
-[custom matchers](#NewMatchers)); for example:
+[custom matchers](cook_book.md#NewMatchers)); for example:
 
 ```cpp
 using ::testing::Ge;
@@ -396,7 +396,8 @@ EXPECT_CALL(turtle, GoTo);
 
 This works for all non-overloaded methods; if a method is overloaded, you need
 to help gMock resolve which overload is expected by specifying the number of
-arguments and possibly also the [types of the arguments](#SelectOverload).
+arguments and possibly also the
+[types of the arguments](cook_book.md#SelectOverload).
 
 #### Cardinalities: How Many Times Will It Be Called?
 

@@ -977,9 +977,9 @@ template <typename C>
 struct IsRecursiveContainerImpl<C, true> {
   using value_type = decltype(*std::declval<typename C::const_iterator>());
   using type =
-      is_same<typename std::remove_const<
-                  typename std::remove_reference<value_type>::type>::type,
-              C>;
+      std::is_same<typename std::remove_const<
+                       typename std::remove_reference<value_type>::type>::type,
+                   C>;
 };
 
 // IsRecursiveContainer<Type> is a unary compile-time predicate that

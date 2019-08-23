@@ -178,7 +178,7 @@ class MockStack : public StackInterface<Elem> {
 #### Mocking Non-virtual Methods {#MockingNonVirtualMethods}
 
 gMock can mock non-virtual functions to be used in Hi-perf dependency
-injection.<!-- GOOGLETEST_CM0017 DO NOT DELETE -->.
+injection.<!-- GOOGLETEST_CM0017 DO NOT DELETE -->
 
 In this case, instead of sharing a common base class with the real class, your
 mock class will be *unrelated* to the real class, but contain methods with the
