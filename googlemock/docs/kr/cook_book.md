@@ -1001,7 +1001,7 @@ using ::testing::Pointee;
 
 Argument로 object가 전달되었을 때, 해당 object의 property를 검증하고 싶은 경우가 있을 것입니다. 그러나 그러한 경우를 위한 matcher는 아직 없으므로 필요한 경우에는 직접 정의해야 합니다. 여기서는 이처럼 matcher를 직접 구현해야 할 때 일반 function을 구현하는 것처럼 빠르게 구현하는 방법을 설명합니다.
 
-일단, `Foo` class를 argument를 갖는 mock function이 있다고 가정합니다. 그리고 `Foo`는 `int bar()`와 `int baz()`라는 method를 가지고 있습니다. 이 때, `bar()`, `baz()`라는 method 2개의 반환값을 더한 값(`bar()` + `baz()`)이 기대한 바를 만족하는지 구현하고 싶습니다. 어떻게 하면 될까요? 아래 예제를 참조하세요.
+일단, `Foo` class를 argument로 갖는 mock function이 있다고 가정합니다. 그리고 `Foo`는 `int bar()`와 `int baz()`라는 method를 가지고 있습니다. 이 때, `bar()`, `baz()`라는 method 2개의 반환값을 더한 값(`bar()` + `baz()`)이 기대한 바를 만족하는지 구현하고 싶습니다. 어떻게 하면 될까요? 아래 예제를 참조하세요.
 
 ```cpp
 using ::testing::Matcher;
