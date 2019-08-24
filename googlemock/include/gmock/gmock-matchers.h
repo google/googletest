@@ -133,14 +133,14 @@ class MatcherCastImpl {
     // a user-defined conversion from M to T if one exists (assuming M is
     // a value).
     return CastImpl(polymorphic_matcher_or_value,
-                    bool_constant<std::is_convertible<M, Matcher<T>>::value>(),
-                    bool_constant<std::is_convertible<M, T>::value>());
+                    std::is_convertible<M, Matcher<T>>{},
+                    std::is_convertible<M, T>{});
   }
 
  private:
   template <bool Ignore>
   static Matcher<T> CastImpl(const M& polymorphic_matcher_or_value,
-                             bool_constant<true> /* convertible_to_matcher */,
+                             std::true_type /* convertible_to_matcher */,
                              bool_constant<Ignore>) {
     // M is implicitly convertible to Matcher<T>, which means that either
     // M is a polymorphic matcher or Matcher<T> has an implicit constructor
@@ -157,8 +157,8 @@ class MatcherCastImpl {
   // matcher. It's a value of a type implicitly convertible to T. Use direct
   // initialization to create a matcher.
   static Matcher<T> CastImpl(const M& value,
-                             bool_constant<false> /* convertible_to_matcher */,
-                             bool_constant<true> /* convertible_to_T */) {
+                             std::false_type /* convertible_to_matcher */,
+                             std::true_type /* convertible_to_T */) {
     return Matcher<T>(ImplicitCast_<T>(value));
   }
 
@@ -173,8 +173,8 @@ class MatcherCastImpl {
   //
   // We don't define this method inline as we need the declaration of Eq().
   static Matcher<T> CastImpl(const M& value,
-                             bool_constant<false> /* convertible_to_matcher */,
-                             bool_constant<false> /* convertible_to_T */);
+                             std::false_type /* convertible_to_matcher */,
+                             std::false_type /* convertible_to_T */);
 };
 
 // This more specialized version is used when MatcherCast()'s argument
@@ -3600,8 +3600,8 @@ inline Matcher<T> An() { return A<T>(); }
 
 template <typename T, typename M>
 Matcher<T> internal::MatcherCastImpl<T, M>::CastImpl(
-    const M& value, internal::bool_constant<false> /* convertible_to_matcher */,
-    internal::bool_constant<false> /* convertible_to_T */) {
+    const M& value, std::false_type /* convertible_to_matcher */,
+    std::false_type /* convertible_to_T */) {
   return Eq(value);
 }
 
