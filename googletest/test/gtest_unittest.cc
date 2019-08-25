@@ -233,7 +233,6 @@ using testing::internal::AppendUserMessage;
 using testing::internal::ArrayAwareFind;
 using testing::internal::ArrayEq;
 using testing::internal::CodePointToUtf8;
-using testing::internal::CompileAssertTypesEqual;
 using testing::internal::CopyArray;
 using testing::internal::CountIf;
 using testing::internal::EqFailure;
@@ -7102,18 +7101,11 @@ TEST(IsAProtocolMessageTest, ValueIsFalseWhenTypeIsNotAProtocolMessage) {
   EXPECT_FALSE(IsAProtocolMessage<const ConversionHelperBase>::value);
 }
 
-// Tests that CompileAssertTypesEqual compiles when the type arguments are
-// equal.
-TEST(CompileAssertTypesEqual, CompilesWhenTypesAreEqual) {
-  CompileAssertTypesEqual<void, void>();
-  CompileAssertTypesEqual<int*, int*>();
-}
-
 // Tests GTEST_REMOVE_REFERENCE_AND_CONST_.
 
 template <typename T1, typename T2>
 void TestGTestRemoveReferenceAndConst() {
-  CompileAssertTypesEqual<T1, GTEST_REMOVE_REFERENCE_AND_CONST_(T2)>();
+  static_assert(std::is_same<T1, GTEST_REMOVE_REFERENCE_AND_CONST_(T2)>::value, "GTEST_REMOVE_REFERENCE_AND_CONST_ failed.");
 }
 
 TEST(RemoveReferenceToConstTest, Works) {
@@ -7128,7 +7120,7 @@ TEST(RemoveReferenceToConstTest, Works) {
 
 template <typename T1, typename T2>
 void TestGTestReferenceToConst() {
-  CompileAssertTypesEqual<T1, GTEST_REFERENCE_TO_CONST_(T2)>();
+  static_assert(std::is_same<T1, GTEST_REFERENCE_TO_CONST_(T2)>::value, "GTEST_REFERENCE_TO_CONST_ failed.");
 }
 
 TEST(GTestReferenceToConstTest, Works) {
