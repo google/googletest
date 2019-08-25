@@ -2,7 +2,7 @@
 
 이 문서에서는 gMock의 심화된 사용방법을 확인할 수 있습니다. 아직 gMock 사용경험이 없는 분은 [ForDummies](for_dummies.md) 문서를 먼저 보는 것이 좋습니다.
 
-**Note:** gMock은 소스코드상에 `testing` 이라는 namespace에 구현되어 있습니다. 따라서 gMock에 구현된 `foo`라는 기능을 사용하고자 한다면 `using testing:Foo` 와 같이 namespace를 명시해서 사용해야 합니다. 이 문서에는 예제코드를 간단하게 작성하기 위해서 `using`을 사용하지 않은 코드도 종종 있긴 하지만 사용자가 구현할 때는 `using`을 꼭 사용해야 합니다.
+**Note:** gMock은 소스코드상에 `testing` 이라는 namespace에 구현되어 있습니다. 따라서 gMock에 구현된 `foo`라는 기능을 사용하고자 한다면 `using ::testing::Foo` 와 같이 namespace를 명시해서 사용해야 합니다. 이 문서에는 예제코드를 간단하게 작성하기 위해서 `using`을 사용하지 않은 코드도 종종 있긴 하지만 사용자가 구현할 때는 `using`을 꼭 사용해야 합니다.
 
 ### Mock Class 만들기 ###
 
