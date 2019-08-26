@@ -49,7 +49,7 @@ gMock은 googletest와 함께 제공되는 번들소프트웨어입니다.
 
 ### 예시: Mock Turtles
 
-먼저 우리가 어떤 그래픽 관련 프로그램을 개발하고 있다고 가정합시다. 또한, 렌더링 API로는 [LOGO](https://en.wikipedia.org/wiki/Logo_(programming_language))라는 것을 사용하고 있다고 합시다. 과연 이 프로그램은 어떻게 테스트하면 좋을까요? 네, 가장 쉬운 방법은 역시 해당 API를 사용해서 그림을 그린 후, 그 결과를 golden image와 비교하는 것입니다. (golden image = "OK"라고 판단할 수 있는 비교대상) 그러나 이런 테스트는 시간이 많이 걸리고 깨지기도 쉬운 테스트 방법입니다. 만약, 그래픽카드를 변경했더니 anti-aliasing 동작도 바뀌었다고 생각해보십시오. 그렇게 되면 golden image도 변경되어야만 합니다. 왜냐하면 그려진 그림의 결과가 그래픽카드에 종속되어 있기 때문입니다. 테스트가 많으면 많을수록 golden image를 변경하는 작업도 매우 힘들고 귀찮은 일이 될 것입니다. 이제부터 mock을 사용해서 이러한 문제를 해결해 보겠습니다. 그럼 본격적으로 시작하기에 앞서 의존성 주입([Dependency Injection](https://en.wikipedia.org/wiki/Dependency_injection)) 패턴을 어느정도 이해하고 있다면 도움이 될 것입니다. 물론 완벽히는 몰라도 괜찮으며 앞으로 나오는 내용들을 따라가다 보면 그 의미를 자연스럽게 알게 될 것입니다. 그럼 이제 `Turtle`이라는 interface를 하나 정의하고 본격적인 설명을 시작하겠습니다.
+먼저 우리가 어떤 그래픽 관련 프로그램을 개발하고 있다고 가정합시다. 또한, 렌더링 API로는 [LOGO](https://en.wikipedia.org/wiki/Logo_(programming_language))라는 것을 사용하고 있다고 합시다. 과연 이 프로그램은 어떻게 테스트하면 좋을까요? 네, 가장 쉬운 방법은 역시 해당 API를 사용해서 그림을 그린 후, 그 결과를 golden image와 비교하는 것입니다. (golden image = "OK"라고 판단할 수 있는 비교대상) 그러나 이런 테스트는 시간이 많이 걸리고 깨지기도 쉬운 테스트 방법입니다. 만약, 그래픽카드를 변경했더니 anti-aliasing 동작도 바뀌었다고 생각해보십시오. 그렇게 되면 golden image도 변경되어야만 합니다. 왜냐하면 그려진 그림의 결과가 그래픽카드에 종속되어 있기 때문입니다. 테스트가 많으면 많을수록 golden image를 변경하는 작업도 매우 힘들고 귀찮은 일이 될 것입니다. 이제부터 mock을 사용해서 이러한 문제를 해결해 보겠습니다. 본격적으로 시작하기에 앞서 의존성 주입([Dependency Injection](https://en.wikipedia.org/wiki/Dependency_injection)) 패턴을 어느정도 이해하고 있다면 도움이 될 것입니다. 물론 완벽히는 몰라도 괜찮으며 앞으로 나오는 내용들을 따라가다 보면 그 의미를 자연스럽게 알게 될 것입니다. 그럼 이제 `Turtle`이라는 interface를 하나 정의하고 본격적인 설명을 시작하겠습니다.
 
 ```cpp
 class Turtle {
