@@ -2,7 +2,7 @@
 
 ### gMock이란 무엇인가?
 
-프로토타입 혹은 테스트 프로그램을 구현할 때, 관련된 모든 소프트웨어를 구현하고 실행하는 것은 사실상 불가능합니다. 이러한 경우, 아직 구현하지 못한 소프트웨어(real object)들을 대체하기 위해서 그와 동일한 interface를 갖는 mock object를 만들어서 적용한다면 runtime에 마치 real object가 있는 것처럼 동작시킬 수 있습니다. 예를 들어서 "어떤 function을 호출할지, 그러한 function은 어떤 argument를 통해 몇 번 호출되어야 하는지, return value는 어떻게 할지, function이 여러개라면 그들간의 호출순서는 어떠한지" 등을 사용자가 자유롭게 지정할 수 있게 됩니다.
+프로토타입 혹은 테스트 프로그램을 구현할 때, 처음부터 관련된 모든 소프트웨어를 구현하고 실행하는 것은 사실상 불가능합니다. 이러한 경우, 아직 구현하지 못한 소프트웨어(real object)들을 대체하기 위해서 그와 동일한 interface를 갖는 mock object를 만들어서 적용한다면 runtime에 마치 real object가 있는 것처럼 동작시킬 수 있습니다. 예를 들어서 "어떤 function을 호출할지, 그러한 function은 어떤 argument를 통해 몇 번 호출되어야 하는지, return value는 어떻게 할지, function이 여러개라면 그들간의 호출순서는 어떠한지" 등을 사용자가 자유롭게 지정할 수 있게 됩니다.
 
 **Note**: Mock object라는 용어와 *fake object*라는 용어는 혼동하기 쉽습니다. 그러나 TDD(Test-Driven Development) 관점에서 보면 fake와 mock의 의미는 매우 다릅니다.
 
