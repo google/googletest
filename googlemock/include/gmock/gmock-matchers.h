@@ -3239,14 +3239,8 @@ class OptionalMatcher {
       : value_matcher_(value_matcher) {}
 
   template <typename Optional>
-  operator Matcher<Optional>() const {  // NOLINT
+  operator Matcher<Optional>() const {
     return Matcher<Optional>(new Impl<const Optional&>(value_matcher_));
-  }
-
-  template <typename Optional1, typename ValueType2>
-  operator Matcher<std::tuple<Optional1, ValueType2>>() const {  // NOLINT
-    return MakeMatcher(
-        new PairImpl<Optional1, ValueType2>(value_matcher_));
   }
 
   template <typename Optional>
@@ -3285,49 +3279,6 @@ class OptionalMatcher {
    private:
     const Matcher<ValueType> value_matcher_;
     GTEST_DISALLOW_ASSIGN_(Impl);
-  };
-
-  template <typename Optional1, typename ValueType2>
-  class PairImpl : public MatcherInterface<std::tuple<Optional1, ValueType2>> {
-   public:
-    typedef GTEST_REMOVE_REFERENCE_AND_CONST_(Optional1) Optional1View;
-    typedef typename Optional1View::value_type ValueType1;
-    typedef std::tuple<Optional1, ValueType2> OptionalTuple;
-    typedef std::tuple<ValueType1, ValueType2> ValuePair;
-
-    explicit PairImpl(const ValueMatcher& value_matcher)
-        : value_matcher_(MatcherCast<ValuePair>(value_matcher)) {}
-
-    void DescribeTo(::std::ostream* os) const override {
-      *os << "are optionals where the values ";
-      value_matcher_.DescribeTo(os);
-    }
-
-    void DescribeNegationTo(::std::ostream* os) const override {
-      *os << "are optionals where the values ";
-      value_matcher_.DescribeNegationTo(os);
-    }
-
-    bool MatchAndExplain(OptionalTuple optional_tuple,
-                         MatchResultListener* listener) const override {
-      const auto& optional1 = std::get<0>(optional_tuple);
-      const auto& value2 = std::get<1>(optional_tuple);
-      if (!optional1) {
-        *listener << "left is nullopt";
-        return false;
-      }
-      const ValueType1& value1 = *optional1;
-      StringMatchResultListener value_listener;
-      const bool match = value_matcher_.MatchAndExplain(
-          std::make_tuple(value1, value2), &value_listener);
-      *listener << (match ? "which match" : "whose values don't match");
-      PrintIfNotEmpty(value_listener.str(), listener->stream());
-      return match;
-    }
-
-   private:
-    const Matcher<ValuePair> value_matcher_;
-    GTEST_DISALLOW_ASSIGN_(PairImpl);
   };
 
  private:
