@@ -340,19 +340,6 @@ GTEST_API_ WithoutMatchers GetWithoutMatchers();
 template <typename T> struct remove_reference { typedef T type; };  // NOLINT
 template <typename T> struct remove_reference<T&> { typedef T type; }; // NOLINT
 
-// DecayArray<T>::type turns an array type U[N] to const U* and preserves
-// other types.  Useful for saving a copy of a function argument.
-template <typename T> struct DecayArray { typedef T type; };  // NOLINT
-template <typename T, size_t N> struct DecayArray<T[N]> {
-  typedef const T* type;
-};
-// Sometimes people use arrays whose size is not available at the use site
-// (e.g. extern const char kNamePrefix[]).  This specialization covers that
-// case.
-template <typename T> struct DecayArray<T[]> {
-  typedef const T* type;
-};
-
 // Disable MSVC warnings for infinite recursion, since in this case the
 // the recursion is unreachable.
 #ifdef _MSC_VER
