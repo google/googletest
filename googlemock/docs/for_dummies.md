@@ -375,7 +375,7 @@ In the above examples, `100` and `50` are also matchers; implicitly, they are
 the same as `Eq(100)` and `Eq(50)`, which specify that the argument must be
 equal (using `operator==`) to the matcher argument. There are many
 [built-in matchers](#MatcherList) for common types (as well as
-[custom matchers](#NewMatchers)); for example:
+[custom matchers](cook_book.md#NewMatchers)); for example:
 
 ```cpp
 using ::testing::Ge;
@@ -396,7 +396,8 @@ EXPECT_CALL(turtle, GoTo);
 
 This works for all non-overloaded methods; if a method is overloaded, you need
 to help gMock resolve which overload is expected by specifying the number of
-arguments and possibly also the [types of the arguments](#SelectOverload).
+arguments and possibly also the
+[types of the arguments](cook_book.md#SelectOverload).
 
 #### Cardinalities: How Many Times Will It Be Called?
 
@@ -482,7 +483,7 @@ the *default* action for the function every time (unless, of course, you have a
 
 What can we do inside `WillOnce()` besides `Return()`? You can return a
 reference using `ReturnRef(*variable*)`, or invoke a pre-defined function, among
-[others](#ActionList).
+[others](cook_book.md#using-actions).
 
 **Important note:** The `EXPECT_CALL()` statement evaluates the action clause
 only once, even though the action may be performed many times. Therefore you
@@ -560,7 +561,7 @@ overloaded). This makes any calls to the method expected. This is not necessary
 for methods that are not mentioned at all (these are "uninteresting"), but is
 useful for methods that have some expectations, but for which other calls are
 ok. See
-[Understanding Uninteresting vs Unexpected Calls](#uninteresting-vs-unexpected).
+[Understanding Uninteresting vs Unexpected Calls](cook_book.md#uninteresting-vs-unexpected).
 
 #### Ordered vs Unordered Calls {#OrderedCalls}
 

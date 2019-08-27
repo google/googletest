@@ -132,19 +132,16 @@ class MatcherCastImpl {
     // polymorphic_matcher_or_value to Matcher<T> because it won't trigger
     // a user-defined conversion from M to T if one exists (assuming M is
     // a value).
-    return CastImpl(
-        polymorphic_matcher_or_value,
-        BooleanConstant<
-            std::is_convertible<M, Matcher<T> >::value>(),
-        BooleanConstant<
-            std::is_convertible<M, T>::value>());
+    return CastImpl(polymorphic_matcher_or_value,
+                    bool_constant<std::is_convertible<M, Matcher<T>>::value>(),
+                    bool_constant<std::is_convertible<M, T>::value>());
   }
 
  private:
   template <bool Ignore>
   static Matcher<T> CastImpl(const M& polymorphic_matcher_or_value,
-                             BooleanConstant<true> /* convertible_to_matcher */,
-                             BooleanConstant<Ignore>) {
+                             bool_constant<true> /* convertible_to_matcher */,
+                             bool_constant<Ignore>) {
     // M is implicitly convertible to Matcher<T>, which means that either
     // M is a polymorphic matcher or Matcher<T> has an implicit constructor
     // from M.  In both cases using the implicit conversion will produce a
@@ -159,9 +156,9 @@ class MatcherCastImpl {
   // M can't be implicitly converted to Matcher<T>, so M isn't a polymorphic
   // matcher. It's a value of a type implicitly convertible to T. Use direct
   // initialization to create a matcher.
-  static Matcher<T> CastImpl(
-      const M& value, BooleanConstant<false> /* convertible_to_matcher */,
-      BooleanConstant<true> /* convertible_to_T */) {
+  static Matcher<T> CastImpl(const M& value,
+                             bool_constant<false> /* convertible_to_matcher */,
+                             bool_constant<true> /* convertible_to_T */) {
     return Matcher<T>(ImplicitCast_<T>(value));
   }
 
@@ -175,9 +172,9 @@ class MatcherCastImpl {
   // (e.g. std::pair<const int, int> vs. std::pair<int, int>).
   //
   // We don't define this method inline as we need the declaration of Eq().
-  static Matcher<T> CastImpl(
-      const M& value, BooleanConstant<false> /* convertible_to_matcher */,
-      BooleanConstant<false> /* convertible_to_T */);
+  static Matcher<T> CastImpl(const M& value,
+                             bool_constant<false> /* convertible_to_matcher */,
+                             bool_constant<false> /* convertible_to_T */);
 };
 
 // This more specialized version is used when MatcherCast()'s argument
@@ -280,7 +277,7 @@ class SafeMatcherCastImpl {
     // Enforce that we are not converting a non-reference type T to a reference
     // type U.
     GTEST_COMPILE_ASSERT_(
-        internal::is_reference<T>::value || !internal::is_reference<U>::value,
+        std::is_reference<T>::value || !std::is_reference<U>::value,
         cannot_convert_non_reference_arg_to_reference);
     // In case both T and U are arithmetic types, enforce that the
     // conversion is not lossy.
@@ -1610,8 +1607,8 @@ class PointeeMatcher {
   template <typename Pointer>
   class Impl : public MatcherInterface<Pointer> {
    public:
-    typedef typename PointeeOf<GTEST_REMOVE_CONST_(  // NOLINT
-        typename std::remove_reference<Pointer>::type)>::type Pointee;
+    typedef typename PointeeOf<GTEST_REMOVE_REFERENCE_AND_CONST_(Pointer)>::type
+        Pointee;
 
     explicit Impl(const InnerMatcher& matcher)
         : matcher_(MatcherCast<const Pointee&>(matcher)) {}
@@ -1749,8 +1746,8 @@ class FieldMatcher {
     // FIXME: The dispatch on std::is_pointer was introduced as a workaround for
     // a compiler bug, and can now be removed.
     return MatchAndExplainImpl(
-        typename std::is_pointer<GTEST_REMOVE_CONST_(T)>::type(), value,
-        listener);
+        typename std::is_pointer<typename std::remove_const<T>::type>::type(),
+        value, listener);
   }
 
  private:
@@ -1816,8 +1813,8 @@ class PropertyMatcher {
   template <typename T>
   bool MatchAndExplain(const T&value, MatchResultListener* listener) const {
     return MatchAndExplainImpl(
-        typename std::is_pointer<GTEST_REMOVE_CONST_(T)>::type(), value,
-        listener);
+        typename std::is_pointer<typename std::remove_const<T>::type>::type(),
+        value, listener);
   }
 
  private:
@@ -2093,9 +2090,8 @@ class ContainerEqMatcher {
   template <typename LhsContainer>
   bool MatchAndExplain(const LhsContainer& lhs,
                        MatchResultListener* listener) const {
-    // GTEST_REMOVE_CONST_() is needed to work around an MSVC 8.0 bug
-    // that causes LhsContainer to be a const type sometimes.
-    typedef internal::StlContainerView<GTEST_REMOVE_CONST_(LhsContainer)>
+    typedef internal::StlContainerView<
+        typename std::remove_const<LhsContainer>::type>
         LhsView;
     typedef typename LhsView::type LhsStlContainer;
     StlContainerReference lhs_stl_container = LhsView::ConstReference(lhs);
@@ -3603,9 +3599,8 @@ inline Matcher<T> An() { return A<T>(); }
 
 template <typename T, typename M>
 Matcher<T> internal::MatcherCastImpl<T, M>::CastImpl(
-    const M& value,
-    internal::BooleanConstant<false> /* convertible_to_matcher */,
-    internal::BooleanConstant<false> /* convertible_to_T */) {
+    const M& value, internal::bool_constant<false> /* convertible_to_matcher */,
+    internal::bool_constant<false> /* convertible_to_T */) {
   return Eq(value);
 }
 
@@ -4034,12 +4029,12 @@ BeginEndDistanceIs(const DistanceMatcher& distance_matcher) {
 // values that are included in one container but not the other. (Duplicate
 // values and order differences are not explained.)
 template <typename Container>
-inline PolymorphicMatcher<internal::ContainerEqMatcher<  // NOLINT
-                            GTEST_REMOVE_CONST_(Container)> >
-    ContainerEq(const Container& rhs) {
+inline PolymorphicMatcher<internal::ContainerEqMatcher<
+    typename std::remove_const<Container>::type>>
+ContainerEq(const Container& rhs) {
   // This following line is for working around a bug in MSVC 8.0,
   // which causes Container to be a const type sometimes.
-  typedef GTEST_REMOVE_CONST_(Container) RawContainer;
+  typedef typename std::remove_const<Container>::type RawContainer;
   return MakePolymorphicMatcher(
       internal::ContainerEqMatcher<RawContainer>(rhs));
 }
@@ -4072,12 +4067,12 @@ WhenSorted(const ContainerMatcher& container_matcher) {
 // LHS container and the RHS container respectively.
 template <typename TupleMatcher, typename Container>
 inline internal::PointwiseMatcher<TupleMatcher,
-                                  GTEST_REMOVE_CONST_(Container)>
+                                  typename std::remove_const<Container>::type>
 Pointwise(const TupleMatcher& tuple_matcher, const Container& rhs) {
   // This following line is for working around a bug in MSVC 8.0,
   // which causes Container to be a const type sometimes (e.g. when
   // rhs is a const int[])..
-  typedef GTEST_REMOVE_CONST_(Container) RawContainer;
+  typedef typename std::remove_const<Container>::type RawContainer;
   return internal::PointwiseMatcher<TupleMatcher, RawContainer>(
       tuple_matcher, rhs);
 }
@@ -4105,14 +4100,15 @@ inline internal::PointwiseMatcher<TupleMatcher, std::vector<T> > Pointwise(
 template <typename Tuple2Matcher, typename RhsContainer>
 inline internal::UnorderedElementsAreArrayMatcher<
     typename internal::BoundSecondMatcher<
-        Tuple2Matcher, typename internal::StlContainerView<GTEST_REMOVE_CONST_(
-                           RhsContainer)>::type::value_type> >
+        Tuple2Matcher,
+        typename internal::StlContainerView<
+            typename std::remove_const<RhsContainer>::type>::type::value_type>>
 UnorderedPointwise(const Tuple2Matcher& tuple2_matcher,
                    const RhsContainer& rhs_container) {
   // This following line is for working around a bug in MSVC 8.0,
   // which causes RhsContainer to be a const type sometimes (e.g. when
   // rhs_container is a const int[]).
-  typedef GTEST_REMOVE_CONST_(RhsContainer) RawRhsContainer;
+  typedef typename std::remove_const<RhsContainer>::type RawRhsContainer;
 
   // RhsView allows the same code to handle RhsContainer being a
   // STL-style container and it being a native C-style array.

@@ -33,16 +33,19 @@
 // This file tests the internal utilities.
 
 #include "gmock/internal/gmock-internal-utils.h"
+
 #include <stdlib.h>
+
 #include <map>
 #include <memory>
-#include <string>
 #include <sstream>
+#include <string>
 #include <vector>
+
 #include "gmock/gmock.h"
 #include "gmock/internal/gmock-port.h"
-#include "gtest/gtest.h"
 #include "gtest/gtest-spi.h"
+#include "gtest/gtest.h"
 
 // Indicates that this translation unit is part of Google Test's
 // implementation.  It must come before gtest-internal-inl.h is
@@ -503,27 +506,6 @@ TEST(LogTest, OnlyWarningsArePrintedWhenVerbosityIsInvalid) {
 }
 
 #endif  // GTEST_HAS_STREAM_REDIRECTION
-
-TEST(TypeTraitsTest, true_type) {
-  EXPECT_TRUE(true_type::value);
-}
-
-TEST(TypeTraitsTest, false_type) {
-  EXPECT_FALSE(false_type::value);
-}
-
-TEST(TypeTraitsTest, is_reference) {
-  EXPECT_FALSE(is_reference<int>::value);
-  EXPECT_FALSE(is_reference<char*>::value);
-  EXPECT_TRUE(is_reference<const int&>::value);
-}
-
-TEST(TypeTraitsTest, type_equals) {
-  EXPECT_FALSE((type_equals<int, const int>::value));
-  EXPECT_FALSE((type_equals<int, int&>::value));
-  EXPECT_FALSE((type_equals<int, double>::value));
-  EXPECT_TRUE((type_equals<char, char>::value));
-}
 
 #if GTEST_HAS_STREAM_REDIRECTION
 

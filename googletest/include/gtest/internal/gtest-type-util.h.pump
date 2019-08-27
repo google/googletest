@@ -104,18 +104,6 @@ std::string GetTypeName() {
 
 #if GTEST_HAS_TYPED_TEST || GTEST_HAS_TYPED_TEST_P
 
-// AssertyTypeEq<T1, T2>::type is defined if T1 and T2 are the same
-// type.  This can be used as a compile-time assertion to ensure that
-// two types are equal.
-
-template <typename T1, typename T2>
-struct AssertTypeEq;
-
-template <typename T>
-struct AssertTypeEq<T, T> {
-  typedef bool type;
-};
-
 // A unique type used as the default value for the arguments of class
 // template Types.  This allows us to simulate variadic templates
 // (e.g. Types<int>, Type<int, double>, and etc), which C++ doesn't
