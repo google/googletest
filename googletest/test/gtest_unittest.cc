@@ -3477,7 +3477,7 @@ TEST_F(NoFatalFailureTest, MessageIsStreamable) {
     EXPECT_NO_FATAL_FAILURE(FAIL() << "foo") << "my message";
   }
   ASSERT_EQ(2, gtest_failures.size());
-  EXPECT_EQ(TestPartResult::kNonFatalFailure,
+  EXPECT_EQ(TestPartResult::kFatalFailure,
             gtest_failures.GetTestPartResult(0).type());
   EXPECT_EQ(TestPartResult::kNonFatalFailure,
             gtest_failures.GetTestPartResult(1).type());

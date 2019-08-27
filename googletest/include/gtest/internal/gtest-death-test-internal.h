@@ -212,37 +212,36 @@ inline Matcher<const ::std::string&> MakeDeathTestMatcher(
 // This macro is for implementing ASSERT_DEATH*, EXPECT_DEATH*,
 // ASSERT_EXIT*, and EXPECT_EXIT*.
 #define GTEST_DEATH_TEST_(statement, predicate, regex_or_matcher, fail)        \
-  GTEST_AMBIGUOUS_ELSE_BLOCKER_                                                \
-  if (::testing::internal::AlwaysTrue()) {                                     \
+  for (bool gtest_passed_deathtest_ = [&] {                                    \
     ::testing::internal::DeathTest* gtest_dt;                                  \
     if (!::testing::internal::DeathTest::Create(                               \
             #statement,                                                        \
             ::testing::internal::MakeDeathTestMatcher(regex_or_matcher),       \
             __FILE__, __LINE__, &gtest_dt)) {                                  \
-      goto GTEST_CONCAT_TOKEN_(gtest_label_, __LINE__);                        \
+      return false;                                                            \
     }                                                                          \
     if (gtest_dt != nullptr) {                                                 \
       std::unique_ptr< ::testing::internal::DeathTest> gtest_dt_ptr(gtest_dt); \
       switch (gtest_dt->AssumeRole()) {                                        \
         case ::testing::internal::DeathTest::OVERSEE_TEST:                     \
           if (!gtest_dt->Passed(predicate(gtest_dt->Wait()))) {                \
-            goto GTEST_CONCAT_TOKEN_(gtest_label_, __LINE__);                  \
+            return false;                                                      \
           }                                                                    \
           break;                                                               \
-        case ::testing::internal::DeathTest::EXECUTE_TEST: {                   \
+        case ::testing::internal::DeathTest::EXECUTE_TEST: [&] {               \
           ::testing::internal::DeathTest::ReturnSentinel gtest_sentinel(       \
               gtest_dt);                                                       \
           GTEST_EXECUTE_DEATH_TEST_STATEMENT_(statement, gtest_dt);            \
           gtest_dt->Abort(::testing::internal::DeathTest::TEST_DID_NOT_DIE);   \
+        }();                                                                   \
           break;                                                               \
-        }                                                                      \
         default:                                                               \
           break;                                                               \
       }                                                                        \
     }                                                                          \
-  } else                                                                       \
-    GTEST_CONCAT_TOKEN_(gtest_label_, __LINE__)                                \
-        : fail(::testing::internal::DeathTest::LastMessage())
+    return true;                                                               \
+  }(); !gtest_passed_deathtest_; gtest_passed_deathtest_ = true)               \
+    fail(::testing::internal::DeathTest::LastMessage())
 // The symbol "fail" here expands to something into which a message
 // can be streamed.
 
@@ -251,13 +250,10 @@ inline Matcher<const ::std::string&> MakeDeathTestMatcher(
 // must accept a streamed message even though the message is never printed.
 // The regex object is not evaluated, but it is used to prevent "unused"
 // warnings and to avoid an expression that doesn't compile in debug mode.
-#define GTEST_EXECUTE_STATEMENT_(statement, regex_or_matcher)    \
-  GTEST_AMBIGUOUS_ELSE_BLOCKER_                                  \
-  if (::testing::internal::AlwaysTrue()) {                       \
-    GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement);   \
-  } else if (!::testing::internal::AlwaysTrue()) {               \
-    ::testing::internal::MakeDeathTestMatcher(regex_or_matcher); \
-  } else                                                         \
+#define GTEST_EXECUTE_STATEMENT_(statement, regex_or_matcher)      \
+  for (GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement);  \
+      ::testing::internal::AlwaysFalse();                          \
+      ::testing::internal::MakeDeathTestMatcher(regex_or_matcher)) \
     ::testing::Message()
 
 // A class representing the parsed contents of the

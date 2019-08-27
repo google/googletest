@@ -309,16 +309,14 @@ class GTEST_API_ KilledBySignal {
 //  the end allows the syntax of streaming additional messages into the
 //  macro, for compilational compatibility with EXPECT_DEATH/ASSERT_DEATH.
 # define GTEST_UNSUPPORTED_DEATH_TEST(statement, regex, terminator) \
-    GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
-    if (::testing::internal::AlwaysTrue()) { \
-      GTEST_LOG_(WARNING) \
+    for (GTEST_LOG_(WARNING) \
           << "Death tests are not supported on this platform.\n" \
           << "Statement '" #statement "' cannot be verified."; \
-    } else if (::testing::internal::AlwaysFalse()) { \
-      ::testing::internal::RE::PartialMatch(".*", (regex)); \
-      GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement); \
-      terminator; \
-    } else \
+      ::testing::internal::AlwaysFalse(); [&] { \
+        ::testing::internal::RE::PartialMatch(".*", (regex)); \
+        GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement); \
+        terminator; \
+      }())\
       ::testing::Message()
 
 // EXPECT_DEATH_IF_SUPPORTED(statement, regex) and

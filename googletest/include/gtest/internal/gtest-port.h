@@ -187,7 +187,6 @@
 // use only.  Code outside Google Test MUST NOT USE THEM DIRECTLY.
 //
 // Macros for basic C++ coding:
-//   GTEST_AMBIGUOUS_ELSE_BLOCKER_ - for disabling a gcc warning.
 //   GTEST_ATTRIBUTE_UNUSED_  - declares that a class' instances or a
 //                              variable don't have to be used.
 //   GTEST_DISALLOW_ASSIGN_   - disables operator=.
@@ -624,20 +623,6 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 
 // Defines some utility macros.
 
-// The GNU compiler emits a warning if nested "if" statements are followed by
-// an "else" statement and braces are not used to explicitly disambiguate the
-// "else" binding.  This leads to problems with code like:
-//
-//   if (gate)
-//     ASSERT_*(condition) << "Some message";
-//
-// The "switch (0) case 0:" idiom is used to suppress this.
-#ifdef __INTEL_COMPILER
-# define GTEST_AMBIGUOUS_ELSE_BLOCKER_
-#else
-# define GTEST_AMBIGUOUS_ELSE_BLOCKER_ switch (0) case 0: default:  // NOLINT
-#endif
-
 // Use this annotation at the end of a struct/class definition to
 // prevent the compiler from optimizing away instances that are never
 // used.  This is useful when all interesting logic happens inside the
@@ -1002,10 +987,8 @@ inline void FlushInfoLog() { fflush(nullptr); }
 //    and then it aborts the program. It aborts the program irrespective of
 //    whether it is built in the debug mode or not.
 # define GTEST_CHECK_(condition) \
-    GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
-    if (::testing::internal::IsTrue(condition)) \
-      ; \
-    else \
+    for (bool gtest_check_ = ::testing::internal::IsTrue(condition); \
+        !gtest_check_; gtest_check_ = true) \
       GTEST_LOG_(FATAL) << "Condition " #condition " failed. "
 #endif  // !defined(GTEST_CHECK_)
 

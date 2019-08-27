@@ -1282,8 +1282,7 @@ constexpr bool InstantiateTypedTestCase_P_IsDeprecated() { return true; }
   if (::testing::internal::AlwaysTrue()) { statement; }
 
 #define GTEST_TEST_THROW_(statement, expected_exception, fail) \
-  GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
-  if (::testing::internal::ConstCharPtr gtest_msg = "") { \
+  for (::testing::internal::ConstCharPtr gtest_msg = [&]() -> char const* { \
     bool gtest_caught_expected = false; \
     try { \
       GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement); \
@@ -1292,50 +1291,40 @@ constexpr bool InstantiateTypedTestCase_P_IsDeprecated() { return true; }
       gtest_caught_expected = true; \
     } \
     catch (...) { \
-      gtest_msg.value = \
-          "Expected: " #statement " throws an exception of type " \
+      return "Expected: " #statement " throws an exception of type " \
           #expected_exception ".\n  Actual: it throws a different type."; \
-      goto GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__); \
     } \
     if (!gtest_caught_expected) { \
-      gtest_msg.value = \
-          "Expected: " #statement " throws an exception of type " \
+      return "Expected: " #statement " throws an exception of type " \
           #expected_exception ".\n  Actual: it throws nothing."; \
-      goto GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__); \
     } \
-  } else \
-    GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__): \
+    return nullptr; \
+  }(); gtest_msg.value != nullptr; gtest_msg.value = nullptr) \
       fail(gtest_msg.value)
 
 #define GTEST_TEST_NO_THROW_(statement, fail) \
-  GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
-  if (::testing::internal::AlwaysTrue()) { \
+  for (bool gtest_passed_testnothrow_ = [&] { \
     try { \
       GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement); \
     } \
     catch (...) { \
-      goto GTEST_CONCAT_TOKEN_(gtest_label_testnothrow_, __LINE__); \
+      return false; \
     } \
-  } else \
-    GTEST_CONCAT_TOKEN_(gtest_label_testnothrow_, __LINE__): \
+    return true; \
+  }(); !gtest_passed_testnothrow_; gtest_passed_testnothrow_ = true) \
       fail("Expected: " #statement " doesn't throw an exception.\n" \
            "  Actual: it throws.")
 
 #define GTEST_TEST_ANY_THROW_(statement, fail) \
-  GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
-  if (::testing::internal::AlwaysTrue()) { \
-    bool gtest_caught_any = false; \
+  for (bool gtest_passed_testanythrow_ = [&] { \
     try { \
       GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement); \
     } \
     catch (...) { \
-      gtest_caught_any = true; \
+      return true; \
     } \
-    if (!gtest_caught_any) { \
-      goto GTEST_CONCAT_TOKEN_(gtest_label_testanythrow_, __LINE__); \
-    } \
-  } else \
-    GTEST_CONCAT_TOKEN_(gtest_label_testanythrow_, __LINE__): \
+    return false; \
+  }(); !gtest_passed_testanythrow_; gtest_passed_testanythrow_ = true) \
       fail("Expected: " #statement " throws an exception.\n" \
            "  Actual: it doesn't.")
 
@@ -1344,24 +1333,17 @@ constexpr bool InstantiateTypedTestCase_P_IsDeprecated() { return true; }
 // either a boolean expression or an AssertionResult. text is a textual
 // represenation of expression as it was passed into the EXPECT_TRUE.
 #define GTEST_TEST_BOOLEAN_(expression, text, actual, expected, fail) \
-  GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
-  if (const ::testing::AssertionResult gtest_ar_ = \
-      ::testing::AssertionResult(expression)) \
-    ; \
-  else \
+  for (::testing::AssertionResult gtest_ar_ = ::testing::AssertionResult(expression); \
+    !gtest_ar_; gtest_ar_ = ::testing::AssertionResult(true)) \
     fail(::testing::internal::GetBoolAssertionFailureMessage(\
         gtest_ar_, text, #actual, #expected).c_str())
 
 #define GTEST_TEST_NO_FATAL_FAILURE_(statement, fail) \
-  GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
-  if (::testing::internal::AlwaysTrue()) { \
+  for (bool gtest_passed_testnofatalfailure_ = [&] { \
     ::testing::internal::HasNewFatalFailureHelper gtest_fatal_failure_checker; \
-    GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement); \
-    if (gtest_fatal_failure_checker.has_new_fatal_failure()) { \
-      goto GTEST_CONCAT_TOKEN_(gtest_label_testnofatal_, __LINE__); \
-    } \
-  } else \
-    GTEST_CONCAT_TOKEN_(gtest_label_testnofatal_, __LINE__): \
+    GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_([&] { statement; }()); \
+    return !gtest_fatal_failure_checker.has_new_fatal_failure(); \
+  }(); !gtest_passed_testnofatalfailure_; gtest_passed_testnofatalfailure_ = true) \
       fail("Expected: " #statement " doesn't generate new fatal " \
            "failures in the current thread.\n" \
            "  Actual: it does.")
