@@ -38,58 +38,12 @@
 #define GMOCK_INCLUDE_GMOCK_GMOCK_MORE_ACTIONS_H_
 
 #include <algorithm>
+#include <type_traits>
 
 #include "gmock/gmock-generated-actions.h"
 
 namespace testing {
 namespace internal {
-
-// Implements the Invoke(f) action.  The template argument
-// FunctionImpl is the implementation type of f, which can be either a
-// function pointer or a functor.  Invoke(f) can be used as an
-// Action<F> as long as f's type is compatible with F (i.e. f can be
-// assigned to a tr1::function<F>).
-template <typename FunctionImpl>
-class InvokeAction {
- public:
-  // The c'tor makes a copy of function_impl (either a function
-  // pointer or a functor).
-  explicit InvokeAction(FunctionImpl function_impl)
-      : function_impl_(function_impl) {}
-
-  template <typename Result, typename ArgumentTuple>
-  Result Perform(const ArgumentTuple& args) {
-    return InvokeHelper<Result, ArgumentTuple>::Invoke(function_impl_, args);
-  }
-
- private:
-  FunctionImpl function_impl_;
-
-  GTEST_DISALLOW_ASSIGN_(InvokeAction);
-};
-
-// Implements the Invoke(object_ptr, &Class::Method) action.
-template <class Class, typename MethodPtr>
-class InvokeMethodAction {
- public:
-  InvokeMethodAction(Class* obj_ptr, MethodPtr method_ptr)
-      : method_ptr_(method_ptr), obj_ptr_(obj_ptr) {}
-
-  template <typename Result, typename ArgumentTuple>
-  Result Perform(const ArgumentTuple& args) const {
-    return InvokeHelper<Result, ArgumentTuple>::InvokeMethod(
-        obj_ptr_, method_ptr_, args);
-  }
-
- private:
-  // The order of these members matters.  Reversing the order can trigger
-  // warning C4121 in MSVC (see
-  // http://computer-programming-forum.com/7-vc.net/6fbc30265f860ad1.htm ).
-  const MethodPtr method_ptr_;
-  Class* const obj_ptr_;
-
-  GTEST_DISALLOW_ASSIGN_(InvokeMethodAction);
-};
 
 // An internal replacement for std::copy which mimics its behavior. This is
 // necessary because Visual Studio deprecates ::std::copy, issuing warning 4996.
@@ -108,24 +62,6 @@ inline OutputIterator CopyElements(InputIterator first,
 }  // namespace internal
 
 // Various overloads for Invoke().
-
-// Creates an action that invokes 'function_impl' with the mock
-// function's arguments.
-template <typename FunctionImpl>
-PolymorphicAction<internal::InvokeAction<FunctionImpl> > Invoke(
-    FunctionImpl function_impl) {
-  return MakePolymorphicAction(
-      internal::InvokeAction<FunctionImpl>(function_impl));
-}
-
-// Creates an action that invokes the given method on the given object
-// with the mock function's arguments.
-template <class Class, typename MethodPtr>
-PolymorphicAction<internal::InvokeMethodAction<Class, MethodPtr> > Invoke(
-    Class* obj_ptr, MethodPtr method_ptr) {
-  return MakePolymorphicAction(
-      internal::InvokeMethodAction<Class, MethodPtr>(obj_ptr, method_ptr));
-}
 
 // The ACTION*() macros trigger warning C4100 (unreferenced formal
 // parameter) in MSVC with -W4.  Unfortunately they cannot be fixed in
@@ -169,7 +105,7 @@ ACTION_TEMPLATE(SetArgReferee,
   // Ensures that argument #k is a reference.  If you get a compiler
   // error on the next line, you are using SetArgReferee<k>(value) in
   // a mock function whose k-th (0-based) argument is not a reference.
-  GTEST_COMPILE_ASSERT_(internal::is_reference<argk_type>::value,
+  GTEST_COMPILE_ASSERT_(std::is_reference<argk_type>::value,
                         SetArgReferee_must_be_used_with_a_reference_argument);
   ::std::get<k>(args) = value;
 }

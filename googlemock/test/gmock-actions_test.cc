@@ -54,12 +54,14 @@
 namespace {
 
 // This list should be kept sorted.
+using testing::_;
 using testing::Action;
 using testing::ActionInterface;
 using testing::Assign;
 using testing::ByMove;
 using testing::ByRef;
 using testing::DefaultValue;
+using testing::DoAll;
 using testing::DoDefault;
 using testing::IgnoreResult;
 using testing::Invoke;
@@ -75,7 +77,6 @@ using testing::SetArgPointee;
 using testing::SetArgumentPointee;
 using testing::Unused;
 using testing::WithArgs;
-using testing::_;
 using testing::internal::BuiltInDefaultValue;
 using testing::internal::Int64;
 using testing::internal::UInt64;
@@ -104,10 +105,6 @@ TEST(BuiltInDefaultValueTest, IsZeroForNumericTypes) {
   EXPECT_EQ(0U, BuiltInDefaultValue<unsigned char>::Get());
   EXPECT_EQ(0, BuiltInDefaultValue<signed char>::Get());
   EXPECT_EQ(0, BuiltInDefaultValue<char>::Get());
-#if GMOCK_HAS_SIGNED_WCHAR_T_
-  EXPECT_EQ(0U, BuiltInDefaultValue<unsigned wchar_t>::Get());
-  EXPECT_EQ(0, BuiltInDefaultValue<signed wchar_t>::Get());
-#endif
 #if GMOCK_WCHAR_T_IS_NATIVE_
 #if !defined(__WCHAR_UNSIGNED__)
   EXPECT_EQ(0, BuiltInDefaultValue<wchar_t>::Get());
@@ -136,10 +133,6 @@ TEST(BuiltInDefaultValueTest, ExistsForNumericTypes) {
   EXPECT_TRUE(BuiltInDefaultValue<unsigned char>::Exists());
   EXPECT_TRUE(BuiltInDefaultValue<signed char>::Exists());
   EXPECT_TRUE(BuiltInDefaultValue<char>::Exists());
-#if GMOCK_HAS_SIGNED_WCHAR_T_
-  EXPECT_TRUE(BuiltInDefaultValue<unsigned wchar_t>::Exists());
-  EXPECT_TRUE(BuiltInDefaultValue<signed wchar_t>::Exists());
-#endif
 #if GMOCK_WCHAR_T_IS_NATIVE_
   EXPECT_TRUE(BuiltInDefaultValue<wchar_t>::Exists());
 #endif
@@ -171,20 +164,12 @@ TEST(BuiltInDefaultValueTest, BoolExists) {
 // Tests that BuiltInDefaultValue<T>::Get() returns "" when T is a
 // string type.
 TEST(BuiltInDefaultValueTest, IsEmptyStringForString) {
-#if GTEST_HAS_GLOBAL_STRING
-  EXPECT_EQ("", BuiltInDefaultValue< ::string>::Get());
-#endif  // GTEST_HAS_GLOBAL_STRING
-
   EXPECT_EQ("", BuiltInDefaultValue< ::std::string>::Get());
 }
 
 // Tests that BuiltInDefaultValue<T>::Exists() returns true when T is a
 // string type.
 TEST(BuiltInDefaultValueTest, ExistsForString) {
-#if GTEST_HAS_GLOBAL_STRING
-  EXPECT_TRUE(BuiltInDefaultValue< ::string>::Exists());
-#endif  // GTEST_HAS_GLOBAL_STRING
-
   EXPECT_TRUE(BuiltInDefaultValue< ::std::string>::Exists());
 }
 
@@ -220,7 +205,6 @@ class MyNonDefaultConstructible {
   int value_;
 };
 
-#if GTEST_LANG_CXX11
 
 TEST(BuiltInDefaultValueTest, ExistsForDefaultConstructibleType) {
   EXPECT_TRUE(BuiltInDefaultValue<MyDefaultConstructible>::Exists());
@@ -230,7 +214,6 @@ TEST(BuiltInDefaultValueTest, IsDefaultConstructedForDefaultConstructibleType) {
   EXPECT_EQ(42, BuiltInDefaultValue<MyDefaultConstructible>::Get().value());
 }
 
-#endif  // GTEST_LANG_CXX11
 
 TEST(BuiltInDefaultValueTest, DoesNotExistForNonDefaultConstructibleType) {
   EXPECT_FALSE(BuiltInDefaultValue<MyNonDefaultConstructible>::Exists());
@@ -300,7 +283,6 @@ TEST(DefaultValueDeathTest, GetReturnsBuiltInDefaultValueWhenUnset) {
   }, "");
 }
 
-#if GTEST_HAS_STD_UNIQUE_PTR_
 TEST(DefaultValueTest, GetWorksForMoveOnlyIfSet) {
   EXPECT_TRUE(DefaultValue<std::unique_ptr<int>>::Exists());
   EXPECT_TRUE(DefaultValue<std::unique_ptr<int>>::Get() == nullptr);
@@ -311,7 +293,6 @@ TEST(DefaultValueTest, GetWorksForMoveOnlyIfSet) {
   std::unique_ptr<int> i = DefaultValue<std::unique_ptr<int>>::Get();
   EXPECT_EQ(42, *i);
 }
-#endif  // GTEST_HAS_STD_UNIQUE_PTR_
 
 // Tests that DefaultValue<void>::Get() returns void.
 TEST(DefaultValueTest, GetWorksForVoid) {
@@ -448,19 +429,12 @@ class IsNotZero : public ActionInterface<bool(int)> {  // NOLINT
   }
 };
 
-#if !GTEST_OS_SYMBIAN
-// Compiling this test on Nokia's Symbian compiler fails with:
-//  'Result' is not a member of class 'testing::internal::Function<int>'
-//  (point of instantiation: '@unnamed@gmock_actions_test_cc@::
-//      ActionTest_CanBeConvertedToOtherActionType_Test::TestBody()')
-// with no obvious fix.
 TEST(ActionTest, CanBeConvertedToOtherActionType) {
   const Action<bool(int)> a1(new IsNotZero);  // NOLINT
   const Action<int(char)> a2 = Action<int(char)>(a1);  // NOLINT
   EXPECT_EQ(1, a2.Perform(std::make_tuple('a')));
   EXPECT_EQ(0, a2.Perform(std::make_tuple('\0')));
 }
-#endif  // !GTEST_OS_SYMBIAN
 
 // The following two classes are for testing MakePolymorphicAction().
 
@@ -643,7 +617,6 @@ TEST(ReturnNullTest, WorksInPointerReturningFunction) {
   EXPECT_TRUE(a2.Perform(std::make_tuple(true)) == nullptr);
 }
 
-#if GTEST_HAS_STD_UNIQUE_PTR_
 // Tests that ReturnNull() returns NULL for shared_ptr and unique_ptr returning
 // functions.
 TEST(ReturnNullTest, WorksInSmartPointerReturningFunction) {
@@ -653,7 +626,6 @@ TEST(ReturnNullTest, WorksInSmartPointerReturningFunction) {
   const Action<std::shared_ptr<int>(std::string)> a2 = ReturnNull();
   EXPECT_TRUE(a2.Perform(std::make_tuple("foo")) == nullptr);
 }
-#endif  // GTEST_HAS_STD_UNIQUE_PTR_
 
 // Tests that ReturnRef(v) works for reference types.
 TEST(ReturnRefTest, WorksForReference) {
@@ -706,14 +678,12 @@ class MockClass {
 
   MOCK_METHOD1(IntFunc, int(bool flag));  // NOLINT
   MOCK_METHOD0(Foo, MyNonDefaultConstructible());
-#if GTEST_HAS_STD_UNIQUE_PTR_
   MOCK_METHOD0(MakeUnique, std::unique_ptr<int>());
   MOCK_METHOD0(MakeUniqueBase, std::unique_ptr<Base>());
   MOCK_METHOD0(MakeVectorUnique, std::vector<std::unique_ptr<int>>());
   MOCK_METHOD1(TakeUnique, int(std::unique_ptr<int>));
   MOCK_METHOD2(TakeUnique,
                int(const std::unique_ptr<int>&, std::unique_ptr<int>));
-#endif
 
  private:
   GTEST_DISALLOW_COPY_AND_ASSIGN_(MockClass);
@@ -813,9 +783,7 @@ TEST(SetArgPointeeTest, SetsTheNthPointee) {
   EXPECT_EQ('a', ch);
 }
 
-#if !((GTEST_GCC_VER_ && GTEST_GCC_VER_ < 40000) || GTEST_OS_SYMBIAN)
 // Tests that SetArgPointee<N>() accepts a string literal.
-// GCC prior to v4.0 and the Symbian compiler do not support this.
 TEST(SetArgPointeeTest, AcceptsStringLiteral) {
   typedef void MyFunction(std::string*, const char**);
   Action<MyFunction> a = SetArgPointee<0>("hi");
@@ -849,7 +817,6 @@ TEST(SetArgPointeeTest, AcceptsWideStringLiteral) {
 
 # endif
 }
-#endif
 
 // Tests that SetArgPointee<N>() accepts a char pointer.
 TEST(SetArgPointeeTest, AcceptsCharPointer) {
@@ -1182,13 +1149,12 @@ TEST_F(SetErrnoAndReturnTest, CompatibleTypes) {
 
 // Tests ByRef().
 
-// Tests that ReferenceWrapper<T> is copyable.
+// Tests that the result of ByRef() is copyable.
 TEST(ByRefTest, IsCopyable) {
   const std::string s1 = "Hi";
   const std::string s2 = "Hello";
 
-  ::testing::internal::ReferenceWrapper<const std::string> ref_wrapper =
-      ByRef(s1);
+  auto ref_wrapper = ByRef(s1);
   const std::string& r1 = ref_wrapper;
   EXPECT_EQ(&s1, &r1);
 
@@ -1197,8 +1163,7 @@ TEST(ByRefTest, IsCopyable) {
   const std::string& r2 = ref_wrapper;
   EXPECT_EQ(&s2, &r2);
 
-  ::testing::internal::ReferenceWrapper<const std::string> ref_wrapper1 =
-      ByRef(s1);
+  auto ref_wrapper1 = ByRef(s1);
   // Copies ref_wrapper1 to ref_wrapper.
   ref_wrapper = ref_wrapper1;
   const std::string& r3 = ref_wrapper;
@@ -1265,7 +1230,6 @@ TEST(ByRefTest, PrintsCorrectly) {
   EXPECT_EQ(expected.str(), actual.str());
 }
 
-#if GTEST_HAS_STD_UNIQUE_PTR_
 
 std::unique_ptr<int> UniquePtrSource() {
   return std::unique_ptr<int>(new int(19));
@@ -1378,9 +1342,7 @@ TEST(MockMethodTest, CanTakeMoveOnlyValue) {
   EXPECT_EQ(42, *saved);
 }
 
-#endif  // GTEST_HAS_STD_UNIQUE_PTR_
 
-#if GTEST_LANG_CXX11
 // Tests for std::function based action.
 
 int Add(int val, int& ref, int* ptr) {  // NOLINT
@@ -1459,10 +1421,6 @@ TEST(FunctorActionTest, UnusedArguments) {
 }
 
 // Test that basic built-in actions work with move-only arguments.
-// FIXME: Currently, almost all ActionInterface-based actions will not
-// work, even if they only try to use other, copyable arguments. Implement them
-// if necessary (but note that DoAll cannot work on non-copyable types anyway -
-// so maybe it's better to make users use lambdas instead.
 TEST(MoveOnlyArgumentsTest, ReturningActions) {
   Action<int(std::unique_ptr<int>)> a = Return(1);
   EXPECT_EQ(1, a.Perform(std::make_tuple(nullptr)));
@@ -1476,7 +1434,6 @@ TEST(MoveOnlyArgumentsTest, ReturningActions) {
   EXPECT_EQ(x, 3);
 }
 
-#endif  // GTEST_LANG_CXX11
 
 }  // Unnamed namespace
 

@@ -41,7 +41,9 @@ using testing::internal::AlwaysTrue;
 #if GTEST_HAS_DEATH_TEST
 
 # if GTEST_OS_WINDOWS
+#  include <fcntl.h>           // For O_BINARY
 #  include <direct.h>          // For chdir().
+#  include <io.h>
 # else
 #  include <unistd.h>
 #  include <sys/wait.h>        // For waitpid.
@@ -139,7 +141,7 @@ class TestForDeathTest : public testing::Test {
       DieInside("MemberFunction");
   }
 
-  // True iff MemberFunction() should die.
+  // True if MemberFunction() should die.
   bool should_die_;
   const FilePath original_dir_;
 };
@@ -156,7 +158,7 @@ class MayDie {
   }
 
  private:
-  // True iff MemberFunction() should die.
+  // True if MemberFunction() should die.
   bool should_die_;
 };
 
@@ -201,6 +203,26 @@ int DieInDebugElse12(int* sideeffect) {
 
   return 12;
 }
+
+# if GTEST_OS_WINDOWS
+
+// Death in dbg due to Windows CRT assertion failure, not opt.
+int DieInCRTDebugElse12(int* sideeffect) {
+  if (sideeffect) *sideeffect = 12;
+
+  // Create an invalid fd by closing a valid one
+  int fdpipe[2];
+  EXPECT_EQ(_pipe(fdpipe, 256, O_BINARY), 0);
+  EXPECT_EQ(_close(fdpipe[0]), 0);
+  EXPECT_EQ(_close(fdpipe[1]), 0);
+
+  // _dup() should crash in debug mode
+  EXPECT_EQ(_dup(fdpipe[0]), -1);
+
+  return 12;
+}
+
+#endif  // GTEST_OS_WINDOWS
 
 # if GTEST_OS_WINDOWS || GTEST_OS_FUCHSIA
 
@@ -493,17 +515,6 @@ TEST_F(TestForDeathTest, AcceptsAnythingConvertibleToRE) {
   const testing::internal::RE regex(regex_c_str);
   EXPECT_DEATH(GlobalFunction(), regex);
 
-# if GTEST_HAS_GLOBAL_STRING
-
-  const ::string regex_str(regex_c_str);
-  EXPECT_DEATH(GlobalFunction(), regex_str);
-
-  // This one is tricky; a temporary pointer into another temporary.  Reference
-  // lifetime extension of the pointer is not sufficient.
-  EXPECT_DEATH(GlobalFunction(), ::string(regex_c_str).c_str());
-
-# endif  // GTEST_HAS_GLOBAL_STRING
-
 # if !GTEST_USES_PCRE
 
   const ::std::string regex_std_str(regex_c_str);
@@ -562,7 +573,7 @@ TEST_F(TestForDeathTest, ErrorMessageMismatch) {
   }, "died but not with expected error");
 }
 
-// On exit, *aborted will be true iff the EXPECT_DEATH() statement
+// On exit, *aborted will be true if the EXPECT_DEATH() statement
 // aborted the function.
 void ExpectDeathTestHelper(bool* aborted) {
   *aborted = true;
@@ -642,6 +653,40 @@ TEST_F(TestForDeathTest, TestExpectDebugDeath) {
 
 # endif
 }
+
+# if GTEST_OS_WINDOWS
+
+// Tests that EXPECT_DEBUG_DEATH works as expected when in debug mode
+// the Windows CRT crashes the process with an assertion failure.
+// 1. Asserts on death.
+// 2. Has no side effect (doesn't pop up a window or wait for user input).
+//
+// And in opt mode, it:
+// 1.  Has side effects but does not assert.
+TEST_F(TestForDeathTest, CRTDebugDeath) {
+  int sideeffect = 0;
+
+  // Put the regex in a local variable to make sure we don't get an "unused"
+  // warning in opt mode.
+  const char* regex = "dup.* : Assertion failed";
+
+  EXPECT_DEBUG_DEATH(DieInCRTDebugElse12(&sideeffect), regex)
+      << "Must accept a streamed message";
+
+# ifdef NDEBUG
+
+  // Checks that the assignment occurs in opt mode (sideeffect).
+  EXPECT_EQ(12, sideeffect);
+
+# else
+
+  // Checks that the assignment does not occur in dbg mode (no sideeffect).
+  EXPECT_EQ(0, sideeffect);
+
+# endif
+}
+
+# endif  // GTEST_OS_WINDOWS
 
 // Tests that ASSERT_DEBUG_DEATH works as expected, that is, you can stream a
 // message to it, and in debug mode it:
@@ -895,10 +940,12 @@ class MockDeathTestFactory : public DeathTestFactory {
   int AssumeRoleCalls() const { return assume_role_calls_; }
   int WaitCalls() const { return wait_calls_; }
   size_t PassedCalls() const { return passed_args_.size(); }
-  bool PassedArgument(int n) const { return passed_args_[n]; }
+  bool PassedArgument(int n) const {
+    return passed_args_[static_cast<size_t>(n)];
+  }
   size_t AbortCalls() const { return abort_args_.size(); }
   DeathTest::AbortReason AbortArgument(int n) const {
-    return abort_args_[n];
+    return abort_args_[static_cast<size_t>(n)];
   }
   bool TestDeleted() const { return test_deleted_; }
 
@@ -1017,12 +1064,12 @@ class MacroLogicDeathTest : public testing::Test {
   static testing::internal::ReplaceDeathTestFactory* replacer_;
   static MockDeathTestFactory* factory_;
 
-  static void SetUpTestCase() {
+  static void SetUpTestSuite() {
     factory_ = new MockDeathTestFactory;
     replacer_ = new testing::internal::ReplaceDeathTestFactory(factory_);
   }
 
-  static void TearDownTestCase() {
+  static void TearDownTestSuite() {
     delete replacer_;
     replacer_ = nullptr;
     delete factory_;
@@ -1281,9 +1328,6 @@ TEST(ParseNaturalNumberTest, WorksForShorterIntegers) {
 
 # if GTEST_OS_WINDOWS
 TEST(EnvironmentTest, HandleFitsIntoSizeT) {
-  // FIXME: Remove this test after this condition is verified
-  // in a static assertion in gtest-death-test.cc in the function
-  // GetStatusFileDescriptor.
   ASSERT_TRUE(sizeof(HANDLE) <= sizeof(size_t));
 }
 # endif  // GTEST_OS_WINDOWS

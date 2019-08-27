@@ -6,48 +6,7 @@ To build Google Test and your tests that use it, you need to tell your build
 system where to find its headers and source files. The exact way to do it
 depends on which build system you use, and is usually straightforward.
 
-#### Build
-
-Suppose you put Google Test in directory `${GTEST_DIR}`. To build it, create a
-library build target (or a project as called by Visual Studio and Xcode) to
-compile
-
-    ${GTEST_DIR}/src/gtest-all.cc
-
-with `${GTEST_DIR}/include` in the system header search path and `${GTEST_DIR}`
-in the normal header search path. Assuming a Linux-like system and gcc,
-something like the following will do:
-
-    g++ -std=c++11 -isystem ${GTEST_DIR}/include -I${GTEST_DIR} \
-        -pthread -c ${GTEST_DIR}/src/gtest-all.cc
-    ar -rv libgtest.a gtest-all.o
-
-(We need `-pthread` as Google Test uses threads.)
-
-Next, you should compile your test source file with `${GTEST_DIR}/include` in
-the system header search path, and link it with gtest and any other necessary
-libraries:
-
-    g++ -std=c++11 -isystem ${GTEST_DIR}/include -pthread path/to/your_test.cc libgtest.a \
-        -o your_test
-
-As an example, the make/ directory contains a Makefile that you can use to build
-Google Test on systems where GNU make is available (e.g. Linux, Mac OS X, and
-Cygwin). It doesn't try to build Google Test's own tests. Instead, it just
-builds the Google Test library and a sample test. You can use it as a starting
-point for your own build script.
-
-If the default settings are correct for your environment, the following commands
-should succeed:
-
-    cd ${GTEST_DIR}/make
-    make
-    ./sample1_unittest
-
-If you see errors, try to tweak the contents of `make/Makefile` to make them go
-away. There are instructions in `make/Makefile` on how to do it.
-
-### Using CMake
+### Build with CMake
 
 Google Test comes with a CMake build script (
 [CMakeLists.txt](https://github.com/google/googletest/blob/master/CMakeLists.txt))
@@ -115,7 +74,7 @@ pulled into the main build with `add_subdirectory()`. For example:
 
 New file `CMakeLists.txt.in`:
 
-``` cmake
+```cmake
 cmake_minimum_required(VERSION 2.8.2)
 
 project(googletest-download NONE)
@@ -135,7 +94,7 @@ ExternalProject_Add(googletest
 
 Existing build's `CMakeLists.txt`:
 
-``` cmake
+```cmake
 # Download and unpack googletest at configure time
 configure_file(CMakeLists.txt.in googletest-download/CMakeLists.txt)
 execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
@@ -201,48 +160,6 @@ is not feasible, for example in a C project using Google Test for validation,
 then it can be specified by adding it to the options for cmake via the
 `DCMAKE_CXX_FLAGS` option.
 
-### Legacy Build Scripts
-
-Before settling on CMake, we have been providing hand-maintained build
-projects/scripts for Visual Studio, Xcode, and Autotools. While we continue to
-provide them for convenience, they are not actively maintained any more. We
-highly recommend that you follow the instructions in the above sections to
-integrate Google Test with your existing build system.
-
-If you still need to use the legacy build scripts, here's how:
-
-The msvc\ folder contains two solutions with Visual C++ projects. Open the
-`gtest.sln` or `gtest-md.sln` file using Visual Studio, and you are ready to
-build Google Test the same way you build any Visual Studio project. Files that
-have names ending with -md use DLL versions of Microsoft runtime libraries (the
-/MD or the /MDd compiler option). Files without that suffix use static versions
-of the runtime libraries (the /MT or the /MTd option). Please note that one must
-use the same option to compile both gtest and the test code. If you use Visual
-Studio 2005 or above, we recommend the -md version as /MD is the default for new
-projects in these versions of Visual Studio.
-
-On Mac OS X, open the `gtest.xcodeproj` in the `xcode/` folder using Xcode.
-Build the "gtest" target. The universal binary framework will end up in your
-selected build directory (selected in the Xcode "Preferences..." -> "Building"
-pane and defaults to xcode/build). Alternatively, at the command line, enter:
-
-    xcodebuild
-
-This will build the "Release" configuration of gtest.framework in your default
-build location. See the "xcodebuild" man page for more information about
-building different configurations and building in different locations.
-
-If you wish to use the Google Test Xcode project with Xcode 4.x and above, you
-need to either:
-
-*   update the SDK configuration options in xcode/Config/General.xconfig.
-    Comment options `SDKROOT`, `MACOS_DEPLOYMENT_TARGET`, and `GCC_VERSION`. If
-    you choose this route you lose the ability to target earlier versions of
-    MacOS X.
-*   Install an SDK for an earlier version. This doesn't appear to be supported
-    by Apple, but has been reported to work
-    (http://stackoverflow.com/questions/5378518).
-
 ### Tweaking Google Test
 
 Google Test can be used in diverse environments. The default configuration may
@@ -252,14 +169,14 @@ command line. Generally, these macros are named like `GTEST_XYZ` and you define
 them to either 1 or 0 to enable or disable a certain feature.
 
 We list the most frequently used macros below. For a complete list, see file
-[include/gtest/internal/gtest-port.h](https://github.com/google/googletest/blob/master/include/gtest/internal/gtest-port.h).
+[include/gtest/internal/gtest-port.h](https://github.com/google/googletest/blob/master/googletest/include/gtest/internal/gtest-port.h).
 
 ### Multi-threaded Tests
 
 Google Test is thread-safe where the pthread library is available. After
-`#include "gtest/gtest.h"`, you can check the `GTEST_IS_THREADSAFE` macro to see
-whether this is the case (yes if the macro is `#defined` to 1, no if it's
-undefined.).
+`#include "gtest/gtest.h"`, you can check the
+`GTEST_IS_THREADSAFE` macro to see whether this is the case (yes if the macro is
+`#defined` to 1, no if it's undefined.).
 
 If Google Test doesn't correctly detect whether pthread is available in your
 environment, you can force it with

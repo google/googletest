@@ -126,7 +126,7 @@ void ExpectationBase::RetireAllPreRequisites()
   }
 }
 
-// Returns true iff all pre-requisites of this expectation have been
+// Returns true if all pre-requisites of this expectation have been
 // satisfied.
 bool ExpectationBase::AllPrerequisitesAreSatisfied() const
     GTEST_EXCLUSIVE_LOCK_REQUIRED_(g_gmock_mutex) {
@@ -292,7 +292,7 @@ void ReportUninterestingCall(CallReaction reaction, const std::string& msg) {
               "an EXPECT_CALL() if you don't mean to enforce the call.  "
               "See "
               "https://github.com/google/googletest/blob/master/googlemock/"
-              "docs/CookBook.md#"
+              "docs/cook_book.md#"
               "knowing-when-to-expect for details.\n",
           stack_frames_to_skip);
       break;
@@ -384,7 +384,7 @@ UntypedActionResultHolderBase* UntypedFunctionMockerBase::UntypedInvokeWith(
     const CallReaction reaction =
         Mock::GetReactionOnUninterestingCalls(MockObject());
 
-    // True iff we need to print this call's arguments and return
+    // True if we need to print this call's arguments and return
     // value.  This definition must be kept in sync with
     // the behavior of ReportUninterestingCall().
     const bool need_to_report_uninteresting_call =
@@ -435,7 +435,7 @@ UntypedActionResultHolderBase* UntypedFunctionMockerBase::UntypedInvokeWith(
           &ss, &why);
   const bool found = untyped_expectation != nullptr;
 
-  // True iff we need to print the call's arguments and return value.
+  // True if we need to print the call's arguments and return value.
   // This definition must be kept in sync with the uses of Expect()
   // and Log() in this function.
   const bool need_to_report_call =
@@ -572,9 +572,9 @@ struct MockObjectState {
   // invoked on this mock object.
   const char* first_used_file;
   int first_used_line;
-  ::std::string first_used_test_case;
+  ::std::string first_used_test_suite;
   ::std::string first_used_test;
-  bool leakable;  // true iff it's OK to leak the object.
+  bool leakable;  // true if it's OK to leak the object.
   FunctionMockers function_mockers;  // All registered methods of the object.
 };
 
@@ -592,9 +592,6 @@ class MockObjectRegistry {
   // object alive.  Therefore we report any living object as test
   // failure, unless the user explicitly asked us to ignore it.
   ~MockObjectRegistry() {
-    // "using ::std::cout;" doesn't work with Symbian's STLport, where cout is
-    // a macro.
-
     if (!GMOCK_FLAG(catch_leaked_mocks))
       return;
 
@@ -612,8 +609,8 @@ class MockObjectRegistry {
                                                 state.first_used_line);
       std::cout << " ERROR: this mock object";
       if (state.first_used_test != "") {
-        std::cout << " (used in test " << state.first_used_test_case << "."
-             << state.first_used_test << ")";
+        std::cout << " (used in test " << state.first_used_test_suite << "."
+                  << state.first_used_test << ")";
       }
       std::cout << " should be deleted but never is. Its address is @"
            << it->first << ".";
@@ -721,7 +718,7 @@ bool Mock::VerifyAndClearExpectations(void* mock_obj)
 }
 
 // Verifies all expectations on the given mock object and clears its
-// default actions and expectations.  Returns true iff the
+// default actions and expectations.  Returns true if the
 // verification was successful.
 bool Mock::VerifyAndClear(void* mock_obj)
     GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex) {
@@ -793,10 +790,7 @@ void Mock::RegisterUseByOnCallOrExpectCall(const void* mock_obj,
     const TestInfo* const test_info =
         UnitTest::GetInstance()->current_test_info();
     if (test_info != nullptr) {
-      // FIXME: record the test case name when the
-      // ON_CALL or EXPECT_CALL is invoked from SetUpTestCase() or
-      // TearDownTestCase().
-      state.first_used_test_case = test_info->test_case_name();
+      state.first_used_test_suite = test_info->test_suite_name();
       state.first_used_test = test_info->name();
     }
   }

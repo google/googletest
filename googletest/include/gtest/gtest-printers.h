@@ -151,9 +151,10 @@ class TypeWithoutFormatter {
  public:
   // This default version is called when kTypeKind is kOtherType.
   static void PrintValue(const T& value, ::std::ostream* os) {
-    PrintBytesInObjectTo(static_cast<const unsigned char*>(
-                             reinterpret_cast<const void*>(&value)),
-                         sizeof(value), os);
+    PrintBytesInObjectTo(
+        static_cast<const unsigned char*>(
+            reinterpret_cast<const void*>(std::addressof(value))),
+        sizeof(value), os);
   }
 };
 
@@ -232,12 +233,12 @@ template <typename Char, typename CharTraits, typename T>
     ::std::basic_ostream<Char, CharTraits>& os, const T& x) {
   TypeWithoutFormatter<T, (internal::IsAProtocolMessage<T>::value
                                ? kProtobuf
-                               : internal::ImplicitlyConvertible<
+                               : std::is_convertible<
                                      const T&, internal::BiggestInt>::value
                                      ? kConvertibleToInteger
                                      :
 #if GTEST_HAS_ABSL
-                                     internal::ImplicitlyConvertible<
+                                     std::is_convertible<
                                          const T&, absl::string_view>::value
                                          ? kConvertibleToStringView
                                          :
@@ -356,16 +357,6 @@ GTEST_IMPL_FORMAT_C_STRING_AS_POINTER_(const wchar_t);
 
 GTEST_IMPL_FORMAT_C_STRING_AS_STRING_(char, ::std::string);
 GTEST_IMPL_FORMAT_C_STRING_AS_STRING_(const char, ::std::string);
-
-#if GTEST_HAS_GLOBAL_STRING
-GTEST_IMPL_FORMAT_C_STRING_AS_STRING_(char, ::string);
-GTEST_IMPL_FORMAT_C_STRING_AS_STRING_(const char, ::string);
-#endif
-
-#if GTEST_HAS_GLOBAL_WSTRING
-GTEST_IMPL_FORMAT_C_STRING_AS_STRING_(wchar_t, ::wstring);
-GTEST_IMPL_FORMAT_C_STRING_AS_STRING_(const wchar_t, ::wstring);
-#endif
 
 #if GTEST_HAS_STD_WSTRING
 GTEST_IMPL_FORMAT_C_STRING_AS_STRING_(wchar_t, ::std::wstring);
@@ -514,7 +505,7 @@ void PrintTo(const T& value, ::std::ostream* os) {
                   (sizeof(IsContainerTest<T>(0)) == sizeof(IsContainer)) &&
               !IsRecursiveContainer<T>::value
           ? kPrintContainer
-          : !is_pointer<T>::value
+          : !std::is_pointer<T>::value
                 ? kPrintOther
                 : std::is_function<typename std::remove_pointer<T>::type>::value
                       ? kPrintFunctionPointer
@@ -598,27 +589,13 @@ void PrintRawArrayTo(const T a[], size_t count, ::std::ostream* os) {
   }
 }
 
-// Overloads for ::string and ::std::string.
-#if GTEST_HAS_GLOBAL_STRING
-GTEST_API_ void PrintStringTo(const ::string&s, ::std::ostream* os);
-inline void PrintTo(const ::string& s, ::std::ostream* os) {
-  PrintStringTo(s, os);
-}
-#endif  // GTEST_HAS_GLOBAL_STRING
-
+// Overloads for ::std::string.
 GTEST_API_ void PrintStringTo(const ::std::string&s, ::std::ostream* os);
 inline void PrintTo(const ::std::string& s, ::std::ostream* os) {
   PrintStringTo(s, os);
 }
 
-// Overloads for ::wstring and ::std::wstring.
-#if GTEST_HAS_GLOBAL_WSTRING
-GTEST_API_ void PrintWideStringTo(const ::wstring&s, ::std::ostream* os);
-inline void PrintTo(const ::wstring& s, ::std::ostream* os) {
-  PrintWideStringTo(s, os);
-}
-#endif  // GTEST_HAS_GLOBAL_WSTRING
-
+// Overloads for ::std::wstring.
 #if GTEST_HAS_STD_WSTRING
 GTEST_API_ void PrintWideStringTo(const ::std::wstring&s, ::std::ostream* os);
 inline void PrintTo(const ::std::wstring& s, ::std::ostream* os) {
@@ -637,8 +614,7 @@ inline void PrintTo(std::nullptr_t, ::std::ostream* os) { *os << "(nullptr)"; }
 
 template <typename T>
 void PrintTo(std::reference_wrapper<T> ref, ::std::ostream* os) {
-  // Delegate to wrapped value.
-  PrintTo(ref.get(), os);
+  UniversalPrinter<T&>::Print(ref.get(), os);
 }
 
 // Helper function for printing a tuple.  T must be instantiated with
@@ -761,7 +737,6 @@ void UniversalPrintArray(const T* begin, size_t len, ::std::ostream* os) {
     // If the array has more than kThreshold elements, we'll have to
     // omit some details by printing only the first and the last
     // kChunkSize elements.
-    // FIXME: let the user control the threshold using a flag.
     if (len <= kThreshold) {
       PrintRawArrayTo(begin, len, os);
     } else {

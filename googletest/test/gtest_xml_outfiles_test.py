@@ -42,8 +42,8 @@ GTEST_OUTPUT_2_TEST = "gtest_xml_outfile2_test_"
 
 EXPECTED_XML_1 = """<?xml version="1.0" encoding="UTF-8"?>
 <testsuites tests="1" failures="0" disabled="0" errors="0" time="*" timestamp="*" name="AllTests">
-  <testsuite name="PropertyOne" tests="1" failures="0" disabled="0" errors="0" time="*">
-    <testcase name="TestSomeProperties" status="run" time="*" classname="PropertyOne">
+  <testsuite name="PropertyOne" tests="1" failures="0" disabled="0" errors="0" time="*" timestamp="*">
+    <testcase name="TestSomeProperties" status="run" result="completed" time="*" timestamp="*" classname="PropertyOne">
       <properties>
         <property name="SetUpProp" value="1"/>
         <property name="TestSomeProperty" value="1"/>
@@ -56,8 +56,8 @@ EXPECTED_XML_1 = """<?xml version="1.0" encoding="UTF-8"?>
 
 EXPECTED_XML_2 = """<?xml version="1.0" encoding="UTF-8"?>
 <testsuites tests="1" failures="0" disabled="0" errors="0" time="*" timestamp="*" name="AllTests">
-  <testsuite name="PropertyTwo" tests="1" failures="0" disabled="0" errors="0" time="*">
-    <testcase name="TestSomeProperties" status="run" time="*" classname="PropertyTwo">
+  <testsuite name="PropertyTwo" tests="1" failures="0" disabled="0" errors="0" time="*" timestamp="*">
+    <testcase name="TestSomeProperties" status="run" result="completed" time="*" timestamp="*" classname="PropertyTwo">
       <properties>
         <property name="SetUpProp" value="2"/>
         <property name="TestSomeProperty" value="2"/>
@@ -111,11 +111,6 @@ class GTestXMLOutFilesTest(gtest_xml_test_utils.GTestXMLTestCase):
     self.assert_(p.exited)
     self.assertEquals(0, p.exit_code)
 
-    # FIXME: libtool causes the built test binary to be
-    #   named lt-gtest_xml_outfiles_test_ instead of
-    #   gtest_xml_outfiles_test_.  To account for this possibility, we
-    #   allow both names in the following code.  We should remove this
-    #   when libtool replacement tool is ready.
     output_file_name1 = test_name + ".xml"
     output_file1 = os.path.join(self.output_dir_, output_file_name1)
     output_file_name2 = 'lt-' + output_file_name1

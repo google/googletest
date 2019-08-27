@@ -64,7 +64,9 @@ using std::stringstream;
 using std::vector;
 using testing::_;
 using testing::AllOf;
+using testing::AllOfArray;
 using testing::AnyOf;
+using testing::AnyOfArray;
 using testing::Args;
 using testing::Contains;
 using testing::ElementsAre;
@@ -489,7 +491,6 @@ TEST(ElementsAreArrayTest, CanBeCreatedWithVector) {
   EXPECT_THAT(test_vector, Not(ElementsAreArray(expected)));
 }
 
-#if GTEST_HAS_STD_INITIALIZER_LIST_
 
 TEST(ElementsAreArrayTest, TakesInitializerList) {
   const int a[5] = { 1, 2, 3, 4, 5 };
@@ -525,7 +526,6 @@ TEST(ElementsAreArrayTest,
       { Eq(1), Ne(-2), Ge(3), Le(4), Eq(6) })));
 }
 
-#endif  // GTEST_HAS_STD_INITIALIZER_LIST_
 
 TEST(ElementsAreArrayTest, CanBeCreatedWithMatcherVector) {
   const int a[] = { 1, 2, 3 };
@@ -1096,6 +1096,146 @@ TEST(ContainsTest, WorksForTwoDimensionalNativeArray) {
   EXPECT_THAT(a, Contains(Not(Contains(5))));
 }
 
+TEST(AllOfArrayTest, BasicForms) {
+  // Iterator
+  std::vector<int> v0{};
+  std::vector<int> v1{1};
+  std::vector<int> v2{2, 3};
+  std::vector<int> v3{4, 4, 4};
+  EXPECT_THAT(0, AllOfArray(v0.begin(), v0.end()));
+  EXPECT_THAT(1, AllOfArray(v1.begin(), v1.end()));
+  EXPECT_THAT(2, Not(AllOfArray(v1.begin(), v1.end())));
+  EXPECT_THAT(3, Not(AllOfArray(v2.begin(), v2.end())));
+  EXPECT_THAT(4, AllOfArray(v3.begin(), v3.end()));
+  // Pointer +  size
+  int ar[6] = {1, 2, 3, 4, 4, 4};
+  EXPECT_THAT(0, AllOfArray(ar, 0));
+  EXPECT_THAT(1, AllOfArray(ar, 1));
+  EXPECT_THAT(2, Not(AllOfArray(ar, 1)));
+  EXPECT_THAT(3, Not(AllOfArray(ar + 1, 3)));
+  EXPECT_THAT(4, AllOfArray(ar + 3, 3));
+  // Array
+  // int ar0[0];  Not usable
+  int ar1[1] = {1};
+  int ar2[2] = {2, 3};
+  int ar3[3] = {4, 4, 4};
+  // EXPECT_THAT(0, Not(AllOfArray(ar0)));  // Cannot work
+  EXPECT_THAT(1, AllOfArray(ar1));
+  EXPECT_THAT(2, Not(AllOfArray(ar1)));
+  EXPECT_THAT(3, Not(AllOfArray(ar2)));
+  EXPECT_THAT(4, AllOfArray(ar3));
+  // Container
+  EXPECT_THAT(0, AllOfArray(v0));
+  EXPECT_THAT(1, AllOfArray(v1));
+  EXPECT_THAT(2, Not(AllOfArray(v1)));
+  EXPECT_THAT(3, Not(AllOfArray(v2)));
+  EXPECT_THAT(4, AllOfArray(v3));
+  // Initializer
+  EXPECT_THAT(0, AllOfArray<int>({}));  // Requires template arg.
+  EXPECT_THAT(1, AllOfArray({1}));
+  EXPECT_THAT(2, Not(AllOfArray({1})));
+  EXPECT_THAT(3, Not(AllOfArray({2, 3})));
+  EXPECT_THAT(4, AllOfArray({4, 4, 4}));
+}
+
+TEST(AllOfArrayTest, Matchers) {
+  // vector
+  std::vector<Matcher<int>> matchers{Ge(1), Lt(2)};
+  EXPECT_THAT(0, Not(AllOfArray(matchers)));
+  EXPECT_THAT(1, AllOfArray(matchers));
+  EXPECT_THAT(2, Not(AllOfArray(matchers)));
+  // initializer_list
+  EXPECT_THAT(0, Not(AllOfArray({Ge(0), Ge(1)})));
+  EXPECT_THAT(1, AllOfArray({Ge(0), Ge(1)}));
+}
+
+TEST(AnyOfArrayTest, BasicForms) {
+  // Iterator
+  std::vector<int> v0{};
+  std::vector<int> v1{1};
+  std::vector<int> v2{2, 3};
+  EXPECT_THAT(0, Not(AnyOfArray(v0.begin(), v0.end())));
+  EXPECT_THAT(1, AnyOfArray(v1.begin(), v1.end()));
+  EXPECT_THAT(2, Not(AnyOfArray(v1.begin(), v1.end())));
+  EXPECT_THAT(3, AnyOfArray(v2.begin(), v2.end()));
+  EXPECT_THAT(4, Not(AnyOfArray(v2.begin(), v2.end())));
+  // Pointer +  size
+  int ar[3] = {1, 2, 3};
+  EXPECT_THAT(0, Not(AnyOfArray(ar, 0)));
+  EXPECT_THAT(1, AnyOfArray(ar, 1));
+  EXPECT_THAT(2, Not(AnyOfArray(ar, 1)));
+  EXPECT_THAT(3, AnyOfArray(ar + 1, 2));
+  EXPECT_THAT(4, Not(AnyOfArray(ar + 1, 2)));
+  // Array
+  // int ar0[0];  Not usable
+  int ar1[1] = {1};
+  int ar2[2] = {2, 3};
+  // EXPECT_THAT(0, Not(AnyOfArray(ar0)));  // Cannot work
+  EXPECT_THAT(1, AnyOfArray(ar1));
+  EXPECT_THAT(2, Not(AnyOfArray(ar1)));
+  EXPECT_THAT(3, AnyOfArray(ar2));
+  EXPECT_THAT(4, Not(AnyOfArray(ar2)));
+  // Container
+  EXPECT_THAT(0, Not(AnyOfArray(v0)));
+  EXPECT_THAT(1, AnyOfArray(v1));
+  EXPECT_THAT(2, Not(AnyOfArray(v1)));
+  EXPECT_THAT(3, AnyOfArray(v2));
+  EXPECT_THAT(4, Not(AnyOfArray(v2)));
+  // Initializer
+  EXPECT_THAT(0, Not(AnyOfArray<int>({})));  // Requires template arg.
+  EXPECT_THAT(1, AnyOfArray({1}));
+  EXPECT_THAT(2, Not(AnyOfArray({1})));
+  EXPECT_THAT(3, AnyOfArray({2, 3}));
+  EXPECT_THAT(4, Not(AnyOfArray({2, 3})));
+}
+
+TEST(AnyOfArrayTest, Matchers) {
+  // We negate test AllOfArrayTest.Matchers.
+  // vector
+  std::vector<Matcher<int>> matchers{Lt(1), Ge(2)};
+  EXPECT_THAT(0, AnyOfArray(matchers));
+  EXPECT_THAT(1, Not(AnyOfArray(matchers)));
+  EXPECT_THAT(2, AnyOfArray(matchers));
+  // initializer_list
+  EXPECT_THAT(0, AnyOfArray({Lt(0), Lt(1)}));
+  EXPECT_THAT(1, Not(AllOfArray({Lt(0), Lt(1)})));
+}
+
+TEST(AnyOfArrayTest, ExplainsMatchResultCorrectly) {
+  // AnyOfArray and AllOfArry use the same underlying template-template,
+  // thus it is sufficient to test one here.
+  const std::vector<int> v0{};
+  const std::vector<int> v1{1};
+  const std::vector<int> v2{2, 3};
+  const Matcher<int> m0 = AnyOfArray(v0);
+  const Matcher<int> m1 = AnyOfArray(v1);
+  const Matcher<int> m2 = AnyOfArray(v2);
+  EXPECT_EQ("", Explain(m0, 0));
+  EXPECT_EQ("", Explain(m1, 1));
+  EXPECT_EQ("", Explain(m1, 2));
+  EXPECT_EQ("", Explain(m2, 3));
+  EXPECT_EQ("", Explain(m2, 4));
+  EXPECT_EQ("()", Describe(m0));
+  EXPECT_EQ("(is equal to 1)", Describe(m1));
+  EXPECT_EQ("(is equal to 2) or (is equal to 3)", Describe(m2));
+  EXPECT_EQ("()", DescribeNegation(m0));
+  EXPECT_EQ("(isn't equal to 1)", DescribeNegation(m1));
+  EXPECT_EQ("(isn't equal to 2) and (isn't equal to 3)", DescribeNegation(m2));
+  // Explain with matchers
+  const Matcher<int> g1 = AnyOfArray({GreaterThan(1)});
+  const Matcher<int> g2 = AnyOfArray({GreaterThan(1), GreaterThan(2)});
+  // Explains the first positiv match and all prior negative matches...
+  EXPECT_EQ("which is 1 less than 1", Explain(g1, 0));
+  EXPECT_EQ("which is the same as 1", Explain(g1, 1));
+  EXPECT_EQ("which is 1 more than 1", Explain(g1, 2));
+  EXPECT_EQ("which is 1 less than 1, and which is 2 less than 2",
+            Explain(g2, 0));
+  EXPECT_EQ("which is the same as 1, and which is 1 less than 2",
+            Explain(g2, 1));
+  EXPECT_EQ("which is 1 more than 1",  // Only the first
+            Explain(g2, 2));
+}
+
 TEST(AllOfTest, HugeMatcher) {
   // Verify that using AllOf with many arguments doesn't cause
   // the compiler to exceed template instantiation depth limit.
@@ -1122,7 +1262,7 @@ namespace adl_test {
 MATCHER(M, "") { return true; }
 
 template <typename T1, typename T2>
-bool AllOf(const T1& t1, const T2& t2) { return true; }
+bool AllOf(const T1& /*t1*/, const T2& /*t2*/) { return true; }
 
 TEST(AllOfTest, DoesNotCallAllOfUnqualified) {
   EXPECT_THAT(42, testing::AllOf(
@@ -1139,7 +1279,6 @@ TEST(AnyOfTest, DoesNotCallAnyOfUnqualified) {
 
 }  // namespace adl_test
 
-#if GTEST_LANG_CXX11
 
 TEST(AllOfTest, WorksOnMoveOnlyType) {
   std::unique_ptr<int> p(new int(3));
@@ -1177,7 +1316,6 @@ TEST(MatcherPMacroTest, WorksOnMoveOnlyType) {
   EXPECT_THAT(p, Not(UniquePointee(2)));
 }
 
-#endif  // GTEST_LASNG_CXX11
 
 }  // namespace
 

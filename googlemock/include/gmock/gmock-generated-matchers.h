@@ -250,18 +250,15 @@
 // overloading matchers based on parameter types (as opposed to just
 // based on the number of parameters).
 //
-// MATCHER*() can only be used in a namespace scope.  The reason is
-// that C++ doesn't yet allow function-local types to be used to
-// instantiate templates.  The up-coming C++0x standard will fix this.
-// Once that's done, we'll consider supporting using MATCHER*() inside
-// a function.
+// MATCHER*() can only be used in a namespace scope as templates cannot be
+// declared inside of a local class.
 //
 // More Information
 // ================
 //
 // To learn more about using these macros, please search for 'MATCHER'
 // on
-// https://github.com/google/googletest/blob/master/googlemock/docs/CookBook.md
+// https://github.com/google/googletest/blob/master/googlemock/docs/cook_book.md
 
 #define MATCHER(name, description)\
   class name##Matcher {\

@@ -52,76 +52,6 @@ $$}} This meta comment fixes auto-indentation in editors.
 namespace testing {
 namespace internal {
 
-// InvokeHelper<F> knows how to unpack an N-tuple and invoke an N-ary
-// function, method, or callback with the unpacked values, where F is
-// a function type that takes N arguments.
-template <typename Result, typename ArgumentTuple>
-class InvokeHelper;
-
-
-$var max_callback_arity = 5
-$range i 0..n
-$for i [[
-$range j 1..i
-$var types = [[$for j [[, typename A$j]]]]
-$var as = [[$for j, [[A$j]]]]
-$var args = [[$if i==0 [[]] $else [[ args]]]]
-$var gets = [[$for j, [[std::get<$(j - 1)>(args)]]]]
-template <typename R$types>
-class InvokeHelper<R, ::std::tuple<$as> > {
- public:
-  template <typename Function>
-  static R Invoke(Function function, const ::std::tuple<$as>&$args) {
-           return function($gets);
-  }
-
-  template <class Class, typename MethodPtr>
-  static R InvokeMethod(Class* obj_ptr,
-                        MethodPtr method_ptr,
-                        const ::std::tuple<$as>&$args) {
-           return (obj_ptr->*method_ptr)($gets);
-  }
-
-
-$if i <= max_callback_arity [[
-  template <typename CallbackType>
-  static R InvokeCallback(CallbackType* callback,
-                          const ::std::tuple<$as>&$args) {
-           return callback->Run($gets);
-  }
-]] $else [[
-  // There is no InvokeCallback() for $i-tuples
-]]
-
-};
-
-
-]]
-// Implements the Invoke(callback) action.
-template <typename CallbackType>
-class InvokeCallbackAction {
- public:
-  // The c'tor takes ownership of the callback.
-  explicit InvokeCallbackAction(CallbackType* callback)
-      : callback_(callback) {
-    callback->CheckIsRepeatable();  // Makes sure the callback is permanent.
-  }
-
-  // This type conversion operator template allows Invoke(callback) to
-  // be used wherever the callback's type is compatible with that of
-  // the mock function, i.e. if the mock function's arguments can be
-  // implicitly converted to the callback's arguments and the
-  // callback's result can be implicitly converted to the mock
-  // function's result.
-  template <typename Result, typename ArgumentTuple>
-  Result Perform(const ArgumentTuple& args) const {
-    return InvokeHelper<Result, ArgumentTuple>::InvokeCallback(
-        callback_.get(), args);
-  }
- private:
-  const std::shared_ptr<CallbackType> callback_;
-};
-
 // A macro from the ACTION* family (defined later in this file)
 // defines an action that can be used in a mock function.  Typically,
 // these actions only care about a subset of the arguments of the mock
@@ -165,34 +95,6 @@ $template
 };
 
 }  // namespace internal
-
-// Creates an action that does actions a1, a2, ..., sequentially in
-// each invocation.
-$range i 2..n
-$for i [[
-$range j 2..i
-$var types = [[$for j, [[typename Action$j]]]]
-$var Aas = [[$for j [[, Action$j a$j]]]]
-
-template <typename Action1, $types>
-$range k 1..i-1
-
-inline $for k [[internal::DoBothAction<Action$k, ]]Action$i$for k  [[>]]
-
-DoAll(Action1 a1$Aas) {
-$if i==2 [[
-
-  return internal::DoBothAction<Action1, Action2>(a1, a2);
-]] $else [[
-$range j2 2..i
-
-  return DoAll(a1, DoAll($for j2, [[a$j2]]));
-]]
-
-}
-
-]]
-
 }  // namespace testing
 
 // The ACTION* family of macros can be used in a namespace scope to
@@ -280,16 +182,15 @@ $range j2 2..i
 //
 // CAVEAT:
 //
-// ACTION*() can only be used in a namespace scope.  The reason is
-// that C++ doesn't yet allow function-local types to be used to
-// instantiate templates.  The up-coming C++0x standard will fix this.
-// Once that's done, we'll consider supporting using ACTION*() inside
-// a function.
+// ACTION*() can only be used in a namespace scope as templates cannot be
+// declared inside of a local class.
+// Users can, however, define any local functors (e.g. a lambda) that
+// can be used as actions.
 //
 // MORE INFORMATION:
 //
 // To learn more about using these macros, please search for 'ACTION' on
-// https://github.com/google/googletest/blob/master/googlemock/docs/CookBook.md
+// https://github.com/google/googletest/blob/master/googlemock/docs/cook_book.md
 
 $range i 0..n
 $range k 0..n-1
@@ -298,7 +199,7 @@ $range k 0..n-1
 #define GMOCK_ACTION_ARG_TYPES_AND_NAMES_UNUSED_\
     const args_type& args GTEST_ATTRIBUTE_UNUSED_
 $for k [[, \
-    arg$k[[]]_type arg$k GTEST_ATTRIBUTE_UNUSED_]]
+    const arg$k[[]]_type& arg$k GTEST_ATTRIBUTE_UNUSED_]]
 
 
 // Sometimes you want to give an action explicit template parameters
@@ -500,7 +401,7 @@ $range k 0..n-1
       }\
       template <$for k, [[typename arg$k[[]]_type]]>\
       return_type gmock_PerformImpl(const args_type& args[[]]
-$for k [[, arg$k[[]]_type arg$k]]) const;\
+$for k [[, const arg$k[[]]_type& arg$k]]) const;\
       GMOCK_INTERNAL_DEFN_##value_params\
      private:\
       GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
@@ -565,7 +466,7 @@ $var param_field_decls2 = [[$for j
 $var params = [[$for j, [[p$j]]]]
 $var param_types = [[$if i==0 [[]] $else [[<$for j, [[p$j##_type]]>]]]]
 $var typename_arg_types = [[$for k, [[typename arg$k[[]]_type]]]]
-$var arg_types_and_names = [[$for k, [[arg$k[[]]_type arg$k]]]]
+$var arg_types_and_names = [[$for k, [[const arg$k[[]]_type& arg$k]]]]
 $var macro_name = [[$if i==0 [[ACTION]] $elif i==1 [[ACTION_P]]
                                         $else [[ACTION_P$i]]]]
 

@@ -41,8 +41,6 @@
 # elif defined(__MINGW__) || defined(__MINGW32__) || defined(__MINGW64__)
 #  define GTEST_OS_WINDOWS_MINGW 1
 #  define GTEST_OS_WINDOWS 1
-#elif defined __SYMBIAN32__
-# define GTEST_OS_SYMBIAN 1
 #elif defined _WIN32
 # define GTEST_OS_WINDOWS 1
 # ifdef _WIN32_WCE
@@ -73,10 +71,14 @@
 # if TARGET_OS_IPHONE
 #  define GTEST_OS_IOS 1
 # endif
+#elif defined __DragonFly__
+# define GTEST_OS_DRAGONFLY 1
 #elif defined __FreeBSD__
 # define GTEST_OS_FREEBSD 1
 #elif defined __Fuchsia__
 # define GTEST_OS_FUCHSIA 1
+#elif defined(__GLIBC__) && defined(__FreeBSD_kernel__)
+# define GTEST_OS_GNU_KFREEBSD 1
 #elif defined __linux__
 # define GTEST_OS_LINUX 1
 # if defined __ANDROID__
@@ -98,6 +100,8 @@
 # define GTEST_OS_OPENBSD 1
 #elif defined __QNX__
 # define GTEST_OS_QNX 1
+#elif defined(__HAIKU__)
+#define GTEST_OS_HAIKU 1
 #endif  // __CYGWIN__
 
 #endif  // GTEST_INCLUDE_GTEST_INTERNAL_GTEST_PORT_ARCH_H_

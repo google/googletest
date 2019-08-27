@@ -32,6 +32,9 @@
 #
 # Bazel BUILD for The Google C++ Testing Framework (Google Test)
 
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_test")
+load("@rules_python//python:defs.bzl", "py_library", "py_test")
+
 licenses(["notice"])
 
 #on windows exclude gtest-tuple.h
@@ -276,6 +279,30 @@ cc_binary(
     testonly = 1,
     srcs = ["googletest-list-tests-unittest_.cc"],
     deps = ["//:gtest"],
+)
+
+cc_test(
+    name = "gtest_skip_test",
+    size = "small",
+    srcs = ["gtest_skip_test.cc"],
+    deps = ["//:gtest_main"],
+)
+
+cc_test(
+    name = "gtest_skip_in_environment_setup_test",
+    size = "small",
+    srcs = ["gtest_skip_in_environment_setup_test.cc"],
+    deps = ["//:gtest_main"],
+)
+
+py_test(
+    name = "gtest_skip_environment_check_output_test",
+    size = "small",
+    srcs = ["gtest_skip_environment_check_output_test.py"],
+    data = [
+        ":gtest_skip_in_environment_setup_test",
+    ],
+    deps = [":gtest_test_utils"],
 )
 
 py_test(

@@ -37,28 +37,19 @@
 #include <string.h>
 #include <algorithm>
 #include <deque>
+#include <forward_list>
 #include <list>
 #include <map>
 #include <set>
 #include <sstream>
 #include <string>
+#include <unordered_map>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
 #include "gtest/gtest-printers.h"
 #include "gtest/gtest.h"
-
-#if GTEST_HAS_UNORDERED_MAP_
-# include <unordered_map>  // NOLINT
-#endif  // GTEST_HAS_UNORDERED_MAP_
-
-#if GTEST_HAS_UNORDERED_SET_
-# include <unordered_set>  // NOLINT
-#endif  // GTEST_HAS_UNORDERED_SET_
-
-#if GTEST_HAS_STD_FORWARD_LIST_
-# include <forward_list> // NOLINT
-#endif  // GTEST_HAS_STD_FORWARD_LIST_
 
 // Some user-defined types for testing the universal value printer.
 
@@ -192,7 +183,13 @@ class PathLike {
  public:
   struct iterator {
     typedef PathLike value_type;
+
+    iterator& operator++();
+    PathLike& operator*();
   };
+
+  using value_type = char;
+  using const_iterator = iterator;
 
   PathLike() {}
 
@@ -659,16 +656,6 @@ TEST(PrintArrayTest, BigArray) {
 
 // Tests printing ::string and ::std::string.
 
-#if GTEST_HAS_GLOBAL_STRING
-// ::string.
-TEST(PrintStringTest, StringInGlobalNamespace) {
-  const char s[] = "'\"?\\\a\b\f\n\0\r\t\v\x7F\xFF a";
-  const ::string str(s, sizeof(s));
-  EXPECT_EQ("\"'\\\"?\\\\\\a\\b\\f\\n\\0\\r\\t\\v\\x7F\\xFF a\\0\"",
-            Print(str));
-}
-#endif  // GTEST_HAS_GLOBAL_STRING
-
 // ::std::string.
 TEST(PrintStringTest, StringInStdNamespace) {
   const char s[] = "'\"?\\\a\b\f\n\0\r\t\v\x7F\xFF a";
@@ -691,19 +678,7 @@ TEST(PrintStringTest, StringAmbiguousHex) {
   EXPECT_EQ("\"!\\x5-!\"", Print(::std::string("!\x5-!")));
 }
 
-// Tests printing ::wstring and ::std::wstring.
-
-#if GTEST_HAS_GLOBAL_WSTRING
-// ::wstring.
-TEST(PrintWideStringTest, StringInGlobalNamespace) {
-  const wchar_t s[] = L"'\"?\\\a\b\f\n\0\r\t\v\xD3\x576\x8D3\xC74D a";
-  const ::wstring str(s, sizeof(s)/sizeof(wchar_t));
-  EXPECT_EQ("L\"'\\\"?\\\\\\a\\b\\f\\n\\0\\r\\t\\v"
-            "\\xD3\\x576\\x8D3\\xC74D a\\0\"",
-            Print(str));
-}
-#endif  // GTEST_HAS_GLOBAL_WSTRING
-
+// Tests printing ::std::wstring.
 #if GTEST_HAS_STD_WSTRING
 // ::std::wstring.
 TEST(PrintWideStringTest, StringInStdNamespace) {
@@ -814,7 +789,6 @@ TEST(PrintStlContainerTest, NonEmptyDeque) {
   EXPECT_EQ("{ 1, 3 }", Print(non_empty));
 }
 
-#if GTEST_HAS_UNORDERED_MAP_
 
 TEST(PrintStlContainerTest, OneElementHashMap) {
   ::std::unordered_map<int, char> map1;
@@ -834,9 +808,7 @@ TEST(PrintStlContainerTest, HashMultiMap) {
                   << " where Print(map1) returns \"" << result << "\".";
 }
 
-#endif  // GTEST_HAS_UNORDERED_MAP_
 
-#if GTEST_HAS_UNORDERED_SET_
 
 TEST(PrintStlContainerTest, HashSet) {
   ::std::unordered_set<int> set1;
@@ -873,7 +845,6 @@ TEST(PrintStlContainerTest, HashMultiSet) {
   EXPECT_TRUE(std::equal(a, a + kSize, numbers.begin()));
 }
 
-#endif  //  GTEST_HAS_UNORDERED_SET_
 
 TEST(PrintStlContainerTest, List) {
   const std::string a[] = {"hello", "world"};
@@ -915,14 +886,12 @@ TEST(PrintStlContainerTest, MultiSet) {
   EXPECT_EQ("{ 1, 1, 1, 2, 5 }", Print(set1));
 }
 
-#if GTEST_HAS_STD_FORWARD_LIST_
 
 TEST(PrintStlContainerTest, SinglyLinkedList) {
   int a[] = { 9, 2, 8 };
   const std::forward_list<int> ints(a, a + 3);
   EXPECT_EQ("{ 9, 2, 8 }", Print(ints));
 }
-#endif  // GTEST_HAS_STD_FORWARD_LIST_
 
 TEST(PrintStlContainerTest, Pair) {
   pair<const bool, int> p(true, 5);
@@ -1032,16 +1001,20 @@ TEST(PrintNullptrT, Basic) {
 
 TEST(PrintReferenceWrapper, Printable) {
   int x = 5;
-  EXPECT_EQ("5", Print(std::ref(x)));
-  EXPECT_EQ("5", Print(std::cref(x)));
+  EXPECT_EQ("@" + PrintPointer(&x) + " 5", Print(std::ref(x)));
+  EXPECT_EQ("@" + PrintPointer(&x) + " 5", Print(std::cref(x)));
 }
 
 TEST(PrintReferenceWrapper, Unprintable) {
   ::foo::UnprintableInFoo up;
-  EXPECT_EQ("16-byte object <EF-12 00-00 34-AB 00-00 00-00 00-00 00-00 00-00>",
-            Print(std::ref(up)));
-  EXPECT_EQ("16-byte object <EF-12 00-00 34-AB 00-00 00-00 00-00 00-00 00-00>",
-            Print(std::cref(up)));
+  EXPECT_EQ(
+      "@" + PrintPointer(&up) +
+          " 16-byte object <EF-12 00-00 34-AB 00-00 00-00 00-00 00-00 00-00>",
+      Print(std::ref(up)));
+  EXPECT_EQ(
+      "@" + PrintPointer(&up) +
+          " 16-byte object <EF-12 00-00 34-AB 00-00 00-00 00-00 00-00 00-00>",
+      Print(std::cref(up)));
 }
 
 // Tests printing user-defined unprintable types.
@@ -1248,21 +1221,6 @@ TEST(FormatForComparisonFailureMessageTest, WorksForWCharPointerVsPointer) {
 // Tests formatting a char pointer when it's compared to a string object.
 // In this case we want to print the char pointer as a C string.
 
-#if GTEST_HAS_GLOBAL_STRING
-// char pointer vs ::string
-TEST(FormatForComparisonFailureMessageTest, WorksForCharPointerVsString) {
-  const char* s = "hello \"world";
-  EXPECT_STREQ("\"hello \\\"world\"",  // The string content should be escaped.
-               FormatForComparisonFailureMessage(s, ::string()).c_str());
-
-  // char*
-  char str[] = "hi\1";
-  char* p = str;
-  EXPECT_STREQ("\"hi\\x1\"",  // The string content should be escaped.
-               FormatForComparisonFailureMessage(p, ::string()).c_str());
-}
-#endif
-
 // char pointer vs std::string
 TEST(FormatForComparisonFailureMessageTest, WorksForCharPointerVsStdString) {
   const char* s = "hello \"world";
@@ -1275,21 +1233,6 @@ TEST(FormatForComparisonFailureMessageTest, WorksForCharPointerVsStdString) {
   EXPECT_STREQ("\"hi\\x1\"",  // The string content should be escaped.
                FormatForComparisonFailureMessage(p, ::std::string()).c_str());
 }
-
-#if GTEST_HAS_GLOBAL_WSTRING
-// wchar_t pointer vs ::wstring
-TEST(FormatForComparisonFailureMessageTest, WorksForWCharPointerVsWString) {
-  const wchar_t* s = L"hi \"world";
-  EXPECT_STREQ("L\"hi \\\"world\"",  // The string content should be escaped.
-               FormatForComparisonFailureMessage(s, ::wstring()).c_str());
-
-  // wchar_t*
-  wchar_t str[] = L"hi\1";
-  wchar_t* p = str;
-  EXPECT_STREQ("L\"hi\\x1\"",  // The string content should be escaped.
-               FormatForComparisonFailureMessage(p, ::wstring()).c_str());
-}
-#endif
 
 #if GTEST_HAS_STD_WSTRING
 // wchar_t pointer vs std::wstring
@@ -1343,31 +1286,12 @@ TEST(FormatForComparisonFailureMessageTest, WorksForWCharArrayVsWCharArray) {
 // Tests formatting a char array when it's compared with a string object.
 // In this case we want to print the array as a C string.
 
-#if GTEST_HAS_GLOBAL_STRING
-// char array vs string
-TEST(FormatForComparisonFailureMessageTest, WorksForCharArrayVsString) {
-  const char str[] = "hi \"w\0rld\"";
-  EXPECT_STREQ("\"hi \\\"w\"",  // The content should be escaped.
-                                // Embedded NUL terminates the string.
-               FormatForComparisonFailureMessage(str, ::string()).c_str());
-}
-#endif
-
 // char array vs std::string
 TEST(FormatForComparisonFailureMessageTest, WorksForCharArrayVsStdString) {
   const char str[] = "hi \"world\"";
   EXPECT_STREQ("\"hi \\\"world\\\"\"",  // The content should be escaped.
                FormatForComparisonFailureMessage(str, ::std::string()).c_str());
 }
-
-#if GTEST_HAS_GLOBAL_WSTRING
-// wchar_t array vs wstring
-TEST(FormatForComparisonFailureMessageTest, WorksForWCharArrayVsWString) {
-  const wchar_t str[] = L"hi \"world\"";
-  EXPECT_STREQ("L\"hi \\\"world\\\"\"",  // The content should be escaped.
-               FormatForComparisonFailureMessage(str, ::wstring()).c_str());
-}
-#endif
 
 #if GTEST_HAS_STD_WSTRING
 // wchar_t array vs std::wstring
@@ -1632,6 +1556,65 @@ TEST(PrintOneofTest, Basic) {
       PrintToString(Type(NonPrintable{})));
 }
 #endif  // GTEST_HAS_ABSL
+namespace {
+class string_ref;
+
+/**
+ * This is a synthetic pointer to a fixed size string.
+ */
+class string_ptr {
+ public:
+  string_ptr(const char* data, size_t size) : data_(data), size_(size) {}
+
+  string_ptr& operator++() noexcept {
+    data_ += size_;
+    return *this;
+  }
+
+  string_ref operator*() const noexcept;
+
+ private:
+  const char* data_;
+  size_t size_;
+};
+
+/**
+ * This is a synthetic reference of a fixed size string.
+ */
+class string_ref {
+ public:
+  string_ref(const char* data, size_t size) : data_(data), size_(size) {}
+
+  string_ptr operator&() const noexcept { return {data_, size_}; }  // NOLINT
+
+  bool operator==(const char* s) const noexcept {
+    if (size_ > 0 && data_[size_ - 1] != 0) {
+      return std::string(data_, size_) == std::string(s);
+    } else {
+      return std::string(data_) == std::string(s);
+    }
+  }
+
+ private:
+  const char* data_;
+  size_t size_;
+};
+
+string_ref string_ptr::operator*() const noexcept { return {data_, size_}; }
+
+TEST(string_ref, compare) {
+  const char* s = "alex\0davidjohn\0";
+  string_ptr ptr(s, 5);
+  EXPECT_EQ(*ptr, "alex");
+  EXPECT_TRUE(*ptr == "alex");
+  ++ptr;
+  EXPECT_EQ(*ptr, "david");
+  EXPECT_TRUE(*ptr == "david");
+  ++ptr;
+  EXPECT_EQ(*ptr, "john");
+}
+
+}  // namespace
 
 }  // namespace gtest_printers_test
 }  // namespace testing

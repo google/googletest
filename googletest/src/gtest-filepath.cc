@@ -38,9 +38,6 @@
 #elif GTEST_OS_WINDOWS
 # include <direct.h>
 # include <io.h>
-#elif GTEST_OS_SYMBIAN
-// Symbian OpenC has PATH_MAX in sys/syslimits.h
-# include <sys/syslimits.h>
 #else
 # include <limits.h>
 # include <climits>  // Some Linux distributions define PATH_MAX here.
@@ -95,8 +92,9 @@ static bool IsPathSeparator(char c) {
 
 // Returns the current working directory, or "" if unsuccessful.
 FilePath FilePath::GetCurrentDir() {
-#if GTEST_OS_WINDOWS_MOBILE || GTEST_OS_WINDOWS_PHONE || GTEST_OS_WINDOWS_RT
-  // Windows CE doesn't have a current directory, so we just return
+#if GTEST_OS_WINDOWS_MOBILE || GTEST_OS_WINDOWS_PHONE || \
+    GTEST_OS_WINDOWS_RT || ARDUINO
+  // Windows CE and Arduino don't have a current directory, so we just return
   // something reasonable.
   return FilePath(kCurrentDirectoryString);
 #elif GTEST_OS_WINDOWS
@@ -165,7 +163,7 @@ FilePath FilePath::RemoveFileName() const {
   const char* const last_sep = FindLastPathSeparator();
   std::string dir;
   if (last_sep) {
-    dir = std::string(c_str(), last_sep + 1 - c_str());
+    dir = std::string(c_str(), static_cast<size_t>(last_sep + 1 - c_str()));
   } else {
     dir = kCurrentDirectoryString;
   }
@@ -250,9 +248,6 @@ bool FilePath::DirectoryExists() const {
 // root directory per disk drive.)
 bool FilePath::IsRootDirectory() const {
 #if GTEST_OS_WINDOWS
-  // FIXME: on Windows a network share like
-  // \\server\share can be a root directory, although it cannot be the
-  // current directory.  Handle this properly.
   return pathname_.length() == 3 && IsAbsolutePath();
 #else
   return pathname_.length() == 1 && IsPathSeparator(pathname_.c_str()[0]);
@@ -350,7 +345,6 @@ FilePath FilePath::RemoveTrailingPathSeparator() const {
 // Removes any redundant separators that might be in the pathname.
 // For example, "bar///foo" becomes "bar/foo". Does not eliminate other
 // redundancies that might be in a pathname involving "." or "..".
-// FIXME: handle Windows network shares (e.g. \\server\share).
 void FilePath::Normalize() {
   if (pathname_.c_str() == nullptr) {
     pathname_ = "";

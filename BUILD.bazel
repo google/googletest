@@ -28,9 +28,9 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-# Author: misterg@google.com (Gennadiy Civil)
-#
 #   Bazel Build for Google C++ Testing Framework(Google Test)
+
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -83,6 +83,10 @@ cc_library(
         ":has_absl": ["GTEST_HAS_ABSL=1"],
         "//conditions:default": [],
     }),
+    features = select({
+        ":windows": ["windows_export_all_symbols"],
+        "//conditions:default": [],
+    }),
     includes = [
         "googlemock",
         "googlemock/include",
@@ -109,6 +113,10 @@ cc_library(
 cc_library(
     name = "gtest_main",
     srcs = ["googlemock/src/gmock_main.cc"],
+    features = select({
+        ":windows": ["windows_export_all_symbols"],
+        "//conditions:default": [],
+    }),
     deps = [":gtest"],
 )
 
@@ -127,6 +135,10 @@ cc_library(
         "googletest/samples/sample3-inl.h",
         "googletest/samples/sample4.h",
     ],
+    features = select({
+        ":windows": ["windows_export_all_symbols"],
+        "//conditions:default": [],
+    }),
 )
 
 cc_test(
@@ -145,6 +157,7 @@ cc_test(
         "googletest/samples/sample7_unittest.cc",
         "googletest/samples/sample8_unittest.cc",
     ],
+    linkstatic = 0,
     deps = [
         "gtest_sample_lib",
         ":gtest_main",

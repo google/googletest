@@ -73,8 +73,7 @@ def Run(command):
   return p.exited and p.exit_code == 0
 
 
-# The tests.  FIXME: refactor the class to share common
-# logic with code in googletest-break-on-failure-unittest.py.
+# The tests.
 class ThrowOnFailureTest(gtest_test_utils.TestCase):
   """Tests the throw-on-failure mode."""
 
@@ -87,7 +86,7 @@ class ThrowOnFailureTest(gtest_test_utils.TestCase):
                         variable; None if the variable should be unset.
       flag_value:       value of the --gtest_break_on_failure flag;
                         None if the flag should not be present.
-      should_fail:      True iff the program is expected to fail.
+      should_fail:      True if the program is expected to fail.
     """
 
     SetEnvVar(THROW_ON_FAILURE, env_var_value)

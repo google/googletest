@@ -39,14 +39,14 @@
 
 // This file implements the following syntax:
 //
-//   ON_CALL(mock_object.Method(...))
+//   ON_CALL(mock_object, Method(...))
 //     .With(...) ?
 //     .WillByDefault(...);
 //
 // where With() is optional and WillByDefault() must appear exactly
 // once.
 //
-//   EXPECT_CALL(mock_object.Method(...))
+//   EXPECT_CALL(mock_object, Method(...))
 //     .With(...) ?
 //     .Times(...) ?
 //     .InSequence(...) *
@@ -62,10 +62,10 @@
 #include "gmock/gmock-generated-actions.h"
 #include "gmock/gmock-generated-function-mockers.h"
 #include "gmock/gmock-generated-matchers.h"
-#include "gmock/gmock-generated-nice-strict.h"
 #include "gmock/gmock-matchers.h"
 #include "gmock/gmock-more-actions.h"
 #include "gmock/gmock-more-matchers.h"
+#include "gmock/gmock-nice-strict.h"
 #include "gmock/internal/gmock-internal-utils.h"
 
 namespace testing {
@@ -91,6 +91,10 @@ GTEST_API_ void InitGoogleMock(int* argc, char** argv);
 // This overloaded version can be used in Windows programs compiled in
 // UNICODE mode.
 GTEST_API_ void InitGoogleMock(int* argc, wchar_t** argv);
+
+// This overloaded version can be used on Arduino/embedded platforms where
+// there is no argc/argv.
+GTEST_API_ void InitGoogleMock();
 
 }  // namespace testing
 
