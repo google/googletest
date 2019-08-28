@@ -32,7 +32,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-#ifdef ARDUINO
+#if defined GTEST_OS_ESP8266 || defined GTEST_OS_ESP32
 void setup() {
   int argc = 0;
   char** argv = nullptr;
