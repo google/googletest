@@ -30,7 +30,7 @@
 #include <cstdio>
 #include "gtest/gtest.h"
 
-#ifdef ARDUINO
+#if defined GTEST_OS_ESP8266 || defined GTEST_OS_ESP32
 void setup() {
   testing::InitGoogleTest();
 }
