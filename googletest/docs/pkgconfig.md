@@ -98,7 +98,7 @@ test('first_and_only_test', testapp)
 Since `pkg-config` is a small Unix command-line utility, it can be used in
 handwritten `Makefile`s too:
 
-```Makefile
+```makefile
 GTEST_CFLAGS = `pkg-config --cflags gtest_main`
 GTEST_LIBS = `pkg-config --libs gtest_main`
 
