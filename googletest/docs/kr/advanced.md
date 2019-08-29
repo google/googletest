@@ -66,7 +66,7 @@ EXPECT_NO_THROW({
 
 ### Predicate Assertion을 통해 더 유용한 Error Message 만들기
 
-지금까지 확인한 것처럼 googletest는 다양한 assertion들을 제공하고 있습니다. 다만, 여전히 사용자가 원하는 모든 경우를 커버할 수는 없으며 또 그런 상황들을 위해서 너무 다양한 assertion을 제공하는 것도 좋은 방법은 아닌 것 같습니다. 그렇다보니 원하는 목적을 달성하기 위해 `EXPECT_TRUE()`와 같이 (단순하다고도 할 수 있는) assertion에 복잡한 expression을 전달하기도 합니다. 물론 복잡한 expression을 사용한다고 해서 꼭 문제가 되는 것은 아니지만 사용자 입장에서의 불편함들이 발생하곤 했습니다. 예를 들어 expression이 복잡하면 기본적으로 제공되는 failure message만으로는 부족하기 때문에 사용자가 직접 failure message를 변경하는 경우가 있을텐데요. 이 때, 해당 expression이 어떤 side-effect(부수효과)를 포함하고 있다면 failrue message가 출력해주는 값들이 정확한지도 의심해야 되고 여러가지로 신경써야 할 것들이 많아집니다.
+지금까지 확인한 것처럼 googletest는 다양한 assertion들을 제공하고 있습니다. 다만, 여전히 사용자가 원하는 모든 경우를 커버할 수는 없으며 또 그런 상황들을 위해서 너무 다양한 assertion을 제공하는 것도 좋은 방법은 아닌 것 같습니다. 그렇다보니 `EXPECT_TRUE()`와 같이 (단순하다고도 할 수 있는) assertion에 매우 복잡한 expression이 전달되는 상황이 발생하기도 합니다. 물론 복잡한 expression을 사용한다고 해서 꼭 문제가 되는 것은 아니지만 사용자 입장에서의 불편함들을 초래하곤 했습니다. 예를 들어 expression이 복잡하면 기본적으로 제공되는 failure message만으로는 부족하게 되고 사용자가 직접 failure message를 변경하게 될 확률이 높은데요. 이 때, 해당 expression이 어떤 side-effect(부수효과)를 포함하고 있다면 failrue message가 출력해주는 값들이 정확한지도 의심해야 되고 여러가지로 신경써야 할 것들이 많아집니다.
 
 이에 googletest는 위와 같은 상황에서 유연하게 대처하기 위한 몇 가지 방법을 제공합니다.
 
