@@ -30,7 +30,10 @@
 #include <cstdio>
 #include "gtest/gtest.h"
 
-#if defined GTEST_OS_ESP8266 || defined GTEST_OS_ESP32
+#if GTEST_OS_ESP8266 || GTEST_OS_ESP32
+# if GTEST_OS_ESP8266
+extern "C" {
+# endif
 void setup() {
   int argc = 0;
   char** argv = nullptr;
