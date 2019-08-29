@@ -90,32 +90,40 @@ and their own tests from a git checkout, which has further requirements:
 *   [Python](https://www.python.org/) v2.3 or newer (for running some of the
     tests and re-generating certain source files from templates)
 *   [CMake](https://cmake.org/) v2.6.4 or newer
-*   [GNU Build System](https://en.wikipedia.org/wiki/GNU_Build_System) including
-    automake (>= 1.9), autoconf (>= 2.59), and libtool / libtoolize.
 
-## Developing Google Test
+## Developing Google Test and Google Mock
 
-This section discusses how to make your own changes to Google Test.
+This section discusses how to make your own changes to the Google Test project.
 
-### Testing Google Test Itself
+### Testing Google Test and Google Mock Themselves
 
 To make sure your changes work as intended and don't break existing
-functionality, you'll want to compile and run Google Test's own tests. For that
-you can use CMake:
+functionality, you'll want to compile and run Google Test and GoogleMock's own
+tests. For that you can use CMake:
 
     mkdir mybuild
     cd mybuild
-    cmake -Dgtest_build_tests=ON ${GTEST_DIR}
+    cmake -Dgtest_build_tests=ON -Dgmock_build_tests=ON ${GTEST_REPO_DIR}
+
+To choose between building only Google Test or Google Mock, you may modify your
+cmake command to be one of each
+
+    cmake -Dgtest_build_tests=ON ${GTEST_DIR} # sets up Google Test tests
+    cmake -Dgmock_build_tests=ON ${GMOCK_DIR} # sets up Google Mock tests
 
 Make sure you have Python installed, as some of Google Test's tests are written
 in Python. If the cmake command complains about not being able to find Python
 (`Could NOT find PythonInterp (missing: PYTHON_EXECUTABLE)`), try telling it
 explicitly where your Python executable can be found:
 
-    cmake -DPYTHON_EXECUTABLE=path/to/python -Dgtest_build_tests=ON ${GTEST_DIR}
+    cmake -DPYTHON_EXECUTABLE=path/to/python ...
 
-Next, you can build Google Test and all of its own tests. On \*nix, this is
-usually done by 'make'. To run the tests, do
+Next, you can build Google Test and / or Google Mock and all desired tests. On
+\*nix, this is usually done by
+
+    make
+
+To run the tests, do
 
     make test
 
@@ -132,27 +140,3 @@ You don't need to worry about regenerating the source files unless you need to
 modify them. You would then modify the corresponding `.pump` files and run the
 '[pump.py](googletest/scripts/pump.py)' generator script. See the
 [Pump Manual](googletest/docs/pump_manual.md).
-
-## Developing Google Mock
-
-This section discusses how to make your own changes to Google Mock.
-
-#### Testing Google Mock Itself
-
-To make sure your changes work as intended and don't break existing
-functionality, you'll want to compile and run Google Test's own tests. For that
-you'll need Autotools. First, make sure you have followed the instructions above
-to configure Google Mock. Then, create a build output directory and enter it.
-Next,
-
-    ${GMOCK_DIR}/configure  # try --help for more info
-
-Once you have successfully configured Google Mock, the build steps are standard
-for GNU-style OSS packages.
-
-    make        # Standard makefile following GNU conventions
-    make check  # Builds and runs all tests - all should pass.
-
-Note that when building your project against Google Mock, you are building
-against Google Test as well. There is no need to configure Google Test
-separately.
