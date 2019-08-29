@@ -1320,8 +1320,8 @@ class ReferenceOrValueWrapper {
 
   // Provides nondestructive access to the underlying value/reference.
   // Always returns a const reference (more precisely,
-  // const RemoveReference<T>&). The behavior of calling this after
-  // calling Unwrap on the same object is unspecified.
+  // const std::add_lvalue_reference<T>::type). The behavior of calling this
+  // after calling Unwrap on the same object is unspecified.
   const T& Peek() const {
     return value_;
   }

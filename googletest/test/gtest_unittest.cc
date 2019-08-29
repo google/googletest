@@ -262,7 +262,6 @@ using testing::internal::OsStackTraceGetterInterface;
 using testing::internal::ParseInt32Flag;
 using testing::internal::RelationToSourceCopy;
 using testing::internal::RelationToSourceReference;
-using testing::internal::RemoveReference;
 using testing::internal::ShouldRunTestOnShard;
 using testing::internal::ShouldShard;
 using testing::internal::ShouldUseColor;
@@ -7108,30 +7107,6 @@ TEST(IsAProtocolMessageTest, ValueIsFalseWhenTypeIsNotAProtocolMessage) {
 TEST(CompileAssertTypesEqual, CompilesWhenTypesAreEqual) {
   CompileAssertTypesEqual<void, void>();
   CompileAssertTypesEqual<int*, int*>();
-}
-
-// Tests that RemoveReference does not affect non-reference types.
-TEST(RemoveReferenceTest, DoesNotAffectNonReferenceType) {
-  CompileAssertTypesEqual<int, RemoveReference<int>::type>();
-  CompileAssertTypesEqual<const char, RemoveReference<const char>::type>();
-}
-
-// Tests that RemoveReference removes reference from reference types.
-TEST(RemoveReferenceTest, RemovesReference) {
-  CompileAssertTypesEqual<int, RemoveReference<int&>::type>();
-  CompileAssertTypesEqual<const char, RemoveReference<const char&>::type>();
-}
-
-// Tests GTEST_REMOVE_REFERENCE_.
-
-template <typename T1, typename T2>
-void TestGTestRemoveReference() {
-  CompileAssertTypesEqual<T1, GTEST_REMOVE_REFERENCE_(T2)>();
-}
-
-TEST(RemoveReferenceTest, MacroVersion) {
-  TestGTestRemoveReference<int, int>();
-  TestGTestRemoveReference<const char, const char&>();
 }
 
 // Tests GTEST_REMOVE_REFERENCE_AND_CONST_.

@@ -336,10 +336,6 @@ GTEST_API_ WithoutMatchers GetWithoutMatchers();
 
 // Type traits.
 
-// remove_reference<T>::type removes the reference from type T, if any.
-template <typename T> struct remove_reference { typedef T type; };  // NOLINT
-template <typename T> struct remove_reference<T&> { typedef T type; }; // NOLINT
-
 // Disable MSVC warnings for infinite recursion, since in this case the
 // the recursion is unreachable.
 #ifdef _MSC_VER
