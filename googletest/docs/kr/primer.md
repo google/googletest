@@ -180,7 +180,7 @@ Fixture를 생성하는 방법
 
 1. `::testing::Test` class를 상속받아서 test fixture class를 하나 만듭니다. 이제 `protected:` 영역에 필요한 내용을 구현할 것입니다.
 2. test fixture class 내부에 여러 Test들이 공유하게 될 데이터(변수)를 선언합니다.
-3. 필요하다면 `SetUp()`이나 default constructor를 정의함으로서 test fixture에 속한 각각의 Test들이 시작될때 공통적으로 수행할 일들(공유자원 자원할당 등)을 구현할 수 있습니다. 이 때, `SetUp()`을 **`Setup()`**으로 구현하는 대소문자 실수를 하는 경우가 많기 때문에 주의하기 바랍니다. C++11의 `override` 키워드를 사용한다면 실수를 줄일 수 있을 것입니다.
+3. 필요하다면 `SetUp()`이나 default constructor를 정의함으로서 test fixture에 속한 각각의 Test들이 시작될때 공통적으로 수행할 일들(공유자원 자원할당 등)을 구현할 수 있습니다. 이 때, `SetUp()`을 **`Setup()`** 으로 구현하는 대소문자 실수를 하는 경우가 많기 때문에 주의하기 바랍니다. C++11의 `override` 키워드를 사용한다면 실수를 줄일 수 있을 것입니다.
 4. 필요하다면 `TearDown()`이나 destructor를 정의함으로서 개별 Test가 끝날때마다 공통적으로 수행할 일들(공유자원 자원해제 등)을 구현한 수 있습니다. `SetUp()/TearDown()`과 constructor/destructor를 어떻게 구분해서 사용해야 하는지 궁금하다면 [FAQ](faq.md#test-fixture에서-constructordestructor-와-setupteardown중-어느것을-써야하나요)을 참조하기 바랍니다.
 5. 필요하다면 각 Test가 공통적으로 수행하게 될 함수(subroutine)를 정의하는 것도 좋습니다.
 
