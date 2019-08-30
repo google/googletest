@@ -29,7 +29,7 @@ Googletest는 개별 테스트를 가리키는 용어로서 Test를 사용해왔
 
 Meaning | googletest Term | ISTQB Term 
 ------- | --------------- | -------------------------------------
-클래스 또는 단일 function에 input 을 주고 그 결과를 확인하는 단위 | TEST() | Test Case
+클래스 또는 단일 function에 input을 주고 그 결과를 확인하는 단위 | TEST() | Test Case
 바로 위에서 표현한 단위에 대한 묶음 | Test Case → Test Suite (변경 중) | Test Suite 
 
 ## 기본 개념
