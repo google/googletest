@@ -29,7 +29,7 @@ Googletest는 개별 테스트를 가리키는 용어로서 Test를 사용해왔
 
 Meaning | googletest Term | ISTQB Term 
 ------- | --------------- | -------------------------------------
-클래스 또는 단일function에 input 을 주고 그 결과를 확인하는 단위 | TEST() | Test Case 
+클래스 또는 단일 function에 input 을 주고 그 결과를 확인하는 단위 | TEST() | Test Case
 바로 위에서 표현한 단위에 대한 묶음 | Test Case → Test Suite (변경 중) | Test Suite 
 
 ## 기본 개념
@@ -92,7 +92,7 @@ Fatal assertion | Nonfatal assertion | Verifies
 
 위의 assertion을 사용하려면 `val1`, `val2`와 같은 argument들이 assertion 종류에 맞는 비교연산자(`==`, `<` 등)를 제공해야 합니다. `int`, `double`과 같은 산술타입들은 기본적으로 제공되겠지만 사용자 정의 타입이라면 그에 맞는 비교연산자를 구현해서 제공해야 합니다. 그렇지 않으면 당연하게도 compile error가 발생합니다. 이전에는 argument에 대한 정보를 출력하기 위해 `<<` 연산자도 필요했지만 현재는 그 부분은 꼭 제공하지 않아도 괜찮습니다. 만약 argument가 `<<`연산자를 지원한다면 assertion이 실패했을 때 정의된 연산자를 통해 관련정보를 출력하게 됩니다. 반대로 지원하지 않는다면 googletest가 출력할 수 있는 방법을 최대한 찾게 됩니다. 이러한 출력정보에 관련한 더 자세한 내용은 [여기](../../../googlemock/docs/kr/cook_book.md#gmock이-사용자타입-정보도-출력-가능하게-만들기)을 참고하세요.
 
-이처럼 assertion을 사용자정의 타입과 함께 사용하는 것이 가능하지만, 비교연산자도 함께 제공해야만 합니다. 다만, 이렇게 비교연산자를 제공하는 것은 Google [C++ Style Guide](https://google.github.io/styleguide/cppguide.html#Operator_Overloading)에서 권장하는 내용은 아니기 떄문에 비교연산자가 아닌 별도의 function을 통해 비교를 수행한 후에 그 결과인 `bool`값만 `ASSERT_TRUE()` 혹은 `EXPECT_TRUE()` 를 통해 검사하는 것도 괜찮습니다.
+이처럼 assertion을 사용자정의 타입과 함께 사용하는 것이 가능하지만, 비교연산자도 함께 제공해야만 동작한다는 점을 기억해주시기 합니다. 물론, 사용자정의 타입에 비교연산자를 제공하는 것은 Google [C++ Style Guide](https://google.github.io/styleguide/cppguide.html#Operator_Overloading)에서 권장하는 내용이 아니기 때문에 비교연산자가 아닌 별도의 function을 통해 비교를 수행한 후에 그 결과인 `bool`값만 `ASSERT_TRUE()` 혹은 `EXPECT_TRUE()`를 통해 검사하는 것을 더 추천합니다.
 
 물론 사용자 입장에서는 `ASSERT_TRUE(actual == expected)`보다 `ASSERT_EQ(actual, expected)`가 더 유용할 것입니다. 왜냐하면 후자를 사용하면 assertion에 `actual(실제값)`, `expected(기대값)` 을 모두 전달하기 때문에 실패시에 위의 값들을 출력해주기 때문입니다. 즉, 왜 실패했는지 더 빠르게 확인할 수 있게 됩니다.
 
