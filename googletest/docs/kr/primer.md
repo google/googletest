@@ -1,27 +1,25 @@
-# Googletest Primer
-
 ## 왜 googletest 인가?
 
-*Googletest*를 통해서 C++에서도 진보된 테스트코드를 구현할 수 있게 되었습니다.
+*googletest*를 통해서 C++에서도 진보된 테스트코드를 구현할 수 있게 되었습니다.
 
-Googletest는 Google Testing Technology Team 주도로 개발이 시작되었습니다. Linux, Windows, Mac 등 *플랫폼 제한없이* 사용할 수 있으며 단위테스트 뿐만 아니라 다른 종류의 테스트에도 적용이 가능합니다.
+googletest는 Google Testing Technology Team 주도로 개발이 시작되었습니다. Linux, Windows, Mac 등 *플랫폼 제한없이* 사용할 수 있으며 단위테스트 뿐만 아니라 다른 종류의 테스트에도 적용이 가능합니다.
 
 시작하기에 앞서, 좋은 테스트란 무엇이고 googletest가 이에 기여할 수 있는 부분을 알아보겠습니다.
 
-1. 테스트는 *독립적이고 반복적으로* 수행될 수 있어야 합니다. 테스트들이 서로 영향을 받는다면 디버깅이 어려워질 것입니다. Googletest는 각각의 테스트가 서로 다른 object에서 수행될 수 있도록 도와줍니다. 따라서 테스트가 실패했을 때도 빠르게 디버깅이 가능합니다.
-2. 테스트는 테스트 대상코드의 변화에 유연하게 대응할 수 있도록 구조화되어야 합니다. Googletest에서는 동일한 환경에서 실행되는 여러개의 Test를 Test Suite으로 묶어서 관리할 수 있으며(Test Suite도 여러개가 가능) 이를 통해 공통적으로 사용되는 데이터와 subroutine을 공유할 수 있습니다. 이러한 구조는 테스트의 가독성과 유지보수성을 증가시키며 테스트코드를 새로운 프로젝트에 적용할 때도 유용합니다.
-3. 테스트는 *이식성 및 재사용성이 있어야 합니다.* Google에는 플랫폼 종속성이 없는 코드가 많이 존재하기 때문에 테스트코드 또한 플랫폼 종속성이 없어야 했습니다. 이를 위해 googletest는 특정 운영체제 및 컴파일러에 국한되지 않고 예외도 발생시키지 않는 방향으로 설계되었습니다.
-4. 테스트는 실패했을 때, 그 문제에 대해 가능한 많은 *정보를 제공해야 합니다.* Googletest가 여러개의 Test를 수행하는 동안에는 1개의 Test가 실패하더라도 나머지 Test들은 계속해서 수행합니다. 또한, 실패한 Test가 non-fatal failure로 지정되었다면 해당 Test 자체도 중단하지 않습니다. 이러한 설계의 장점은 한 번의 수행으로도 여러개의 bug를 찾아내고 개선할 수 있다는 것입니다.
-5. 테스트 프레임워크는 테스트를 구현하는 사람이 실제 구현에만 집중할 수 있도록 도와줘야 합니다. Googletest는 정의된 모든 Test를 자동으로 찾아서 실행해주기 때문에 사용자가 하나하나 찾아서 실행할 필요가 없습니다.
-6. 테스트는 *빨라야 합니다.* Googletest는 set-up/tear-down을 제공함으로서 여러 Test가 공유해야할 내용을 한번의 구현만으로도 재사용될 수 있도록 했습니다.
+1. 테스트는 *독립적이고 반복적으로* 수행될 수 있어야 합니다. 테스트들이 서로 영향을 받는다면 디버깅이 어려워질 것입니다. googletest는 각 테스트를 서로 다른 객체object에서 실행함으로써 테스트들을 격리시킵니다. 한 테스트가 실패했을 때 googletest로 그것만 따로 실행해서 디버깅을 빨리 할 수 있습니다.
+2. 테스트는 *잘 정리되어 있어야* 하고 테스트한 코드의 구조도 반영해야 합니다. googletest는 관련있는 테스트를 테스트 스위트test suite로 묶어 데이터와 서브루틴subroutine을 공유할 수 있게 합니다. 이 보편적인 형태는 알아보기도 쉽고 테스트 유지보수도 쉽게 만듭니다. 이런 일관성은 사람들이 프로젝트를 바꿔 새로운 코드에서 일을 시작할 때 특히 도움이 됩니다.
+3. 테스트는 *이식성*과 *재사용성*이 있어야 합니다. Google에는 플랫폼 중립적인 코드가 아주 많기 때문에 테스트코드 또한 플랫폼 중립적이어야 합니다. googletest는 여러 운영체제에서 여러 컴파일러와 예외exception가 활성화되었든 아니든 동작하므로 googletest는 다양한 구성으도 동작할 수 있습니다.
+4. 테스트는 실패했을 때, 그 문제에 대해 가능한 많은 *정보를 제공해야 합니다.* googletest가 여러개의 Test를 수행하는 동안에는 1개의 Test가 실패하더라도 나머지 Test들은 계속해서 수행합니다. 또한, 실패한 Test가 non-fatal failure로 지정되었다면 해당 Test 자체도 중단하지 않습니다. 이러한 설계의 장점은 한 번의 수행으로도 여러개의 bug를 찾아내고 개선할 수 있다는 것입니다.
+5. 테스트 프레임워크는 테스트를 구현하는 사람이 실제 구현에만 집중할 수 있도록 도와줘야 합니다. googletest는 정의된 모든 Test를 자동으로 찾아서 실행해주기 때문에 사용자가 하나하나 찾아서 실행할 필요가 없습니다.
+6. 테스트는 *빨라야 합니다.* googletest는 set-up/tear-down을 제공함으로서 여러 Test가 공유해야할 내용을 한번의 구현만으로도 재사용될 수 있도록 했습니다.
 
-Googletest가 xUnit architecture를 기반으로 설계되었기 때문에 JUnit, PyUnit과 같은 xUnit계열 테스트 프레임워크를 사용해본 경험이 있다면 빠르게 적응할 수 있습니다. 물론, 그러한 경험이 없더라도 기초적인 것을 배우고 구현하는 데에는 10분이면 충분합니다.
+googletest가 xUnit architecture를 기반으로 설계되었기 때문에 JUnit, PyUnit과 같은 xUnit계열 테스트 프레임워크를 사용해본 경험이 있다면 빠르게 적응할 수 있습니다. 물론, 그러한 경험이 없더라도 기초적인 것을 배우고 구현하는 데에는 10분이면 충분합니다.
 
 ## 용어 구분하기
 
 *Note:* *Test*, *Test Case*, *Test Suite*과 같은 용어를 사용함에 있어서 googletest와 [ISTQB](http://www.istqb.org/) 간에 정의가 다르기 때문에 주의가 필요합니다.
 
-Googletest는 개별 테스트를 가리키는 용어로서 Test를 사용해왔고 여러 Test의 묶음을 의미하는 용어로 Test Case를 사용해왔습니다. 그러나 ISTQB를 비롯한 표준기관에서는 여러 Test의 묶음을 의미하는 용어로 [*Test Suite*](https://glossary.istqb.org/en/search/test%20suite)를 채택하고 있어서 혼란이 발생하곤 했습니다.
+googletest는 개별 테스트를 가리키는 용어로서 Test를 사용해왔고 여러 Test의 묶음을 의미하는 용어로 Test Case를 사용해왔습니다. 그러나 ISTQB를 비롯한 표준기관에서는 여러 Test의 묶음을 의미하는 용어로 [*Test Suite*](https://glossary.istqb.org/en/search/test%20suite)를 채택하고 있어서 혼란이 발생하곤 했습니다.
 
 즉, googletest의 Test라는 용어를 ISTQB의 [*Test Case*](https://glossary.istqb.org/en/search/test%20case)와 동일한 의미로 사용하려고 해도 원래 googletest에서 Test 묶음을 의미하는 용어였던 Test Case와 충돌이 발생해서 문제가 되었던 것입니다. 결국 googletest는 *Test Case*라는 용어를 *Test Suite*으로 바꾸기로 결정했으며 *TestCase*로 시작하는 API들을 *TestSuite*으로 변경하는 과정에 있습니다.
 
@@ -34,7 +32,7 @@ Meaning | googletest Term | ISTQB Term
 
 ## 기본 개념
 
-Googletest를 사용한다고 하면 *assertion*을 쓰는 것부터 시작하게 됩니다. Assertion이란 어떤 조건이 참인지 거짓인지 검사하는 것을 의미하며 이러한 assertion의 결과는 *success*, *non-fatal failure*, *fatal failure* 중에 하나가 됩니다. 만약, Test를 진행하는 중에 fatal failure가 발생하면 해당 Test가 중단되지만, 반대로 success나 non-fatal failure가 발생하면 중단하지 않고 계속 진행합니다.
+googletest를 사용한다고 하면 *assertion*을 쓰는 것부터 시작하게 됩니다. Assertion이란 어떤 조건이 참인지 거짓인지 검사하는 것을 의미하며 이러한 assertion의 결과는 *success*, *non-fatal failure*, *fatal failure* 중에 하나가 됩니다. 만약, Test를 진행하는 중에 fatal failure가 발생하면 해당 Test가 중단되지만, 반대로 success나 non-fatal failure가 발생하면 중단하지 않고 계속 진행합니다.
 
 각 Test에는 이러한 assertion을 사용해서 테스트 대상코드가 잘 동작하는지 구현하게 되며 assertion의 수행결과에 따라 Test의 *성공이나 실패도 결정됩니다.*
 
@@ -46,7 +44,7 @@ Test Program은 더 큰 개념으로서 여러개의 Test Suite을 포함합니�
 
 ## Assertions
 
-Googletest의 assertion은 function처럼 보이기는 하지만 macro입니다. 사용자는 이러한 assertion을 통해 class나 function을 테스트하게 됩니다. Googletest는 assertion이 실패하면 해당 소스파일과 실패한 위치, 그리고 오류메시지(실패한 이유)와 같은 정보를 출력해줍니다. 그리고 이렇게 출력되는 정보를 사용자가 자유롭게 변경할 수도 있습니다.
+googletest의 assertion은 function처럼 보이기는 하지만 macro입니다. 사용자는 이러한 assertion을 통해 class나 function을 테스트하게 됩니다. googletest는 assertion이 실패하면 해당 소스파일과 실패한 위치, 그리고 오류메시지(실패한 이유)와 같은 정보를 출력해줍니다. 그리고 이렇게 출력되는 정보를 사용자가 자유롭게 변경할 수도 있습니다.
 
 어떤 기능을 테스트할 때, 여러개의 assertion을 함께 사용하는 것도 가능합니다. Assertion을 상위 레벨에서 분류해보면 `ASSERT_*`계열과 `EXPECT_*`계열이 있습니다. 먼저, `ASSERT_*` 계열은 테스트가 실패하면 fatal failure를 발생시키며 현재 동작중인 function을 중단시킵니다. 다음으로 `EXPECT_*` 계열은 non-fatal failure를 발생시키며 현재 function을 중단시키지 않고 계속 진행합니다. 일반적으로는`EXPECT_*` 계열이 선호되는데 왜냐하면 어떤 Test에서 여러개의 failure가 발생한다고 가정하면 한 번의 실행만으로도 모든 failure를 검출해주기 때문입니다. 물론 failure가 발생했을 때, 계속해서 Test를 진행하는 것이 의미가 없다거나 또는 위험한 상황이라면 `ASSERT_*` 를 사용하는 것이 맞습니다.
 
@@ -168,7 +166,7 @@ TEST(FactorialTest, HandlesPositiveInput) {
 }
 ```
 
-Googletest가 Test Suite 별로 테스트결과를 취합해 주기 때문에 Test Suite에는 논리적으로 관련이 있는 Test들을 모아두는 것이 좋습니다. 위 소스코드도 마찬가지로 `FactorialTest` 라는 Test Suite은 `Factorial()`을 테스트하기 위한 Input을 종류별로 구분해서 여러개의 Test로 나누어 놓았습니다. 좀 더 자세히 보면 `HandlesZeroInput`은 argument로 0을 전달하는 Test이고, `HandlesPositiveInput`는 argument로 0보다 큰 양수들을 전달합니다. 크게 보면 2개의 Test 모두 숫자를 전달해서 `Factorial()`을 검증한다는 공통적인 주제로 묶을 수 있는 것입니다.
+googletest가 Test Suite 별로 테스트결과를 취합해 주기 때문에 Test Suite에는 논리적으로 관련이 있는 Test들을 모아두는 것이 좋습니다. 위 소스코드도 마찬가지로 `FactorialTest` 라는 Test Suite은 `Factorial()`을 테스트하기 위한 Input을 종류별로 구분해서 여러개의 Test로 나누어 놓았습니다. 좀 더 자세히 보면 `HandlesZeroInput`은 argument로 0을 전달하는 Test이고, `HandlesPositiveInput`는 argument로 0보다 큰 양수들을 전달합니다. 크게 보면 2개의 Test 모두 숫자를 전달해서 `Factorial()`을 검증한다는 공통적인 주제로 묶을 수 있는 것입니다.
 
 Test Suite과 Test의 이름을 만들때는 관련 규범인 [naming functions and classes](https://google.github.io/styleguide/cppguide.html#Function_Names)를 준수해야 합니다.
 
@@ -200,7 +198,7 @@ TEST_F(TestFixtureName, TestName) {
 
 또한, `TEST_F()`를 사용하기 전에 fixture 클래스를 먼저 정의해야 하는 것은 당연합니다. 그렇지 않으면  "`virtual outside class declaration`"과 같은 compile error가 발생합니다.
 
-Googletest는 `TEST_F()`로 정의된 각 Test가 실행될 때마다 해당 test fixture class의 object를 새롭게 생성합니다. 그런 후에 `SetUp()`을 통해 실행을 위한 준비작업을 하고 Test를 실행합니다. 이제 실행이 끝나면 `TearDown()`을 통해 정리작업을 하며 마지막으로 test fixture object를 삭제합니다. 이렇게 여러 Test들이 같은 Test Suite에 에 속해있다고 하더라도 별도의 test fixture object를 통해 독립적으로 수행됩니다. Googletest는 새로운 test fixture object를 생성하기 전에 항상 이전에 사용하던 object를 삭제하기 때문에 이전 Test에서 fixture를 변경시켰다고 해서 다음 fixture에 영향을 주지 않습니다.
+googletest는 `TEST_F()`로 정의된 각 Test가 실행될 때마다 해당 test fixture class의 object를 새롭게 생성합니다. 그런 후에 `SetUp()`을 통해 실행을 위한 준비작업을 하고 Test를 실행합니다. 이제 실행이 끝나면 `TearDown()`을 통해 정리작업을 하며 마지막으로 test fixture object를 삭제합니다. 이렇게 여러 Test들이 같은 Test Suite에 에 속해있다고 하더라도 별도의 test fixture object를 통해 독립적으로 수행됩니다. googletest는 새로운 test fixture object를 생성하기 전에 항상 이전에 사용하던 object를 삭제하기 때문에 이전 Test에서 fixture를 변경시켰다고 해서 다음 fixture에 영향을 주지 않습니다.
 
 그럼 이제 `Queue`라는 class를 위한 Test를 한 번 구현해 보겠습니다. 먼저 `Queue` class는 아래와 같습니다.
 
@@ -294,9 +292,9 @@ Test program을 구현한 후 `main()` function에서 `RUN_ALL_TESTS()`만 호�
 
 주의할 점은 어떤 Test를 진행하다가 fatal failure가 발생했다면 그 다음 단계들은 수행하지 않고 다음 Test로 넘어간다는 점입니다.
 
-> IMPORTANT: `RUN_ALL_TESTS()`는 `main()`의 맨 끝에서 호출되고 또 반환되어야만 합니다. 그렇지 않으면 compile error가 발생합니다. Googletest가 이렇게 설계된 이유는 자동화된 testing service 환경에서 test program의 성공여부를 stdout/stderr이 아닌 exit code를 통해서 자동으로 확인할 수 있도록 하기 위함입니다. 이를 위해서 `main()`은 반드시 `RUN_ALL_TESTS()`를 반환해야 합니다.
+> IMPORTANT: `RUN_ALL_TESTS()`는 `main()`의 맨 끝에서 호출되고 또 반환되어야만 합니다. 그렇지 않으면 compile error가 발생합니다. googletest가 이렇게 설계된 이유는 자동화된 testing service 환경에서 test program의 성공여부를 stdout/stderr이 아닌 exit code를 통해서 자동으로 확인할 수 있도록 하기 위함입니다. 이를 위해서 `main()`은 반드시 `RUN_ALL_TESTS()`를 반환해야 합니다.
 > 
-> 또한, `RUN_ALL_TESTS()`는 딱 한 번만 호출되어야 합니다. 이 function을 두 번 이상 호출하게 되면 몇몇 advanced googletest features(예: thread-safe [death tests](advanced.md#death-tests))와의 출동이 발생하기 때문에 지원하지 않고 있습니다.
+> 또한, `RUN_ALL_TESTS()`는 딱 한 번만 호출되어야 합니다. 이 function을 두 번 이상 호출하게 되면 몇몇 advanced googletest features(예: thread-safe [death tests](http://collab.lge.com/main/display/SEETVTEST/Google+Test%3A+Advanced#DeathTests))와의 출동이 발생하기 때문에 지원하지 않고 있습니다.
 
 **Availability**: Linux, Windows, Mac.
 
@@ -373,4 +371,4 @@ NOTE: 예전에 사용하던 `ParseGUnitFlags()`는 `InitGoogleTest()`으로 대
 
 ## Known Limitations
 
-* Googletest는 thread-safe하게 설계되었습니다. 다만, 이러한 설계는 `pthreads` library를 사용할 수 있는 시스템에만 해당됩니다. 예를 들어 Windows 환경에서 2개의 thread를 생성하고 각각의 thread에서 googletest assertion을 동시에 사용한다면 문제가 발생할 수 있습니다. 물론 아주 예외적인 경우를 제외하고는 대부분 main thread에서 assertion을 수행하기 때문에 괜찮을 것입니다. 사용자의 환경에 맞는 동기화를 직접 구현하려 한다면 `gtest-port.h` 파일을 사용하시기 바랍니다.
+* googletest는 thread-safe하게 설계되었습니다. 다만, 이러한 설계는 `pthreads` library를 사용할 수 있는 시스템에만 해당됩니다. 예를 들어 Windows 환경에서 2개의 thread를 생성하고 각각의 thread에서 googletest assertion을 동시에 사용한다면 문제가 발생할 수 있습니다. 물론 아주 예외적인 경우를 제외하고는 대부분 main thread에서 assertion을 수행하기 때문에 괜찮을 것입니다. 사용자의 환경에 맞는 동기화를 직접 구현하려 한다면 `gtest-port.h` 파일을 사용하시기 바랍니다.
