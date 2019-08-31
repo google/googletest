@@ -111,11 +111,14 @@
 #include "gtest/internal/gtest-internal.h"
 #include "gtest/internal/gtest-port.h"
 
-#if GTEST_HAS_ABSL
+#if __cplusplus >= 201703L
+#include <optional>
+#include <variant>
+#elif GTEST_HAS_ABSL
 #include "absl/strings/string_view.h"
 #include "absl/types/optional.h"
 #include "absl/types/variant.h"
-#endif  // GTEST_HAS_ABSL
+#endif  // __cplusplus >= 201703L
 
 namespace testing {
 
@@ -682,14 +685,30 @@ class UniversalPrinter {
   GTEST_DISABLE_MSC_WARNINGS_POP_()
 };
 
-#if GTEST_HAS_ABSL
-
-// Printer for absl::optional
+#if GTEST_HAS_ABSL || __cplusplus >= 201703L
 
 template <typename T>
-class UniversalPrinter<::absl::optional<T>> {
+using optional =
+#if __cplusplus >= 201703L
+    std::optional<T>;
+#elif GTEST_HAS_ABSL
+    absl::optional<T>;
+#endif  // __cplusplus >= 201703L
+
+template <typename... Ts>
+using variant =
+#if __cplusplus >= 201703L
+    std::variant<Ts...>;
+#elif GTEST_HAS_ABSL
+    absl::variant<Ts...>;
+#endif  // __cplusplus >= 201703L
+
+// Printer for std::optional / absl::optional
+
+template <typename T>
+class UniversalPrinter<optional<T>> {
  public:
-  static void Print(const ::absl::optional<T>& value, ::std::ostream* os) {
+  static void Print(const optional<T>& value, ::std::ostream* os) {
     *os << '(';
     if (!value) {
       *os << "nullopt";
@@ -700,14 +719,18 @@ class UniversalPrinter<::absl::optional<T>> {
   }
 };
 
-// Printer for absl::variant
+// Printer for std::variant / absl::variant
 
 template <typename... T>
-class UniversalPrinter<::absl::variant<T...>> {
+class UniversalPrinter<variant<T...>> {
  public:
-  static void Print(const ::absl::variant<T...>& value, ::std::ostream* os) {
+  static void Print(const variant<T...>& value, ::std::ostream* os) {
     *os << '(';
+#if __cplusplus >= 201703L
+    std::visit(Visitor{os}, value);
+#elif GTEST_HAS_ABSL
     absl::visit(Visitor{os}, value);
+#endif  // __cplusplus >= 201703L
     *os << ')';
   }
 
@@ -722,7 +745,7 @@ class UniversalPrinter<::absl::variant<T...>> {
   };
 };
 
-#endif  // GTEST_HAS_ABSL
+#endif  // GTEST_HAS_ABSL || __cplusplus >= 201703L
 
 // UniversalPrintArray(begin, len, os) prints an array of 'len'
 // elements, starting at address 'begin'.

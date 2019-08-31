@@ -1530,15 +1530,16 @@ TEST(UniversalTersePrintTupleFieldsToStringsTestWithStd, PrintsTersely) {
   EXPECT_EQ("\"a\"", result[1]);
 }
 
-#if GTEST_HAS_ABSL
+#if GTEST_HAS_ABSL || __cplusplus >= 201703L
 
 TEST(PrintOptionalTest, Basic) {
-  absl::optional<int> value;
+  using ::testing::internal::optional;
+  optional<int> value;
   EXPECT_EQ("(nullopt)", PrintToString(value));
   value = {7};
   EXPECT_EQ("(7)", PrintToString(value));
-  EXPECT_EQ("(1.1)", PrintToString(absl::optional<double>{1.1}));
-  EXPECT_EQ("(\"A\")", PrintToString(absl::optional<std::string>{"A"}));
+  EXPECT_EQ("(1.1)", PrintToString(optional<double>{1.1}));
+  EXPECT_EQ("(\"A\")", PrintToString(optional<std::string>{"A"}));
 }
 
 struct NonPrintable {
@@ -1546,7 +1547,8 @@ struct NonPrintable {
 };
 
 TEST(PrintOneofTest, Basic) {
-  using Type = absl::variant<int, StreamableInGlobal, NonPrintable>;
+  using Type =
+      ::testing::internal::variant<int, StreamableInGlobal, NonPrintable>;
   EXPECT_EQ("('int' with value 7)", PrintToString(Type(7)));
   EXPECT_EQ("('StreamableInGlobal' with value StreamableInGlobal)",
             PrintToString(Type(StreamableInGlobal{})));
@@ -1555,7 +1557,7 @@ TEST(PrintOneofTest, Basic) {
       "<11>)",
       PrintToString(Type(NonPrintable{})));
 }
-#endif  // GTEST_HAS_ABSL
+#endif  // GTEST_HAS_ABSL || __cplusplus >= 201703L
 namespace {
 class string_ref;
 
