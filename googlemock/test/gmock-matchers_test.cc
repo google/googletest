@@ -347,43 +347,49 @@ TEST(StringMatcherTest, CanBeImplicitlyConstructedFromString) {
   EXPECT_FALSE(m2.Matches("hello"));
 }
 
-#if GTEST_HAS_ABSL
+#if GTEST_HAS_CPP17_TYPES
 // Tests that a C-string literal can be implicitly converted to a
-// Matcher<absl::string_view> or Matcher<const absl::string_view&>.
+// Matcher<std::string_view / absl::string_view> or
+// Matcher<const std::string_view& / const absl::string_view&>.
 TEST(StringViewMatcherTest, CanBeImplicitlyConstructedFromCStringLiteral) {
-  Matcher<absl::string_view> m1 = "cats";
+  using ::testing::internal::string_view;
+  Matcher<string_view> m1 = "cats";
   EXPECT_TRUE(m1.Matches("cats"));
   EXPECT_FALSE(m1.Matches("dogs"));
 
-  Matcher<const absl::string_view&> m2 = "cats";
+  Matcher<const string_view&> m2 = "cats";
   EXPECT_TRUE(m2.Matches("cats"));
   EXPECT_FALSE(m2.Matches("dogs"));
 }
 
 // Tests that a std::string object can be implicitly converted to a
-// Matcher<absl::string_view> or Matcher<const absl::string_view&>.
+// Matcher<std::string_view / absl::string_view> or
+// Matcher<const std::string_view& / const absl::string_view&>.
 TEST(StringViewMatcherTest, CanBeImplicitlyConstructedFromString) {
-  Matcher<absl::string_view> m1 = std::string("cats");
+  using ::testing::internal::string_view;
+  Matcher<string_view> m1 = std::string("cats");
   EXPECT_TRUE(m1.Matches("cats"));
   EXPECT_FALSE(m1.Matches("dogs"));
 
-  Matcher<const absl::string_view&> m2 = std::string("cats");
+  Matcher<const string_view&> m2 = std::string("cats");
   EXPECT_TRUE(m2.Matches("cats"));
   EXPECT_FALSE(m2.Matches("dogs"));
 }
 
-// Tests that a absl::string_view object can be implicitly converted to a
-// Matcher<absl::string_view> or Matcher<const absl::string_view&>.
+// Tests that a std::string_view / absl::string_view object can be
+// implicitly converted to a Matcher<std::string_view / absl::string_view>
+// or Matcher<const std::string_view& / const absl::string_view&>.
 TEST(StringViewMatcherTest, CanBeImplicitlyConstructedFromStringView) {
-  Matcher<absl::string_view> m1 = absl::string_view("cats");
+  using ::testing::internal::string_view;
+  Matcher<string_view> m1 = string_view("cats");
   EXPECT_TRUE(m1.Matches("cats"));
   EXPECT_FALSE(m1.Matches("dogs"));
 
-  Matcher<const absl::string_view&> m2 = absl::string_view("cats");
+  Matcher<const string_view&> m2 = string_view("cats");
   EXPECT_TRUE(m2.Matches("cats"));
   EXPECT_FALSE(m2.Matches("dogs"));
 }
-#endif  // GTEST_HAS_ABSL
+#endif  // GTEST_HAS_CPP17_TYPES
 
 // Tests that a std::reference_wrapper<std::string> object can be implicitly
 // converted to a Matcher<std::string> or Matcher<const std::string&> via Eq().
@@ -1232,17 +1238,18 @@ TEST(StrEqTest, MatchesEqualString) {
   EXPECT_TRUE(m2.Matches("Hello"));
   EXPECT_FALSE(m2.Matches("Hi"));
 
-#if GTEST_HAS_ABSL
-  Matcher<const absl::string_view&> m3 = StrEq("Hello");
-  EXPECT_TRUE(m3.Matches(absl::string_view("Hello")));
-  EXPECT_FALSE(m3.Matches(absl::string_view("hello")));
-  EXPECT_FALSE(m3.Matches(absl::string_view()));
+#if GTEST_HAS_CPP17_TYPES
+  using ::testing::internal::string_view;
+  Matcher<const string_view&> m3 = StrEq("Hello");
+  EXPECT_TRUE(m3.Matches(string_view("Hello")));
+  EXPECT_FALSE(m3.Matches(string_view("hello")));
+  EXPECT_FALSE(m3.Matches(string_view()));
 
-  Matcher<const absl::string_view&> m_empty = StrEq("");
-  EXPECT_TRUE(m_empty.Matches(absl::string_view("")));
-  EXPECT_TRUE(m_empty.Matches(absl::string_view()));
-  EXPECT_FALSE(m_empty.Matches(absl::string_view("hello")));
-#endif  // GTEST_HAS_ABSL
+  Matcher<const string_view&> m_empty = StrEq("");
+  EXPECT_TRUE(m_empty.Matches(string_view("")));
+  EXPECT_TRUE(m_empty.Matches(string_view()));
+  EXPECT_FALSE(m_empty.Matches(string_view("hello")));
+#endif  // GTEST_HAS_CPP17_TYPES
 }
 
 TEST(StrEqTest, CanDescribeSelf) {
@@ -1269,12 +1276,13 @@ TEST(StrNeTest, MatchesUnequalString) {
   EXPECT_TRUE(m2.Matches("hello"));
   EXPECT_FALSE(m2.Matches("Hello"));
 
-#if GTEST_HAS_ABSL
-  Matcher<const absl::string_view> m3 = StrNe("Hello");
-  EXPECT_TRUE(m3.Matches(absl::string_view("")));
-  EXPECT_TRUE(m3.Matches(absl::string_view()));
-  EXPECT_FALSE(m3.Matches(absl::string_view("Hello")));
-#endif  // GTEST_HAS_ABSL
+#if GTEST_HAS_CPP17_TYPES
+  using ::testing::internal::string_view;
+  Matcher<string_view> m3 = StrNe("Hello");
+  EXPECT_TRUE(m3.Matches(string_view("")));
+  EXPECT_TRUE(m3.Matches(string_view()));
+  EXPECT_FALSE(m3.Matches(string_view("Hello")));
+#endif  // GTEST_HAS_CPP17_TYPES
 }
 
 TEST(StrNeTest, CanDescribeSelf) {
@@ -1293,13 +1301,14 @@ TEST(StrCaseEqTest, MatchesEqualStringIgnoringCase) {
   EXPECT_TRUE(m2.Matches("hello"));
   EXPECT_FALSE(m2.Matches("Hi"));
 
-#if GTEST_HAS_ABSL
-  Matcher<const absl::string_view&> m3 = StrCaseEq(std::string("Hello"));
-  EXPECT_TRUE(m3.Matches(absl::string_view("Hello")));
-  EXPECT_TRUE(m3.Matches(absl::string_view("hello")));
-  EXPECT_FALSE(m3.Matches(absl::string_view("Hi")));
-  EXPECT_FALSE(m3.Matches(absl::string_view()));
-#endif  // GTEST_HAS_ABSL
+#if GTEST_HAS_CPP17_TYPES
+  using ::testing::internal::string_view;
+  Matcher<const string_view&> m3 = StrCaseEq(std::string("Hello"));
+  EXPECT_TRUE(m3.Matches(string_view("Hello")));
+  EXPECT_TRUE(m3.Matches(string_view("hello")));
+  EXPECT_FALSE(m3.Matches(string_view("Hi")));
+  EXPECT_FALSE(m3.Matches(string_view()));
+#endif  // GTEST_HAS_CPP17_TYPES
 }
 
 TEST(StrCaseEqTest, MatchesEqualStringWith0IgnoringCase) {
@@ -1343,13 +1352,14 @@ TEST(StrCaseNeTest, MatchesUnequalStringIgnoringCase) {
   EXPECT_TRUE(m2.Matches(""));
   EXPECT_FALSE(m2.Matches("Hello"));
 
-#if GTEST_HAS_ABSL
-  Matcher<const absl::string_view> m3 = StrCaseNe("Hello");
-  EXPECT_TRUE(m3.Matches(absl::string_view("Hi")));
-  EXPECT_TRUE(m3.Matches(absl::string_view()));
-  EXPECT_FALSE(m3.Matches(absl::string_view("Hello")));
-  EXPECT_FALSE(m3.Matches(absl::string_view("hello")));
-#endif  // GTEST_HAS_ABSL
+#if GTEST_HAS_CPP17_TYPES
+  using ::testing::internal::string_view;
+  Matcher<string_view> m3 = StrCaseNe("Hello");
+  EXPECT_TRUE(m3.Matches(string_view("Hi")));
+  EXPECT_TRUE(m3.Matches(string_view()));
+  EXPECT_FALSE(m3.Matches(string_view("Hello")));
+  EXPECT_FALSE(m3.Matches(string_view("hello")));
+#endif  // GTEST_HAS_CPP17_TYPES
 }
 
 TEST(StrCaseNeTest, CanDescribeSelf) {
@@ -1390,25 +1400,27 @@ TEST(HasSubstrTest, WorksForCStrings) {
   EXPECT_FALSE(m_empty.Matches(nullptr));
 }
 
-#if GTEST_HAS_ABSL
-// Tests that HasSubstr() works for matching absl::string_view-typed values.
+#if GTEST_HAS_CPP17_TYPES
+// Tests that HasSubstr() works for matching
+// std::string_view / absl::string_view -typed values.
 TEST(HasSubstrTest, WorksForStringViewClasses) {
-  const Matcher<absl::string_view> m1 = HasSubstr("foo");
-  EXPECT_TRUE(m1.Matches(absl::string_view("I love food.")));
-  EXPECT_FALSE(m1.Matches(absl::string_view("tofo")));
-  EXPECT_FALSE(m1.Matches(absl::string_view()));
+  using ::testing::internal::string_view;
+  const Matcher<string_view> m1 = HasSubstr("foo");
+  EXPECT_TRUE(m1.Matches(string_view("I love food.")));
+  EXPECT_FALSE(m1.Matches(string_view("tofo")));
+  EXPECT_FALSE(m1.Matches(string_view()));
 
-  const Matcher<const absl::string_view&> m2 = HasSubstr("foo");
-  EXPECT_TRUE(m2.Matches(absl::string_view("I love food.")));
-  EXPECT_FALSE(m2.Matches(absl::string_view("tofo")));
-  EXPECT_FALSE(m2.Matches(absl::string_view()));
+  const Matcher<const string_view&> m2 = HasSubstr("foo");
+  EXPECT_TRUE(m2.Matches(string_view("I love food.")));
+  EXPECT_FALSE(m2.Matches(string_view("tofo")));
+  EXPECT_FALSE(m2.Matches(string_view()));
 
-  const Matcher<const absl::string_view&> m3 = HasSubstr("");
-  EXPECT_TRUE(m3.Matches(absl::string_view("foo")));
-  EXPECT_TRUE(m3.Matches(absl::string_view("")));
-  EXPECT_TRUE(m3.Matches(absl::string_view()));
+  const Matcher<const string_view&> m3 = HasSubstr("");
+  EXPECT_TRUE(m3.Matches(string_view("foo")));
+  EXPECT_TRUE(m3.Matches(string_view("")));
+  EXPECT_TRUE(m3.Matches(string_view()));
 }
-#endif  // GTEST_HAS_ABSL
+#endif  // GTEST_HAS_CPP17_TYPES
 
 // Tests that HasSubstr(s) describes itself properly.
 TEST(HasSubstrTest, CanDescribeSelf) {
@@ -1645,12 +1657,13 @@ TEST(StartsWithTest, MatchesStringWithGivenPrefix) {
   EXPECT_FALSE(m2.Matches("H"));
   EXPECT_FALSE(m2.Matches(" Hi"));
 
-#if GTEST_HAS_ABSL
-  const Matcher<absl::string_view> m_empty = StartsWith("");
-  EXPECT_TRUE(m_empty.Matches(absl::string_view()));
-  EXPECT_TRUE(m_empty.Matches(absl::string_view("")));
-  EXPECT_TRUE(m_empty.Matches(absl::string_view("not empty")));
-#endif  // GTEST_HAS_ABSL
+#if GTEST_HAS_CPP17_TYPES
+  using ::testing::internal::string_view;
+  const Matcher<string_view> m_empty = StartsWith("");
+  EXPECT_TRUE(m_empty.Matches(string_view()));
+  EXPECT_TRUE(m_empty.Matches(string_view("")));
+  EXPECT_TRUE(m_empty.Matches(string_view("not empty")));
+#endif  // GTEST_HAS_CPP17_TYPES
 }
 
 TEST(StartsWithTest, CanDescribeSelf) {
@@ -1673,13 +1686,14 @@ TEST(EndsWithTest, MatchesStringWithGivenSuffix) {
   EXPECT_FALSE(m2.Matches("i"));
   EXPECT_FALSE(m2.Matches("Hi "));
 
-#if GTEST_HAS_ABSL
-  const Matcher<const absl::string_view&> m4 = EndsWith("");
+#if GTEST_HAS_CPP17_TYPES
+  using ::testing::internal::string_view;
+  const Matcher<const string_view&> m4 = EndsWith("");
   EXPECT_TRUE(m4.Matches("Hi"));
   EXPECT_TRUE(m4.Matches(""));
-  EXPECT_TRUE(m4.Matches(absl::string_view()));
-  EXPECT_TRUE(m4.Matches(absl::string_view("")));
-#endif  // GTEST_HAS_ABSL
+  EXPECT_TRUE(m4.Matches(string_view()));
+  EXPECT_TRUE(m4.Matches(string_view("")));
+#endif  // GTEST_HAS_CPP17_TYPES
 }
 
 TEST(EndsWithTest, CanDescribeSelf) {
@@ -1700,16 +1714,17 @@ TEST(MatchesRegexTest, MatchesStringMatchingGivenRegex) {
   EXPECT_FALSE(m2.Matches("az1"));
   EXPECT_FALSE(m2.Matches("1az"));
 
-#if GTEST_HAS_ABSL
-  const Matcher<const absl::string_view&> m3 = MatchesRegex("a.*z");
-  EXPECT_TRUE(m3.Matches(absl::string_view("az")));
-  EXPECT_TRUE(m3.Matches(absl::string_view("abcz")));
-  EXPECT_FALSE(m3.Matches(absl::string_view("1az")));
-  EXPECT_FALSE(m3.Matches(absl::string_view()));
-  const Matcher<const absl::string_view&> m4 = MatchesRegex("");
-  EXPECT_TRUE(m4.Matches(absl::string_view("")));
-  EXPECT_TRUE(m4.Matches(absl::string_view()));
-#endif  // GTEST_HAS_ABSL
+#if GTEST_HAS_CPP17_TYPES
+  using ::testing::internal::string_view;
+  const Matcher<const string_view&> m3 = MatchesRegex("a.*z");
+  EXPECT_TRUE(m3.Matches(string_view("az")));
+  EXPECT_TRUE(m3.Matches(string_view("abcz")));
+  EXPECT_FALSE(m3.Matches(string_view("1az")));
+  EXPECT_FALSE(m3.Matches(string_view()));
+  const Matcher<const string_view&> m4 = MatchesRegex("");
+  EXPECT_TRUE(m4.Matches(string_view("")));
+  EXPECT_TRUE(m4.Matches(string_view()));
+#endif  // GTEST_HAS_CPP17_TYPES
 }
 
 TEST(MatchesRegexTest, CanDescribeSelf) {
@@ -1719,10 +1734,11 @@ TEST(MatchesRegexTest, CanDescribeSelf) {
   Matcher<const char*> m2 = MatchesRegex(new RE("a.*"));
   EXPECT_EQ("matches regular expression \"a.*\"", Describe(m2));
 
-#if GTEST_HAS_ABSL
-  Matcher<const absl::string_view> m3 = MatchesRegex(new RE("0.*"));
+#if GTEST_HAS_CPP17_TYPES
+  Matcher<const ::testing::internal::string_view> m3 =
+      MatchesRegex(new RE("0.*"));
   EXPECT_EQ("matches regular expression \"0.*\"", Describe(m3));
-#endif  // GTEST_HAS_ABSL
+#endif  // GTEST_HAS_CPP17_TYPES
 }
 
 // Tests ContainsRegex().
@@ -1738,16 +1754,17 @@ TEST(ContainsRegexTest, MatchesStringContainingGivenRegex) {
   EXPECT_TRUE(m2.Matches("az1"));
   EXPECT_FALSE(m2.Matches("1a"));
 
-#if GTEST_HAS_ABSL
-  const Matcher<const absl::string_view&> m3 = ContainsRegex(new RE("a.*z"));
-  EXPECT_TRUE(m3.Matches(absl::string_view("azbz")));
-  EXPECT_TRUE(m3.Matches(absl::string_view("az1")));
-  EXPECT_FALSE(m3.Matches(absl::string_view("1a")));
-  EXPECT_FALSE(m3.Matches(absl::string_view()));
-  const Matcher<const absl::string_view&> m4 = ContainsRegex("");
-  EXPECT_TRUE(m4.Matches(absl::string_view("")));
-  EXPECT_TRUE(m4.Matches(absl::string_view()));
-#endif  // GTEST_HAS_ABSL
+#if GTEST_HAS_CPP17_TYPES
+  using ::testing::internal::string_view;
+  const Matcher<const string_view&> m3 = ContainsRegex(new RE("a.*z"));
+  EXPECT_TRUE(m3.Matches(string_view("azbz")));
+  EXPECT_TRUE(m3.Matches(string_view("az1")));
+  EXPECT_FALSE(m3.Matches(string_view("1a")));
+  EXPECT_FALSE(m3.Matches(string_view()));
+  const Matcher<const string_view&> m4 = ContainsRegex("");
+  EXPECT_TRUE(m4.Matches(string_view("")));
+  EXPECT_TRUE(m4.Matches(string_view()));
+#endif  // GTEST_HAS_CPP17_TYPES
 }
 
 TEST(ContainsRegexTest, CanDescribeSelf) {
@@ -1757,10 +1774,11 @@ TEST(ContainsRegexTest, CanDescribeSelf) {
   Matcher<const char*> m2 = ContainsRegex(new RE("a.*"));
   EXPECT_EQ("contains regular expression \"a.*\"", Describe(m2));
 
-#if GTEST_HAS_ABSL
-  Matcher<const absl::string_view> m3 = ContainsRegex(new RE("0.*"));
+#if GTEST_HAS_CPP17_TYPES
+  Matcher<const ::testing::internal::string_view> m3 =
+      ContainsRegex(new RE("0.*"));
   EXPECT_EQ("contains regular expression \"0.*\"", Describe(m3));
-#endif  // GTEST_HAS_ABSL
+#endif  // GTEST_HAS_CPP17_TYPES
 }
 
 // Tests for wide strings.

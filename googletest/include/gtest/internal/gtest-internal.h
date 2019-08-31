@@ -66,6 +66,17 @@
 #include "gtest/internal/gtest-string.h"
 #include "gtest/internal/gtest-type-util.h"
 
+#if __cplusplus >= 201703L
+#include <any>
+#include <optional>
+#include <variant>
+#elif GTEST_HAS_ABSL
+#include "absl/strings/string_view.h"
+#include "absl/types/any.h"
+#include "absl/types/optional.h"
+#include "absl/types/variant.h"
+#endif  // __cplusplus >= 201703L
+
 // Due to C++ preprocessor weirdness, we need double indirection to
 // concatenate two tokens when one of them is __LINE__.  Writing
 //
@@ -1252,6 +1263,46 @@ GTEST_INTERNAL_DEPRECATED(
     "INSTANTIATE_TYPED_TEST_CASE_P is deprecated, please use "
     "INSTANTIATE_TYPED_TEST_SUITE_P")
 constexpr bool InstantiateTypedTestCase_P_IsDeprecated() { return true; }
+
+#ifdef GTEST_HAS_CPP17_TYPES
+#error GTEST_HAS_CPP17_TYPES cannot be directly set
+#elif GTEST_HAS_ABSL || __cplusplus >= 201703L
+#define GTEST_HAS_CPP17_TYPES 1
+#endif  // GTEST_HAS_CPP17_TYPES
+
+#if GTEST_HAS_CPP17_TYPES
+
+using any =
+#if __cplusplus >= 201703L
+    std::any;
+#elif GTEST_HAS_ABSL
+    absl::any;
+#endif  // __cplusplus >= 201703L
+
+template <typename T>
+using optional =
+#if __cplusplus >= 201703L
+    std::optional<T>;
+#elif GTEST_HAS_ABSL
+    absl::optional<T>;
+#endif  // __cplusplus >= 201703L
+
+using string_view =
+#if __cplusplus >= 201703L
+    std::string_view;
+#elif GTEST_HAS_ABSL
+    absl::string_view;
+#endif  // __cplusplus >= 201703L
+
+template <typename... Ts>
+using variant =
+#if __cplusplus >= 201703L
+    std::variant<Ts...>;
+#elif GTEST_HAS_ABSL
+    absl::variant<Ts...>;
+#endif  // __cplusplus >= 201703L
+
+#endif  // GTEST_HAS_CPP17_TYPES
 
 }  // namespace internal
 }  // namespace testing

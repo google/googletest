@@ -659,16 +659,15 @@ class StrEqualityMatcher {
   StrEqualityMatcher(const StringType& str, bool expect_eq,
                      bool case_sensitive)
       : string_(str), expect_eq_(expect_eq), case_sensitive_(case_sensitive) {}
-
-#if GTEST_HAS_ABSL
-  bool MatchAndExplain(const absl::string_view& s,
+#if GTEST_HAS_CPP17_TYPES
+  bool MatchAndExplain(const string_view& s,
                        MatchResultListener* listener) const {
-    // This should fail to compile if absl::string_view is used with wide
-    // strings.
+    // This should fail to compile if std::string_view / absl::string_view
+    // is used with wide strings.
     const StringType& str = std::string(s);
     return MatchAndExplain(str, listener);
   }
-#endif  // GTEST_HAS_ABSL
+#endif  // GTEST_HAS_CPP17_TYPES
 
   // Accepts pointer types, particularly:
   //   const char*
@@ -685,8 +684,9 @@ class StrEqualityMatcher {
 
   // Matches anything that can convert to StringType.
   //
-  // This is a template, not just a plain function with const StringType&,
-  // because absl::string_view has some interfering non-explicit constructors.
+  // This is a template, not just a plain function with const std::string&,
+  // because std::string_view and absl::string_view have some interfering
+  // non-explicit constructors.
   template <typename MatcheeStringType>
   bool MatchAndExplain(const MatcheeStringType& s,
                        MatchResultListener* /* listener */) const {
@@ -730,15 +730,15 @@ class HasSubstrMatcher {
   explicit HasSubstrMatcher(const StringType& substring)
       : substring_(substring) {}
 
-#if GTEST_HAS_ABSL
-  bool MatchAndExplain(const absl::string_view& s,
+#if GTEST_HAS_CPP17_TYPES
+  bool MatchAndExplain(const string_view& s,
                        MatchResultListener* listener) const {
-    // This should fail to compile if absl::string_view is used with wide
-    // strings.
+    // This should fail to compile if std::string_view / absl::string_view
+    // is used with wide strings.
     const StringType& str = std::string(s);
     return MatchAndExplain(str, listener);
   }
-#endif  // GTEST_HAS_ABSL
+#endif  // GTEST_HAS_CPP17_TYPES
 
   // Accepts pointer types, particularly:
   //   const char*
@@ -752,8 +752,9 @@ class HasSubstrMatcher {
 
   // Matches anything that can convert to StringType.
   //
-  // This is a template, not just a plain function with const StringType&,
-  // because absl::string_view has some interfering non-explicit constructors.
+  // This is a template, not just a plain function with const std::string&,
+  // because std::string_view and absl::string_view have some interfering
+  // non-explicit constructors.
   template <typename MatcheeStringType>
   bool MatchAndExplain(const MatcheeStringType& s,
                        MatchResultListener* /* listener */) const {
@@ -787,15 +788,15 @@ class StartsWithMatcher {
   explicit StartsWithMatcher(const StringType& prefix) : prefix_(prefix) {
   }
 
-#if GTEST_HAS_ABSL
-  bool MatchAndExplain(const absl::string_view& s,
+#if GTEST_HAS_CPP17_TYPES
+  bool MatchAndExplain(const string_view& s,
                        MatchResultListener* listener) const {
-    // This should fail to compile if absl::string_view is used with wide
-    // strings.
+    // This should fail to compile if std::string_view / absl::string_view
+    // is used with wide strings.
     const StringType& str = std::string(s);
     return MatchAndExplain(str, listener);
   }
-#endif  // GTEST_HAS_ABSL
+#endif  // GTEST_HAS_CPP17_TYPES
 
   // Accepts pointer types, particularly:
   //   const char*
@@ -809,8 +810,9 @@ class StartsWithMatcher {
 
   // Matches anything that can convert to StringType.
   //
-  // This is a template, not just a plain function with const StringType&,
-  // because absl::string_view has some interfering non-explicit constructors.
+  // This is a template, not just a plain function with const std::string&,
+  // because std::string_view and absl::string_view have some interfering
+  // non-explicit constructors.
   template <typename MatcheeStringType>
   bool MatchAndExplain(const MatcheeStringType& s,
                        MatchResultListener* /* listener */) const {
@@ -843,15 +845,15 @@ class EndsWithMatcher {
  public:
   explicit EndsWithMatcher(const StringType& suffix) : suffix_(suffix) {}
 
-#if GTEST_HAS_ABSL
-  bool MatchAndExplain(const absl::string_view& s,
+#if GTEST_HAS_CPP17_TYPES
+  bool MatchAndExplain(const string_view& s,
                        MatchResultListener* listener) const {
-    // This should fail to compile if absl::string_view is used with wide
-    // strings.
+    // This should fail to compile if std::string_view / absl::string_view
+    // is used with wide strings.
     const StringType& str = std::string(s);
     return MatchAndExplain(str, listener);
   }
-#endif  // GTEST_HAS_ABSL
+#endif  // GTEST_HAS_CPP17_TYPES
 
   // Accepts pointer types, particularly:
   //   const char*
@@ -865,8 +867,9 @@ class EndsWithMatcher {
 
   // Matches anything that can convert to StringType.
   //
-  // This is a template, not just a plain function with const StringType&,
-  // because absl::string_view has some interfering non-explicit constructors.
+  // This is a template, not just a plain function with const std::string&,
+  // because std::string_view and absl::string_view have some interfering
+  // non-explicit constructors.
   template <typename MatcheeStringType>
   bool MatchAndExplain(const MatcheeStringType& s,
                        MatchResultListener* /* listener */) const {

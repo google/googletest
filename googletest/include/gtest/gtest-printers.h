@@ -111,23 +111,6 @@
 #include "gtest/internal/gtest-internal.h"
 #include "gtest/internal/gtest-port.h"
 
-#if __cplusplus >= 201703L
-#include <any>
-#include <optional>
-#include <variant>
-#elif GTEST_HAS_ABSL
-#include "absl/strings/string_view.h"
-#include "absl/types/any.h"
-#include "absl/types/optional.h"
-#include "absl/types/variant.h"
-#endif  // __cplusplus >= 201703L
-
-#ifdef GTEST_HAS_CPP17_TYPES
-#error GTEST_HAS_CPP17_TYPES cannot be directly set
-#elif GTEST_HAS_ABSL || __cplusplus >= 201703L
-#define GTEST_HAS_CPP17_TYPES 1
-#endif  // GTEST_HAS_CPP17_TYPES
-
 namespace testing {
 
 // Definitions in the 'internal' and 'internal2' name spaces are
@@ -146,10 +129,10 @@ enum TypeKind {
   kProtobuf,              // a protobuf type
   kConvertibleToInteger,  // a type implicitly convertible to BiggestInt
                           // (e.g. a named or unnamed enum type)
-#if GTEST_HAS_ABSL
+#if GTEST_HAS_CPP17_TYPES
   kConvertibleToStringView,  // a type implicitly convertible to
-                             // absl::string_view
-#endif
+                             // std::string_view or absl::string_view
+#endif  // GTEST_HAS_CPP17_TYPES
   kOtherType  // anything else
 };
 
@@ -202,18 +185,19 @@ class TypeWithoutFormatter<T, kConvertibleToInteger> {
   }
 };
 
-#if GTEST_HAS_ABSL
+#if GTEST_HAS_CPP17_TYPES
 template <typename T>
 class TypeWithoutFormatter<T, kConvertibleToStringView> {
  public:
   // Since T has neither operator<< nor PrintTo() but can be implicitly
-  // converted to absl::string_view, we print it as a absl::string_view.
+  // converted to std::string_view / absl::string_view, we print it
+  // as a std::string_view / absl::string_view.
   //
   // Note: the implementation is further below, as it depends on
   // internal::PrintTo symbol which is defined later in the file.
   static void PrintValue(const T& value, ::std::ostream* os);
 };
-#endif
+#endif  // GTEST_HAS_CPP17_TYPES
 
 // Prints the given value to the given ostream.  If the value is a
 // protocol message, its debug string is printed; if it's an enum or
@@ -242,19 +226,18 @@ class TypeWithoutFormatter<T, kConvertibleToStringView> {
 template <typename Char, typename CharTraits, typename T>
 ::std::basic_ostream<Char, CharTraits>& operator<<(
     ::std::basic_ostream<Char, CharTraits>& os, const T& x) {
-  TypeWithoutFormatter<T, (internal::IsAProtocolMessage<T>::value
-                               ? kProtobuf
-                               : std::is_convertible<
-                                     const T&, internal::BiggestInt>::value
-                                     ? kConvertibleToInteger
-                                     :
-#if GTEST_HAS_ABSL
-                                     std::is_convertible<
-                                         const T&, absl::string_view>::value
-                                         ? kConvertibleToStringView
-                                         :
-#endif
-                                         kOtherType)>::PrintValue(x, &os);
+  TypeWithoutFormatter<
+      T, (internal::IsAProtocolMessage<T>::value
+              ? kProtobuf
+              : std::is_convertible<const T&, internal::BiggestInt>::value
+                    ? kConvertibleToInteger
+                    :
+#if GTEST_HAS_CPP17_TYPES
+                    std::is_convertible<const T&, internal::string_view>::value
+                        ? kConvertibleToStringView
+                        :
+#endif  // GTEST_HAS_CPP17_TYPES
+                        kOtherType)>::PrintValue(x, &os);
   return os;
 }
 
@@ -614,12 +597,12 @@ inline void PrintTo(const ::std::wstring& s, ::std::ostream* os) {
 }
 #endif  // GTEST_HAS_STD_WSTRING
 
-#if GTEST_HAS_ABSL
-// Overload for absl::string_view.
-inline void PrintTo(absl::string_view sp, ::std::ostream* os) {
+#if GTEST_HAS_CPP17_TYPES
+// Overload for std::string_view / absl::string_view.
+inline void PrintTo(string_view sp, ::std::ostream* os) {
   PrintTo(::std::string(sp), os);
 }
-#endif  // GTEST_HAS_ABSL
+#endif  // GTEST_HAS_CPP17_TYPES
 
 inline void PrintTo(std::nullptr_t, ::std::ostream* os) { *os << "(nullptr)"; }
 
@@ -694,29 +677,6 @@ class UniversalPrinter {
 };
 
 #if GTEST_HAS_CPP17_TYPES
-
-using any =
-#if __cplusplus >= 201703L
-    std::any;
-#elif GTEST_HAS_ABSL
-    absl::any;
-#endif  // __cplusplus >= 201703L
-
-template <typename T>
-using optional =
-#if __cplusplus >= 201703L
-    std::optional<T>;
-#elif GTEST_HAS_ABSL
-    absl::optional<T>;
-#endif  // __cplusplus >= 201703L
-
-template <typename... Ts>
-using variant =
-#if __cplusplus >= 201703L
-    std::variant<Ts...>;
-#elif GTEST_HAS_ABSL
-    absl::variant<Ts...>;
-#endif  // __cplusplus >= 201703L
 
 // Printer for std::any / absl::any
 
@@ -956,15 +916,15 @@ Strings UniversalTersePrintTupleFieldsToStrings(const Tuple& value) {
 
 }  // namespace internal
 
-#if GTEST_HAS_ABSL
+#if GTEST_HAS_CPP17_TYPES
 namespace internal2 {
 template <typename T>
 void TypeWithoutFormatter<T, kConvertibleToStringView>::PrintValue(
     const T& value, ::std::ostream* os) {
-  internal::PrintTo(absl::string_view(value), os);
+  internal::PrintTo(internal::string_view(value), os);
 }
 }  // namespace internal2
-#endif
+#endif  // GTEST_HAS_CPP17_TYPES
 
 template <typename T>
 ::std::string PrintToString(const T& value) {

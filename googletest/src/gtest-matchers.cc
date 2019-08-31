@@ -58,40 +58,40 @@ Matcher<std::string>::Matcher(const std::string& s) { *this = Eq(s); }
 // s.
 Matcher<std::string>::Matcher(const char* s) { *this = Eq(std::string(s)); }
 
-#if GTEST_HAS_ABSL
-// Constructs a matcher that matches a const absl::string_view& whose value is
-// equal to s.
-Matcher<const absl::string_view&>::Matcher(const std::string& s) {
+#if GTEST_HAS_CPP17_TYPES
+// Constructs a matcher that matches a const std::string_view /
+// const absl::string_view& whose value is equal to s.
+Matcher<const internal::string_view&>::Matcher(const std::string& s) {
   *this = Eq(s);
 }
 
-// Constructs a matcher that matches a const absl::string_view& whose value is
-// equal to s.
-Matcher<const absl::string_view&>::Matcher(const char* s) {
+// Constructs a matcher that matches a const std::string_view /
+// const absl::string_view& whose value is equal to s.
+Matcher<const internal::string_view&>::Matcher(const char* s) {
   *this = Eq(std::string(s));
 }
 
-// Constructs a matcher that matches a const absl::string_view& whose value is
-// equal to s.
-Matcher<const absl::string_view&>::Matcher(absl::string_view s) {
+// Constructs a matcher that matches a const std::string_view& /
+// const absl::string_view& whose value is equal to s.
+Matcher<const internal::string_view&>::Matcher(internal::string_view s) {
   *this = Eq(std::string(s));
 }
 
-// Constructs a matcher that matches a absl::string_view whose value is equal to
-// s.
-Matcher<absl::string_view>::Matcher(const std::string& s) { *this = Eq(s); }
+// Constructs a matcher that matches a std::string_view / absl::string_view
+// whose value is equal to s.
+Matcher<internal::string_view>::Matcher(const std::string& s) { *this = Eq(s); }
 
-// Constructs a matcher that matches a absl::string_view whose value is equal to
-// s.
-Matcher<absl::string_view>::Matcher(const char* s) {
+// Constructs a matcher that matches a std::string_view / absl::string_view
+// whose value is equal to s.
+Matcher<internal::string_view>::Matcher(const char* s) {
   *this = Eq(std::string(s));
 }
 
-// Constructs a matcher that matches a absl::string_view whose value is equal to
-// s.
-Matcher<absl::string_view>::Matcher(absl::string_view s) {
+// Constructs a matcher that matches a std::string_view / absl::string_view
+// whose value is equal to s.
+Matcher<internal::string_view>::Matcher(internal::string_view s) {
   *this = Eq(std::string(s));
 }
-#endif  // GTEST_HAS_ABSL
+#endif  // GTEST_HAS_CPP17_TYPES
 
 }  // namespace testing
