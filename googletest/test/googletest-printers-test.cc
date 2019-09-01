@@ -1532,6 +1532,48 @@ TEST(UniversalTersePrintTupleFieldsToStringsTestWithStd, PrintsTersely) {
 
 #if GTEST_HAS_ABSL || __cplusplus >= 201703L
 
+class PrintAnyTest : public ::testing::Test {
+ protected:
+  void SetUp() override {
+#if __cplusplus >= 201703L
+    any_prefix = "std::any";
+#elif GTEST_HAS_ABSL
+    any_prefix = "absl::any";
+#endif  // __cplusplus >= 201703L
+  }
+  std::string ExpectedTypeName(std::string s) const {
+#if GTEST_HAS_RTTI
+    return any_prefix + " (" + s + ')';
+#else
+    static_cast<void>(s);
+    return any_prefix;
+#endif  // GTEST_HAS_RTTI
+  }
+
+  ::testing::internal::any any;
+  std::string any_prefix;
+};
+
+TEST_F(PrintAnyTest, Empty) {
+  EXPECT_EQ(ExpectedTypeName(::testing::internal::GetTypeName<void>()),
+            PrintToString(any));
+}
+
+TEST_F(PrintAnyTest, NonEmpty) {
+  constexpr int val1 = 10;
+  const std::string val2 = "content";
+
+  any = val1;
+  EXPECT_EQ(
+      ExpectedTypeName(::testing::internal::GetTypeName<decltype(val1)>()),
+      PrintToString(any));
+
+  any = val2;
+  EXPECT_EQ(
+      ExpectedTypeName(::testing::internal::GetTypeName<decltype(val2)>()),
+      PrintToString(any));
+}
+
 TEST(PrintOptionalTest, Basic) {
   using ::testing::internal::optional;
   optional<int> value;

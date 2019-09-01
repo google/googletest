@@ -112,10 +112,12 @@
 #include "gtest/internal/gtest-port.h"
 
 #if __cplusplus >= 201703L
+#include <any>
 #include <optional>
 #include <variant>
 #elif GTEST_HAS_ABSL
 #include "absl/strings/string_view.h"
+#include "absl/types/any.h"
 #include "absl/types/optional.h"
 #include "absl/types/variant.h"
 #endif  // __cplusplus >= 201703L
@@ -687,6 +689,13 @@ class UniversalPrinter {
 
 #if GTEST_HAS_ABSL || __cplusplus >= 201703L
 
+using any =
+#if __cplusplus >= 201703L
+    std::any;
+#elif GTEST_HAS_ABSL
+    absl::any;
+#endif  // __cplusplus >= 201703L
+
 template <typename T>
 using optional =
 #if __cplusplus >= 201703L
@@ -702,6 +711,23 @@ using variant =
 #elif GTEST_HAS_ABSL
     absl::variant<Ts...>;
 #endif  // __cplusplus >= 201703L
+
+// Printer for std::any / absl::any
+
+template <>
+class UniversalPrinter<any> {
+ public:
+  static void Print(const any& value, ::std::ostream* os) {
+#if __cplusplus >= 201703L
+    *os << "std::any";
+#elif GTEST_HAS_ABSL
+    *os << "absl::any";
+#endif  // __cplusplus >= 201703L
+#if GTEST_HAS_RTTI
+    *os << " (" << GetTypeName(value.type()) << ')';
+#endif  // GTEST_HAS_RTTI
+  }
+};
 
 // Printer for std::optional / absl::optional
 
