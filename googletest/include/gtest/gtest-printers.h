@@ -122,6 +122,12 @@
 #include "absl/types/variant.h"
 #endif  // __cplusplus >= 201703L
 
+#ifdef GTEST_HAS_CPP17_TYPES
+#error GTEST_HAS_CPP17_TYPES cannot be directly set
+#elif GTEST_HAS_ABSL || __cplusplus >= 201703L
+#define GTEST_HAS_CPP17_TYPES 1
+#endif  // GTEST_HAS_CPP17_TYPES
+
 namespace testing {
 
 // Definitions in the 'internal' and 'internal2' name spaces are
@@ -687,7 +693,7 @@ class UniversalPrinter {
   GTEST_DISABLE_MSC_WARNINGS_POP_()
 };
 
-#if GTEST_HAS_ABSL || __cplusplus >= 201703L
+#if GTEST_HAS_CPP17_TYPES
 
 using any =
 #if __cplusplus >= 201703L
@@ -771,7 +777,7 @@ class UniversalPrinter<variant<T...>> {
   };
 };
 
-#endif  // GTEST_HAS_ABSL || __cplusplus >= 201703L
+#endif  // GTEST_HAS_CPP17_TYPES
 
 // UniversalPrintArray(begin, len, os) prints an array of 'len'
 // elements, starting at address 'begin'.

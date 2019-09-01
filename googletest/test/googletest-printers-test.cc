@@ -1530,7 +1530,7 @@ TEST(UniversalTersePrintTupleFieldsToStringsTestWithStd, PrintsTersely) {
   EXPECT_EQ("\"a\"", result[1]);
 }
 
-#if GTEST_HAS_ABSL || __cplusplus >= 201703L
+#if GTEST_HAS_CPP17_TYPES
 
 class PrintAnyTest : public ::testing::Test {
  protected:
@@ -1599,7 +1599,7 @@ TEST(PrintOneofTest, Basic) {
       "<11>)",
       PrintToString(Type(NonPrintable{})));
 }
-#endif  // GTEST_HAS_ABSL || __cplusplus >= 201703L
+#endif  // GTEST_HAS_CPP17_TYPES
 namespace {
 class string_ref;
 
