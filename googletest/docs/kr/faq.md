@@ -29,7 +29,7 @@ TEST(Time_Flies, Like_An_Arrow) { ... }
 
 위의 코드는 동일한 이름(`Time_Files_Like_An_Arrow_Test)`을 가진 2개의 Test를 만들려고 하기 때문에 당연히 문제가 됩니다.
 
-언급한 내용들을 유념하여 `TestSuiteName`, `TestName`에는 `_`를 사용하지 않기를 당부합니다. 복잡한 규칙을 기억하는 것보다는 아예 사용하지 않는 것이 편하겠지요. Googletest의 개선여지도 조금 남겨둘 수 있어서 여러모로 좋습니다.
+언급한 내용들을 유념하여 `TestSuiteName`, `TestName`에는 `_`를 사용하지 않기를 당부합니다. 복잡한 규칙을 기억하는 것보다는 아예 사용하지 않는 것이 편하겠지요. googletest의 개선여지도 조금 남겨둘 수 있어서 여러모로 좋습니다.
 
 물론 예외상황을 잘 찾아서 구현하면 지금 당장은 문제없이 동작할 수도 있습니다. 그러나 compiler나 googletest 버전이 변경되면 언젠가는 문제가 발생할지도 모릅니다. 따라서 `_`를 사용하지 않는다는 단순한 규칙을 기억하고 지켜주시기 바랍니다.
 
@@ -109,7 +109,7 @@ Class 바깥에서도 정의를 해줘야 합니다.
 const int Foo::kBar;  // No initializer here.
 ```
 
-**C++**에서 static member variable을 사용할때는 항상 이렇게 해야합니다. 이러한 문법을 지키지 않으면서 googletest 기능을 사용하면 안 됩니다. Googletest 자체도 C++을 사용하기 때문입니다.
+**C++**에서 static member variable을 사용할때는 항상 이렇게 해야합니다. 이러한 문법을 지키지 않으면서 googletest 기능을 사용하면 안 됩니다. googletest 자체도 C++을 사용하기 때문입니다.
 
 ## 다른 test fixture로부터 상속받는 것이 가능한가요?
 
@@ -443,7 +443,7 @@ Googletest singleton은 정적으로 초기화되기 데는데 이 때 heap에�
 
 ## 현재 코드가 test 중임을 어떻게 알 수 있나요?
 
-혹시 테스트가 진행 중인지 확인하는 목적이 제품코드에서 테스트인지 아닌지에 따라 분기하는 코드를 구현하기 위함인가요? 그렇다면 좋은 방법이 아닙니다. 제품코드에 테스트관련 의존성이 생기기 때문입니다. 사소한 실수로 인해서 제품코드에서 테스트코드가 수행되버릴 확률도 높아집니다. [Heisenbugs](https://en.wikipedia.org/wiki/Heisenbug)(100% 재현되는게 아니라 간헐적으로 재현되는 bug)라도 발생하면 많은 시간을 소모하게 될 것입니다. Googletest에서도 그런 방법을 제공하지 않습니다.
+혹시 테스트가 진행 중인지 확인하는 목적이 제품코드에서 테스트인지 아닌지에 따라 분기하는 코드를 구현하기 위함인가요? 그렇다면 좋은 방법이 아닙니다. 제품코드에 테스트관련 의존성이 생기기 때문입니다. 사소한 실수로 인해서 제품코드에서 테스트코드가 수행되버릴 확률도 높아집니다. [Heisenbugs](https://en.wikipedia.org/wiki/Heisenbug)(100% 재현되는게 아니라 간헐적으로 재현되는 bug)라도 발생하면 많은 시간을 소모하게 될 것입니다. googletest에서도 그런 방법을 제공하지 않습니다.
 
 실행중에 테스트가 수행중인지 확인해서 분기하지 말고, 제품코드와 테스트코드에 동시에 사용할 수 있는 일반화된 코드를 개발하는 것이 중요합니다. 이를 위해서 추천하는 방법은 [Dependency Injection](https://en.wikipedia.org/wiki/Dependency_injection)을 사용하는 것입니다. 제품코드와 테스트코드의 의존성을 제거하고 구분이 필요하다면 [`testonly`](https://docs.bazel.build/versions/master/be/common-definitions.html#common.testonly)와 같은 빌드옵션을 통해서 구부하기 바랍니다.
 

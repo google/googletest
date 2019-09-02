@@ -3239,7 +3239,7 @@ class MockFoo : public Foo {
 
 #### gMock이 사용자타입 정보도 출력 가능하게 만들기 ####
 
-gMock은 uninteresting call이나 unexpected call이 발생하면 해당 mock function으로 전달된 argument와 stack trace 정보를 출력해 줍니다. 마찬가지로 `EXPECT_THAT`, `EXPECT_EQ`과 같은 macro도 assertion 실패 시에 관련 정보를 출력해 줍니다. Googletest와 gMock은 user-extensible value printer를 통해 이러한 동작을 구현하고 있습니다.
+gMock은 uninteresting call이나 unexpected call이 발생하면 해당 mock function으로 전달된 argument와 stack trace 정보를 출력해 줍니다. 마찬가지로 `EXPECT_THAT`, `EXPECT_EQ`과 같은 macro도 assertion 실패 시에 관련 정보를 출력해 줍니다. googletest와 gMock은 user-extensible value printer를 통해 이러한 동작을 구현하고 있습니다.
 
 다만, 위의 printer가 출력할 수 있는 대상은 built-in C++ type, array,  STL container, 그리고 `<<` 연산자를 정의한 타입들만 해당됩니다. 다시 말하면 그 외의 사용자정의 타입들은 관련정보를 출력할 수 없으며 단순히 byte dump만 출력하도록 구현되어 있습니다. 이러한 문제를 개선하려면 [googletests`s advanced guide](../../../googletest/docs/kr/advanced.md#googletest의-디버깅정보-출력방식-변경하기)를 참고하여 더 많은 정보를 출력할 수 있도록 변경할 수 있습니다.
 

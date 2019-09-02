@@ -2,7 +2,7 @@
 
 ## 소개
 
-이 문서를 읽기 전에 [googletest primer](primer.md)를 먼저 보시기 바랍니다. Googletest primer를 다 읽으셨다면 이제 다양한 심화기능을 공부 할 시간입니다. 이 문서는 googletest의 다양한 assertion 사용법, 사용자정의 failure message 만들기, fatal failure 전파하기, test fixture를 빠르고 재사용하기 쉽게 만들기, test program실행시 flag사용법과 같은 여러가지 주제를 포함하고 있습니다.
+이 문서를 읽기 전에 [googletest primer](primer.md)를 먼저 보시기 바랍니다. googletest primer를 다 읽으셨다면 이제 다양한 심화기능을 공부 할 시간입니다. 이 문서는 googletest의 다양한 assertion 사용법, 사용자정의 failure message 만들기, fatal failure 전파하기, test fixture를 빠르고 재사용하기 쉽게 만들기, test program실행시 flag사용법과 같은 여러가지 주제를 포함하고 있습니다.
 
 ## Googletest가 지원하는 다양한 Assertion 소개 및 사용법
 
@@ -123,7 +123,7 @@ c is 10
 
 `EXPECT_PRED*()`계열이 유용하지만 argument개수에 따라 macro가 달라지기 때문에 약간 불편한 부분도 있습니다. C++ 문법보다는 Lisp 문법에 가까워 보이기도 하네요. 또 다른 방법으로 `::testing::AssertionResult` class를 사용해 보겠습니다. 
 
-`AssertionResult`는 이름 그대로 assertion의 결과를 의미합니다. 사용법은 간단합니다. Googletest에서 제공하는 factory function을 사용하면 됩니다. Factory function 2개는 아래와 같습니다.
+`AssertionResult`는 이름 그대로 assertion의 결과를 의미합니다. 사용법은 간단합니다. googletest에서 제공하는 factory function을 사용하면 됩니다. Factory function 2개는 아래와 같습니다.
 
 ```c++
 namespace testing {
@@ -260,7 +260,7 @@ b and c (4 and 10) are not mutually prime, as they have a common divisor 2.
 
 반올림 이슈로 인해서 2개의 floating-point 값이 정확히 같다고 판정하는 것은 언제나 까다로운 문제입니다. 기존에 사용하던 `ASSERT_EQ`로는 정확한 답을 얻을 수 없을 것입니다. 또한, floating-point는 값의 범위가 큰 경우가 많기 때문에 고정 오차범위보다는 상대 오차범위를 사용하는 것이 정밀도 측면에서 더 좋은 선택입니다. 고정 오차범위가 더 좋은 경우는 `0`과 같은지 비교할 때 뿐입니다.
 
-결론적으로 floating-point를 비교하기 위해서는 오차범위를 신중하게 선택해야 합니다. Googletest는 오차범위 단위로 ULPs를 기본적으로 사용하고 있으며 그 범위는 4 ULP's입니다. 만약, 직접 오차범위를 지정하기가 꺼려진다면 googletest의 기본설정을 사용하기를 추천합니다. 물론, 기본설정 오차범위를 이용하는 macro와 사용자가 오차범위를 지정할 수 있는 macro를 둘 다 제공하므로 주어진 상황에 맞게 사용할 수 있습니다. (ULPs 및 floating-point 비교에 대한 자세한 설명은 [이곳](https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/) 또는 [이곳](https://bitbashing.io/comparing-floats.html)을 참조하기 바랍니다.)
+결론적으로 floating-point를 비교하기 위해서는 오차범위를 신중하게 선택해야 합니다. googletest는 오차범위 단위로 ULPs를 기본적으로 사용하고 있으며 그 범위는 4 ULP's입니다. 만약, 직접 오차범위를 지정하기가 꺼려진다면 googletest의 기본설정을 사용하기를 추천합니다. 물론, 기본설정 오차범위를 이용하는 macro와 사용자가 오차범위를 지정할 수 있는 macro를 둘 다 제공하므로 주어진 상황에 맞게 사용할 수 있습니다. (ULPs 및 floating-point 비교에 대한 자세한 설명은 [이곳](https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/) 또는 [이곳](https://bitbashing.io/comparing-floats.html)을 참조하기 바랍니다.)
 
 #### Floating-Point Macros
 
@@ -883,7 +883,7 @@ Googletest는 개별 test case를 실행할 때마다 test fixure object를 새�
 2.  해당 `static` 변수를 초기화합니다. (C++에서 `static` 멤버변수는 class 바깥에서도 초기화해야 합니다.)
 3.  이제 test fixture class에 `static void SetUpTestSuite()` 과 `static void TearDownTestSuite()`을 구현하세요. 두 함수 내부에는 공유자원을 위한 초기화 작업, 정리 작업을 구현하면 됩니다.(`SetupTestSuite`이 아니라 대문자 `*Up*`인 점을 유의하세요.)
 
-이제 필요한 것은 다 됐습니다. Googletest는 해당 test fixture(`FooTest`)의 첫번째 test case을 수행하기 전에 `SetUpTestSuite()`을 호출합니다. 그리고 마지막 test case를 수행한 후에는 `TearDownTestSuite()`을 호출할 것입니다. 이와 같은 방법을 통해 `FooTest`에 포함된 test case끼리 자원을 공유할 수 있게 됩니다.
+이제 필요한 것은 다 됐습니다. googletest는 해당 test fixture(`FooTest`)의 첫번째 test case을 수행하기 전에 `SetUpTestSuite()`을 호출합니다. 그리고 마지막 test case를 수행한 후에는 `TearDownTestSuite()`을 호출할 것입니다. 이와 같은 방법을 통해 `FooTest`에 포함된 test case끼리 자원을 공유할 수 있게 됩니다.
 
 Test case가 수행되는 순서는 정해지지 않았음을 기억하기 바랍니다. 따라서 각각의 test case는 서로 의존성이 없어야 합니다. 또한, 공유자원을 변경해서도 안됩니다. 만약 공유자원을 꼭 변경해야만 한다면 해당 test case가 끝나기 전에 원래대로 복구시켜야 합니다. 
 
@@ -932,7 +932,7 @@ NOTE: 위의 코드는 `SetUpTestSuite()`을 protected로 선언했지만 public
 
 ## Global Set-Up, Tear-Down
 
-개별 test case 혹은 test suite에서 set-up 및 tear-down을 설정하는 방법에 대해서 배웠습니다. Googletest는 test program 레벨에서도 이러한 설정이 가능하도록 지원합니다. 즉, 전역적인 set-up, tear-down을 구현할 수 있습니다.
+개별 test case 혹은 test suite에서 set-up 및 tear-down을 설정하는 방법에 대해서 배웠습니다. googletest는 test program 레벨에서도 이러한 설정이 가능하도록 지원합니다. 즉, 전역적인 set-up, tear-down을 구현할 수 있습니다.
 
 먼저, `::testing::Environment`라는 class를 상속받아서 test envrionment를 정의해야 합니다. Test environment는 전역적인 set-up, tear-down 설정을 도와줍니다.
 
@@ -1017,7 +1017,7 @@ TEST_P(FooTest, HasBlahBlah) {
 }
 ```
 
-거의 다 왔습니다. 이제 테스트를 위한 데이터(parameter)를 정의하겠습니다. 이를 위해서 `INSTANTIATE_TEST_SUITE_P`를 사용합니다. Googletest는 `INSTANTIATE_TEST_SUITE_P`와 함께 사용함으로써 parameter 생성을 도와주는 여러가지 function도 함께 제공합니다. 이러한 function을 *parameter generator*라고 부르며 아래는 관련 내용을 정리한 표입니다. (이들은 모두 `testing` namespace에 정의되어 있습니다.)
+거의 다 왔습니다. 이제 테스트를 위한 데이터(parameter)를 정의하겠습니다. 이를 위해서 `INSTANTIATE_TEST_SUITE_P`를 사용합니다. googletest는 `INSTANTIATE_TEST_SUITE_P`와 함께 사용함으로써 parameter 생성을 도와주는 여러가지 function도 함께 제공합니다. 이러한 function을 *parameter generator*라고 부르며 아래는 관련 내용을 정리한 표입니다. (이들은 모두 `testing` namespace에 정의되어 있습니다.)
 
 | Parameter Generator                             | Behavior                                                     |
 | ----------------------------------------------- | ------------------------------------------------------------ |
@@ -1356,7 +1356,7 @@ NOTE: Windows환경에서는 위와 같이 multiple thread에서 failure를 확�
 
 ## 개별 Test를 런타임에 등록하기
 
-Googletest에서 test case를 정의할 때 `*TEST*`계열 macro를 사용하는 것이 일반적입니다. 실제로도 대다수의 개발자들이 `*TEST*`계열 macro를 사용하고 있으며 이들은 내부적으로 test case들을 compile time에 등록합니다. 그럼 혹시 test case를 runtime에 등록하고 싶은 사용자가 있으신가요? 예를 들어 별도의 설정파일(.config 등)에서 test case의 정보를 관리하다가 test program이 실행된 후에 설정파일을 읽어서 test case를 등록하고 싶은 경우가 있을 것입니다. Googletest는 그러한 사용자를 위해서 `::testing::RegisterTest`를 제공하고 있습니다.
+Googletest에서 test case를 정의할 때 `*TEST*`계열 macro를 사용하는 것이 일반적입니다. 실제로도 대다수의 개발자들이 `*TEST*`계열 macro를 사용하고 있으며 이들은 내부적으로 test case들을 compile time에 등록합니다. 그럼 혹시 test case를 runtime에 등록하고 싶은 사용자가 있으신가요? 예를 들어 별도의 설정파일(.config 등)에서 test case의 정보를 관리하다가 test program이 실행된 후에 설정파일을 읽어서 test case를 등록하고 싶은 경우가 있을 것입니다. googletest는 그러한 사용자를 위해서 `::testing::RegisterTest`를 제공하고 있습니다.
 
 다만, 이러한 기능을 제공하고 있기는 하지만 `::testing::RegisterTest`는 복잡도가 상당히 높기 때문에 꼭 필요한 경우에만 사용하기 바랍니다. 되도록이면 `*TEST*`를 통해서 정적으로 등록하는 것이 좋습니다.
 
@@ -1931,7 +1931,7 @@ IMPORTANT: JSON Report 형식은 변경될 수도 있습니다.
 
 #### Assertion Failures를 Break-Points처럼 사용하기
 
-디버거에서 test program을 동작시킨다면 assertion이 발생했을 때, 바로 interactive mode로 전환되게 하면 디버깅에 도움이 될 것입니다. Googletest는 그런 사용자를 위해 *break-on-failure* mode를 제공합니다.
+디버거에서 test program을 동작시킨다면 assertion이 발생했을 때, 바로 interactive mode로 전환되게 하면 디버깅에 도움이 될 것입니다. googletest는 그런 사용자를 위해 *break-on-failure* mode를 제공합니다.
 
 `GTEST_BREAK_ON_FAILURE` environment variable을 `0`이 아닌 값으로 설정하거나 `--gtest_break_on_failure` flag를 사용하면 이 기능을 활성화할 수 있습니다.
 
