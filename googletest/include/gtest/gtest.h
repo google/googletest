@@ -245,7 +245,7 @@ class UnitTest;
 // Then a statement EXPECT_FALSE(IsEven(Fib(6))) will print
 //
 //   Value of: IsEven(Fib(6))
-//     Actual: true (8 is even)
+//     Actual: true (6 is even)
 //   Expected: false
 //
 // NB: Predicates that support negative Boolean assertions have reduced
