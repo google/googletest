@@ -844,9 +844,6 @@ class Secret;
 // expression is false, compiler will issue an error containing this identifier.
 #define GTEST_COMPILE_ASSERT_(expr, msg) static_assert(expr, #msg)
 
-// Evaluates to the number of elements in 'array'.
-#define GTEST_ARRAY_SIZE_(array) (sizeof(array) / sizeof(array[0]))
-
 // A helper for suppressing warnings on constant condition.  It just
 // returns 'condition'.
 GTEST_API_ bool IsTrue(bool condition);

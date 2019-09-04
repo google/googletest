@@ -45,6 +45,7 @@
 
 #include <string.h>
 #include <time.h>
+#include <array>
 #include <deque>
 #include <forward_list>
 #include <functional>
@@ -5199,14 +5200,14 @@ TEST(WhenSortedTest, WorksForStreamlike) {
   // Streamlike 'container' provides only minimal iterator support.
   // Its iterators are tagged with input_iterator_tag.
   const int a[5] = {2, 1, 4, 5, 3};
-  Streamlike<int> s(a, a + GTEST_ARRAY_SIZE_(a));
+  Streamlike<int> s(std::begin(a), std::end(a));
   EXPECT_THAT(s, WhenSorted(ElementsAre(1, 2, 3, 4, 5)));
   EXPECT_THAT(s, Not(WhenSorted(ElementsAre(2, 1, 4, 5, 3))));
 }
 
 TEST(WhenSortedTest, WorksForVectorConstRefMatcherOnStreamlike) {
   const int a[] = {2, 1, 4, 5, 3};
-  Streamlike<int> s(a, a + GTEST_ARRAY_SIZE_(a));
+  Streamlike<int> s(std::begin(a), std::end(a));
   Matcher<const std::vector<int>&> vector_match = ElementsAre(1, 2, 3, 4, 5);
   EXPECT_THAT(s, WhenSorted(vector_match));
   EXPECT_THAT(s, Not(WhenSorted(ElementsAre(2, 1, 4, 5, 3))));
@@ -5251,7 +5252,7 @@ TEST(IsSupersetOfTest, WorksForEmpty) {
 
 TEST(IsSupersetOfTest, WorksForStreamlike) {
   const int a[5] = {1, 2, 3, 4, 5};
-  Streamlike<int> s(a, a + GTEST_ARRAY_SIZE_(a));
+  Streamlike<int> s(std::begin(a), std::end(a));
 
   vector<int> expected;
   expected.push_back(1);
@@ -5379,7 +5380,7 @@ TEST(IsSubsetOfTest, WorksForEmpty) {
 
 TEST(IsSubsetOfTest, WorksForStreamlike) {
   const int a[5] = {1, 2};
-  Streamlike<int> s(a, a + GTEST_ARRAY_SIZE_(a));
+  Streamlike<int> s(std::begin(a), std::end(a));
 
   vector<int> expected;
   expected.push_back(1);
@@ -5473,14 +5474,14 @@ TEST(IsSubsetOfTest, WorksWithMoveOnly) {
 
 TEST(ElemensAreStreamTest, WorksForStreamlike) {
   const int a[5] = {1, 2, 3, 4, 5};
-  Streamlike<int> s(a, a + GTEST_ARRAY_SIZE_(a));
+  Streamlike<int> s(std::begin(a), std::end(a));
   EXPECT_THAT(s, ElementsAre(1, 2, 3, 4, 5));
   EXPECT_THAT(s, Not(ElementsAre(2, 1, 4, 5, 3)));
 }
 
 TEST(ElemensAreArrayStreamTest, WorksForStreamlike) {
   const int a[5] = {1, 2, 3, 4, 5};
-  Streamlike<int> s(a, a + GTEST_ARRAY_SIZE_(a));
+  Streamlike<int> s(std::begin(a), std::end(a));
 
   vector<int> expected;
   expected.push_back(1);
@@ -5527,7 +5528,7 @@ TEST(ElementsAreTest, TakesStlContainer) {
 
 TEST(UnorderedElementsAreArrayTest, SucceedsWhenExpected) {
   const int a[] = {0, 1, 2, 3, 4};
-  std::vector<int> s(a, a + GTEST_ARRAY_SIZE_(a));
+  std::vector<int> s(std::begin(a), std::end(a));
   do {
     StringMatchResultListener listener;
     EXPECT_TRUE(ExplainMatchResult(UnorderedElementsAreArray(a),
@@ -5538,8 +5539,8 @@ TEST(UnorderedElementsAreArrayTest, SucceedsWhenExpected) {
 TEST(UnorderedElementsAreArrayTest, VectorBool) {
   const bool a[] = {0, 1, 0, 1, 1};
   const bool b[] = {1, 0, 1, 1, 0};
-  std::vector<bool> expected(a, a + GTEST_ARRAY_SIZE_(a));
-  std::vector<bool> actual(b, b + GTEST_ARRAY_SIZE_(b));
+  std::vector<bool> expected(std::begin(a), std::end(a));
+  std::vector<bool> actual(std::begin(b), std::end(b));
   StringMatchResultListener listener;
   EXPECT_TRUE(ExplainMatchResult(UnorderedElementsAreArray(expected),
                                  actual, &listener)) << listener.str();
@@ -5550,7 +5551,7 @@ TEST(UnorderedElementsAreArrayTest, WorksForStreamlike) {
   // Its iterators are tagged with input_iterator_tag, and it has no
   // size() or empty() methods.
   const int a[5] = {2, 1, 4, 5, 3};
-  Streamlike<int> s(a, a + GTEST_ARRAY_SIZE_(a));
+  Streamlike<int> s(std::begin(a), std::end(a));
 
   ::std::vector<int> expected;
   expected.push_back(1);
@@ -5633,7 +5634,7 @@ TEST_F(UnorderedElementsAreTest, WorksWithUncopyable) {
 
 TEST_F(UnorderedElementsAreTest, SucceedsWhenExpected) {
   const int a[] = {1, 2, 3};
-  std::vector<int> s(a, a + GTEST_ARRAY_SIZE_(a));
+  std::vector<int> s(std::begin(a), std::end(a));
   do {
     StringMatchResultListener listener;
     EXPECT_TRUE(ExplainMatchResult(UnorderedElementsAre(1, 2, 3),
@@ -5643,7 +5644,7 @@ TEST_F(UnorderedElementsAreTest, SucceedsWhenExpected) {
 
 TEST_F(UnorderedElementsAreTest, FailsWhenAnElementMatchesNoMatcher) {
   const int a[] = {1, 2, 3};
-  std::vector<int> s(a, a + GTEST_ARRAY_SIZE_(a));
+  std::vector<int> s(std::begin(a), std::end(a));
   std::vector<Matcher<int> > mv;
   mv.push_back(1);
   mv.push_back(2);
@@ -5659,7 +5660,7 @@ TEST_F(UnorderedElementsAreTest, WorksForStreamlike) {
   // Its iterators are tagged with input_iterator_tag, and it has no
   // size() or empty() methods.
   const int a[5] = {2, 1, 4, 5, 3};
-  Streamlike<int> s(a, a + GTEST_ARRAY_SIZE_(a));
+  Streamlike<int> s(std::begin(a), std::end(a));
 
   EXPECT_THAT(s, UnorderedElementsAre(1, 2, 3, 4, 5));
   EXPECT_THAT(s, Not(UnorderedElementsAre(2, 2, 3, 4, 5)));
@@ -5976,8 +5977,9 @@ TEST_F(BipartiteNonSquareTest, SimpleBacktracking) {
   //  :.......:
   //    0 1 2
   MatchMatrix g(4, 3);
-  static const size_t kEdges[][2] = {{0, 2}, {1, 1}, {2, 1}, {3, 0}};
-  for (size_t i = 0; i < GTEST_ARRAY_SIZE_(kEdges); ++i) {
+  constexpr std::array<std::array<size_t, 2>, 4> kEdges = {
+      {{{0, 2}}, {{1, 1}}, {{2, 1}}, {{3, 0}}}};
+  for (size_t i = 0; i < kEdges.size(); ++i) {
     g.SetEdge(kEdges[i][0], kEdges[i][1], true);
   }
   EXPECT_THAT(FindBacktrackingMaxBPM(g),
