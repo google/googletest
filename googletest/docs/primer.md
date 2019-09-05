@@ -302,7 +302,7 @@ for
 
 **Availability**: Linux, Windows, Mac.
 
-## Test Fixtures: Using the Same Data Configuration for Multiple Tests
+## Test Fixtures: Using the Same Data Configuration for Multiple Tests {#same-data-multiple-tests}
 
 If you find yourself writing two or more tests that operate on similar data, you
 can use a *test fixture*. It allows you to reuse the same configuration of
