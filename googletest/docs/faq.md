@@ -298,7 +298,7 @@ In the end, this boils down to good concurrent programming. You have to make
 sure that there is no race conditions or dead locks in your program. No silver
 bullet - sorry!
 
-## Should I use the constructor/destructor of the test fixture or SetUp()/TearDown()?
+## Should I use the constructor/destructor of the test fixture or SetUp()/TearDown()? {#CtorVsSetUp}
 
 The first thing to remember is that googletest does **not** reuse the same test
 fixture object across multiple tests. For each `TEST_F`, googletest will create
