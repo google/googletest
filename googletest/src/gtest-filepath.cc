@@ -93,8 +93,8 @@ static bool IsPathSeparator(char c) {
 // Returns the current working directory, or "" if unsuccessful.
 FilePath FilePath::GetCurrentDir() {
 #if GTEST_OS_WINDOWS_MOBILE || GTEST_OS_WINDOWS_PHONE || \
-    GTEST_OS_WINDOWS_RT || ARDUINO
-  // Windows CE and Arduino don't have a current directory, so we just return
+    GTEST_OS_WINDOWS_RT || ARDUINO || defined(ESP_PLATFORM)
+  // These platforms do not have a current directory, so we just return
   // something reasonable.
   return FilePath(kCurrentDirectoryString);
 #elif GTEST_OS_WINDOWS
