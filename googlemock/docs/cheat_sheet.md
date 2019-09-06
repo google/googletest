@@ -221,17 +221,17 @@ and the default action will be taken each time.
 <!-- GOOGLETEST_CM0020 DO NOT DELETE -->
 
 A **matcher** matches a *single* argument. You can use it inside `ON_CALL()` or
-`EXPECT_CALL()`, or use it to validate a value directly:
+`EXPECT_CALL()`, or use it to validate a value directly using two macros:
 
 <!-- mdformat off(github rendering does not support multiline tables) -->
-| Matcher                              | Description                           |
+| Macro                                | Description                           |
 | :----------------------------------- | :------------------------------------ |
 | `EXPECT_THAT(actual_value, matcher)` | Asserts that `actual_value` matches `matcher`. |
 | `ASSERT_THAT(actual_value, matcher)` | The same as `EXPECT_THAT(actual_value, matcher)`, except that it generates a **fatal** failure. |
 <!-- mdformat on -->
 
-Built-in matchers (where `argument` is the function argument) are divided into
-several categories:
+Built-in matchers (where `argument` is the function argument, e.g.
+`actual_value` in the example above) are divided into several categories:
 
 #### Wildcard
 
