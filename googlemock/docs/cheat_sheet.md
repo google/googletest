@@ -202,6 +202,15 @@ EXPECT_CALL(mock-object, method (matchers)?)
      .RetiresOnSaturation();        ?
 ```
 
+For each item above, `?` means it can be used at most once, while `*` means it
+can be used any number of times.
+
+In order to pass, `EXPECT_CALL` must be used before the calls are actually made.
+
+The `(matchers)` is a comma-separated list of matchers that correspond to each
+of the arguments of `method`, and sets the expectation only for calls of
+`method` that matches all of the matchers.
+
 If `(matchers)` is omitted, the expectation is the same as if the matchers were
 set to anything matchers (for example, `(_, _, _, _)` for a four-arg method).
 
@@ -231,7 +240,9 @@ A **matcher** matches a *single* argument. You can use it inside `ON_CALL()` or
 <!-- mdformat on -->
 
 Built-in matchers (where `argument` is the function argument, e.g.
-`actual_value` in the example above) are divided into several categories:
+`actual_value` in the example above, or when used in the context of
+`EXPECT_CALL(mock_object, method(matchers))`, the arguments of `method`) are
+divided into several categories:
 
 #### Wildcard
 
