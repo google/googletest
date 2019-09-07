@@ -1607,8 +1607,8 @@ class PointeeMatcher {
   template <typename Pointer>
   class Impl : public MatcherInterface<Pointer> {
    public:
-    typedef typename PointeeOf<typename std::remove_const<
-        typename std::remove_reference<Pointer>::type>::type>::type Pointee;
+    typedef typename PointeeOf<GTEST_REMOVE_REFERENCE_AND_CONST_(Pointer)>::type
+        Pointee;
 
     explicit Impl(const InnerMatcher& matcher)
         : matcher_(MatcherCast<const Pointee&>(matcher)) {}
