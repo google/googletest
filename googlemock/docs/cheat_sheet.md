@@ -262,6 +262,8 @@ Matcher                     | Description
 | `Le(value)`            | `argument <= value`                                 |
 | `Lt(value)`            | `argument < value`                                  |
 | `Ne(value)`            | `argument != value`                                 |
+| `IsFalse()`            | `argument` evaluates to `false` in a Boolean context. |
+| `IsTrue()`             | `argument` evaluates to `true` in a Boolean context. |
 | `IsNull()`             | `argument` is a `NULL` pointer (raw or smart).      |
 | `NotNull()`            | `argument` is a non-null pointer (raw or smart).    |
 | `Optional(m)`          | `argument` is `optional<>` that contains a value matching `m`. |
@@ -344,10 +346,8 @@ messages, you can use:
 | `ElementsAre(e0, e1, ..., en)` | `argument` has `n + 1` elements, where the *i*-th element matches `ei`, which can be a value or a matcher. |
 | `ElementsAreArray({e0, e1, ..., en})`, `ElementsAreArray(a_container)`, `ElementsAreArray(begin, end)`, `ElementsAreArray(array)`, or `ElementsAreArray(array, count)` | The same as `ElementsAre()` except that the expected element values/matchers come from an initializer list, STL-style container, iterator range, or C-style array. |
 | `IsEmpty()` | `argument` is an empty container (`container.empty()`). |
-| `IsFalse()` | `argument` evaluates to `false` in a Boolean context. |
 | `IsSubsetOf({e0, e1, ..., en})`, `IsSubsetOf(a_container)`, `IsSubsetOf(begin, end)`, `IsSubsetOf(array)`, or `IsSubsetOf(array, count)` | `argument` matches `UnorderedElementsAre(x0, x1, ..., xk)` for some subset `{x0, x1, ..., xk}` of the expected matchers. |
 | `IsSupersetOf({e0, e1, ..., en})`, `IsSupersetOf(a_container)`, `IsSupersetOf(begin, end)`, `IsSupersetOf(array)`, or `IsSupersetOf(array, count)` | Some subset of `argument` matches `UnorderedElementsAre(`expected matchers`)`. |
-| `IsTrue()` | `argument` evaluates to `true` in a Boolean context. |
 | `Pointwise(m, container)`, `Pointwise(m, {e0, e1, ..., en})` | `argument` contains the same number of elements as in `container`, and for all i, (the i-th element in `argument`, the i-th element in `container`) match `m`, which is a matcher on 2-tuples. E.g. `Pointwise(Le(), upper_bounds)` verifies that each element in `argument` doesn't exceed the corresponding element in `upper_bounds`. See more detail below. |
 | `SizeIs(m)` | `argument` is a container whose size matches `m`. E.g. `SizeIs(2)` or `SizeIs(Lt(2))`. |
 | `UnorderedElementsAre(e0, e1, ..., en)` | `argument` has `n + 1` elements, and under *some* permutation of the elements, each element matches an `ei` (for a different `i`), which can be a value or a matcher. |
