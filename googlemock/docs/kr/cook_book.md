@@ -1132,7 +1132,7 @@ WARNING: gMock은 언제 얼마나 많은 matcher가 실행될지 미리 알지 
 
 gMock의 `ON_CALL`은 아마도 자주 사용되는 기능은 아닐 것입니다.
 
-알다시피 mock object의 행위를 지정하는 방법은 2가지가 있습니다. `ON_CALL`, `EXPECT_CALL`이 그것입니다. 그럼 2개의 다른점은 무엇일까요? 먼저 `ON_CALL`은 mock method가 호출되었을 때 어떤 행위를 해야하는지는 지정할 수 있지만 *expectation*은 지정할 수 없습니다. 다음으로 `EXPECT_CALL`은 행위를 지정하는 것에 더해서 expectation도 지정할 수 있습니다. *예를 들어서 mock method로 어떤 argument가 전달되어야 하는지, 몇 번 호출되어야 하는지, mock method 간의 호출순서는 어떠한지 등입니다.*
+알다시피 mock object의 행위를 지정하는 방법은 2가지가 있습니다. `ON_CALL`, `EXPECT_CALL`이 그것입니다. 그럼 2개의 다른점은 무엇일까요? 먼저 `ON_CALL`의 경우를 보면 `ON_CALL`은 mock method가 호출되었을 때 어떤 행위를 해야하는지를 지정하는 것은 가능하지만 *expectation*을 지정할 수는 없습니다. 다음으로 `EXPECT_CALL`은 행위를 지정하는 것에 더해서 expectation을 지정하는 것도 가능합니다. 여기서 expectation을 지정한다는 것의 의미는 예를 들어서 *mock method로 어떤 argument가 전달되어야 하는지, 몇 번 호출되어야 하는지, mock method 간의 호출순서는 어떠한지*와 같은 정보를 테스트를 구현하는 사람이 명시할 수 있다는 의미입니다.
 
 그럼 "`EXPECT_CALL`이 제공하는 기능이 더 많으므로 `EXPECT_CALL`이 `ON_CALL`보다 좋다"라고 하면 될까요? 물론 아닙니다. 왜냐하면 `EXPECT_CALL`은 테스트 대상의 행위에 어찌됐든 제약을 계속해서 추가하는 것입니다. 여기서 우리는 제약사항이 필요한 것보다 많은 상황이 부족한 상황보다 오히려 더 나쁜 것으로 봐야한다는 점이 중요합니다.
 
