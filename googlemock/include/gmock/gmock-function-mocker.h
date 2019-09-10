@@ -91,7 +91,7 @@
       "Signature must be a function type, maybe return type contains " \
       "unprotected comma.");                                           \
   static_assert(                                                       \
-      ::testing::tuple_size<typename ::testing::internal::Function<    \
+      std::tuple_size<typename ::testing::internal::Function<          \
               __VA_ARGS__>::ArgumentTuple>::value == _N,               \
       "This method does not take " GMOCK_PP_STRINGIZE(                 \
           _N) " arguments. Parenthesize all types with unproctected commas.")

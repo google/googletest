@@ -265,7 +265,6 @@
 #include <iostream>   // NOLINT
 #include <sstream>    // NOLINT
 #include <string>     // NOLINT
-#include <tuple>
 #include <utility>
 #include <vector>  // NOLINT
 
@@ -826,14 +825,6 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 namespace testing {
 
 class Message;
-
-// Legacy imports for backwards compatibility.
-// New code should use std:: names directly.
-using std::get;
-using std::make_tuple;
-using std::tuple;
-using std::tuple_element;
-using std::tuple_size;
 
 namespace internal {
 

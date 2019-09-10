@@ -6249,8 +6249,8 @@ TEST(PointwiseTest, AllowsMonomorphicInnerMatcher) {
 }
 
 MATCHER(PointeeEquals, "Points to an equal value") {
-  return ExplainMatchResult(::testing::Pointee(::testing::get<1>(arg)),
-                            ::testing::get<0>(arg), result_listener);
+  return ExplainMatchResult(::testing::Pointee(std::get<1>(arg)),
+                            std::get<0>(arg), result_listener);
 }
 
 TEST(PointwiseTest, WorksWithMoveOnly) {
