@@ -133,7 +133,7 @@ GTEST_API_ void PrintBytesInObjectTo(const unsigned char* obj_bytes,
 // nor PrintTo().
 enum TypeKind {
   kProtobuf,              // a protobuf type
-  kConvertibleToInteger,  // a type implicitly convertible to BiggestInt
+  kConvertibleToInteger,  // a type implicitly convertible to std::intmax_t
                           // (e.g. a named or unnamed enum type)
 #if GTEST_HAS_ABSL
   kConvertibleToStringView,  // a type implicitly convertible to
@@ -179,14 +179,14 @@ template <typename T>
 class TypeWithoutFormatter<T, kConvertibleToInteger> {
  public:
   // Since T has no << operator or PrintTo() but can be implicitly
-  // converted to BiggestInt, we print it as a BiggestInt.
+  // converted to the maximum width integer, we print it as a std::intmax_t.
   //
   // Most likely T is an enum type (either named or unnamed), in which
-  // case printing it as an integer is the desired behavior.  In case
+  // case printing it as an integer is the desired behavior. In case
   // T is not an enum, printing it as an integer is the best we can do
   // given that it has no user-defined printer.
   static void PrintValue(const T& value, ::std::ostream* os) {
-    const internal::BiggestInt kBigInt = value;
+    const std::intmax_t kBigInt = value;
     *os << kBigInt;
   }
 };
@@ -204,10 +204,10 @@ class TypeWithoutFormatter<T, kConvertibleToStringView> {
 };
 #endif
 
-// Prints the given value to the given ostream.  If the value is a
+// Prints the given value to the given ostream. If the value is a
 // protocol message, its debug string is printed; if it's an enum or
-// of a type implicitly convertible to BiggestInt, it's printed as an
-// integer; otherwise the bytes in the value are printed.  This is
+// of a type implicitly convertible to std::intmax_t, it's printed as an
+// integer; otherwise the bytes in the value are printed. This is
 // what UniversalPrinter<T>::Print() does when it knows nothing about
 // type T and T has neither << operator nor PrintTo().
 //
@@ -234,7 +234,7 @@ template <typename Char, typename CharTraits, typename T>
   TypeWithoutFormatter<T, (internal::IsAProtocolMessage<T>::value
                                ? kProtobuf
                                : std::is_convertible<
-                                     const T&, internal::BiggestInt>::value
+                                     const T&, std::intmax_t>::value
                                      ? kConvertibleToInteger
                                      :
 #if GTEST_HAS_ABSL
