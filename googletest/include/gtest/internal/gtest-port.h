@@ -243,7 +243,6 @@
 //                                        deprecated; calling a marked function
 //                                        should generate a compiler warning
 
-#include <ctype.h>   // for isspace, etc
 #include <stddef.h>  // for ptrdiff_t
 #include <stdio.h>
 #include <stdlib.h>
@@ -1906,53 +1905,6 @@ typedef __int64 BiggestInt;
 # define GTEST_HAS_ALT_PATH_SEP_ 0
 typedef long long BiggestInt;  // NOLINT
 #endif  // GTEST_OS_WINDOWS
-
-// Utilities for char.
-
-// isspace(int ch) and friends accept an unsigned char or EOF.  char
-// may be signed, depending on the compiler (or compiler flags).
-// Therefore we need to cast a char to unsigned char before calling
-// isspace(), etc.
-
-inline bool IsAlpha(char ch) {
-  return isalpha(static_cast<unsigned char>(ch)) != 0;
-}
-inline bool IsAlNum(char ch) {
-  return isalnum(static_cast<unsigned char>(ch)) != 0;
-}
-inline bool IsDigit(char ch) {
-  return isdigit(static_cast<unsigned char>(ch)) != 0;
-}
-inline bool IsLower(char ch) {
-  return islower(static_cast<unsigned char>(ch)) != 0;
-}
-inline bool IsSpace(char ch) {
-  return isspace(static_cast<unsigned char>(ch)) != 0;
-}
-inline bool IsUpper(char ch) {
-  return isupper(static_cast<unsigned char>(ch)) != 0;
-}
-inline bool IsXDigit(char ch) {
-  return isxdigit(static_cast<unsigned char>(ch)) != 0;
-}
-inline bool IsXDigit(wchar_t ch) {
-  const unsigned char low_byte = static_cast<unsigned char>(ch);
-  return ch == low_byte && isxdigit(low_byte) != 0;
-}
-
-inline char ToLower(char ch) {
-  return static_cast<char>(tolower(static_cast<unsigned char>(ch)));
-}
-inline char ToUpper(char ch) {
-  return static_cast<char>(toupper(static_cast<unsigned char>(ch)));
-}
-
-inline std::string StripTrailingSpaces(std::string str) {
-  std::string::iterator it = str.end();
-  while (it != str.begin() && IsSpace(*--it))
-    it = str.erase(it);
-  return str;
-}
 
 // The testing::internal::posix namespace holds wrappers for common
 // POSIX functions.  These wrappers hide the differences between

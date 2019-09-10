@@ -50,9 +50,9 @@
 # include <stdexcept>
 #endif
 
-#include <ctype.h>
 #include <float.h>
 #include <string.h>
+#include <cctype>
 #include <iomanip>
 #include <limits>
 #include <map>
@@ -623,6 +623,53 @@ using TypedTestCasePState = TypedTestSuitePState;
 #endif  //  GTEST_REMOVE_LEGACY_TEST_CASEAPI_
 
 GTEST_DISABLE_MSC_WARNINGS_POP_()  //  4251
+
+// Utilities for char.
+
+// std::isspace(int ch) and friends accept an unsigned char or EOF.
+// char may be signed, depending on the compiler (or compiler flags).
+// Therefore we need to cast a char to unsigned char before calling
+// std::isspace(int ch), etc.
+
+inline bool IsAlpha(char ch) {
+  return std::isalpha(static_cast<unsigned char>(ch)) != 0;
+}
+inline bool IsAlNum(char ch) {
+  return std::isalnum(static_cast<unsigned char>(ch)) != 0;
+}
+inline bool IsDigit(char ch) {
+  return std::isdigit(static_cast<unsigned char>(ch)) != 0;
+}
+inline bool IsLower(char ch) {
+  return std::islower(static_cast<unsigned char>(ch)) != 0;
+}
+inline bool IsSpace(char ch) {
+  return std::isspace(static_cast<unsigned char>(ch)) != 0;
+}
+inline bool IsUpper(char ch) {
+  return std::isupper(static_cast<unsigned char>(ch)) != 0;
+}
+inline bool IsXDigit(char ch) {
+  return std::isxdigit(static_cast<unsigned char>(ch)) != 0;
+}
+inline bool IsXDigit(wchar_t ch) {
+  const auto low_byte = static_cast<unsigned char>(ch);
+  return ch == low_byte && std::isxdigit(low_byte) != 0;
+}
+
+inline char ToLower(char ch) {
+  return static_cast<char>(std::tolower(static_cast<unsigned char>(ch)));
+}
+inline char ToUpper(char ch) {
+  return static_cast<char>(std::toupper(static_cast<unsigned char>(ch)));
+}
+
+inline std::string StripTrailingSpaces(std::string str) {
+  std::string::iterator it = str.end();
+  while (it != str.begin() && IsSpace(*--it))
+    it = str.erase(it);
+  return str;
+}
 
 // Skips to the first non-space char after the first comma in 'str';
 // returns NULL if no comma is found in 'str'.
