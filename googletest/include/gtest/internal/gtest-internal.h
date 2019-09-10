@@ -52,6 +52,7 @@
 
 #include <float.h>
 #include <string.h>
+#include <algorithm>
 #include <cctype>
 #include <iomanip>
 #include <limits>
@@ -665,9 +666,9 @@ inline char ToUpper(char ch) {
 }
 
 inline std::string StripTrailingSpaces(std::string str) {
-  std::string::iterator it = str.end();
-  while (it != str.begin() && IsSpace(*--it))
-    it = str.erase(it);
+  const auto first_to_be_removed =
+      std::find_if_not(str.rbegin(), str.rend(), &IsSpace).base();
+  str.erase(first_to_be_removed, str.end());
   return str;
 }
 
