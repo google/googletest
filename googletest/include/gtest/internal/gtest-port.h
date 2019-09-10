@@ -441,15 +441,6 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 # endif  // defined(_MSC_VER) || defined(__BORLANDC__)
 #endif  // GTEST_HAS_EXCEPTIONS
 
-#if !defined(GTEST_HAS_STD_STRING)
-// Even though we don't use this macro any longer, we keep it in case
-// some clients still depend on it.
-# define GTEST_HAS_STD_STRING 1
-#elif !GTEST_HAS_STD_STRING
-// The user told us that ::std::string isn't available.
-# error "::std::string isn't available."
-#endif  // !defined(GTEST_HAS_STD_STRING)
-
 #ifndef GTEST_HAS_STD_WSTRING
 // The user didn't tell us whether ::std::wstring is available, so we need
 // to figure it out.
