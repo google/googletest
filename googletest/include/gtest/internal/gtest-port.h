@@ -248,7 +248,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <memory>
 #include <type_traits>
 
 #ifndef _WIN32_WCE
@@ -261,12 +260,10 @@
 # include <TargetConditionals.h>
 #endif
 
-#include <algorithm>  // NOLINT
 #include <iostream>   // NOLINT
-#include <sstream>    // NOLINT
+#include <memory>
 #include <string>     // NOLINT
 #include <tuple>
-#include <utility>
 #include <vector>  // NOLINT
 
 #include "gtest/internal/gtest-port-arch.h"
