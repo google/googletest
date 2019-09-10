@@ -249,7 +249,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <memory>
-#include <type_traits>
 
 #ifndef _WIN32_WCE
 # include <sys/types.h>
@@ -1892,9 +1891,6 @@ class GTEST_API_ ThreadLocal {
 // Returns the number of threads running in the process, or 0 to indicate that
 // we cannot detect it.
 GTEST_API_ size_t GetThreadCount();
-
-template <bool B>
-using bool_constant = std::integral_constant<bool, B>;
 
 #if GTEST_OS_WINDOWS
 # define GTEST_PATH_SEP_ "\\"

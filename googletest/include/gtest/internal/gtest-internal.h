@@ -860,6 +860,9 @@ struct CompileAssertTypesEqual<T, T> {
 #define GTEST_REMOVE_REFERENCE_AND_CONST_(T) \
   typename std::remove_const<typename std::remove_reference<T>::type>::type
 
+template <bool B>
+using bool_constant = std::integral_constant<bool, B>;
+
 // IsAProtocolMessage<T>::value is a compile-time bool constant that's
 // true if T is type proto2::Message or a subclass of it.
 template <typename T>
