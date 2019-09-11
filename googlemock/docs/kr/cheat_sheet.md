@@ -512,9 +512,9 @@ Expectation init_y = EXPECT_CALL(foo, InitY());
 EXPECT_CALL(foo, Bar())
      .After(init_x, init_y);
 ```
-위 코드는 `InitX()`와 `InitY()` 호출된 이후에 `Bar()`가 호출하기를 기대한다는 의미합니다.
+위 코드는 `InitX()`와 `InitY()`가 수행된 이후에 `Bar()`가 호출되기를 기대한다는 의미합니다.
 
-만약, 아직 `Bar()` 이전에 수행되어야 할 function들을 확정할 수 없는 상황이라면 `ExpectationSet`을 사용하면 됩니다.
+아직 개발 중이어서 `Bar()` 이전에 수행되어야 할 function들을 확정하기거 어려운 상황이라면 `ExpectationSet`을 사용하면 됩니다.
 
 ```cpp
 using ::testing::ExpectationSet;
@@ -526,7 +526,7 @@ for (int i = 0; i < element_count; i++) {
 EXPECT_CALL(foo, Bar())
      .After(all_inits);
 ```
-위 코드는 `Bar()`가 `all_inits`에 포함된 모든 expectation들이 수행된 후에 호출되기를 기대한다는 의미입니다. 그러나 `all_inits `에 포함된 expectaion들간의 호출순서는 신경쓰지 않습니다. 오직 `Bar()`가 그 후에 호출되기만 하면 됩니다.
+위 코드는 `Bar()`가 `all_inits`에 포함된 모든 expectation들이 수행된 이후에 호출되기를 기대한다는 의미입니다. 그러나 `all_inits `에 포함된 expectaion들간의 호출순서는 신경쓰지 않습니다. 오직 `Bar()`가 그 후에 호출되기만 하면 됩니다.
 
 이렇게 구현하면 나중에 `all_inits`에 expectation이 추가 혹은 삭제되더라도 `Bar()`가 그 다음에 호출되어야 한다는 점은 변함이 없습니다.
 
