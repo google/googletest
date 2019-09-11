@@ -1250,7 +1250,7 @@ using ::testing::InSequence;
 
 `InSequence`는 function의 호출순서를 일렬로 지정합니다. 이에 더해서 여러 function에 다양한 순서를 지정하는 것도 가능합니다. 예를 들어 `A`가 `B`와 `C`보다 먼저 호출되기를 바라는 것과 동시에 `B`와 `C`간에는 호출순서를 지정하고 싶지 않을 수도 있습니다. 기존처럼 `InSequence`를 사용하는 것은 원하는 것에 비해 많은 제약을 지정하는 것이기 때문에 적합하지 않습니다.
 
-gMock은 이렇게 부분적인 호출순서를 지원하기 위해서 DAG(directed acyclic graph)를 적용했습니다. 이를 사용하기 위한 몇 가지 방법이 있는데 먼저 `EXPECT_CALL`에 [After](cheat_sheet.md#the-after-clause)를 붙여서 사용하는 것이 한가지 방법입니다.
+gMock은 이렇게 부분적인 호출순서를 지원하기 위해서 DAG(directed acyclic graph)를 적용했습니다. 이를 사용하기 위한 몇 가지 방법이 있는데 먼저 `EXPECT_CALL`에 [`After()`](cheat_sheet.md#the-after-clause)를 붙여서 사용하는 것이 한가지 방법입니다.
 
 또 다른 방법은 `InSequence()`를 사용하는 것입니다.(위에서 설명한 `InSequence` class와는 다릅니다.) 이 개념은 jMock 2에서 가져왔습니다. `After()`보다는 유연성이 떨어지긴 하지만 길고 연속된 함수호출을 지정할 때 편리합니다. 왜냐하면 하나의 호출흐름 안에 있는 `EXPECT_CALL`들은 별도의 이름을 가질 필요가 없기 때문입니다. 아래에 계속해서 `InSequence()`의 동작방식을 설명하겠습니다.
 
