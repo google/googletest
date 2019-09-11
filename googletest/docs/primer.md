@@ -319,7 +319,7 @@ To create a fixture:
 4.  If necessary, write a destructor or `TearDown()` function to release any
     resources you allocated in `SetUp()` . To learn when you should use the
     constructor/destructor and when you should use `SetUp()/TearDown()`, read
-    the [FAQ](faq.md).
+    the [FAQ](faq.md#CtorVsSetUp).
 5.  If needed, define subroutines for your tests to share.
 
 When using a fixture, use `TEST_F()` instead of `TEST()` as it allows you to
