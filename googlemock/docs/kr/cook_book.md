@@ -63,7 +63,7 @@ class MockFoo {
 
 #### Private, Protected 영역에 정의된 Method를 Mocking하기 ####
 
-Base class의 method가 `public`, `protected`, `private` 등 어느 영역에 정의되어 있는지에 관계없이 mock method를 정의할 때 사용하는 `MOCK_METHOD` macro는 항상 `public` 영역에서 사용해야 합니다. (C++은 base class의 virtual function이 어느 영역에 선언되었는지에 관계없이 derived class에서는 원하는 영역에 자유롭게 overriding 할 수 있습니다.) 이렇게 해야만 `ON_CALL`, `EXPECT_CALL`과 같은 매크로가 mock class 또는 mock function에 접근할 수 있습니다. 아래 예제를 확인하세요.
+Base class의 method가 `public`, `protected`, `private` 등 어느 영역에 정의되어 있는지에 관계없이 mock method를 정의할 때 사용하는 `MOCK_METHOD` macro는 항상 `public` 영역에서 사용해야 합니다. (C++은 base class의 virtual function이 어느 영역에 선언되었는지에 관계없이 derived class에서는 원하는 영역에 자유롭게 overriding 할 수 있습니다.) 이렇게 해야만 `ON_CALL()`, `EXPECT_CALL()`과 같은 매크로가 mock class 또는 mock function에 접근할 수 있습니다. 아래 예제를 확인하세요.
 
 ```cpp
 class Foo {
@@ -271,9 +271,9 @@ class File : public FileInterface {
 
 #### Nice 모드, Strict 모드, Naggy 모드 (Naggy: 잔소리가 심한) ####
 
-`EXPECT_CALL` 없이 호출된 mock method가 있다면, gMock은 "uninteresting call"이라는 warning을 출력한 후에 default action을 수행합니다. 이 때, warning을 출력해주는 이유는 아래와 같습니다.
+`EXPECT_CALL()` 없이 호출된 mock method가 있다면, gMock은 "uninteresting call"이라는 warning을 출력한 후에 default action을 수행합니다. 이 때, warning을 출력해주는 이유는 아래와 같습니다.
 
-- 테스트코드가 이미 작성된 상태라고 해도 시간이 지남에 따라 mocking 대상 interface(혹은 base class)에 새로운 method가 추가될 수 있습니다. 또 이렇게 새로 추가된 method가 있다면 이를 위한 mock method를 추가하는 것도 자연스러운 과정입니다. 따라서 gMock에서는 새로 추가된 mock method가 있는데 `EXPECT_CALL` 없이 호출되었으니 한 번 확인해보라는 의미로 warning을 출력합니다.
+- 테스트코드가 이미 작성된 상태라고 해도 시간이 지남에 따라 mocking 대상 interface(혹은 base class)에 새로운 method가 추가될 수 있습니다. 또 이렇게 새로 추가된 method가 있다면 이를 위한 mock method를 추가하는 것도 자연스러운 과정입니다. 따라서 gMock에서는 새로 추가된 mock method가 있는데 `EXPECT_CALL()` 없이 호출되었으니 한 번 확인해보라는 의미로 warning을 출력합니다.
 - 이렇게 예측하지 못했던 mock method가 호출되는 상황은 추후에 문제가 될 수도 있기 때문에 테스트 failure까지는 아니더라도 warning을 통해 알려주는 것입니다. 따라서 warning이 발생하면 해당 mock method가 호출되어야 할 상황인지 아닌지 확인해보기 바랍니다. 만약 호출되는 것이 맞다면 해당 mock method에 대해 `EXPECT_CALL()`만 추가하면 됩니다. 그럼 더 이상 warning도 발생하지 않을 것입니다.
 
 "uninteresting call"이라는 warning을 출력해주는 것은 말 그대로 경고의 의미입니다. 다만, 이러한 warning조차도 아예 출력되지 않기를 바라는 사람도 있을 수 있고 또는 모든 warning을 error로 처리하고 싶은 사람도 있을 것입니다. gMock에서는 이러한 처리방법을 사용자가 선택할 수 있게 했습니다. 더불어 mock object 별로 이러한 설정을 다르게 할 수도 있습니다.
@@ -288,7 +288,7 @@ TEST(...) {
 }
 ```
 
-먼저, `MockFoo`에는 여러개의 mock method가 정의되어 있다고 가정하겠습니다. 이런 상황에서 위의 테스트코드를 실행했더니 `EXPECT_CALL`을 명시적으로 사용한 `DoThis()` 외에 다른 mock method의 호출도 발생했습니다. 그럼 gMock은 warning을 출력할텐데 만약 이러한 warning을 보고 싶지 않다면 mock object를 생성할 때 `NiceMock<MockFoo>`으로 사용하면 됩니다. 즉, 아래와 같이 구현하면 더 이상 warning을 출력하지 않습니다.
+먼저, `MockFoo`에는 여러개의 mock method가 정의되어 있다고 가정하겠습니다. 이런 상황에서 위의 테스트코드를 실행했더니 `EXPECT_CALL()`을 명시적으로 사용한 `DoThis()` 외에 다른 mock method의 호출도 발생했습니다. 그럼 gMock은 warning을 출력할텐데 만약 이러한 warning을 보고 싶지 않다면 mock object를 생성할 때 `NiceMock<MockFoo>`으로 사용하면 됩니다. 즉, 아래와 같이 구현하면 더 이상 warning을 출력하지 않습니다.
 
 ```cpp
 using ::testing::NiceMock;
@@ -609,7 +609,7 @@ class MockFoo : public Foo {
   });
 ```
 
-아니면 `ON_CALL`을 사용해서 default action으로 지정하는 것도 괜찮습니다.
+아니면 `ON_CALL()`을 사용해서 default action으로 지정하는 것도 괜찮습니다.
 
 ```cpp
 ...
@@ -912,7 +912,7 @@ int IsEven(int n) { return (n % 2) == 0 ? 1 : 0; }
 
 사용자가 `EXPECT_CALL(mock_obj, Foo(bar))`라고 구현했다면, gMock은 `Foo()`의 argument로 전달된 `bar`의 복사본을 만들고 내부적으로 저장해 둡니다. 그랬다가 추후에 `Foo()`가 실제로 호출되면 미리 저장해둔 `bar`의 복사본을 사용하는 것입니다. 이렇게 동작하는 이유는 `EXPECT_CALL()`이 호출되고 난 후에 `bar`의 값이 변경되는 문제를 방지하기 위한 것입니다. `Eq(bar)`, `Le(bar)`와 같은 다른 matcher를 사용하는 경우에도 동일한 방식이 적용됩니다.
 
-그런데 여기서 `bar`의 복사가 불가능하다면 어떻게 해야 할까요?(예를 들어 copy constructor가 없다거나) 첫번째 해결방법은 자체적으로 matcher function을 구현하여 `Truly()`와 함께 사용하는 것입니다. 두번째 해결방법은 `EXPECT_CALL`이 호출된 이후에는 `bar`가 수정되지 않을 것임을 gMock에게 알려주는 것입니다. 그렇게 되면 gMock은 `bar`의 복사본 대신에 참조(주소)를 저장하게 됩니다. 아래와 같이 하면 됩니다.
+그런데 여기서 `bar`의 복사가 불가능하다면 어떻게 해야 할까요?(예를 들어 copy constructor가 없다거나) 첫번째 해결방법은 자체적으로 matcher function을 구현하여 `Truly()`와 함께 사용하는 것입니다. 두번째 해결방법은 `EXPECT_CALL()`이 호출된 이후에는 `bar`가 수정되지 않을 것임을 gMock에게 알려주는 것입니다. 그렇게 되면 gMock은 `bar`의 복사본 대신에 참조(주소)를 저장하게 됩니다. 아래와 같이 하면 됩니다.
 
 ```cpp
 using ::testing::ByRef;
@@ -1130,11 +1130,11 @@ WARNING: gMock은 언제 얼마나 많은 matcher가 실행될지 미리 알지 
 
 #### ON_CALL, EXPECT_CALL을 구분하고 사용하는 방법 ####
 
-gMock의 `ON_CALL`은 아마도 자주 사용되는 기능은 아닐 것입니다.
+gMock의 `ON_CALL()`은 아마도 자주 사용되는 기능은 아닐 것입니다.
 
-알다시피 mock object의 행위를 지정하는 방법은 2가지가 있습니다. `ON_CALL`, `EXPECT_CALL`이 그것입니다. 그럼 2개의 다른점은 무엇일까요? 먼저 `ON_CALL`의 경우를 보면 `ON_CALL`은 mock method가 호출되었을 때 어떤 행위를 해야하는지를 지정하는 것은 가능하지만 *expectation*을 지정할 수는 없습니다. 다음으로 `EXPECT_CALL`은 행위를 지정하는 것에 더해서 expectation을 지정하는 것도 가능합니다. 여기서 expectation을 지정한다는 것의 의미는 예를 들어서 *mock method로 어떤 argument가 전달되어야 하는지, 몇 번 호출되어야 하는지, mock method 간의 호출순서는 어떠한지*와 같은 정보를 테스트를 구현하는 사람이 명시할 수 있다는 의미입니다.
+알다시피 mock object의 행위를 지정하는 방법은 2가지가 있습니다. `ON_CALL()`, `EXPECT_CALL()`이 그것입니다. 그럼 2개의 다른점은 무엇일까요? 먼저 `ON_CALL()`의 경우를 보면 `ON_CALL()`은 mock method가 호출되었을 때 어떤 행위를 해야하는지를 지정하는 것은 가능하지만 *expectation*을 지정할 수는 없습니다. 다음으로 `EXPECT_CALL()`은 행위를 지정하는 것에 더해서 expectation을 지정하는 것도 가능합니다. 여기서 expectation을 지정한다는 것의 의미는 예를 들어서 *mock method로 어떤 argument가 전달되어야 하는지, 몇 번 호출되어야 하는지, mock method 간의 호출순서는 어떠한지*와 같은 정보를 테스트를 구현하는 사람이 명시할 수 있다는 의미입니다.
 
-그럼 "`EXPECT_CALL`이 제공하는 기능이 더 많으므로 `EXPECT_CALL`이 `ON_CALL`보다 좋다"라고 하면 될까요? 물론 아닙니다. 왜냐하면 `EXPECT_CALL`은 테스트 대상의 행위에 어찌됐든 제약을 계속해서 추가하는 것입니다. 여기서 우리는 제약사항이 필요한 것보다 많은 상황이 부족한 상황보다 오히려 더 나쁜 것으로 봐야한다는 점이 중요합니다.
+그럼 "`EXPECT_CALL()`이 제공하는 기능이 더 많으므로 `EXPECT_CALL()`이 `ON_CALL()`보다 좋다"라고 하면 될까요? 물론 아닙니다. 왜냐하면 `EXPECT_CALL()`은 테스트 대상의 행위에 어찌됐든 제약을 계속해서 추가하는 것입니다. 여기서 우리는 제약사항이 필요한 것보다 많은 상황이 부족한 상황보다 오히려 더 나쁜 것으로 봐야한다는 점이 중요합니다.
 
 약간 직관에 반하는 이야기이기도 합니다. 왜 더 많이 검증하는 것이 더 적게 검증하는 것보다 나쁜 걸까요?
 
@@ -1142,15 +1142,15 @@ gMock의 `ON_CALL`은 아마도 자주 사용되는 기능은 아닐 것입니�
 
 1개의 테스트로 많은 것을 검증하려고 하면 안됩니다. **1개 테스트로는 1개만 검증하는 것이 좋은 습관입니다.** 그렇게 해야만 bug가 발생해도 1~2개의 테스트에서만 문제가 될 것입니다. 그렇지 않고 여러개의 테스트가 한 번에 잘못되면 디버깅하기가 훨씬 어려워집니다. 또한, 테스트의 이름을 통해서 무엇을 검증하려 하는지 자세히 표현하는 것도 좋은 습관입니다. 그렇게 해야 log만 보고도 어떤 문제인지 예측할 수 있습니다.
 
-이제부터는 `ON_CALL`을 먼저 사용하고, 실제로 필요할 때만 `EXPECT_CALL`을 사용하시기 바랍니다. 예를 들어 test fixture에 여러개의 `ON_CALL`을 구현할 수도 있습니다. 그렇게 되면 모든 `TEST_F()`가 동일한 설정을 공유하도록 할 수 있습니다. 이렇게 `ON_CALL`을 통해 기본적인 설정을 공유한 다음에 개별 `TEST_F()`에는 조심스럽게 `EXPECT_CALL`을 적용하기 바랍니다. 이러한 전략은 각각의 `TEST_F()`에 많은 `EXPECT_CALL`을 사용하는 것보다 훨씬 유연한 테스트로 만들어 줄 것입니다. 또한, 테스트의 목적도 명확하게 표현할 수 있기 때문에 가독성 및 유지보수성도 향상될 것입니다.
+이제부터는 `ON_CALL()`을 먼저 사용하고, 실제로 필요할 때만 `EXPECT_CALL()`을 사용하시기 바랍니다. 예를 들어 test fixture에 여러개의 `ON_CALL()`을 구현할 수도 있습니다. 그렇게 되면 모든 `TEST_F()`가 동일한 설정을 공유하도록 할 수 있습니다. 이렇게 `ON_CALL()`을 통해 기본적인 설정을 공유한 다음에 개별 `TEST_F()`에는 조심스럽게 `EXPECT_CALL()`을 적용하기 바랍니다. 이러한 전략은 각각의 `TEST_F()`에 많은 `EXPECT_CALL()`을 사용하는 것보다 훨씬 유연한 테스트로 만들어 줄 것입니다. 또한, 테스트의 목적도 명확하게 표현할 수 있기 때문에 가독성 및 유지보수성도 향상될 것입니다.
 
-만약, `EXPECT_CALL`을 사용하는 mock function들이 너무 많은 "Uninteresting mock function call"을 발생시켜서 문제가 된다면 `NiceMock`을 사용하기 바랍니다. 또는 문제가 되는 mock function에 대해 `EXPECT_CALL(....).Times(AnyNumber())`를 사용하는 것도 괜찮습니다. 단지 warning message를 없애기 위한 목적으로 너무 상세한 `EXPECT_CALL(....)`을 작성해서는 안 됩니다. 그렇게 하면 유지보수가 힘들어집니다.
+만약, `EXPECT_CALL()`을 사용하는 mock function들이 너무 많은 "Uninteresting mock function call"을 발생시켜서 문제가 된다면 `NiceMock`을 사용하기 바랍니다. 또는 문제가 되는 mock function에 대해 `EXPECT_CALL(....).Times(AnyNumber())`를 사용하는 것도 괜찮습니다. 단지 warning message를 없애기 위한 목적으로 너무 상세한 `EXPECT_CALL(....)`을 작성해서는 안 됩니다. 그렇게 하면 유지보수가 힘들어집니다.
 
 #### Uninteresting Call 무시하기 ####
 
-만약, 어떤 mock method가 호출되는것에 관심이 없다면 별다른 설정을 하지 않으면 됩니다. 그런 상황에서 해당 mock method가 호출되면 gMock은 test program을 계속 진행하기 위한 목적으로 default action을 자동적으로 수행합니다. 만약 이러한 default action이 원하는 방향과 다르다면 default action을 변경할 수도 있습니다. 이를 위해서는 `ON_CALL`을 이용해도 되고 `DefaultValue<T>::Set()`을 overriding해도 됩니다.(뒤에서 다시 설명합니다.)
+만약, 어떤 mock method가 호출되는것에 관심이 없다면 별다른 설정을 하지 않으면 됩니다. 그런 상황에서 해당 mock method가 호출되면 gMock은 test program을 계속 진행하기 위한 목적으로 default action을 자동적으로 수행합니다. 만약 이러한 default action이 원하는 방향과 다르다면 default action을 변경할 수도 있습니다. 이를 위해서는 `ON_CALL()`을 이용해도 되고 `DefaultValue<T>::Set()`을 overriding해도 됩니다.(뒤에서 다시 설명합니다.)
 
-이렇게 `ON_CALL`을 사용한 default action 설정과 대비하여 다시 한 번 기억해야 할 부분은 `EXPECT_CALL`은 사용하는 순간부터 해당 mock method에 (더 엄격한) expectation을 설정하는 것이며 그러한 expectation이 만족하지 않으면 test failure를 발생한다는 것입니다.
+이렇게 `ON_CALL()`을 사용한 default action 설정과 대비하여 다시 한 번 기억해야 할 부분은 `EXPECT_CALL()`은 사용하는 순간부터 해당 mock method에 (더 엄격한) expectation을 설정하는 것이며 그러한 expectation이 만족하지 않으면 test failure를 발생한다는 것입니다.
 
 #### Unexpected Call 허용하지 않기 ####
 
@@ -1163,7 +1163,7 @@ using ::testing::_;
       .Times(0);
 ```
 
-동일한 mock method에 대해서 어떤 방식의 호출은 허용하고, 나머지는 허용하지 않으려면 `EXPECT_CALL`을  여러개 사용하면 됩니다.
+동일한 mock method에 대해서 어떤 방식의 호출은 허용하고, 나머지는 허용하지 않으려면 `EXPECT_CALL()`을  여러개 사용하면 됩니다.
 
 ```cpp
 using ::testing::AnyNumber;
@@ -1174,7 +1174,7 @@ using ::testing::Gt;
       .Times(AnyNumber());
 ```
 
-만약 `foo.Bar()`가 호출되었는데 위의 코드에서 설정한 2개의 `EXPECT_CALL` 중에서 어느 것도 만족하지 않았다면 해당 테스트는 실패하게 됩니다.
+만약 `foo.Bar()`가 호출되었는데 위의 코드에서 설정한 2개의 `EXPECT_CALL()` 중에서 어느 것도 만족하지 않았다면 해당 테스트는 실패하게 됩니다.
 
 #### Uninteresting vs Unexpected 를 구분하자 ####
 
@@ -1186,7 +1186,7 @@ gMock에서 *uninteresting* 호출과 *unexpected*호출은 서로 다른 개념
 
 **unexpected call이 발생한 테스트는 항상 실패로 판정됩니다.** 왜냐하면 이것은 곧 mock function에 대한 expectation과 실제 코드의 동작이 다름을 의미하기 때문입니다.
 
-반대로 (기본모드naggy에서) **uninteresting call은 테스트 실패를 의미하지 않습니다.** 왜냐하면 테스트에서 해당 mock function의 동작을 정의한 적이 없기 때문입니다. gMock은 아무런 expectation도 설정되지 않은 mock function은 어떻게 수행되더라도 괜찮다고 판단합니다. 대신 언젠가 문제가 *될 수도 있음을* 알리기 위해 warning을 출력해 줍니다. 왜냐하면 예를 들어서 사용자가 테스트를 구현하다가 `EXPECT_CALL`을 실수로 빠트렸을 수도 있기 때문입니다.
+반대로 (기본모드naggy에서) **uninteresting call은 테스트 실패를 의미하지 않습니다.** 왜냐하면 테스트에서 해당 mock function의 동작을 정의한 적이 없기 때문입니다. gMock은 아무런 expectation도 설정되지 않은 mock function은 어떻게 수행되더라도 괜찮다고 판단합니다. 대신 언젠가 문제가 *될 수도 있음을* 알리기 위해 warning을 출력해 줍니다. 왜냐하면 예를 들어서 사용자가 테스트를 구현하다가 `EXPECT_CALL()`을 실수로 빠트렸을 수도 있기 때문입니다.
 
 gMock에서 `NiceMock`과 `StrictMock`은 mock class를 "nice" 또는 "strict"로 만들어 줍니다. 이것이 uninteresting call과 unexpected call에 어떤 영향을 미칠까요?
 
@@ -1207,9 +1207,9 @@ TEST(...) {
 }
 ```
 
-위의 `EXPECT_CALL`은 `GetDomainOwner()`의 argument로 `"google.com"`을 전달받기를 기대합니다. 따라서 `GetDomainOnwer("yahoo.com")`라는 내용으로 호출되면 이것은 unexpected call이고 테스트는 실패합니다. 즉, `NiceMock`을 사용했다고 하더라도 unexpected call로 인한 실패는 동일하게 실패라는 것입니다.
+위의 `EXPECT_CALL()`은 `GetDomainOwner()`의 argument로 `"google.com"`을 전달받기를 기대합니다. 따라서 `GetDomainOnwer("yahoo.com")`라는 내용으로 호출되면 이것은 unexpected call이고 테스트는 실패합니다. 즉, `NiceMock`을 사용했다고 하더라도 unexpected call로 인한 실패는 동일하게 실패라는 것입니다.
 
-그러면 `GetDomainOnwer()`가 어떤 argument를 전달받더라도 테스트가 실패하지 않게 하려면 어떻게 하면 될까요? 이런 경우에는 "catch all" 목적의 `EXPECT_CALL`을 추가하는 것이 일반적입니다. `_` 와 `AnyNumber()`를 사용해서 구현합니다.
+그러면 `GetDomainOnwer()`가 어떤 argument를 전달받더라도 테스트가 실패하지 않게 하려면 어떻게 하면 될까요? 이런 경우에는 "catch all" 목적의 `EXPECT_CALL()`을 추가하는 것이 일반적입니다. `_` 와 `AnyNumber()`를 사용해서 구현합니다.
 
 ```cpp
   EXPECT_CALL(mock_registry, GetDomainOwner(_))
@@ -1218,15 +1218,15 @@ TEST(...) {
         .WillRepeatedly(Return("Larry Page"));
 ```
 
-`_`는 argument로 어떤 값이 전달되더라도 성공하는 wildcard matcher라는 것은 이미 배운 내용입니다. 이와 함께 두번째 `EXPECT_CALL`에는 `GetDomainOwner("google.com")`도 지정하고 있습니다. 이것이 의미하는 바는 argument에 따라서 `GetDomainOnwer()` 함수의 행위를 다르게 하라는 것입니다.
+`_`는 argument로 어떤 값이 전달되더라도 성공하는 wildcard matcher라는 것은 이미 배운 내용입니다. 이와 함께 두번째 `EXPECT_CALL()`에는 `GetDomainOwner("google.com")`도 지정하고 있습니다. 이것이 의미하는 바는 argument에 따라서 `GetDomainOnwer()` 함수의 행위를 다르게 하라는 것입니다.
 
-한가지 주의할 점은 이렇게 동일한 mock function에 대해 여러개의 `EXPECT_CALL`을 사용하면 소스코드 상에서 나중에 오는 것과 먼저 비교한다는 것입니다. 즉, 위의 코드에서는 `GetDomainOwner()`에 대한 호출이 발생하면 `GetDomainOwner("google.com")`와 먼저 비교해보고 이것을 만족하지 않으면 다음으로 `GetDomainOwner(_)`와의 비교를 수행하게 됩니다.
+한가지 주의할 점은 이렇게 동일한 mock function에 대해 여러개의 `EXPECT_CALL()`을 사용하면 소스코드 상에서 나중에 오는 것과 먼저 비교한다는 것입니다. 즉, 위의 코드에서는 `GetDomainOwner()`에 대한 호출이 발생하면 `GetDomainOwner("google.com")`와 먼저 비교해보고 이것을 만족하지 않으면 다음으로 `GetDomainOwner(_)`와의 비교를 수행하게 됩니다.
 
 Uninteresting call, nice mock, strict mock에 대한 더 자세한 내용은 ["The Nice, the Strict, and the Naggy"](cook_book.md#nice-모드-strict-모드-naggy-모드-naggy-잔소리가-심한)를 참조하세요.
 
 #### 함수의 호출순서 지정하기 ####
 
-하나의 mock function에 대해 여러개의 `EXPECT_CALL`을 사용했을 때, `EXPECT_CALL`을 비교하는 순서가 있다고 바로 위에서 얘기했습니다. 그러나 이렇게 만족하는 `EXPECT_CALL`을 탐색하는 과정에 순서가 있다고 해서 해당 mock function이 특정한 호출순서가 가진다고 말할 수는 없습니다. 예를 들어 어떤 mock function에 2개의 `EXPECT_CALL`을 설정했다면 기대를 만족하는 `EXPECT_CALL`은 첫번째 일수도 있고, 두번째 일수도 있습니다. 단지 두번째 것을 먼저 비교해보는 것 뿐이죠. 다시 말하면 비교순서는 정해져 있지만 호출순서는 아직 지정하지 않은 것입니다.
+하나의 mock function에 대해 여러개의 `EXPECT_CALL()`을 사용했을 때, `EXPECT_CALL()`을 비교하는 순서가 있다고 바로 위에서 얘기했습니다. 그러나 이렇게 만족하는 `EXPECT_CALL()`을 탐색하는 과정에 순서가 있다고 해서 해당 mock function이 특정한 호출순서가 가진다고 말할 수는 없습니다. 예를 들어 어떤 mock function에 2개의 `EXPECT_CALL()`을 설정했다면 기대를 만족하는 `EXPECT_CALL()`은 첫번째 일수도 있고, 두번째 일수도 있습니다. 단지 두번째 것을 먼저 비교해보는 것 뿐이죠. 다시 말하면 비교순서는 정해져 있지만 호출순서는 아직 지정하지 않은 것입니다.
 
 그러면 호출순서를 명확히 지정하고 싶다면 어떻게 해야할까요? 이를 위해서는 아래 예제와 같이 해당하는 `EXPECT_CALL()`들을 모아서 새로운 block에 넣고 상단에 `InSequence`라는 타입의 변수를 선언하면 됩니다.
 
@@ -1244,21 +1244,21 @@ using ::testing::InSequence;
   }
 ```
 
-위 코드는 `foo.DoThis(5)`가 제일 먼저 호출되고 그 다음에 `foo.DoThat(_)`, `foo.DoThis(6)`이 순서대로 호출되기를 기대하는 코드입니다. 만약 `foo.DoThis()`를 처음 호출할때 argument로 `6`이 전달되면 `DoThis(5)`를 만족하지 않기 때문에 테스트가 실패합니다. 즉, 현재 호출순서에 있는 `EXPECT_CALL`이 기대를 만족하지 않는다고 해서 기대를 만족하는 다른 `EXPECT_CALL`이 있는지 찾거나 하지 않습니다. 여기서 한가지 유의할 점은 기존에는 단순히 만족하는 `EXPECT_CALL`을 탐색할 때는 소스코드상에서 하단에 있는 `EXPECT_CALL`부터 먼저 비교했지만, `InSequence`를 사용하는 상황에서는 위에서부터 순서대로 진행한다는 점입니다.
+위 코드는 `foo.DoThis(5)`가 제일 먼저 호출되고 그 다음에 `foo.DoThat(_)`, `foo.DoThis(6)`이 순서대로 호출되기를 기대하는 코드입니다. 만약 `foo.DoThis()`를 처음 호출할때 argument로 `6`이 전달되면 `DoThis(5)`를 만족하지 않기 때문에 테스트가 실패합니다. 즉, 현재 호출순서에 있는 `EXPECT_CALL()`이 기대를 만족하지 않는다고 해서 기대를 만족하는 다른 `EXPECT_CALL()`이 있는지 찾거나 하지 않습니다. 여기서 한가지 유의할 점은 기존에는 단순히 만족하는 `EXPECT_CALL()`을 탐색할 때는 소스코드상에서 하단에 있는 `EXPECT_CALL()`부터 먼저 비교했지만, `InSequence`를 사용하는 상황에서는 위에서부터 순서대로 진행한다는 점입니다.
 
 #### 함수의 호출순서를 부분부분 지정하기 ####
 
 `InSequence`는 function의 호출순서를 일렬로 지정합니다. 이에 더해서 여러 function에 다양한 순서를 지정하는 것도 가능합니다. 예를 들어 `A`가 `B`와 `C`보다 먼저 호출되기를 바라는 것과 동시에 `B`와 `C`간에는 호출순서를 지정하고 싶지 않을 수도 있습니다. 기존처럼 `InSequence`를 사용하는 것은 원하는 것에 비해 많은 제약을 지정하는 것이기 때문에 적합하지 않습니다.
 
-gMock은 이렇게 부분적인 호출순서를 지원하기 위해서 DAG(directed acyclic graph)를 적용했습니다. 이를 사용하기 위한 몇 가지 방법이 있는데 먼저 `EXPECT_CALL`에 [`After()`](cheat_sheet.md#the-after-clause)를 붙여서 사용하는 것이 한가지 방법입니다.
+gMock은 이렇게 부분적인 호출순서를 지원하기 위해서 DAG(directed acyclic graph)를 적용했습니다. 이를 사용하기 위한 몇 가지 방법이 있는데 먼저 `EXPECT_CALL()`에 `After()`(cheat_sheet.md#the-after-clause)를 붙여서 사용하는 것이 한가지 방법입니다.
 
-또 다른 방법은 `InSequence()`를 사용하는 것입니다.(위에서 설명한 `InSequence` class와는 다릅니다.) 이 개념은 jMock 2에서 가져왔습니다. `After()`보다는 유연성이 떨어지긴 하지만 길고 연속된 함수호출을 지정할 때 편리합니다. 왜냐하면 하나의 호출흐름 안에 있는 `EXPECT_CALL`들은 별도의 이름을 가질 필요가 없기 때문입니다. 아래에 계속해서 `InSequence()`의 동작방식을 설명하겠습니다.
+또 다른 방법은 `InSequence()`를 사용하는 것입니다.(위에서 설명한 `InSequence` class와는 다릅니다.) 이 개념은 jMock 2에서 가져왔습니다. `After()`보다는 유연성이 떨어지긴 하지만 길고 연속된 함수호출을 지정할 때 편리합니다. 왜냐하면 하나의 호출흐름 안에 있는 `EXPECT_CALL()`들은 별도의 이름을 가질 필요가 없기 때문입니다. 아래에 계속해서 `InSequence()`의 동작방식을 설명하겠습니다.
 
 `EXPECT_CALL()`을 graph 자료구조의 node라고 가정해봅시다. 그럼 node A에서 node B로 가는 edge를 추가함으로 DAG가 하나 만들어집니다. 이 때, 해당 DAG의 의미는 A가 B보다 먼저 호출되어야 함을 뜻합니다. 이렇게 DAG에서 직접적으로 연결되는 edge를 "sequence"라고 부릅니다. 여기서 하나의 sequence에는 또 다시 내부적으로 DAG를 구성할 수 있습니다. 이렇게 내부적으로 구성된 DAG는 자신이 가지고 있는 `EXPECT_CALL()`들의 호출순서 정보와 함께 바깥의 DAG를 만드는데 영향을 주는 `EXPECT_CALL()`도 알고 있어야 합니다.
 
-이러한 부분적인 호출순서를 실제로 구현하려면 2가지만 알면 됩니다. 먼저 DAG의 edge(sequence)를 의미하는 `Sequence` object를 정의합니다. 다음으로 DAG의 node(`EXPECT_CALL`)가 어느 `Sequence`에 속하는지 알려주는 것입니다. 
+이러한 부분적인 호출순서를 실제로 구현하려면 2가지만 알면 됩니다. 먼저 DAG의 edge(sequence)를 의미하는 `Sequence` object를 정의합니다. 다음으로 DAG의 node(`EXPECT_CALL()`)가 어느 `Sequence`에 속하는지 알려주는 것입니다. 
 
-이제 같은 `Sequence`에 속하는 `EXPECT_CALL`들은 소스코드상에서 위-아래로, 즉 작성된 순서대로 호출되어야 합니다.
+이제 같은 `Sequence`에 속하는 `EXPECT_CALL()`들은 소스코드상에서 위-아래로, 즉 작성된 순서대로 호출되어야 합니다.
 
 ```cpp
 using ::testing::Sequence;
@@ -1289,7 +1289,7 @@ using ::testing::Sequence;
 
 #### Expectation의 active/inactive 설정하기 ####
 
-어떤 mock method가 호출되어 만족하는 expectation(`EXPECT_CALL`)을 찾을 때, gMock은 active 상태인 expectation에 대해서만 이러한 작업을 수행합니다. Expectation들이 처음 생성되어 호출되기 전에는 기본적으로 active상태라고 보면 됩니다. 그러다가 자신보다 나중에 호출되어야 할 함수가 호출되는 시점에 inactive 상태가 됩니다. 이렇게 inactive 상태가 되는 것을 *retires*라고 부릅니다.
+어떤 mock method가 호출되어 만족하는 expectation(`EXPECT_CALL()`)을 찾을 때, gMock은 active 상태인 expectation에 대해서만 이러한 작업을 수행합니다. Expectation들이 처음 생성되어 호출되기 전에는 기본적으로 active상태라고 보면 됩니다. 그러다가 자신보다 나중에 호출되어야 할 함수가 호출되는 시점에 inactive 상태가 됩니다. 이렇게 inactive 상태가 되는 것을 *retires*라고 부릅니다.
 
 ```cpp
 using ::testing::_;
@@ -1624,7 +1624,7 @@ using ::testing::Return;
   foo.Sign(0);   // This should return 0.
 ```
 
-동일한 mock method에 대해서 `ON_CALL()`을 여러개 사용하면 코드상에서 나중에 오는 것부터 먼저 탐색하게 됩니다. 즉, 밑에서 위 방향으로 하나씩 비교하면서 원하는 `ON_CALL`이 있는지 찾게 됩니다. 이러한 비교순서는 mock object의 constructor나 test fixture에서 적용한 `ON_CALL()`의 우선순위가 개별 `TEST()`에서 지정한 `ON_CALL()`의 우선순위보다 낮아지도록 만듭니다. 쉽게 말하면 동일한 이름의 지역변수와 전역변수가 있을 때, 지역변수가 먼저 선택되는 것과 같습니다.
+동일한 mock method에 대해서 `ON_CALL()`을 여러개 사용하면 코드상에서 나중에 오는 것부터 먼저 탐색하게 됩니다. 즉, 밑에서 위 방향으로 하나씩 비교하면서 원하는 `ON_CALL()`이 있는지 찾게 됩니다. 이러한 비교순서는 mock object의 constructor나 test fixture에서 적용한 `ON_CALL()`의 우선순위가 개별 `TEST()`에서 지정한 `ON_CALL()`의 우선순위보다 낮아지도록 만듭니다. 쉽게 말하면 동일한 이름의 지역변수와 전역변수가 있을 때, 지역변수가 먼저 선택되는 것과 같습니다.
 
 #### Functions/Functors/Lambda를 Action으로 사용하기 ####
 
@@ -2405,7 +2405,7 @@ gMock은 잠재적으로 error 가능성이 있는 부분에 대해 warning mess
 
 따라서 gMock은 이러한 정보의 양을 조절하는 방법을 제공합니다. 실행시점에 `--gmock_verbose=LEVEL`이라는 flag를 사용하면 됩니다. 여기서 `LEVEL`에는 3개의 값을 지정할 수 있습니다.
 
-- `info`: gMock은 warning, error등의 모든 정보를 최대한 자세하게 출력합니다. 또한, `ON_CALL/EXPECT_CALL` 사용에 대한 log도 출력해 줍니다.
+- `info`: gMock은 warning, error등의 모든 정보를 최대한 자세하게 출력합니다. 또한, `ON_CALL()/EXPECT_CALL()` 사용에 대한 log도 출력해 줍니다.
 - `warning`: gMock은 warning, error를 출력해 줍니다. 단, 그 내용이 `info` 모드보다 자세하지는 않습니다. 현재 gMock의 기본설정입니다.
 - `error`: gMock은 error만 출력해줍니다.
 
@@ -2419,9 +2419,9 @@ Flag 외에 코드에서 아래와 같은 변수를 수정해도 동일한 기�
 
 #### Mock 호출을 자세하게 들여다보기 ####
 
-gMock은 mock function에 지정한 expectation이 만족되지 않으면 이를 알려줍니다. 그러나 왜 그런 문제가 발생했는지가 궁금한 사용자도 있을 것입니다. 예를 들어 matcher를 사용할 때 어떤 오타가 있었는지? `EXPECT_CALL`의 순서가 틀렸는지? 혹은 테스트 대상코드에 문제가 있었는지? 등등이 있을텐데요. 어떻게 하면 이런 내용을 알아낼 수 있을까요?
+gMock은 mock function에 지정한 expectation이 만족되지 않으면 이를 알려줍니다. 그러나 왜 그런 문제가 발생했는지가 궁금한 사용자도 있을 것입니다. 예를 들어 matcher를 사용할 때 어떤 오타가 있었는지? `EXPECT_CALL()`의 순서가 틀렸는지? 혹은 테스트 대상코드에 문제가 있었는지? 등등이 있을텐데요. 어떻게 하면 이런 내용을 알아낼 수 있을까요?
 
-마치 X-ray를 보듯이 모든 `EXPECT_CALL`과 mock method 호출을 추적할 수 있다면 좋지 않을까요? 각각의 호출에서 실제 전달된 argument도 궁금하고 어떤 `EXPECT_CALL`과 매칭되었는지도 궁금합니다. 어떻게 해야할까요?
+마치 X-ray를 보듯이 모든 `EXPECT_CALL()`과 mock method 호출을 추적할 수 있다면 좋지 않을까요? 각각의 호출에서 실제 전달된 argument도 궁금하고 어떤 `EXPECT_CALL()`과 매칭되었는지도 궁금합니다. 어떻게 해야할까요?
 
 `--gmock_verbose=info` flag를 통해서 테스트코드에도 X-ray를 사용할 수 있습니다. 아래의 코드를 먼저 보겠습니다.
 
@@ -2477,7 +2477,7 @@ Actual function call count doesn't match EXPECT_CALL(mock, F("c", HasSubstr("d")
 [  FAILED  ] Foo.Bar
 ```
 
-여기서 3번째 `EXPECT_CALL`의 `"c"`가 원래 `"a"`를 쓰려다가 잘못 쓴 오타라고 가정해봅시다. 즉, `mock.F("a", "good")`라는 호출은 원래 3번째 `EXPECT_CALL`과 매칭되었어야 합니다. 이제 위에 출력된 정보를 보면 `mock.F("a", "good")`이 첫번째 `EXPECT_CALL`과 매칭되어 문제가 됐음을 바로 알 수 있습니다. 기존에는 불가능했던 일입니다.
+여기서 3번째 `EXPECT_CALL()`의 `"c"`가 원래 `"a"`를 쓰려다가 잘못 쓴 오타라고 가정해봅시다. 즉, `mock.F("a", "good")`라는 호출은 원래 3번째 `EXPECT_CALL()`과 매칭되었어야 합니다. 이제 위에 출력된 정보를 보면 `mock.F("a", "good")`이 첫번째 `EXPECT_CALL()`과 매칭되어 문제가 됐음을 바로 알 수 있습니다. 기존에는 불가능했던 일입니다.
 
 만약, mock call trace은 보고싶지만 stack trace는 보고 싶지 않다면 test program을 실행할 때 flag 2개를 조합(`--gmock_verbose=info --gtest_stack_trace_depth=0`)하여 실행하시기 바랍니다.
 
