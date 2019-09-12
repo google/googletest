@@ -847,15 +847,6 @@ class GTEST_API_ Random {
   GTEST_DISALLOW_COPY_AND_ASSIGN_(Random);
 };
 
-// Defining a variable of type CompileAssertTypesEqual<T1, T2> will cause a
-// compiler error if T1 and T2 are different types.
-template <typename T1, typename T2>
-struct CompileAssertTypesEqual;
-
-template <typename T>
-struct CompileAssertTypesEqual<T, T> {
-};
-
 // Turns const U&, U&, const U, and U all into U.
 #define GTEST_REMOVE_REFERENCE_AND_CONST_(T) \
   typename std::remove_const<typename std::remove_reference<T>::type>::type

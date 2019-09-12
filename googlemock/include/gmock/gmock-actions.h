@@ -619,7 +619,7 @@ class ReturnVoidAction {
   // Allows Return() to be used in any void-returning function.
   template <typename Result, typename ArgumentTuple>
   static void Perform(const ArgumentTuple&) {
-    CompileAssertTypesEqual<void, Result>();
+    static_assert(std::is_void<Result>::value, "Result should be void.");
   }
 };
 
@@ -842,7 +842,7 @@ class IgnoreResultAction {
     typedef typename internal::Function<F>::Result Result;
 
     // Asserts at compile time that F returns void.
-    CompileAssertTypesEqual<void, Result>();
+    static_assert(std::is_void<Result>::value, "Result type should be void.");
 
     return Action<F>(new Impl<F>(action_));
   }
