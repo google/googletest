@@ -1270,8 +1270,8 @@ what if you want to make sure the value *pointed to* by the pointer, instead of
 the pointer itself, has a certain property? Well, you can use the `Pointee(m)`
 matcher.
 
-`Pointee(m)` matches a pointer if `m` matches the value the pointer points to.
-For example:
+`Pointee(m)` matches a pointer if and only if `m` matches the value the pointer
+points to. For example:
 
 ```cpp
 using ::testing::Ge;
@@ -3573,7 +3573,7 @@ class MatcherInterface {
  public:
   virtual ~MatcherInterface();
 
-  // Returns true if the matcher matches x; also explains the match
+  // Returns true if and only if the matcher matches x; also explains the match
   // result to 'listener'.
   virtual bool MatchAndExplain(T x, MatchResultListener* listener) const = 0;
 
@@ -3727,10 +3727,11 @@ class CardinalityInterface {
  public:
   virtual ~CardinalityInterface();
 
-  // Returns true if call_count calls will satisfy this cardinality.
+  // Returns true if and only if call_count calls will satisfy this cardinality.
   virtual bool IsSatisfiedByCallCount(int call_count) const = 0;
 
-  // Returns true if call_count calls will saturate this cardinality.
+  // Returns true if and only if call_count calls will saturate this
+  // cardinality.
   virtual bool IsSaturatedByCallCount(int call_count) const = 0;
 
   // Describes self to an ostream.
