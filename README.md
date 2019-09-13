@@ -1,5 +1,10 @@
 # Google Test
 
+#### Announcement:
+
+Please note that Sept 13 - Sept 20 most of the maintainers will be attending
+CppCon 2019. Our response time for Pull Requests and Issues will increase.
+
 #### OSS Builds Status:
 
 [![Build Status](https://api.travis-ci.org/google/googletest.svg?branch=master)](https://travis-ci.org/google/googletest)
