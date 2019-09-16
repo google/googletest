@@ -63,7 +63,7 @@ class MockFoo {
 
 #### Private, Protected 영역에 정의된 Method를 Mocking하기 ####
 
-Base class의 method가 `public`, `protected`, `private` 등 어느 영역에 정의되어 있는지에 관계없이 mock method를 정의할 때 사용하는 `MOCK_METHOD` macro는 항상 `public` 영역에서 사용해야 합니다. (C++은 base class의 virtual function이 어느 영역에 선언되었는지에 관계없이 derived class에서는 원하는 영역에 자유롭게 overriding 할 수 있습니다.) 이렇게 해야만 `ON_CALL()`, `EXPECT_CALL()`과 같은 매크로가 mock class 또는 mock function에 접근할 수 있습니다. 아래 예제를 확인하세요.
+Base class의 method가 `public`, `protected`, `private` 등 어느 영역에 정의되어 있는지에 관계없이 mock method를 정의할 때 사용하는 `MOCK_METHOD` macro는 항상 `public` 영역에서 사용해야 합니다. (C++ 에서는 base class의 virtual function이 어느 영역에 선언되었는지에 관계없이 derived class에서는 원하는 영역에 자유롭게 overriding 할 수 있습니다.) 이렇게 해야만 `ON_CALL()`, `EXPECT_CALL()`과 같은 macro가 mock class 또는 mock function에 접근할 수 있습니다. 아래 예제를 확인하세요.
 
 ```cpp
 class Foo {
