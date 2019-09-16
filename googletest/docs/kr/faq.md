@@ -185,8 +185,8 @@ Thread-safe death test는 child process를 생성하기 전에 아예 test progr
 
 *   C++의 constructor, destructor에서는 virtual function을 호출할 수 없습니다. 물론, 호출할 수는 있지만 그렇게 되면 derived class의 function을 동적으로 호출하는 것이 아니라 constructor/destructor가 구현된 base class의 function을 호출하게 됩니다. 이렇게 동작하는 이유는 base class의 constructor가 수행되는 시점에 derived class의 constructor는 아직 호출되지 않았을 것이고 이렇게 초기화되지 않은 derived class의 method를 호출하는 것은 매우 위험하기 때문입니다. 해당 virtual method가 초기화되지 않은 값들을 사용하기라도 한다면 큰 문제가 발생할 수 있습니다. 따라서 이렇게 overriding 관계에 있는 virtual function을 사용하려면 `SetUp()/TearDown()`을 사용할 수 밖에 없습니다.
 *   Constructor/destructor에는 `ASSERT_xx`계열 assertion을 사용할 수 없습니다. (`EXPECT_xx`는 아닙니다.) 만약, constructor에서 이런 목적을 구현하려면 `abort`를 사용해야 하는데 이것은 test program 자체를 종료시키기 때문에 `ASSERT_xx`보다 비효율적입니다. 따라서 test fixture 레벨에서 `ASSERT_xx`계열 assertion을 사용하고 싶다면 `SetUp()`을 사용하는 것이 더 좋습니다.
-*   Test fixture를 정리하는 과정에서 exception을 던지고 싶을 수도 있습니다. 그러나 C++에서destructor가 exception을 던지는 것은 미정의 동작이므로 그렇게 구현하면 안됩니다. 대부분의 경우 test program을 바로 종료시킬 것입니다. 이런 경우에도 역시 `TearDown()`을 사용하면 좋습니다. 참고로 C++에서는 STL과 같은 standard library들도 예외를 발생시킬 수 있습니다. (컴파일러에 exception이 활성화 되어 있다면)
-*   Googletest team은 exception이 활성화되어 있는 플랫폼(Windows, Mac OS, Linux client-side)에서는 assertion도 exception을 던질 수 있도록 하는 부분에 대해 고민하고 있습니다. 그렇게 되면 subroutine에서 발생한 failure를 caller쪽으로 전달할 때, 사용자가 직접 구현할 필요가 없어집니다. 추후에 추가될지 모르는 이러한 기능을 위해서 destructor에는 googletest assertion을 사용하면 안 됩니다.
+*   Test fixture를 사용한 후에 정리하는 과정에서 exception을 던지고 싶을 수도 있습니다. 그러나 C++에서destructor가 exception을 던지는 것은 미정의 동작이므로 그렇게 구현하면 안됩니다. 대부분의 경우 test program을 바로 종료시킬 것입니다. 이런 경우에도 역시 `TearDown()`을 사용하면 좋습니다. 참고로 C++에서는 STL과 같은 standard library들도 예외를 발생시킬 수 있습니다. (컴파일러에 exception이 활성화 되어 있다면)
+*   Googletest team은 exception이 활성화되어 있는 플랫폼(Windows, Mac OS, Linux client-side)에서는 assertion도 exception을 던질 수 있도록 하는 부분에 대해 고민하고 있습니다. 그렇게 되면 subroutine에서 발생한 failure를 caller쪽으로 전달할 때, 사용자가 직접 구현할 필요가 없어집니다. 추후에 추가될지 모르는 이러한 기능을 위해서라도 destructor에는 googletest assertion을 사용하면 안 됩니다.
 
 ## `ASSERT_PRED*`를 사용할 때, "no matching function to call" 이라는 compile error가 발생했습니다. 어떻게 해야 하나요?
 
