@@ -364,7 +364,7 @@ ASSERT_HRESULT_SUCCEEDED(shell->ShellExecute(CComBSTR(url), empty, empty, empty,
 ::testing::StaticAssertTypeEq<T1, T2>();
 ```
 
-Type assertion의 특이한 점은 실패했을 때 compile error가 발생한다는 것입니다. 즉, compiler에 의해서 assertion의 결과가 판정됩니다. 출력되는 error message는 compiler마다 조금씩 다르겠지만 대개의 경우 `T1`, `T2`의 실제 타입을 출력해 줍니다. 템플릿 코드를 구현할 때 유용하게 쓸 수 있을 것입니다.
+Type assertion은 compiler에 의해서 수행되기 때문에 성공하면 아무런 문제없이 지나가지만 실패했을 때는 compile error가 발생합니다. 그렇게 실패했을 때는 `type1 and type2 are not the same type`이라는 error message가 출력되며 compiler에 따라 다르지만 `T1`, `T2`가 실제로 무엇인지도 알려줍니다. 템플릿 코드를 구현할 때 유용합니다.
 
 **Caveat**: 한가지 주의할 점은 위의 assertion을 function template이나 class template에서 사용하게 되면 해당 타입에 대한 template 코드가 실제로 만들어 질 때만 동작한다는 것입니다.(C++ 자체의 특징입니다.) 왜냐하면 C++에서는 호출되지 않거나 사용되지 않는 template은 compile 대상에도 포함되지 않기 때문입니다. 예를 들어 아래와 같은 class template이 있다고 가정해보겠습니다.
 
