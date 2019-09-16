@@ -573,12 +573,12 @@ gMock은 어떤 mock object가 소멸될 때, 해당 mock object에 설정된 ex
 using ::testing::Mock;
 ...
 // Verifies and removes the expectations on mock_obj;
-// returns true iff successful.
+// returns true if and only if successful.
 Mock::VerifyAndClearExpectations(&mock_obj);
 ...
 // Verifies and removes the expectations on mock_obj;
 // also removes the default actions set by ON_CALL();
-// returns true iff successful.
+// returns true if and only if successful.
 Mock::VerifyAndClear(&mock_obj);
 ```
 
