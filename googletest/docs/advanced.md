@@ -465,7 +465,7 @@ You can call the function
 to assert that types `T1` and `T2` are the same. The function does nothing if
 the assertion is satisfied. If the types are different, the function call will
 fail to compile, the compiler error message will say that
-`type1 and type2 are not the same type` and most likely (depending on the compiler)
+`T1 and T2 are not the same type` and most likely (depending on the compiler)
 show you the actual values of `T1` and `T2`. This is mainly useful inside
 template code.
 
