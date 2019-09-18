@@ -201,24 +201,6 @@ TEST(ImplicitCastTest, CanUseImplicitConstructor) {
   EXPECT_TRUE(converted);
 }
 
-TEST(IteratorTraitsTest, WorksForSTLContainerIterators) {
-  StaticAssertTypeEq<int,
-      IteratorTraits< ::std::vector<int>::const_iterator>::value_type>();
-  StaticAssertTypeEq<bool,
-      IteratorTraits< ::std::list<bool>::iterator>::value_type>();
-}
-
-TEST(IteratorTraitsTest, WorksForPointerToNonConst) {
-  StaticAssertTypeEq<char, IteratorTraits<char*>::value_type>();
-  StaticAssertTypeEq<const void*, IteratorTraits<const void**>::value_type>();
-}
-
-TEST(IteratorTraitsTest, WorksForPointerToConst) {
-  StaticAssertTypeEq<char, IteratorTraits<const char*>::value_type>();
-  StaticAssertTypeEq<const void*,
-      IteratorTraits<const void* const*>::value_type>();
-}
-
 TEST(GtestCheckSyntaxTest, BehavesLikeASingleStatement) {
   if (AlwaysFalse())
     GTEST_CHECK_(false) << "This should never be executed; "

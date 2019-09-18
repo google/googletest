@@ -123,8 +123,8 @@ GTEST_API_ FailureReporterInterface* GetFailureReporter() {
 // Protects global resources (stdout in particular) used by Log().
 static GTEST_DEFINE_STATIC_MUTEX_(g_log_mutex);
 
-// Returns true iff a log with the given severity is visible according
-// to the --gmock_verbose flag.
+// Returns true if and only if a log with the given severity is visible
+// according to the --gmock_verbose flag.
 GTEST_API_ bool LogIsVisible(LogSeverity severity) {
   if (GMOCK_FLAG(verbose) == kInfoVerbosity) {
     // Always show the log if --gmock_verbose=info.
@@ -139,7 +139,7 @@ GTEST_API_ bool LogIsVisible(LogSeverity severity) {
   }
 }
 
-// Prints the given message to stdout iff 'severity' >= the level
+// Prints the given message to stdout if and only if 'severity' >= the level
 // specified by the --gmock_verbose flag.  If stack_frames_to_skip >=
 // 0, also prints the stack trace excluding the top
 // stack_frames_to_skip frames.  In opt mode, any positive

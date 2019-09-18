@@ -31,6 +31,7 @@
 #include "test/gtest-typed-test_test.h"
 
 #include <set>
+#include <type_traits>
 #include <vector>
 
 #include "gtest/gtest.h"
@@ -177,10 +178,10 @@ class TypedTestNames {
  public:
   template <typename T>
   static std::string GetName(int i) {
-    if (testing::internal::IsSame<T, char>::value) {
+    if (std::is_same<T, char>::value) {
       return std::string("char") + ::testing::PrintToString(i);
     }
-    if (testing::internal::IsSame<T, int>::value) {
+    if (std::is_same<T, int>::value) {
       return std::string("int") + ::testing::PrintToString(i);
     }
   }
@@ -189,13 +190,13 @@ class TypedTestNames {
 TYPED_TEST_SUITE(TypedTestWithNames, TwoTypes, TypedTestNames);
 
 TYPED_TEST(TypedTestWithNames, TestSuiteName) {
-  if (testing::internal::IsSame<TypeParam, char>::value) {
+  if (std::is_same<TypeParam, char>::value) {
     EXPECT_STREQ(::testing::UnitTest::GetInstance()
                      ->current_test_info()
                      ->test_case_name(),
                  "TypedTestWithNames/char0");
   }
-  if (testing::internal::IsSame<TypeParam, int>::value) {
+  if (std::is_same<TypeParam, int>::value) {
     EXPECT_STREQ(::testing::UnitTest::GetInstance()
                      ->current_test_info()
                      ->test_case_name(),
@@ -311,13 +312,13 @@ class TypeParametrizedTestWithNames : public Test {};
 TYPED_TEST_SUITE_P(TypeParametrizedTestWithNames);
 
 TYPED_TEST_P(TypeParametrizedTestWithNames, TestSuiteName) {
-  if (testing::internal::IsSame<TypeParam, char>::value) {
+  if (std::is_same<TypeParam, char>::value) {
     EXPECT_STREQ(::testing::UnitTest::GetInstance()
                      ->current_test_info()
                      ->test_case_name(),
                  "CustomName/TypeParametrizedTestWithNames/parChar0");
   }
-  if (testing::internal::IsSame<TypeParam, int>::value) {
+  if (std::is_same<TypeParam, int>::value) {
     EXPECT_STREQ(::testing::UnitTest::GetInstance()
                      ->current_test_info()
                      ->test_case_name(),
@@ -331,10 +332,10 @@ class TypeParametrizedTestNames {
  public:
   template <typename T>
   static std::string GetName(int i) {
-    if (testing::internal::IsSame<T, char>::value) {
+    if (std::is_same<T, char>::value) {
       return std::string("parChar") + ::testing::PrintToString(i);
     }
-    if (testing::internal::IsSame<T, int>::value) {
+    if (std::is_same<T, int>::value) {
       return std::string("parInt") + ::testing::PrintToString(i);
     }
   }

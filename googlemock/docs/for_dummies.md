@@ -1,4 +1,4 @@
-## Googletest Mocking (gMock) for Dummies {#GMockForDummies}
+## gMock for Dummies {#GMockForDummies}
 
 <!-- GOOGLETEST_CM0013 DO NOT DELETE -->
 
@@ -148,8 +148,8 @@ follow:
 
 *   Derive a class `MockTurtle` from `Turtle`.
 *   Take a *virtual* function of `Turtle` (while it's possible to
-    [mock non-virtual methods using templates](#MockingNonVirtualMethods), it's
-    much more involved).
+    [mock non-virtual methods using templates](cook_book.md#MockingNonVirtualMethods),
+    it's much more involved).
 *   In the `public:` section of the child class, write `MOCK_METHOD();`
 *   Now comes the fun part: you take the function signature, cut-and-paste it
     into the macro, and add two commas - one between the return type and the
@@ -205,6 +205,8 @@ changes in `Foo` much more easily. While this is more work initially, carefully
 choosing the adaptor interface can make your code easier to write and more
 readable (a net win in the long run), as you can choose `FooAdaptor` to fit your
 specific domain much better than `Foo` does.
+
+<!-- GOOGLETEST_CM0029 DO NOT DELETE -->
 
 ### Using Mocks in Tests
 
@@ -373,7 +375,7 @@ In the above examples, `100` and `50` are also matchers; implicitly, they are
 the same as `Eq(100)` and `Eq(50)`, which specify that the argument must be
 equal (using `operator==`) to the matcher argument. There are many
 [built-in matchers](#MatcherList) for common types (as well as
-[custom matchers](#NewMatchers)); for example:
+[custom matchers](cook_book.md#NewMatchers)); for example:
 
 ```cpp
 using ::testing::Ge;
@@ -394,7 +396,8 @@ EXPECT_CALL(turtle, GoTo);
 
 This works for all non-overloaded methods; if a method is overloaded, you need
 to help gMock resolve which overload is expected by specifying the number of
-arguments and possibly also the [types of the arguments](#SelectOverload).
+arguments and possibly also the
+[types of the arguments](cook_book.md#SelectOverload).
 
 #### Cardinalities: How Many Times Will It Be Called?
 
@@ -410,7 +413,8 @@ gMock will report a googletest failure whenever the function is (wrongfully)
 called.
 
 We've seen `AtLeast(n)` as an example of fuzzy cardinalities earlier. For the
-list of built-in cardinalities you can use, see [here](#CardinalityList).
+list of built-in cardinalities you can use, see
+[here](cheat_sheet.md#CardinalityList).
 
 The `Times()` clause can be omitted. **If you omit `Times()`, gMock will infer
 the cardinality for you.** The rules are easy to remember:
@@ -479,7 +483,7 @@ the *default* action for the function every time (unless, of course, you have a
 
 What can we do inside `WillOnce()` besides `Return()`? You can return a
 reference using `ReturnRef(*variable*)`, or invoke a pre-defined function, among
-[others](#ActionList).
+[others](cook_book.md#using-actions).
 
 **Important note:** The `EXPECT_CALL()` statement evaluates the action clause
 only once, even though the action may be performed many times. Therefore you
@@ -557,7 +561,7 @@ overloaded). This makes any calls to the method expected. This is not necessary
 for methods that are not mentioned at all (these are "uninteresting"), but is
 useful for methods that have some expectations, but for which other calls are
 ok. See
-[Understanding Uninteresting vs Unexpected Calls](#uninteresting-vs-unexpected).
+[Understanding Uninteresting vs Unexpected Calls](cook_book.md#uninteresting-vs-unexpected).
 
 #### Ordered vs Unordered Calls {#OrderedCalls}
 
@@ -593,8 +597,8 @@ In this example, we test that `Foo()` calls the three expected functions in the
 order as written. If a call is made out-of-order, it will be an error.
 
 (What if you care about the relative order of some of the calls, but not all of
-them? Can you specify an arbitrary partial order? The answer is ... yes! If you
-are impatient, the details can be found [here](#PartialOrder).)
+them? Can you specify an arbitrary partial order? The answer is ... yes! The
+details can be found [here](cook_book.md#OrderedCalls).)
 
 #### All Expectations Are Sticky (Unless Said Otherwise) {#StickyExpectations}
 
@@ -693,4 +697,4 @@ For example, in some tests we may not care about how many times `GetX()` and
 In gMock, if you are not interested in a method, just don't say anything about
 it. If a call to this method occurs, you'll see a warning in the test output,
 but it won't be a failure. This is called "naggy" behavior; to change, see
-[The Nice, the Strict, and the Naggy](#NiceStrictNaggy).
+[The Nice, the Strict, and the Naggy](cook_book.md#NiceStrictNaggy).

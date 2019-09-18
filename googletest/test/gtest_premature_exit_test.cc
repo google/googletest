@@ -45,7 +45,7 @@ namespace {
 
 class PrematureExitTest : public Test {
  public:
-  // Returns true iff the given file exists.
+  // Returns true if and only if the given file exists.
   static bool FileExists(const char* filepath) {
     StatStruct stat;
     return Stat(filepath, &stat) == 0;
@@ -61,7 +61,7 @@ class PrematureExitTest : public Test {
     }
   }
 
-  // Returns true iff the premature-exit file exists.
+  // Returns true if and only if the premature-exit file exists.
   bool PrematureExitFileExists() const {
     return FileExists(premature_exit_file_path_);
   }

@@ -2,6 +2,8 @@
 
 <!-- GOOGLETEST_CM0019 DO NOT DELETE -->
 
+<!-- GOOGLETEST_CM0033 DO NOT DELETE -->
+
 ### Defining a Mock Class
 
 #### Mocking a Normal Class {#MockClass}
@@ -175,7 +177,8 @@ Example usage:
 To customize the default action for a particular method of a specific mock
 object, use `ON_CALL()`. `ON_CALL()` has a similar syntax to `EXPECT_CALL()`,
 but it is used for setting default behaviors (when you do not require that the
-mock method is called). See go/prefer-on-call for a more detailed discussion.
+mock method is called). See [here](cook_book.md#UseOnCall) for a more detailed
+discussion.
 
 ```cpp
 ON_CALL(mock-object, method(matchers))
@@ -199,6 +202,15 @@ EXPECT_CALL(mock-object, method (matchers)?)
      .RetiresOnSaturation();        ?
 ```
 
+For each item above, `?` means it can be used at most once, while `*` means it
+can be used any number of times.
+
+In order to pass, `EXPECT_CALL` must be used before the calls are actually made.
+
+The `(matchers)` is a comma-separated list of matchers that correspond to each
+of the arguments of `method`, and sets the expectation only for calls of
+`method` that matches all of the matchers.
+
 If `(matchers)` is omitted, the expectation is the same as if the matchers were
 set to anything matchers (for example, `(_, _, _, _)` for a four-arg method).
 
@@ -218,21 +230,21 @@ and the default action will be taken each time.
 <!-- GOOGLETEST_CM0020 DO NOT DELETE -->
 
 A **matcher** matches a *single* argument. You can use it inside `ON_CALL()` or
-`EXPECT_CALL()`, or use it to validate a value directly:
+`EXPECT_CALL()`, or use it to validate a value directly using two macros:
 
-| Matcher                              | Description                           |
+<!-- mdformat off(github rendering does not support multiline tables) -->
+| Macro                                | Description                           |
 | :----------------------------------- | :------------------------------------ |
-| `EXPECT_THAT(actual_value, matcher)` | Asserts that `actual_value` matches   |
-:                                      : `matcher`.                            :
-| `ASSERT_THAT(actual_value, matcher)` | The same as                           |
-:                                      : `EXPECT_THAT(actual_value, matcher)`, :
-:                                      : except that it generates a **fatal**  :
-:                                      : failure.                              :
+| `EXPECT_THAT(actual_value, matcher)` | Asserts that `actual_value` matches `matcher`. |
+| `ASSERT_THAT(actual_value, matcher)` | The same as `EXPECT_THAT(actual_value, matcher)`, except that it generates a **fatal** failure. |
+<!-- mdformat on -->
 
-Built-in matchers (where `argument` is the function argument) are divided into
-several categories:
+Built-in matchers (where `argument` is the function argument, e.g.
+`actual_value` in the example above, or when used in the context of
+`EXPECT_CALL(mock_object, method(matchers))`, the arguments of `method`) are
+divided into several categories:
 
-## Wildcard
+#### Wildcard
 
 Matcher                     | Description
 :-------------------------- | :-----------------------------------------------
@@ -241,6 +253,7 @@ Matcher                     | Description
 
 #### Generic Comparison
 
+<!-- mdformat off(no multiline tables) -->
 | Matcher                | Description                                         |
 | :--------------------- | :-------------------------------------------------- |
 | `Eq(value)` or `value` | `argument == value`                                 |
@@ -249,16 +262,15 @@ Matcher                     | Description
 | `Le(value)`            | `argument <= value`                                 |
 | `Lt(value)`            | `argument < value`                                  |
 | `Ne(value)`            | `argument != value`                                 |
+| `IsFalse()`            | `argument` evaluates to `false` in a Boolean context. |
+| `IsTrue()`             | `argument` evaluates to `true` in a Boolean context. |
 | `IsNull()`             | `argument` is a `NULL` pointer (raw or smart).      |
 | `NotNull()`            | `argument` is a non-null pointer (raw or smart).    |
-| `Optional(m)`          | `argument` is `optional<>` that contains a value    |
-:                        : matching `m`.                                       :
-| `VariantWith<T>(m)`    | `argument` is `variant<>` that holds the            |
-:                        : alternative of type T with a value matching `m`.    :
+| `Optional(m)`          | `argument` is `optional<>` that contains a value matching `m`. |
+| `VariantWith<T>(m)`    | `argument` is `variant<>` that holds the alternative of type T with a value matching `m`. |
 | `Ref(variable)`        | `argument` is a reference to `variable`.            |
-| `TypedEq<type>(value)` | `argument` has type `type` and is equal to `value`. |
-:                        : You may need to use this instead of `Eq(value)`     :
-:                        : when the mock function is overloaded.               :
+| `TypedEq<type>(value)` | `argument` has type `type` and is equal to `value`. You may need to use this instead of `Eq(value)` when the mock function is overloaded. |
+<!-- mdformat on -->
 
 Except `Ref()`, these matchers make a *copy* of `value` in case it's modified or
 destructed later. If the compiler complains that `value` doesn't have a public
@@ -268,20 +280,14 @@ is not changed afterwards, or the meaning of your matcher will be changed.
 
 #### Floating-Point Matchers {#FpMatchers}
 
+<!-- mdformat off(no multiline tables) -->
 | Matcher                          | Description                        |
 | :------------------------------- | :--------------------------------- |
-| `DoubleEq(a_double)`             | `argument` is a `double` value     |
-:                                  : approximately equal to `a_double`, :
-:                                  : treating two NaNs as unequal.      :
-| `FloatEq(a_float)`               | `argument` is a `float` value      |
-:                                  : approximately equal to `a_float`,  :
-:                                  : treating two NaNs as unequal.      :
-| `NanSensitiveDoubleEq(a_double)` | `argument` is a `double` value     |
-:                                  : approximately equal to `a_double`, :
-:                                  : treating two NaNs as equal.        :
-| `NanSensitiveFloatEq(a_float)`   | `argument` is a `float` value      |
-:                                  : approximately equal to `a_float`,  :
-:                                  : treating two NaNs as equal.        :
+| `DoubleEq(a_double)`             | `argument` is a `double` value approximately equal to `a_double`, treating two NaNs as unequal. |
+| `FloatEq(a_float)`               | `argument` is a `float` value approximately equal to `a_float`, treating two NaNs as unequal. |
+| `NanSensitiveDoubleEq(a_double)` | `argument` is a `double` value approximately equal to `a_double`, treating two NaNs as equal. |
+| `NanSensitiveFloatEq(a_float)`   | `argument` is a `float` value approximately equal to `a_float`, treating two NaNs as equal. |
+<!-- mdformat on -->
 
 The above matchers use ULP-based comparison (the same as used in googletest).
 They automatically pick a reasonable error bound based on the absolute value of
@@ -290,48 +296,38 @@ which requires comparing two NaNs for equality to return false. The
 `NanSensitive*` version instead treats two NaNs as equal, which is often what a
 user wants.
 
-| Matcher                             | Description                            |
-| :---------------------------------- | :------------------------------------- |
-| `DoubleNear(a_double,               | `argument` is a `double` value close   |
-: max_abs_error)`                     : to `a_double` (absolute error <=       :
-:                                     : `max_abs_error`), treating two NaNs as :
-:                                     : unequal.                               :
-| `FloatNear(a_float, max_abs_error)` | `argument` is a `float` value close to |
-:                                     : `a_float` (absolute error <=           :
-:                                     : `max_abs_error`), treating two NaNs as :
-:                                     : unequal.                               :
-| `NanSensitiveDoubleNear(a_double,   | `argument` is a `double` value close   |
-: max_abs_error)`                     : to `a_double` (absolute error <=       :
-:                                     : `max_abs_error`), treating two NaNs as :
-:                                     : equal.                                 :
-| `NanSensitiveFloatNear(a_float,     | `argument` is a `float` value close to |
-: max_abs_error)`                     : `a_float` (absolute error <=           :
-:                                     : `max_abs_error`), treating two NaNs as :
-:                                     : equal.                                 :
+<!-- mdformat off(no multiline tables) -->
+| Matcher                                           | Description              |
+| :------------------------------------------------ | :----------------------- |
+| `DoubleNear(a_double, max_abs_error)`             | `argument` is a `double` value close to `a_double` (absolute error <= `max_abs_error`), treating two NaNs as unequal. |
+| `FloatNear(a_float, max_abs_error)`               | `argument` is a `float` value close to `a_float` (absolute error <= `max_abs_error`), treating two NaNs as unequal. |
+| `NanSensitiveDoubleNear(a_double, max_abs_error)` | `argument` is a `double` value close to `a_double` (absolute error <= `max_abs_error`), treating two NaNs as equal. |
+| `NanSensitiveFloatNear(a_float, max_abs_error)`   | `argument` is a `float` value close to `a_float` (absolute error <= `max_abs_error`), treating two NaNs as equal. |
+<!-- mdformat on -->
 
 #### String Matchers
 
 The `argument` can be either a C string or a C++ string object:
 
+<!-- mdformat off(no multiline tables) -->
 | Matcher                 | Description                                        |
 | :---------------------- | :------------------------------------------------- |
 | `ContainsRegex(string)` | `argument` matches the given regular expression.   |
 | `EndsWith(suffix)`      | `argument` ends with string `suffix`.              |
 | `HasSubstr(string)`     | `argument` contains `string` as a sub-string.      |
-| `MatchesRegex(string)`  | `argument` matches the given regular expression    |
-:                         : with the match starting at the first character and :
-:                         : ending at the last character.                      :
+| `MatchesRegex(string)`  | `argument` matches the given regular expression with the match starting at the first character and ending at the last character. |
 | `StartsWith(prefix)`    | `argument` starts with string `prefix`.            |
 | `StrCaseEq(string)`     | `argument` is equal to `string`, ignoring case.    |
-| `StrCaseNe(string)`     | `argument` is not equal to `string`, ignoring      |
-:                         : case.                                              :
+| `StrCaseNe(string)`     | `argument` is not equal to `string`, ignoring case. |
 | `StrEq(string)`         | `argument` is equal to `string`.                   |
 | `StrNe(string)`         | `argument` is not equal to `string`.               |
+<!-- mdformat on -->
 
 `ContainsRegex()` and `MatchesRegex()` take ownership of the `RE` object. They
 use the regular expression syntax defined
-[here](http://go/gunit-advanced-regex). `StrCaseEq()`, `StrCaseNe()`, `StrEq()`,
-and `StrNe()` work for wide strings as well.
+[here](../../googletest/docs/advanced.md#regular-expression-syntax).
+`StrCaseEq()`, `StrCaseNe()`, `StrEq()`, and `StrNe()` work for wide strings as
+well.
 
 #### Container Matchers
 
@@ -340,99 +336,26 @@ or simply `expected_container` to match a container exactly. If you want to
 write the elements in-line, match them more flexibly, or get more informative
 messages, you can use:
 
+<!-- mdformat off(no multiline tables) -->
 | Matcher                                   | Description                      |
 | :---------------------------------------- | :------------------------------- |
-| `BeginEndDistanceIs(m)`                   | `argument` is a container whose  |
-:                                           : `begin()` and `end()` iterators  :
-:                                           : are separated by a number of     :
-:                                           : increments matching `m`. E.g.    :
-:                                           : `BeginEndDistanceIs(2)` or       :
-:                                           : `BeginEndDistanceIs(Lt(2))`. For :
-:                                           : containers that define a         :
-:                                           : `size()` method, `SizeIs(m)` may :
-:                                           : be more efficient.               :
-| `ContainerEq(container)`                  | The same as `Eq(container)`      |
-:                                           : except that the failure message  :
-:                                           : also includes which elements are :
-:                                           : in one container but not the     :
-:                                           : other.                           :
-| `Contains(e)`                             | `argument` contains an element   |
-:                                           : that matches `e`, which can be   :
-:                                           : either a value or a matcher.     :
-| `Each(e)`                                 | `argument` is a container where  |
-:                                           : *every* element matches `e`,     :
-:                                           : which can be either a value or a :
-:                                           : matcher.                         :
-| `ElementsAre(e0, e1, ..., en)`            | `argument` has `n + 1` elements, |
-:                                           : where the *i*-th element matches :
-:                                           : `ei`, which can be a value or a  :
-:                                           : matcher.                         :
-| `ElementsAreArray({e0, e1, ..., en})`,    | The same as `ElementsAre()`      |
-: `ElementsAreArray(a_container)`,          : except that the expected element :
-: `ElementsAreArray(begin, end)`,           : values/matchers come from an     :
-: `ElementsAreArray(array)`, or             : initializer list, STL-style      :
-: `ElementsAreArray(array, count)`          : container, iterator range, or    :
-:                                           : C-style array.                   :
-| `IsEmpty()`                               | `argument` is an empty container |
-:                                           : (`container.empty()`).           :
-| `IsFalse()`                               | `argument` evaluates to `false`  |
-:                                           : in a Boolean context.            :
-| `IsSubsetOf({e0, e1, ..., en})`,          | `argument` matches               |
-: `IsSubsetOf(a_container)`,                : `UnorderedElementsAre(x0, x1,    :
-: `IsSubsetOf(begin, end)`,                 : ..., xk)` for some subset `{x0,  :
-: `IsSubsetOf(array)`, or                   : x1, ..., xk}` of the expected    :
-: `IsSubsetOf(array, count)`                : matchers.                        :
-| `IsSupersetOf({e0, e1, ..., en})`,        | Some subset of `argument`        |
-: `IsSupersetOf(a_container)`,              : matches                          :
-: `IsSupersetOf(begin, end)`,               : `UnorderedElementsAre(`expected  :
-: `IsSupersetOf(array)`, or                 : matchers`)`.                     :
-: `IsSupersetOf(array, count)`              :                                  :
-| `IsTrue()`                                | `argument` evaluates to `true`   |
-:                                           : in a Boolean context.            :
-| `Pointwise(m, container)`, `Pointwise(m,  | `argument` contains the same     |
-: {e0, e1, ..., en})`                       : number of elements as in         :
-:                                           : `container`, and for all i, (the :
-:                                           : i-th element in `argument`, the  :
-:                                           : i-th element in `container`)     :
-:                                           : match `m`, which is a matcher on :
-:                                           : 2-tuples. E.g. `Pointwise(Le(),  :
-:                                           : upper_bounds)` verifies that     :
-:                                           : each element in `argument`       :
-:                                           : doesn't exceed the corresponding :
-:                                           : element in `upper_bounds`. See   :
-:                                           : more detail below.               :
-| `SizeIs(m)`                               | `argument` is a container whose  |
-:                                           : size matches `m`. E.g.           :
-:                                           : `SizeIs(2)` or `SizeIs(Lt(2))`.  :
-| `UnorderedElementsAre(e0, e1, ..., en)`   | `argument` has `n + 1` elements, |
-:                                           : and under *some* permutation of  :
-:                                           : the elements, each element       :
-:                                           : matches an `ei` (for a different :
-:                                           : `i`), which can be a value or a  :
-:                                           : matcher.                         :
-| `UnorderedElementsAreArray({e0, e1, ...,  | The same as                      |
-: en})`,                                    : `UnorderedElementsAre()` except  :
-: `UnorderedElementsAreArray(a_container)`, : that the expected element        :
-: `UnorderedElementsAreArray(begin, end)`,  : values/matchers come from an     :
-: `UnorderedElementsAreArray(array)`, or    : initializer list, STL-style      :
-: `UnorderedElementsAreArray(array, count)` : container, iterator range, or    :
-:                                           : C-style array.                   :
-| `UnorderedPointwise(m, container)`,       | Like `Pointwise(m, container)`,  |
-: `UnorderedPointwise(m, {e0, e1, ...,      : but ignores the order of         :
-: en})`                                     : elements.                        :
-| `WhenSorted(m)`                           | When `argument` is sorted using  |
-:                                           : the `<` operator, it matches     :
-:                                           : container matcher `m`. E.g.      :
-:                                           : `WhenSorted(ElementsAre(1, 2,    :
-:                                           : 3))` verifies that `argument`    :
-:                                           : contains elements 1, 2, and 3,   :
-:                                           : ignoring order.                  :
-| `WhenSortedBy(comparator, m)`             | The same as `WhenSorted(m)`,     |
-:                                           : except that the given comparator :
-:                                           : instead of `<` is used to sort   :
-:                                           : `argument`. E.g.                 :
-:                                           : `WhenSortedBy(std\:\:greater(),  :
-:                                           : ElementsAre(3, 2, 1))`.          :
+| `BeginEndDistanceIs(m)` | `argument` is a container whose `begin()` and `end()` iterators are separated by a number of increments matching `m`. E.g. `BeginEndDistanceIs(2)` or `BeginEndDistanceIs(Lt(2))`. For containers that define a `size()` method, `SizeIs(m)` may be more efficient. |
+| `ContainerEq(container)` | The same as `Eq(container)` except that the failure message also includes which elements are in one container but not the other. |
+| `Contains(e)` | `argument` contains an element that matches `e`, which can be either a value or a matcher. |
+| `Each(e)` | `argument` is a container where *every* element matches `e`, which can be either a value or a matcher. |
+| `ElementsAre(e0, e1, ..., en)` | `argument` has `n + 1` elements, where the *i*-th element matches `ei`, which can be a value or a matcher. |
+| `ElementsAreArray({e0, e1, ..., en})`, `ElementsAreArray(a_container)`, `ElementsAreArray(begin, end)`, `ElementsAreArray(array)`, or `ElementsAreArray(array, count)` | The same as `ElementsAre()` except that the expected element values/matchers come from an initializer list, STL-style container, iterator range, or C-style array. |
+| `IsEmpty()` | `argument` is an empty container (`container.empty()`). |
+| `IsSubsetOf({e0, e1, ..., en})`, `IsSubsetOf(a_container)`, `IsSubsetOf(begin, end)`, `IsSubsetOf(array)`, or `IsSubsetOf(array, count)` | `argument` matches `UnorderedElementsAre(x0, x1, ..., xk)` for some subset `{x0, x1, ..., xk}` of the expected matchers. |
+| `IsSupersetOf({e0, e1, ..., en})`, `IsSupersetOf(a_container)`, `IsSupersetOf(begin, end)`, `IsSupersetOf(array)`, or `IsSupersetOf(array, count)` | Some subset of `argument` matches `UnorderedElementsAre(`expected matchers`)`. |
+| `Pointwise(m, container)`, `Pointwise(m, {e0, e1, ..., en})` | `argument` contains the same number of elements as in `container`, and for all i, (the i-th element in `argument`, the i-th element in `container`) match `m`, which is a matcher on 2-tuples. E.g. `Pointwise(Le(), upper_bounds)` verifies that each element in `argument` doesn't exceed the corresponding element in `upper_bounds`. See more detail below. |
+| `SizeIs(m)` | `argument` is a container whose size matches `m`. E.g. `SizeIs(2)` or `SizeIs(Lt(2))`. |
+| `UnorderedElementsAre(e0, e1, ..., en)` | `argument` has `n + 1` elements, and under *some* permutation of the elements, each element matches an `ei` (for a different `i`), which can be a value or a matcher. |
+| `UnorderedElementsAreArray({e0, e1, ..., en})`, `UnorderedElementsAreArray(a_container)`, `UnorderedElementsAreArray(begin, end)`, `UnorderedElementsAreArray(array)`, or `UnorderedElementsAreArray(array, count)` | The same as `UnorderedElementsAre()` except that the expected element values/matchers come from an initializer list, STL-style container, iterator range, or C-style array. |
+| `UnorderedPointwise(m, container)`, `UnorderedPointwise(m, {e0, e1, ..., en})` | Like `Pointwise(m, container)`, but ignores the order of elements. |
+| `WhenSorted(m)` | When `argument` is sorted using the `<` operator, it matches container matcher `m`. E.g. `WhenSorted(ElementsAre(1, 2, 3))` verifies that `argument` contains elements 1, 2, and 3, ignoring order. |
+| `WhenSortedBy(comparator, m)` | The same as `WhenSorted(m)`, except that the given comparator instead of `<` is used to sort `argument`. E.g. `WhenSortedBy(std::greater(), ElementsAre(3, 2, 1))`. |
+<!-- mdformat on -->
 
 **Notes:**
 
@@ -459,41 +382,35 @@ messages, you can use:
 
 #### Member Matchers
 
+<!-- mdformat off(no multiline tables) -->
 | Matcher                         | Description                                |
 | :------------------------------ | :----------------------------------------- |
-| `Field(&class::field, m)`       | `argument.field` (or `argument->field`     |
-:                                 : when `argument` is a plain pointer)        :
-:                                 : matches matcher `m`, where `argument` is   :
-:                                 : an object of type _class_.                 :
-| `Key(e)`                        | `argument.first` matches `e`, which can be |
-:                                 : either a value or a matcher. E.g.          :
-:                                 : `Contains(Key(Le(5)))` can verify that a   :
-:                                 : `map` contains a key `<= 5`.               :
-| `Pair(m1, m2)`                  | `argument` is an `std::pair` whose `first` |
-:                                 : field matches `m1` and `second` field      :
-:                                 : matches `m2`.                              :
-| `Property(&class::property, m)` | `argument.property()` (or                  |
-:                                 : `argument->property()` when `argument` is  :
-:                                 : a plain pointer) matches matcher `m`,      :
-:                                 : where `argument` is an object of type      :
-:                                 : _class_.                                   :
+| `Field(&class::field, m)`       | `argument.field` (or `argument->field` when `argument` is a plain pointer) matches matcher `m`, where `argument` is an object of type _class_. |
+| `Key(e)`                        | `argument.first` matches `e`, which can be either a value or a matcher. E.g. `Contains(Key(Le(5)))` can verify that a `map` contains a key `<= 5`. |
+| `Pair(m1, m2)`                  | `argument` is an `std::pair` whose `first` field matches `m1` and `second` field matches `m2`. |
+| `Property(&class::property, m)` | `argument.property()` (or `argument->property()` when `argument` is a plain pointer) matches matcher `m`, where `argument` is an object of type _class_. |
+<!-- mdformat on -->
 
 #### Matching the Result of a Function, Functor, or Callback
 
+<!-- mdformat off(no multiline tables) -->
 | Matcher          | Description                                       |
 | :--------------- | :------------------------------------------------ |
-| `ResultOf(f, m)` | `f(argument)` matches matcher `m`, where `f` is a |
-:                  : function or functor.                              :
+| `ResultOf(f, m)` | `f(argument)` matches matcher `m`, where `f` is a function or functor. |
+<!-- mdformat on -->
 
 #### Pointer Matchers
 
+<!-- mdformat off(no multiline tables) -->
 | Matcher                   | Description                                     |
 | :------------------------ | :---------------------------------------------- |
-| `Pointee(m)`              | `argument` (either a smart pointer or a raw     |
-:                           : pointer) points to a value that matches matcher :
-:                           : `m`.                                            :
-| `WhenDynamicCastTo<T>(m)` | when `argument` is passed through               |
-:                           : `dynamic_cast<T>()`, it matches matcher `m`.    :
+| `Pointee(m)`              | `argument` (either a smart pointer or a raw pointer) points to a value that matches matcher `m`. |
+| `WhenDynamicCastTo<T>(m)` | when `argument` is passed through `dynamic_cast<T>()`, it matches matcher `m`. |
+<!-- mdformat on -->
+
+<!-- GOOGLETEST_CM0026 DO NOT DELETE -->
+
+<!-- GOOGLETEST_CM0027 DO NOT DELETE -->
 
 #### Multi-argument Matchers {#MultiArgMatchers}
 
@@ -513,86 +430,70 @@ Matcher | Description
 You can use the following selectors to pick a subset of the arguments (or
 reorder them) to participate in the matching:
 
+<!-- mdformat off(no multiline tables) -->
 | Matcher                    | Description                                     |
 | :------------------------- | :---------------------------------------------- |
-| `AllArgs(m)`               | Equivalent to `m`. Useful as syntactic sugar in |
-:                            : `.With(AllArgs(m))`.                            :
-| `Args<N1, N2, ..., Nk>(m)` | The tuple of the `k` selected (using 0-based    |
-:                            : indices) arguments matches `m`, e.g. `Args<1,   :
-:                            : 2>(Eq())`.                                      :
+| `AllArgs(m)`               | Equivalent to `m`. Useful as syntactic sugar in `.With(AllArgs(m))`. |
+| `Args<N1, N2, ..., Nk>(m)` | The tuple of the `k` selected (using 0-based indices) arguments matches `m`, e.g. `Args<1, 2>(Eq())`. |
+<!-- mdformat on -->
 
 #### Composite Matchers
 
 You can make a matcher from one or more other matchers:
 
-| Matcher                  | Description                                     |
-| :----------------------- | :---------------------------------------------- |
-| `AllOf(m1, m2, ..., mn)` | `argument` matches all of the matchers `m1` to  |
-:                          : `mn`.                                           :
-| `AnyOf(m1, m2, ..., mn)` | `argument` matches at least one of the matchers |
-:                          : `m1` to `mn`.                                   :
-| `Not(m)`                 | `argument` doesn't match matcher `m`.           |
+<!-- mdformat off(no multiline tables) -->
+| Matcher                          | Description                             |
+| :------------------------------- | :-------------------------------------- |
+| `AllOf(m1, m2, ..., mn)` | `argument` matches all of the matchers `m1` to `mn`. |
+| `AllOfArray({m0, m1, ..., mn})`, `AllOfArray(a_container)`, `AllOfArray(begin, end)`, `AllOfArray(array)`, or `AllOfArray(array, count)` | The same as `AllOf()` except that the matchers come from an initializer list, STL-style container, iterator range, or C-style array. |
+| `AnyOf(m1, m2, ..., mn)` | `argument` matches at least one of the matchers `m1` to `mn`. |
+| `AnyOfArray({m0, m1, ..., mn})`, `AnyOfArray(a_container)`, `AnyOfArray(begin, end)`, `AnyOfArray(array)`, or `AnyOfArray(array, count)` | The same as `AnyOf()` except that the matchers come from an initializer list, STL-style container, iterator range, or C-style array. |
+| `Not(m)` | `argument` doesn't match matcher `m`. |
+<!-- mdformat on -->
+
+<!-- GOOGLETEST_CM0028 DO NOT DELETE -->
 
 #### Adapters for Matchers
 
+<!-- mdformat off(no multiline tables) -->
 | Matcher                 | Description                           |
 | :---------------------- | :------------------------------------ |
-| `MatcherCast<T>(m)`     | casts matcher `m` to type             |
-:                         : `Matcher<T>`.                         :
-| `SafeMatcherCast<T>(m)` | [safely                               |
-:                         : casts](cook_book.md#casting-matchers) :
-:                         : matcher `m` to type `Matcher<T>`.     :
-| `Truly(predicate)`      | `predicate(argument)` returns         |
-:                         : something considered by C++ to be     :
-:                         : true, where `predicate` is a function :
-:                         : or functor.                           :
+| `MatcherCast<T>(m)`     | casts matcher `m` to type `Matcher<T>`. |
+| `SafeMatcherCast<T>(m)` | [safely casts](cook_book.md#casting-matchers) matcher `m` to type `Matcher<T>`. |
+| `Truly(predicate)`      | `predicate(argument)` returns something considered by C++ to be true, where `predicate` is a function or functor. |
+<!-- mdformat on -->
 
 `AddressSatisfies(callback)` and `Truly(callback)` take ownership of `callback`,
 which must be a permanent callback.
 
-#### Matchers as Predicates {#MatchersAsPredicatesCheat}
+#### Using Matchers as Predicates {#MatchersAsPredicatesCheat}
 
+<!-- mdformat off(no multiline tables) -->
 | Matcher                       | Description                                 |
 | :---------------------------- | :------------------------------------------ |
-| `Matches(m)(value)`           | evaluates to `true` if `value` matches `m`. |
-:                               : You can use `Matches(m)` alone as a unary   :
-:                               : functor.                                    :
-| `ExplainMatchResult(m, value, | evaluates to `true` if `value` matches `m`, |
-: result_listener)`             : explaining the result to `result_listener`. :
-| `Value(value, m)`             | evaluates to `true` if `value` matches `m`. |
+| `Matches(m)(value)` | evaluates to `true` if `value` matches `m`. You can use `Matches(m)` alone as a unary functor. |
+| `ExplainMatchResult(m, value, result_listener)` | evaluates to `true` if `value` matches `m`, explaining the result to `result_listener`. |
+| `Value(value, m)` | evaluates to `true` if `value` matches `m`. |
+<!-- mdformat on -->
 
 #### Defining Matchers
 
+<!-- mdformat off(no multiline tables) -->
 | Matcher                              | Description                           |
 | :----------------------------------- | :------------------------------------ |
-| `MATCHER(IsEven, "") { return (arg % | Defines a matcher `IsEven()` to match |
-: 2) == 0; }`                          : an even number.                       :
-| `MATCHER_P(IsDivisibleBy, n, "") {   | Defines a macher `IsDivisibleBy(n)`   |
-: *result_listener << "where the       : to match a number divisible by `n`.   :
-: remainder is " << (arg % n); return  :                                       :
-: (arg % n) == 0; }`                   :                                       :
-| `MATCHER_P2(IsBetween, a, b,         | Defines a matcher `IsBetween(a, b)`   |
-: std\:\:string(negation ? "isn't" \:  : to match a value in the range [`a`,   :
-: "is") + " between " +                : `b`].                                 :
-: PrintToString(a) + " and " +         :                                       :
-: PrintToString(b)) { return a <= arg  :                                       :
-: && arg <= b; }`                      :                                       :
+| `MATCHER(IsEven, "") { return (arg % 2) == 0; }` | Defines a matcher `IsEven()` to match an even number. |
+| `MATCHER_P(IsDivisibleBy, n, "") { *result_listener << "where the remainder is " << (arg % n); return (arg % n) == 0; }` | Defines a macher `IsDivisibleBy(n)` to match a number divisible by `n`. |
+| `MATCHER_P2(IsBetween, a, b, std::string(negation ? "isn't" : "is") + " between " + PrintToString(a) + " and " + PrintToString(b)) { return a <= arg && arg <= b; }` | Defines a matcher `IsBetween(a, b)` to match a value in the range [`a`, `b`]. |
+<!-- mdformat on -->
 
 **Notes:**
 
 1.  The `MATCHER*` macros cannot be used inside a function or class.
-1.  The matcher body must be *purely functional* (i.e. it cannot have any side
+2.  The matcher body must be *purely functional* (i.e. it cannot have any side
     effect, and the result must not depend on anything other than the value
     being matched and the matcher parameters).
-1.  You can use `PrintToString(x)` to convert a value `x` of any type to a
+3.  You can use `PrintToString(x)` to convert a value `x` of any type to a
     string.
-
-## Matchers as Test Assertions
-
-Matcher                      | Description
-:--------------------------- | :----------
-`ASSERT_THAT(expression, m)` | Generates a [fatal failure](../../googletest/docs/primer.md#assertions) if the value of `expression` doesn't match matcher `m`.
-`EXPECT_THAT(expression, m)` | Generates a non-fatal failure if the value of `expression` doesn't match matcher `m`.
 
 ### Actions {#ActionList}
 
@@ -600,75 +501,51 @@ Matcher                      | Description
 
 #### Returning a Value
 
-| Matcher                     | Description                                   |
+<!-- mdformat off(no multiline tables) -->
+|                             |                                               |
 | :-------------------------- | :-------------------------------------------- |
 | `Return()`                  | Return from a `void` mock function.           |
-| `Return(value)`             | Return `value`. If the type of `value` is     |
-:                             : different to the mock function's return type, :
-:                             : `value` is converted to the latter type <i>at :
-:                             : the time the expectation is set</i>, not when :
-:                             : the action is executed.                       :
+| `Return(value)`             | Return `value`. If the type of `value` is     different to the mock function's return type, `value` is converted to the latter type <i>at the time the expectation is set</i>, not when the action is executed. |
 | `ReturnArg<N>()`            | Return the `N`-th (0-based) argument.         |
-| `ReturnNew<T>(a1, ..., ak)` | Return `new T(a1, ..., ak)`; a different      |
-:                             : object is created each time.                  :
+| `ReturnNew<T>(a1, ..., ak)` | Return `new T(a1, ..., ak)`; a different      object is created each time. |
 | `ReturnNull()`              | Return a null pointer.                        |
 | `ReturnPointee(ptr)`        | Return the value pointed to by `ptr`.         |
 | `ReturnRef(variable)`       | Return a reference to `variable`.             |
-| `ReturnRefOfCopy(value)`    | Return a reference to a copy of `value`; the  |
-:                             : copy lives as long as the action.             :
+| `ReturnRefOfCopy(value)`    | Return a reference to a copy of `value`; the  copy lives as long as the action. |
+<!-- mdformat on -->
 
 #### Side Effects
 
-| Matcher                            | Description                             |
+<!-- mdformat off(no multiline tables) -->
+|                                    |                                         |
 | :--------------------------------- | :-------------------------------------- |
-| `Assign(&variable, value)`         | Assign `value` to variable.             |
-| `DeleteArg<N>()`                   | Delete the `N`-th (0-based) argument,   |
-:                                    : which must be a pointer.                :
-| `SaveArg<N>(pointer)`              | Save the `N`-th (0-based) argument to   |
-:                                    : `*pointer`.                             :
-| `SaveArgPointee<N>(pointer)`       | Save the value pointed to by the `N`-th |
-:                                    : (0-based) argument to `*pointer`.       :
-| `SetArgReferee<N>(value)`          | Assign value to the variable referenced |
-:                                    : by the `N`-th (0-based) argument.       :
-| `SetArgPointee<N>(value)`          | Assign `value` to the variable pointed  |
-:                                    : by the `N`-th (0-based) argument.       :
-| `SetArgumentPointee<N>(value)`     | Same as `SetArgPointee<N>(value)`.      |
-:                                    : Deprecated. Will be removed in v1.7.0.  :
-| `SetArrayArgument<N>(first, last)` | Copies the elements in source range     |
-:                                    : [`first`, `last`) to the array pointed  :
-:                                    : to by the `N`-th (0-based) argument,    :
-:                                    : which can be either a pointer or an     :
-:                                    : iterator. The action does not take      :
-:                                    : ownership of the elements in the source :
-:                                    : range.                                  :
-| `SetErrnoAndReturn(error, value)`  | Set `errno` to `error` and return       |
-:                                    : `value`.                                :
-| `Throw(exception)`                 | Throws the given exception, which can   |
-:                                    : be any copyable value. Available since  :
-:                                    : v1.1.0.                                 :
+| `Assign(&variable, value)` | Assign `value` to variable. |
+| `DeleteArg<N>()` | Delete the `N`-th (0-based) argument, which must be a pointer. |
+| `SaveArg<N>(pointer)` | Save the `N`-th (0-based) argument to `*pointer`. |
+| `SaveArgPointee<N>(pointer)` | Save the value pointed to by the `N`-th (0-based) argument to `*pointer`. |
+| `SetArgReferee<N>(value)` | Assign value to the variable referenced by the `N`-th (0-based) argument. |
+| `SetArgPointee<N>(value)` | Assign `value` to the variable pointed by the `N`-th (0-based) argument. |
+| `SetArgumentPointee<N>(value)` | Same as `SetArgPointee<N>(value)`. Deprecated. Will be removed in v1.7.0. |
+| `SetArrayArgument<N>(first, last)` | Copies the elements in source range [`first`, `last`) to the array pointed to by the `N`-th (0-based) argument, which can be either a pointer or an iterator. The action does not take ownership of the elements in the source range. |
+| `SetErrnoAndReturn(error, value)` | Set `errno` to `error` and return `value`. |
+| `Throw(exception)` | Throws the given exception, which can be any copyable value. Available since v1.1.0. |
+<!-- mdformat on -->
 
-#### Using a Function, Functor, Lambda, or Callback as an Action
+#### Using a Function, Functor, or Lambda as an Action
 
 In the following, by "callable" we mean a free function, `std::function`,
-functor, lambda, or `google3`-style permanent callback.
+functor, or lambda.
 
-| Matcher                             | Description                            |
+<!-- mdformat off(no multiline tables) -->
+|                                     |                                        |
 | :---------------------------------- | :------------------------------------- |
-| `Invoke(f)`                         | Invoke `f` with the arguments passed   |
-:                                     : to the mock function, where `f` can be :
-:                                     : a global/static function or a functor. :
-| `Invoke(object_pointer,             | Invoke the {method on the object with  |
-: &class\:\:method)`                  : the arguments passed to the mock       :
-:                                     : function.                              :
-| `InvokeWithoutArgs(f)`              | Invoke `f`, which can be a             |
-:                                     : global/static function or a functor.   :
-:                                     : `f` must take no arguments.            :
-| `InvokeWithoutArgs(object_pointer,  | Invoke the method on the object, which |
-: &class\:\:method)`                  : takes no arguments.                    :
-| `InvokeArgument<N>(arg1, arg2, ..., | Invoke the mock function's `N`-th      |
-: argk)`                              : (0-based) argument, which must be a    :
-:                                     : function or a functor, with the `k`    :
-:                                     : arguments.                             :
+| `f` | Invoke f with the arguments passed to the mock function, where f is a callable. |
+| `Invoke(f)` | Invoke `f` with the arguments passed to the mock function, where `f` can be a global/static function or a functor. |
+| `Invoke(object_pointer, &class::method)` | Invoke the method on the object with the arguments passed to the mock function. |
+| `InvokeWithoutArgs(f)` | Invoke `f`, which can be a global/static function or a functor. `f` must take no arguments. |
+| `InvokeWithoutArgs(object_pointer, &class::method)` | Invoke the method on the object, which takes no arguments. |
+| `InvokeArgument<N>(arg1, arg2, ..., argk)` | Invoke the mock function's `N`-th (0-based) argument, which must be a function or a functor, with the `k` arguments. |
+<!-- mdformat on -->
 
 The return value of the invoked function is used as the return value of the
 action.
@@ -708,45 +585,53 @@ InvokeArgument<2>(5, string("Hi"), ByRef(foo))
 calls the mock function's #2 argument, passing to it `5` and `string("Hi")` by
 value, and `foo` by reference.
 
-## Default Action
+#### Default Action
 
+<!-- mdformat off(no multiline tables) -->
 | Matcher       | Description                                            |
 | :------------ | :----------------------------------------------------- |
-| `DoDefault()` | Do the default action (specified by `ON_CALL()` or the |
-:               : built-in one).                                         :
+| `DoDefault()` | Do the default action (specified by `ON_CALL()` or the built-in one). |
+<!-- mdformat on -->
 
 **Note:** due to technical reasons, `DoDefault()` cannot be used inside a
 composite action - trying to do so will result in a run-time error.
 
-## Composite Actions
+<!-- GOOGLETEST_CM0032 DO NOT DELETE -->
 
-| Matcher                        | Description                                 |
+#### Composite Actions
+
+<!-- mdformat off(no multiline tables) -->
+|                                |                                             |
 | :----------------------------- | :------------------------------------------ |
-| `DoAll(a1, a2, ..., an)`       | Do all actions `a1` to `an` and return the  |
-:                                : result of `an` in each invocation. The      :
-:                                : first `n - 1` sub-actions must return void. :
-| `IgnoreResult(a)`              | Perform action `a` and ignore its result.   |
-:                                : `a` must not return void.                   :
-| `WithArg<N>(a)`                | Pass the `N`-th (0-based) argument of the   |
-:                                : mock function to action `a` and perform it. :
-| `WithArgs<N1, N2, ..., Nk>(a)` | Pass the selected (0-based) arguments of    |
-:                                : the mock function to action `a` and perform :
-:                                : it.                                         :
-| `WithoutArgs(a)`               | Perform action `a` without any arguments.   |
+| `DoAll(a1, a2, ..., an)`       | Do all actions `a1` to `an` and return the result of `an` in each invocation. The first `n - 1` sub-actions must return void. |
+| `IgnoreResult(a)`              | Perform action `a` and ignore its result. `a` must not return void. |
+| `WithArg<N>(a)`                | Pass the `N`-th (0-based) argument of the mock function to action `a` and perform it. |
+| `WithArgs<N1, N2, ..., Nk>(a)` | Pass the selected (0-based) arguments of the mock function to action `a` and perform it. |
+| `WithoutArgs(a)`               | Perform action `a` without any arguments. |
+<!-- mdformat on -->
 
-## Defining Actions
+#### Defining Actions
 
-| Matcher                            | Description                             |
+<table border="1" cellspacing="0" cellpadding="1">
+  <tr>
+    <td>`struct SumAction {` <br>
+        &emsp;`template <typename T>` <br>
+        &emsp;`T operator()(T x, Ty) { return x + y; }` <br>
+        `};`
+    </td>
+    <td> Defines a generic functor that can be used as an action summing its
+    arguments. </td> </tr>
+  <tr>
+  </tr>
+</table>
+
+<!-- mdformat off(no multiline tables) -->
+|                                    |                                         |
 | :--------------------------------- | :-------------------------------------- |
-| `ACTION(Sum) { return arg0 + arg1; | Defines an action `Sum()` to return the |
-: }`                                 : sum of the mock function's argument #0  :
-:                                    : and #1.                                 :
-| `ACTION_P(Plus, n) { return arg0 + | Defines an action `Plus(n)` to return   |
-: n; }`                              : the sum of the mock function's          :
-:                                    : argument #0 and `n`.                    :
-| `ACTION_Pk(Foo, p1, ..., pk) {     | Defines a parameterized action `Foo(p1, |
-: statements; }`                     : ..., pk)` to execute the given          :
-:                                    : `statements`.                           :
+| `ACTION(Sum) { return arg0 + arg1; }` | Defines an action `Sum()` to return the sum of the mock function's argument #0 and #1. |
+| `ACTION_P(Plus, n) { return arg0 + n; }` | Defines an action `Plus(n)` to return the sum of the mock function's argument #0 and `n`. |
+| `ACTION_Pk(Foo, p1, ..., pk) { statements; }` | Defines a parameterized action `Foo(p1, ..., pk)` to execute the given `statements`. |
+<!-- mdformat on -->
 
 The `ACTION*` macros cannot be used inside a function or class.
 
@@ -755,15 +640,15 @@ The `ACTION*` macros cannot be used inside a function or class.
 These are used in `Times()` to specify how many times a mock function will be
 called:
 
-| Matcher           | Description                                            |
+<!-- mdformat off(no multiline tables) -->
+|                   |                                                        |
 | :---------------- | :----------------------------------------------------- |
 | `AnyNumber()`     | The function can be called any number of times.        |
 | `AtLeast(n)`      | The call is expected at least `n` times.               |
 | `AtMost(n)`       | The call is expected at most `n` times.                |
-| `Between(m, n)`   | The call is expected between `m` and `n` (inclusive)   |
-:                   : times.                                                 :
-| `Exactly(n) or n` | The call is expected exactly `n` times. In particular, |
-:                   : the call should never happen when `n` is 0.            :
+| `Between(m, n)`   | The call is expected between `m` and `n` (inclusive) times. |
+| `Exactly(n) or n` | The call is expected exactly `n` times. In particular, the call should never happen when `n` is 0. |
+<!-- mdformat on -->
 
 ### Expectation Order
 
@@ -857,12 +742,12 @@ you can do it earlier:
 using ::testing::Mock;
 ...
 // Verifies and removes the expectations on mock_obj;
-// returns true iff successful.
+// returns true if and only if successful.
 Mock::VerifyAndClearExpectations(&mock_obj);
 ...
 // Verifies and removes the expectations on mock_obj;
 // also removes the default actions set by ON_CALL();
-// returns true iff successful.
+// returns true if and only if successful.
 Mock::VerifyAndClear(&mock_obj);
 ```
 
@@ -888,10 +773,9 @@ See this [recipe](cook_book.md#using-check-points) for one application of it.
 
 ### Flags
 
+<!-- mdformat off(no multiline tables) -->
 | Flag                           | Description                               |
 | :----------------------------- | :---------------------------------------- |
-| `--gmock_catch_leaked_mocks=0` | Don't report leaked mock objects as       |
-:                                : failures.                                 :
-| `--gmock_verbose=LEVEL`        | Sets the default verbosity level (`info`, |
-:                                : `warning`, or `error`) of Google Mock     :
-:                                : messages.                                 :
+| `--gmock_catch_leaked_mocks=0` | Don't report leaked mock objects as failures. |
+| `--gmock_verbose=LEVEL` | Sets the default verbosity level (`info`, `warning`, or `error`) of Google Mock messages. |
+<!-- mdformat on -->

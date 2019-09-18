@@ -1,4 +1,4 @@
-## Googletest Mocking (gMock) Cookbook
+## gMock Cookbook
 
 <!-- GOOGLETEST_CM0012 DO NOT DELETE -->
 
@@ -12,12 +12,36 @@ brevity, but you should do it in your own code.
 
 ### Creating Mock Classes
 
+Mock classes are defined as normal classes, using the `MOCK_METHOD` macro to
+generate mocked methods. The macro gets 3 or 4 parameters:
+
+```cpp
+class MyMock {
+ public:
+  MOCK_METHOD(ReturnType, MethodName, (Args...));
+  MOCK_METHOD(ReturnType, MethodName, (Args...), (Specs...));
+};
+```
+
+The first 3 parameters are simply the method declaration, split into 3 parts.
+The 4th parameter accepts a closed list of qualifiers, which affect the
+generated method:
+
+*   **`const`** - Makes the mocked method a `const` method. Required if
+    overriding a `const` method.
+*   **`override`** - Marks the method with `override`. Recommended if overriding
+    a `virtual` method.
+*   **`noexcept`** - Marks the method with `noexcept`. Required if overriding a
+    `noexcept` method.
+*   **`Calltype(...)`** - Sets the call type for the method (e.g. to
+    `STDMETHODCALLTYPE`), useful in Windows.
+
 #### Dealing with unprotected commas
 
 Unprotected commas, i.e. commas which are not surrounded by parentheses, prevent
 `MOCK_METHOD` from parsing its arguments correctly:
 
-```cpp
+```cpp {.bad}
 class MockFoo {
  public:
   MOCK_METHOD(std::pair<bool, int>, GetPair, ());  // Won't compile!
@@ -27,7 +51,7 @@ class MockFoo {
 
 Solution 1 - wrap with parentheses:
 
-```cpp
+```cpp {.good}
 class MockFoo {
  public:
   MOCK_METHOD((std::pair<bool, int>), GetPair, ());
@@ -40,7 +64,7 @@ invalid C++. `MOCK_METHOD` removes the parentheses.
 
 Solution 2 - define an alias:
 
-```cpp
+```cpp {.good}
 class MockFoo {
  public:
   using BoolAndInt = std::pair<bool, int>;
@@ -154,7 +178,7 @@ class MockStack : public StackInterface<Elem> {
 #### Mocking Non-virtual Methods {#MockingNonVirtualMethods}
 
 gMock can mock non-virtual functions to be used in Hi-perf dependency
-injection.<!-- GOOGLETEST_CM0017 DO NOT DELETE -->.
+injection.<!-- GOOGLETEST_CM0017 DO NOT DELETE -->
 
 In this case, instead of sharing a common base class with the real class, your
 mock class will be *unrelated* to the real class, but contain methods with the
@@ -824,6 +848,7 @@ A frequently used matcher is `_`, which matches anything:
 ```cpp
   EXPECT_CALL(foo, DoThat(_, NotNull()));
 ```
+<!-- GOOGLETEST_CM0022 DO NOT DELETE -->
 
 #### Combining Matchers {#CombiningMatchers}
 
@@ -1037,7 +1062,7 @@ arguments as *one* single tuple to the predicate.
 Have you noticed that a matcher is just a fancy predicate that also knows how to
 describe itself? Many existing algorithms take predicates as arguments (e.g.
 those defined in STL's `<algorithm>` header), and it would be a shame if gMock
-matchers are not allowed to participate.
+matchers were not allowed to participate.
 
 Luckily, you can use a matcher where a unary predicate functor is expected by
 wrapping it inside the `Matches()` function. For example,
@@ -1138,6 +1163,8 @@ Note that the predicate function / functor doesn't have to return `bool`. It
 works as long as the return value can be used as the condition in in statement
 `if (condition) ...`.
 
+<!-- GOOGLETEST_CM0023 DO NOT DELETE -->
+
 #### Matching Arguments that Are Not Copyable
 
 When you do an `EXPECT_CALL(mock_obj, Foo(bar))`, gMock saves away a copy of
@@ -1192,11 +1219,12 @@ that satisfies matcher `m`.
 
 For example:
 
+<!-- mdformat off(github rendering does not support multiline tables) -->
 | Expression                   | Description                              |
 | :--------------------------- | :--------------------------------------- |
 | `Field(&Foo::number, Ge(3))` | Matches `x` where `x.number >= 3`.       |
-| `Property(&Foo::name,        | Matches `x` where `x.name()` starts with |
-: StartsWith("John "))`        : `"John "`.                               :
+| `Property(&Foo::name,  StartsWith("John "))` | Matches `x` where `x.name()` starts with  `"John "`. |
+<!-- mdformat on -->
 
 Note that in `Property(&Foo::baz, ...)`, method `baz()` must take no argument
 and be declared as `const`.
@@ -1242,8 +1270,8 @@ what if you want to make sure the value *pointed to* by the pointer, instead of
 the pointer itself, has a certain property? Well, you can use the `Pointee(m)`
 matcher.
 
-`Pointee(m)` matches a pointer iff `m` matches the value the pointer points to.
-For example:
+`Pointee(m)` matches a pointer if and only if `m` matches the value the pointer
+points to. For example:
 
 ```cpp
 using ::testing::Ge;
@@ -2147,7 +2175,11 @@ own precedence order distinct from the `ON_CALL` precedence order.
 #### Using Functions/Methods/Functors/Lambdas as Actions {#FunctionsAsActions}
 
 If the built-in actions don't suit you, you can use an existing callable
-(function, `std::function`, method, functor, lambda as an action. ```cpp
+(function, `std::function`, method, functor, lambda as an action.
+
+<!-- GOOGLETEST_CM0024 DO NOT DELETE -->
+
+```cpp
 using ::testing::_; using ::testing::Invoke;
 
 class MockFoo : public Foo {
@@ -2596,7 +2628,7 @@ However, if the action has its own state, you may be surprised if you share the
 action object. Suppose you have an action factory `IncrementCounter(init)` which
 creates an action that increments and returns a counter whose initial value is
 `init`, using two actions created from the same expression and using a shared
-action will exihibit different behaviors. Example:
+action will exhibit different behaviors. Example:
 
 ```cpp
   EXPECT_CALL(foo, DoThis())
@@ -3239,6 +3271,8 @@ If you are interested in the mock call trace but not the stack traces, you can
 combine `--gmock_verbose=info` with `--gtest_stack_trace_depth=0` on the test
 command line.
 
+<!-- GOOGLETEST_CM0025 DO NOT DELETE -->
+
 #### Running Tests in Emacs
 
 If you build and run your tests in Emacs using the `M-x google-compile` command
@@ -3539,7 +3573,7 @@ class MatcherInterface {
  public:
   virtual ~MatcherInterface();
 
-  // Returns true iff the matcher matches x; also explains the match
+  // Returns true if and only if the matcher matches x; also explains the match
   // result to 'listener'.
   virtual bool MatchAndExplain(T x, MatchResultListener* listener) const = 0;
 
@@ -3684,19 +3718,20 @@ A cardinality is used in `Times()` to tell gMock how many times you expect a
 call to occur. It doesn't have to be exact. For example, you can say
 `AtLeast(5)` or `Between(2, 4)`.
 
-If the [built-in set](#CardinalityList) of cardinalities doesn't suit you, you
-are free to define your own by implementing the following interface (in
-namespace `testing`):
+If the [built-in set](cheat_sheet.md#CardinalityList) of cardinalities doesn't
+suit you, you are free to define your own by implementing the following
+interface (in namespace `testing`):
 
 ```cpp
 class CardinalityInterface {
  public:
   virtual ~CardinalityInterface();
 
-  // Returns true iff call_count calls will satisfy this cardinality.
+  // Returns true if and only if call_count calls will satisfy this cardinality.
   virtual bool IsSatisfiedByCallCount(int call_count) const = 0;
 
-  // Returns true iff call_count calls will saturate this cardinality.
+  // Returns true if and only if call_count calls will saturate this
+  // cardinality.
   virtual bool IsSaturatedByCallCount(int call_count) const = 0;
 
   // Describes self to an ostream.
@@ -4175,3 +4210,61 @@ prints the raw bytes in the value and hopes that you the user can figure it out.
 [googletest's advanced guide](../../googletest/docs/advanced.md#teaching-googletest-how-to-print-your-values)
 explains how to extend the printer to do a better job at printing your
 particular type than to dump the bytes.
+
+### Useful Mocks Created Using gMock
+
+<!--#include file="includes/g3_testing_LOGs.md"-->
+<!--#include file="includes/g3_mock_callbacks.md"-->
+
+#### Mock std::function {#MockFunction}
+
+`std::function` is a general function type introduced in C++11. It is a
+preferred way of passing callbacks to new interfaces. Functions are copiable,
+and are not usually passed around by pointer, which makes them tricky to mock.
+But fear not - `MockFunction` can help you with that.
+
+`MockFunction<R(T1, ..., Tn)>` has a mock method `Call()` with the signature:
+
+```cpp
+  R Call(T1, ..., Tn);
+```
+
+It also has a `AsStdFunction()` method, which creates a `std::function` proxy
+forwarding to Call:
+
+```cpp
+  std::function<R(T1, ..., Tn)> AsStdFunction();
+```
+
+To use `MockFunction`, first create `MockFunction` object and set up
+expectations on its `Call` method. Then pass proxy obtained from
+`AsStdFunction()` to the code you are testing. For example:
+
+```cpp
+TEST(FooTest, RunsCallbackWithBarArgument) {
+  // 1. Create a mock object.
+  MockFunction<int(string)> mock_function;
+
+  // 2. Set expectations on Call() method.
+  EXPECT_CALL(mock_function, Call("bar")).WillOnce(Return(1));
+
+  // 3. Exercise code that uses std::function.
+  Foo(mock_function.AsStdFunction());
+  // Foo's signature can be either of:
+  // void Foo(const std::function<int(string)>& fun);
+  // void Foo(std::function<int(string)> fun);
+
+  // 4. All expectations will be verified when mock_function
+  //     goes out of scope and is destroyed.
+}
+```
+
+Remember that function objects created with `AsStdFunction()` are just
+forwarders. If you create multiple of them, they will share the same set of
+expectations.
+
+Although `std::function` supports unlimited number of arguments, `MockFunction`
+implementation is limited to ten. If you ever hit that limit... well, your
+callback has bigger problems than being mockable. :-)
+
+<!-- GOOGLETEST_CM0034 DO NOT DELETE -->

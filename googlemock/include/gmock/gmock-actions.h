@@ -99,7 +99,8 @@ struct BuiltInDefaultValueGetter<T, false> {
 template <typename T>
 class BuiltInDefaultValue {
  public:
-  // This function returns true iff type T has a built-in default value.
+  // This function returns true if and only if type T has a built-in default
+  // value.
   static bool Exists() {
     return ::std::is_default_constructible<T>::value;
   }
@@ -208,7 +209,7 @@ class DefaultValue {
     producer_ = nullptr;
   }
 
-  // Returns true iff the user has set the default value for type T.
+  // Returns true if and only if the user has set the default value for type T.
   static bool IsSet() { return producer_ != nullptr; }
 
   // Returns true if T has a default return value set by the user or there
@@ -269,7 +270,7 @@ class DefaultValue<T&> {
   // Unsets the default value for type T&.
   static void Clear() { address_ = nullptr; }
 
-  // Returns true iff the user has set the default value for type T&.
+  // Returns true if and only if the user has set the default value for type T&.
   static bool IsSet() { return address_ != nullptr; }
 
   // Returns true if T has a default return value set by the user or there
@@ -375,7 +376,7 @@ class Action {
   template <typename Func>
   explicit Action(const Action<Func>& action) : fun_(action.fun_) {}
 
-  // Returns true iff this is the DoDefault() action.
+  // Returns true if and only if this is the DoDefault() action.
   bool IsDoDefault() const { return fun_ == nullptr; }
 
   // Performs the action.  Note that this method is const even though
@@ -395,7 +396,7 @@ class Action {
   template <typename G>
   friend class Action;
 
-  // fun_ is an empty function iff this is the DoDefault() action.
+  // fun_ is an empty function if and only if this is the DoDefault() action.
   ::std::function<F> fun_;
 };
 
@@ -532,7 +533,7 @@ class ReturnAction {
     // in the Impl class. But both definitions must be the same.
     typedef typename Function<F>::Result Result;
     GTEST_COMPILE_ASSERT_(
-        !is_reference<Result>::value,
+        !std::is_reference<Result>::value,
         use_ReturnRef_instead_of_Return_to_return_a_reference);
     static_assert(!std::is_void<Result>::value,
                   "Can't use Return() on an action expected to return `void`.");
@@ -561,7 +562,7 @@ class ReturnAction {
     Result Perform(const ArgumentTuple&) override { return value_; }
 
    private:
-    GTEST_COMPILE_ASSERT_(!is_reference<Result>::value,
+    GTEST_COMPILE_ASSERT_(!std::is_reference<Result>::value,
                           Result_cannot_be_a_reference_type);
     // We save the value before casting just in case it is being cast to a
     // wrapper type.
@@ -619,7 +620,7 @@ class ReturnVoidAction {
   // Allows Return() to be used in any void-returning function.
   template <typename Result, typename ArgumentTuple>
   static void Perform(const ArgumentTuple&) {
-    CompileAssertTypesEqual<void, Result>();
+    static_assert(std::is_void<Result>::value, "Result should be void.");
   }
 };
 
@@ -640,7 +641,7 @@ class ReturnRefAction {
     // Asserts that the function return type is a reference.  This
     // catches the user error of using ReturnRef(x) when Return(x)
     // should be used, and generates some helpful error message.
-    GTEST_COMPILE_ASSERT_(internal::is_reference<Result>::value,
+    GTEST_COMPILE_ASSERT_(std::is_reference<Result>::value,
                           use_Return_instead_of_ReturnRef_to_return_a_value);
     return Action<F>(new Impl<F>(ref_));
   }
@@ -687,7 +688,7 @@ class ReturnRefOfCopyAction {
     // catches the user error of using ReturnRefOfCopy(x) when Return(x)
     // should be used, and generates some helpful error message.
     GTEST_COMPILE_ASSERT_(
-        internal::is_reference<Result>::value,
+        std::is_reference<Result>::value,
         use_Return_instead_of_ReturnRefOfCopy_to_return_a_value);
     return Action<F>(new Impl<F>(value_));
   }
@@ -842,7 +843,7 @@ class IgnoreResultAction {
     typedef typename internal::Function<F>::Result Result;
 
     // Asserts at compile time that F returns void.
-    CompileAssertTypesEqual<void, Result>();
+    static_assert(std::is_void<Result>::value, "Result type should be void.");
 
     return Action<F>(new Impl<F>(action_));
   }
