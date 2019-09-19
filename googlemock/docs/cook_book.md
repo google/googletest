@@ -3689,10 +3689,10 @@ class NotNullMatcher {
   }
 
   // Describes the property of a value matching this matcher.
-  void DescribeTo(::std::ostream* os) const { *os << "is not NULL"; }
+  void DescribeTo(std::ostream* os) const { *os << "is not NULL"; }
 
   // Describes the property of a value NOT matching this matcher.
-  void DescribeNegationTo(::std::ostream* os) const { *os << "is NULL"; }
+  void DescribeNegationTo(std::ostream* os) const { *os << "is NULL"; }
 };
 
 // To construct a polymorphic matcher, pass an instance of the class
@@ -3736,7 +3736,7 @@ class CardinalityInterface {
   virtual bool IsSaturatedByCallCount(int call_count) const = 0;
 
   // Describes self to an ostream.
-  virtual void DescribeTo(::std::ostream* os) const = 0;
+  virtual void DescribeTo(std::ostream* os) const = 0;
 };
 ```
 
@@ -3758,7 +3758,7 @@ class EvenNumberCardinality : public CardinalityInterface {
     return false;
   }
 
-  void DescribeTo(::std::ostream* os) const {
+  void DescribeTo(std::ostream* os) const {
     *os << "called even number of times";
   }
 };
