@@ -8,7 +8,7 @@ Underscore (`_`) is special, as C++ reserves the following to be used by the
 compiler and the standard library:
 
 1.  any identifier that starts with an `_` followed by an upper-case letter, and
-1.  any identifier that contains two consecutive underscores (i.e. `__`)
+2.  any identifier that contains two consecutive underscores (i.e. `__`)
     *anywhere* in its name.
 
 User code is *prohibited* from using such identifiers.
@@ -22,11 +22,11 @@ contains `_`?
 1.  If `TestSuiteName` starts with an `_` followed by an upper-case letter (say,
     `_Foo`), we end up with `_Foo_TestName_Test`, which is reserved and thus
     invalid.
-1.  If `TestSuiteName` ends with an `_` (say, `Foo_`), we get
+2.  If `TestSuiteName` ends with an `_` (say, `Foo_`), we get
     `Foo__TestName_Test`, which is invalid.
-1.  If `TestName` starts with an `_` (say, `_Bar`), we get
+3.  If `TestName` starts with an `_` (say, `_Bar`), we get
     `TestSuiteName__Bar_Test`, which is invalid.
-1.  If `TestName` ends with an `_` (say, `Bar_`), we get
+4.  If `TestName` ends with an `_` (say, `Bar_`), we get
     `TestSuiteName_Bar__Test`, which is invalid.
 
 So clearly `TestSuiteName` and `TestName` cannot start or end with `_`
@@ -263,7 +263,7 @@ If necessary, you can continue to derive test fixtures from a derived fixture.
 googletest has no limit on how deep the hierarchy can be.
 
 For a complete example using derived test fixtures, see
-[googletest sample](https://github.com/google/googletest/blob/master/googletest/samples/sample5_unittest.cc)
+[sample5_unittest.cc](../samples/sample5_unittest.cc).
 
 ## My compiler complains "void value not ignored as it ought to be." What does this mean?
 
@@ -298,7 +298,7 @@ In the end, this boils down to good concurrent programming. You have to make
 sure that there is no race conditions or dead locks in your program. No silver
 bullet - sorry!
 
-## Should I use the constructor/destructor of the test fixture or SetUp()/TearDown()?
+## Should I use the constructor/destructor of the test fixture or SetUp()/TearDown()? {#CtorVsSetUp}
 
 The first thing to remember is that googletest does **not** reuse the same test
 fixture object across multiple tests. For each `TEST_F`, googletest will create
@@ -524,8 +524,8 @@ There are several good reasons:
     contaminating others, making debugging difficult. By using fixtures, each
     test has a fresh set of variables that's different (but with the same
     names). Thus, tests are kept independent of each other.
-1.  Global variables pollute the global namespace.
-1.  Test fixtures can be reused via subclassing, which cannot be done easily
+2.  Global variables pollute the global namespace.
+3.  Test fixtures can be reused via subclassing, which cannot be done easily
     with global variables. This is useful if many test suites have something in
     common.
 

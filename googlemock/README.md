@@ -28,6 +28,13 @@ gMock:
 -   does not use exceptions, and
 -   is easy to learn and use.
 
+Details and examples can be found here:
+
+*   [gMock for Dummies](docs/for_dummies.md)
+*   [Legacy gMock FAQ](docs/gmock_faq.md)
+*   [gMock Cookbook](docs/cook_book.md)
+*   [gMock Cheat Sheet](docs/cheat_sheet.md)
+
 Please note that code under scripts/generator/ is from the [cppclean
 project](http://code.google.com/p/cppclean/) and under the Apache
 License, which is different from Google Mock's license.

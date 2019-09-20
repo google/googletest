@@ -96,6 +96,14 @@ INSTANTIATE_TEST_SUITE_P(PrintingFailingParams,
                          FailingParamTest,
                          testing::Values(2));
 
+// Tests that an empty value for the test suite basename yields just
+// the test name without any prior /
+class EmptyBasenameParamInst : public testing::TestWithParam<int> {};
+
+TEST_P(EmptyBasenameParamInst, Passes) { EXPECT_EQ(1, GetParam()); }
+
+INSTANTIATE_TEST_SUITE_P(, EmptyBasenameParamInst, testing::Values(1));
+
 static const char kGoldenString[] = "\"Line\0 1\"\nLine 2";
 
 TEST(NonfatalFailureTest, EscapesStringOperands) {
@@ -808,9 +816,9 @@ class TypedTestNames {
  public:
   template <typename T>
   static std::string GetName(int i) {
-    if (testing::internal::IsSame<T, char>::value)
+    if (std::is_same<T, char>::value)
       return std::string("char") + ::testing::PrintToString(i);
-    if (testing::internal::IsSame<T, int>::value)
+    if (std::is_same<T, int>::value)
       return std::string("int") + ::testing::PrintToString(i);
   }
 };
@@ -849,10 +857,10 @@ class TypedTestPNames {
  public:
   template <typename T>
   static std::string GetName(int i) {
-    if (testing::internal::IsSame<T, unsigned char>::value) {
+    if (std::is_same<T, unsigned char>::value) {
       return std::string("unsignedChar") + ::testing::PrintToString(i);
     }
-    if (testing::internal::IsSame<T, unsigned int>::value) {
+    if (std::is_same<T, unsigned int>::value) {
       return std::string("unsignedInt") + ::testing::PrintToString(i);
     }
   }

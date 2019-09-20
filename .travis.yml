@@ -3,7 +3,6 @@
 # This file can be validated on:
 # http://lint.travis-ci.org/
 
-sudo: false
 language: cpp
 
 # Define the matrix explicitly, manually expanding the combinations of (os, compiler, env).
@@ -11,25 +10,22 @@ language: cpp
 matrix:
   include:
     - os: linux
-      sudo: required
-      before_install: chmod -R +x ./ci/*platformio.sh 
+      before_install: chmod -R +x ./ci/*platformio.sh
       install: ./ci/install-platformio.sh
-      script: ./ci/build-platformio.sh      
+      script: ./ci/build-platformio.sh
     - os: linux
       dist: xenial
       compiler: gcc
-      sudo : true
       install: ./ci/install-linux.sh && ./ci/log-config.sh
       script: ./ci/build-linux-bazel.sh
     - os: linux
       dist: xenial
       compiler: clang
-      sudo : true
       install: ./ci/install-linux.sh && ./ci/log-config.sh
       script: ./ci/build-linux-bazel.sh
     - os: linux
       compiler: gcc
-      env: BUILD_TYPE=Debug VERBOSE=1 CXX_FLAGS=-std=c++11 
+      env: BUILD_TYPE=Debug VERBOSE=1 CXX_FLAGS=-std=c++11
     - os: linux
       compiler: clang
       env: BUILD_TYPE=Release VERBOSE=1 CXX_FLAGS=-std=c++11 -Wgnu-zero-variadic-macro-arguments
@@ -52,7 +48,7 @@ install:
 
 script: ./ci/travis.sh
 
-# For sudo=false builds this section installs the necessary dependencies.
+# This section installs the necessary dependencies.
 addons:
   apt:
     # List of whitelisted in travis packages for ubuntu-precise can be found here:

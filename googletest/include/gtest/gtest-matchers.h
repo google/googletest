@@ -42,6 +42,7 @@
 #include <memory>
 #include <ostream>
 #include <string>
+#include <type_traits>
 
 #include "gtest/gtest-printers.h"
 #include "gtest/internal/gtest-internal.h"
@@ -95,8 +96,8 @@ class MatchResultListener {
   // Returns the underlying ostream.
   ::std::ostream* stream() { return stream_; }
 
-  // Returns true iff the listener is interested in an explanation of
-  // the match result.  A matcher's MatchAndExplain() method can use
+  // Returns true if and only if the listener is interested in an explanation
+  // of the match result.  A matcher's MatchAndExplain() method can use
   // this information to avoid generating the explanation when no one
   // intends to hear it.
   bool IsInterested() const { return stream_ != nullptr; }
@@ -140,8 +141,8 @@ class MatcherDescriberInterface {
 template <typename T>
 class MatcherInterface : public MatcherDescriberInterface {
  public:
-  // Returns true iff the matcher matches x; also explains the match
-  // result to 'listener' if necessary (see the next paragraph), in
+  // Returns true if and only if the matcher matches x; also explains the
+  // match result to 'listener' if necessary (see the next paragraph), in
   // the form of a non-restrictive relative clause ("which ...",
   // "whose ...", etc) that describes x.  For example, the
   // MatchAndExplain() method of the Pointee(...) matcher should
@@ -257,13 +258,13 @@ class StreamMatchResultListener : public MatchResultListener {
 template <typename T>
 class MatcherBase {
  public:
-  // Returns true iff the matcher matches x; also explains the match
-  // result to 'listener'.
+  // Returns true if and only if the matcher matches x; also explains the
+  // match result to 'listener'.
   bool MatchAndExplain(const T& x, MatchResultListener* listener) const {
     return impl_->MatchAndExplain(x, listener);
   }
 
-  // Returns true iff this matcher matches x.
+  // Returns true if and only if this matcher matches x.
   bool Matches(const T& x) const {
     DummyMatchResultListener dummy;
     return MatchAndExplain(x, &dummy);
@@ -299,8 +300,8 @@ class MatcherBase {
   template <typename U>
   explicit MatcherBase(
       const MatcherInterface<U>* impl,
-      typename internal::EnableIf<
-          !internal::IsSame<U, const U&>::value>::type* = nullptr)
+      typename std::enable_if<!std::is_same<U, const U&>::value>::type* =
+          nullptr)
       : impl_(new internal::MatcherInterfaceAdapter<U>(impl)) {}
 
   MatcherBase(const MatcherBase&) = default;
@@ -333,9 +334,10 @@ class Matcher : public internal::MatcherBase<T> {
       : internal::MatcherBase<T>(impl) {}
 
   template <typename U>
-  explicit Matcher(const MatcherInterface<U>* impl,
-                   typename internal::EnableIf<
-                       !internal::IsSame<U, const U&>::value>::type* = nullptr)
+  explicit Matcher(
+      const MatcherInterface<U>* impl,
+      typename std::enable_if<!std::is_same<U, const U&>::value>::type* =
+          nullptr)
       : internal::MatcherBase<T>(impl) {}
 
   // Implicit constructor here allows people to write

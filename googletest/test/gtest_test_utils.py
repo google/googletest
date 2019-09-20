@@ -215,10 +215,11 @@ class Subprocess:
     Returns:
       An object that represents outcome of the executed process. It has the
       following attributes:
-        terminated_by_signal   True iff the child process has been terminated
-                               by a signal.
+        terminated_by_signal   True if and only if the child process has been
+                               terminated by a signal.
         signal                 Sygnal that terminated the child process.
-        exited                 True iff the child process exited normally.
+        exited                 True if and only if the child process exited
+                               normally.
         exit_code              The code with which the child process exited.
         output                 Child process's stdout and stderr output
                                combined in a string.
