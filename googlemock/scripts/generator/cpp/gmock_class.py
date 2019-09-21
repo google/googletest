@@ -50,10 +50,11 @@ from cpp import utils
 
 # Preserve compatibility with Python 2.3.
 try:
-  _dummy = set
+    _dummy = set
 except NameError:
-  import sets
-  set = sets.Set
+    import sets
+
+    set = sets.Set
 
 _VERSION = (1, 0, 1)  # The version of this script.
 # How many spaces to indent.  Can set me with the INDENT environment variable.
@@ -164,104 +165,104 @@ def _GenerateMethods(output_lines, source, class_node):
 
 
 def _GenerateMocks(filename, source, ast_list, desired_class_names):
-  processed_class_names = set()
-  lines = []
-  for node in ast_list:
-    if (isinstance(node, ast.Class) and node.body and
-        # desired_class_names being None means that all classes are selected.
-        (not desired_class_names or node.name in desired_class_names)):
-      class_name = node.name
-      parent_name = class_name
-      processed_class_names.add(class_name)
-      class_node = node
-      # Add namespace before the class.
-      if class_node.namespace:
-        lines.extend(['namespace %s {' % n for n in class_node.namespace])  # }
-        lines.append('')
+    processed_class_names = set()
+    lines = []
+    for node in ast_list:
+        if (isinstance(node, ast.Class) and node.body and
+                # desired_class_names being None means that all classes are selected.
+                (not desired_class_names or node.name in desired_class_names)):
+            class_name = node.name
+            parent_name = class_name
+            processed_class_names.add(class_name)
+            class_node = node
+            # Add namespace before the class.
+            if class_node.namespace:
+                lines.extend(['namespace %s {' % n for n in class_node.namespace])  # }
+                lines.append('')
 
-      # Add template args for templated classes.
-      if class_node.templated_types:
-        # TODO(paulchang): The AST doesn't preserve template argument order,
-        # so we have to make up names here.
-        # TODO(paulchang): Handle non-type template arguments (e.g.
-        # template<typename T, int N>).
-        template_arg_count = len(class_node.templated_types.keys())
-        template_args = ['T%d' % n for n in range(template_arg_count)]
-        template_decls = ['typename ' + arg for arg in template_args]
-        lines.append('template <' + ', '.join(template_decls) + '>')
-        parent_name += '<' + ', '.join(template_args) + '>'
+            # Add template args for templated classes.
+            if class_node.templated_types:
+                # TODO(paulchang): The AST doesn't preserve template argument order,
+                # so we have to make up names here.
+                # TODO(paulchang): Handle non-type template arguments (e.g.
+                # template<typename T, int N>).
+                template_arg_count = len(class_node.templated_types.keys())
+                template_args = ['T%d' % n for n in range(template_arg_count)]
+                template_decls = ['typename ' + arg for arg in template_args]
+                lines.append('template <' + ', '.join(template_decls) + '>')
+                parent_name += '<' + ', '.join(template_args) + '>'
 
-      # Add the class prolog.
-      lines.append('class Mock%s : public %s {'  # }
-                   % (class_name, parent_name))
-      lines.append('%spublic:' % (' ' * (_INDENT // 2)))
+            # Add the class prolog.
+            lines.append('class Mock%s : public %s {'  # }
+                         % (class_name, parent_name))
+            lines.append('%spublic:' % (' ' * (_INDENT // 2)))
 
-      # Add all the methods.
-      _GenerateMethods(lines, source, class_node)
+            # Add all the methods.
+            _GenerateMethods(lines, source, class_node)
 
-      # Close the class.
-      if lines:
-        # If there are no virtual methods, no need for a public label.
-        if len(lines) == 2:
-          del lines[-1]
+            # Close the class.
+            if lines:
+                # If there are no virtual methods, no need for a public label.
+                if len(lines) == 2:
+                    del lines[-1]
 
-        # Only close the class if there really is a class.
-        lines.append('};')
-        lines.append('')  # Add an extra newline.
+                # Only close the class if there really is a class.
+                lines.append('};')
+                lines.append('')  # Add an extra newline.
 
-      # Close the namespace.
-      if class_node.namespace:
-        for i in range(len(class_node.namespace)-1, -1, -1):
-          lines.append('}  // namespace %s' % class_node.namespace[i])
-        lines.append('')  # Add an extra newline.
+            # Close the namespace.
+            if class_node.namespace:
+                for i in range(len(class_node.namespace) - 1, -1, -1):
+                    lines.append('}  // namespace %s' % class_node.namespace[i])
+                lines.append('')  # Add an extra newline.
 
-  if desired_class_names:
-    missing_class_name_list = list(desired_class_names - processed_class_names)
-    if missing_class_name_list:
-      missing_class_name_list.sort()
-      sys.stderr.write('Class(es) not found in %s: %s\n' %
-                       (filename, ', '.join(missing_class_name_list)))
-  elif not processed_class_names:
-    sys.stderr.write('No class found in %s\n' % filename)
+    if desired_class_names:
+        missing_class_name_list = list(desired_class_names - processed_class_names)
+        if missing_class_name_list:
+            missing_class_name_list.sort()
+            sys.stderr.write('Class(es) not found in %s: %s\n' %
+                             (filename, ', '.join(missing_class_name_list)))
+    elif not processed_class_names:
+        sys.stderr.write('No class found in %s\n' % filename)
 
-  return lines
+    return lines
 
 
 def main(argv=sys.argv):
-  if len(argv) < 2:
-    sys.stderr.write('Google Mock Class Generator v%s\n\n' %
-                     '.'.join(map(str, _VERSION)))
-    sys.stderr.write(__doc__)
-    return 1
+    if len(argv) < 2:
+        sys.stderr.write('Google Mock Class Generator v%s\n\n' %
+                         '.'.join(map(str, _VERSION)))
+        sys.stderr.write(__doc__)
+        return 1
 
-  global _INDENT
-  try:
-    _INDENT = int(os.environ['INDENT'])
-  except KeyError:
-    pass
-  except:
-    sys.stderr.write('Unable to use indent of %s\n' % os.environ.get('INDENT'))
+    global _INDENT
+    try:
+        _INDENT = int(os.environ['INDENT'])
+    except KeyError:
+        pass
+    except:
+        sys.stderr.write('Unable to use indent of %s\n' % os.environ.get('INDENT'))
 
-  filename = argv[1]
-  desired_class_names = None  # None means all classes in the source file.
-  if len(argv) >= 3:
-    desired_class_names = set(argv[2:])
-  source = utils.ReadFile(filename)
-  if source is None:
-    return 1
+    filename = argv[1]
+    desired_class_names = None  # None means all classes in the source file.
+    if len(argv) >= 3:
+        desired_class_names = set(argv[2:])
+    source = utils.ReadFile(filename)
+    if source is None:
+        return 1
 
-  builder = ast.BuilderFromSource(source, filename)
-  try:
-    entire_ast = filter(None, builder.Generate())
-  except KeyboardInterrupt:
-    return
-  except:
-    # An error message was already printed since we couldn't parse.
-    sys.exit(1)
-  else:
-    lines = _GenerateMocks(filename, source, entire_ast, desired_class_names)
-    sys.stdout.write('\n'.join(lines))
+    builder = ast.BuilderFromSource(source, filename)
+    try:
+        entire_ast = filter(None, builder.Generate())
+    except KeyboardInterrupt:
+        return
+    except:
+        # An error message was already printed since we couldn't parse.
+        sys.exit(1)
+    else:
+        lines = _GenerateMocks(filename, source, entire_ast, desired_class_names)
+        sys.stdout.write('\n'.join(lines))
 
 
 if __name__ == '__main__':
-  main(sys.argv)
+    main(sys.argv)

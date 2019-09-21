@@ -518,7 +518,7 @@ class TypeConverter(object):
             elif token.name == '&':
                 reference = True
             elif token.name == '[':
-               pointer = True
+                pointer = True
             elif token.name == ']':
                 pass
             else:
@@ -576,7 +576,7 @@ class TypeConverter(object):
             elif p.name not in ('*', '&', '>'):
                 # Ensure that names have a space between them.
                 if (type_name and type_name[-1].token_type == tokenize.NAME and
-                    p.token_type == tokenize.NAME):
+                        p.token_type == tokenize.NAME):
                     type_name.append(tokenize.Token(tokenize.SYNTAX, ' ', 0, 0))
                 type_name.append(p)
             else:
@@ -652,7 +652,7 @@ class TypeConverter(object):
         start = return_type_seq[0].start
         end = return_type_seq[-1].end
         _, name, templated_types, modifiers, default, other_tokens = \
-           self.DeclarationToParts(return_type_seq, False)
+            self.DeclarationToParts(return_type_seq, False)
         names = [n.name for n in other_tokens]
         reference = '&' in names
         pointer = '*' in names
@@ -816,7 +816,7 @@ class AstBuilder(object):
                 # self.in_class can contain A::Name, but the dtor will only
                 # be Name.  Make sure to compare against the right value.
                 if (token.token_type == tokenize.NAME and
-                    token.name == self.in_class_name_only):
+                        token.name == self.in_class_name_only):
                     return self._GetMethod([token], FUNCTION_DTOR, None, True)
             # TODO(nnorwitz): handle a lot more syntax.
         elif token.token_type == tokenize.PREPROCESSOR:
@@ -1129,7 +1129,7 @@ class AstBuilder(object):
         # Looks like we got a method, not a function.
         if len(return_type) > 2 and return_type[-1].name == '::':
             return_type, in_class = \
-                         self._GetReturnTypeAndClassName(return_type)
+                self._GetReturnTypeAndClassName(return_type)
             return Method(indices.start, indices.end, name.name, in_class,
                           return_type, parameters, modifiers, templated_types,
                           body, self.namespace_stack)
@@ -1374,7 +1374,7 @@ class AstBuilder(object):
     def handle_typedef(self):
         token = self._GetNextToken()
         if (token.token_type == tokenize.NAME and
-            keywords.IsKeyword(token.name)):
+                keywords.IsKeyword(token.name)):
             # Token must be struct/enum/union/class.
             method = getattr(self, 'handle_' + token.name)
             self._handling_typedef = True
@@ -1397,7 +1397,7 @@ class AstBuilder(object):
         if name.name == ')':
             # HACK(nnorwitz): Handle pointers to functions "properly".
             if (len(tokens) >= 4 and
-                tokens[1].name == '(' and tokens[2].name == '*'):
+                    tokens[1].name == '(' and tokens[2].name == '*'):
                 tokens.append(name)
                 name = tokens[3]
         elif name.name == ']':
