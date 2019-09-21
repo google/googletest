@@ -193,19 +193,48 @@ class Foo {
 };
 """
         self.assertEqualIgnoreLeadingWhitespace(
-            'MOCK_METHOD2(Bar,\nvoid(int, char));',
+            'MOCK_METHOD2(Bar,\nvoid(int a, char c ));',
             self.GenerateMethodSource(source))
 
     def testMultipleDefaultParameters(self):
         source = """
 class Foo {
  public:
-  virtual void Bar(int a = 42, char c = 'x') = 0;
+  virtual void Bar(
+        int a = 42, 
+        char c = 'x', 
+        const int* const p = nullptr, 
+        const std::string& s = "42",
+        char tab[] = {'4','2'},
+        int const *& rp = aDefaultPointer) = 0;
 };
 """
         self.assertEqualIgnoreLeadingWhitespace(
-            'MOCK_METHOD2(Bar,\nvoid(int, char));',
+            "MOCK_METHOD7(Bar,\n"
+            "void(int a , char c , const int* const p , const std::string& s , char tab[] , int const *& rp ));",
             self.GenerateMethodSource(source))
+
+    def testConstDefaultParameter(self):
+        source = """
+class Test {
+ public:
+  virtual bool Bar(const int test_arg = 42) = 0;
+};
+"""
+        expected = 'MOCK_METHOD1(Bar,\nbool(const int test_arg ));'
+        self.assertEqualIgnoreLeadingWhitespace(
+            expected, self.GenerateMethodSource(source))
+
+    def testConstRefDefaultParameter(self):
+        source = """
+class Test {
+ public:
+  virtual bool Bar(const std::string& test_arg = "42" ) = 0;
+};
+"""
+        expected = 'MOCK_METHOD1(Bar,\nbool(const std::string& test_arg ));'
+        self.assertEqualIgnoreLeadingWhitespace(
+            expected, self.GenerateMethodSource(source))
 
     def testRemovesCommentsWhenDefaultsArePresent(self):
         source = """
@@ -216,7 +245,7 @@ class Foo {
 };
 """
         self.assertEqualIgnoreLeadingWhitespace(
-            'MOCK_METHOD2(Bar,\nvoid(int, char));',
+            'MOCK_METHOD2(Bar,\nvoid(int a , char c));',
             self.GenerateMethodSource(source))
 
     def testDoubleSlashCommentsInParameterListAreRemoved(self):
@@ -243,7 +272,7 @@ class Foo {
 };
 """
         self.assertEqualIgnoreLeadingWhitespace(
-            'MOCK_METHOD2(Bar,\nconst string&(int /* keeper */, int b));',
+            'MOCK_METHOD2(Bar,\nconst string&(int , int b));',
             self.GenerateMethodSource(source))
 
     def testArgsOfTemplateTypes(self):
@@ -458,8 +487,8 @@ void(const FooType& test_arg));
         self.assertEqualIgnoreLeadingWhitespace(
             expected, self.GenerateMocks(source))
 
-  def testEnumType(self):
-    source = """
+    def testEnumType(self):
+        source = """
 class Test {
  public:
   enum Bar {
@@ -475,11 +504,11 @@ MOCK_METHOD0(Foo,
 void());
 };
 """
-    self.assertEqualIgnoreLeadingWhitespace(
-        expected, self.GenerateMocks(source))
+        self.assertEqualIgnoreLeadingWhitespace(
+            expected, self.GenerateMocks(source))
 
-  def testEnumClassType(self):
-    source = """
+    def testEnumClassType(self):
+        source = """
 class Test {
  public:
   enum class Bar {
@@ -488,18 +517,18 @@ class Test {
   virtual void Foo();
 };
 """
-    expected = """\
+        expected = """\
 class MockTest : public Test {
 public:
 MOCK_METHOD0(Foo,
 void());
 };
 """
-    self.assertEqualIgnoreLeadingWhitespace(
-        expected, self.GenerateMocks(source))
+        self.assertEqualIgnoreLeadingWhitespace(
+            expected, self.GenerateMocks(source))
 
-  def testStdFunction(self):
-    source = """
+    def testStdFunction(self):
+        source = """
 class Test {
  public:
   Test(std::function<int(std::string)> foo) : foo_(foo) {}
@@ -510,7 +539,7 @@ class Test {
   std::function<int(std::string)> foo_;
 };
 """
-    expected = """\
+        expected = """\
 class MockTest : public Test {
 public:
 MOCK_METHOD0(foo,

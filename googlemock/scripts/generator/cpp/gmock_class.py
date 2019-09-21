@@ -62,7 +62,7 @@ _INDENT = 2
 
 
 def _RenderType(ast_type):
-  """Renders the potentially recursively templated type into a string.
+    """Renders the potentially recursively templated type into a string.
 
   Args:
     ast_type: The AST of the type.
@@ -71,97 +71,92 @@ def _RenderType(ast_type):
     Rendered string and a boolean to indicate whether we have multiple args
     (which is not handled correctly).
   """
-  has_multiarg_error = False
-  # Add modifiers like 'const'.
-  modifiers = ''
-  if ast_type.modifiers:
-    modifiers = ' '.join(ast_type.modifiers) + ' '
-  return_type = modifiers + ast_type.name
-  if ast_type.templated_types:
-    # Collect template args.
-    template_args = []
-    for arg in ast_type.templated_types:
-      rendered_arg, e = _RenderType(arg)
-      if e: has_multiarg_error = True
-      template_args.append(rendered_arg)
-    return_type += '<' + ', '.join(template_args) + '>'
-    # We are actually not handling multi-template-args correctly. So mark it.
-    if len(template_args) > 1:
-      has_multiarg_error = True
-  if ast_type.pointer:
-    return_type += '*'
-  if ast_type.reference:
-    return_type += '&'
-  return return_type, has_multiarg_error
+    has_multiarg_error = False
+    # Add modifiers like 'const'.
+    modifiers = ''
+    if ast_type.modifiers:
+        modifiers = ' '.join(ast_type.modifiers) + ' '
+    return_type = modifiers + ast_type.name
+    if ast_type.templated_types:
+        # Collect template args.
+        template_args = []
+        for arg in ast_type.templated_types:
+            rendered_arg, e = _RenderType(arg)
+            if e: has_multiarg_error = True
+            template_args.append(rendered_arg)
+        return_type += '<' + ', '.join(template_args) + '>'
+        # We are actually not handling multi-template-args correctly. So mark it.
+        if len(template_args) > 1:
+            has_multiarg_error = True
+    if ast_type.pointer:
+        return_type += '*'
+    if ast_type.reference:
+        return_type += '&'
+    return return_type, has_multiarg_error
 
 
 def _GetNumParameters(parameters, source):
-  num_parameters = len(parameters)
-  if num_parameters == 1:
-    first_param = parameters[0]
-    if source[first_param.start:first_param.end].strip() == 'void':
-      # We must treat T(void) as a function with no parameters.
-      return 0
-  return num_parameters
+    num_parameters = len(parameters)
+    if num_parameters == 1:
+        first_param = parameters[0]
+        if source[first_param.start:first_param.end].strip() == 'void':
+            # We must treat T(void) as a function with no parameters.
+            return 0
+    return num_parameters
 
 
 def _GenerateMethods(output_lines, source, class_node):
-  function_type = (ast.FUNCTION_VIRTUAL | ast.FUNCTION_PURE_VIRTUAL |
-                   ast.FUNCTION_OVERRIDE)
-  ctor_or_dtor = ast.FUNCTION_CTOR | ast.FUNCTION_DTOR
-  indent = ' ' * _INDENT
+    function_type = (ast.FUNCTION_VIRTUAL | ast.FUNCTION_PURE_VIRTUAL |
+                     ast.FUNCTION_OVERRIDE)
+    ctor_or_dtor = ast.FUNCTION_CTOR | ast.FUNCTION_DTOR
+    indent = ' ' * _INDENT
 
-  for node in class_node.body:
-    # We only care about virtual functions.
-    if (isinstance(node, ast.Function) and
-        node.modifiers & function_type and
-        not node.modifiers & ctor_or_dtor):
-      # Pick out all the elements we need from the original function.
-      const = ''
-      if node.modifiers & ast.FUNCTION_CONST:
-        const = 'CONST_'
-      num_parameters = _GetNumParameters(node.parameters, source)
-      return_type = 'void'
-      if node.return_type:
-        return_type, has_multiarg_error = _RenderType(node.return_type)
-        if has_multiarg_error:
-          for line in [
-              '// The following line won\'t really compile, as the return',
-              '// type has multiple template arguments.  To fix it, use a',
-              '// typedef for the return type.']:
-            output_lines.append(indent + line)
-      tmpl = ''
-      if class_node.templated_types:
-        tmpl = '_T'
-      mock_method_macro = 'MOCK_%sMETHOD%d%s' % (const, num_parameters, tmpl)
+    for node in class_node.body:
+        # We only care about virtual functions.
+        if (isinstance(node, ast.Function) and
+                node.modifiers & function_type and
+                not node.modifiers & ctor_or_dtor):
+            # Pick out all the elements we need from the original function.
+            const = ''
+            if node.modifiers & ast.FUNCTION_CONST:
+                const = 'CONST_'
+            num_parameters = _GetNumParameters(node.parameters, source)
+            return_type = 'void'
+            if node.return_type:
+                return_type, has_multiarg_error = _RenderType(node.return_type)
+                if has_multiarg_error:
+                    for line in [
+                        '// The following line won\'t really compile, as the return',
+                        '// type has multiple template arguments.  To fix it, use a',
+                        '// typedef for the return type.']:
+                        output_lines.append(indent + line)
+            tmpl = ''
+            if class_node.templated_types:
+                tmpl = '_T'
+            mock_method_macro = 'MOCK_%sMETHOD%d%s' % (const, num_parameters, tmpl)
 
-      args = ''
-      if node.parameters:
-        # Due to the parser limitations, it is impossible to keep comments
-        # while stripping the default parameters.  When defaults are
-        # present, we choose to strip them and comments (and produce
-        # compilable code).
-        # TODO(nnorwitz@google.com): Investigate whether it is possible to
-        # preserve parameter name when reconstructing parameter text from
-        # the AST.
-        if len([param for param in node.parameters if param.default]) > 0:
-          args = ', '.join(param.type.name for param in node.parameters)
-        else:
-          # Get the full text of the parameters from the start
-          # of the first parameter to the end of the last parameter.
-          start = node.parameters[0].start
-          end = node.parameters[-1].end
-          # Remove // comments.
-          args_strings = re.sub(r'//.*', '', source[start:end])
-          # Condense multiple spaces and eliminate newlines putting the
-          # parameters together on a single line.  Ensure there is a
-          # space in an argument which is split by a newline without
-          # intervening whitespace, e.g.: int\nBar
-          args = re.sub('  +', ' ', args_strings.replace('\n', ' '))
+            args = ''
+            if node.parameters:
+                # Get the full text of the parameters from the start
+                # of the first parameter to the end of the last parameter.
+                start = node.parameters[0].start
+                end = node.parameters[-1].end
+                # Remove // comments.
+                args_strings = re.sub(r'//.*', '', source[start:end])
+                # Remove /* comments */.
+                args_strings = re.sub(r'/\*.*\*/', '', args_strings)
+                # Remove default arguments.
+                args_strings = re.sub(r'=.*,', ',', args_strings)
+                args_strings = re.sub(r'=.*', '', args_strings)
+                # Condense multiple spaces and eliminate newlines putting the
+                # parameters together on a single line.  Ensure there is a
+                # space in an argument which is split by a newline without
+                # intervening whitespace, e.g.: int\nBar
+                args = re.sub('  +', ' ', args_strings.replace('\n', ' '))
 
-      # Create the mock method definition.
-      output_lines.extend(['%s%s(%s,' % (indent, mock_method_macro, node.name),
-                           '%s%s(%s));' % (indent*3, return_type, args)])
+            # Create the mock method definition.
+            output_lines.extend(['%s%s(%s,' % (indent, mock_method_macro, node.name),
+                                 '%s%s(%s));' % (indent * 3, return_type, args)])
 
 
 def _GenerateMocks(filename, source, ast_list, desired_class_names):

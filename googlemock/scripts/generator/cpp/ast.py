@@ -929,7 +929,10 @@ class AstBuilder(object):
     def _GetNextToken(self):
         if self.token_queue:
             return self.token_queue.pop()
-        return next(self.tokens)
+        try:
+            return next(self.tokens)
+        except StopIteration:
+            return
 
     def _AddBackToken(self, token):
         if token.whence == tokenize.WHENCE_STREAM:
