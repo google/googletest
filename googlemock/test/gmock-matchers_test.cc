@@ -4318,6 +4318,16 @@ TEST(ResultOfTest, WorksForLambdas) {
   EXPECT_FALSE(matcher.Matches(1));
 }
 
+TEST(ResultOfTest, WorksForNonCopyableArguments) {
+  Matcher<std::unique_ptr<int>> matcher = ResultOf(
+      [](const std::unique_ptr<int>& str_len) {
+        return std::string(static_cast<size_t>(*str_len), 'x');
+      },
+      "xxx");
+  EXPECT_TRUE(matcher.Matches(std::unique_ptr<int>(new int(3))));
+  EXPECT_FALSE(matcher.Matches(std::unique_ptr<int>(new int(1))));
+}
+
 const int* ReferencingFunction(const int& n) { return &n; }
 
 struct ReferencingFunctor {
