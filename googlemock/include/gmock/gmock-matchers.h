@@ -1858,7 +1858,9 @@ struct CallableTraits {
   static void CheckIsValid(Functor /* functor */) {}
 
   template <typename T>
-  static auto Invoke(Functor f, T arg) -> decltype(f(arg)) { return f(arg); }
+  static auto Invoke(Functor f, const T& arg) -> decltype(f(arg)) {
+    return f(arg);
+  }
 };
 
 // Specialization for function pointers.
@@ -1889,7 +1891,7 @@ class ResultOfMatcher {
 
   template <typename T>
   operator Matcher<T>() const {
-    return Matcher<T>(new Impl<T>(callable_, matcher_));
+    return Matcher<T>(new Impl<const T&>(callable_, matcher_));
   }
 
  private:
