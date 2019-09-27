@@ -300,7 +300,7 @@ Test program을 구현한 후 `main()` function에서 `RUN_ALL_TESTS()`만 호�
 
 > IMPORTANT: `RUN_ALL_TESTS()`는 `main()`의 맨 끝에서 호출되고 또 반환되어야만 합니다. 그렇지 않으면 compile error가 발생합니다. googletest가 이렇게 설계된 이유는 자동화된 testing service 환경에서 test program의 성공여부를 stdout/stderr이 아닌 exit code를 통해서 자동으로 확인할 수 있도록 하기 위함입니다. 이를 위해서 `main()`은 반드시 `RUN_ALL_TESTS()`를 반환해야 합니다.
 >
-> 또한, `RUN_ALL_TESTS()`는 딱 한 번만 호출되어야 합니다. 이 function을 두 번 이상 호출하게 되면 몇몇 advanced googletest features(예: thread-safe [death tests](http://collab.lge.com/main/display/SEETVTEST/Google+Test%3A+Advanced#DeathTests))와의 출동이 발생하기 때문에 지원하지 않고 있습니다.
+> 또한, `RUN_ALL_TESTS()`는 딱 한 번만 호출되어야 합니다. 이 function을 두 번 이상 호출하게 되면 몇몇 advanced googletest features(예: thread-safe [death tests](advanced.md#death-test))와의 출동이 발생하기 때문에 지원하지 않고 있습니다.
 
 **Availability**: Linux, Windows, Mac.
 
