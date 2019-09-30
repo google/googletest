@@ -1,10 +1,10 @@
-## gMock Cookbook
+# gMock Cookbook
 
 이 문서에서는 gMock의 심화된 사용방법을 확인할 수 있습니다. 아직 gMock 사용경험이 없는 분은 [ForDummies](for_dummies.md) 문서를 먼저 보는 것이 좋습니다.
 
 **Note:** gMock은 소스코드상에 `testing`이라는 namespace에 구현되어 있습니다. 따라서 gMock에 구현된 `Foo`라는 기능을 사용하고자 한다면 `using ::testing::Foo`와 같이 namespace를 명시해서 사용해야 합니다. 이 문서에는 예제코드를 간단하게 작성하기 위해서 `using`을 사용하지 않은 코드도 종종 있긴 하지만 사용자가 구현할 때는 `using`을 꼭 사용해야 합니다.
 
-### Mock Class 만들기 ###
+## Mock Class 만들기
 
 사실 mock class를 정의하는 방법은 일반적인 C++ class를 정의하는 방법과 다르지 않습니다. 다만, mock class 내부에 mock method를 정의할 때는 `MOCK_METHOD`라는 macro를 사용해야 합니다. 이 macro를 사용해야만 mock method로서 사용할 수 있습니다. 물론, mock class 안에서 mock method가 아니라 일반 method를 정의할 때는 macro를 사용하지 않아도 됩니다. Macro는 3개 또는 4개의 parameter를 전달받을 수 있습니다. 아래 예제를 보시기 바랍니다.
 
@@ -23,7 +23,7 @@ class MyMock {
 *   **`noexcept`** - mock method를 `noexcept`로 선언합니다. 대상 method가 `noexcept` method 일 때 사용하면 됩니다.
 *   **`Calltype(...)`** - mock method의 call type을 지정합니다. Windows 환경에서 주로 사용합니다.(예: `STDMETHODCALLTYPE`)
 
-#### Comma(`,`)를 문제없이 사용하는 방법
+### Comma(`,`)를 문제없이 사용하는 방법
 
 `MOCK_METHOD` macro를 사용할 때, comma의 사용은 주의가 필요합니다.
 
@@ -61,7 +61,7 @@ class MockFoo {
 };
 ```
 
-#### Private, Protected 영역에 정의된 Method를 Mocking하기 ####
+### Private, Protected 영역에 정의된 Method를 Mocking하기
 
 Base class의 method가 `public`, `protected`, `private` 등 어느 영역에 정의되어 있는지에 관계없이 mock method를 정의할 때 사용하는 `MOCK_METHOD` macro는 항상 `public` 영역에서 사용해야 합니다. (C++ 에서는 base class의 virtual function이 어느 영역에 선언되었는지에 관계없이 derived class에서는 원하는 영역에 자유롭게 overriding 할 수 있습니다.) 이렇게 해야만 `ON_CALL()`, `EXPECT_CALL()`과 같은 macro가 mock class 또는 mock function에 접근할 수 있습니다. 아래 예제를 확인하세요.
 
@@ -90,7 +90,7 @@ class MockFoo : public Foo {
 };
 ```
 
-#### Overloaded Method를 Mocking 하기 ####
+### Overloaded Method를 Mocking 하기
 
 Overloaded function을 mocking하는 것도 기존의 방법과 다르지 않습니다.
 
@@ -132,7 +132,7 @@ class MockFoo : public Foo {
 };
 ```
 
-#### Class Template Mocking 하기 ####
+### Class Template Mocking 하기
 
 Class template을 mocking하는 것도 기존의 방법과 다르지 않습니다.
 
@@ -155,7 +155,7 @@ class MockStack : public StackInterface<Elem> {
 };
 ```
 
-#### Non-virtual Method Mocking 하기 ####
+### Non-virtual Method Mocking 하기
 
 gMock에서는 non-virtual function도 간단하게 mocking 할 수 있습니다. 이러한 방법을 hi-perf dependency injection이라고도 부르는데요. 왜냐하면 vtable과 같이 virtual function에 필수적으로 수반되는 자원을 사용하지 않아도 되기 때문입니다.
 
@@ -208,7 +208,7 @@ class PacketReader {
   ... exercise reader ...
 ```
 
-#### Free Function Mocking 하기 ####
+### Free Function Mocking 하기
 
 gMock에서는 free function을 mocking하는 것도 가능합니다. 여기서 free function이란 C-style function 또는 static method를 의미합니다. 잘 생각해보면 지금까지는 non-static class method만 다뤘음을 알 수 있습니다. gMock에서 free function을 mocking하기 위해서는 interface(abstract class)를 새로 만들어야 합니다.
 
@@ -236,7 +236,7 @@ class File : public FileInterface {
 
 혹시나 virtual function을 호출하기 때문에 발생하는 성능저하가 우려된다면 [mocking non-virtual methods](cook_book.md#nonvirtual-method-mocking-하기)와 같이 사용하면 성능저하도 크게 문제가 되지 않습니다.
 
-#### 이전방식의 macro인 `MOCK_METHODn` 간단소개
+### 이전방식의 macro인 `MOCK_METHODn` 간단소개
 
 현재와 같은 `MOCK_METHOD` macro가 구현되기 전에는 `MOCK_METHODn` 계열의 macro를 사용했습니다. 이전방식 macro에서 `n`은 argument의 개수를 의미하며 이로 인해 argument 개수에 따라 여러개의 macro가 존재하게 되므로 약간의 불편함이 있었습니다. 물론, `MOCK_METHODn`계열도 여전히 지원하고는 있지만 사용자 환경에서도 점차 새로운 방식으로 변경하시길 추천합니다.
 
@@ -269,7 +269,7 @@ class File : public FileInterface {
 | **Const Method with Call Type in a Class Template** | Old  | `MOCK_CONST_METHOD1_T_WITH_CALLTYPE(STDMETHODCALLTYPE, Foo, bool(int))` |
 |                                                     | New  | `MOCK_METHOD(bool, Foo, (int), (const, Calltype(STDMETHODCALLTYPE)))` |
 
-#### Nice 모드, Strict 모드, Naggy 모드 (Naggy: 잔소리가 심한) ####
+### Nice 모드, Strict 모드, Naggy 모드 (Naggy: 잔소리가 심한)
 
 `EXPECT_CALL()` 없이 호출된 mock method가 있다면, gMock은 "uninteresting call"이라는 warning을 출력한 후에 default action을 수행합니다. 이 때, warning을 출력해주는 이유는 아래와 같습니다.
 
@@ -339,7 +339,7 @@ NOTE: `NiceMock`과 `StrictMock`의 대상은 *uninteresting call*이지 *unexpe
 
 마지막으로 naggy 모드, strict 모드는 테스트가 자주 실패하게 하고 유지보수를 어렵게 만들기도 하기 때문에 **주의**해서 사용해야 합니다. 예를 들어, 코드의 외부는 그대로 두고 내부적인 동작에 대해서만 refactoring하는 경우라면 테스트코드는 수정하지 않는 것이 이상적입니다. 그러나 naggy 모드로 설정되어 있다면 이러한 내부적인 수정에 대해서도 많은 warning들이 발생 할 것입니다. 게다가 strict 모드라면 아예 테스트가 실패하기 때문에 테스트코드의 유지보수 비용이 증가될 것입니다. 이를 위해 추천드리는 방법은 일반적인 상황에서는 nice 모드을 주로 사용하고 테스트코드를 개발할 때는 naggy 모드를 사용하는 것입니다. (다만, 현재 gMock은 naggy모드가 기본설정이긴 합니다.) 그리고 strict 모드는 필요한 경우에 한번씩 점검용으로 사용하기 바랍니다.
 
-#### 기존코드에 영향을 주지 않고, interface를 단순하게 만들기 ####
+### 기존코드에 영향을 주지 않고, interface를 단순하게 만들기
 
 아래처럼 argument의 개수가 아주 많은 method를 mocking한다면 테스트코드가 매우 복잡해 질 것입니다. 이런 경우에는 테스트의 목적을 달성하는 과정에서 크게 중요하지 않은 argument들은 걸러냄으로써 interface를 보다 단순하게 만들 수 있습니다.
 
@@ -405,7 +405,7 @@ ON_CALL(factory, DoMakeTurtle)
     .WillByDefault(MakeMockTurtle());
 ```
 
-#### Concrete Classe Mocking 하기, 그리고 대안 ####
+### Concrete Classe Mocking 하기, 그리고 대안
 
 상위 interface가 없는 class를 바로 mocking 해야하는 상황도 발생할 수 있습니다. 이러한 class들을 `Concrete`라고 부르겠습니다. 이러한 `Concrete` class는 어떻게 mocking해야 할까요? 지금까지 공부한 내용을 기반으로 하면 먼저 `Concrete` class에 포함된 method를 virtual function으로 만들고 다음으로 `Concrete` class를 상속받는 mock class를 만들면 될 것 같습니다.
 
@@ -434,7 +434,7 @@ ON_CALL(factory, DoMakeTurtle)
 
 어떤 방법이든 찬성과 반대의견을 잘 따져보는 것은 중요합니다. 다만, 여기서 설명한 interface를 사용하는 기술은 다양한 상황에서 적용가능하며 Java community에서 긴 시간에 걸쳐 효율성이 입증된 방법임을 말씀드립니다.
 
-#### Fake Class에 위임하기 ####
+### Fake Class에 위임하기
 
 어떤 interface를 위한 fake class를 구현해서 테스트를 비롯한 다양한 용도로 사용하는 개발자들이 많이 있습니다. 이렇게 이미 fake class를 잘 사용하고 있는 경우에 굳이 mock class를 새로 만들 필요가 있을까요? 사실 정답은 없으며 상황에 따라 사용자가 선택해야 합니다. 다만, gMock의 좋은 점은 mock class를 통해서 기존에 사용하던 fake class도 사용할 수 있다는 것입니다. 즉, mock class는 fake class를 포함할 수 있습니다.
 
@@ -522,7 +522,7 @@ Mock, fake가 함께 나타날 때, bad sign을 찾아내는 예제를 하나 �
 
 위의 상황은 `System` class가 너무 많은 역할을 가지고 있음을 보여주는 예입니다. 이런 경우에는 `System` class의 역할을 분리해서 `FileOps`, `IOOps`라는 interface 2개로 분리하는 것도 좋은 방법입니다. 그렇게 되면 분리된 `IOOps` interface만 mocking하여 테스트할 수 있습니다.
 
-#### Real Class에 위임하기 ####
+### Real Class에 위임하기
 
 테스트를 위해 testing double(mock, fake, stub, spy 등)을 사용할 떄의 문제는 동작이 real object와 달라질 수 있다는 것입니다. 물론 negative test를 위해서 일부러 다르게 만들기도 하지만, 때로는 실수로 인해 동작이 달라지기도 합니다. 후자의 경우라면 bug를 잡아내지 못하고 제품을 출시하는 것과 같은 문제가 발생하기도 합니다.
 
@@ -561,7 +561,7 @@ class MockFoo : public Foo {
 
 이제 gMock을 통해 real object를 사용한 검증도 가능하게 되었습니다. 사실 real object를 사용하는 것은 독립적이고 빨라야 된다는 단위테스트의 특성과는 조금 거리가 있기도 합니다. 그러나 테스트코드를 통해서 real object와의 interaction도 확인할 수 있다는 점은 상황에 따라 매우 유용하게 사용할 수 있는 옵션이 될 것입니다.
 
-#### Base Class에 위임하기 ####
+### Base Class에 위임하기
 
 이상적인 경우 interface(base class)는 pure virtual method만 가지는 것이 좋습니다. 다만, C++에서 interface의 method가 구현부를 가지는 것도 문법상 문제가 없습니다. 아래 예제를 보겠습니다.
 
@@ -620,9 +620,9 @@ class MockFoo : public Foo {
 
 그런데 왜 action을 지정할 때 `{ return foo.Concrete(str); }`과 같이 구현해서 base class의 method를 직접 호출하지 않고 한 단계를 거치도록 구현해야 할까요? 왜냐하면 base class의 `Concrete()`가 virtual function이기 때문에 이것을 직접 호출하면 derived class인 MockFoo의 `Concrete()`가 호출될 것이기 때문입니다. 게다가 derived class의 `MockFoo:Concrete`는 다시 base class의 `Foo::Concrete` 를 호출하고 있기 때문에 이러한 과정이 무한반복되는 문제가 발생할 것입니다.
 
-### Matcher 사용하기 ###
+## Matcher 사용하기
 
-#### 전달된 argument가 기대한 값과 일치하는지 확인하기 ####
+### 전달된 argument가 기대한 값과 일치하는지 확인하기
 
 Matcher를 통해서 mock method로 전달되는 argument가 정확히 어떤 값이기를 기대한다고 명세할 수 있습니다. 예를 들면, 아래에서 `DoThis()`로는 `5`가 전달되어야 하고, `DoThat()`은 `"Hello"`와 `bar`가 전달되기를 기대합니다.
 
@@ -634,7 +634,7 @@ using ::testing::Return;
   EXPECT_CALL(foo, DoThat("Hello", bar));
 ```
 
-#### 간단한 Matcher 사용하기 ####
+### 간단한 Matcher 사용하기
 
 Matcher를 통해서 전달되는 argument가 특정한 범위에 포함되어야 한다고 명세하는 것도 가능합니다. 아래에서 `DoThis()`는 `5`보다 큰 값이 전달되기를 기대하고, `DoThat()`은 첫번째 argument로 `"Hello"`, 그리고 두번째 argument로는 `Null`이 아닌 값을 기대한다고 명세하고 있습니다.
 
@@ -655,7 +655,7 @@ using ::testing::Return;
 EXPECT_CALL(foo, DoThat(_, NotNull()));
 ```
 
-#### Matcher 조합하기 ####
+### Matcher 조합하기
 
 `AllOf()`, `AnyOf()`, `Not()`, `AnyOfArray()`, `Not()` 을 이용하면 여러가지 matcher들을 조합할 수 있습니다. 각각의 역할은 이름과 동일합니다.
 
@@ -675,7 +675,7 @@ using ::testing::Not;
                           NULL));
 ```
 
-#### Casting Matchers ####
+### Casting Matchers
 
 gMock의 matcher는 정적으로 타입을 결정합니다. 즉, compile time에 타입을 검사해서 잘못된 부분을 알려준다는 의미입니다. 예를 들어 `Eq(5)`인 곳에 `string`을 전달하면 compile error가 발생하게 됩니다.
 
@@ -713,7 +713,7 @@ class MockFoo : public Foo {
 
 `MatcherCast`는 자동적으로 C++의 타입검사 기능(`static_cast` 등)를 사용하게 합니다. 다만, `static_cast`와 같은 C++ 타입검사는 변환과정에서 정보를 없애버리기도 하기 때문에 남용/오용하지 않도록 주의해야 합니다.
 
-#### 여러개의 Overloaded Function 중에서 선택하기 ####
+### 여러개의 Overloaded Function 중에서 선택하기
 
 Overloaded function 중에서 하나를 선택하고 싶은 경우가 있을 것입니다. 이 때에는 모호성을 없애기 위해서 compiler에게 관련 내용을 알려줄 필요가 있습니다.
 
@@ -764,7 +764,7 @@ TEST(PrinterTest, Print) {
 }
 ```
 
-#### Argument에 따라 다른 Action을 실행하기 ####
+### Argument에 따라 다른 Action을 실행하기
 
 Mock method가 호출되면, 소스코드 상에서 제일 *밑에 있는* expectation부터 탐색합니다.(물론 해당 expectation은 active 상태여야 합니다.) 이러한 동작방식은 [여기](for_dummies.md#여러개의-expectations-사용하기) 에서 설명된 적이 있습니다. 이러한 규칙을 이용하면 argument로 전달되는 값에 따라 다른 action이 수행되도록 지정하는 것도 가능합니다.
 
@@ -783,7 +783,7 @@ using ::testing::Return;
 
 위 코드의 `foo.DoThis()`는 전달된 argument가 `5` 미만이라면 `a`를 반환하고, 그 외의 경우에는 `b`를 반환할 것입니다.
 
-#### Argument 간의 관계 비교하기 ####
+### Argument 간의 관계 비교하기
 
 지금까지는 argument 하나하나에 대한 matcher 사용법을 주로 다뤘습니다. 그럼 "첫번째 argument가 두번째 argument보다 작아야 된다."와 같이 argument 간의 관계를 비교하고 싶은 경우에는 어떻게 해야할까요? 이런 경우에는 `With()` 를 사용하면 원하는 조건을 비교할 수 있습니다.
 
@@ -820,7 +820,7 @@ using ::testing::Lt;
 
 만약 `.With(Args<0, 1>(Truly(&MyPredicate)))`와 같이 직접 만든 predicate를 사용하고 싶은 경우에는 해당 predicate의 argument가 `::testing::tuple` 타입으로 선언되어 있어야만 합니다. 왜냐하면 gMock이 `Args<>`를 통해 선택된 argument들을 1개의 tuple 형태로 변환해서 predicate으로 전달하기 때문입니다.
 
-#### Matcher를 Predicate처럼 사용하기 ####
+### Matcher를 Predicate처럼 사용하기
 
 이미 눈치챘겠지만 사실 matcher는 predicate의 확장판(출력문이 잘 정의된)이라고 볼 수 있습니다. 현재 C++ STL의 `<algorithm>`을 포함해서 많은 algorithm들이 predicate를 argument로 받을 수 있게 구현되어 있습니다. 따라서 predicate의 확장판인 matcher도 그러한 내용을 지원하는 것이 맞을 것입니다.
 
@@ -851,7 +851,7 @@ using testing::Ne;
 Matches(AllOf(Ge(0), Le(100), Ne(50)))
 ```
 
-#### Matcher를 googletest Assertion처럼 사용하기 ####
+### Matcher를 googletest Assertion처럼 사용하기
 
 Matcher는 기본적으로 predicate와 동일하고 상응하는 출력문도 잘 정의되어 있습니다. 따라서 matcher를 googletest assertion처럼 사용할 수 있다면 매우 유용할 것입니다. gMock의 `ASSERT_THAT`, `EXPECT_THAT`은 이러한 기능을 제공합니다.
 
@@ -893,7 +893,7 @@ Expected: starts with "Hello"
 
 **Credit:** `(ASSERT|EXPECT)_THAT`의 아이디어는 `assertThat()`을 `JUnit`에 추가했던 [Hamcrest](https://github.com/hamcrest/) 프로젝트에서 가져왔음을 밝힙니다.
 
-#### Predicate를 Matcher처럼 사용하기 ####
+### Predicate를 Matcher처럼 사용하기
 
 gMock은 다양한 built-in matcher들을 제공하고 있습니다. 그럼에도 사용자가 필요로 하는 모든 경우를 만족하지는 못할 것입니다. 이처럼 새로운 matcher가 필요한 경우에는 unary predicate function 또는 functor를 matcher처럼 사용하는 것도 가능합니다. 이를 위해서는 `Truly()`로 predicate를 감싸기만 하면 됩니다.
 
@@ -908,7 +908,7 @@ int IsEven(int n) { return (n % 2) == 0 ? 1 : 0; }
 
 또한, predicate function(functor)이 꼭 `bool` 타입을 반환하지 않아도 됩니다. 반환타입은 조건문 `if (condition)`에 사용할 수 있는 타입이기만 하면 됩니다.
 
-#### 복사가 안되는 argument를 비교하기 ####
+### 복사가 안되는 argument를 비교하기
 
 사용자가 `EXPECT_CALL(mock_obj, Foo(bar))`라고 구현했다면, gMock은 `Foo()`의 argument로 전달된 `bar`의 복사본을 만들고 내부적으로 저장해 둡니다. 그랬다가 추후에 `Foo()`가 실제로 호출되면 미리 저장해둔 `bar`의 복사본을 사용하는 것입니다. 이렇게 동작하는 이유는 `EXPECT_CALL()`이 호출되고 난 후에 `bar`의 값이 변경되는 문제를 방지하기 위한 것입니다. `Eq(bar)`, `Le(bar)`와 같은 다른 matcher를 사용하는 경우에도 동일한 방식이 적용됩니다.
 
@@ -928,7 +928,7 @@ using ::testing::Lt;
 
 Remember: 위와 같이 참조형태(`ByRef`)로 전달한 후에 `bar`를 수정하는 것은 미정의 동작이므로 위험합니다.
 
-#### Object Member 비교하기 ####
+### Object Member 비교하기
 
 Mock function의 argument로 object가 전달되면 어떻게 해야 할까요? Object로 전달되는 argument를 비교하기 위해 object 전체를 비교하는 것은 좋은 방법이 아닐 것입니다. 그럼 특정한 member variable만 비교하려면 어떻게 해야 할까요? 이런 경우에는 `Field()` 또는 `Property()`를 사용하세요. 사용방법은 아래와 같습니다.
 
@@ -966,7 +966,7 @@ Field(&Foo::number, Ge(3))
 
 만약, 1개 이상의 member variable을 비교하고 싶다면 어떻게 하면 될까요? 기존처럼 `AllOf()`를 사용하면 됩니다.
 
-#### 포인터가 가리키는 값을 비교하기 ####
+### 포인터가 가리키는 값을 비교하기
 
 C++에서는 포인터를 argument로 사용하는 것도 당연히 가능합니다. 이를 위해서 gMock은 `IsNull()`, `NotNull()`과 같은 포인터용 matcher들을 다수 제공하고 있습니다. 그럼 포인터 자체를 비교하는 것이 아니라 포인터가 가리키는 값을 비교하려면 어떻게 하면 될까요? 그런 경우에는 `Pointee(m)` matcher를 사용하면 됩니다.
 
@@ -997,7 +997,7 @@ using ::testing::Pointee;
 
 그럼 포인터를 가리키는 포인터를 어떨까요? 추측해 보십시오. 네, `Pointee()`는 여러번 중첩해서 사용할 수 있습니다. 예를 들어 `Pointee(Pointee(Lt(3)))`라는 코드의 의미는 포인터가 가리키는 포인터가 가리키는 값이 3보다 작거나 같은지 비교합니다.
 
-#### Object Property 테스트하기 ####
+### Object Property 테스트하기
 
 Argument로 object가 전달되었을 때, 해당 object의 property를 검증하고 싶은 경우가 있을 것입니다. 그러나 그러한 경우를 위한 matcher는 아직 없으므로 필요한 경우에는 직접 정의해야 합니다. 여기서는 이처럼 matcher를 직접 구현해야 할 때 일반 function을 구현하는 것처럼 빠르게 구현하는 방법을 설명합니다.
 
@@ -1037,7 +1037,7 @@ Matcher<const Foo&> BarPlusBazEq(int expected_sum) {
   EXPECT_CALL(..., DoThis(BarPlusBazEq(5)))...;
 ```
 
-#### Container 비교하기 ####
+### Container 비교하기
 
 STL container(list, vector, map 등)를 비교하려면 어떻게 해야 할까요? 일단, C++ STL containter 대부분은 `==` 연산자를 제공하기 때문에 간단하게 `Eq(expected_container)`를 사용해도 됩니다. 여기서 `expected_container`는 argument로 전달되기를 바라는 기대값 container입니다.
 
@@ -1104,7 +1104,7 @@ using ::testing::ElementsAreArray;
   * 만약, container가 참조형식이 아니라 포인터로 전달되는 경우라고 해도 `Pointee(ElementsAre*(...))`라고 써주기만 하면 됩니다.
   * `ElementAre*` 계열은 element 간의 *순서가 중요할 때* 사용해야 합니다. 따라서 `hash_map`과 같이 순서가 정해지지 않은 container에 대해서는 사용하면 안됩니다.
 
-#### Matcher 공유하기 ####
+### Matcher 공유하기
 
 gMock의 matcher는 내부적으로 ref-count 방식을 사용하는 포인터로 구현되어 있습니다. 이러한 구조를 통해서 matcher를 복사할 때는 포인터만 복사하면 되므로 매우 빠르게 동작합니다. 또한 ref-count 방식이므로 마지막으로 가리키는 포인터가 사라지면 해당 matcher object도 삭제됩니다.
 
@@ -1120,15 +1120,15 @@ using ::testing::Matcher;
   ... use in_range as a matcher in multiple EXPECT_CALLs ...
 ```
 
-#### Matcher는 부수효과(side-effect)를 가지면 안됩니다.
+### Matcher는 부수효과(side-effect)를 가지면 안됩니다.
 
 WARNING: gMock은 언제 얼마나 많은 matcher가 실행될지 미리 알지 못합니다. 따라서 모든 matcher는 *순수하게 기능적인 동작*만 해야합니다. 즉, 프로그램 내의 다른 부분을 수정하면 안됩니다. 더불어 결과를 만들어낼 때 프로그램 내의 다른 부분으로부터 영향을 받아서도 안됩니다. 오직 matcher로 전달되는 parameter, argument, 및 내부변수만 가지고 결과를 만들어내야 합니다. Parameter나 argument가 참조 혹은 포인터 타입인 경우에는 수정하지 않도록 주의해야 합니다.
 
 이 내용은 standard matcher이든 custom matcher이든 관계없이 모두 충족해야 하는 요구사항입니다. 같은 맥락에서 matcher는 내부적으로 mock function을 호출해서도 안됩니다. 왜냐하면 mock object와 gMock에 어떠한 수정도 가해서는 안되기 때문입니다.
 
-### Expectation 설정하기 ##
+## Expectation 설정하기
 
-#### ON_CALL, EXPECT_CALL을 구분하고 사용하는 방법 ####
+### ON_CALL, EXPECT_CALL을 구분하고 사용하는 방법
 
 gMock의 `ON_CALL()`은 아마도 자주 사용되는 기능은 아닐 것입니다.
 
@@ -1146,13 +1146,13 @@ gMock의 `ON_CALL()`은 아마도 자주 사용되는 기능은 아닐 것입니
 
 만약, `EXPECT_CALL()`을 사용하는 mock function들이 너무 많은 "Uninteresting mock function call"을 발생시켜서 문제가 된다면 `NiceMock`을 사용하기 바랍니다. 또는 문제가 되는 mock function에 대해 `EXPECT_CALL(....).Times(AnyNumber())`를 사용하는 것도 괜찮습니다. 단지 warning message를 없애기 위한 목적으로 너무 상세한 `EXPECT_CALL(....)`을 작성해서는 안 됩니다. 그렇게 하면 유지보수가 힘들어집니다.
 
-#### Uninteresting Call 무시하기 ####
+### Uninteresting Call 무시하기
 
 만약, 어떤 mock method가 호출되는것에 관심이 없다면 별다른 설정을 하지 않으면 됩니다. 그런 상황에서 해당 mock method가 호출되면 gMock은 test program을 계속 진행하기 위한 목적으로 default action을 자동적으로 수행합니다. 만약 이러한 default action이 원하는 방향과 다르다면 default action을 변경할 수도 있습니다. 이를 위해서는 `ON_CALL()`을 이용해도 되고 `DefaultValue<T>::Set()`을 overriding해도 됩니다.(뒤에서 다시 설명합니다.)
 
 이렇게 `ON_CALL()`을 사용한 default action 설정과 대비하여 다시 한 번 기억해야 할 부분은 `EXPECT_CALL()`은 사용하는 순간부터 해당 mock method에 (더 엄격한) expectation을 설정하는 것이며 그러한 expectation이 만족하지 않으면 test failure를 발생한다는 것입니다.
 
-#### Unexpected Call 허용하지 않기 ####
+### Unexpected Call 허용하지 않기
 
 어떤 mock method가 호출되지 않기를 바라는 경우도 있을 것입니다. 이에 대해서는 아래처럼 구현할 수 있습니다.
 
@@ -1176,7 +1176,7 @@ using ::testing::Gt;
 
 만약 `foo.Bar()`가 호출되었는데 위의 코드에서 설정한 2개의 `EXPECT_CALL()` 중에서 어느 것도 만족하지 않았다면 해당 테스트는 실패하게 됩니다.
 
-#### Uninteresting vs Unexpected 를 구분하자 ####
+### Uninteresting vs Unexpected 를 구분하자
 
 gMock에서 *uninteresting* 호출과 *unexpected*호출은 서로 다른 개념입니다. 매우 다릅니다.
 
@@ -1224,7 +1224,7 @@ TEST(...) {
 
 Uninteresting call, nice mock, strict mock에 대한 더 자세한 내용은 ["The Nice, the Strict, and the Naggy"](cook_book.md#nice-모드-strict-모드-naggy-모드-naggy-잔소리가-심한)를 참조하세요.
 
-#### 함수의 호출순서 지정하기 ####
+### 함수의 호출순서 지정하기
 
 하나의 mock function에 대해 여러개의 `EXPECT_CALL()`을 사용했을 때, `EXPECT_CALL()`을 비교하는 순서가 있다고 바로 위에서 얘기했습니다. 그러나 이렇게 만족하는 `EXPECT_CALL()`을 탐색하는 과정에 순서가 있다고 해서 해당 mock function이 특정한 호출순서가 가진다고 말할 수는 없습니다. 예를 들어 어떤 mock function에 2개의 `EXPECT_CALL()`을 설정했다면 기대를 만족하는 `EXPECT_CALL()`은 첫번째 일수도 있고, 두번째 일수도 있습니다. 단지 두번째 것을 먼저 비교해보는 것 뿐이죠. 다시 말하면 비교순서는 정해져 있지만 호출순서는 아직 지정하지 않은 것입니다.
 
@@ -1246,7 +1246,7 @@ using ::testing::InSequence;
 
 위 코드는 `foo.DoThis(5)`가 제일 먼저 호출되고 그 다음에 `foo.DoThat(_)`, `foo.DoThis(6)`이 순서대로 호출되기를 기대하는 코드입니다. 만약 `foo.DoThis()`를 처음 호출할때 argument로 `6`이 전달되면 `DoThis(5)`를 만족하지 않기 때문에 테스트가 실패합니다. 즉, 현재 호출순서에 있는 `EXPECT_CALL()`이 기대를 만족하지 않는다고 해서 기대를 만족하는 다른 `EXPECT_CALL()`이 있는지 찾거나 하지 않습니다. 여기서 한가지 유의할 점은 기존에는 단순히 만족하는 `EXPECT_CALL()`을 탐색할 때는 소스코드상에서 하단에 있는 `EXPECT_CALL()`부터 먼저 비교했지만, `InSequence`를 사용하는 상황에서는 위에서부터 순서대로 진행한다는 점입니다.
 
-#### 함수의 호출순서를 부분부분 지정하기 ####
+### 함수의 호출순서를 부분부분 지정하기
 
 `InSequence`는 function의 호출순서를 일렬로 지정합니다. 이에 더해서 여러 function에 다양한 순서를 지정하는 것도 가능합니다. 예를 들어 `A`가 `B`와 `C`보다 먼저 호출되기를 바라는 것과 동시에 `B`와 `C`간에는 호출순서를 지정하고 싶지 않을 수도 있습니다. 기존처럼 `InSequence`를 사용하는 것은 원하는 것에 비해 많은 제약을 지정하는 것이기 때문에 적합하지 않습니다.
 
@@ -1287,7 +1287,7 @@ using ::testing::Sequence;
 
 위 DAG는 A가 B,C보다 먼저 호출되어야 함을 의미하고, C가 D보다 먼저 호출되어야 함을 의미합니다. 그 외의 제약은 없습니다.
 
-#### Expectation의 active/inactive 설정하기 ####
+### Expectation의 active/inactive 설정하기
 
 어떤 mock method가 호출되어 만족하는 expectation(`EXPECT_CALL()`)을 찾을 때, gMock은 active 상태인 expectation에 대해서만 이러한 작업을 수행합니다. Expectation들이 처음 생성되어 호출되기 전에는 기본적으로 active상태라고 보면 됩니다. 그러다가 자신보다 나중에 호출되어야 할 함수가 호출되는 시점에 inactive 상태가 됩니다. 이렇게 inactive 상태가 되는 것을 *retires*라고 부릅니다.
 
@@ -1331,9 +1331,9 @@ using ::testing::_;
 
 `RetiresOnSaturation()`을 사용해서 #2번 expectation이 1회 호출된 이후에는 retire되도록 구현했습니다. 이제 `Log(WARNING, _, "File too large.")`가 2회 호출되면 #2번 expectation을 건너뛰고 #1번 expectation으로 넘어갑니다. 왜냐하면 #2번은 retire되어 inactive상태로 변경되었고 gMock의 고려대상에서 제외되었기 때문입니다.
 
-### Action 사용하기 ###
+## Action 사용하기
 
-#### Mock Method에서 참조타입 반환하기 ####
+### Mock Method에서 참조타입 반환하기
 
 만약 mock function이 참조타입을 반환해야 한다면 `Return()` 대신 `ReturnRef()`를 써야합니다.
 
@@ -1352,7 +1352,7 @@ class MockFoo : public Foo {
 ...
 ```
 
-#### Mock Method에서 Live Value 반환하기 ####
+### Mock Method에서 Live Value 반환하기
 
 `Return(x)`는 해당 소스코드가 수행될 때 `x`의 복사본을 만들어서 미리 저장해둡니다. 따라서 `x`가 변수라고 해도 반환하는 값은 이미 고정되어 버립니다. 이렇게 미리 복사해 놓은 똑같은 값을 계속 반환하기를 원하지 않는다면 어떻게 해야 할까요? 이렇게 변수에 저장된 값을 동작으로 반영해서 반환하는 것을 *live value*라고 부릅니다. 즉, live value란 mock method가 호출되는 시점에 `x`라는 변수에 저장되어 있는 값을 반환값으로 사용한다는 의미입니다.
 
@@ -1400,7 +1400,7 @@ using testing::ReturnPointee;
   EXPECT_EQ(42, foo.GetValue());  // This will succeed now.
 ```
 
-#### Action 조합하기 ####
+### Action 조합하기
 
 Mock function이 호출될 때, 1개 이상의 action을 수행하려면 어떻게 해야 할까요? `DoAll()`을 사용하면 여러개의 action을 모두 수행할 수 있습니다. 또한, 해당 mock function의 반환값으로는 마지막 action의 반환값을 사용한다는 점도 기억하기 바랍니다.
 
@@ -1420,7 +1420,7 @@ class MockFoo : public Foo {
                       action_n));
 ```
 
-#### 복잡한 argument 검증하기
+### 복잡한 argument 검증하기
 
 Argument가 여러개이고 각각의 기대사항이 복잡한 mock method가 있다고 가정해 보겠습니다. 이런 경우에 각 argument의 기대사항이 다르다면(cardinality가 서로 다른경우 등) expectation을 지정하기가 쉽지 않습니다. 게다가 테스트가 실패한다면 어느 것이 잘못된 것인지 구분하기 어려울 것입니다.
 
@@ -1440,7 +1440,7 @@ Argument가 여러개이고 각각의 기대사항이 복잡한 mock method가 �
   EXPECT_THAT(actual_proto, EqualsProto( ... ));
 ```
 
-#### Mocking에서 Side Effects(부수효과) 사용하기 ####
+### Mocking에서 Side Effects(부수효과) 사용하기
 
 Method가 반환값만으로 프로그램에 영향을 주는 것은 아닙니다. 예를 들어, method에서 global variable을 수정하면 반환값을 통하지 않더라도 프로그램의 상태를 변경할 수 있으며 문법적으로도 문제가 없습니다. 이렇게 반환값 외의 동작으로 프로그램에 영향을 주는 행위를 side-effect라고 합니다. side-effect라고 해서 꼭 문제되는 상황을 의미하는 것이 아님을 기억하기 바랍니다. 이러한 side-effect를 mocking에 사용하기 위한 가장 기본적인 방법은 `::testing::ActionInterface`를 사용자가 직접 정의하는 것입니다. 더불어 gMock은 side-effect와 관련된 기본적인 기능들도 역시 제공하고 있습니다. 
 
@@ -1524,7 +1524,7 @@ class MockRolodex : public Rolodex {
       .WillOnce(SetArrayArgument<0>(names.begin(), names.end()));
 ```
 
-#### Mock Object의 동작을 프로그램에 상태에 따라 변화시키기 ####
+### Mock Object의 동작을 프로그램에 상태에 따라 변화시키기
 
 Mock object의 동작을 프로그램의 상태에 따라 변화시키길 원한다면 `::testing::InSequence`를 사용하면 됩니다. 아래에 예제가 있습니다.
 
@@ -1565,7 +1565,7 @@ ACTION_P(ReturnPointee, p) { return *p; }
 
 위의 코드에서 `my_mock.GetPrevValue()`는 `previous_value`의 최신값을 항상 반환합니다. 또한, 이러한 `previous_value`는 `UpdateValue()`에 의해서 변경됩니다.
 
-#### Return Type의 Default Value 변경하기 ####
+### Return Type의 Default Value 변경하기
 
 사용자가 어떤 mock method의 반환값을 별도로 지정하지 않은 경우에는 해당타입에 대한 C++ built-in default value가 반환됩니다. 아시다시피 이러한 값은 대부분의 경우에 `0`일 확률이 큽니다. 더불어 C++ 11 이상 버전에 대해서는 mock method의 return type이 default constructor를 가지고 있는 경우에는 `0`이 아니라 default constructor를 통해 생성된 값을 반환해줍니다. 이처럼 gMock은 사용자가 mock method의 반환값을 직접 지정하지 않더라도 default value를 최대한 찾아서 반환해줌으로써 테스트가 중단되지 않고 진행될 수 있도록 도와줍니다.
 
@@ -1599,7 +1599,7 @@ class MockFoo : public Foo {
 
 사실 default value를 직접 변경하는 것은 test program의 가독성을 저하시키기 때문에 주의해서 사용해야 합니다. 위 예제는 그러한 문제를 해결하기 위해서 `Set()`과 `Clear()`를 함께 사용한 코드입니다. 즉, default value를 변경하여 사용했다가 다시 원래대로 복구시키기 때문에 다른 곳에 끼치는 영향이 거의 없습니다.
 
-#### Default Action을 상황에 따라 변화시키기 ####
+### Default Action을 상황에 따라 변화시키기
 
 위에서 특정타입에 대한 default value를 변경하는 방법에 대해 배웠습니다. 그러나 이렇게 반환값을 변경하는 것만으로는 부족할 수도 있습니다. 예를 들어 동일한 return type을 사용하는 2개의 mock method가 있을때 각각에 대해 다른 동작을 지정하고 싶을 수 있습니다. 이런 경우에는 `ON_CALL()`을 사용하면 mock method마다 다른 행위를 지정할 수 있습니다.
 
@@ -1626,7 +1626,7 @@ using ::testing::Return;
 
 동일한 mock method에 대해서 `ON_CALL()`을 여러개 사용하면 코드상에서 나중에 오는 것부터 먼저 탐색하게 됩니다. 즉, 밑에서 위 방향으로 하나씩 비교하면서 원하는 `ON_CALL()`이 있는지 찾게 됩니다. 이러한 비교순서는 mock object의 constructor나 test fixture에서 적용한 `ON_CALL()`의 우선순위가 개별 `TEST()`에서 지정한 `ON_CALL()`의 우선순위보다 낮아지도록 만듭니다. 쉽게 말하면 동일한 이름의 지역변수와 전역변수가 있을 때, 지역변수가 먼저 선택되는 것과 같습니다.
 
-#### Functions/Functors/Lambda를 Action으로 사용하기 ####
+### Functions/Functors/Lambda를 Action으로 사용하기
 
 테스트를 구현하다 보면 gMock에서 제공하는 built-in action만으로는 뭔가 부족한 상황이 발생할 수 있습니다. 이런 경우에는 기존에 사용하던 function, functor, `std::function`, lambda 등을 마치 action처럼 사용하는 것도 가능합니다. 이를 위한 구현방법은 아래 예제에 있습니다.
 
@@ -1682,7 +1682,7 @@ using ::testing::Invoke;
  Invoke(implicit_cast<Closure*>(done)) ...;  // The cast is necessary.
 ```
 
-#### Argument 개수가 더 많은 Function/Functor/Lambda를 Action으로 사용하기
+### Argument 개수가 더 많은 Function/Functor/Lambda를 Action으로 사용하기
 
 현재까지는 mock function에 `Invoke()`를 사용하기 위해서 argument의 개수가 동일한 function, functor, lambda만을 주로 다뤄왔습니다. 만약 function, functor, labmda 등의 argument가 mock function보다 많으면 어떻게 해야할까요? 이런 경우에는 `NewPermanentCallback`를 사용해서 부족한 argument를 미리(pre-bound) 지정할 수 있습니다. 아래 예제는 `SignOfSum()`의 첫번째 argument `x`에 `5`라는 값을 지정하는 방법을 보여줍니다.
 
@@ -1708,7 +1708,7 @@ TEST_F(FooTest, Test) {
 }
 ```
 
-#### Agument 없는 Function/Functor/Lambda를 Action으로 사용하기 ####
+### Agument 없는 Function/Functor/Lambda를 Action으로 사용하기
 
 `Invoke()`는 복잡한 action을 구현해야 할 때 매우 유용합니다. 특히, mock function으로 전달된 argument들을 연결된 function이나 functor로 그대로 전달해주기 때문에 mock function과 동일한 context를 사용할 수 있도록 도와줍니다.
 
@@ -1738,7 +1738,7 @@ bool Job2(int n, char c) { ... }
   foo.ComplexJob(20);  // Invokes Job2(5, 'a').
 ```
 
-#### Mock Function에 전달된 Callable Argument를 호출하기 ####
+### Mock Function에 전달된 Callable Argument를 호출하기
 
 Mock function의 argument로 fuction pointer, functor가 전달되는 경우도 있을 것입니다. 즉, "callable" 타입이 argument로 전달되는 경우입니다. 아래 예제를 보시기 바랍니다.
 
@@ -1826,7 +1826,7 @@ Callable에 참조형식 argument를 전달할 때, `ByRef()`를 사용하지 �
       // are kept inside the InvokeArgument action.
 ```
 
-#### Action의 반환값 무시하기 ####
+### Action의 반환값 무시하기
 
 모두 그런것은 아니지만 `Return`, `Invoke`와 같은 action은 무언가를 반환할 수 있습니다. 그러나 이러한 기능이 오히려 불편한 경우도 있습니다. 왜냐하면 mock function의 return type이 void일 때는 void가 아닌 다른 것을 반환하는 action은 사용할 수 없기 때문입니다. 또는 반환값이 있는 action을 `DoAll()`의 중간에 두고 싶을 수도 있습니다.(반환값이 있는 action은 원래 `DoAll()`의 마지막에 와야합니다.) Googletest는 이러한 상황에 대한 해결방법을 제공하고 있습니다. 이처럼 action의 반환값을 무시해야 하는 상황이 발생하면 `IgnoreResult()`을 사용할 수 있는데요. 아래 예제에서 확인하시기 바랍니다.
 
@@ -1860,7 +1860,7 @@ class MockFoo : public Foo {
 
 당연한 이야기지만 `IgnoreResult()`를 return type이 `void`인 action에는 사용하면 안 됩니다.
 
-#### Action의 Argument 선택하기 ####
+### Action의 Argument 선택하기
 
 Argument가 7개인 mock function `Foo()`가 있고 여기에 직접 구현한 action을 연결하려 합니다. 그런데 action은 3개의 argument만 받도록 이미 구현되어 있다면 어떻게 해야할까요? 현재까지 파악된 방법으로는 아래처럼 구현할 수 밖에 없습니다.
 
@@ -1931,7 +1931,7 @@ using ::testing::WithArgs;
 - argument들의 순서를 바꿔서 내부 action을 호출하는 것도 가능합니다. 예를 들어 `WithArgs<3, 2, 1>(...)`과 같이 전달해도 됩니다.
 - 선택한 argument type과 내부 action의 argument type이 정확히 같지는 않아도 됩니다. 암시적인 형변환이 가능하다면 동작합니다. 예를 들어 mock function으로 전달된 argument가 `int` 타입이라면 이것을 action의 `double` 타입 argument에 전달해도 문제없이 잘 동작합니다.
 
-#### 관심없는 Argument 무시하기 ####
+### 관심없는 Argument 무시하기
 
 [Action의 Argument를 선택하기](cook_book.md#action의-argument를-선택하기)에서 mock function이 action으로 argument를 전달하게 하는 방법을 배웠습니다. 이 때, `WithArgs<...>()`를 사용함에 있어서 한가지 단점은 테스트를 구현하는 사람이 조금 귀찮을 수 있다는 것입니다.
 
@@ -1980,7 +1980,7 @@ double DistanceToOrigin(Unused, double x, double y) {
       .WillOnce(Invoke(DistanceToOrigin));
 ```
 
-#### Action 공유하기 ####
+### Action 공유하기
 
 gMock에서 matcher는 내부적으로 ref-counted 포인터를 사용하기 때문에 여러 곳에서 공유하기가 편리하다는 내용을 위에서 설명했습니다. Action도 마찬가지입니다. 내부적으로 ref-counted 포인터를 사용하기 때문에 효율적으로 공유될 수 있습니다. 즉, 동일한 action object를 여러곳에서 참조하고 있다면 마지막 참조자가 없어질 때에 action object도 실제로 소멸될 것입니다.
 
@@ -2024,7 +2024,7 @@ using ::testing::SetArgPointee;
   foo.DoThat();  // Returns 3 - the counter is shared.
 ```
 
-#### 비동기적인 동작을 검증하기
+### 비동기적인 동작을 검증하기
 
 비동기적인 동작을 검증하는 것은 gMock을 사용하면서 자주 겪게되는 어려움 중에 하나입니다. EventQueue라는 class가 하나 있고 이를 위한 interface인 EventDispatcher도 있다고 가정해 보겠습니다. EventQueue class는 말 그대로 전달된 event에 대응하는 동작을 수행해주는 class입니다. 이 때, EventQueue class가 별도의 thread를 생성해서 코드를 수행한다면 이를 어떻게 검증할 수 있을까요? `sleep()`을 적절히 조절해서 event가 전달되기를 기다려야 할까요? 물론 가능한 방법이긴 하지만 `sleep()`을 사용하면 테스트의 동작이 non-deterministic하게 됩니다. 이런 상황에서 제일 좋은 방법은 gMock action과 notification object를 조합하는 것입니다. 이를 통해 비동기적인 동작을 동기적으로 변경할 수 있습니다. 아래 예제코드가 있습니다.
 
@@ -2059,9 +2059,9 @@ TEST(EventQueueTest, EnqueueEventTest) {
 
 Note: 이 예제의 단점도 있습니다. 만약 expectation이 만족하지 않으면 테스트가 영원히 끝나지 않기 때문입니다. 언젠가는 타임아웃이 발생하고 실패로 판정되긴 하겠지만 무작정 기다리는 것은 테스트 수행시간을 늘어나게 하며 디버깅도 어렵게 합니다. 이러한 문제를 해결하기 위해서 `WaitForNotificationWithTimeout(ms)`를 사용하면 얼마간의 시간동안만 기다렸다가 타임아웃을 발생시킬 수 있습니다.
 
-### gMock의 다양한 사용법 ###
+## gMock의 다양한 사용법
 
-#### Method가 Move-Only Type을 사용할 때의 Mocking 방법 ####
+### Method가 Move-Only Type을 사용할 때의 Mocking 방법
 
 C++11에서 *move-only-type*이 소개되었습니다. Move-only-type이란 이동은 가능하지만 복사는 불가능한 객체를 의미합니다. C++의 `std::unique_ptr<T>`가 대표적인 예입니다.
 
@@ -2167,7 +2167,7 @@ Lambda 혹은 callable object를 사용하면 위와 같은 문제를 해결할 
 
 `DoAll`과 같은 일부 action은 내부적으로 argument의 복사본을 만듭니다. 따라서 복사가 불가능한 object는 `DoAll`에 사용할 수 없습니다. 이런 경우에는 functor를 사용해야 합니다.
 
-##### Legacy : move-only type 해결방법
+#### Legacy : move-only type 해결방법
 
 Move-only argument를 지원하는 기능은 2017년 4월에 gMock에 추가되었습니다. 따라서 그보다 예전 gMock을 사용하고 있는 사용자는 아래와 같은 방법을 사용하시기 바랍니다. (사실 더 이상 필요하지는 않지만 참조용으로 남겨둔 내용입니다.)
 
@@ -2195,7 +2195,7 @@ class MockBuzzer : public Buzzer {
   mock_buzzer_.ShareBuzz(MakeUnique<Buzz>(AccessLevel::kInternal), 0);
 ```
 
-#### 컴파일을 빠르게 하기 ####
+### 컴파일을 빠르게 하기
 
 모든 사람이 동의할지는 모르겠지만, mock class를 컴파일하는 시간의 대부분은 constructor와 destructor를 만드는데 사용됩니다. 왜냐하면 constructor나 destructor에서 expectation 검증과 같은 중요한 일들을 수행하기 때문이기도 하고 더 직접적으로는 mock method가 여러가지 타입에 대응해야 한다면 constructor나 destructor도 각각의 타입에 대해 컴파일되기 때문입니다. 결과적으로 다양한 타입을 사용하는 method가 많을수록 컴파일 속도가 느려질 확률이 큽니다.
 
@@ -2250,7 +2250,7 @@ MockFoo::MockFoo() {}
 MockFoo::~MockFoo() {}
 ```
 
-#### 검증을 바로 수행하기 ####
+### 검증을 바로 수행하기
 
 Mock object는 자신이 소멸되는 시점에 연관된 모든 expectation의 수행결과를 종합하여 알려줍니다. 이런 방식을 통해 사용자가 직접 모든 expectation이 만족되었는지 확인해야하는 수고를 덜어줍니다. 다만 이것은 어디까지나 mock object가 정상적으로 소멸된다는 가정하에서 의미가 있는 내용입니다.
 
@@ -2278,7 +2278,7 @@ TEST(MyServerTest, ProcessesRequest) {
 
 **Tip:** `Mock::VerifyAndClearExpectations()`은 검증의 성공여부를 `bool` 타입으로 반환합니다. 따라서 해당 mock object의 검증결과를 `ASSERT_TRUE()`를 통해서 다시 확인하는 것도 가능합니다.
 
-#### Check Point 사용하기 ####
+### Check Point 사용하기
 
 어떤 mock object에 설정한 다양한 내용들을 "reset" 하고 싶을 때도 있습니다. 그러한 시점을 "check point"라고 부릅니다. 즉, 설정된 expectation들이 만족되었는지 한 차례 확인한 후에 다시 새로운 expectation들을 지정하는 것입니다. 이러한 방법은 mock object가 "phases" 개념 위에서 동작하도록 만들어 줍니다. 쉽게 말해서 단계별로 검증해야 할 항목들을 분류하는 것이 가능해집니다.
 
@@ -2322,7 +2322,7 @@ TEST(FooTest, InvokesBarCorrectly) {
 
 위의 expectation은 첫번째 `Bar("a")`가 check point "1" 이전에 수행되기를 기대하고 두번째 `Bar("a")`는 check point "2" 이후에 수행되기를 기대합니다. check point "1" 과 check point "2" 사이에는 `Bar("a")` 가 호출되면 안됩니다. 이렇게 명시적으로 check point를 만들어서 `Bar("a")`가 3개의 `Foo()` 호출 중 어느것에 매칭되어야 하는지 표현할 수 있습니다.
 
-#### Destructor Mocking하기 ####
+### Destructor Mocking하기
 
 때때로 mock object가 원하는 시점에 딱 소멸되기를 바랄 수 있습니다. 이를 위해서는 destructor가 언제 호출되는지 확인하는 것이 가장 좋은 방법일 것입니다. 그럼 mock object가 `bar->A()`, `bar->B()` 호출의 중간시점에 소멸되기를 기대한다고 해보겠습니다. Mock function이 호출되는 순서에 대해서는 이미 배웠기 때문에 destructor를 mocking하는 방법만 배우면 구현할 수 있을 것입니다.
 
@@ -2359,7 +2359,7 @@ class MockFoo : public Foo {
   }
 ```
 
-#### gMock과 Thread 사용하기 ####
+### gMock과 Thread 사용하기
 
 사실 **unit** test는 single-threaded context에 구현하는 것이 제일 좋습니다. 그렇게 해야 race condition과 deadlock을 피할 수 있고, 디버깅하기가 훨씬 쉽기 때문입니다.
 
@@ -2397,7 +2397,7 @@ gMock은 같은 sequence에 속한 action들이 서로 다른 thread에서 수�
 
 마지막으로 `DefaultValue<T>`를 사용하면 현재 test program에서 살아있는 모든 mock object에 영향을 준다는 것입니다. 따라서 multiple threads 환경이거나 수행중인 action이 있을 때는 사용하지 않는 것이 좋습니다.
 
-#### gMock이 출력할 정보의 양 조절하기 ####
+### gMock이 출력할 정보의 양 조절하기
 
 gMock은 잠재적으로 error 가능성이 있는 부분에 대해 warning message를 출력해 줍니다. 대표적인 예로 uninteresting call이 있습니다. 즉, expectation이 없는 mock function에 대해서 error로 여기지는 않지만 사용자가 실수했을 수도 있음을 알리기 위해 warning message로 알려주는 것입니다. 이 때, 해당 uninteresting function에 전달된 argument와 return value 등의 정보를 출력해줌으로써 사용자는 이것이 실제로 문제인지 아닌지 다시 한 번 검토해 볼 수 있습니다.
 
@@ -2417,7 +2417,7 @@ Flag 외에 코드에서 아래와 같은 변수를 수정해도 동일한 기�
 
 이제, 어떤 모드가 본인에게 제일 적합한지 잘 판단하고 사용하기 바랍니다.
 
-#### Mock 호출을 자세하게 들여다보기 ####
+### Mock 호출을 자세하게 들여다보기
 
 gMock은 mock function에 지정한 expectation이 만족되지 않으면 이를 알려줍니다. 그러나 왜 그런 문제가 발생했는지가 궁금한 사용자도 있을 것입니다. 예를 들어 matcher를 사용할 때 어떤 오타가 있었는지? `EXPECT_CALL()`의 순서가 틀렸는지? 혹은 테스트 대상코드에 문제가 있었는지? 등등이 있을텐데요. 어떻게 하면 이런 내용을 알아낼 수 있을까요?
 
@@ -2481,7 +2481,7 @@ Actual function call count doesn't match EXPECT_CALL(mock, F("c", HasSubstr("d")
 
 만약, mock call trace은 보고싶지만 stack trace는 보고 싶지 않다면 test program을 실행할 때 flag 2개를 조합(`--gmock_verbose=info --gtest_stack_trace_depth=0`)하여 실행하시기 바랍니다.
 
-#### Emacs에서 테스트 실행하기 ####
+### Emacs에서 테스트 실행하기
 
 Emacs에서 `M-x google-complie` 명령을 통해 테스트를 구현하고 실행하는 사용자들은 googletest 혹은 gMock error가 발생했을 때, 관련 소스파일의 위치가 강조되어 출력되는걸 볼 수 있습니다. 그 때, 강조된 부분에서 `<Enter>`를 누르면 바로 해당 위치로 이동하게 될 것입니다. 그리고 `C-x`를 누르게 되면 다음 error 위치로 바로 이동할 수 있습니다.
 
@@ -2495,9 +2495,9 @@ Emacs에서 `M-x google-complie` 명령을 통해 테스트를 구현하고 실�
 
 이제 `M-m`을 눌러서 빌드를 시작하고, `M-up` / `M-down`을 눌러서 error 간에 이동할 수 있습니다. 더불어 빌드할 때마다 테스트도 같이 수행하고 싶다면 `M-m` 명령의 build command 설정부분에 `foo_test.run` 혹은 `runtests`라는 내용을 추가하시기 바랍니다.
 
-### Extending gMock ###
+## Extending gMock
 
-#### 새로운 Matcher 구현하기 ####
+### 새로운 Matcher 구현하기
 
 WARNING: gMock은 matcher가 언제 몇 번 호출될지를 보장하지 않습니다. 따라서 모든 matcher는 순수하게 기능적인 동작만 수행하도록 구현해야 합니다. 즉, 프로그램 내의 다른 정보에 대한 side effect나 의존성을 가지면 안된다는 것입니다. 이와 관련된 내용은 [여기](cook_book.md#matcher는-부수효과side-effect를-가지면-안됩니다)에서 좀 더 자세하게 설명하고 있습니다.
 
@@ -2583,7 +2583,7 @@ MATCHER(IsDivisibleBy7, "") {
 
 **Notes:** `arg_type`은 matcher를 사용하는 context 혹은 compiler에 따라서 달라질 수 있긴 하지만 사용자가 특별히 신경 쓸 필요는 없습니다. 이러한 동작방식은 matcher를 polymorphic하게 사용하기 위해 채택되었습니다. 예를 들어 `IsDivisibleBy7()`과 같은 예제에서 `(arg % 7)`을 계산하고 그 결과를 `bool` 타입으로 반환할 수만 있다면 `arg_type`은 어떤 타입이 되더라도 괜찮습니다. 이를 통해서 (암시적인 형변환까지 포함해서) `%` 연산을 수행할 수 있는 타입이라면 모두 사용할 수 있는 matcher가 만들어지는 것입니다. 예제코드의 `Bar(IsDivisibleBy7())`를 보면, `Bar()`라는 method는 `int` 타입 argument를 전달받고 있기 때문에 `arg_type`도 역시 `int`로 결정됩니다. 이 때, argument가 `unsigned long`이라고 해도 문제가 없는 것입니다. 단지 `arg_type`이 `unsigned long`이 되는 것 뿐입니다.
 
-#### 새로운 Parameterized Matcher 구현하기 ####
+### 새로운 Parameterized Matcher 구현하기
 
 Matcher 자체적으로 parameter를 가지길 원할 수도 있습니다. 본격적인 설명에 앞서 matcher에서 사용하는 argument와 parameter라는 용어를 구분할 필요가 있습니다. 먼저, argument란 mock function으로부터 matcher로 전달되는 값들을 의미합니다. 그러나 parameter는 matcher 자신이 스스로 관리하고 사용하려는 목적의 값들을 의미합니다. 즉, parameter는 mock function과 직접적인 연관은 없습니다. 여기서는 matcher에 parameter를 사용하려면 어떻게 구현해야 하는지 소개합니다. 그 시작은 아래의 macro입니다.
 
@@ -2687,7 +2687,7 @@ MATCHER_P2(Blah, a, b, description_string_2) { ... }
 
 네, 상당히 많은 내용을 다뤘는데요. 지금까지 배운 것처럼 `MATCHER*` macro를 이용하면 빠르고 편리하게 사용자만의 matcher를 만들 수 있을 것입니다. 주의할 점은 새로운 matcher를 구현하는 방법이 `MATCHER*`만 있는 것은 아니라는 점입니다. 이렇게 새로운 기능을 구현해야 할 때는 가능한 여러가지 방법들을 고민해보고 적절한 방법을 선택하는 것이 중요합니다. 특히, 바로 다음에 설명하는 `MatcherInterface`, `MakePolymorphicMatcher()`도 꽤 괜찮은 방법들입니다. 물론 `MATCHER*`에 비해서 해야할 일이 많긴 하지만 그와 동시에 좀 더 세밀한 작업도 가능합니다. 예를 들어 타입지정을 다양하게 조절할 수도 있고 compile error message도 좀 더 깔끔합니다. 마지막으로 matcher를 parameter 개수 뿐만 아니라 parameter 타입에 대해서도 overload 할 수 있게 도와줄 것입니다.
 
-#### 새로운 Monomorphic Matcher 구현하기 ####
+### 새로운 Monomorphic Matcher 구현하기
 
 gMock에서 제공하는 `::testing::MatcherInterface<T>`를 상속받고 구현하면 `T` 타입의 argument를 전달받는 matcher를 만들 수 있습니다. 이렇게 만들어진 matcher는 2가지 일을 가능하게 합니다. 먼저, argument type(`T`)과 argument value를 같이 검사할 수 있습니다. 다음으로는 출력문을 자유롭게 구현할 수 있습니다. 즉, expectation을 만족하지 못했을 때 어떤 값들을 비교했는지와 같은 정보를 보다 상세히 알려줄 수 있습니다.
 
@@ -2782,7 +2782,7 @@ Expected: is divisible by 7
   Actual: 23 (the remainder is 2)
 ```
 
-#### 새로운 Polymorphic Matcher 구현하기 ####
+### 새로운 Polymorphic Matcher 구현하기
 
 새로운 matcher를 만드는 방법들을 계속 배웠습니다. 하지만 문제는 `MakeMatcher()`를 통해 만들었던 matcher들은 한가지 타입에만 사용이 가능하다는 것입니다. `Eq(x)`처럼 어떤 타입에도 사용가능한(`==`연산자가 구현되어 있는) matcher는 어떻게 만들 수 있을까요? 이제부터는 *polymorphic* matcher를 정의함으로써 다양한 타입에도 사용가능한 matcher를 만들어 보도록 하겠습니다. 관련 기술들이 `"testing/base/public/gmock-matchers.h"`에 구현되어 있으나 내용이 조금 어려울 수 있습니다.
 
@@ -2831,7 +2831,7 @@ PolymorphicMatcher<NotNullMatcher> NotNull() {
 
 그럼에도 monomorphic matcher처럼 `MatchAndExplain()`의 argument인 `listener`를 통해 출력문 내용을 추가하는 것도 가능합니다.
 
-#### 새로운 Cardinality 구현하기 ####
+### 새로운 Cardinality 구현하기
 
 Cardinality(호출횟수)는 `Times()`와 함께 사용되며 gMock에 mock function이 몇 번 호출되기를 기대하는지 알려주는 용도로 사용합니다. 다만, 꼭 정확한 횟수를 지정해야 하는 것은 아닙니다. 예를 들어 `AtLeast(5)` 또는 `Between(2, 4)`와 같이 특정범위를 지정하는 cardinality도 제공하고 있습니다. 
 
@@ -2885,7 +2885,7 @@ Cardinality EvenNumber() {
       .Times(EvenNumber());
 ```
 
-#### 새로운 Action 구현하기
+### 새로운 Action 구현하기
 
 Built-in action만으로 부족하다고 느끼는 사용자가 있다면 action을 직접 구현하는 것도 어렵지 않습니다. Action의 signature와 매칭되는 functor class를 정의하면 됩니다.(template도 가능합니다.) 간단한 action을 구현예제를 아래에서 확인하세요.
 
@@ -2912,7 +2912,7 @@ struct MultiplyBy {
 // EXPECT_CALL(...).WillOnce(MultiplyBy{7});
 ```
 
-##### Legacy : 새로운 Action 구현하기 #####
+#### Legacy : 새로운 Action 구현하기
 
 C++11 이전에는 functor를 기반으로 한 action을 지원하지 않았으며 주로 `ACTION*`이라는 macro를 통해서 action을 정의할 수 있었습니다. 다만, 이제는 새로운 기능으로 대부분 대체되었습니다. 물론 현재도 사용할 수는 있지만 언젠가 compile error가 발생할 수도 있으며 되도록이면 새로운 방법을 사용하기를 권장합니다. 비록 지금은 대체된 기능이긴 하지만 관련 내용을 공유합니다.
 
@@ -2951,14 +2951,14 @@ ACTION(Foo) {
 
 `ACTION` macro를 좀 더 편리하게 사용하기 위해서 아래와 같은 pre-defined symbol을 알아두면 편리합니다. 이들은 action statement 안에서 자유롭게 사용할 수 있습니다.
 
-| Pre-defined Symbol | Description                                                   |
-| :----------------- | :------------------------------------------------------------ |
+| Pre-defined Symbol | Description                                                  |
+| :----------------- | :----------------------------------------------------------- |
 | `argK`             | The value of the K-th (0-based) argument of the mock function |
-| `argK_type`        | The type of the K-th (0-based) argument of the mock function  |
-| `args`             | All arguments of the mock function as a tuple                 |
-| `args_type`        | The type of all arguments of the mock function as a tuple     |
-| `return_type`      | The return type of the mock function                          |
-| `function_type`    | The type of the mock function                                 |
+| `argK_type`        | The type of the K-th (0-based) argument of the mock function |
+| `args`             | All arguments of the mock function as a tuple                |
+| `args_type`        | The type of all arguments of the mock function as a tuple    |
+| `return_type`      | The return type of the mock function                         |
+| `function_type`    | The type of the mock function                                |
 
 예를 들어 아래와 같은 mock function을 위한 action을 구현한다고 해봅시다.
 
@@ -2979,7 +2979,7 @@ int DoSomething(bool flag, int* ptr);
 | `return_type`          | the type `int`                          |
 | `function_type`        | the type `int(bool, int*)`              |
 
-##### Legacy : 새로운 Parameterized Action 구현하기 #####
+#### Legacy : 새로운 Parameterized Action 구현하기
 
 Action macro가 parameter를 받을 수 있도록 구현해야 할 필요도 있을 것입니다. 이를 위해서 `ACTION_P*` 계열 macro를 제공하고 있습니다.
 
@@ -3029,7 +3029,7 @@ ACTION_P(Plus, a) { ... }
 ACTION_P2(Plus, a, b) { ... }
 ```
 
-#### ACTION으로 전달되는 argument나 parameter의 타입을 제한하기 ####
+### ACTION으로 전달되는 argument나 parameter의 타입을 제한하기
 
 최대한 간결하고 재사용성을 높이기 위해서 `ACTION*` macro는 mock function의 argument type과 action parameter를 요구하지 않습니다. 대신, compiler가 그런 타입을 추론할 수 있도록 구현해 두었습니다.
 
@@ -3053,7 +3053,7 @@ ACTION_P(Bar, param) {
 
 위의 코드는 첫번째 argument의 타입을 의미하는 `arg1_type`를 통해서 action의 시작부분에서 타입을 확인하고 있습니다. 이를 위해서 `StaticAssertTypeEq`라는 googletest의 타입비교 기능을 사용할 수 있습니다. (compile time에 비교를 수행합니다.)
 
-#### 새로운 Action Template 구현하기 ####
+### 새로운 Action Template 구현하기
 
 Action을 정의할 때, action으로 전달되는 parameter의 타입을 추론하기 어려운 경우가 있습니다. 이런 경우에는 template parameter을 통해 명시적으로 parameter의 타입을 지정해야 합니다. gMock의 `ACTION_TEMPLATE()`은 이러한 기능을 지원합니다. 이름에서 알 수 있듯이 `ACTION()`과 `ACTION_P*()`의 확장판이라고 생각하면 됩니다.
 
@@ -3112,7 +3112,7 @@ ActionName<t1, ..., t_m, u1, ..., u_k>(v1, ..., v_n)
 * template parameter 1개 (`int`) + value paramter 1개 (`bool x`)
 * template parameter 2개 (`int`, `bool`) + value parameter 1개 (임의의 타입 `x` , 컴파일러가 나중에 추론)
 
-#### ACTION Object의 타입 확인하기 ####
+### ACTION Object의 타입 확인하기
 
 만약, `ACTION` object를 반환하는 function을 구현하려 한다면, 해당 `ACTION` object의 타입을 알아야만 합니다. 이러한 타입은 어떤 macro를 사용했는지에 따라 달라지긴 하지만 다행히도 그 규칙은 비교적 간단하며 아래 표에서 확인할 수 있습니다.
 
@@ -3128,7 +3128,7 @@ ActionName<t1, ..., t_m, u1, ..., u_k>(v1, ..., v_n)
 
 위 표를 보면 `ACTION`, `ACTION_P`, `ACTION_P2`와 같이 macro의 suffix들이 서로 다릅니다. 이 때, macro의 이름은 action으로 전달되는 parameter 개수로 구분되며 overload를 방지하는 효과가 있습니다.
 
-#### 새로운 Monomorphic Action 구현하기 ####
+### 새로운 Monomorphic Action 구현하기
 
 `ACTION*` macro는 편리하지만, 사용하기에 적절하지 않은 경우도 있습니다. 왜냐하면 `ACTION*` macro를 사용하면 mock function argument와 action parameter를 직접적으로 지정할 수가 없습니다. 이런 이유로 인해 compile error가 발생하기도 하며 사용자를 혼란스럽게 합니다. 또한, `ACTION*` macro만 가지고는 action을 overloading 하기가 상당히 까다롭습니다. (할 수는 있지만)
 
@@ -3178,7 +3178,7 @@ Action<IncrementMethod> IncrementArgument() {
   foo.Baz(&n);  // Should return 5 and change n to 6.
 ```
 
-#### 새로운 Polymorphic Action 구현하기 ####
+### 새로운 Polymorphic Action 구현하기
 
 바로 위에서 action을 직접 구현하는 방법에 대해 배웠습니다. 다만, 그건 어디까지나 mock function의 function type을 알고 있을 때만 가능한 방법입니다. 그렇다면 `Return()`, `SetArgPointee()`처럼 *여러가지 타입*에 적용할 수 있는 action을 만들기 위해서는 어떻게 하면 될까요?
 
@@ -3238,7 +3238,7 @@ class MockFoo : public Foo {
   foo.DoThat(1, "Hi", "Bye");  // Will return "Hi".
 ```
 
-#### gMock이 사용자타입 정보도 출력 가능하게 만들기 ####
+### gMock이 사용자타입 정보도 출력 가능하게 만들기
 
 gMock은 uninteresting call이나 unexpected call이 발생하면 해당 mock function으로 전달된 argument와 stack trace 정보를 출력해 줍니다. 마찬가지로 `EXPECT_THAT`, `EXPECT_EQ`과 같은 macro도 assertion 실패 시에 관련 정보를 출력해 줍니다. googletest와 gMock은 user-extensible value printer를 통해 이러한 동작을 구현하고 있습니다.
 
