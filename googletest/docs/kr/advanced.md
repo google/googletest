@@ -2,23 +2,23 @@
 
 ## 소개
 
-이 문서를 읽기 전에 [googletest primer](primer.md)를 먼저 보시기 바랍니다. googletest primer를 다 읽으셨다면 이제 다양한 심화기능을 공부 할 시간입니다. 이 문서는 googletest의 다양한 assertion 사용법, 사용자정의 failure message 만들기, fatal failure 전파하기, test fixture를 빠르고 재사용하기 쉽게 만들기, test program실행시 flag사용법과 같은 여러가지 주제를 포함하고 있습니다.
+이 문서를 읽기 전에 [googletest primer](primer.md)를 먼저 보기를 추천한다. googletest primer를 다 읽었다면 이제 다양한 심화기능을 공부 할 시간이다. 이 문서는 googletest의 다양한 assertion 사용법, 사용자정의 failure message 만들기, fatal failure 전파하기, test fixture를 빠르고 재사용하기 쉽게 만들기, test program실행시 flag 사용법과 같은 여러가지 주제를 포함하고 있다.
 
 ## Googletest가 지원하는 다양한 Assertion 소개 및 사용법
 
-자주 사용되지는 않지만, 여전히 중요하고 또 필요한 여러가지 assertion들을 소개하려 합니다.
+자주 사용되지는 않지만, 여전히 중요하고 또 필요한 여러가지 assertion들을 확인해보자.
 
 ### 성공과 실패 명시하기
 
-`SUCCEED()`, `FAIL()`, `ADD_FAILURE()`라는 assertion들은 value나 expression의 판정하지는 않지만 성공과 실패를 명시적으로 나타내기 위해 사용합니다. 다른 assertion macro들처럼 failure message를 변경하는 것도 가능합니다.
+`SUCCEED()`, `FAIL()`, `ADD_FAILURE()`라는 assertion들은 value나 expression의 판정하지는 않지만 성공과 실패를 명시적으로 나타내기 위해 사용한다. 다른 assertion macro들처럼 failure message를 변경하는 것도 가능하다.
 
 ```c++
 SUCCEED();
 ```
 
-위 코드는 테스트가 성공했음을 코드상에서 표시하기 위한 용도로 사용합니다. 다만, 테스트가 여기까지 진행되었다면 성공이다라고 명세하는 것 뿐이며 해당 테스트에 **실패가 없다**를 의미하지는 않습니다. 즉, `SUCCEED()`가 포함된 테스트를 실행하더라도 다른 assertion으로 인해 실패가 발생했다면 그 결과는 그대로 실패입니다. 왜냐하면 `SUCCEDD()`가 테스트 결과에 실제로 영향을 주거나 하지는 않기 때문입니다.
+위 코드는 테스트가 성공했음을 코드상에서 표시하기 위한 용도로 사용한다. 다만, 테스트가 여기까지 진행되었다면 성공이다라고 명세하는 것 뿐이며 해당 테스트에 **실패가 없다**를 의미하지는 않는다. 즉, `SUCCEED()`가 포함된 테스트를 실행하더라도 다른 assertion으로 인해 실패가 발생했다면 그 결과는 그대로 실패가 된다. 왜냐하면 `SUCCEDD()`가 테스트 결과에 실제로 영향을 주거나 하지는 않기 때문이다.
 
-NOTE: `SUCCEED()`는 코드상에서 추가적인 정보를 전달합니다. 그 외에 사용자가 확인할 수 있는 출력물을 제공하거나 하지는 않습니다. 추후에 변경될 수는 있지만 현재로서는 그렇습니다. 
+NOTE: `SUCCEED()`는 코드상에서 추가적인 정보를 전달하기 위해 사용한다. 그 외에 사용자가 확인할 수 있는 출력물을 제공하거나 하지는 않는다. 추후에 변경될 수는 있지만 현재로서는 그렇다.
 
 ```c++
 FAIL();
@@ -26,7 +26,7 @@ ADD_FAILURE();
 ADD_FAILURE_AT("file_path", line_number);
 ```
 
-`FAIL()`은 fatal failure를 발생시키며 `ADD_FAILURE()` 와 `ADD_FAILURE_AT()` 는 non-fatal failure를 발생시킵니다. 바로 위에서 설명한 `SUCCEED()`는 결과에 영향을 주지 않지만, `FAIL()`, `ADD_FAILURE*()`는 실제로 해당 테스트를 실패로 판정합니다. 제어흐름상에서 불필요한 부분을 표현하는데 유용합니다. 예를 들어 아래와 같은 코드에 사용할 수 있습니다.
+`FAIL()`은 fatal failure를 발생시키며 `ADD_FAILURE()`와 `ADD_FAILURE_AT()`는 non-fatal failure를 발생시킨다. 바로 위에서 설명한 `SUCCEED()`는 결과에 영향을 끼치지 않지만, `FAIL()`, `ADD_FAILURE*()`는 실제로 해당 테스트를 실패로 판정한다. 제어흐름 상에서 불필요한 부분을 표현하는데 유용하게 쓸 수 있다. 예를 들어 아래와 같은 코드에 사용할 수 있다.
 
 ```c++
 switch(expression) {
@@ -39,11 +39,11 @@ switch(expression) {
 }
 ```
 
-NOTE: `FAIL()`은  return type이 `void`인 function에만 사용할 수 있습니다. 이와 관련한 자세한 내용은 [Assertion Placement section](advanced.md#assertion을-사용가능한-곳)를 참조하세요.
+NOTE: `FAIL()`은  return type이 `void`인 function에만 사용할 수 있다. 이와 관련한 자세한 내용은 [Assertion Placement section](advanced.md#assertion을-사용가능한-곳)를 참조할 수 있다.
 
 ### Exception Assertions
 
-아래 assertion들은 주어진 코드(`statement`)가 exception를 던지는지 아닌지를 검증하는데 사용합니다. 
+아래 assertion들은 주어진 코드(`statement`)가 exception를 던지는지 아닌지를 검증하는데 사용한다.
 
 | Fatal assertion                            | Nonfatal assertion                         | Verifies                                          |
 | ------------------------------------------ | ------------------------------------------ | ------------------------------------------------- |
@@ -62,17 +62,17 @@ EXPECT_NO_THROW({
 });
 ```
 
-**Availability**: 기본적으로 빌드시에 exception이 활성화되어 있어야 동작합니다.
+**Availability**: 기본적으로 빌드시에 exception이 활성화되어 있어야 동작한다.
 
 ### Predicate Assertion을 통해 더 유용한 Error Message 만들기
 
-지금까지 확인한 것처럼 googletest는 다양한 assertion들을 제공하고 있습니다. 다만, 여전히 사용자가 원하는 모든 경우를 커버할 수는 없으며 또 그런 상황들을 위해서 너무 다양한 assertion을 제공하는 것도 좋은 방법은 아닌 것 같습니다. 그렇다보니 `EXPECT_TRUE()`와 같이 (단순하다고도 할 수 있는) assertion에 매우 복잡한 expression이 전달되는 상황이 발생하기도 합니다. 물론 복잡한 expression을 사용한다고 해서 꼭 문제가 되는 것은 아니지만 사용자 입장에서의 불편함들을 초래하곤 했습니다. 예를 들어 expression이 복잡하면 기본적으로 제공되는 failure message만으로는 부족하게 되고 사용자가 직접 failure message를 변경하게 될 확률이 높은데요. 이 때, 해당 expression이 어떤 side-effect(부수효과)를 포함하고 있다면 failrue message가 출력해주는 값들이 정확한지도 의심해야 되고 여러가지로 신경써야 할 것들이 많아집니다.
+지금까지 확인한 것처럼 googletest는 다양한 assertion들을 제공하고 있다. 다만, 여전히 사용자가 원하는 모든 경우를 커버할 수는 없으며 또 그런 상황들을 위해서 너무 다양한 assertion을 제공하는 것도 좋은 방법은 아닌 것 같다. 그렇다보니 `EXPECT_TRUE()`와 같이 (단순하다고도 할 수 있는) assertion에 매우 복잡한 expression이 전달되는 상황이 발생하기도 한다. 물론 복잡한 expression을 사용한다고 해서 꼭 문제가 되는 것은 아니지만 사용자 입장에서의 불편함들을 초래한 것은 사실이다. 예를 들어 expression이 복잡하면 기본적으로 제공되는 failure message만으로는 부족하게 되고 사용자가 직접 failure message를 변경하게 될 확률이 높다. 이 때, 해당 expression이 어떤 side-effect(부수효과)를 포함하고 있다면 failrue message가 출력해주는 값들이 정확한지도 의심해야 되고 여러가지로 신경써야 할 것들이 많아지기 때문이다.
 
-이에 googletest는 위와 같은 상황에서 유연하게 대처하기 위한 몇 가지 방법을 제공합니다.
+이에 googletest는 위와 같은 상황에서 유연하게 대처하기 위한 몇 가지 방법을 제공하고 있다.
 
 #### 이미 정의해 놓은 Boolean Function 사용하기
 
-사용자가 구현한 일반 C++ function(혹은 functor)을 assertion처럼 사용할 수 있습니다. (단, 해당 function의 return type이 `bool`이어야 합니다. *predicate assertion*이라고 부르는 이 기능은 function을 *assertion*처럼 동작하게 만들고 원하는 failure message를 출력하도록 도와줍니다. 그럼 아래 표에서 관련 macro를 확인하기 바랍니다.
+사용자가 구현한 일반 C++ function(혹은 functor)을 assertion처럼 사용할 수 있다. (단, 해당 function의 return type이 `bool`이어야 한다. *predicate assertion*이라고 부르는 이 기능은 function을 *assertion*처럼 동작하게 만들고 원하는 failure message를 출력하도록 도와준다. 그럼 아래 표에서 관련 macro를 확인해보자.
 
 | Fatal assertion                    | Nonfatal assertion                 | Verifies                    |
 | ---------------------------------- | ---------------------------------- | --------------------------- |
@@ -80,9 +80,9 @@ EXPECT_NO_THROW({
 | `ASSERT_PRED2(pred2, val1, val2);` | `EXPECT_PRED2(pred2, val1, val2);` | `pred2(val1, val2)` is true |
 | `...`                              | `...`                              | `...`                       |
 
-첫 번째 argument인 `predn`은 `bool`을 반환하는 function(혹은 functor)를 의미합니다. 이 때, 해당 function이 `ASSERT_PREDn` macro의 `n`과 동일한 개수의 argument를 전달받아야 하기때문에 `predn`이라고 표시한 것입니다. 두 번째 및 그 이후에 전달되는 argument들(`val1`, `val2`, `...`)은 `predn`에 전달하기 위한 argument입니다. 이렇게 정의된 predicate assertion도 다른 assertion과 동일하게 동작합니다. 즉, `true`가 반환되면 성공을 의미하고 `false`가 반환되면 실패를 의미합니다. 그리고 assertion이 실패할 때는 각 argument의 정보도 출력해줍니다.
+첫 번째 argument인 `predn`은 `bool`을 반환하는 function(혹은 functor)를 의미한다. 이 때, 해당 function이 `ASSERT_PREDn` macro의 `n`과 동일한 개수의 argument를 전달받아야 하기때문에 `predn`이라고 표시한 것이다. 두 번째 및 그 이후에 전달되는 argument들(`val1`, `val2`, `...`)은 `predn`에 전달하기 위한 argument이다. 이렇게 정의된 predicate assertion도 다른 assertion과 동일하게 동작한다. 즉, `true`가 반환되면 성공을 의미하고 `false`가 반환되면 실패를 의미한다. 그리고 assertion이 실패할 때는 각 argument의 정보도 출력해 준다.
 
-그럼 예제를 보겠습니다.
+그럼 예제를 보자.
 
 ```c++
 // Returns true if m and n have no common divisors except 1.
@@ -93,21 +93,21 @@ const int b = 4;
 const int c = 10;
 ```
 
-전달된 argument 2개(`m`, `n`)에 공약수가 1밖에 없으면 `true`를 반환하는 `MutuallyPrime()`이라는 function이 정의되어 있습니다. 이제 아래와 같이 구현하면 해당 function을 assertion처럼 사용할 수 있습니다. 
+전달된 argument 2개(`m`, `n`)에 공약수가 1밖에 없으면 `true`를 반환하는 `MutuallyPrime()`이라는 function이 정의되어 있다. 이제 아래와 같이 구현하면 해당 function을 assertion처럼 사용할 수 있다.
 
 ```c++
   EXPECT_PRED2(MutuallyPrime, a, b);
 ```
 
-위 코드에서 `a`, `b` 는 1 외에는 공약수가 없으므로 아래 assertion은 성공합니다.
+`a`와 `b`는 1 외에는 공약수가 없으므로 위 assertion은 성공할 것이다.
 
-다음으로 아래에 있는 assertion은 `b`, `c`가 1 외에도 공약수(2)를 가지므로 실패합니다.
+반면에 아래에 있는 assertion에서는 `b`와 `c`가 1 외에도 공약수(2)를 가지므로 실패할 것이다.
 
 ```c++
   EXPECT_PRED2(MutuallyPrime, b, c);
 ```
 
- 그리고 아래와 같은 failure message를 출력해줍니다.
+ 그리고 아래와 같은 failure message를 출력할 것이다.
 
 ```none
 MutuallyPrime(b, c) is false, where
@@ -117,13 +117,13 @@ c is 10
 
 > NOTE:
 >
-> 1.  `ASSERT_PRED*` 또는 `EXPECT_PRED*`를 사용할 때, "no matching function to call"와 같은 compile error가 발생하면 [여기](faq.md#assert_pred를-사용할-때-no-matching-function-to-call-이라는-compile-error가-발생했습니다-어떻게-해야-하나요)를 참조하세요.
+> 1.  `ASSERT_PRED*` 또는 `EXPECT_PRED*`를 사용할 때, "no matching function to call"와 같은 compile error가 발생하면 [여기](faq.md#assert_pred를-사용할-때-no-matching-function-to-call-이라는-compile-error가-발생했습니다-어떻게-해야-하나요)를 확인해보자.
 
 #### AssertionResult를 반환하는 function을 사용하기
 
-`EXPECT_PRED*()`계열이 유용하지만 argument개수에 따라 macro가 달라지기 때문에 약간 불편한 부분도 있습니다. C++ 문법보다는 Lisp 문법에 가까워 보이기도 하네요. 또 다른 방법으로 `::testing::AssertionResult` class를 사용해 보겠습니다. 
+`EXPECT_PRED*()` 계열은 유용하지만 argument 개수에 따라 macro가 달라지기 때문에 약간 불편한 부분도 있긴 하다. C++ 문법보다는 Lisp 문법에 가까워 보이기도 한다. 여기서는 또 다른 방법으로 `::testing::AssertionResult` class를 사용해 보자.
 
-`AssertionResult`는 이름 그대로 assertion의 결과를 의미합니다. 사용법은 간단합니다. googletest에서 제공하는 factory function을 사용하면 됩니다. Factory function 2개는 아래와 같습니다.
+`AssertionResult`는 이름 그대로 assertion의 결과를 의미하며 사용법은 간단하다. googletest에서 제공하는 factory function을 사용하면 된다. Factory function 2개는 아래와 같다.
 
 ```c++
 namespace testing {
@@ -139,9 +139,9 @@ AssertionResult AssertionFailure();
 }
 ```
 
-더불어 `AssertionResult` object에 `<<` 연산자를 구현하면 stream message를 변경할 수도 있습니다.
+더불어 `AssertionResult` object에 `<<` 연산자를 구현하면 stream message를 변경할 수도 있다.
 
-사용방법은 `bool MutuallyPrime()`를 predicate assertion으로 사용했던 것과 동일합니다. 다만, function의 return type에 `bool`이 아니라 `AssertionResult`을 사용해야 합니다. 먼저 아래와 같이 `n`이 짝수인지 아닌지 판정하는 `IsEven()`이라는 function이 있다고 가정해 보겠습니다.
+사용방법은 `bool MutuallyPrime()`를 predicate assertion으로 사용했던 것과 동일하다. 다만, function의 return type에 `bool`이 아니라 `AssertionResult`을 사용해야 한다. 먼저 아래와 같이 `n`이 짝수인지 아닌지 판정하는 `IsEven()`이라는 function이 있다고 가정해 보자.
 
 ```c++
 bool IsEven(int n) {
@@ -149,7 +149,7 @@ bool IsEven(int n) {
 }
 ```
 
-`IsEven()`이 `AssertionResult`를 반환할 수 있도록 변경합니다.
+`IsEven()`이 `AssertionResult`를 반환할 수 있도록 변경하자.
 
 ```c++
 ::testing::AssertionResult IsEven(int n) {
@@ -160,9 +160,9 @@ bool IsEven(int n) {
 }
 ```
 
-모두 준비가 끝났습니다. 이제 기존 assertion과 함께 사용하기만 하면 됩니다.
+모두 준비가 끝났다. 이제 기존 assertion과 함께 사용하기만 하면 된다.
 
-예를 들어 `EXPECT_TRUE(IsEven(Fib(4)))`와 같이 사용하면 됩니다. 만약 실패하면 아래와 같은 failure message를 출력해 줄 것입니다. "3 is odd" 라는 추가 정보가 출력된 부분을 주목하십시오. 이렇듯 간단하게 디버깅에 필요한 더 많은 정보를 제공할 수 있습니다.
+예를 들어 `EXPECT_TRUE(IsEven(Fib(4)))`와 같이 사용하면 된다. 만약 실패하면 아래와 같은 failure message를 출력해 줄 것이다. "3 is odd"라는 추가 정보가 출력되었다. 이렇듯 간단하게 디버깅에 필요한 더 많은 정보를 제공할 수 있다.
 
 ```none
 Value of: IsEven(Fib(4))
@@ -170,7 +170,7 @@ Value of: IsEven(Fib(4))
 Expected: true
 ```
 
-위의 failure message가 왜 좋을까요? 아래에 있는 기존 failure message와 비교해보면 "3 is odd"라는 디버깅 정보를 바로 확인할 수 있게 되었습니다. 테스트의 양이 많아질수록 이런 부분들이 도움이 될 것입니다.
+위의 failure message가 왜 좋을까? 아래의 기존 failure message와 비교해보면 "3 is odd"라는 디버깅 정보를 바로 확인할 수 있게 되었다. 테스트의 양이 많아질수록 이런 작은 부분들도 도움이 될 것이다.
 
 ```none
 Value of: IsEven(Fib(4))
@@ -178,7 +178,7 @@ Value of: IsEven(Fib(4))
 Expected: true
 ```
 
-`IsEven`을 `EXPECT_FALSE` 또는 `ASSERT_FALSE`와 같은 negative assertion에도 사용할 수 있도록 조금 더 개선해 보겠습니다.
+`IsEven`을 `EXPECT_FALSE` 또는 `ASSERT_FALSE`와 같은 negative assertion에도 사용할 수 있도록 조금 더 개선해 보자.
 
 ```c++
 ::testing::AssertionResult IsEven(int n) {
@@ -189,7 +189,7 @@ Expected: true
 }
 ```
 
-이제 `EXPECT_FALSE`와 함께 사용해도 추가적인 디버깅 정보를 제공할 수 있게 되었습니다. `IsEven()`의 최종코드는 `EXPECT_FALSE(IsEven(Fib(6)))`라는 assertion에 대해서도 꽤 괜찮은 디버깅 정보를 출력해 줍니다.
+이제 `EXPECT_FALSE`와 함께 사용해도 추가적인 디버깅 정보를 제공할 수 있게 되었다. `IsEven()`의 최종코드는 `EXPECT_FALSE(IsEven(Fib(6)))`라는 assertion에 대해서도 꽤 괜찮은 디버깅 정보를 출력해 줄 것이다.
 
 ```none
   Value of: IsEven(Fib(6))
@@ -199,7 +199,7 @@ Expected: true
 
 #### Predicate-Formatter 사용하기
 
-지금까지 `(ASSERT|EXPECT)_PRED*` 와 `(ASSERT|EXPECT)_(TRUE|FALSE)`을 일반 function(또는 functor)과 함께 사용하는 방법에 대해 배웠습니다. 아직도 부족한가요? 네, 그럴 수 있습니다. 예를 들어 argument가 `ostream`을 사용하지 못하는 타입이라면 위의 2가지 방법을 적용하기 어렵습니다. 그런 경우에는 *predicate-formatter assertions*을 사용하기 바랍니다. *predicate-formatter assertions*을 사용하면 아예 모든 message를 사용자가 정의할 수 있습니다.
+지금까지 `(ASSERT|EXPECT)_PRED*` 와 `(ASSERT|EXPECT)_(TRUE|FALSE)`을 일반 function(또는 functor)과 함께 사용하는 방법에 대해 확인했다. 아직도 부족하다고 생각하는 사람도 있을 것이다. 예를 들어 argument가 `ostream`을 사용하지 못하는 타입이라면 위의 2가지 방법을 적용하기 어렵다. 그런 경우에는 *predicate-formatter assertions*을 사용해야 한다. *predicate-formatter assertions*을 사용하면 아예 모든 message를 사용자가 정의할 수 있게 된다.
 
 | Fatal assertion                                  | Nonfatal assertion                               | Verifies                                 |
 | ------------------------------------------------ | ------------------------------------------------ | ---------------------------------------- |
@@ -207,7 +207,7 @@ Expected: true
 | `ASSERT_PRED_FORMAT2(pred_format2, val1, val2);` | `EXPECT_PRED_FORMAT2(pred_format2, val1, val2);` | `pred_format2(val1, val2)` is successful |
 | `...`                                            | `...`                                            | `...`                                      |
 
-`(ASSERT|EXPECT)_PRED_FORMAT*`계열과 앞서 설명한 2가지 방법과의 다른 점은 predicate가 아니라 *predicate-formatter*(`pred_formatn`)를 사용한다는 점입니다. *predicate-formatter*란 아래와 같은 형식으로 정의된 function을 의미합니다.
+`(ASSERT|EXPECT)_PRED_FORMAT*` 계열과 앞서 설명한 2가지 방법과의 다른 점은 predicate가 아니라 *predicate-formatter*(`pred_formatn`)를 사용한다는 점입니다. *predicate-formatter*란 아래와 같은 형식으로 정의된 function을 의미한다.
 
 ```c++
 ::testing::AssertionResult PredicateFormattern(const char* expr1,
@@ -220,9 +220,9 @@ Expected: true
                                                Tn valn);
 ```
 
-`PredicateFormattern()`로 전달되는 `valn` argument들은 실제로 assertion에 사용되는 값들입니다. 그리고 `Tn`은 `valn`의 타입을 의미하는데 값, 참조 둘 다 가능합니다. 예를 들어 `int` 타입이라면 그대로 `int` 혹은 `const Foo&`등이 올 수 있습니다. 마지막으로 `exprn`은 `valn`을 전달하는 caller쪽 소스코드가 그대로 저장된 문자열입니다. 쉽게 말해서 caller쪽의 구현이 `Foo(variable)`라면 `expr1`은 `"variable"`이라는 문자열이 됩니다.
+`PredicateFormattern()`로 전달되는 `valn` argument들은 실제로 assertion에 사용되는 값들이다. 그리고 `Tn`은 `valn`의 타입을 의미하는데 값, 참조 둘 다 가능하다. 예를 들어 `int` 타입이라면 그대로 `int` 혹은 `const Foo&` 등이 올 수 있다. 마지막으로 `exprn`은 `valn`을 전달하는 caller 쪽 소스코드가 그대로 저장된 문자열이다. 쉽게 말해서 caller쪽의 구현이 `Foo(variable)`라면 `expr1`은 `"variable"`이라는 문자열이 된다.
 
-이제 예제를 보겠습니다. 예제코드의 `AssertMutuallyPrime()`은 `EXPECT_PRED2()`를 설명할 때 사용했던 `MutuallyPrime()`을 *predicate-formatter*로 변경한 코드입니다.
+이제 예제를 보자. 예제코드의 `AssertMutuallyPrime()`은 `EXPECT_PRED2()`를 설명할 때 사용했던 `MutuallyPrime()`을 *predicate-formatter*로 변경한 코드이다.
 
 ```c++
 // Returns the smallest prime common divisor of m and n,
@@ -242,25 +242,25 @@ int SmallestPrimeCommonDivisor(int m, int n) { ... }
 }
 ```
 
-이렇게 구현된 `AssertMutuallyPrime()`는 아래처럼 사용할 수 있습니다.
+이렇게 구현된 `AssertMutuallyPrime()`는 아래처럼 사용할 수 있다.
 
 ```c++
   EXPECT_PRED_FORMAT2(AssertMutuallyPrime, b, c);
 ```
 
-위 코드에서 `b`, `c`의 값이 각각 `4`, `10`이었다면 최종적으로 아래와 같은 failure message가 출력됨을 확인할 수 있습니다.
+위 코드에서 `b`, `c`의 값이 각각 `4`, `10` 이었다면 최종적으로 아래와 같은 failure message가 출력됨을 확인할 수 있다.
 
 ```none
 b and c (4 and 10) are not mutually prime, as they have a common divisor 2.
 ```
 
-이미 눈치챘을 수도 있지만 `(EXPECT|ASSERT)_PRED_FORMAT*`은 가장 기본적인 assertion 정의방법이며 대부분의 built-in assertion들도 이를 기반으로 만들어 졌습니다.
+이미 눈치챘을 수도 있지만 `(EXPECT|ASSERT)_PRED_FORMAT*`은 가장 기본적인 assertion 정의방법이며 대부분의 built-in assertion들도 이를 기반으로 만들어 졌다.
 
 ### Floating-Point 비교하기
 
-반올림 이슈로 인해서 2개의 floating-point 값이 정확히 같다고 판정하는 것은 언제나 까다로운 문제입니다. 기존에 사용하던 `ASSERT_EQ`로는 정확한 답을 얻을 수 없을 것입니다. 또한, floating-point는 값의 범위가 큰 경우가 많기 때문에 고정 오차범위보다는 상대 오차범위를 사용하는 것이 정밀도 측면에서 더 좋은 선택입니다. 고정 오차범위가 더 좋은 경우는 `0`과 같은지 비교할 때 뿐입니다.
+반올림 이슈로 인해서 2개의 floating-point 값이 정확히 같다고 판정하는 것은 언제나 까다로운 문제이다. 기존에 사용하던 `ASSERT_EQ`로는 정확한 답을 얻을 수 없을 것이다. 또한, floating-point는 값의 범위가 큰 경우가 많기 때문에 고정 오차범위보다는 상대 오차범위를 사용하는 것이 정밀도 측면에서 더 좋은 선택이다. 고정 오차범위가 더 좋은 경우는 `0`과 같은지 비교할 때 뿐이다.
 
-결론적으로 floating-point를 비교하기 위해서는 오차범위를 신중하게 선택해야 합니다. googletest는 오차범위 단위로 ULPs를 기본적으로 사용하고 있으며 그 범위는 4 ULP's입니다. 만약, 직접 오차범위를 지정하기가 꺼려진다면 googletest의 기본설정을 사용하기를 추천합니다. 물론, 기본설정 오차범위를 이용하는 macro와 사용자가 오차범위를 지정할 수 있는 macro를 둘 다 제공하므로 주어진 상황에 맞게 사용할 수 있습니다. (ULPs 및 floating-point 비교에 대한 자세한 설명은 [이곳](https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/) 또는 [이곳](https://bitbashing.io/comparing-floats.html)을 참조하기 바랍니다.)
+결론적으로 floating-point를 비교하기 위해서는 오차범위를 신중하게 선택해야 한다. googletest는 오차범위 단위로 ULPs를 기본적으로 사용하고 있으며 그 범위는 4 ULP's 이다. 만약, 직접 오차범위를 지정하기가 꺼려진다면 googletest의 기본설정을 사용하기를 추천한다. 물론, 기본설정 오차범위를 이용하는 macro와 사용자가 오차범위를 지정할 수 있는 macro를 둘 다 제공하므로 주어진 상황에 맞게 사용할 수 있다. (ULPs 및 floating-point 비교에 대한 자세한 설명은 [이곳](https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/) 또는 [이곳](https://bitbashing.io/comparing-floats.html)에서 확인할 수 있다.)
 
 #### Floating-Point Macros
 
@@ -269,9 +269,9 @@ b and c (4 and 10) are not mutually prime, as they have a common divisor 2.
 | `ASSERT_FLOAT_EQ(val1, val2);`  | `EXPECT_FLOAT_EQ(val1, val2);`  | the two `float` values are almost equal  |
 | `ASSERT_DOUBLE_EQ(val1, val2);` | `EXPECT_DOUBLE_EQ(val1, val2);` | the two `double` values are almost equal |
 
-위 표에서 "almost equal"이란, googletest 기본설정에 따라 2개의 값이 오차범위 4 ULP's 내에서 같음을 의미합니다.
+위 표에서 "almost equal"이란, googletest 기본설정에 따라 2개의 값이 오차범위 4 ULP's 내에서 같음을 의미한다.
 
-만약, 사용자가 오차범위를 직접 지정하고 싶다면 아래의 assertion을 사용하기 바랍니다.
+만약, 사용자가 오차범위를 직접 지정하고 싶다면 아래의 assertion을 사용하기 바란다.
 
 | Fatal assertion                       | Nonfatal assertion                    | Verifies                                                     |
 | ------------------------------------- | ------------------------------------- | ------------------------------------------------------------ |
@@ -279,26 +279,26 @@ b and c (4 and 10) are not mutually prime, as they have a common divisor 2.
 
 #### Floating-Point Predicate-Format Functions
 
-Floating-point 연산자들을 더 다양하게 만들어서 제공할 수도 있지만 macro가 너무 많아지는 것도 좋지 않습니다. 대신에 predicate-formatter assertion을 floating-piont에도 사용할 수 있도록 했습니다. 사용방법은 기존과 동일하며 첫번째 argument에 `FloatLE`, `DoubleLE`와 같은 floating-point 관련 function을 전달한다는 점만 다릅니다.
+Floating-point 연산자들을 더 다양하게 만들어서 제공할 수도 있지만 macro가 너무 많아지는 것도 좋지 않다. 대신에 predicate-formatter assertion을 floating-piont에도 사용할 수 있도록 했다. 사용방법은 기존과 동일하며 첫번째 argument에 `FloatLE`, `DoubleLE`와 같은 floating-point 관련 function을 전달한다는 점만 다르다.
 
 ```c++
 EXPECT_PRED_FORMAT2(::testing::FloatLE, val1, val2);
 EXPECT_PRED_FORMAT2(::testing::DoubleLE, val1, val2);
 ```
 
-위 예제는 `val1`이 `val2`보다 작거나 같은지(almost equal)를 검사하는 코드입니다. `ASSERT_PRED_FORMAT2`의 사용방법도 동일합니다.
+위 예제는 `val1`이 `val2`보다 작거나 같은지(almost equal)를 검사하는 코드이다. `ASSERT_PRED_FORMAT2`을 사용할때도 동일하게 사용하면 된다.
 
 ### gMock Matchers를 이용한 Asserting
 
-C++ mocking framework인 [gMock](../../../googlemock)을 개발하면서 mock object로 전달되는 argument를 확인하기 위한 방법으로 matcher라는 것을 새로 도입하게 되었습니다. gMock *matcher*는 predicate와 그 원리가 같으면서도 이미 풍부한 built-in matcher들을 제공하고 있습니다.
+C++ mocking framework인 [gMock](../../../googlemock)을 개발하면서 mock object로 전달되는 argument를 확인하기 위한 방법으로 matcher라는 것을 새로 도입했다. gMock *matcher*는 predicate와 그 원리가 같으면서도 이미 풍부한 built-in matcher들을 제공하고 있다.
 
-이러한 matcher들을 `*_THAT`계열 assertion macro와 함께 사용하기만 하면 됩니다.
+이러한 matcher들을 `*_THAT` 계열 assertion macro와 함께 사용하기만 하면 된다.
 
 | Fatal assertion                | Nonfatal assertion             | Verifies              |
 | ------------------------------ | ------------------------------ | --------------------- |
 | `ASSERT_THAT(value, matcher);` | `EXPECT_THAT(value, matcher);` | value matches matcher |
 
-아래는 `StartsWith(prefix)`라는 built-in matcher를 통해서 `Foo()`의 반환값(문자열)이 `"Hello"`로 시작하는지 검사해주는 assertion을 구현한 코드입니다.
+아래는 `StartsWith(prefix)`라는 built-in matcher를 통해서 `Foo()`의 반환값(문자열)이 `"Hello"`로 시작하는지 검사해주는 assertion을 구현한 코드이다.
 
 ```c++
 using ::testing::StartsWith;
@@ -307,17 +307,17 @@ using ::testing::StartsWith;
     EXPECT_THAT(Foo(), StartsWith("Hello"));
 ```
 
-이렇듯 matcher를 사용하면 간단하게 새로운 assertion을 만들 수 있습니다. 좀 더 상세한 사용방법은 [여기](../../../googlemock/docs/kr/cook_book.md#matcher를-googletest-assertion처럼-사용하기)을 참조하시기 바랍니다.
+이렇듯 matcher를 사용하면 간단하게 새로운 assertion을 만들 수 있다. 좀 더 상세한 사용방법은 [여기](../../../googlemock/docs/kr/cook_book.md#matcher를-googletest-assertion처럼-사용하기)에서 확인할 수 있다.
 
-gMock은 `StartsWith()` 외에도 다양한 built-in matcher를 제공하고 있습니다. 이러한 built-in matcher를 알아보려면 [여기](../../../googlemock/docs/kr/cook_book.md#matcher-사용하기)를 참조하세요. 만약, built-in matcher 중에 원하는 기능이 없다면 matcher를 직접 구현하는 것도 가능합니다. [여기](../../../googlemock/docs/kr/cook_book.md#새로운-matcher를-빠르게-구현하기)에서 그 방법을 확인해보세요.
+gMock은 `StartsWith()` 외에도 다양한 built-in matcher를 제공하고 있다. 이러한 built-in matcher를 알아보려면 [여기](../../../googlemock/docs/kr/cook_book.md#matcher-사용하기)를 참조하라. 만약, built-in matcher 중에 원하는 기능이 없다면 matcher를 직접 구현하는 것도 가능하다. [여기](../../../googlemock/docs/kr/cook_book.md#새로운-matcher를-빠르게-구현하기)에서 그 방법을 확인할 수 있다.
 
-마지막으로 gMock 자체가 googletest와 함께 제공되는 번들 소프트웨어이므로 matcher 사용을 위한 추가적인 환경설정은 따로 없습니다. 헤더파일만 포함(`#include "testing/base/public/gmock.h"`)하면 바로 사용할 수 있습니다.
+마지막으로 gMock 자체가 googletest와 함께 제공되는 번들 소프트웨어이므로 matcher 사용을 위한 추가적인 환경설정은 따로 필요하지 않다. 헤더파일만 포함(`#include "testing/base/public/gmock.h"`)하면 바로 사용할 수 있을 것이다.
 
 ### More String Assertions
 
-([이전](#gmock-matchers를-이용한-asserting) 섹션을 먼저 읽으세요)
+([이전](#gmock-matchers를-이용한-asserting) 섹션을 먼저 읽어야 함)
 
-바로 위에서도 확인했듯이 gMock은 문자열과 관련된 [string matchers](../../../googlemock/docs/kr/cheat_sheet.md#string-matchers)를 풍부하게 제공하고 있습니다. 이렇게 제공되는 built-in matcher들을 `EXPECT_THAT()` 또는 `ASSERT_THAT()`과 함께 사용하기만 하면 됩니다. 이를 통해 sub-string, prefix, suffix, regular expression과 같은 다양한 방법의 string assertion을 수행할 수 있습니다. 사용방법은 아래 예제코드와 같습니다.
+바로 위에서도 확인했듯이 gMock은 문자열과 관련된 [string matchers](../../../googlemock/docs/kr/cheat_sheet.md#string-matchers)를 풍부하게 제공하고 있다. 이렇게 제공되는 built-in matcher들을 `EXPECT_THAT()` 또는 `ASSERT_THAT()`과 함께 사용하기만 하면 된다. 이를 통해 sub-string, prefix, suffix, regular expression과 같은 다양한 방법의 string assertion을 수행할 수 있다. 사용방법은 아래 예제코드와 같다.
 
 ```c++
 using ::testing::HasSubstr;
@@ -327,7 +327,7 @@ using ::testing::MatchesRegex;
   EXPECT_THAT(bar_string, MatchesRegex("\\w*\\d+"));
 ```
 
-또한, 문자열이 HTML이나 XML을 포함할때는 [XPath expression](http://www.w3.org/TR/xpath/#contents)를 통해서 DOM tree와의 비교도 수행할 수 있습니다.
+또한, 문자열이 HTML이나 XML을 포함할 때는 [XPath expression](http://www.w3.org/TR/xpath/#contents)를 통해서 DOM tree와의 비교도 수행할 수 있다.
 
 ```c++
 // Currently still in //template/prototemplate/testing:xpath_matcher
@@ -338,16 +338,16 @@ EXPECT_THAT(html_string, MatchesXPath("//a[text()='click here']"));
 
 ### Windows HRESULT assertions
 
-Windows 환경의 `HRESULT`를 위한 assertion도 제공하고 있습니다.
+Windows 환경의 `HRESULT`를 위한 assertion도 제공하고 있다.
 
 | Fatal assertion                        | Nonfatal assertion                     | Verifies                            |
 | -------------------------------------- | -------------------------------------- | ----------------------------------- |
 | `ASSERT_HRESULT_SUCCEEDED(expression)` | `EXPECT_HRESULT_SUCCEEDED(expression)` | `expression` is a success `HRESULT` |
 | `ASSERT_HRESULT_FAILED(expression)`    | `EXPECT_HRESULT_FAILED(expression)`    | `expression` is a failure `HRESULT` |
 
-위의 assertion을 사용하면 주어진 `expression`을 수행하고 그 결과인 `HRESULT`를 출력해 줍니다.
+위의 assertion을 사용하면 주어진 `expression`을 수행하고 그 결과인 `HRESULT`를 출력해 준다.
 
-사용방법은 아래와 같습니다.
+사용방법은 아래와 같다.
 
 ```c++
 CComPtr<IShellDispatch2> shell;
@@ -358,15 +358,15 @@ ASSERT_HRESULT_SUCCEEDED(shell->ShellExecute(CComBSTR(url), empty, empty, empty,
 
 ### Type Assertions
 
-타입 `T1`과 `T2`가 같은지 확인하기 위한 assertion은 아래와 같습니다.
+타입 `T1`과 `T2`가 같은지 확인하기 위한 assertion은 아래와 같다.
 
 ```c++
 ::testing::StaticAssertTypeEq<T1, T2>();
 ```
 
-Type assertion은 compiler에 의해서 수행되기 때문에 성공하면 아무런 문제없이 지나가지만 실패했을 때는 compile error가 발생합니다. 그렇게 실패했을 때는 `type1 and type2 are not the same type`이라는 error message가 출력되며 이와 더불어 (compiler에 따라 다르긴 하지만) `T1`, `T2`가 실제로 무엇인지도 알려줍니다. 템플릿 코드를 구현할 때 유용합니다.
+Type assertion은 compiler에 의해서 수행되기 때문에 성공하면 아무런 문제없이 지나가지만 실패했을 때는 compile error가 발생한다. 그렇게 실패했을 때는 `type1 and type2 are not the same type`이라는 error message가 출력되며 이와 더불어 (compiler에 따라 다르긴 하지만) `T1`, `T2`가 실제로 무엇인지도 알려준다. 템플릿 코드를 구현할 때 유용할 것이다.
 
-**Caveat**: 한가지 주의할 점은 위의 assertion을 function template이나 class template에서 사용하게 되면 해당 타입에 대한 template 코드가 실제로 만들어 질 때만 동작한다는 것입니다.(C++ 자체의 특징입니다.) 왜냐하면 C++에서는 호출되지 않거나 사용되지 않는 template은 compile 대상에도 포함되지 않기 때문입니다. 예를 들어 아래와 같은 class template이 있다고 가정해보겠습니다.
+**Caveat**: 한가지 주의할 점은 위의 assertion을 function template이나 class template에서 사용하게 되면 해당 타입에 대한 template 코드가 실제로 만들어 질 때만 동작한다는 것이다. 왜냐하면 C++에서는 호출되지 않거나 사용되지 않는 template은 compile 대상에도 포함되지 않기 때문이다. 예를 들어 아래와 같은 class template이 있다고 가정해보자.
 
 ```c++
 template <typename T> class Foo {
@@ -375,13 +375,13 @@ template <typename T> class Foo {
 };
 ```
 
-위에서 정의한 class template `Foo`를 사용하는 코드를 보겠습니다. 먼저 아래의 `Test1()`은 `StaticAssertTypeEq`로 전달되는 2개 타입(`int`, `bool`)이 서로 다름에도 compile error가 발생하지 않습니다. 왜냐하면 `Bar()`를 호출하는 코드가 없기 때문에 compile 대상에서도 제외되기 때문입니다.
+다음으로 위에서 정의한 class template인 `Foo`를 사용하는 코드를 살펴보자. 먼저 아래의 `Test1()`은 `StaticAssertTypeEq`로 전달되는 2개 타입(`int`, `bool`)이 서로 다름에도 compile error가 발생하지 않는다. 왜냐하면 `Bar()`를 호출하는 코드가 없기 때문에 compile 대상에서도 제외되기 때문이다.
 
 ```c++
 void Test1() { Foo<bool> foo; }
 ```
 
-반면에 아래의 `Test2()`는 `Foo<bool>::Bar()`를 호출하는 코드가 존재하기 때문에 assertion이 동작하게 될 것입니다. 물론, 그 결과는 타입 불일치로 인한 compile error입니다.
+반면에 아래의 `Test2()`는 `Foo<bool>::Bar()`를 호출하는 코드가 존재하기 때문에 assertion이 동작하게 된다. 그리고 그 결과는 타입 불일치로 인한 compile error일 것이다.
 
 ```c++
 void Test2() { Foo<bool> foo; foo.Bar(); }
@@ -389,7 +389,7 @@ void Test2() { Foo<bool> foo; foo.Bar(); }
 
 ### Assertion을 사용가능한 곳
 
-Assertion은 C++ function이라면 어디에서든 사용할 수 있습니다. 꼭 test fixture class의 member function일 필요도 없습니다. 다만, 유일한 한 가지 제약은 fatal failure(`FAIL*`, `ASSERT_*`) 계열 assertion들은 return type이 `void`인 function에서만 사용할 수 있다는 것인데 그 이유는 googletest가 exception을 사용하지 않기 때문입니다. Return type이 `void`가 아닌 function에서 fatal assertion을 사용하면 아래와 같은 compile error 중 하나가 발생할 것입니다.
+Assertion은 C++ function이기만 한다면 어디에든 사용할 수 있다. 꼭 test fixture class의 member function일 필요도 없다. 다만, 유일한 한 가지 제약은 fatal failure(`FAIL*`, `ASSERT_*`) 계열 assertion들은 return type이 `void`인 function에서만 사용할 수 있다는 것인데 그 이유는 googletest가 exception을 사용하지 않기 때문이다. Return type이 `void`가 아닌 function에서 fatal assertion을 사용하면 아래와 같은 compile error 중 하나가 발생하게 된다.
 
 ```bash
 error: void value not ignored as it ought to be
@@ -401,21 +401,21 @@ cannot initialize return object of type 'bool' with an rvalue of type 'void'
 error: no viable conversion from 'void' to 'string'.
 ```
 
-만약 return type이 `void`가 아닌 function에서 fatal assertion을 사용해야 한다면 조금 수정이 필요합니다. 먼저 해당 function의 return type을 `void`로 변경하고 원래 반환하려고 했던 값은 반환하는게 아니라 argument에 대입하도록 수정해야 합니다. 예를 들어 `T2 Foo(T1 x)`라는 function을 `void Foo(T1 x, T2* result)`로 변경하면 됩니다. 그러면 return type이 `void`로 변경되었으니 `Foo()` 내부에서도 fatal assertion을 사용할 수 있게 됩니다. 주의할 점은 이러한 변경이 `Foo()`의 caller와 `Foo()` 간의 관계도 변경하는 것이기 때문에 `Foo()`가 어떤 이유로 인해서든 `result`에 의미있는 값을 대입하지 못하고 비정상 종료되더라도 `Foo()`를 사용하는 쪽에서는 문제가 없도록 구현해야 합니다.
+만약 return type이 `void`가 아닌 function에서 fatal assertion을 사용해야 한다면 조금 수정이 필요하다. 먼저 해당 function의 return type을 `void`로 변경하고 원래 반환하려고 했던 값은 반환하는게 아니라 argument에 대입하도록 수정해야 한다. 예를 들어 `T2 Foo(T1 x)`라는 function을 `void Foo(T1 x, T2* result)`로 변경하면 된다. 그러면 return type이 `void`로 변경되었으니 `Foo()` 내부에서도 fatal assertion을 사용할 수 있게 된다. 주의할 점으로 이러한 변경은 `Foo()`의 caller와 `Foo()` 간의 관계를 변경하는 것이기 때문에 `Foo()`가 어떤 이유로 인해서든 `result`에 의미 있는 값을 대입하지 못하고 비정상 종료되더라도 `Foo()`를 사용하는 쪽에서는 문제가 없도록 구현해야 한다.
 
-만약, 이처럼 return type을 변경할 수 없는 상황이라면 어쩔 수 없이 `ADD_FAILURE*` 또는 `EXPECT_*`와 같은 non-fatal failure를 사용하기를 바랍니다.
+만약, 이처럼 return type을 변경할 수 없는 상황이라면 어쩔 수 없이 `ADD_FAILURE*` 또는 `EXPECT_*`와 같은 non-fatal failure를 사용해야 한다.
 
-NOTE: class의 constructor나 destructor는 return type이 따로 없기 때문에 fatal assertion도 사용할 수 없습니다. 사용하더라도 compile error가 발생할 것입니다. 이를 위한 첫 번째 대안으로 `abort`를 사용할 수 있는데 `abort`는 test program을 아예 종료하는 것이기 때문에 원하는 동작이 맞는지는 확인해봐야 합니다. 두 번째 대안은 `SetUp`/ `TearDown`을 사용하는 것이며 이와 관련 내용은 [constructor/destructor vs. `SetUp`/`TearDown`](faq.md#test-fixture에서-constructordestructor-와-setupteardown중-어느것을-써야하나요)에서 자세하게 확인할 수 있습니다.
+NOTE: class의 constructor나 destructor는 return type이 따로 없기 때문에 fatal assertion도 사용할 수 없다. 사용하더라도 compile error가 발생할 것이다. 이를 위한 첫 번째 대안으로 `abort`를 사용할 수 있는데 `abort`는 test program을 아예 종료하는 것이기 때문에 원하는 동작이 맞는지는 확인해봐야 한다. 두 번째 대안은 `SetUp`/ `TearDown`을 사용하는 것이며 이와 관련 내용은 [constructor/destructor vs. `SetUp`/`TearDown`](faq.md#test-fixture에서-constructordestructor-와-setupteardown중-어느것을-써야하나요)에서 자세하게 확인할 수 있다.
 
-WARNING: constructor, desturctor에서 fatal assertion을 사용하는 또 다른 방법은 assertion을 수행 할 function을 별도로 만들고(private 영역에) constructor나 destructor가 해당 function을 호출하도록 하는 것입니다. 여기서 주의할 점은 constructor나 destructor에서 발생한 fatal assertion은 진행중인 테스트를 중단시키지는 못하고 자기자신만 중단한다는 것입니다. 그렇게 되면 상황에 따라 object의 생성이나 소멸이 완료되지 못한 상태에서 테스트가 진행될 가능성이 있기 때문에 심각한 문제를 초래할 수도 있습니다. 이와 같은 이유로 constructor나 destructor에서 fatal assertion을 사용하려는 사용자는 그에 따른 문제가 없는지에 대해서 사전에 철저히 확인해야 하며 그러한 부분이 부담된다면 `SetUp/TearDown`을 사용하거나 아니면 `abort`를 사용하는 것이 더 편할 것입니다.
+WARNING: constructor, desturctor에서 fatal assertion을 사용하는 또 다른 방법은 assertion을 수행 할 function을 별도로 만들고(private 영역에) constructor나 destructor가 해당 function을 호출하도록 하는 것이다. 여기서 주의할 점은 constructor나 destructor에서 발생한 fatal assertion은 진행 중인 테스트를 중단시키지는 못하고 자기자신만 중단한다는 것이다. 그렇게 되면 상황에 따라 object의 생성이나 소멸이 완료되지 못한 상태에서 테스트가 진행될 가능성이 있기 때문에 심각한 문제를 초래할 수도 있다. 이와 같은 이유로 constructor나 destructor에서 fatal assertion을 사용하려는 사용자는 그에 따른 문제가 없는지에 대해서 사전에 철저히 확인해야 하며 그러한 부분이 부담된다면 `SetUp/TearDown`을 사용하거나 아니면 `abort`를 사용하는 것이 더 편할 것이다.
 
 ## Googletest의 디버깅정보 출력방식 변경하기
 
-`EXPECT_EQ`같은 assertion이 실패하면, googletest는 argument로 전달된 값을 비롯해서 디버깅에 필요한 정보를 출력해줍니다. 이렇게 디버깅 정보를 출력해주는 기능을 printer라고 하는데 이 printer는 사용자가 원하는 방향으로 확장도 가능합니다.
+`EXPECT_EQ`같은 assertion이 실패하면, googletest는 argument로 전달된 값을 비롯해서 디버깅에 필요한 정보를 출력해준다. 이렇게 디버깅 정보를 출력해주는 기능을 printer라고 하는데 이 printer는 사용자가 원하는 방향으로 확장도 가능하다.
 
-Googletest는 기본적으로 C++ built-in 타입, STL container, `<<` 연산자를 정의한 타입에 대해서는 디버깅 정보를 출력해주지만 그 외의 타입들은 raw bytes 값만 출력해주기 때문에 디버깅이 어려울 수 있습니다.
+Googletest는 기본적으로 C++ built-in 타입, STL container, `<<` 연산자를 정의한 타입에 대해서는 디버깅 정보를 출력해주지만 그 외의 타입들은 raw bytes 값만 출력해주기 때문에 디버깅이 어려울 수 있다.
 
-이런 경우에는`<<` 연산자를 재정의해서 printer를 확장하는 것이 좋습니다. 아래에 예제코드가 있습니다.
+이런 경우에는`<<` 연산자를 재정의해서 printer를 확장하는 것이 좋다. 아래 예제코드를 보자.
 
 ```c++
 // Streams are allowed only for logging.  Don't include this for
@@ -442,7 +442,7 @@ std::ostream& operator<<(std::ostream& os, const Bar& bar) {
 }  // namespace foo
 ```
 
-다만, 경우에 따라서는 `<<` 연산자를 재정의하는 것에 대해 팀 동료들이 반대할 수도 있고 `<<` 연산자가 이미 구현되어 있어서 바꿀 수 없을 수도 있습니다. 그럴 때에는 `PrintTo()`와 같은 디버깅정보를 확인하기 위한 별도의 function을 정의하는 것도 좋은 방법입니다. 아래 예제코드가 있습니다.
+다만, 경우에 따라서는 `<<` 연산자를 재정의하는 것에 대해 팀 동료들이 반대할 수도 있고 `<<` 연산자가 이미 구현되어 있어서 바꿀 수 없을 수도 있다. 그럴 때에는 `PrintTo()`와 같은 디버깅정보를 확인하기 위한 별도의 function을 정의하는 것도 좋은 방법이다. 아래 예제코드를 보자.
 
 ```c++
 // Streams are allowed only for logging.  Don't include this for
@@ -468,9 +468,9 @@ void PrintTo(const Bar& bar, std::ostream* os) {
 }  // namespace foo
 ```
 
-만약, 사용자가 `<<`와 `PrintTo()`를 2개 모두 구현했다면 `PrintTo()`가 우선적으로 선택됩니다. 그 이유는 2개를 비교했을 때, `<<`연산자는 이미 구현해서 다른 용도로 사용하고 있을 확률이 더 높기 때문입니다.
+만약, 사용자가 `<<`와 `PrintTo()`를 2개 모두 구현했다면 `PrintTo()`가 우선적으로 선택된다. 그 이유는 2개를 비교했을 때, `<<` 연산자 쪽이 이미 구현되어 다른 용도로 사용하고 있을 확률이 더 높기 때문이다.
 
-`Bar` class에 `<<` 혹은 `PrintTo()`를 정의하는 것까지 완료했다면, 이제 확인하고 싶은 값을 출력하기만 하면 됩니다. 예를 들어 `x`의 값을 출력하고 싶다면 `::testing::PrintToString(x)`라고 구현하면 됩니다. 여기서 `::testing::PrintToString(x)`의 return type은 `std::string`입니다. 사용방법은 아래 예제코드를 확인하세요.
+`Bar` class에 `<<` 혹은 `PrintTo()`를 정의하는 것까지 완료했다면, 이제 확인하고 싶은 값을 출력하기만 하면 된다. 예를 들어 `x`의 값을 출력하고 싶다면 `::testing::PrintToString(x)`라고 구현하면 된다. 여기서 `::testing::PrintToString(x)`의 return type은 `std::string`이다. 사용방법은 아래 예제코드에서 확인할 수 있다.
 
 ```c++
 vector<pair<Bar, int> > bar_ints = GetBarIntVector();
@@ -481,15 +481,15 @@ EXPECT_TRUE(IsCorrectBarIntVector(bar_ints))
 
 ## Death Test
 
-원하는 조건이 충족되지 않았을 때 스스로를 종료시키는 프로그램도 당연히 존재할 것입니다. 예를 들어 프로그램이 동작하다가 치명적인 문제를 일으킬 수도 있는 비정상상태로 진입했음을 알게되면 문제가 더 악화되기 전에 스스로를 종료시키는 상황이 있을 것입니다. (여기서 치명적인 문제라는 것은 memory corruption이나 security holes와 같은 문제들입니다.)
+원하는 조건이 충족되지 않았을 때 스스로를 종료시키는 프로그램도 당연히 존재할 것이다. 예를 들어 프로그램이 동작하다가 치명적인 문제를 일으킬 수도 있는 비정상상태로 진입했음을 알게되면 문제가 더 악화되기 전에 스스로를 종료시키는 상황이 있을 것이다. (여기서 치명적인 문제라는 것은 memory corruption이나 security holes와 같은 문제를 의미한다.)
 
-Googletest는 이렇게 스스로 종료하도록 구현된 프로그램들이 실제로 원하는 상황에서 원하는 방향으로 잘 종료되는지를 확인하기 위한 방법을 제공하고 있으며 이를 *death test*라고 부릅니다. 쉽게 말해서 *death test*란 프로그램이 원하는 방향으로 종료되었는지 확인하는 것입니다.
+Googletest는 이렇게 스스로 종료하도록 구현된 프로그램들이 실제로 원하는 상황에서 원하는 방향으로 잘 종료되는지를 확인하기 위한 방법을 제공하고 있으며 이를 *death test*라고 부른다. 쉽게 말해서 *death test*란 프로그램이 원하는 방향으로 종료되었는지 확인하는 것이다.
 
-단, exception은 death test에 포함되지 않습니다. 왜냐하면 exception은 catch해서 적절한 조치를 취하도록 구현하는 것이 목적이기 때문에 프로그램을 아예 종료하는 death test와는 다른 관점에서 봐야 합니다. 만약, exception에 대한 테스트가 필요하다면 [Exception Assertions](#exception-assertions)에서 관련 내용을 별도로 다루고 있습니다.
+단, exception은 death test에 포함되지 않는다. 왜냐하면 exception은 catch해서 적절한 조치를 취하도록 구현하는 것이 목적이기 때문에 프로그램을 아예 종료하는 death test와는 다른 관점에서 봐야하기 때문니다. 만약, exception에 대한 테스트가 필요하다면 [Exception Assertions](#exception-assertions)에서 관련 내용을 별도로 다루고 있다.
 
 ### Death Test 구현하기
 
-Death test를 위해서 아래와 같은 macro를 제공하고 있습니다.
+Death test를 위해서 아래와 같은 macro를 제공하고 있다.
 
 | Fatal assertion                                  | Nonfatal assertion                               | Verifies                                                     |
 | ------------------------------------------------ | ------------------------------------------------ | ------------------------------------------------------------ |
@@ -497,39 +497,39 @@ Death test를 위해서 아래와 같은 macro를 제공하고 있습니다.
 | `ASSERT_DEATH_IF_SUPPORTED(statement, matcher);` | `EXPECT_DEATH_IF_SUPPORTED(statement, matcher);` | if death tests are supported, verifies that `statement` crashes with the given error; otherwise verifies nothing |
 | `ASSERT_EXIT(statement, predicate, matcher);`    | `EXPECT_EXIT(statement, predicate, matcher);`    | `statement` exits with the given error, and its exit code matches `predicate` |
 
-먼저 `statement`는 종료되기를 기대하는 대상 프로그램이나 코드를 의미합니다. 당연히 여러줄의 코드도 가능합니다. 다음으로 `predicate`는 `statement`의 exit status를 확인하는 function이나 function object입니다. 마지막으로 `matcher`에는 `const std::string&`을 전달받을 수 있는 gMock matcher 또는 (Perl) regular expression을 사용할 수 있습니다. 이러한 `matcher`는 `statement`가 stderr로 출력하는 error message를 확인하는데 사용됩니다. `statement`의 stderr 출력이 `matcher`를 만족하지 못하면 death test는 실패합니다. 만약에 `matcher`에 순수 문자열만 전달한다면 `ContainsRegex(str)`로 자동 변환됩니다. 그 이유는 googletest의 이전 버전에서는 regular expression만 전달받을 수 있었다가 gMock matcher도 사용할 수 있게 변경되었기 때문에 하위호환을 위해 그렇게 구현되었습니다.
+먼저 `statement`는 종료되기를 기대하는 대상 프로그램이나 코드를 의미한다. 당연히 여러줄의 코드도 가능하다. 다음으로 `predicate`는 `statement`의 exit status를 확인하는 function이나 function object이다. 마지막으로 `matcher`에는 `const std::string&`을 전달받을 수 있는 gMock matcher 또는 (Perl) regular expression을 사용할 수 있다. 이러한 `matcher`는 `statement`가 stderr로 출력하는 error message를 확인하는데 사용된다. `statement`의 stderr 출력이 `matcher`를 만족하지 못하면 death test는 실패한다. 만약에 `matcher`에 순수 문자열만 전달한다면 `ContainsRegex(str)`로 자동 변환된다. 그 이유는 googletest의 이전 버전에서는 regular expression만 전달받을 수 있었다가 gMock matcher도 사용할 수 있게 변경되었기 때문에 하위호환을 위해 그렇게 구현되었다.
 
-Death test assertion도 `ASSERT`계열은 현재 실행중인 test function을 중단시키고 `EXPECT`계열은 계속해서 진행합니다.
+Death test assertion도 `ASSERT`계열은 현재 실행중인 test function을 중단시키고 `EXPECT`계열은 계속해서 진행한다.
 
-> NOTE: 위 표에서 사용된 "crash"라는 단어는 process가 종료될 때의 exit status가 `0`이 아님을 의미합니다. 2가지 가능성이 있습니다. 해당 process가 `exit()` 또는 `_exit()`를 호출하면서 `0`이 아닌 값을 전달했거나 혹은 signal을 수신해서 종료된 경우입니다.
+> NOTE: 위 표에서 사용된 "crash"라는 단어는 process가 종료될 때의 exit status가 `0`이 아님을 의미한다. 2가지 가능성이 있다. 해당 process가 `exit()` 또는 `_exit()`를 호출하면서 `0`이 아닌 값을 전달했거나 혹은 signal을 수신해서 종료된 경우이다.
 >
-> 반대로 `statement`의 exit status가 `0`이라면 이는 곧 crash가 아님을 의미하기 떄문에 `EXPECT_DEATH`를 사용할 수가 없게 됩니다. 만약, 이처럼 crash가 아니거나 또는 exit status를 좀 더 세부적으로 조작하고 싶은 경우에는 `EXPECT_EXIT`를 사용하기 바랍니다.
+> 반대로 `statement`의 exit status가 `0`이라면 이는 곧 crash가 아님을 의미하기 때문에 `EXPECT_DEATH`를 사용할 수가 없게 된다. 만약, 이처럼 crash가 아니거나 또는 exit status를 좀 더 세부적으로 조작하고 싶은 경우에는 `EXPECT_EXIT`를 사용해야 한다.
 
-`predicate`는 return type이 `int` 또는 `bool`인 function만 사용 가능하며 그렇게 전달된 `predicate`가 `true`를 반환하면 death test도 성공하게 됩니다. 즉 `statement`가 원하는 exit code와 함께 종료된 것을 의미합니다. 더불어 googletest는 일반적인 상황에서 사용가능한 `predicate`들을 기본적으로 제공하고 있습니다.
+`predicate`는 return type이 `int` 또는 `bool`인 function만 사용 가능하며 그렇게 전달된 `predicate`가 `true`를 반환하면 death test도 성공하게 된다. 즉, `statement`가 원하는 exit code와 함께 종료된 것을 의미한다. 더불어 googletest는 일반적인 상황에서 사용가능한 `predicate`들을 기본적으로 제공하고 있다.
 
 ```c++
 ::testing::ExitedWithCode(exit_code)
 ```
 
-위의 `predicate`는 `statement`의 exit code가 `exit_code`와 동일하다면  `true`입니다.
+위의 `predicate`는 `statement`의 exit code가 `exit_code`와 동일하다면  `true`이다.
 
 ```c++
 ::testing::KilledBySignal(signal_number)  // Not available on Windows.
 ```
 
-위의 `predicate`는 `statement`가 signal을 수신했고, 해당 signal number가 `signal_number`과 동일하다면 `true` 입니다.
+위의 `predicate`는 `statement`가 signal을 수신했고, 해당 signal number가 `signal_number`과 동일하다면 `true`이다.
 
-`*_DEATH` macro는 사실 `*_EXIT`를 사용해서 확장한 wrapper macro이며 `statment`의 exit code가 0인지 아닌지를 확인합니다.
+`*_DEATH` macro는 사실 `*_EXIT`를 사용해서 확장한 wrapper macro이며 `statment`의 exit code가 0인지 아닌지를 확인하기 위해 사용한다.
 
-정리해보면 death test assertion은 아래 3가지를 확인해서 성공,실패를 결정합니다.
+정리해보면 death test assertion은 아래 3가지를 확인해서 성공,실패를 결정한다.
 
-1.  `statement`가 `abort` 또는 `exit` 되었나?
-2.  `ASSERT_EXIT` 또는 `EXPECT_EXIT`는 exit status가 `predicate`를 만족하는지 확인하고, `ASSERT_DEATH` 또는 `EXPECT_DEATH`는 exit code != 0을 만족하는지 확인합니다.
-3.  `statment`의 stderr출력이 `matcher`를 만족하는지?
+1.  `statement`가 `abort` 또는 `exit` 되었는지 확인
+2.  `ASSERT_EXIT` 또는 `EXPECT_EXIT`는 exit status가 `predicate`를 만족하는지 확인하고, `ASSERT_DEATH` 또는 `EXPECT_DEATH`는 exit code != 0 을 만족하는지 확인
+3.  `statment`의 stderr출력이 `matcher`를 만족하는지 확인
 
-한가지 주의할 점은 만약 `statement`내부에 `ASSERT_*` 또는 `EXPECT_*`를 사용했다고 하더라도 death test assertion의 결과에는 영향을 미치지 않는 다는 것입니다. 당연하게도 death test는 `statement`가 어떻게 종료되는지 확인하는 것이 목적이기 때문입니다. `ASSERT_*`, `EXPECT_*`은 프로그램을 종료시키거나 하는 macro가 아니기 때문에 `statement`내부에서 발생하는 작업일 뿐이며 death test의 관심대상은 아닙니다.
+한가지 주의할 점은 만약 `statement` 내부에 `ASSERT_*` 또는 `EXPECT_*`를 사용했다고 하더라도 death test assertion의 결과에는 영향을 미치지 않는 다는 것이다. 당연하게도 death test는 `statement`가 어떻게 종료되는지 확인하는 것이 목적이기 때문이다. `ASSERT_*`, `EXPECT_*`은 프로그램을 종료시키거나 하는 macro가 아니기 때문에 `statement`내부에서 발생하는 작업일 뿐이며 death test의 관심대상은 아니다.
 
-이제는 death test를 구현할 수 있을 것입니다. 간단한 예시가 아래에 있습니다. 다만, 예제코드에서 `statement`들의 세부 구현은 생략되습니다.
+이제는 death test를 구현할 수 있을 것이며 간단한 예시가 아래에 있다. 예제코드에서 `statement`들의 세부 구현은 생략헸다.
 
 ```c++
 TEST(MyDeathTest, Foo) {
@@ -550,19 +550,19 @@ TEST(MyDeathTest, KillMyself) {
 }
 ```
 
-위 코드는 아래 3가지를 검증합니다.
+위 코드는 아래 3가지를 검증한다.
 
 *   `Foo(5)`를 호출하면 stderr로 `"Error on line .* of Foo()"`를 출력한 후에 "exit code != 0" 이 아닌 값으로 종료하는지 확인
 *   `NormalExit()`를 호출하면 sdterr로 `"Success"`를 출력한 후에 "exit code == 0" 인 값으로 종료하는지 확인
 *   `KillMyself()`를 호출하면 stderr로 `"Sending myself unblockable signal"`을 출력한 후에 `SIGKILL`시그널을 전달받아서 종료하는지 확인
 
-`TEST()`, `TEST_F()`를 구현할 때 death test assertion과 다른 assertion 혹은 코드를 함께 사용하는 것도 물론 가능합니다.
+`TEST()`, `TEST_F()`를 구현할 때 death test assertion과 다른 assertion 혹은 코드를 함께 사용하는 것도 물론 가능하다.
 
 ### Death Test 이름짓기
 
-IMPORTANT: death test를 구현할 때는 **test suite**(not test case)을 `*DeathTest`라는 이름으로 작성하여 사용하기 바랍니다. 그 이유는 [Death Tests And Threads](advanced.md#death-tests-그리고-threads)에 상세하게 설명되어 있습니다.
+IMPORTANT: death test를 구현할 때는 **test suite**(not test case)을 `*DeathTest`라는 이름으로 작성하여 사용해야 한다. 그 이유는 [Death Tests And Threads](advanced.md#death-tests-그리고-threads)에 상세하게 설명되어 있다.
 
-만약 사용자의 test fixture class가 normal test case와 death test case를 모두 포함한다면 `using` 혹은 `typedef`를 사용하여 alias를 만드는 것이 좋습니다. 아래 예제를 참고하세요.
+만약 사용자의 test fixture class가 normal test case와 death test case를 모두 포함한다면 `using` 혹은 `typedef`를 사용하여 alias를 만드는 것이 좋다. 아래 예제를 참고하자.
 
 ```c++
 class FooTest : public ::testing::Test { ... };
@@ -580,9 +580,9 @@ TEST_F(FooDeathTest, DoesThat) {
 
 ### 정규식 문법
 
-POSIX system(e.g. Linux, Cygwin, Mac) 환경에서는 [POSIX extended regular expression](http://www.opengroup.org/onlinepubs/009695399/basedefs/xbd_chap09.html#tag_09_04) 문법을 사용합니다. 관련 문법을 공부하려면 [Wikipedia entry](http://en.wikipedia.org/wiki/Regular_expression#POSIX_Extended_Regular_Expressions)를 참조하세요.
+POSIX system(e.g. Linux, Cygwin, Mac) 환경에서는 [POSIX extended regular expression](http://www.opengroup.org/onlinepubs/009695399/basedefs/xbd_chap09.html#tag_09_04) 문법을 사용한다. 관련 문법을 공부하려면 [Wikipedia entry](http://en.wikipedia.org/wiki/Regular_expression#POSIX_Extended_Regular_Expressions)를 참조하기 바란다.
 
-Windows 환경에서는 googletest 자체적으로 간단한 문법을 구현하여 사용하고 있습니다. 따라서 기능이 약간 부족할 수도 있습니다. 예를 들어 (`"x|y"`), (`"(xy)"`), (`"[xy]"`), (`"{5,7}"`) 과 같은 문법은 지원하지 않고 있습니다. 아래 표에서 사용가능한 문법을 확인하세요. (`A`와 `.`는 문자, `\\`은 escape sequnce, `x`, `y`는 정규식을 의미합니다.)
+Windows 환경에서는 googletest 자체적으로 간단한 문법을 구현하여 사용하고 있다. 따라서 기능이 약간 부족할 수도 있다. 예를 들어 (`"x|y"`), (`"(xy)"`), (`"[xy]"`), (`"{5,7}"`) 과 같은 문법은 지원하지 않고 있다. 아래 표에서 사용가능한 문법을 확인할 수 있다. (`A`와 `.`는 문자, `\\`은 escape sequnce, `x`, `y`는 정규식을 의미한다.)
 
 | Expression | Meaning                                                      |
 | ---------- | ------------------------------------------------------------ |
@@ -607,49 +607,49 @@ Windows 환경에서는 googletest 자체적으로 간단한 문법을 구현하
 | `$`        | matches the end of a string (not that of each line)          |
 | `xy`       | matches `x` followed by `y`                                  |
 
-사용자의 환경에서 어떤 정규식 표현이 가능한지 확인하기 위한 macro를 제공하고 있습니다. `#if`를 사용해서 현재 시스템에 맞는 정규식을 구분해서 사용하세요. 관련 macro는 아래와 아래와 같습니다.
+사용자의 환경에서 어떤 정규식 표현이 가능한지 확인하기 위한 macro를 제공하고 있다. `#if` 를 사용해서 현재 시스템에 맞는 정규식을 구분해서 사용하자. 관련 macro는 아래와 아래와 같다.
 
 `GTEST_USES_PCRE=1`, or `GTEST_USES_SIMPLE_RE=1` or `GTEST_USES_POSIX_RE=1`
 
 ### Death Test 의 동작방식
 
-`ASSERT_EXIT()`는 내부적으로 새로운 process를 생성하고 death test assertion으로 전달된 `statement`를 수행하도록 되어 있습니다. 다만, 그 과정에서 사용자의 시스템이 POSIX인지 Windows인지에 따라 그 동작이 조금씩 달라집니다. 또한, 환경변수 `::testing::GTEST_FLAG(death_test_style)`의 설정값에 따라서도 동작이 달라집니다. 이 환경변수는 test program을 실행할 때 cmd line을 통해서 설정할 수 있습니다.(`--gtest_death_test_style`) 이렇게 설정된 환경변수를 death test style이라고 부르는데 현재는 2가지(`fast`와 `threadsafe`) style을 지원하고 있습니다. 그럼 아래는 사용자의 시스템 환경과 death test style에 따라 death test의 동작이 어떻게 다른지에 대한 설명입니다.
+`ASSERT_EXIT()`는 내부적으로 새로운 process를 생성하고 death test assertion으로 전달된 `statement`를 수행하도록 되어 있다. 다만, 그 과정에서 사용자의 시스템이 POSIX인지 Windows인지에 따라 그 동작이 조금씩 달라진다. 또한, 환경변수 `::testing::GTEST_FLAG(death_test_style)`의 설정값에 따라서도 동작을 다르게 할 수 있다. 이 환경변수는 test program을 실행할 때 cmd line을 통해서 설정할 수 있다.(`--gtest_death_test_style`) 이렇게 설정된 환경변수를 death test style이라고 부르는데 현재는 2가지(`fast`와 `threadsafe`) style을 지원하고 있다. 아래는 사용자의 시스템 환경과 death test style에 따라 death test의 동작이 어떻게 다른지에 대한 설명이다.
 
-*   POSIX 시스템에서는 child process를 만들기 위해 `fork()`(`clone()` on Linux)를 사용합니다.
-    *   만약, death test style이 `"fast"`라면 death test의 `statement`는 즉시 수행됩니다.
-    *   만약, death test style이 `"threadsafe"`라면 test program 자체를 1개 더 실행시킨 후에 필요한 해당 death test를 실행합니다.
-*   Windows 시스템에서는 child process를 만들기 위해 `"CreateProcess()"` API를 사용합니다. 그런 후에 해당 process를 실행시켜서 death test를 수행합니다. 따라서 POSIX의 `"threadsafe"`모드일 때와 유사하게 동작합니다.
+*   POSIX 시스템에서는 child process를 만들기 위해 `fork()`(`clone()` on Linux)를 사용한다.
+    *   만약, death test style이 `"fast"`라면 death test의 `statement`는 즉시 수행된다.
+    *   만약, death test style이 `"threadsafe"`라면 test program 자체를 1개 더 실행시킨 후에 필요한 해당 death test를 실행한다.
+*   Windows 시스템에서는 child process를 만들기 위해 `"CreateProcess()"` API를 사용한다. 그런 후에 해당 process를 실행시켜서 death test를 수행한다. 따라서 POSIX의 `"threadsafe"` 모드일 때와 유사하게 동작한다.
 
-현재 death test style의 기본설정값은 `"fast"`입니다. 또한, death test style에 지원하지 않는(`fast`, `threadsafe`가 아닌) 다른 값을 지정하면 death test는 실패하게 됩니다. 이제 마지막으로 death test의 성공조건 2가지를 다시 한 번 기억하고 넘어갑시다.
+현재 death test style의 기본 설정값은 `"fast"`이다. Death test style에서 지원하지 않는(`fast`, `threadsafe`가 아닌) 다른 값을 지정하면 death test는 실패하게 된다. 마지막으로 death test의 성공조건 2가지를 다시 한 번 기억하고 넘어가자.
 
-1.  child process의 exit status(code)는 `predicate`를 만족해야 합니다.
-2.  child process의 strerr 출력은 `matcher`와 동일해야 합니다.
+1.  child process의 exit status(code)는 `predicate`를 만족해야 한다.
+2.  child process의 strerr 출력은 `matcher`와 동일해야 한다.
 
-만약 death test의 `statement`가 문제없이 정상적으로 코드를 다 수행하고 종료되면 어떻게 될까요? 일단 child process는 문제없이 잘 종료될 것입니다. 즉, child process가 종료되는 건 보장됩니다. 단지 death test의 결과가 실패일 뿐입니다.
+만약 death test의 `statement`가 문제없이 정상적으로 코드를 다 수행하고 종료되면 어떻게 될까? 일단 child process는 문제없이 잘 종료될 것이다. 즉, child process가 종료되는 건 보장된다. 단지 death test의 결과가 실패일 뿐이다.
 
 ### Death Test 그리고 Thread
 
-Death test를 위해서는 test program의 child thread를 생성하는 작업이 꼭 필요합니다. 따라서 death test는 thread safety가 보장되는 상황에서 제일 안정적으로 수행될 수 있습니다. 기본적으로 death test를 single-threaded 환경에서 실행하는 것이 제일 중요합니다. 그러나 만약 애초에 single-threaded 환경이 불가능하면 어떻게 될까요? 예를 들어서 main function이 실행되기 전에 생성되는 (정적으로 초기화하는) thread가 있다면 어떻게 해야 될까요? 네, 원래대로 돌아가기란 정말 쉽지 않습니다. Thread가 일단 하나라도 생성되었다면 parent process를 다시 처음 상태로 되돌리는 것은 매우 어렵습니다.
+Death test를 위해서는 test program의 child thread를 생성하는 작업이 꼭 필요하다. 따라서 death test는 thread safety가 보장되는 상황에서 제일 안정적으로 수행될 수 있다. 이를 위해서는 기본적으로 death test를 single-threaded 환경에서 실행하는 것이 제일 중요하다. 그러나 만약 애초에 single-threaded 환경이 불가능하면 어떻게 될까? 예를 들어서 main function이 실행되기 전에 생성되는 (정적으로 초기화하는) thread가 있다면 어떻게 해야 할까? 사실 그런 경우에 원래대로 돌아가기란 정말 쉽지 않다. Thread가 일단 하나라도 생성되었다면 parent process를 다시 처음 상태로 되돌리는 것은 매우 어려운 문제이다.
 
-Googletest는 이런 상황을 대비해서 thread 관련 이슈를 사용자에게 최대한 전달하려고 노력합니다.
+Googletest는 이런 상황을 대비해서 thread 관련 이슈를 사용자에게 최대한 전달하려고 노력한다.
 
-1. Death test가 시작했을 때, 2개 이상의 thread가 실행중이라면 이에 대한 경고문을 출력합니다.
-2. "*DeathTest"라는 이름을 가진 test suite을 다른 테스트들보다 먼저 실행해 줍니다.
-3. Linux 환경에서는 `fork()` 대신 `clone()`을 사용해서 child process를 생성하도록 했습니다. 왜냐하면 multi-threaded 환경에서 `fork()`가 문제를 일으킬 확률이 더 크기 때문입니다. (Cygwin이나 Mac에서는 `clone()`을 지원하지 않 때문에 fork()를 그대로 사용합니다.)
+1. Death test가 시작했을 때, 2개 이상의 thread가 실행중이라면 이에 대한 경고문을 출력한다.
+2. *"DeathTest"*라는 이름을 가진 test suite을 다른 테스트들보다 먼저 실행해 준다.
+3. Linux 환경에서는 `fork()` 대신 `clone()`을 사용해서 child process를 생성하도록 했다. 왜냐하면 multi-threaded 환경에서 `fork()`가 문제를 일으킬 확률이 더 크기 때문이다. (Cygwin이나 Mac에서는 `clone()`을 지원하지 않 때문에 fork()를 그대로 사용한다.)
 
-위의 내용들과는 별개로 death test로 전달되는 `statement` 내부에서 child thread를 생성하는 것은 괜찮습니다. 아무런 문제가 되지 않습니다.
+위의 내용들과는 별개로 death test로 전달되는 `statement` 내부에서 child thread를 생성하는 것은 괜찮다. 아무런 문제가 되지 않는다.
 
 ### Death Test Style
 
-Multi-threaded 환경에서 "threadsafe" 모드를 사용하면 테스트에 문제가 발생할 확률을 조금이나마 줄여줍니다. 테스트 실행시간을 증가시킨다는 단점은 있지만 thread safety를 위해서는 좋은 선택이라고 할 수 있습니다.
+Multi-threaded 환경에서 "threadsafe" 모드를 사용하면 테스트에 문제가 발생할 확률을 조금이나마 줄여준다. 테스트 실행 시간을 증가시킨다는 단점은 있지만 thread safety를 위해서는 좋은 선택이라고 할 수 있다.
 
-만약, 사용자가 자동화된 테스트 환경을 사용 중이라서 cmd line flag를 전달할 수 없다면, 아래와 같이 소스코드에서 직접 설정하는 것도 가능합니다.
+만약, 사용자가 자동화된 테스트 환경을 사용 중이라서 cmd line flag를 전달할 수 없다면, 아래와 같이 소스코드에서 직접 설정하는 것도 가능하다.
 
 ```c++
 testing::FLAGS_gtest_death_test_style="threadsafe"
 ```
 
-위의 코드는 `main()`에 추가해도 되고 아니면 각각의 test case에 추가해도 됩니다. 단, 개별 test case에 설정한 값은 해당 test function에만 적용되며 function이 종료되면 원래 값(전역 값)으로 복구됩니다.
+위의 코드는 `main()`에 추가해도 되고 아니면 각각의 test case에 추가해도 된다. 단, 개별 test case에 설정한 값은 해당 test function에만 적용되며 function이 종료되면 원래 값(전역 값)으로 복구된다.
 
 ```c++
 int main(int argc, char** argv) {
@@ -672,34 +672,34 @@ TEST(MyDeathTest, TestTwo) {
 
 ### Caveats
 
-`ASSERT_EXIT()`로 전달되는 `statement`에는 어떤 C++ statement라도 구현할 수 있습니다. 다만, `statement`가 `return`으로 끝나거나 (`exit()`이 아니라) exception을 발생시키면 해당 death test는 실패로 간주됩니다. `ASSERT_TRUE()`와 같은 대다수의 googletest macro가 `return` 으로 끝나는 것과 비교하면 확연히 구분되는 다른 점입니다.
+`ASSERT_EXIT()`로 전달되는 `statement`에는 어떤 C++ statement라도 구현할 수 있다. 다만, `statement`가 `return`으로 끝나거나 (`exit()`가 아니라) exception을 발생시키면 해당 death test는 실패로 간주된다. `ASSERT_TRUE()`와 같은 대다수의 googletest macro가 `return`으로 끝나는 것과 비교하면 확연히 구분되는 다른 점이다.
 
-또한, `statement`는 child process(thread)에서 수행되기 때문에 메모리 관리에 있어서 주의가 필요합니다. 알다시피 child process에서의 잘못된 동작을 parent process에서는 알 수 없기 때문입니다. 만약 death test에서 메모리를 해제해버리면 parent process는 이를 알 수 없고, 따라서 heap checker가 이를 추적할 수 없기 때문에 테스트는 실패로 판정됩니다. 이를 위해서 아래와 같이 구현하기를 권장합니다.
+또한, `statement`는 child process(thread)에서 수행되기 때문에 메모리 관리에 있어서 주의가 필요하다. 알다시피 child process에서의 잘못된 동작을 parent process에서는 알 수 없기 때문이다. 만약 death test에서 메모리를 해제해버리면 parent process는 이를 알 수 없고, 따라서 heap checker가 이를 추적할 수 없기 때문에 테스트는 실패로 판정된다. 이를 위해서 아래와 같이 구현하기를 권장한다.
 
-1.  death test statment(child process)에서 메모리를 해제하지 마세요.
-2.  child process에서 해제한 메모리를 parent process에서 다시 해제하지 마세요.
-3.  test program에서 heap checker를 사용하지 마세요.
+1.  death test statment(child process)에서 메모리를 해제하지 말라.
+2.  child process에서 해제한 메모리를 parent process에서 다시 해제하지 말라.
+3.  test program에서 heap checker를 사용하지 말라.
 
-Death test 구현상의 특징으로 인해 소스코드 1줄에 여러개의 death test assertion을 사용할 수는 없습니다. 그렇게 구현하면 compile error가 발생합니다.
+Death test 구현상의 특징으로 인해 소스코드 1줄에 여러개의 death test assertion을 사용할 수는 없다. 그렇게 구현하면 compile error가 발생할 것이다.
 
-Death test를 "threadsafe"로 설정하는 것이 thread safety를 향상시키도록 도와주긴 하지만, deadlock과 같은 thread 사용에 따른 기본적인 이슈들은 여전히 사용자가 직접 꼼꼼하게 확인해야 합니다. 이런 이슈는 `pthread_atfork(3)`핸들러가 등록되어 있다고 해도 여전히 발생할 수 있습니다.
+Death test를 "threadsafe"로 설정하는 것이 thread safety를 향상시키도록 도와주기는 하지만 deadlock과 같은 thread 사용에 따른 기본적인 이슈들은 여전히 사용자가 직접 꼼꼼하게 확인해야 한다. 이런 이슈는 `pthread_atfork(3)`핸들러가 등록되어 있다고 해도 여전히 발생할 수 있다.
 
 ## Sub-routines에서 Assertion을 사용하는 방법
 
 ### Assertions 추적하기
 
-먼저, *sub-routine*은 기본적으로 C++의 일반적인 function을 뜻하며 test function 내부에서 호출하기 때문에 sub-routine이라고 표현하고 있습니다. 그럼 test function이 동일한 sub-routine을 여러번 호출한다고 가정해 봅시다. 그리고 테스트를 수행했더니 sub-routine에 구현된 assertion이 실패했다고 합시다. 이런 상황에서는 어떤 호출에서 실패했는지 어떻게 구분할 수 있을까요?
+먼저, *sub-routine*은 기본적으로 C++의 일반적인 function을 뜻하며 test function 내부에서 호출하기 때문에 sub-routine이라고 표현하고 있다. 그럼 test function이 동일한 sub-routine을 여러번 호출한다고 가정해 보자. 그리고 테스트를 수행했더니 sub-routine에 구현된 assertion이 실패했다고 하자. 이런 상황에서는 어떤 호출에서 실패했는지 어떻게 구분할 수 있을까?
 
-물론 단순하게 로그를 추가하거나 failure message를 변경함으로써 확인해도 되지만 그러한 방법은 테스트를 복잡하게 만드는 원인이 되기도 합니다. 이런 상황에서는 `SCOPED_TRACE`와 `ScopedTrace`를 사용하는 것을 추천합니다.
+물론 단순하게 로그를 추가하거나 failure message를 변경해서 확인해도 되지만 그러한 방법은 테스트를 복잡하게 만드는 원인이 된다. 이런 상황에서는 `SCOPED_TRACE`와 `ScopedTrace`를 사용하는 것을 추천한다.
 
 ```c++
 SCOPED_TRACE(message);
 ScopedTrace trace("file_path", line_number, message);
 ```
 
-먼저, `SCOPED_TRACE`는 현재 실행중인 file name, line number, failure message를 출력해 줍니다. 이 때, `SCOPED_TRACE`로 전달되는 argument인 `message`는 `std::ostream`으로 출력가능한 값이여야 하며 그 내용이 default failure message에 더해져서 출력되게 됩니다. 다음으로 `ScopedTrace`는 `SCOPE_TRACE`가 출력해주는 file name, line number와 같은 내용을 보다 명시적으로 전달하고 싶을 때 사용합니다. 이러한 방법은 test helper를 구현할 때 유용합니다. 마지막으로 scope을 벗어나면 적용했던 내용들도 해제됩니다.
+먼저, `SCOPED_TRACE`는 현재 실행중인 file name, line number, failure message를 출력해 준다. 이 때, `SCOPED_TRACE`로 전달되는 argument인 `message`는 `std::ostream`으로 출력가능한 값이여야 하며 그 내용이 default failure message에 더해져서 출력되게 된다. 다음으로 `ScopedTrace`는 `SCOPE_TRACE`가 출력해주는 file name, line number와 같은 내용을 보다 명시적으로 전달하고 싶을 때 사용한다. 이러한 방법은 test helper를 구현할 때 유용하다. 마지막으로 scope을 벗어나면 적용했던 내용들도 해제될 것이다.
 
-아래는 예제코드입니다.
+아래는 예제코드이다.
 
 ```c++
 10: void Sub1(int n) {
@@ -718,7 +718,7 @@ ScopedTrace trace("file_path", line_number, message);
 23: }
 ```
 
-위 예제는 아래와 같은 failure message를 만들어 냅니다. `SCOPED_TRACE`가 사용된 첫번째 실패에서 `path/to/foo_test.cc:17: A`라는 출력문이 추가된 것을 확인할 수 있습니다.
+위 예제는 아래와 같은 failure message를 만들어 낸다. `SCOPED_TRACE`가 사용된 첫번째 실패에서 `path/to/foo_test.cc:17: A`라는 출력문이 추가된 것을 확인할 수 있다.
 
 ```none
 path/to/foo_test.cc:11: Failure
@@ -734,19 +734,19 @@ Expected: 2
   Actual: 3
 ```
 
-이러한 기능을 적용하지 않았다면 `Sub1()`이 동일한 failure message를 출력하기 때문에 어떤 호출에서 실패한 것인지 구별할 수가 없습니다. 물론 `Sub1()`에서 사용중인 assertion에 `n`도 같이 출력하도록 수정해도 되겠지만 assertion의 개수가 많아지면 해야할 일도 많아지기 때문에 불편할 것입니다.
+이러한 기능을 적용하지 않았다면 `Sub1()`이 동일한 failure message를 출력하기 때문에 어떤 호출에서 실패한 것인지 구별할 수가 없다. 물론 `Sub1()`에서 사용중인 assertion에 `n`도 같이 출력하도록 수정해도 되겠지만 assertion의 개수가 많아지면 해야할 일도 많아지기 때문에 불편할 것이다.
 
-아래에 `SCOPED_TRACE`를 사용할 때 유용한 팁을 공유합니다.
+아래에 `SCOPED_TRACE`를 사용할 때의 유용한 팁을 공유한다.
 
-1.  Sub-routine을 호출할 때마다 `SCOPE_TRACE`를 사용하는 것보다는 아예 sub-routine의 시작부분에 구현하는 편리할 수 있습니다.
-2.  반복문에서 sub-routine을 호출한다면 `message`에 iterator를 포함시켜서 어떤 호출에서 failure가 발생했는지 구분할 수 있도록 하세요.
-3.  추가적인 failure message 없이 file name, line number만 알아도 충분하다면 `message`에 빈 문자열(`""`)을 전달하면 됩니다.
-4.  여러 개의 scope가 중첩(nested)되어도 괜찮습니다. 이런 경우에는 중첩된 scope의 failure message를 모두 출력해 줍니다. 순서는 안쪽에 있는 scope부터 출력됩니다.
-5.  Emacs를 사용한다면 trace dump를 확인할 수 있습니다. 해당 line number에서 `return`키를 누르면 바로 소스파일로 이동합니다.
+1.  Sub-routine을 호출할 때마다 `SCOPE_TRACE`를 사용하는 것보다는 아예 sub-routine의 시작부분에 구현하는 것이 편리할 수 있다.
+2.  반복문에서 sub-routine을 호출한다면 `message`에 iterator를 포함시켜서 어떤 호출에서 failure가 발생했는지 구분할 수 있도록 하자.
+3.  추가적인 failure message 없이 file name, line number만 알아도 충분하다면 `message`에 빈 문자열(`""`)을 전달하면 된다.
+4.  여러 개의 scope가 중첩(nested)되어도 괜찮다. 이런 경우에는 중첩된 scope의 failure message를 모두 출력해 준다. 순서는 안쪽에 있는 scope부터 출력됩니다.
+5.  Emacs를 사용한다면 trace dump를 확인할 수 있다. 해당 line number에서 `return` 키를 누르면 바로 소스파일로 이동한다.
 
 ### Sub-routine에서 발생한 Fatal Failures를 test function(혹은 caller)에 알려주기
 
-`ASSERT_*` 나 `FAIL*`가 실패했을 때, 수행중인 test case를 중단하는 것이 아니라 *현재 수행중인 function만* 종료된다는 것을 기억해야 합니다. 즉, sub-routine에서 fatal failure가 발생해도 해당 sub-routine만 종료될 뿐이지 상위 test function은 종료되지 않음을 의미합니다. 아래 예제는 이로 인해 발생할 수 있는 문제(여기서는 segfault) 중 하나를 보여줍니다.
+`ASSERT_*` 나 `FAIL*`가 실패했을 때, 수행중인 test case를 중단하는 것이 아니라 *현재 수행중인 function만* 종료된다는 것을 기억하자. 즉, sub-routine에서 fatal failure가 발생해도 해당 sub-routine만 종료될 뿐이지 상위 test function은 종료되지 않음을 의미한다. 아래 예제는 이로 인해 발생할 수 있는 문제(여기서는 segfault) 중 하나를 보여준다.
 
 ```c++
 void Subroutine() {
@@ -767,11 +767,11 @@ TEST(FooTest, Bar) {
 }
 ```
 
-위의 `Subroutine()` function에 사용된 assertion은 해당 test case(`TEST(FooTest, Bar)가 종료되기를 바라고 구현한 것입니다. 그러나 실제로는 `int *p = NULL`까지를 모두 진행하게 되며 이는 곧 segfault를 유발하게 됩니다. 이런 문제를 해결하기 위해서 googletest는 3가지 해결방법을 제공하고 있습니다. 첫 번째는 exception, 두 번째는 `ASSERT_NO_FATAL_FAILURE / EXPECT_NO_FATAL_FAILURE` 계열의 assertion, 세 번째는 `HasFatalFailure()`입니다. 이제 각각에 대해서 자세하게 설명하겠습니다.
+위의 `Subroutine()` function에 사용된 assertion은 해당 test case(`TEST(FooTest, Bar)`가 종료되기를 바라고 구현한 것이다. 그러나 실제로는 `int *p = NULL` 까지가 모두 수행되며 이는 곧 segfault를 유발하게 된다. 이런 문제를 해결하기 위해서 googletest는 3가지 해결방법을 제공하고 있다. 첫 번째는 exception, 두 번째는 `ASSERT_NO_FATAL_FAILURE / EXPECT_NO_FATAL_FAILURE` 계열의 assertion, 세 번째는 `HasFatalFailure()` 이다. 이제 각각에 대해서 자세하게 알아보자.
 
 #### Sub-routine의 Assertion을 Exception처럼 사용하기
 
-아래와 같이 `ThrowListener`를 등록해 놓으면 fatal failure를 exception으로 변경해줍니다.
+아래와 같이 `ThrowListener`를 등록해 놓으면 fatal failure를 exception으로 변경해준다.
 
 ```c++
 class ThrowListener : public testing::EmptyTestEventListener {
@@ -788,21 +788,21 @@ int main(int argc, char** argv) {
 }
 ```
 
-주의 할 점은 다른 listener들이 모두 등록된 후에 `ThrowListener`를 등록해야 합니다. 그렇지 않으면 의도한대로 동작하지 않을 것입니다.
+주의 할 점은 다른 listener들이 모두 등록된 후에 `ThrowListener`를 등록해야 한다는 것이다. 그렇지 않으면 의도한대로 동작하지 않는다.
 
 #### Sub-routine의 Asserting 알아내기
 
-위에서 확인했듯이 test function(test case)이 sub-routine을 호출하는 구조에서 sub-routine에서 발생한 fatal failure를 test function에서는 알 수가 없고, 이로 인해서 sub-routine에서 fatal failure가 발생하더라도 test function 자체는 종료되지 않았습니다. 그러나 `ASSERT_*` 계열의 assertion은 해당 test function을 종료시키는 목적으로 사용하는 것이 맞기 때문에 뭔가 좀 어색했던 것도 사실입니다.
+위에서 확인했듯이 test function(test case)이 sub-routine을 호출하는 구조에서 sub-routine에서 발생한 fatal failure를 test function에서는 알 수가 없고, 이로 인해서 sub-routine에서 fatal failure가 발생하더라도 test function 자체는 종료되지 않았다. 그러나 `ASSERT_*` 계열의 assertion은 해당 test function을 종료시키는 목적으로 사용하는 것이 맞기 때문에 뭔가 좀 어색했던 것도 사실이다.
 
-역시나 많은 사람들이 이러한 문제제기를 했습니다. 이에 googletest는 sub-routine에서 발생한 fatal failure를 마치 exception처럼 상위 function으로 전달해주는 기능을 추가하게 되었습니다.
+역시나 많은 사람들이 이러한 문제제기를 했다. 이에 googletest는 sub-routine에서 발생한 fatal failure를 마치 exception처럼 상위 function으로 전달해주는 기능을 추가했다.
 
 | Fatal assertion                       | Nonfatal assertion                    | Verifies                                                     |
 | ------------------------------------- | ------------------------------------- | ------------------------------------------------------------ |
 | `ASSERT_NO_FATAL_FAILURE(statement);` | `EXPECT_NO_FATAL_FAILURE(statement);` | `statement` doesn't generate any new fatal failures in the current thread. |
 
-만족하시나요? 다만, 위의 macro를 사용한다고 해도 현재 thread에서 발생하는 fatal failure에 대해서만 유효합니다. 예를 들어 `statement`가 새로운 thread를 생성하고 그 thread에서 fatal failure가 발생하는 경우에는 확인할 수 없습니다.
+어떠한가? 다만, 위의 macro를 사용한다고 해도 현재 thread에서 발생하는 fatal failure에 대해서만 유효하다. 예를 들어 `statement`가 새로운 thread를 생성하고 그 thread에서 fatal failure가 발생하는 경우에는 확인할 수 없다.
 
-아래는 예제코드입니다.
+아래는 예제코드이다.
 
 ```c++
 ASSERT_NO_FATAL_FAILURE(Foo());
@@ -813,11 +813,11 @@ EXPECT_NO_FATAL_FAILURE({
 });
 ```
 
-참고사항으로 Windows 환경에서는 multiple threads에서의 assertion사용 자체를 (현재는) 지원하지 않고 있습니다.
+참고사항으로 Windows 환경에서는 multiple threads에서의 assertion사용 자체를 (현재는) 지원하지 않고 있다.
 
 #### 현재 테스트에서 발생한 Failures를 확인하기
 
-`::testing::Test` class의 `HasFatalFailure()` function은 수행중인 test case에서 fatal failure가 발생했다면 `true`를 반환해 줍니다. 이를 통해 sub-routine의 fatal failure를 확인하고 원하는 조치를 할 수 있도록 도와줍니다.
+`::testing::Test` class의 `HasFatalFailure()` function은 수행중인 test case에서 fatal failure가 발생했다면 `true`를 반환해 준다. 이를 통해 sub-routine의 fatal failure를 확인하고 원하는 조치를 할 수 있도록 도와준다.
 
 ```c++
 class Test {
@@ -827,7 +827,7 @@ class Test {
 };
 ```
 
-일반적인 사용법은 아래와 같습니다.
+일반적인 사용법은 아래와 같다.
 
 ```c++
 TEST(FooTest, Bar) {
@@ -840,17 +840,17 @@ TEST(FooTest, Bar) {
 }
 ```
 
-만약 `TEST()`, `TEST_F()`, test fixture 외의 장소에서 `HasFatalFailure()`을 사용하려면 아래처럼 `::testing::Test::` prefix를 사용해야 합니다.
+만약 `TEST()`, `TEST_F()`, test fixture 외의 장소에서 `HasFatalFailure()`을 사용하려면 아래처럼 `::testing::Test::` prefix를 사용해야 한다.
 
 ```c++
 if (::testing::Test::HasFatalFailure()) return;
 ```
 
-동일한 방법으로 `HasNonfatalFailure()`는 non-fatal failure가 발생한 경우에 `true`를 반환해주며  `HasFailure()`은 fatal, non-fatal 관계 없이 failure가 발생한 경우를 확인할 수 있도록 도와줍니다.
+동일한 방법으로 `HasNonfatalFailure()`는 non-fatal failure가 발생한 경우에 `true`를 반환해주며 `HasFailure()`은 fatal, non-fatal 관계 없이 failure가 발생한 경우를 확인할 수 있도록 도와준다.
 
 ## 추가정보 기록하기
 
-이 문서의 앞 부분에서는 message 혹은 failure message를 변경하는 법에 대해서 배운 적이 있습니다. 이에 더해서 조금 다른 방법으로 추가정보를 기록하는 것도 가능합니다. 예를 들면 test program을 실행할 때 `--gtest_output="xml"`과 같은 cmd line flag를 전달해서 [XML output](#xml-report-출력하기)으로 출력하는 것도 가능합니다. 이런 경우를 위해서 제공되는 function은 `RecordProperty("key", value)`입니다. `value`에는 `string` 이나 `int` 타입을 사용할 수 있습니다. `key`는 말 그대로 `value`를 구분하는 key(구분자)로 사용됩니다. 아래에 사용예제가 있습니다.
+이 문서의 앞 부분에서 message 혹은 failure message를 변경하는 방법에 대해서 배운 적이 있다. 이에 더해서 조금 다른 방법으로 추가정보를 기록하는 것도 가능하다. 예를 들면 test program을 실행할 때 `--gtest_output="xml"`과 같은 cmd line flag를 전달해서 [XML output](#xml-report-출력하기)으로 출력하는 것도 가능하다. 이런 경우를 위해서 제공되는 function은 `RecordProperty("key", value)`이다. `value`에는 `string` 이나 `int` 타입을 사용할 수 있다. `key`는 말 그대로 `value`를 구분하는 key(구분자)로 사용된다. 관련예제를 아래에서 확인하자.
 
 ```c++
 TEST_F(WidgetUsageTest, MinAndMaxWidgets) {
@@ -859,7 +859,7 @@ TEST_F(WidgetUsageTest, MinAndMaxWidgets) {
 }
 ```
 
-위의 테스트코드가 실행되면 XML파일에 아래와 같은 내용이 추가됩니다.
+위의 테스트코드가 실행되면 XML파일에 아래와 같은 내용이 추가된다.
 
 ```xml
   ...
@@ -869,9 +869,9 @@ TEST_F(WidgetUsageTest, MinAndMaxWidgets) {
 
 > NOTE:
 >
-> *   `RecordProperty()`는 `Test`라는 class의 static member function입니다. 따라서 `TEST`, `TEST_F`, 혹은 test fixture class에서 사용하는 것이 아니라면 `::testing:Test::`라는 prefix를 붙여줘야만 합니다.
-> *   `key`는 XML attribute로서 유효한 이름으로 지정해야 합니다. 또한, googletest에서 이미 사용중인 attribute도 사용해서는 안 됩니다. (이미 사용중인 attribute : `name`, `status`, `time`, `classname`, `type_param`, `value_param`) 
-> *   `RecordProperty()`를 test case가 아니라 test suite에서 사용한다면 (즉, `SetUpTestSuite()`이 호출되고 `TearDownTestSuite()`호출되기까지의 구간) XML 결과물에도 test suite의 정보로 기록됩니다. 같은 맥락에서 test suite의 바깥에서 사용한다면 XML 결과물에도 top-level element 정보로 기록됩니다.
+> *   `RecordProperty()`는 `Test`라는 class의 static member function이다. 따라서 `TEST`, `TEST_F`, 혹은 test fixture class에서 사용하는 것이 아니라면 `::testing:Test::`라는 prefix를 붙여줘야만 한다.
+> *   `key`는 XML attribute로서 유효한 이름으로 지정해야 한다. 또한, googletest에서 이미 사용중인 attribute도 사용해서는 안 된다. (이미 사용중인 attribute : `name`, `status`, `time`, `classname`, `type_param`, `value_param`) 
+> *   `RecordProperty()`를 test case가 아니라 test suite에서 사용한다면 (즉, `SetUpTestSuite()`이 호출되고 `TearDownTestSuite()`호출되기까지의 구간) XML 결과물에도 test suite의 정보로 기록된다. 같은 맥락에서 test suite의 바깥에서 사용한다면 XML 결과물에도 top-level element 정보로 기록된다.
 
 ## Test Suite의 자원을 Test Case간에 공유하기
 
