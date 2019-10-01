@@ -642,7 +642,7 @@ Fatal assertion                                  | Nonfatal assertion           
 
 where `statement` is a statement that is expected to cause the process to die,
 `predicate` is a function or function object that evaluates an integer exit
-status, and `matcher` is either a GMock matcher matching a `const std::string&`
+status, and `matcher` is either a gMock matcher matching a `const std::string&`
 or a (Perl) regular expression - either of which is matched against the stderr
 output of `statement`. For legacy reasons, a bare string (i.e. with no matcher)
 is interpreted as `ContainsRegex(str)`, **not** `Eq(str)`. Note that `statement`
@@ -657,7 +657,7 @@ As usual, the `ASSERT` variants abort the current test function, while the
 > has called `exit()` or `_exit()` with a non-zero value, or it may be killed by
 > a signal.
 >
-> This means that if `*statement*` terminates the process with a 0 exit code, it
+> This means that if *`statement`* terminates the process with a 0 exit code, it
 > is *not* considered a crash by `EXPECT_DEATH`. Use `EXPECT_EXIT` instead if
 > this is the case, or if you want to restrict the exit code more precisely.
 
@@ -687,7 +687,7 @@ Note that a death test only cares about three things:
 2.  (in the case of `ASSERT_EXIT` and `EXPECT_EXIT`) does the exit status
     satisfy `predicate`? Or (in the case of `ASSERT_DEATH` and `EXPECT_DEATH`)
     is the exit status non-zero? And
-3.  does the stderr output match `regex`?
+3.  does the stderr output match `matcher`?
 
 In particular, if `statement` generates an `ASSERT_*` or `EXPECT_*` failure, it
 will **not** cause the death test to fail, as googletest assertions don't abort
@@ -1132,7 +1132,7 @@ will output XML like this:
 > *   `RecordProperty()` is a static member of the `Test` class. Therefore it
 >     needs to be prefixed with `::testing::Test::` if used outside of the
 >     `TEST` body and the test fixture class.
-> *   `*key*` must be a valid XML attribute name, and cannot conflict with the
+> *   *`key`* must be a valid XML attribute name, and cannot conflict with the
 >     ones already used by googletest (`name`, `status`, `time`, `classname`,
 >     `type_param`, and `value_param`).
 > *   Calling `RecordProperty()` outside of the lifespan of a test is allowed.
@@ -1903,8 +1903,6 @@ To obtain a `TestInfo` object for the currently running test, call
   // Do NOT delete the returned object - it's managed by the UnitTest class.
   const ::testing::TestInfo* const test_info =
     ::testing::UnitTest::GetInstance()->current_test_info();
-
-
 
   printf("We are in test %s of test suite %s.\n",
          test_info->name(),
