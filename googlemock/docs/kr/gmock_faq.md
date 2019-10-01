@@ -42,7 +42,7 @@ warning C4301: 'MockFoo::Bar': overriding virtual function only differs from 'Fo
 warning C4373: 'MockFoo::Bar': virtual function overrides 'Foo::Bar', previous versions of the compiler did not override when parameters only differed by const/volatile qualifiers
 ```
 
-C++에서 `const` parameter를 사용할 때 `const`는 무시됩니다.  즉, compiler가 `Bar(int)`와 `Bar(const int)`를 동일하게 취급하기 때문에 처음에 구현했던 코드는 아래 코드와 동일합니다.
+C++의 value parameter에 `const`를 사용하면 `const`는 무시됩니다. 즉, compiler가 `Bar(int)`와 `Bar(const int)`를 동일하게 취급하기 때문에 처음에 구현했던 코드는 사실  같다고 봐야합니다.
 
 ```c++
 class Foo {
@@ -99,7 +99,7 @@ using ::testing::_;
 
 gMock은 failure를 발견했을 때, 사용자를 위해 다양한 디버깅 정보들을 출력해줍니다. 예를 들면 mock function으로 전달된 argument 나 expectation의 상태 등을 알려줍니다. 이것은 failure가 발견될 때마다 같은 방식으로 동작합니다.
 
-만약, 2개의 expectation이 있고 기대하는 것들이 같다고 가정해봅시다. Expectation 2개를 테스트하는 동안에도 기대하는 바를 충족하지 못한다면 당연히 failure도 동일한 정보를 출력할 것입니다. 이런 경우는 *중복이 아니라 서로 다른 시점에 동일한 문제가 발견 된 것입니다.* 비록 그 내용이 같을지라도 필요한 정보를 출력했다고 봐야합니다.
+만약, 2개의 expectation이 있고 기대하는 것들이 같다고 가정해봅시다. 그러한 2개의 expectation을 테스트하면서 기대하는 바를 충족하지 못한다면 당연히 2개의 failure가 발생하고 출력되는 정보도 동일하게 됩니다. 이런 경우는 *중복이 아니라 서로 다른 시점에 동일한 문제가 발견 된 것입니다.* 비록 그 내용이 같을지라도 필요한 정보를 출력했다고 봐야합니다.
 
 ### Real object를 사용하면 괜찮은데 Mock object를 사용하면 heap check failure가 발생합니다. 뭐가 잘못된 걸까요? ###
 
