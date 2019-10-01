@@ -531,8 +531,8 @@ There are several good reasons:
 
 ## What can the statement argument in ASSERT_DEATH() be?
 
-`ASSERT_DEATH(*statement*, *regex*)` (or any death assertion macro) can be used
-wherever `*statement*` is valid. So basically `*statement*` can be any C++
+`ASSERT_DEATH(statement, matcher)` (or any death assertion macro) can be used
+wherever *`statement`* is valid. So basically *`statement`* can be any C++
 statement that makes sense in the current context. In particular, it can
 reference global and/or local variables, and can be:
 
