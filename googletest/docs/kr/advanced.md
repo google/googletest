@@ -205,7 +205,7 @@ Expected: true
 | ------------------------------------------------ | ------------------------------------------------ | ---------------------------------------- |
 | `ASSERT_PRED_FORMAT1(pred_format1, val1);`       | `EXPECT_PRED_FORMAT1(pred_format1, val1);`       | `pred_format1(val1)` is successful       |
 | `ASSERT_PRED_FORMAT2(pred_format2, val1, val2);` | `EXPECT_PRED_FORMAT2(pred_format2, val1, val2);` | `pred_format2(val1, val2)` is successful |
-| `...`                                            | `...`                                            | `...`                                      |
+| `...`                                            | `...`                                            | `...`                                    |
 
 `(ASSERT|EXPECT)_PRED_FORMAT*` 계열과 앞서 설명한 2가지 방법과의 다른 점은 predicate가 아니라 *predicate-formatter*(`pred_formatn`)를 사용한다는 점입니다. *predicate-formatter*란 아래와 같은 형식으로 정의된 function을 의미한다.
 
@@ -875,19 +875,19 @@ TEST_F(WidgetUsageTest, MinAndMaxWidgets) {
 
 ## Test Suite의 자원을 Test Case간에 공유하기
 
-Googletest는 개별 test case를 실행할 때마다 test fixure object를 새로 생성합니다. 그 이유는 각 test case를 독립된 환경에서 수행하면 안정성을 확보할 수 있고 동시에 문제가 발생했을 때 디버깅에도 도움이 되기 때문입니다. 이러한 방법을 one-copy-per-test model이라고 합니다. 이 model의 한 가지 단점은 자원이 많은 경우에는 이들을 매번 set-up 하는게 부담이 될 수도 있다는 것입니다.
+Googletest는 개별 test case를 실행할 때마다 test fixure object를 새로 생성한다. 그 이유는 각 test case를 독립된 환경에서 수행하면 안정성을 확보할 수 있고 동시에 문제가 발생했을 때 디버깅에도 도움이 되기 때문이다. 이러한 방법을 one-copy-per-test model이라고도 한다. 이 model의 한 가지 단점은 자원이 많은 경우에는 이들을 매번 set-up 하는게 부담이 될 수도 있다는 것이다.
 
-만약 test case들이 자원을 변경하거나 하지 않는다면 여러 test case들이 동일한 자원을 공유하게 해도 문제가 없을 것입니다. 이런 이유로 per-test set-up/tear-down에 더해 per-test-suite set-up/tear-down 기능도 제공하고 있습니다. 아래와 같이 사용하면 됩니다.
+만약 test case들이 자원을 변경하지 않는다면 여러 test case들이 동일한 자원을 공유하게 해도 문제가 없다. 이런 이유로 per-test set-up/tear-down에 더해 per-test-suite set-up/tear-down 기능도 제공하고 있으며 사용법은 아래와 같다.
 
-1.  `FooTest`라는 test fixture class가 있다고 가정합시다. 공유해야 하는 자원(변수)을 `static`으로 선언하세요.
-2.  해당 `static` 변수를 초기화합니다. (C++에서 `static` 멤버변수는 class 바깥에서도 초기화해야 합니다.)
-3.  이제 test fixture class에 `static void SetUpTestSuite()` 과 `static void TearDownTestSuite()`을 구현하세요. 두 함수 내부에는 공유자원을 위한 초기화 작업, 정리 작업을 구현하면 됩니다.(`SetupTestSuite`이 아니라 대문자 `*Up*`인 점을 유의하세요.)
+1.  `FooTest`라는 test fixture class가 있다고 가정하자. 공유해야 하는 자원(변수)을 `static`으로 선언한다.
+2.  해당 `static` 변수를 초기화한다. (C++에서 `static` 멤버변수는 class 바깥에서도 초기화해야 한다.)
+3.  이제 test fixture class에 `static void SetUpTestSuite()` 과 `static void TearDownTestSuite()`을 구현한다. 두 함수 내부에는 공유자원을 위한 초기화 작업, 정리 작업을 구현하면 된다. (`SetupTestSuite`이 아니라 대문자 *`Up`*인 점을 유의하자.)
 
-이제 필요한 것은 다 됐습니다. googletest는 해당 test fixture(`FooTest`)의 첫번째 test case을 수행하기 전에 `SetUpTestSuite()`을 호출합니다. 그리고 마지막 test case를 수행한 후에는 `TearDownTestSuite()`을 호출할 것입니다. 이와 같은 방법을 통해 `FooTest`에 포함된 test case끼리 자원을 공유할 수 있게 됩니다.
+이제 준비는 끝났다. googletest는 해당 test fixture(`FooTest`)의 첫번째 test case을 수행하기 전에 `SetUpTestSuite()`을 호출한다. 그리고 마지막 test case를 수행한 후에는 `TearDownTestSuite()`을 호출할 것이다. 이와 같은 방법을 통해 `FooTest`에 포함된 test case끼리 자원을 공유할 수 있게 된다.
 
-Test case가 수행되는 순서는 정해지지 않았음을 기억하기 바랍니다. 따라서 각각의 test case는 서로 의존성이 없어야 합니다. 또한, 공유자원을 변경해서도 안됩니다. 만약 공유자원을 꼭 변경해야만 한다면 해당 test case가 끝나기 전에 원래대로 복구시켜야 합니다. 
+단, 현재 test case가 수행되는 순서는 정하지 않았다. 따라서 각각의 test case는 서로 의존성이 없어야 하며 공유자원을 변경해서도 안 된다. 만약 공유자원을 꼭 변경해야 한다면 해당 test case가 끝나기 전에 원래대로 복구시켜야 한다.
 
-아래는 지금까지 설명한 per-test-suite에 대한 set-up/tear-down을 구현한 예제입니다.
+아래는 지금까지 설명한 per-test-suite에 대한 set-up/tear-down을 구현한 예제이다.
 
 ```c++
 class FooTest : public ::testing::Test {
@@ -928,13 +928,13 @@ TEST_F(FooTest, Test2) {
 }
 ```
 
-NOTE: 위의 코드는 `SetUpTestSuite()`을 protected로 선언했지만 public으로 선언해야 하는 경우도 있습니다. 예를 들면 `TEST_P`와 같은 macro를 사용하기 위해서는 public으로 선언하게 됩니다.
+NOTE: 위 코드는 `SetUpTestSuite()`을 protected로 선언했지만 public으로 선언해야 하는 경우도 있다. 예를 들면 `TEST_P`와 같은 macro를 사용하기 위해서는 public으로 선언하게 된다.
 
 ## Global Set-Up, Tear-Down
 
-개별 test case 혹은 test suite에서 set-up 및 tear-down을 설정하는 방법에 대해서 배웠습니다. googletest는 test program 레벨에서도 이러한 설정이 가능하도록 지원합니다. 즉, 전역적인 set-up, tear-down을 구현할 수 있습니다.
+개별 test case 혹은 test suite에서 set-up 및 tear-down을 설정하는 방법에 대해서 알아보았다. googletest는 test program 레벨에서도 이러한 설정이 가능하도록 지원하고 있다. 즉, 전역적인 set-up, tear-down 구현이 가능하다.
 
-먼저, `::testing::Environment`라는 class를 상속받아서 test envrionment를 정의해야 합니다. Test environment는 전역적인 set-up, tear-down 설정을 도와줍니다.
+먼저, `::testing::Environment`라는 class를 상속받아서 test envrionment를 정의해야 한다. Test environment는 전역적인 set-up, tear-down 설정을 도와준다.
 
 ```c++
 class Environment : public ::testing::Environment {
@@ -949,40 +949,40 @@ class Environment : public ::testing::Environment {
 };
 ```
 
-다음으로 위에서 상속받은 class의 object를 생성하고 `::testing:AddGlobalTestEnvironment()`을 통해 등록합니다.
+다음으로 위에서 상속받은 class의 object를 생성하고 `::testing:AddGlobalTestEnvironment()`을 통해 등록한다.
 
 ```c++
 Environment* AddGlobalTestEnvironment(Environment* env);
 ```
 
-이제 `RUN_ALL_TESTS()`를 호출하면 등록된 envrinonment object의 `SetUp()`이 호출 될 것입니다. `SetUp`이 호출되는 동안 fatal failure가 발생하지 않고 `GTEST_SKIP()`도 호출되지 않았다면 계속해서 모든 테스트들르 수행하게 됩니다. 그리고 `RUN_ALL_TESTS()`가 호출되면 `TearDown()`도 무조건 같이 호출해 줍니다. (테스트의 수행여부와 관계없이 호출됩니다.)
+이제 `RUN_ALL_TESTS()`를 호출하면 등록된 envrinonment object의 `SetUp()`이 호출 될 것이다. `SetUp`이 호출되는 동안 fatal failure가 발생하지 않고 `GTEST_SKIP()`도 호출되지 않았다면 계속해서 모든 테스트를 수행하게 된다. 그리고 `RUN_ALL_TESTS()`가 호출되면 `TearDown()`도 무조건 같이 호출해 준다. (테스트의 수행여부와 관계없이 호출된다.)
 
-Eenvironment object를 여러개 등록하는 것도 허용됩니다. 그런 경우에 `SetUp()`은 등록된 순서대로 호출되며 `TearDown()`은 그 반대 순서로 호출됩니다.
+Environment object를 여러개 등록하는 것도 허용된다. 그런 경우에 `SetUp()`은 등록된 순서대로 호출되며 `TearDown()`은 그 반대 순서로 호출된다.
 
-Environment object가 등록되었다면 그 소유권은 googletest로 옮겨지므로 사용자가 **삭제할 수 없습니다.**
+Environment object가 등록되었다면 그 소유권은 googletest로 옮겨지므로 사용자가 **삭제할 수 없다.**
 
-`ADDGlobalTestEnvironment()`는 `RUN_ALL_TESTS()`보다 먼저 호출해야 합니다. `RUN_ALL_TESTS()`는 일반적으로 `main()`에 구현하기 때문에 만약 사용자가 `gtest_main` 라이브러리를 `main()` 대신 사용하고 있다면 이러한 수정이 어려울 것입니다. 이렇게 `gtest_main` 라이브러리를 사용하는 사용자는 전역 변수를 통해 동일한 효과를 가져올 수 있습니다.
+`ADDGlobalTestEnvironment()`는 `RUN_ALL_TESTS()`보다 먼저 호출해야 한다. `RUN_ALL_TESTS()`는 일반적으로 `main()`에 구현하기 때문에 만약 사용자가 `gtest_main` 라이브러리를 `main()` 대신 사용하고 있다면 이러한 수정이 어려울 것이다. 이렇게 `gtest_main` 라이브러리를 사용하는 사용자는 전역 변수를 사용하면 동일한 기능을 사용할 수 있다.
 
 ```c++
 ::testing::Environment* const foo_env =
     ::testing::AddGlobalTestEnvironment(new FooEnvironment);
 ```
 
-위와 같은 방법이 있긴 하지만 `AddGlobalTestEnvironment()`를 사용하려는 사용자는 `main()`을 직접 구현하기를 권장합니다. 1차적인 이유는 전역변수가 소스코드 가독성을 떨어트리기 때문이며 이에 더해 environment를 여러개 사용하면서 각각의 전역변수를 여러 파일에 분산시켜 놓는다면 문제가 발생할 수 있기 떄문입니다. 알다시피 C++ compiler의 전역변수 초기화 순서는 예측할 수 없으며 그로 인해 environment 간에 의존성이 필요한 경우에 목적하는 바를 달성하기 어려워지기 때문입니다.
+위와 같은 방법이 있긴 하지만 `AddGlobalTestEnvironment()`를 사용하려는 사용자는 `main()`을 직접 구현하기를 권장한다. 1차적인 이유는 전역변수가 소스코드 가독성을 떨어트리기 때문이며 이에 더해 environment를 여러개 사용하면서 각각의 전역변수를 여러 파일에 분산시켜 놓는다면 문제가 발생할 수 있기 때문이다. 알다시피 C++ compiler의 전역변수 초기화 순서는 예측할 수 없으며 그로 인해 environment 간에 의존성이 필요한 경우에 목적하는 바를 달성하기 어려워질 수도 있다.
 
 ## Value-Parameterized Tests
 
-*Value-parameterized tests*를 적용하면 하나의 테스트 코드에 데이터(parameter)만 변경해가면서 다양한 테스트를 수행할 수 있습니다. 특히 아래와 같은 경우에 유용합니다.
+*Value-parameterized tests*를 적용하면 하나의 테스트 코드에 데이터(parameter)만 변경해가면서 다양한 테스트를 수행할 수 있다. 특히 아래와 같은 경우에 유용하다.
 
 - cmd line flag에 따라 동작이 달라져야 하기 때문에 각각 flag를 모두 검증해야 할 때
 - interface(abstract class)를 구현한 implementation class가 여러개 있을 때
-- 그 외 다양한 입력들에 대해서도 문제없이 잘 동작하는지 확인하고 싶을 때 (data-driven testing이라고도 불리우는 이 방법은 꼭 필요하지 않은데도 사용하는 경우가 자주 발생하기 때문에 남용하지 않도록 유의해야 합니다.)
+- 그 외 다양한 입력들에 대해서도 문제없이 잘 동작하는지 확인하고 싶을 때 (data-driven testing이라고도 불리우는 이 방법은 꼭 필요하지 않은데도 사용하는 경우가 자주 발생하기 때문에 남용하지 않도록 유의하자.)
 
 ### Value-Parameterized Tests를 구현하는 방법
 
-Value-parameterized tests를 구현하려면 먼저 fixture class를 만들어야 하며 이를 위해서는 `::testting::Test`과 `::testing::WithParamInterface<T>`를 함께 상속받아야 합니다. 특히 `::testing::WithParamInterface<T>`는 abstract class이며 `T`는 parameter로 전달되는 값의 타입을 의미합니다. 좀 복잡한가요? 사실 위의 2가지를 상속받아서 구현해 놓은 `::testing::TestWithParam<T>`도 이미 제공하고 있습니다. Template parameter `T`는 복사만 가능하다면 어떤 타입이라도 괜찮습니다. 다만, raw pointer를 사용한다면 가리키는 대상의 관리도 사용자가 직접 해야하는 부분은 주의하시기 바랍니다.
+Value-parameterized tests를 구현하려면 먼저 fixture class를 만들어야 하며 이를 위해서는 `::testting::Test`과 `::testing::WithParamInterface<T>`를 함께 상속받아야 한다. 특히 `::testing::WithParamInterface<T>`는 abstract class이며 `T`는 parameter로 전달되는 값의 타입을 의미한다. 좀 복잡하게 느껴질지도 모르겠다. 사실은 위의 2가지를 상속받아서 구현된 `::testing::TestWithParam<T>`를 이미 제공하고 있다. Template parameter `T`는 복사가 가능한 타입이라면 어떤 타입이라도 괜찮다. 다만, raw pointer를 사용한다면 가리키는 대상의 관리도 사용자가 직접 해야하는 부분은 주의해야 한다.
 
-NOTE: 만약 value-parameterized tests의 test fixture class에 `SetUpTestSuite()` 또는 `TearDownTestSuite()`을 사용하려면 **protected**가 아닌 **public** 영역에 선언해야 합니다. 그래야만 `TEST_P`를 사용할 수 있습니다.
+NOTE: 만약 value-parameterized tests의 test fixture class에 `SetUpTestSuite()` 또는 `TearDownTestSuite()`을 사용하려면 **protected**가 아닌 **public** 영역에 선언해야 한다. 그래야만 `TEST_P`를 사용할 수 있다.
 
 ```c++
 class FooTest :
@@ -1002,7 +1002,7 @@ class BarTest : public BaseTest,
 };
 ```
 
-위의 코드에서 `FooTest`는 `TestWithParam<T>`만 상속받아서 손쉽게 value-parameterized test를 위한 test fixture class를 구현했습니다. 다만, 이렇게 test fixture를 새로 만드는 것이 아니라 이미 사용중인 test fixture를 value-parameterized test로 확장하고 싶다면 `BaseTest`, `BarTest`처럼 구현하면 됩니다. 여기까지 해서 test fixture가 준비되었다면 `TEST_P`를 사용해서 test function을 정의하면 됩니다. 여기서 `TEST_P`의 `_P`는 "parameterized" 또는 "pattern"을 의미합니다. 의미만 통한다면 어느 쪽으로 생각하든 괜찮습니다.
+위의 코드에서 `FooTest`는 `TestWithParam<T>`만 상속받아서 손쉽게 value-parameterized test를 위한 test fixture class를 구현했다. 다만, 이렇게 test fixture를 새로 만드는 것이 아니라 이미 사용중인 test fixture를 value-parameterized test로 확장하고 싶다면 `BaseTest`, `BarTest`처럼 구현하면 된다. 여기까지 해서 test fixture가 준비되었다면 `TEST_P`를 사용해서 test function을 정의하면 된다. 여기서 `TEST_P`의 `_P`는 "parameterized" 또는 "pattern"을 의미한다. 의미만 통한다면 어느 쪽으로 생각하든 괜찮다.
 
 ```c++
 TEST_P(FooTest, DoesBlah) {
@@ -1017,7 +1017,7 @@ TEST_P(FooTest, HasBlahBlah) {
 }
 ```
 
-거의 다 왔습니다. 이제 테스트를 위한 데이터(parameter)를 정의하겠습니다. 이를 위해서 `INSTANTIATE_TEST_SUITE_P`를 사용합니다. googletest는 `INSTANTIATE_TEST_SUITE_P`와 함께 사용함으로써 parameter 생성을 도와주는 여러가지 function도 함께 제공합니다. 이러한 function을 *parameter generator*라고 부르며 아래는 관련 내용을 정리한 표입니다. (이들은 모두 `testing` namespace에 정의되어 있습니다.)
+이제 거의 다 왔다. 테스트를 위한 데이터(parameter)를 정의해보자. 이를 위해서 `INSTANTIATE_TEST_SUITE_P`를 사용한다. googletest는 `INSTANTIATE_TEST_SUITE_P`와 함께 사용하여 parameter 생성을 도와주는 여러가지 function도 함께 제공한다. 이러한 function을 *parameter generator*라고 부르며 아래 표에서 관련 내용을 확인하자. (이들은 모두 `testing` namespace에 정의되어 있다.)
 
 | Parameter Generator                             | Behavior                                                     |
 | ----------------------------------------------- | ------------------------------------------------------------ |
@@ -1027,9 +1027,9 @@ TEST_P(FooTest, HasBlahBlah) {
 | `Bool()`                                        | Yields sequence `{false, true}`.                             |
 | `Combine(g1, g2, ..., gN)`                      | Yields all combinations (Cartesian product) as std\:\:tuples of the values generated by the `N` generators. |
 
-보다 자세한 내용은 해당 function의 주석을 확인해보기 바랍니다.
+보다 자세한 내용은 해당 function의 주석을 확인하자.
 
-아래 예제는 test suite(`FooTest`)을 위한 value-parameter 3개(`"meeny"`, `"miny"`, `"moe"`)를 초기화하고 있습니다. 이제 총 6개의 서로 다른 test function이 자동으로 생성될 것입니다. (`TEST_P` 개수 x parameter 개수)
+아래 예제는 test suite(`FooTest`)을 위한 value-parameter 3개(`"meeny"`, `"miny"`, `"moe"`)를 초기화하고 있다. 이제 총 6개의 서로 다른 test function이 자동으로 생성될 것이다. (`TEST_P` 개수 x parameter 개수)
 
 ```c++
 INSTANTIATE_TEST_SUITE_P(InstantiationName,
@@ -1037,11 +1037,11 @@ INSTANTIATE_TEST_SUITE_P(InstantiationName,
                          testing::Values("meeny", "miny", "moe"));
 ```
 
-NOTE: 위 코드는 전역범위나 특정 namespace에 포함되어야 합니다. Function 내부에서는 사용할 수 없습니다.
+NOTE: 위 코드는 전역범위나 특정 namespace에 포함되어야 한다. Function 내부에서는 사용할 수 없다.
 
-NOTE: 이전까지 아무리 잘 구현했어도 `INSTANTIATE_TEST_SUITE_P`를 안 했다면 말짱 도루묵입니다. 테스트가 실제로 수행되지도 않고 성공한 것처럼 보이기도 하니 주의하세요.
+NOTE: 이전까지 아무리 잘 구현했어도 `INSTANTIATE_TEST_SUITE_P`를 사용하지 않으면 말짱 도루묵이다. 테스트가 실제로 수행되지도 않고 성공한 것처럼 보이기도 하니 주의해야 한다.
 
-동일한 test suite에 대해서 `INSTANTIATE_TEST_SUITE_P`를 여러번 초기화하는 것도 가능하기 때문에 이들을 구분 할 방법이 필요한데요, 이 때 사용되는 값이 `INSTANTIATE_TEST_SUITE_P`의 첫번째 argument입니다. 따라서 첫 번째 파라미터는 중복되면 안됩니다. 아래는 지금까지 만들어 본 6개의 test function의 이름과 각각에 사용할 value parameter를 보여줍니다.
+동일한 test suite에 대해서 `INSTANTIATE_TEST_SUITE_P`를 여러번 초기화하는 것도 가능하기 때문에 이들을 구분 할 방법이 필요한데 이 때 사용되는 값이 `INSTANTIATE_TEST_SUITE_P`의 첫번째 argument이다. 따라서 첫 번째 파라미터는 중복되면 안 된다. 아래는 지금까지 만들어 본 6개의 test function의 이름과 각각에 사용할 value parameter를 보여준다.
 
 *   `InstantiationName/FooTest.DoesBlah/0` for `"meeny"`
 *   `InstantiationName/FooTest.DoesBlah/1` for `"miny"`
@@ -1050,9 +1050,9 @@ NOTE: 이전까지 아무리 잘 구현했어도 `INSTANTIATE_TEST_SUITE_P`를 �
 *   `InstantiationName/FooTest.HasBlahBlah/1` for `"miny"`
 *   `InstantiationName/FooTest.HasBlahBlah/2` for `"moe"`
 
-위의 test function들에 대해서도 [`--gtest_filter`](#전체-test-중에서-일부만-수행하기)를 사용해서 원하는 테스트만 수행할 수 있습니다.
+위의 test function들에 대해서도 [`--gtest_filter`](#전체-test-중에서-일부만-수행하기)를 사용해서 원하는 테스트만 수행할 수 있다.
 
-아래 예제는 test suite(`FooTest`)을 테스트하기 위한 데이터(parameter)를 추가하고 있습니다. 이 때 기존에 생성된 test function들과의 구분을 위해 `INSTANTIATE_TEST_SUITE_P`의 첫 번째 파라미터를 다르게 했음을 확인할 수 있습니다.
+아래 예제는 test suite(`FooTest`)을 테스트하기 위한 데이터(parameter)를 추가하고 있다. 이 때 기존에 생성된 test function들과의 구분을 위해 `INSTANTIATE_TEST_SUITE_P`의 첫 번째 파라미터를 다르게 했음을 확인할 수 있다.
 
 ```c++
 const char* pets[] = {"cat", "dog"};
@@ -1060,37 +1060,37 @@ INSTANTIATE_TEST_SUITE_P(AnotherInstantiationName, FooTest,
                          testing::ValuesIn(pets));
 ```
 
-위의 코드를 통해 생성된 4개의 test function은 아래와 같습니다.
+위의 코드를 통해 생성된 4개의 test function은 아래와 같다.
 
 *   `AnotherInstantiationName/FooTest.DoesBlah/0` for `"cat"`
 *   `AnotherInstantiationName/FooTest.DoesBlah/1` for `"dog"`
 *   `AnotherInstantiationName/FooTest.HasBlahBlah/0` for `"cat"`
 *   `AnotherInstantiationName/FooTest.HasBlahBlah/1` for `"dog"`
 
-지금까지 본 것처럼 `INSTANTIATE_TEST_SUITE_P`는 `TEST_P` macro를 통해 정의한 *모든* test case에 대해 각 parameter마다 별도의 test function들을 생성해줍니다. 즉 `TEST_P` x parameter 개수 만큼의 test function이 생성됩니다. 이 때, `INSTANTIATE_TEST_SUITE_P`와 `TEST_P`의 구현순서는 중요하지 않습니다.
+지금까지 본 것처럼 `INSTANTIATE_TEST_SUITE_P`는 `TEST_P` macro를 통해 정의한 *모든* test case에 대해 각 parameter마다 별도의 test function들을 생성해준다. 즉 `TEST_P` x parameter 개수 만큼의 test function이 생성된다. 이 때, `INSTANTIATE_TEST_SUITE_P`와 `TEST_P`의 구현순서는 중요하지 않다.
 
-좀 더 자세한 예제가 필요하다면 [sample7_unittest.cc](../../samples/sample7_unittest.cc), [sample8_unittest.cc](../../samples/sample8_unittest.cc)에서 확인이 가능합니다.
+좀 더 자세한 예제가 필요하다면 [sample7_unittest.cc](../../samples/sample7_unittest.cc), [sample8_unittest.cc](../../samples/sample8_unittest.cc)에서 확인 가능하다.
 
 ### Value-Parameterized Abstract Tests 생성하기
 
-위에서 하나의 test suite(`FooTest`)을 여러 데이터(parameter)를 통해 검증하는 방법에 대해 알아봤습니다. 이러한 value-parameterized tests를 라이브러리에 포함시켜서 다른 사람들이 사용할 수 있도록 공유하는 것도 좋은 방법입니다. 또 이러한 방법론을 *abstract test*라고 부릅니다. 어떤 interface를 설계하면서 그 interface를 테스트하기 위한 코드도 제공한다면 interface 사용자들에게 도움이 될 것입니다. Interface를 구현하게 될 다양한 사용자를 아우르려면 아무래도 일반적인 관점에서 구현되어야 하기 때문에 standard suite of abstract tests를 제공해서 interface의 implementation class들을 검증할 수 있도록 해야 합니다. Standard suite of abstract tests를 구현하는 방법의 하나로는 factory function(test parameter을 전달받으면 test case를 생성해주는)을 제공하는 것도 괜찮습니다. 결론적으로 상위 interface의 test suite(abstract tests)을 만들어서 하나의 test suite만 가지고도 해당 interface를 구현한 implementation class들을 검증하는데 공통적으로 사용하자는 것입니다. 이렇게 설계가 된다면 특정 implementation class를 위한 test suite을 만들 때 abstract test를 상속받기만 하면 쉽게 만들 수 있습니다.
+위에서 하나의 test suite(`FooTest`)을 여러 데이터(parameter)를 통해 검증하는 방법에 대해 알아봤다. 이러한 value-parameterized tests를 라이브러리에 포함시켜서 다른 사람들이 사용할 수 있도록 공유하는 것도 좋은 방법이다. 또 이러한 방법론을 *abstract test*라고 부른다. 어떤 interface를 설계하면서 그 interface를 테스트하기 위한 코드도 제공한다면 interface 사용자들에게 도움이 될 것이다. Interface를 구현하게 될 다양한 사용자를 아우르려면 아무래도 일반적인 관점에서 구현되어야 하기 때문에 standard suite of abstract tests를 제공해서 interface의 implementation class들을 검증할 수 있도록 해야 한다. Standard suite of abstract tests를 구현하는 방법의 하나로는 factory function(test parameter을 전달받으면 test case를 생성해주는)을 제공하는 것도 좋다. 결론적으로 상위 interface의 test suite(abstract tests)을 만들어서 하나의 test suite만 가지고도 해당 interface를 구현한 implementation class들을 검증하는데 공통적으로 사용하려는 것이다. 이렇게 설계가 된다면 특정 implementation class를 위한 test suite을 만들 때 abstract test를 상속받기만 하면 쉽게 만들 수 있다.
 
-Abstract test를 정의하기 위해서는 아래와 같이 코드를 구성하면 됩니다.
+Abstract test를 정의하기 위해서는 아래와 같이 코드를 구성하면 된다.
 
-1.  Abstract test를 *선언합니다.* 예를들어 `FooTest`라는 test fixture class를 `foo_param_test.h`라는 헤더파일에 저장합니다.
-1.  Abstract test를 *구현합니다.* 이 때는 `foo_param_test.cc`와 같은 소스파일을 만들고 헤더파일(`foo_param_test.h`)을 포함시킵니다. 내부에는 `TEST_P`를 사용해서 test case를 구현합니다.
+1.  Abstract test를 *선언한다.* 예를 들어 `FooTest`라는 test fixture class를 `foo_param_test.h`라는 헤더파일에 저장한다.
+1.  Abstract test를 *구현한다.* 이 때는 `foo_param_test.cc`와 같은 소스파일을 만들고 헤더파일(`foo_param_test.h`)을 포함시킨다. 내부에는 `TEST_P`를 사용해서 test case를 구현한다.
 
-이렇게 abstract test의 구현이 완료되면 라이브러리로 배포합니다. 그럼 사용자는 abstract test 라이브러리를 링크하고 코드에는 `#include foo_param_test.h` 를 포함시킵니다. 그러면 끝입니다. 이제 `INSTANTIATE_TEST_SUITE_P()`를 사용해서 원하는 데이터를 가지고 test function을 생성할 수 있습니다. 이를 통해 abstract test suite 라이브러리만 포함하면 자신이 필요한 value parameter를 가지고 test case를 생성할 수 있게 됩니다. 위에서도 확인한 내용이지만 `INSTANTIATE_TEST_SUITE_P()`는 첫번째 argument만 다르다면 동일한 test suite에다가 여러번 사용하는 것도 가능합니다. (소스파일이 서로 다르면 더욱 좋습니다.)
+이렇게 abstract test의 구현이 완료되면 라이브러리로 배포한다. 그럼 사용자는 abstract test 라이브러리를 링크하고 코드에는 `#include foo_param_test.h` 를 포함시킨다. 그러면 끝이다. 이제 `INSTANTIATE_TEST_SUITE_P()`를 사용해서 원하는 데이터를 가지고 test function을 생성할 수 있다. 이를 통해 abstract test suite 라이브러리만 포함하면 자신이 필요한 value parameter를 가지고 test case를 생성할 수 있게 된다. 위에서도 확인한 내용이지만 `INSTANTIATE_TEST_SUITE_P()`는 첫번째 argument만 다르다면 동일한 test suite에다가 여러번 사용하는 것도 가능하다. (소스파일이 서로 다르면 더욱 좋다.)
 
 ### Value-Parameterized Test Parameters 이름짓기
 
-지금까지는 `INSTANTIATE_TEST_SUITE_P()`에 3개의 argument만 사용했지만 필요하다면 4번째 argument도 사용할 수 있습니다. 4번째 argument에는 function(또는 functor)을 전달할 수 있으며 그 목적은 test function의 이름을 만들 때 parameter를 사용하기 위함입니다. (3개의 argument만 사용하면 0,1,2와 같은 숫자로 test function의 이름이 정해졌습니다.) 그리고 전달되는 function(또는 functor)은 `testing::TestParamInfo<class ParamType>` 타입의 값을 전달받아서 `std::string` 타입을 반환하는 function이어야 합니다.
+지금까지는 `INSTANTIATE_TEST_SUITE_P()`에 3개의 argument만 사용했지만 필요하다면 4번째 argument도 사용할 수 있다. 4번째 argument에는 function(또는 functor)을 전달할 수 있으며 그 목적은 test function의 이름을 만들 때 parameter를 사용하기 위함이다. (3개의 argument만 사용하면 0,1,2와 같은 숫자를 통해 test function의 이름이 정해진다.) 전달되는 function(또는 functor)은 `testing::TestParamInfo<class ParamType>` 타입의 값을 전달받아서 `std::string` 타입을 반환하는 function이어야 한다.
 
-Googletest는 이러한 4번째 argument를 쉽게 사용할 수 있도록 `testing::PrintToStringParamName`라는 built-in test suffix generator를  제공하고 있습니다. 단, built-in test suffix generator는 `std:string`이나 C string은 지원하지 않으며 `test::PrintToString(GetParam())`이라는 return type을 통해서 `std::string`으로 변환하고 그것을 반환합니다.
+Googletest는 이러한 4번째 argument를 쉽게 사용할 수 있도록 `test::PrintToString(GetParam())`의 값을 반환하는`testing::PrintToStringParamName`이라는 built-in test suffix generator를 제공하고 있다. 이것은 `std:string`이나 C string에는 사용할 수 없다.
 
-NOTE: 모든 test case(혹은 test function)의 이름은 유일해야 하고 ASCII 문자나 숫자만 포함할 수 있습니다. 당연하지만 값이 없어도 안 됩니다. 마지막으로 [should not contain underscores](faq.md#test-case-또는-test-suite의-이름을-정할-때-밑줄을-사용하면-안되는-이유가-뭔가요)에 명시된 것처럼 밑줄(`_`)은 사용할 수는 있지만 최대한 지양해야 합니다. 
+NOTE: 모든 test case(혹은 test function)의 이름은 유일해야 하고 ASCII 문자나 숫자만 포함할 수 있다. 당연하지만 값이 없어도 안 된다. 마지막으로 [should not contain underscores](faq.md#test-case-또는-test-suite의-이름을-정할-때-밑줄을-사용하면-안되는-이유가-뭔가요)에 명시된 것처럼 밑줄(`_`)은 사용할 수는 있지만 최대한 지양해야 한다. 
 
-아래는 4번째 argument에 built-in test suffix generator를 사용한 예제입니다.
+아래는 4번째 argument에 built-in test suffix generator를 사용한 예제이다.
 
 ```c++
 class MyTestSuite : public testing::TestWithParam<int> {};
@@ -1104,7 +1104,7 @@ INSTANTIATE_TEST_SUITE_P(MyGroup, MyTestSuite, testing::Range(0, 10),
                          testing::PrintToStringParamName());
 ```
 
-이에 반해서 아래코드처럼 custom function(functor)을 직접 구현해서 사용하면 test parameter name을 보다 세밀하게 조작할 수도 있습니다. 물론, built-in test suffix generator가 나쁜 것은 아니지만 사용자가 입력한 parameter를 `std::string`으로 형변환하기 때문에 사용성이 조금 떨어지는 경우가 발생하기도 합니다. 아래 예제는 parameter, enumeration type, string을 가지고 test parameter name을 사용자가 직접 생성하는 코드를 보여줍니다. (코드를 간결하게 하기 위해 labmda를 사용했습니다.)
+이에 반해서 아래 코드처럼 custom function(functor)을 직접 구현해서 사용하면 test parameter name을 보다 세밀하게 조작할 수도 있다. 물론, built-in test suffix generator가 나쁜 것은 아니지만 사용자가 입력한 parameter를 `std::string`으로 형변환하기 때문에 사용성이 조금 떨어지는 경우가 발생하기도 한다. 아래 예제는 parameter, enumeration type, string을 가지고 test parameter name을 사용자가 직접 생성하는 코드를 보여준다. (코드를 간결하게 하기 위해 labmda를 사용했다.)
 
 ```c++
 enum class MyType { MY_FOO = 0, MY_BAR = 1 };
@@ -1128,13 +1128,13 @@ INSTANTIATE_TEST_SUITE_P(
 
 ## Typed Tests
 
-동일한 요구사항을 수행하기 위한 interface가 있고 이를 위한 implementation class가 여러개 있다고 가정해 봅니다. 이 때, implementation class는 하나의 타입으로도 볼 수 있기 때문에 위의 상황은 결국 같은 동작을 여러가지 타입에 대해서 수행한다는 의미와 동일합니다. 특히, 이 경우에는 상위 interface가 동일하기 때문에 해당 interface에 대한 테스트가 다양한 타입(implementation class)을 커버할 수 있다면 좋을 것입니다. 이러한 테스트 방법을 *typed tests*라고 합니다. 조금 헷갈릴 수 있는데요. 바로 위에서 설명한 value-parameterized tests가 하나의 테스트를 가지고 여러가지 값(parameter)을 검증했다면, typed tests는 하나의 테스트를 가지고 여러가지 타입(type)을 검증하는 것입니다.
+동일한 요구사항을 수행하기 위한 interface가 있고 이를 위한 implementation class가 여러개 있다고 가정해 보자. 이 때, implementation class는 하나의 타입으로도 볼 수 있기 때문에 위의 상황은 결국 같은 동작을 여러가지 타입에 대해서 수행한다는 의미와 동일하다. 특히, 이 경우에는 상위 interface가 동일하기 때문에 해당 interface에 대한 테스트가 다양한 타입(implementation class)을 커버할 수 있다면 좋을 것이다. 이러한 테스트 방법을 *typed tests*라고 합니다. 바로 위에서 설명한 value-parameterized tests와  조금 헷갈릴 수 있는데 value-parameterized tests가 하나의 테스트를 가지고 여러가지 값(parameter)을 검증했다면, typed tests는 하나의 테스트를 가지고 여러가지 타입(type)을 검증하는 것이다.
 
-물론 `TEST` 또는 `TEST_F`를 템플릿으로 만들거나 여러가지 타입에 대해서 모두 동작하도록 여러개를 구현하는 것도 가능합니다. 단, 그렇게되면 `m`개의 test case를 `n`개의 타입에 대해서 수행하려 할 때 `m*n`개의 `TEST`를 구현하게 될 수도 있습니다. 이런 작업은 힘들고 또 유지보수하기도 힘들 것입니다.
+물론 `TEST` 또는 `TEST_F`를 템플릿으로 만들거나 여러가지 타입에 대해서 모두 동작하도록 여러개를 구현해도 된다. 단, 그렇게 되면 `m`개의 test case를 `n`개의 타입에 대해서 수행하려 할 때 `m*n`개의 `TEST`를 구현하게 될 수도 있다. 이런 작업은 힘들고 그 결과에 대한 유지보수성도 떨어진다.
 
-*Typed tests*는 이러한 내용을 보다 쉽게 구현할 수 있도록 도와줍니다. 검증할 대상타입이 무엇인지 미리 알고 있어야 한다는 단점은 있지만, 구현을 비롯한 다른 측면에서는 더 좋습니다.
+*Typed tests*는 이러한 내용을 보다 쉽게 구현할 수 있도록 도와준다. 검증할 대상타입이 무엇인지 미리 알아야 한다는 단점은 있지만 구현을 비롯한 다른 측면에서는 더 좋다.
 
-이를 위해서 먼저 test fixture class를 구현합니다. 이 때, `::testing::Test`를 상속받는 부분은 일반적인 test fixture와 동일하지만 template class으로 선언해야 합니다.
+이를 위해서는 먼저 test fixture class를 구현한다. 이 때, `::testing::Test`를 상속받는 부분은 일반적인 test fixture와 동일하지만 template class으로 선언해야 한다.
 
 ```c++
 template <typename T>
@@ -1147,16 +1147,16 @@ class FooTest : public ::testing::Test {
 };
 ```
 
-이제 위에서 정의한 test fixture class에 검증하고자 하는 타입들을 연결합니다. 구현방법은 아래와 같습니다.
+이제 위에서 정의한 test fixture class에 검증하고자 하는 타입들을 연결한다. 구현방법은 아래와 같다.
 
 ```c++
 using MyTypes = ::testing::Types<char, int, unsigned int>;
 TYPED_TEST_SUITE(FooTest, MyTypes);
 ```
 
-`TYPED_TEST_SUITE`의 2번째 argument에는 여러가지 타입을 묶어서 전달하고 있는데요. 이 때 주의해야 할 점은 `using`이나 `typedef`를 통해서 alias를 만들고 그 alias를 전달해야 한다는 것입니다. 그렇지 않으면 compiler가 comma(`,`)를 제대로 해석하지 못합니다.
+`TYPED_TEST_SUITE`의 2번째 argument에는 여러가지 타입을 묶어서 전달한다. 이 때 주의해야 할 점은 `using`이나 `typedef`를 통해서 alias를 만들고 그 alias를 전달해야 한다는 것이다. 그렇지 않으면 compiler가 comma(`,`)를 제대로 해석하지 못한다.
 
-이제 test case를 정의할 시간입니다. Typed tests에서는 `TEST_F()` 대신에 `TYPED_TEST()`를 사용해서 test case를 구현합니다. 관련 예제코드는 아래와 같습니다.
+이제 test case를 정의할 시간이다. Typed tests에서는 `TEST_F()` 대신에 `TYPED_TEST()`를 사용해서 test case를 구현한다. 관련 예제코드는 아래와 같다.
 
 ```c++
 TYPED_TEST(FooTest, DoesBlah) {
@@ -1180,15 +1180,15 @@ TYPED_TEST(FooTest, DoesBlah) {
 TYPED_TEST(FooTest, HasPropertyA) { ... }
 ```
 
-도움이 되셨나요? 더 자세한 예제코드는 [sample6_unittest.cc](../../samples/sample6_unittest.cc)에서도 확인할 수 있습니다.
+이상의 내용이 도움되었기를 바라며 더 자세한 예제코드가 필요한 사람은 [sample6_unittest.cc](../../samples/sample6_unittest.cc)에서도 확인할 수 있다.
 
 ## Type-Parameterized Tests
 
-*Type-parameterized tests* 는 typed tests와 유사하지만 필요한 타입을 미리 지정할 필요가 없다는 점이 다릅니다. 테스트만 미리 구현해 놓은 상태에서 타입은 나중에 지정해도 괜찮습니다. 또, 원한다면 여러번 지정하는 것도 가능합니다.
+*Type-parameterized tests*는 typed tests와 유사하지만 필요한 타입을 미리 지정할 필요가 없다는 점이 다르다. 테스트만 미리 구현해 놓은 상태에서 타입은 나중에 지정해도 괜찮다. 또, 원한다면 여러번 지정하는 것도 가능하다.
 
-Typed tests에서도 이야기했지만, interface를 설계하고 있다면 해당 interface를 상속받게 될 다양한 타입(implementation class)을 검증하는 방법도 준비하는 것이 좋습니다. 왜냐하면 각 타입에 대한 테스트를 중복해서 구현하지 않아도 되기 때문입니다. 그럼 이제부터 type-parameterized tests를 사용하는 방법에 대해 알아보겠습니다.
+Typed tests에서도 이야기했지만, interface를 설계하고 있다면 해당 interface를 상속받게 될 다양한 타입(implementation class)을 검증하는 방법도 준비하는 것이 좋다. 왜냐하면 각 타입에 대한 테스트를 중복해서 구현하지 않아도 되기 때문이다. 그럼 이제부터 type-parameterized tests를 사용하는 방법에 대해 알아보자.
 
-먼저 typed tests에서 했던 것처럼 test fixture class를 template class으로 정의합니다.
+먼저 typed tests에서 했던 것처럼 test fixture class를 template class으로 정의한다.
 
 ```c++
 template <typename T>
@@ -1197,13 +1197,13 @@ class FooTest : public ::testing::Test {
 };
 ```
 
-다음으로 위에서 만든 template class가 type-parameterized test임을 googletest에 알려줍니다.
+다음으로 위에서 만든 template class가 type-parameterized test임을 googletest에 알려준다.
 
 ```c++
 TYPED_TEST_SUITE_P(FooTest);
 ```
 
-이제 test case를 구현합니다. 일반적인 과정은 기존과 동일합니다. 단, 이제까지 써왔던 macro(`TEST`, `TEST_F`, `TYPED_TEST`)가 아니라 `TYPED_TEST_P()`라는 또 다른 macro를 사용해야 합니다.
+이제 test case를 구현하자. 일반적인 과정은 기존과 동일하다. 단, 이제까지 써왔던 macro(`TEST`, `TEST_F`, `TYPED_TEST`)가 아니라 `TYPED_TEST_P()`라는 또 다른 macro를 사용해야 한다.
 
 ```c++
 TYPED_TEST_P(FooTest, DoesBlah) {
@@ -1215,58 +1215,58 @@ TYPED_TEST_P(FooTest, DoesBlah) {
 TYPED_TEST_P(FooTest, HasPropertyA) { ... }
 ```
 
-다음으로 위에서 구현한 test suite과 test case들을 `REGISTER_TYPED_TEST_SUITE_P`를 통해서 연결해줍니다. Macro의 첫 번째 argument는 test suite 이름이고, 그 다음부터는 각 test case들의 이름을 하나하나 적어줍니다. 관련 코드는 아래와 같습니다.
+다음으로 위에서 구현한 test suite과 test case들을 `REGISTER_TYPED_TEST_SUITE_P`를 통해서 연결한다. Macro의 첫 번째 argument는 test suite 이름이고 그 다음부터는 각 test case들의 이름을 하나하나 적어준다. 관련 코드는 아래와 같다.
 
 ```c++
 REGISTER_TYPED_TEST_SUITE_P(FooTest,
                             DoesBlah, HasPropertyA);
 ```
 
-여기까지 했으면 모든 사용준비가 끝났습니다. 위의 내용들을 헤더파일에 넣어서 제공한다면 재사용성 측면에서도 좋을 것입니다. 사용할 때는 아래처럼 테스트하려는 타입을 초기화하기만 하면 됩니다.
+여기까지 했으면 모든 사용준비가 끝났다. 위의 내용들을 헤더파일에 넣어서 제공한다면 재사용성 측면에서도 좋을 것이다. 사용할 때는 아래처럼 테스트하려는 타입을 초기화하기만 하면 된다.
 
 ```c++
 typedef ::testing::Types<char, int, unsigned int> MyTypes;
 INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes);
 ```
 
-타입 초기화를 위한 macro는 `INSTANTIATE_TYPED_TEST_SUITE_P`입니다. 여기서 macro의 첫 번째 argument가 test suite 이름의 prefix로 사용되기 때문에 중복해서 사용하면 안됩니다.
+타입 초기화를 위한 macro는 `INSTANTIATE_TYPED_TEST_SUITE_P`이다. 여기서 macro의 첫 번째 argument가 test suite 이름의 prefix로 사용되기 때문에 중복해서 사용하면 안 된다.
 
-마지막으로 타입이 1개뿐이라면 굳이 alias를 만들지 않고 해당 타입이름을 바로 사용해도 됩니다.
+마지막으로 타입이 1개 뿐이라면 굳이 alias를 만들지 않고 해당 타입이름을 바로 사용해도 된다.
 
 ```c++
 INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, int);
 ```
 
-여기까지입니다. 이와 관련한 전체 예제코드는 [sample6_unittest.cc](../../samples/sample6_unittest.cc)에서도 확인할 수 있습니다.
+모두 끝났다. 전체 예제코드가 필요하다면 [sample6_unittest.cc](../../samples/sample6_unittest.cc)를 참조하자.
 
 ## Private Code 테스트하기
 
-만약, 어떤 interface를 구현하는 것이 아니라 해당 interface의 내부구현만을 변경하고 있다면 interface에 대한 테스트는 그러한 변경작업에 관계없이 잘 동작해야 되는게 맞습니다. 이와 같이 어떤 software에 대해서 외부사용자(client) 입장에서 테스트하는 접근방법을 **black-box testing**이라고도 합니다. 여기서 외부사용자 입장이라는 것은 interface 혹은 class의 public method에 대한 테스트를 의미합니다.
+만약, 어떤 interface를 구현하는 것이 아니라 해당 interface의 내부구현만을 변경하고 있다면 interface에 대한 테스트는 그러한 변경작업에 관계 없이 잘 동작해야 한다. 이와 같이 어떤 software에 대해서 외부사용자(client) 입장에서 테스트하는 접근방법을 **black-box testing**이라고도 하는데 여기서 외부사용자 입장이라는 것은 interface 혹은 class의 public method에 대한 테스트를 의미한다.
 
-**Black-box testing** 관점에서 볼 때, public method가 아니라 내부 구현에 대한 테스트가 필요하다고 느꼈다면 **사실은 테스트에 앞서 class 설계에 문제가 없는지를 먼저 검토해야 합니다.** 예를 들어 대상 class가 너무 많은 일을 하는건 아닌지 점검하고 문제가 있다면 기존 class를 분리하는 등의 설계변경이 필요할 수도 있습니다. (구현을 담당하는 implemetation class를 새로 추가하는 것도 해결방법 중에 하나입니다.)
+**Black-box testing** 관점에서 볼 때, public method가 아니라 내부 구현에 대한 테스트가 필요하다고 느꼈다면 **사실은 테스트에 앞서 class 설계에 문제가 없는지를 먼저 검토해야 한다.** 예를 들어 대상 class가 너무 많은 일을 하는건 아닌지 점검하고 문제가 있다면 기존 class를 분리하는 등의 설계변경이 필요할 수도 있다. (구현을 담당하는 implemetation class를 새로 추가하는 것도 해결방법 중에 하나이다.)
 
-이유야 어찌 됐건, 외부로 노출되는 interface(public method)가 아니라 내부 구현에 대한 테스트를 하고 싶다고 가정해 봅시다. 아마도 아래와 같은 function들이 그러한 테스트의 대상이 될 것입니다.
+이유야 어찌 됐건, 외부로 노출되는 interface(public method)가 아니라 내부 구현에 대한 테스트를 하고 싶다고 가정해보면 아마도 아래와 같은 function들이 그러한 테스트의 대상이 될 것이다.
 
 *   Static function(class의 static method를 의미하는 것이 아니라 c-style global function을 의미합니다.) 또는 unnamed namespace에 정의된 function
 *   Class의 private method 또는 protected method
 
-이들을 테스트하기 위해서는 아래와 같은 방법을 사용할 수 있습니다.
+이들을 테스트하기 위해서는 아래와 같은 방법을 사용할 수 있다.
 
-*   기본적으로 static function과 unnamed namespace function은 어디서든 사용이 가능합니다. 따라서 이들을 테스트하려면 해당 function이 구현된 `.cc` 파일만 `#include` 하면 됩니다. 다만, `.cc` 파일을 include하는 것이 좋은 구현이라고 볼 수는 없기 때문에 (꼭 필요한 경우에) 테스트코드에서만 사용해야 합니다.
+*   기본적으로 static function과 unnamed namespace function은 어디서든 사용이 가능하다. 따라서 이들을 테스트하려면 해당 function이 구현된 `.cc` 파일만 `#include` 하면 된다. 다만, `.cc` 파일을 include하는 것이 좋은 구현이라고 볼 수는 없기 때문에 (꼭 필요한 경우에) 테스트코드에서만 사용해야 한다.
     
-    더 좋은 방법은 이들을 특정한 namespace에 모아서 `private`하게 사용하는 것입니다. 예를 들어 진행중인 프로젝트에서 일반적으로 사용하는 namespace가 `foo`라면 `foo::internal`이라는 namespace를 새로 만들고 거기에 `private`한 function들을 모두 모아서 관리하는 것입니다. 그런 다음에는 `-internal.h`와 같은 헤더파일을 포함해서 사용하면 됩니다. 다만, 이 과정에서 주의할 점은 `foo::internal`과 `-internal.h`는 해당 프로젝트의 개발자들만 접근할 수 있도록 제한해야 한다는 점입니다. 이러한 방법을 이용하면 외부에 구현을 노출시키지 않고도 테스트가 가능해집니다.
+    더 좋은 방법은 이들을 특정한 namespace에 모아서 `private`하게 사용하는 것이다. 예를 들어 진행중인 프로젝트에서 일반적으로 사용하는 namespace가 `foo`라면 `foo::internal`이라는 namespace를 새로 만들고 거기에 `private`한 function들을 모두 모아서 관리하는 것이다. 그런 다음에는 `-internal.h`와 같은 헤더파일을 포함해서 사용하면 된다. 다만, 이 과정에서 주의할 점은 `foo::internal`과 `-internal.h`는 해당 프로젝트의 개발자들만 접근할 수 있도록 제한해야 한다는 점이다. 이러한 방법을 이용하면 외부에 구현을 노출시키지 않고도 테스트가 가능해질 것이다.
     
-*   Class의 private method는 해당 class 혹은 friend 에서만 호출이 가능합니다. 따라서 테스트대상 class에서 test fixture class나 혹은 method를 friend로 선언하는 작업이 필요합니다. 그런데 아직도 문제가 있습니다. 왜냐하면 googletest의 test function들은 사실 내부적으로는 test fixture class를 상속받고 있기 때문에 test function에서 테스트대상의 private 영역에 바로 접근할 수가 없습니다. C++에서 base class끼리 friend라고 해도 그 관계가 derived class로 전달되지는 않기 때문입니다.(아버지의 친구가 아들의 친구가 아니듯이) 이 문제를 해결하기 위해서 test fixture class에 테스트대상의 private 영역에 대한 accessor function도 구현해야 합니다. 그래야만 test function에서 해당 accessor를 통해 테스트대상의 private영역에 접근할 수 있습니다.
+*   Class의 private method는 해당 class 혹은 friend 에서만 호출이 가능하다. 따라서 테스트대상 class에서 test fixture class나 혹은 method를 friend로 선언하는 작업이 필요하다. 그런데 아직도 문제가 있다. 왜냐하면 googletest의 test function들은 사실 내부적으로는 test fixture class를 상속받고 있기 때문에 test function에서 테스트대상의 private 영역에 바로 접근할 수가 없다. C++에서 base class끼리 friend라고 해도 그 관계가 derived class로 전달되지는 않기 때문이다. (아버지의 친구가 아들의 친구가 아니듯이) 이 문제를 해결하기 위해서 test fixture class에 테스트대상의 private 영역에 대한 accessor function도 구현해야 한다. 그래야만 test function에서 해당 accessor를 통해 테스트대상의 private 영역에 접근할 수 있게 된다.
     
-    위에서 설명했듯이 여기서도 전체적인 리팩토링을 하는 것이 하나의 방법이 될 수 있습니다. 방법은 테스트대상의 private function들을 implementation class로 분리하는 것입니다 그 다음에 `*-internal.h`와 같이 개발자만 사용할 수 있는 헤더파일을 만들고 사용하면 됩니다. 이 헤더파일을 외부에서는 사용할 수 없도록 제한하면 마치 private function인 것처럼 사용할 수 있습니다. 이러한 방법은 상당히 널리 사용되는 방법으로서 소위 [Pimpl](https://www.gamedev.net/articles/programming/general-and-gameplay-programming/the-c-pimpl-r1794/)(Private Implementation) idiom이라고도 부릅니다.
+    위에서 설명했듯이 여기서도 전체적인 리팩토링을 하는 것이 하나의 방법이 될 수 있다. 방법은 테스트대상의 private function들을 implementation class로 분리하는 것이다. 그 다음에 `*-internal.h`와 같이 개발자만 사용할 수 있는 헤더파일을 만들고 사용하면 된다. 이 헤더파일을 외부에서는 사용할 수 없도록 제한하면 마치 private function인 것처럼 사용할 수 있다. 이러한 방법은 상당히 널리 사용되는 방법으로서 소위 [Pimpl](https://www.gamedev.net/articles/programming/general-and-gameplay-programming/the-c-pimpl-r1794/)(Private Implementation) idiom이라고도 부른다.
     
-    다시 friend 사용법으로 돌아와서 googletest는 friend관계를 간단히 사용하기 위한 기능도 제공하고 있습니다. 테스트대상 class에서 아래와 같이 사용하면 별도의 accessor function을 구현할 필요가 없다는 장점이 있습니다. 필요한 test function별로 각각 지정해야 합니다.
+    다시 friend 사용법으로 돌아와서 googletest는 friend 관계를 간단히 사용하기 위한 기능도 제공하고 있다. 테스트대상 class에서 아래와 같은 방법을 사용하면 별도의 accessor function을 구현할 필요가 없다는 장점이 있다. 단, 필요한 test function 별로 각각 지정해야 한다.
 
     ```c++
         FRIEND_TEST(TestSuiteName, TestName);
     ```
     
-    아래는 예제코드입니다.
+    아래는 예제코드이다.
     
     ```c++
     // foo.h
@@ -1286,7 +1286,7 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, int);
     }
     ```
     
-    `FRIEND_TEST`를 사용할 때, 주의사항으로 테스트대상 class가 특정한 namespace에 선언되어 있는 경우에는 test fixture와 test function도 같은 namespace에 구현해야 한다는 것입니다. 그래야만 friend관계가 정상적으로 맺어질 것입니다. 아래 예제를 확인하세요.
+    `FRIEND_TEST`를 사용할 때의 주의사항으로 테스트대상 class가 특정한 namespace에 선언되어 있는 경우에는 test fixture와 test function도 같은 namespace에 구현해야 한다는 것이다. 그래야만 friend 관계가 정상적으로 맺어진다. 아래 예제를 보자.
     
     ```c++
         namespace my_namespace {
@@ -1301,7 +1301,7 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, int);
         }  // namespace my_namespace
     ```
 
-    위의 `my_namespace::Foo` class를 테스트하기 위한 코드는 아래와 같습니다.
+    위 코드의 `my_namespace::Foo` class를 테스트하기 위한 테스트코드도 같은 namespace에 구현해야 한다. 예제코드는 아래와 같다.
     
     ```c++
     namespace my_namespace {
@@ -1319,48 +1319,48 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, int);
 
 ## "Catching" Failures
 
-만약, Googletest를 기반으로 하는 새로운 테스트 도구를 만들고 있다면, 그러한 테스트 도구가 잘 동작하는지도 확인이 필요합니다. 역설적이만 그런 경우에도 googletest를 사용할 수 있습니다.
+만약, Googletest를 기반으로 하는 새로운 테스트 도구를 만들고 있다면 그러한 테스트 도구가 잘 동작하는지도 확인이 필요하다. 역설적이만 그런 경우에도 googletest를 사용할 수 있다.
 
-테스트 도구의 목적은 failure를 잘 찾아내는 데에 있습니다. 따라서 그러한 테스트 도구를 검증하려면 원하는 상황에서 failure가 발생하는지 테스트하면 됩니다. 근데 만약, 테스트 도구가 failure를 알리기 위한 방법으로 exception을 던지도록 구현되어 있다면 어떻게 해야 할까요? (알다시피 googletest는 기본적으로 exception를 사용하지 않고 있습니다.)
+테스트 도구의 목적은 failure를 잘 찾아내는 것에 있다. 따라서 그러한 테스트 도구를 검증하려면 원하는 상황에서 failure가 발생하는지 테스트하면 된다. 그런데 테스트 도구가 failure를 알리기 위한 방법으로 exception을 던지도록 구현되어 있다면 어떻게 해야 할까? (알다시피 googletest는 기본적으로 exception를 사용하지 않고 있다.)
 
-이를 위해서는 `gunit-spi.h`라는 파일을 사용해야 합니다. 이 파일에는 exception 확인이 가능한 macro들을 제공하고 있습니다. 아래 내용을 확인하세요.
+이를 위해서는 `gunit-spi.h`라는 파일을 사용해야 한다. 이 파일에는 exception 확인이 가능한 macro들을 제공하고 있다. 아래 내용을 보자.
 
 ```c++
   EXPECT_FATAL_FAILURE(statement, substring);
 ```
 
-위 macro는 `statement`가 fatal failure를 발생시키는지 확인합니다. 또한, 해당 fatal failure의 failure message가 `substring`를 포함하는지도 확인합니다.
+위 macro는 `statement`가 fatal failure를 발생시키는지 확인한다. 또한, 해당 fatal failure의 failure message가 `substring`를 포함하는지도 확인한다.
 
 ```c++
   EXPECT_NONFATAL_FAILURE(statement, substring);
 ```
 
-위 macro도 동작은 동일하며 대신 non-fatal failure를 확인하는데 사용합니다.
+위 macro도 동작은 동일하며 대신 non-fatal failure를 확인하는데 사용한다.
 
-다만, 위의 2가지 macro는 current thread에서 발생한 failure들만 확인할 수 있습니다. 따라서 current thread가 아닌 thread에서 failure가 발생하면 검증이 불가능합니다. 그럼 `statement`에서 생성한 thread에서 failure가 발생했다면 어떻게 확인해야 할까요? 그런 경우에는 아래 macro를 사용하기 바랍니다.
+다만, 위의 2가지 macro는 current thread에서 발생한 failure들만 확인할 수 있다. 따라서 current thread가 아닌 thread에서 failure가 발생하면 검증이 불가능하다. 그럼 `statement`에서 생성한 thread에서 failure가 발생했다면 어떻게 확인해야 할까? 그런 경우에는 아래 macro를 사용하기 바란다.
 
 ```c++
   EXPECT_FATAL_FAILURE_ON_ALL_THREADS(statement, substring);
   EXPECT_NONFATAL_FAILURE_ON_ALL_THREADS(statement, substring);
 ```
 
-NOTE: Windows환경에서는 위와 같이 multiple thread에서 failure를 확인하는 방법을 사용할 수 없습니다.
+NOTE: Windows 환경에서는 위와 같이 multiple thread에서 failure를 확인하는 방법을 사용할 수 없다.
 
-마지막으로 위의 macro들을 사용함에 있어서 아래의 제약사항들은 주의하시기 바랍니다.
+마지막으로 위의 macro들을 사용함에 있어서 아래의 제약사항들은 주의가 필요하다.
 
-1.  위의 macro들은 failure message를 출력할 수 없습니다.
+1.  위의 macro들은 failure message를 출력할 수 없다.
 
-1.  fatal failure(`EXPECT_FATAL_FAILURE*`) macro의 `statement`에서 `this`의 non-static local variable 및 non-staic method를 참조할 수는 없습니다.
+1.  fatal failure(`EXPECT_FATAL_FAILURE*`) macro의 `statement`에서 `this`의 non-static local variable 및 non-staic method를 참조할 수는 없다.
     
-1.  fatal failure(`EXPECT_FATAL_FAILURE*`) macro의 `statement`는 값을 반환하면 안 됩니다.
+1.  fatal failure(`EXPECT_FATAL_FAILURE*`) macro의 `statement`는 값을 반환하면 안 된다.
 
 ## 개별 Test를 런타임에 등록하기
 
-Googletest에서 test case를 정의할 때 `*TEST*`계열 macro를 사용하는 것이 일반적입니다. 실제로도 대다수의 개발자들이 `*TEST*`계열 macro를 사용하고 있으며 이들은 내부적으로 test case들을 compile time에 등록합니다. 그럼 혹시 test case를 runtime에 등록하고 싶은 사용자가 있으신가요? 예를 들어 별도의 설정파일(.config 등)에서 test case의 정보를 관리하다가 test program이 실행된 후에 설정파일을 읽어서 test case를 등록하고 싶은 경우가 있을 것입니다. googletest는 그러한 사용자를 위해서 `::testing::RegisterTest`를 제공하고 있습니다.
+Googletest에서 test case를 정의할 때 `TEST` 계열 macro를 사용하는 것이 일반적이다. 실제로도 대다수의 개발자들이 `TEST` 계열 macro를 사용하고 있으며 이들은 내부적으로 test case들을 compile time에 등록하게 된다. 그럼 혹시 test case를 runtime에 등록하고 싶은 사용자도 있지 않을까? 예를 들어 별도의 설정파일(.config 등)에서 test case의 정보를 관리하다가 test program이 실행된 후에 설정파일을 읽어서 test case를 등록하고 싶은 경우가 있을 것이다. googletest는 그러한 사용자를 위해서 `::testing::RegisterTest`를 제공하고 있다.
 
-다만, 이러한 기능을 제공하고 있기는 하지만 `::testing::RegisterTest`는 복잡도가 상당히 높기 때문에 꼭 필요한 경우에만 사용하기 바랍니다. 되도록이면 `*TEST*`를 통해서 정적으로 등록하는 것이 좋습니다.
+다만, 이러한 기능을 제공하고 있기는 하지만 `::testing::RegisterTest`는 복잡도가 상당히 높기 때문에 꼭 필요한 경우에만 사용하는 것이 좋다. 되도록이면 `TEST`를 통해서 정적으로 등록하는 것을 권장한다.
 
-그럼 googletest에서 제공하는 `::testing::RegisterTest`의 정의는 아래와 같습니다.
+그럼 googletest에서 제공하는 `::testing::RegisterTest`의 정의는 아래와 같다.
 
 ```c++
 template <typename Factory>
@@ -1369,11 +1369,11 @@ TestInfo* RegisterTest(const char* test_suite_name, const char* test_name,
                        const char* file, int line, Factory factory);
 ```
 
-마지막 argument인 `factory`는 test case(function)를 생성할 수 있는 factory function를 의미합니다. 이 때는 꼭 function pointer가 아니더라도 factory역할을 할 수 있는 callable object라면 어느 것이라도 괜찮습니다. 단, 어떤 걸 사용하든 return type은 `Fixture`타입이 되어야 하며 여기서 `Fixture`는 test suite class를 의미합니다. 정리하면 첫 번째 argument이자 구분자인 `test_suite_name`에 속한 모든 test case들은 동일한 return type(test fixture class)을 가져야 함을 의미합니다. 이제 이러한 제약사항들이 모두 만족되면 runtime에 test case를 등록할 수 있을 것입니다.
+마지막 argument인 `factory`는 test case(function)를 생성할 수 있는 factory function를 의미한다. 이 때는 꼭 function pointer가 아니더라도 factory 역할을 할 수 있는 callable object라면 어느 것이라도 괜찮다. 단, 어떤 걸 사용하든 return type은 `Fixture`타입이 되어야 하며 여기서 `Fixture`는 test suite class를 의미한다. 정리하면 첫 번째 argument이자 구분자인 `test_suite_name`에 속한 모든 test case들은 동일한 return type(test fixture class)을 가져야 한다. 이제 이러한 제약사항들이 모두 만족되면 runtime에 test case를 등록할 수 있을 것이다.
 
-Googletest는 `factory`로부터 test fixture class를 추론할 수 있기 때문에 test suite class의 function(`SetUpTestSuite`, `TearDownTestSuite `등)들도 호출할 수 있게 됩니다.
+Googletest는 `factory`로부터 test fixture class를 추론할 수 있기 때문에 test suite class의 function(`SetUpTestSuite`, `TearDownTestSuite `등)들도 호출할 수 있게 된다.
 
-위의 모든 내용들이 `RUN_ALL_TEST()`보다 앞서 수행되어야 하며 그렇지 않다면 미정의 동작이므로 문제가 될 것입니다. 그럼 아래 예제를 확인하세요.
+위의 모든 내용들이 `RUN_ALL_TEST()`보다 앞서 수행되어야 하며 그렇지 않다면 미정의 동작이므로 문제가 된다. 아래 예제를 통해 관련내용을 확인해보자.
 
 ```c++
 class MyFixture : public ::testing::Test {
@@ -1415,7 +1415,7 @@ int main(int argc, char** argv) {
 
 ## 현재 수행중인 Test의 이름 확인하기
 
-테스트코드를 구현하다 보면 현재 실행중인 test case의 이름을 확인하고 싶은 경우도 있을 것입니다. 예를 들어 test case의 이름에 따라 golden file을 바꿔가며 테스트를 수행할 수도 있습니다. (golden file: 테스트의 결과를 저장하거나 비교하기 위해 생성하는 파일) Googletest의 `::testing::TestInfo` class는 이러한 정보를 가지고 있으며 사용자도 이것을 사용할 수 있습니다.
+테스트코드를 구현하다 보면 현재 실행중인 test case의 이름을 확인하고 싶은 경우도 있을 것이다. 예를 들어 test case의 이름에 따라 golden file을 바꿔가며 테스트를 수행할 수도 있다. (golden file: 테스트의 결과를 저장하거나 비교하기 위해 생성하는 파일) Googletest의 `::testing::TestInfo` class는 이러한 정보를 가지고 있으며 사용자도 이것을 사용할 수 있다.
 
 ```c++
 namespace testing {
@@ -1433,7 +1433,7 @@ class TestInfo {
 }
 ```
 
-`TestInfo` class를 사용하고 싶다면 `UnitTest`(singleton object)의 member function인 `current_test_info()`를 사용하면 됩니다.
+`TestInfo` class를 사용하고 싶다면 `UnitTest`(singleton object)의 member function인 `current_test_info()`를 사용하면 된다.
 
 ```c++
   // Gets information about the currently running test.
@@ -1446,24 +1446,24 @@ class TestInfo {
          test_info->test_suite_name());
 ```
 
-`current_test_info()`가 호출되었는데 실행중인 test case가 없다면 null pointer를 반환하게 됩니다. 예를 들면 `TestSuiteSetUp()`, `TestSuiteTearDown()`과 같은 function들은 test case를 실행중인 상황이 아니기 때문에 null pointer가 반환됩니다.
+`current_test_info()`가 호출되었는데 실행 중인 test case가 없다면 null pointer를 반환하게 된다. 예를 들면 `TestSuiteSetUp()`, `TestSuiteTearDown()`과 같은 function들은 test case를 실행 중인 상황이 아니기 때문에 null pointer가 반환된다.
 
 ## Test Events를 통해 googletest 확장하기
 
-Googletest는 test program의 진척상황이나 test failure를 알려주기 위한 **event listener API**라는 기능을 제공하고 있습니다. 이 때 발생하는 event들은 test program, test suite, test case 각각의 시작시점과 종료시점에서 수신해 볼 수 있습니다. 이 기능이 사용가능한 분야로는 console이나 XML로 출력되는 output을 변경하고 싶은 경우나 아니면 resource leak checker를 위한 checkpoint가 필요한 경우 등이 있습니다.
+Googletest는 test program의 진척상황이나 test failure를 알려주기 위한 **event listener API**라는 기능을 제공하고 있다. 이 때 발생하는 event들은 test program, test suite, test case 각각의 시작시점과 종료시점에 수신해 볼 수 있다. 이 기능이 사용가능한 분야로는 console이나 XML로 출력되는 output을 변경하고 싶은 경우나 아니면 resource leak checker를 위한 checkpoint가 필요한 경우 등이 있다.
 
 ### Event Listeners 정의하기
 
-Event listener를 정의하려면 `testing::TestEventListener` 또는 `testing::EmptyTestEventListener`를 상속받는 class를 하나 만들어야 합니다. 전자인 `testing::TestEventListener`는 interface(abstract class)이기 때문에 포함된 *pure virtual function을 모두 override 해야 합니다.* 다음으로 후자인 `testing::EmptyTestEventListener`은 member function의 기본적인 구현(사실, 비어 있음)을 제공하기 때문에 필요한 것만 override해서 구현하면 됩니다. 
+Event listener를 정의하려면 `testing::TestEventListener` 또는 `testing::EmptyTestEventListener`를 상속받는 class를 하나 만들어야 한다. 전자인 `testing::TestEventListener`는 interface(abstract class)이기 때문에 포함된 *pure virtual function을 모두 override 해야 한다.* 다음으로 후자인 `testing::EmptyTestEventListener`는 member function의 기본적인 구현(사실, 비어 있음)을 제공하기 때문에 필요한 것만 override해서 구현하면 된다. 
 
-둘 중 하나를 상속하기로 결정했다면 이제 event를 처리하기 위한 동작을 구현하면 됩니다. 기본적으로 event가 발생하면 handler function들이 자동으로 호출되게 됩니다. 이 때 handler function에는 아래와 같은 타입의 argument들이 전달됩니다.
+둘 중 하나를 상속하기로 결정했다면 이제 event를 처리하기 위한 동작을 구현하면 된다. 기본적으로 event가 발생하면 handler function들이 자동으로 호출되는데 이 때 handler function에는 아래와 같은 타입의 argument들이 전달된다.
 
-- UnitTest는 test program 전체의 상태를 가지고 있습니다.
-- TestSuite는 이름 그대로 test suite의 정보를 가지고 있습니다. Test suite은 1개 이상의 test case를 가지고 있습니다.
-- TestInfo는 현재 test case의 정보를 가지고 있습니다.
-- TestPartResult는 test assertion의 결과를 가지고 있습니다.
+- UnitTest는 test program 전체의 상태를 가지고 있다.
+- TestSuite는 이름 그대로 test suite의 정보를 가지고 있다. Test suite은 1개 이상의 test case를 가지고 있다.
+- TestInfo는 현재 test case의 정보를 가지고 있다.
+- TestPartResult는 test assertion의 결과를 가지고 있다.
 
-사용자는 event handler function에서 이러한 argument를 사용할 수가 있습니다. 아래는 이에 대한 예제 코드입니다.
+사용자는 event handler function에서 이러한 argument를 사용할 수 있다. 아래는 이에 대한 예제 코드이다.
 
 ```c++
   class MinimalistPrinter : public ::testing::EmptyTestEventListener {
@@ -1492,7 +1492,7 @@ Event listener를 정의하려면 `testing::TestEventListener` 또는 `testing::
 
 ### Event Listeners 사용하기
 
-위에서 event listener를 정의하는 방법에 대해서 배웠습니다. 다음으로 정의된 event listener를 실제로 사용하기 위해서는 해당 event listener의 instance를 생성하고 이를 googletest event listener list에 추가하는 작업이 필요합니다. `main()` function을 구현할 때, 마지막 부분에서 `return RUN_ALL_TESTS()`를 필수적으로 호출해야 한다고 배웠습니다. 그보다 앞 부분에서 event listener를 추가해주면 됩니다. 이 때 사용하는 class를 `TestEventListeners`라고 부릅니다. 자세히 보면 class 이름에 `s`가 붙어 있는데요, 이는 googletest에 여러개의 event listener를 등록하는 것도 가능함을 의미합니다. 설명은 끝났습니다. 그럼 아래는 예제코드입니다.
+위에서 event listener를 정의하는 방법에 대해서 배웠다. 다음으로 정의된 event listener를 실제로 사용하기 위해서는 해당 event listener의 instance를 생성하고 이를 googletest event listener list에 추가하는 작업이 필요하다. `main()` function을 구현하면서 마지막 부분에 `return RUN_ALL_TESTS()`를 필수적으로 호출해야 한다고 배웠는데 그보다 앞 부분에 event listener를 추가해주면 된다. 이 때 사용하는 class를 `TestEventListeners`라고 부른다. 자세히 보면 class 이름에 `s`가 붙어 있는데 이는 여러개의 event listener를 등록하는 것도 가능함을 의미한다. 그럼 아래의 예제코드를 보자.
 
 ```c++
 int main(int argc, char** argv) {
@@ -1506,7 +1506,7 @@ int main(int argc, char** argv) {
 }
 ```
 
-아마도 위 코드를 구현한 사람은 `MinimalistPrinter`라는 event listener를 통해 console이나 XML 등으로 출력되는 테스트 결과를 최소화려고 했을 것입니다. 따라서 원하는 목적을 달성하려면 기존에 동작하고 있던 default test result printer는 해제해줘야 합니다. 이를 위한 코드는 아래와 같습니다.
+아마도 위 코드를 구현한 사람은 `MinimalistPrinter`라는 event listener를 통해 console이나 XML 등으로 출력되는 테스트 결과를 최소화려고 했을 것이다. 따라서 원하는 목적을 달성하려면 기존에 동작하고 있던 default test result printer는 해제해줘야 한다. 이를 위한 코드는 아래와 같다.
 
 ```c++
   ...
@@ -1515,34 +1515,34 @@ int main(int argc, char** argv) {
   return RUN_ALL_TESTS();
 ```
 
-이제 다 끝났습니다. 의도한 대로 결과가 출력되는지 확인하시기 바랍니다. 보다 상세한 내용은 [sample9_unittest.cc](../../samples/sample9_unittest.cc)에서도 확인할 수 있습니다.
+이제 모두 끝났다. 의도한 대로 결과가 출력되는지 확인해보자. 보다 상세한 내용은 [sample9_unittest.cc](../../samples/sample9_unittest.cc)에서도 확인할 수 있다.
 
-앞에서 얘기한 것처럼 1개 이상의 listener를 사용하는 것도 가능합니다. 따라서 동일한 event에 대해서 listener의 호출순서가 어떻게 되는지는 알아두는게 좋습니다. 주의할 점은 handler function의 종류에 따라서 순서가 다르다는 점입니다. 예를 들어 `On*Start()` 또는 `OnTestPartResult()`라는 event가 발생하면 list에 등록된 listener의 순서대로 호출해 줍니다. 간단히 말하면 새로 등록한 listener일수록 나중에 호출됩니다. 반대로 `On*End()`와 같은 event는 등록순서의 *역방향*으로 listener handler를 호출해줍니다. 따라서 사용자가 결과물을 보게 되면 먼저 등록된 listener handler의 출력물이 늦게 등록된 listener handler의 출력물을 감싸는 (프레임) 형태가 됩니다.
+앞에서 얘기한 것처럼 1개 이상의 listener를 사용하는 것도 가능하다. 따라서 동일한 event에 대해서 listener의 호출순서가 어떻게 되는지는 알아두는게 좋다. 주의할 점은 handler function의 종류에 따라서 순서가 다르다는 점이다. 먼저 `On*Start()` 또는 `OnTestPartResult()`라는 event가 발생하면 list에 등록된 listener들을 순서대로 호출해준다. 즉, 새로 등록한 listener일수록 나중에 호출된다. 이와 반대로 `On*End()`와 같은 event는 등록순서의 *역방향*으로 listener handler를 호출해준다. 따라서 사용자가 결과물을 보게 되면 먼저 등록된 listener handler의 출력물이 늦게 등록된 listener handler의 출력물을 감싸는 (프레임) 형태가 될 것이다.
 
 ### Listeners에서 failure 발생시키기
 
-Event를 처리할 때에도 `EXPECT_*()`, `ASSERT_*()`, `FAIL()`와 같은 assertion을 사용할 수 있습니다. 단, 아래 내용들을 주의하기 바랍니다.
+Event를 처리할 때에도 `EXPECT_*()`, `ASSERT_*()`, `FAIL()`와 같은 assertion을 사용할 수 있다. 단, 아래 내용들을 주의하기 바란다.
 
-1.  `OnTestPartResult()`안에서는 어떤 failure라도 발생시키면 안됩니다. 만약 `OnTestPartResult()`에서 failure가 발생하면 무한히 재귀호출하게 됩니다.
-1.  `OnTestPartResult()`를 처리하는 listener도 failure를 발생시키면 안 됩니다.
+1.  `OnTestPartResult()` 안에서는 어떤 failure라도 발생시키면 안 된다. 만약 `OnTestPartResult()`에서 failure가 발생하면 무한히 재귀호출할 것이다.
+1.  `OnTestPartResult()`를 처리하는 listener도 failure를 발생시키면 안 된다.
 
-만약 failure가 발생가능한 listener를 구현했다면, 등록할때는 `OnTestPartResult()`를 먼저 등록한 후에 failure 발생가능한 listener를 나중에 등록하기 바랍니다. 그렇게 해야만 failure정보가 정상적으로 기록될 수 있습니다.
+만약 failure가 발생가능한 listener를 구현했다면 등록할때는 `OnTestPartResult()`를 먼저 등록한 후에 failure 발생가능한 listener를 나중에 등록해야 한다. 그렇게 해야만 failure 정보가 정상적으로 기록된다.
 
-Failure-raising listener에 대한 예제코드는 [sapmle10_unittest.cc](../../samples/sample10_unittest.cc)를 참고하세요.
+Failure-raising listener에 대한 예제코드는 [sapmle10_unittest.cc](../../samples/sample10_unittest.cc)에서 확인할 수 있다.
 
 ## Test program을 실행하는 다양한 방법
 
-Googletest를 사용한 test program도 일반적인 실행파일과 다르지 않습니다. 빌드된 후에는 자유롭게 실행할 수 있고, 실행시에 cmd line을 통해 flag를 전달할 수도 있습니다. 그리고 test program에서 cmd line flag를 적용하기 위해서는 `RUN_ALL_TESTS()`를 호출하기 전에 `::testing::InitGoogleTest()`를 먼저 호출하면 됩니다.
+Googletest를 사용한 test program도 일반적인 실행파일과 다르지 않다. 빌드된 후에는 자유롭게 실행할 수 있고 실행시에 cmd line을 통해 flag를 전달할 수도 있다. 그리고 test program에서 cmd line flag를 적용하기 위해서는 `RUN_ALL_TESTS()`를 호출하기 전에 `::testing::InitGoogleTest()`를 먼저 호출하면 된다.
 
-지원하는 flag 목록을 확인하고 싶다면 test program을 실행할 때, `--help`를 입력하면 됩니다. `--help`외에 `-h`, `-?`, `/?` 등도 동일한 목적으로 사용할 수 있습니다.
+지원하는 flag 목록을 확인하고 싶다면 test program을 실행할 때, `--help`를 입력하면 된다. `--help`외에 `-h`, `-?`, `/?` 등도 동일한 목적으로 사용할 수 있다.
 
-만약 동일한 옵션에 대해서 2가지 방법(코드에서 직접 environment variable 변경, cmd line flag 전달)을 모두 사용했다면 cmd line flag를 우선적으로 적용합니다.
+만약 동일한 옵션에 대해서 2가지 방법(코드에서 직접 environment variable 변경, cmd line flag 전달)을 모두 사용했다면 cmd line flag가 우선적으로 적용된다.
 
 ### 필요한 Test 선택하기
 
 #### Test 목록보기
 
-test program을 시작하기 전에 해당 프로그램에서 사용가능한 테스트 목록을 확인할 수 있습니다. 더불어 이렇게 목록을 확인한 후에는 filter기능을 사용해서 필요한 테스트만 선택해서 실행하는 것이 가능합니다.(밑에서 설명) 이를 위해서는 `--gtest_list_tests`라는 flag를 사용합니다.
+test program을 시작하기 전에 해당 프로그램에서 사용가능한 테스트 목록을 확인할 수 있다. 더불어 이렇게 목록을 확인한 후에는 filter 기능을 사용해서 필요한 테스트만 선택해서 실행하는 것도 가능하다. (밑에서 설명) 이를 위해서는 `--gtest_list_tests`라는 flag를 사용한다.
 
 ```none
 TestSuite1.
@@ -1552,19 +1552,19 @@ TestSuite2.
   TestName
 ```
 
-`--gtest_list_tests` flag를 사용하면 테스트는 수행되지 않으며 단지 목록만 출력합니다. 더불어 이 옵션은 environment variable로는 설정할 수 없는 옵션입니다.
+`--gtest_list_tests` flag를 사용하면 테스트는 수행되지 않으며 목록만 출력해준다. 더불어 이 옵션은 environment variable로는 설정할 수 없는 옵션이다.
 
 #### 전체 Test 중에서 일부만 수행하기
 
-기본적으로 googletest는 test program에 정의된 모든 테스트를 수행합니다. 그러나 `GTEST_FILTER`라는 environment variable을 사용하면 디버깅 혹은 빠른 확인을 위해 테스트 중 일부만 수행할 수도 있습니다. 동일한 옵션을 `--gtest_filter`라는 cmd line flag를 통해서도 지정할 수 있습니다. 그러면 googletest는 테스트의 이름이 filter와 매칭되는 경우에만 수행하게 됩니다. (포맷 : `TestsuiteName.TestName`)
+기본적으로 googletest는 test program에 정의된 모든 테스트를 수행한다. 그러나 `GTEST_FILTER`라는 environment variable을 사용하면 디버깅 혹은 빠른 확인을 위해 테스트 중 일부만 수행할 수도 있다. 동일한 옵션을 `--gtest_filter`라는 cmd line flag를 통해서도 지정할 수 있다. 그러면 googletest는 테스트의 이름이 filter와 매칭되는 것들만 수행한다. (포맷 : `TestsuiteName.TestName`)
 
-Filter를 사용할 때, *positive pattern*(매칭되는 테스트 수행함)은 바로 이름을 적으면 되고 *negative pattern*(매칭되는 테스트 수행안함)는 이름 앞에 '`-`' 를 적어야 합니다. Positive, negative 각각에 대해서도 여러개의 pattern을 지정할 수 있는데 그런 경우에는 seperator '`:`'를 사용하면 됩니다. 순서로 보면 *positive pattern*을 (1개 혹은 여러개) 적은 후에, *negative pattern*을 (1개 혹은 여러개) 적습니다. 결과적으로 positive pattern과 매칭되면서 negative pattern과는 매칭되지 않는 테스트만 수행됩니다.
+Filter를 사용할 때, *positive pattern*(매칭되는 테스트 수행함)은 바로 이름을 적으면 되고 *negative pattern*(매칭되는 테스트 수행안함)는 이름 앞에 '`-`' 를 적어야 한다. Positive, negative 각각에 대해서도 여러개의 pattern을 지정할 수 있는데 그런 경우에는 seperator '`:`'를 사용하면 된다. 순서로 보면 *positive pattern*을 (1개 혹은 여러개) 적은 후에, *negative pattern*을 (1개 혹은 여러개) 적는다. 결과적으로 positive pattern과 매칭되면서 negative pattern과는 매칭되지 않는 테스트만 수행될 것이다.
 
-Pattern을 만들때는 `'*'`, `'?'`와 같은 wildcard도 사용할 수 있습니다. 이를 이용하면 아래처럼 간단한 표현이 가능해집니다. 또한, 아래와 같은 경우에는 '`*`'를 생략하는 것도 가능합니다.
+Pattern을 만들때는 `'*'`, `'?'`와 같은 wildcard도 사용할 수 있다. 이를 이용하면 아래처럼 간단한 표현이 가능하다. 또한, 아래와 같은 경우에는 '`*`'를 생략하는 것도 가능하다.
 
  `'*-NegativePatterns'` → `'-NegativePatterns'` (둘 다 가능)
 
-예제를 통해 다양한 사용법을 확인해세요.
+예제를 통해 다양한 사용법을 확인해보자.
 
 *   `./foo_test` : 모든 테스트
 *   `./foo_test --gtest_filter=*` : 모든 테스트
@@ -1576,11 +1576,11 @@ Pattern을 만들때는 `'*'`, `'?'`와 같은 wildcard도 사용할 수 있습�
 
 #### Test를 임시로 비활성화하기
 
-어떤 문제로 인해 전체 테스트를 진행할 수 없다면, 문제를 일으키는 test case를 `DISABLED_` prefix를 통해 해당 비활성화 할 수 있습니다. 이 방법은 `#if 0` 으로 막는 것보다 유용할 것입니다. 왜냐하면 단지 실행만 안될 뿐이지 컴파일 대상에는 포함되기 때문에 계속해서 유지보수될 수 있기 때문입니다.
+어떤 문제로 인해 전체 테스트를 진행할 수 없다면, 문제를 일으키는 test case를 `DISABLED_` prefix를 통해 해당 비활성화 할 수 있다. 이 방법은 `#if 0` 으로 막는 것보다 유용하다. 왜냐하면 단지 실행만 안될 뿐이지 컴파일 대상에는 포함되기 때문에 계속해서 유지보수할 수 있기 때문이다.
 
-물론, test case뿐만 아니라 test suite을 비활성화 하는 것도 가능합니다. 방법은 똑같이 "`DISALBED_`" prefix만 붙여주면 됩니다.
+물론, test case뿐만 아니라 test suite을 비활성화 하는 것도 가능하다. 방법은 똑같이 "`DISALBED_`" prefix만 붙여주면 된다.
 
-예제코드는 아래와 같습니다.
+이에 대한 예제코드는 아래와 같다.
 
 ```c++
 // Tests that Foo does Abc.
@@ -1592,19 +1592,19 @@ class DISABLED_BarTest : public ::testing::Test { ... };
 TEST_F(DISABLED_BarTest, DoesXyz) { ... }
 ```
 
-NOTE: 이 기능은 임시로 비활성화 할 때만 사용하는 것이 좋습니다. 문제가 있는 테스트는 언젠가 고쳐야 하며 이 시점은 빠를 수록 좋기 때문입니다. 더불어 googletest는 이렇게 비활성화된 테스트를 발견했을 때, warning message를 출력해 줍니다.
+NOTE: 이 기능은 임시로 비활성화 할 때만 사용하는 것이 좋다. 문제가 있는 테스트는 언젠가 고쳐야 하며 이 시점은 빠를 수록 좋기 때문이다. 더불어 googletest는 이렇게 비활성화된 테스트를 발견했을 때, warning message를 출력해준다.
 
-TIP: `gsearch` 혹은 `grep`을 사용하면 비활성화된 테스트의 개수를 쉽게 파악할 수 있습니다. 이런 결과는 프로젝트의 테스트 수준을 측정하는 지표로도 사용될 수 있습니다.
+TIP: `gsearch` 혹은 `grep`을 사용하면 비활성화된 테스트의 개수를 쉽게 파악할 수 있다. 이런 결과는 프로젝트의 테스트 수준을 측정하는 지표로도 사용할 수 있을 것이다.
 
 #### 비활성화된 Test를 활성화하기
 
-비활성화되어 있는 테스트를 실행하는 것도 가능합니다. 이 때에는 `--gtest_also_run_disabled_test`라는 flag를 전달하거나`GTEST_ALSO_RUN_DISABLED_TESTS`라는 environment variable을 `0`이 아닌 값으로 설정하면 됩니다. 더불어 `--gtest_filter`를 사용하면 비활성화 테스트 중에서도 원하는 것만을 골라서 수행할 수 있습니다.
+비활성화되어 있는 테스트를 실행하는 것도 가능하다. 이 때에는 `--gtest_also_run_disabled_test`라는 flag를 전달하거나`GTEST_ALSO_RUN_DISABLED_TESTS`라는 environment variable을 `0`이 아닌 값으로 설정하면 된다. 더불어 `--gtest_filter`를 사용하면 비활성화 테스트 중에서도 원하는 것만을 골라서 수행할 수 있다.
 
 ### Test를 반복 수행시키기
 
-가끔은 테스트의 결과가 왔다갔다 할 때가 있습니다. 재현빈도가 낮은 이슈들이 여기에 속합니다. 이러한 문제들은 혼란을 야기하기 때문에 반복적인 수행을 통해서 재현빈도와 문제점을 확인해봐야 합니다.
+가끔은 테스트의 결과가 왔다갔다 할 때가 있다. 재현빈도가 낮은 이슈들이 여기에 속하는데 이러한 문제들은 반복적인 수행을 통해서 재현빈도와 문제점을 확인해봐야 한다.
 
-이런 경우에는 `--gtest_repeat` flag를 사용하면 문제되는 테스트를 반복적으로 수행해 볼 수 있으며 디버깅에도 도움이 될 것입니다. 아래처럼 사용할 수 있습니다.
+이런 경우에는 `--gtest_repeat` flag를 사용하면 문제되는 테스트를 반복적으로 수행해 볼 수 있으며 디버깅에도 도움이 될 것이다. 아래처럼 사용할 수 있다.
 
 ```none
 $ foo_test --gtest_repeat=1000
@@ -1623,21 +1623,21 @@ $ foo_test --gtest_repeat=1000 --gtest_filter=FooBar.*
 Repeat the tests whose name matches the filter 1000 times.
 ```
 
-만약 test program이 [global set-up/tear-down](#global-set-up-tear-down)을 포함하고 있다면 그것도 역시 반복적으로 수행 될 것입니다. 왜냐하면 문제가 전역코드에 있을 수도 있기 때문에 이 부분도 필요합니다. 마지막으로 `GTEST_REPEAT` environment variable를 사용해서 반복횟수를 지정하는 것도 가능합니다.
+만약 test program이 [global set-up/tear-down](#global-set-up-tear-down)을 포함하고 있다면 그것도 역시 반복적으로 수행 될 것이다. 왜냐하면 문제가 전역코드에 있을 수도 있기 때문에 이 부분도 필요하다. 마지막으로 `GTEST_REPEAT` environment variable를 사용해서 반복횟수를 지정하는 것도 가능하다.
 
 ### Test 수행 순서를 섞기
 
-`--gtest_shuffle` flag  사용하거나 `GTEST_SHUFFLE` environment variable을 `1`로 설정하면 테스트들을 random하게 수행할 수 있습니다. 이러한 수행의 장점은 테스트 간의 의존성으로 인해 발생하는 문제를 확인할 수 있다는 것입니다.
+`--gtest_shuffle` flag  사용하거나 `GTEST_SHUFFLE` environment variable을 `1`로 설정하면 테스트들을 random하게 수행할 수 있다. 이러한 수행의 장점은 테스트 간의 의존성으로 인해 발생하는 문제를 확인할 수 있다는 것이다.
 
-Googletest는 random seed로 현재시간(time)을 사용하기 때문에 매 순간마다 random한 수행이 가능해집니다. 더불어 콘솔창에 random seed 값을 출력해주기 때문에 특정한 순서에서 발생하는 문제인지를 확인할 수 있습니다. 이러한 random seed를 변경하려면 `--gtest_random_seed=SEED` flag를 사용하거나 `GTEST_RANDOM_SEED` environment variable을 변경하면 됩니다. 설정값의 범위는 0~99999 입니다. 만약, random seed = 0 이라면 googletest는 기본설정(현재시간)을 사용하게 됩니다.
+Googletest는 random seed로 현재시간(time)을 사용하기 때문에 매 순간마다 random한 순서로 수행이 가능하다. 더불어 콘솔창에 random seed 값을 출력해주기 때문에 특정한 순서에서 발생하는 문제인지를 확인할 수 있다. 이러한 random seed를 변경하려면 `--gtest_random_seed=SEED` flag를 사용하거나 `GTEST_RANDOM_SEED` environment variable을 변경하면 된다. 설정값의 범위는 0~99999 이다. 만약, random seed = 0 이라면 googletest는 기본설정(현재시간)을 사용하게 된다.
 
-`--gtest_shuffle`과 `--gtest_repeat=N`을 함께 사용하면 반복할 때마다 새로운 random seed를 사용합니다.
+`--gtest_shuffle`과 `--gtest_repeat=N`을 함께 사용하면 반복할 때마다 새로운 random seed를 사용한다.
 
 ### Test Output 이모저모
 
 #### Terminal Output 색상 변경하기
 
-Googletest는 terminal output의 색상을 통해 중요한 내용을 강조할 수 있도록 도와줍니다.
+Googletest는 terminal output의 색상을 통해 중요한 내용을 강조할 수 있도록 도와준다.
 
 ```bash
 ...
@@ -1660,25 +1660,25 @@ some error messages
 [   FAILED ] AnotherTest.DoesXyz 2 FAILED TESTS
 ```
 
-`GTEST_COLOR` environment variable 또는 `--gtest_color` flag에 `yes`, `no`, `auto` 값을 지정하면 됩니다. 기본적으로는 `auto`로 설정되어 있습니다. `auto`인 경우에 googletest의 출력은 terminal 설정에 따라 달라집니다. Windows가 아닌 경우에는 `xterm` 혹은 `xterm-color`에 의해 설정된 `TERM` environment variable로 설정된 값을 이용합니다.
+`GTEST_COLOR` environment variable 또는 `--gtest_color` flag에 `yes`, `no`, `auto` 값을 지정하면 된다. 기본적으로는 `auto`로 설정되어 있다. `auto`인 경우에 googletest의 출력은 terminal 설정에 따라 달라진다. Windows가 아닌 경우에는 `xterm` 혹은 `xterm-color`에 의해 설정되는 `TERM`이라는 environment variable을 이용한다.
 
 #### Test 수행시간 출력하지 않기
 
-Googletest는 기본적으로 각 테스트의 수행시간을 출력하고 있습니다. 이러한 기능을 비활성화 하려면 `--gtest_print_time=0` flag를 사용하거나 `GTEST_PRINT_TIME` environment variable을 `0`으로 설정하면 됩니다.
+Googletest는 기본적으로 각 테스트의 수행시간을 출력하고 있다. 이러한 기능을 비활성화 하려면 `--gtest_print_time=0` flag를 사용하거나 `GTEST_PRINT_TIME` environment variable을 `0`으로 설정하면 된다.
 
 #### UTF-8 형식 사용하지 않기
 
-테스트가 실패했을 때, googletest는 expected value와 actual value의 `string`값을 hex-encoded로 출력해 주거나 UTF-8로 출력해 줍니다. 만약, 사용자 환경에서 UTF-8을 사용할 수 없다면 이를 비활성화해야 합니다. 이를 위해서는 `--gtest_print_utf8` flag를 `0`으로 설정하거나 `GTEST_PRINT_UTF8` environment variable을 `0`으로 설정해야 합니다.
+테스트가 실패했을 때, googletest는 expected value와 actual value의 `string`값을 hex-encoded로 출력해 주거나 UTF-8로 출력해 준다. 만약, 사용자 환경에서 UTF-8을 사용할 수 없다면 이를 비활성화해야 한다. 이를 위해서는 `--gtest_print_utf8` flag를 `0`으로 설정하거나 `GTEST_PRINT_UTF8` environment variable을 `0`으로 설정한다.
 
 #### XML Report 출력하기
 
-Googletest는 테스트결과를 XML 형식으로 출력하는 방법도 제공합니다. XML Report는 각 테스트의 수행시간도 포함하기 때문에 느리게 수행되는 테스트를 확인하는데에 도움이 될 것입니다. 또한, XML Report를 이용하면 dashboard를 구축하는데도 도움이 될 것입니다.
+Googletest는 테스트결과를 XML 형식으로 출력하는 방법도 제공한다. XML Report는 각 테스트의 수행시간도 포함하기 때문에 느리게 수행되는 테스트를 확인하는데에 도움이 될 것이다. 또한, XML Report를 이용하면 dashboard를 구축하는데도 도움이 될 것이다.
 
-XML Rerpot를 생성하려면 `--gtest_output` flag 혹은 `GTEST_OUTPUT` environment variable에 `"xml:path_to_output_file"`을 대입하면 됩니다. 경로지정 없이 그냥 `"xml"`만 대입하면 현재 경로에 `test_detail.xml` 파일을 생성해 줍니다.
+XML Report를 생성하려면 `--gtest_output` flag 혹은 `GTEST_OUTPUT` environment variable에 `"xml:path_to_output_file"`을 대입하면 된다. 경로지정 없이 그냥 `"xml"`만 대입하면 현재 경로에 `test_detail.xml` 파일을 생성해 준다.
 
-경로를 지정할 때는 Linux에서는 `"xml:output/directory/"`와 같이 지정하고 Windows에서는 `"xml:output\directory\"`과 같이 지정하면 됩니다. 그러면 해당 경로에 XML 파일이 저장되며 파일의 이름은 test program 이름을 사용하게 됩니다. 예를 들어서 test program이 `foo_test` 혹은 `foo_test.exe` 라면 XML 파일은 `foo_test.xml` 이 됩니다. 만약 동일한 파일이 이미 존재한다면 `foo_test_1.xml`과 같은 이름으로 자동으로 변경하기 때문에 덮어쓰기는 걱정하지 않아도 됩니다.
+경로를 지정할 때는 Linux에서는 `"xml:output/directory/"`와 같이 지정하고 Windows에서는 `"xml:output\directory\"`과 같이 지정하면 된다. 그러면 해당 경로에 XML 파일이 저장되며 파일의 이름은 test program 이름을 사용하게 된다. 예를 들어서 test program이 `foo_test` 혹은 `foo_test.exe` 라면 XML 파일은 `foo_test.xml`이 된다. 만약 동일한 파일이 이미 존재한다면 `foo_test_1.xml`과 같은 이름으로 자동으로 변경하기 때문에 덮어쓰기는 걱정하지 않아도 된다.
 
-Googletest의 XML Rerpot 출력방식은 `junitreport` Ant task를 모티브로 합니다. 다만, 대상 언어가 C++, Java로 서로 다르기 때문에 약간의 차이는 있습니다. 그럼 googletest의 XML Report 예시는 아래와 같습니다.
+Googletest의 XML Rerpot 출력방식은 `junitreport` Ant task를 모티브로 한다. 다만, 대상 언어가 C++, Java로 서로 다르기 때문에 약간의 차이는 있을 수 있다. 그럼 googletest의 XML Report 예시는 아래와 같다.
 
 ```xml
 <testsuites name="AllTests" ...>
@@ -1692,9 +1692,9 @@ Googletest의 XML Rerpot 출력방식은 `junitreport` Ant task를 모티브로 
 </testsuites>
 ```
 
-*   `<testsuites>`은 전체 test program을 의미합니다. (testsuites의 's'를 유의하세요.)
-*   `<testsuite>`은 각각의 test suite을 의미합니다. 
-*   `<testcase>`는 `TEST()` 혹은 `TEST_F()`로 정의한 test case(test function)을 의미합니다.
+*   `<testsuites>`은 전체 test program을 의미한다. (testsuites에 's'가 있음을 유의하자.)
+*   `<testsuite>`은 각각의 test suite을 의미한다. 
+*   `<testcase>`는 `TEST()` 혹은 `TEST_F()`로 정의한 test case(test function)을 의미한다.
 
 아래와 같은 test program이 있다고 가정해보면
 
@@ -1704,7 +1704,7 @@ TEST(MathTest, Subtraction) { ... }
 TEST(LogicTest, NonContradiction) { ... }
 ```
 
-XML Report는 아래와 같이 출력됩니다.
+XML Report는 아래와 같이 출력된다.
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -1724,21 +1724,21 @@ XML Report는 아래와 같이 출력됩니다.
 </testsuites>
 ```
 
-몇 가지 기억해야 할 점은 아래와 같습니다.
+몇 가지 기억해야 할 점은 아래와 같다.
 
-*   `<testsuites>`과 `<testsuite>`이 가지고 있는 `tests`라는 attribute은 해당 test suite에 몇 개의 test function이 있는지를 의미합니다. 반면에 `failure` attribute은 그 중에서 몇 개의 test function이 실패했는지를 보여줍니다.
+*   `<testsuites>`과 `<testsuite>`이 가지고 있는 `tests`라는 attribute은 해당 test suite에 몇 개의 test function이 있는지를 의미한다. 반면에 `failure` attribute은 그 중에서 몇 개의 test function이 실패했는지를 보여준다.
     
-*   `time`은 test suites, test suite, test case들이 모두 가지고 있는 attribute이며 각각의 수행시간이 얼마인지를 알려줍니다. 
+*   `time`은 test suites, test suite, test case들이 모두 가지고 있는 attribute이며 각각의 수행시간이 얼마인지를 알려준다.
     
-*   `timestamp`는 test가 시작된 시각을 알려주는 attribute입니다.
+*   `timestamp`는 test가 시작된 시각을 알려주는 attribute이다.
     
-*   `<failure>` element는 실패한 각각의 googletest assertion을 의미합니다. (`failures` attribute와는 다릅니다.)
+*   `<failure>` element는 실패한 각각의 googletest assertion을 의미한다. (`failures` attribute와는 다르다.)
 
 #### JSON Report 출력하기
 
-Googletest는 테스트결과를 JSON 형식으로 출력하는 방법도 제공합니다. JSON Report를 출력하기 위해서는 `GTEST_OUTPUT` environment variable을 설정하거나 `--gtest_output` flag를 사용하면 됩니다. 사용방법은 XML Report와 유사합니다. `GTEST_OUTPUT`이나 `--gtest_output` flag에 `"json:path_to_output_file"`을 대입하면 JSON Report가 저장될 위치를 지정할 수도 있습니다. 간단하게 `"json"`만 지정하면 현재 위치에 `test_detail.json` 파일을 생성해 줍니다.
+Googletest는 테스트결과를 JSON 형식으로 출력하는 방법도 제공한다. JSON Report를 출력하기 위해서는 `GTEST_OUTPUT` environment variable을 설정하거나 `--gtest_output` flag를 사용하면 된다. 사용방법은 XML Report와 유사하다. `GTEST_OUTPUT`이나 `--gtest_output` flag에 `"json:path_to_output_file"`을 대입하면 JSON Report가 저장될 위치를 지정할 수도 있다. 간단하게 `"json"`만 지정하면 현재 위치에 `test_detail.json` 파일을 생성한다.
 
-그럼 googletest의 JSON Report 예시는 아래와 같습니다.
+그럼 googletest의 JSON Report 예시는 아래와 같다.
 
 ```json
 {
@@ -1808,7 +1808,7 @@ Googletest는 테스트결과를 JSON 형식으로 출력하는 방법도 제공
 }
 ```
 
-이러한 JSON Report의 출력형식은 [JSON encoding](https://developers.google.com/protocol-buffers/docs/proto3#json)을 사용한 Proto3을 따르고 있습니다. Proto3은 아래와 같습니다.
+이러한 JSON Report의 출력형식은 [JSON encoding](https://developers.google.com/protocol-buffers/docs/proto3#json)을 사용한 Proto3을 따르고 있다. Proto3은 아래와 같다.
 
 ```proto
 syntax = "proto3";
@@ -1864,7 +1864,7 @@ TEST(MathTest, Subtraction) { ... }
 TEST(LogicTest, NonContradiction) { ... }
 ```
 
-JSON Report는 아래와 같이 출력됩니다.
+JSON Report는 아래와 같이 출력된다.
 
 ```json
 {
@@ -1925,18 +1925,18 @@ JSON Report는 아래와 같이 출력됩니다.
 }
 ```
 
-IMPORTANT: JSON Report 형식은 변경될 수도 있습니다.
+IMPORTANT: JSON Report 형식은 변경될 수도 있다.
 
 ### Failure가 발생했을 때 가능한 조작법
 
 #### Assertion Failures를 Break-Points처럼 사용하기
 
-디버거에서 test program을 동작시킨다면 assertion이 발생했을 때, 바로 interactive mode로 전환되게 하면 디버깅에 도움이 될 것입니다. googletest는 그런 사용자를 위해 *break-on-failure* mode를 제공합니다.
+디버거에서 test program을 동작시킨다면 assertion이 발생했을 때, 바로 interactive mode로 전환되게 하면 디버깅에 도움이 될 것이다. googletest는 그런 사용자를 위해 *break-on-failure* mode를 제공한다.
 
-`GTEST_BREAK_ON_FAILURE` environment variable을 `0`이 아닌 값으로 설정하거나 `--gtest_break_on_failure` flag를 사용하면 이 기능을 활성화할 수 있습니다.
+`GTEST_BREAK_ON_FAILURE` environment variable을 `0`이 아닌 값으로 설정하거나 `--gtest_break_on_failure` flag를 사용하면 이 기능을 활성화할 수 있다.
 
 #### Exception Catching 비활성화하기
 
-기본설정의 googletest는 테스트가 C++ exception를 던진 경우에 exception을 catch하고 해당 테스트를 실패로 판정합니다. 그리고는 다음 테스트를 계속해서 진행합니다. 이런 동작방식이 기본설정인 이유는 한 번의 실행으로도 최대한 많은 테스트를 수행하기 위함입니다. 더불어 Windows와 같은 환경에서 발생할 수 있는 문제도 예방하게 됩니다. 예를 들면 uncaught exception으로 인해 발생한 pop-up이 자동화 테스트를 멈추게 하는데, googletest가 exception을 catch하고 실패로 처리함으로써 자동으로 넘어갈 수 있게 됩니다.
+기본설정의 googletest는 테스트가 C++ exception를 던진 경우에 exception을 catch하고 해당 테스트를 실패로 판정한다. 그리고는 다음 테스트를 계속해서 진행한다. 이런 동작방식이 기본설정인 이유는 한 번의 실행으로도 최대한 많은 테스트를 수행하기 위함이다. 더불어 Windows와 같은 환경에서 발생할 수 있는 문제도 예방하게 된다. 예를 들면 uncaught exception으로 인해 발생한 pop-up이 자동화 테스트를 멈추게 하는데 googletest가 exception을 catch하고 실패로 처리함으로써 자동으로 넘어갈 수 있게 된다.
 
-만약, 사용자가 googletest의 exception 처리를 비활성화하고 싶다면 그것도 가능합니다. 그러한 경우의 예로 디버거의 exception catch기능을 사용하고 싶은 경우가 있을 것입니다. 이를 통해 exception 발생시점의 call stack 확인 등이 가능해지기 때문입니다. 이런 경우에는 `GTEST_CATCH_EXCEPTIONS` environment variable을 `0`으로 설정하거나 `--gtest_catch_exceptions=0` flag를 사용하면 됩니다.
+만약, 사용자가 googletest의 exception 처리를 비활성화하고 싶다면 그것도 가능하다. 그러한 경우의 예로 디버거의 exception catch 기능을 사용하고 싶은 경우가 있을 것이다. 이를 통해 exception 발생시점의 call stack 확인 등이 가능하기 때문이다. 그런 경우에는 `GTEST_CATCH_EXCEPTIONS` environment variable을 `0`으로 설정하거나 `--gtest_catch_exceptions=0` flag를 사용하면 된다.
