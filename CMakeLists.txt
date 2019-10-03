@@ -8,7 +8,7 @@ if (POLICY CMP0048)
 endif (POLICY CMP0048)
 
 project(googletest-distribution)
-set(GOOGLETEST_VERSION 1.9.0)
+set(GOOGLETEST_VERSION 1.10.0)
 
 if (CMAKE_VERSION VERSION_LESS "3.1")
   add_definitions(-std=c++11)
