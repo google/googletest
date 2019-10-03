@@ -5,24 +5,19 @@
 [![Build Status](https://api.travis-ci.org/google/googletest.svg?branch=master)](https://travis-ci.org/google/googletest)
 [![Build status](https://ci.appveyor.com/api/projects/status/4o38plt0xbo1ubc8/branch/master?svg=true)](https://ci.appveyor.com/project/GoogleTestAppVeyor/googletest/branch/master)
 
-### Future Plans
+### Announcements:
 
-#### 1.8.x Release:
+#### Release 1.10.x
 
-[the 1.8.x](https://github.com/google/googletest/releases/tag/release-1.8.1) is
-the last release that works with pre-C++11 compilers. The 1.8.x will not accept
-any requests for any new features and any bugfix requests will only be accepted
-if proven "critical"
+[Release 1.10.x](https://github.com/google/googletest/releases/tag/v1.10.x) is
+now available.
 
-#### Post 1.8.x:
+#### Coming Soon
 
-On-going work to improve/cleanup/pay technical debt. When this work is completed
-there will be a 1.9.x tagged release
-
-#### Post 1.9.x
-
-Post 1.9.x googletest will follow
-[Abseil Live at Head philosophy](https://abseil.io/about/philosophy)
+*   Post 1.10.x googletest will follow
+    [Abseil Live at Head philosophy](https://abseil.io/about/philosophy)
+*   We are also planning to take a dependency on
+    [Abseil](https://github.com/abseil/abseil-cpp).
 
 ## Welcome to **Google Test**, Google's C++ test framework!
 
