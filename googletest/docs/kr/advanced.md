@@ -1931,7 +1931,7 @@ IMPORTANT: JSON Report 형식은 변경될 수도 있다.
 
 #### Assertion Failures를 Break-Points처럼 사용하기
 
-디버거에서 test program을 동작시킨다면 assertion이 발생했을 때, 바로 interactive mode로 전환되게 하면 디버깅에 도움이 될 것이다. googletest는 그런 사용자를 위해 *break-on-failure* mode를 제공한다.
+디버거에서 test program을 동작시킬 때는 assertion 발생시점에 바로 interactive mode로 전환되는 것이 디버깅에 도움이 될 것이다. googletest는 그런 사용자를 위해 *break-on-failure* mode를 제공한다.
 
 `GTEST_BREAK_ON_FAILURE` environment variable을 `0`이 아닌 값으로 설정하거나 `--gtest_break_on_failure` flag를 사용하면 이 기능을 활성화할 수 있다.
 
