@@ -337,7 +337,7 @@ NOTE: `NiceMock`과 `StrictMock`의 대상은 *uninteresting call*이지 *unexpe
 2. `MockFoo`의 destructor가 virtual이 아니라면 `NiceMock<MockFoo>`, `StrictMock<MockFoo>`가 정상적으로 동작하지 않을 수 있다. 이 이슈는 내부적으로 확인 중이다.
 3. `MockFoo`의 constructor나 destructor가 수행되는 동안에는 nice 모드, strict 모드가 적용되지 *않는다*. 따라서 constructor나 destructor에서 `this`를 이용해 mock method를 호출하는 경우에는 의도한 것과 다르게 동작할 수 있다. 이러한 동작방식은 C++ 언어자체의 제약사항에 기반하며 constructor나 destructor에서 `this`를 이용해 virtual method를 호출하는 경우에는 해당 method를 non-virtual로 취급하게 된다. 다시 말해서 derived class의 constructor나 destructor가 호출되면 자연스럽게 base class의 constructor나 destructor도 호출될텐데 그런 경우에 base class의 constructor나 destructor에서 `this`를 사용했다면 이는 base class 자신을 가리킨다는 의미이다. 이런 동작방식은 안정성을 보장하기 위한 C++언어 특징 중 하나이다. 만약, 이렇게 동작하지 않는다면 base class의 constructor는 아직 초기화되지 않은 derived class의 정보를 사용하려고 시도할 것이며 마찬가지로 destructor도 이미 삭제된 derived class의 정보를 참조할 수도 있기 때문에 심각한 문제를 초래할 수 있다.
 
-마지막으로 naggy 모드, strict 모드는 테스트를 조금 더 자주 실패하게 만들기 때문에 유지보수 관점에서는 안 좋아질 수도 있다. 따라서 이들을 사용해야 할 때는 **주의**를 기울이자. 예를 들어, 코드의 외부는 그대로 두고 내부적인 동작에 대해서만 refactoring하는 경우라면 테스트코드는 수정하지 않는 것이 이상적이다. 그러나 naggy 모드로 설정되어 있다면 이러한 내부적인 수정에 대해서도 많은 warning들이 발생 할 것이다. 게다가 strict 모드라면 아예 테스트가 실패하기 때문에 테스트코드의 유지보수 비용이 증가될 것이다. 이를 위해 추천드리는 방법은 일반적인 상황에서는 nice 모드을 주로 사용하고 테스트코드를 개발할 때는 naggy 모드를 사용하는 것이 좋다. (현재 gMock은 naggy모드가 기본설정이긴 합니다.) 그리고 strict 모드는 필요한 경우에 한번씩 점검용으로 사용하기 바란다.
+마지막으로 naggy 모드, strict 모드는 테스트를 조금 더 자주 실패하게 만들기 때문에 유지보수 관점에서는 안 좋아질 수도 있다. 따라서 이들을 사용해야 할 때는 **주의**를 기울이자. 예를 들어, 코드의 외부는 그대로 두고 내부적인 동작에 대해서만 refactoring하는 경우라면 테스트코드는 수정하지 않는 것이 이상적이다. 그러나 naggy 모드로 설정되어 있다면 이러한 내부적인 수정에 대해서도 많은 warning들이 발생할 것이다. 게다가 strict 모드라면 아예 테스트가 실패하기 때문에 테스트코드의 유지보수 비용이 증가될 것이다. 추천하는 방법은 일반적인 상황에서는 nice 모드을 주로 사용하고 테스트코드를 개발할 때는 naggy 모드를 사용하는 것이다. (현재 gMock은 naggy모드가 기본설정임) 그리고 strict 모드는 필요한 경우에 한번씩 점검용으로 사용하면 유용할 것이다.
 
 ### 기존코드에 영향을 주지 않고, interface를 단순하게 만들기
 
@@ -461,7 +461,7 @@ class FakeFoo : public Foo {
 
 `Foo`라는 interface에 대해 mock class를 만들고 expectation을 설정하려 한다. 이 때, 이미 사용하고 있던 `FakeFoo` class를 재사용하고 싶다면 어떻게 하면 될까? 바로 mock function의 기본 동작으로 fake function을 지정하면 된다. 이를 통해 fake function과 동일한 내용을 mock class에 다시 구현하게 되는 중복작업를 피할 수 있다. 결과적으로 mock function의 동작은 이미 구현되어 있는 fake function을 그대로 사용하고 expectation만 지정하면 된다.
 
-이렇게 gMock을 사용해 fake function을 default action으로 지정하고 싶을 경우, 아래 패턴을 사용하기 바란다.
+이처럼 gMock을 사용해 fake function을 default action으로 지정하고 싶다면 아래 패턴을 사용해보자.
 
 ```cpp
 class MockFoo : public Foo {
@@ -816,7 +816,7 @@ using ::testing::Lt;
 
 위 코드는 `Blah()`가 argument 3개(`x`, `y`, `z`)를 전달받았을 때, `x < y < z`를 만족해야 함을 의미한다.
 
-`With`를 쉽게 사용하기 위해서 gMock의 일부 matcher들은 2-tuples 타입을 지원하고 있다. 위 예제의 `Lt()`도 그 중 하나이다. 2-tuples를 지원하는 matcher의 전체목록은 [여기](cheat_sheet.md#multi-argument-matchers)를 참조하시기 바란다.
+`With`를 쉽게 사용하기 위해서 gMock의 일부 matcher들은 2-tuples 타입을 지원하고 있다. 위 예제의 `Lt()`도 그 중 하나이다. 2-tuples를 지원하는 matcher의 전체목록은 [여기](cheat_sheet.md#multi-argument-matchers)에서 확인할 수 있다.
 
 만약 `.With(Args<0, 1>(Truly(&MyPredicate)))`와 같이 직접 만든 predicate를 사용하고 싶은 경우에는 해당 predicate의 argument가 `::testing::tuple` 타입으로 선언되어 있어야만 한다. 왜냐하면 gMock이 `Args<>`를 통해 선택된 argument들을 1개의 tuple 형태로 변환해서 predicate으로 전달하기 때문이다.
 
@@ -1142,7 +1142,7 @@ gMock의 `ON_CALL()`은 아마도 자주 사용되는 기능은 아닐 것이다
 
 1개의 테스트로 많은 것을 검증하려고 하는 것은 좋지 않다. **1개 테스트로는 1개만 검증하는 것이 좋은 습관이다.** 그렇게 해야만 bug가 발생해도 1~2개의 테스트에서만 문제가 될 것이다. 그렇지 않고 여러개의 테스트가 한 번에 잘못되면 디버깅하기가 훨씬 어려워진다. 또한, 테스트의 이름을 통해서 무엇을 검증하려 하는지 자세히 표현하는 것도 좋은 습관이다. 그렇게 해야 log만 보고도 어떤 문제인지 예측할 수 있게 된다.
 
-이제부터는 `ON_CALL()`을 먼저 사용하고 실제로 필요할 때만 `EXPECT_CALL()`을 사용하기 바란다. 예를 들어 test fixture에 여러개의 `ON_CALL()`을 구현할 수도 있다. 그렇게 되면 모든 `TEST_F()`가 동일한 설정을 공유하도록 할 수 있다. 이렇게 `ON_CALL()`을 통해 기본적인 설정을 공유한 다음에 개별 `TEST_F()`에는 조심스럽게 `EXPECT_CALL()`을 적용하기 바란다. 이러한 전략은 각각의 `TEST_F()`에 많은 `EXPECT_CALL()`을 사용하는 것보다 훨씬 유연한 테스트로 만들어 줄 것이다. 또한, 테스트의 목적도 명확하게 표현할 수 있기 때문에 가독성 및 유지보수성도 향상될 것이다.
+이제부터는 `ON_CALL()`을 먼저 사용하고 실제로 필요할 때만 `EXPECT_CALL()`을 사용하기 바란다. 예를 들어 test fixture에 여러개의 `ON_CALL()`을 구현할 수도 있다. 그렇게 되면 모든 `TEST_F()`가 동일한 설정을 공유하도록 할 수 있다. 이렇게 `ON_CALL()`을 통해 기본적인 설정을 공유한 다음에 개별 `TEST_F()`에는 조심스럽게 `EXPECT_CALL()`을 적용하는 것이 좋다. 이러한 전략은 각각의 `TEST_F()`에 많은 `EXPECT_CALL()`을 사용하는 것보다 훨씬 유연한 테스트로 만들어 줄 것이다. 또한, 테스트의 목적도 명확하게 표현할 수 있기 때문에 가독성 및 유지보수성도 향상될 것이다.
 
 만약, `EXPECT_CALL()`을 사용하는 mock function들이 너무 많은 "Uninteresting mock function call"을 발생시켜서 문제가 된다면 `NiceMock`을 사용해보자. 또는 문제가 되는 mock function에 대해 `EXPECT_CALL(....).Times(AnyNumber())`를 사용하는 것도 좋다. 단지 warning message를 없애기 위한 목적으로 너무 상세한 `EXPECT_CALL(....)`을 작성해서는 안 된다. 그렇게 하면 유지보수가 힘들어질 것이다.
 
@@ -1442,7 +1442,7 @@ Argument가 여러개이고 각각의 기대사항이 복잡한 mock method가 �
 
 ### Mocking에서 Side Effects(부수효과) 사용하기
 
-Method가 반환값만으로 프로그램에 영향을 주는 것은 아니다. 예를 들어, method에서 global variable을 수정하면 반환값을 통하지 않더라도 프로그램의 상태를 변경할 수 있으며 문법적으로도 문제가 없다. 이렇게 반환값 외의 동작으로 프로그램에 영향을 주는 행위를 side-effect라고 한다. side-effect라고 해서 꼭 문제되는 상황을 의미하는 것이 아님을 기억하기 바란다. 이러한 side-effect를 mocking에 사용하기 위한 가장 기본적인 방법은 `::testing::ActionInterface`를 사용자가 직접 정의하는 것이다. 물론 gMock은 side-effect와 관련된 기본적인 기능들도 역시 제공하고 있다. 
+Method가 반환값만으로 프로그램에 영향을 주는 것은 아니다. 예를 들어, method에서 global variable을 수정하면 반환값을 통하지 않더라도 프로그램의 상태를 변경할 수 있으며 문법적으로도 문제가 없다. 이렇게 반환값 외의 동작으로 프로그램에 영향을 주는 행위를 side-effect라고 한다. (side-effect라는 용어가 어떤 문제되는 상황을 의미하는 것이 아님을 기억하자.) 이러한 side-effect를 mocking에 사용하기 위한 가장 기본적인 방법은 `::testing::ActionInterface`를 사용자가 직접 정의하는 것이다. 물론 gMock은 side-effect와 관련된 기본적인 기능들도 역시 제공하고 있다. 
 
 먼저, 포인터형식으로 전달된 argument의 값을 바꾸고 싶다면 built-in action인 `SetArgPointee()`를 사용하면 된다.
 
@@ -1484,7 +1484,7 @@ class MockMutator : public Mutator {
                       Return(true)));
 ```
 
-Argument가 배열인 경우에는 `SetArrayArgument<N>(first, last)`를 사용하기 바란다. 이 action은 [first, last) 구간에 있는 값들은 전달받은 N번째 argument(배열)에 복사해준다.
+Argument가 배열인 경우에는 `SetArrayArgument<N>(first, last)`를 사용하면 된다. 이 action은 [first, last) 구간에 있는 값들은 전달받은 N번째 argument(배열)에 복사해준다.
 
 ```cpp
 using ::testing::NotNull;
@@ -2065,7 +2065,7 @@ Note: 이 예제의 단점도 있다. 만약 expectation이 만족하지 않으�
 
 C++11에서 *move-only-type*이 소개되었다. Move-only-type이란 이동은 가능하지만 복사는 불가능한 객체를 의미한다. C++의 `std::unique_ptr<T>`가 그러한 예제 중에 하나이다.
 
-이러한 move-only-type을 반환하는 함수를 mocking하는 것은 사실 좀 어렵지만 역시 불가능한 것은 아니다. 다만, 이에 대한 해결방법이 2017년 4월에 gMock에 추가되었기 때문에 그보다 예전버전을 사용하고 있다면 [Legacy workarounds for move-only types](cook_book.md#legacy--move-only-type-해결방법)를 참조하기를 바란다.
+이러한 move-only-type을 반환하는 함수를 mocking하는 것은 사실 좀 어렵지만 역시 불가능한 것은 아니다. 다만, 이에 대한 해결방법이 2017년 4월에 gMock에 추가되었기 때문에 그보다 예전버전을 사용하고 있다면 [Legacy workarounds for move-only types](cook_book.md#legacy--move-only-type-해결방법)를 참조하자.
 
 먼저 가상의 프로젝트를 하나 진행하고 있다고 해보자. 이 프로젝트는 사람들이 "buzzes"라고 불리는 짧은 글을 작성하고 공유할 수 있게 해주는 프로젝트이다. 이를 위해서 아래와 같은 타입들을 정의하고 사용하고 있다.
 
@@ -2169,7 +2169,7 @@ Lambda 혹은 callable object를 사용하면 위와 같은 문제를 해결할 
 
 #### Legacy : move-only type 해결방법
 
-Move-only argument를 지원하는 기능은 2017년 4월에 gMock에 추가되었다. 따라서 그보다 예전 gMock을 사용하고 있는 사용자는 아래와 같은 방법을 사용하기 바란다. (사실 더 이상 필요하지는 않지만 참조용으로 남겨둔 내용임)
+Move-only argument를 지원하는 기능은 2017년 4월에 gMock에 추가되었다. 따라서 그보다 예전 gMock을 사용하고 있는 사용자는 아래와 같은 방법을 사용할 수 있을 것이다. (사실 더 이상 필요하지는 않지만 참조용으로 남겨둔 내용임)
 
 아래 예제는 move-only argument를 전달받는 `SharedBuzz()`라는 method를 mocking하는 코드이다. 이를 위해서는 `SharedBuzz()`의 역할을 대신 수행하기 위한 method를 추가해야 한다. 즉, 아래 코드의 `DoShareBuzz()`이다. 그런 후에 `ShareBuzz()` 대신에 `DoShareBuzz()`를 mocking 하면 된다.
 
@@ -2256,7 +2256,7 @@ Mock object는 자신이 소멸되는 시점에 연관된 모든 expectation의 
 
 만약, mock object가 소멸되지 않는다면 어떤 일이 발생할까? 알 수 없는 bug로 인해서 mock object가 소멸되지 않았다고 가정해보자. 그렇게 되면 실제로 문제가 발생했는데도 이를 눈치채지 못하고 넘어갈 수 있다.
 
-이러한 문제를 완화시키기 위해서 heap checker를 사용하는 것도 좋은 방법이다. Heap checker는 mock object의 소멸여부를 알려주는 역할을 수행한다. 다만, 사실 heap checker의 구현도 100% 완벽하지는 않기 때문에 gMock은 사용자가 직접 검증을 수행할 수 있는 방법도 제공하고 있다. 이를 위해서는 `Mock::VerifyAndClearExpectations(&mock_object)`를 사용하기 바란다.
+이러한 문제를 완화시키기 위해서 heap checker를 사용하는 것도 좋은 방법이다. Heap checker는 mock object의 소멸여부를 알려주는 역할을 수행한다. 다만, 사실 heap checker의 구현도 100% 완벽하지는 않기 때문에 gMock은 사용자가 직접 검증을 수행할 수 있는 방법도 제공하고 있다. 이를 위해서는 `Mock::VerifyAndClearExpectations(&mock_object)`를 사용하면 된다.
 
 ```cpp
 TEST(MyServerTest, ProcessesRequest) {
@@ -2409,13 +2409,13 @@ gMock은 잠재적으로 error 가능성이 있는 부분에 대해 warning mess
 - `warning`: gMock은 warning, error를 출력해 준다. 단, 그 내용이 `info` 모드보다 자세하지는 않다. 현재 gMock의 기본설정이기도 하다.
 - `error`: gMock은 error만 출력해준다.
 
-Flag 외에 코드에서 아래와 같은 변수를 수정해도 동일한 기능을 적용할 수 있다.
+만약, flag를 사용할 수 없다면 소스코드에서 아래와 같이 구현함으로써 동일한 기능을 적용할 수 있다.
 
 ```cpp
   ::testing::FLAGS_gmock_verbose = "error";
 ```
 
-이제, 어떤 모드가 본인에게 제일 적합한지 잘 판단하고 사용하기 바란다.
+이제 어떤 모드가 본인에게 적합한지 구분하고 사용할 수 있을 것이다.
 
 ### Mock 호출을 자세하게 들여다보기
 
@@ -2479,7 +2479,7 @@ Actual function call count doesn't match EXPECT_CALL(mock, F("c", HasSubstr("d")
 
 여기서 세번째 `EXPECT_CALL()`의 `"c"`가 원래 `"a"`를 쓰려다가 잘못 쓴 오타라고 가정해보자. 즉, `mock.F("a", "good")`라는 호출은 원래 세번째 `EXPECT_CALL()`과 매칭되었어야 한다. 이제 위에 출력된 정보를 보면 `mock.F("a", "good")`이 첫번째 `EXPECT_CALL()`과 매칭되어 문제가 됐음을 바로 알 수 있다. 기존에는 불가능했던 일이다.
 
-만약, mock call trace은 보고 싶지만 stack trace는 보고 싶지 않다면 test program을 실행할 때 flag 2개를 조합(`--gmock_verbose=info --gtest_stack_trace_depth=0`)해서 실행하기 바란다.
+만약, mock call trace는 보고 싶지만 stack trace는 보고 싶지 않다면 test program을 실행할 때 flag 2개를 조합(`--gmock_verbose=info --gtest_stack_trace_depth=0`)해서 실행하면 된다.
 
 ### Emacs에서 테스트 실행하기
 
@@ -2493,7 +2493,7 @@ Emacs에서 `M-x google-complie` 명령을 통해 테스트를 구현하고 실�
 (global-set-key [M-up]  '(lambda () (interactive) (next-error -1)))
 ```
 
-이제 `M-m`을 눌러서 빌드를 시작하고 `M-up` / `M-down`을 눌러서 error 간에 이동할 수 있다. 더불어 빌드할 때마다 테스트도 같이 수행하고 싶다면 `M-m` 명령의 build command 설정부분에 `foo_test.run` 혹은 `runtests`라는 내용을 추가하기 바란다.
+이제 `M-m`을 눌러서 빌드를 시작하고 `M-up` / `M-down`을 눌러서 error 간에 이동할 수 있다. 더불어 빌드할 때마다 테스트도 같이 수행하고 싶다면 `M-m` 명령의 build command 설정부분에 `foo_test.run` 혹은 `runtests`라는 내용을 추가하면 된다.
 
 ## Extending gMock
 
@@ -2623,7 +2623,7 @@ MATCHER_P(HasAbsoluteValue, value, "") { return abs(arg) == value; }
 MATCHER_Pk(name, param_1, ..., param_k, description_string) { statements; }
 ```
 
-위에서 `description_string`은 matcher의 **instance**마다 다를 수 있음을 기억하기 바란다. 위에서 얘기했듯이 `description_string`이 `param_name`을 참조하기 때문에 `param_name`의 값에 따라 출력되는 내용이 달라질 수 있다는 의미이다. 그리고 필요하다면 `description_string`에서 parameter를 참조하는 것도 가능하다.
+위에서 `description_string`은 matcher의 **instance**마다 다를 수 있음을 기억하자. 위에서 얘기했듯이 `description_string`이 `param_name`을 참조하기 때문에 `param_name`의 값에 따라 출력되는 내용이 달라질 수 있다는 의미이다. 그리고 필요하다면 `description_string`에서 parameter를 참조하는 것도 가능하다.
 
 예제를 보자.
 
