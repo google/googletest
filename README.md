@@ -14,7 +14,7 @@ now available.
 
 #### Coming Soon
 
-*   Post 1.10.x googletest will follow
+*   Post 1.10.x google test will follow
     [Abseil Live at Head philosophy](https://abseil.io/about/philosophy)
 *   We are also planning to take a dependency on
     [Abseil](https://github.com/abseil/abseil-cpp).
@@ -36,12 +36,12 @@ The information for **Google Test** is available in the
 **Google Mock** is an extension to Google Test for writing and using C++ mock
 classes. See the separate [Google Mock documentation](googlemock/README.md).
 
-More detailed documentation for googletest is in its interior
-[googletest/README.md](googletest/README.md) file.
+More detailed documentation for google test is in its interior
+[googletest/README.MD](googletest/README.md) file.
 
 ## Features
 
-*   An [xUnit](https://en.wikipedia.org/wiki/XUnit) test framework.
+*   A [xUnit](https://en.wikipedia.org/wiki/XUnit) test framework.
 *   Test discovery.
 *   A rich set of assertions.
 *   User-defined assertions.
@@ -54,7 +54,7 @@ More detailed documentation for googletest is in its interior
 
 ## Platforms
 
-Google test has been used on a variety of platforms:
+Google test has been used in a variety of platforms:
 
 *   Linux
 *   Mac OS X
@@ -85,7 +85,7 @@ following notable projects:
 automated test-runner and Graphical User Interface with powerful features for
 Windows and Linux platforms.
 
-[Google Test UI](https://github.com/ospector/gtest-gbar) is test runner that
+[Google Test UI](https://github.com/ospector/gtest-gbar) is a test runner that
 runs your test binary, allows you to track its progress via a progress bar, and
 displays a list of test failures. Clicking on one shows failure text. Google
 Test UI is written in C#.
@@ -99,7 +99,7 @@ result output. If your test runner understands TAP, you may find it useful.
 runs tests from your binary in parallel to provide significant speed-up.
 
 [GoogleTest Adapter](https://marketplace.visualstudio.com/items?itemName=DavidSchuldenfrei.gtest-adapter)
-is a VS Code extension allowing to view Google Tests in a tree view, and
+is a VS Code extension allowing to view Google Tests in a tree view and
 run/debug your tests.
 
 ## Requirements
@@ -112,7 +112,7 @@ Patches for fixing them are welcome!
 
 ### Build Requirements
 
-These are the base requirements to build and use Google Test from a source
+These are the base requirements to build and use the Google Test from a source
 package:
 
 *   [Bazel](https://bazel.build/) or [CMake](https://cmake.org/). NOTE: Bazel is
