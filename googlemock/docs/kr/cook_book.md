@@ -1881,7 +1881,7 @@ bool IsVisibleInQuadrant1(bool visible, int x, int y) {
       .WillOnce(Invoke(IsVisibleInQuadrant1));  // Uh, won't compile. :-(
 ```
 
-그러나 위 코드는 당연히 컴파일이 안 될 것이다. 이 문제를 해결하기 위해서는 먼저 `Foo()`와 동일한 signature를 갖는 "adaptor"를 하나 구현해서 `Invoke()`가 호출될 수 있도록 만들어줘야 한다.
+그러나 위 코드는 당연히 compile이 안 될 것이다. 이 문제를 해결하기 위해서는 먼저 `Foo()`와 동일한 signature를 갖는 "adaptor"를 하나 구현해서 `Invoke()`가 호출될 수 있도록 만들어줘야 한다.
 
 ```cpp
 using ::testing::_;
@@ -2195,13 +2195,13 @@ class MockBuzzer : public Buzzer {
   mock_buzzer_.ShareBuzz(MakeUnique<Buzz>(AccessLevel::kInternal), 0);
 ```
 
-### 컴파일을 빠르게 하기
+### Compile을 빠르게 하기
 
-모든 사람이 동의할지는 모르겠지만, mock class를 컴파일하는 시간의 대부분은 constructor와 destructor를 만드는데 사용됩니다. 왜냐하면 constructor나 destructor에서 expectation 검증과 같은 중요한 일들을 수행하기 때문이기도 하고 더 직접적으로는 mock method가 여러가지 타입에 대응해야 한다면 constructor나 destructor도 각각의 타입에 대해 컴파일되기 때문입니다. 결과적으로 다양한 타입을 사용하는 method가 많을수록 컴파일 속도가 느려질 확률이 큽니다.
+모든 사람이 동의할지는 모르겠지만 mock class를 compile하는 시간의 대부분은 constructor와 destructor를 위해 사용한다. 왜냐하면 constructor나 destructor에서 expectation 검증과 같은 중요한 일들을 수행하기 때문이기도 하고 더 직접적으로는 mock method가 여러가지 타입에 대응해야 한다면 constructor나 destructor도 각각의 타입에 대해 compile되기 때문이다. 결과적으로 다양한 타입을 사용하는 method가 많을수록 compile 속도가 느려질 확률이 크다.
 
-만약 사용자가 컴파일 속도로 인해 어려움을 겪고 있다면 mock class의 constructor와 destructor에 구현된 내용을 class body 밖으로 빼내서 별도의 `.cpp` 파일로 이동시키는 것도 괜찮은 옵션 중 하나입니다. 이렇게 하면 mock class가 정의된 헤더파일을 여러 곳에서 `#include` 하더라도 속도가 느려지지 않습니다. 즉, constructor와 destructor가 한 번만 컴파일되기 때문에 그 속도도 빨라질 것입니다.
+만약 사용자가 compile 속도로 인해 어려움을 겪고 있다면 mock class의 constructor와 destructor에 구현된 내용을 class body 밖으로 빼내서 별도의 `.cpp` 파일로 이동시키는 것도 괜찮은 옵션 중 하나이다. 이렇게 하면 mock class가 정의된 헤더파일을 여러 곳에서 `#include` 하더라도 속도가 느려지지 않는다. 즉, constructor와 destructor가 한 번만 compile되기 때문에 그 속도도 빨라질 것이다.
 
-아래에서 관련 예제들을 확인하도록 하겠습니다.
+아래에서 관련 예제들을 확인해보자.
 
 ```cpp
 // File mock_foo.h.
@@ -2218,9 +2218,9 @@ class MockFoo : public Foo {
 };
 ```
 
-먼저 위의 코드는 개선사항을 적용하기 전입니다. Class에 constructor와 destructor가 없기 때문에 컴파일러가 직접 생성해줘야 하며 이를 위해 많은 컴파일 시간이 소모됩니다. 
+먼저 위의 코드는 개선사항을 적용하기 전이다. Class에 constructor와 destructor가 없기 때문에 compiler가 직접 생성해줘야 하며 이를 위해 많은 compile 시간이 소모된다. 
 
-반면에 아래 코드는 constructor와 destructor를 직접 선언했지만 정의(구현)는 하지 않았습니다.
+반면에 아래 코드는 constructor와 destructor를 직접 선언했지만 정의(구현)는 하지 않았다.
 
 ```cpp
 // File mock_foo.h.
@@ -2237,7 +2237,7 @@ class MockFoo : public Foo {
 };
 ```
 
-그런 후에 constructor와 destructor의 정의를 `mock_foo.cpp`라는 별도 파일에 구현하면 컴파일속도를 개선할 수 있습니다.
+그런 후에 constructor와 destructor의 정의를 `mock_foo.cpp`라는 별도 파일에 구현하면 compile 속도를 개선할 수 있다.
 
 ```cpp
 // File mock_foo.cc.
@@ -2252,11 +2252,11 @@ MockFoo::~MockFoo() {}
 
 ### 검증을 바로 수행하기
 
-Mock object는 자신이 소멸되는 시점에 연관된 모든 expectation의 수행결과를 종합하여 알려줍니다. 이런 방식을 통해 사용자가 직접 모든 expectation이 만족되었는지 확인해야하는 수고를 덜어줍니다. 다만 이것은 어디까지나 mock object가 정상적으로 소멸된다는 가정하에서 의미가 있는 내용입니다.
+Mock object는 자신이 소멸되는 시점에 연관된 모든 expectation의 수행결과를 종합하여 알려준다. 이런 방식을 통해 사용자가 직접 모든 expectation이 만족되었는지 확인해야하는 수고를 덜어준다. 다만 이것은 어디까지나 mock object가 정상적으로 소멸된다는 가정하에서 의미가 있는 내용이다.
 
-만약, mock object가 소멸되지 않는다면 어떤일이 발생할까요? 알 수 없는 bug로 인해서 mock object가 소멸되지 않았다고 가정해봅시다. 그렇게 되면 실제로 문제가 발생했는데도 이를 눈치채지 못하고 넘어갈 수가 있습니다.
+만약, mock object가 소멸되지 않는다면 어떤 일이 발생할까? 알 수 없는 bug로 인해서 mock object가 소멸되지 않았다고 가정해보자. 그렇게 되면 실제로 문제가 발생했는데도 이를 눈치채지 못하고 넘어갈 수 있다.
 
-이러한 문제를 완화시키기 위해서 heap checker를 사용하는 것도 좋은 방법입니다. Heap checker는 mock object의 소멸여부를 알려주는 역할을 수행합니다. 다만, 사실 heap checker의 구현도 100% 완벽하지는 않기 때문에 gMock은 사용자가 직접 검증을 수행할 수 있는 방법을 제공하고 있습니다. 이런 경우에는 `Mock::VerifyAndClearExpectations(&mock_object)`를 사용하시기 바랍니다.
+이러한 문제를 완화시키기 위해서 heap checker를 사용하는 것도 좋은 방법이다. Heap checker는 mock object의 소멸여부를 알려주는 역할을 수행한다. 다만, 사실 heap checker의 구현도 100% 완벽하지는 않기 때문에 gMock은 사용자가 직접 검증을 수행할 수 있는 방법도 제공하고 있다. 이를 위해서는 `Mock::VerifyAndClearExpectations(&mock_object)`를 사용하기 바란다.
 
 ```cpp
 TEST(MyServerTest, ProcessesRequest) {
@@ -2276,17 +2276,17 @@ TEST(MyServerTest, ProcessesRequest) {
 }  // server is destroyed when it goes out of scope here.
 ```
 
-**Tip:** `Mock::VerifyAndClearExpectations()`은 검증의 성공여부를 `bool` 타입으로 반환합니다. 따라서 해당 mock object의 검증결과를 `ASSERT_TRUE()`를 통해서 다시 확인하는 것도 가능합니다.
+**Tip:** `Mock::VerifyAndClearExpectations()`은 검증의 성공여부를 `bool` 타입으로 반환한다. 따라서 해당 mock object의 검증결과를 `ASSERT_TRUE()`를 통해서 다시 확인하는 것도 가능하다.
 
 ### Check Point 사용하기
 
-어떤 mock object에 설정한 다양한 내용들을 "reset" 하고 싶을 때도 있습니다. 그러한 시점을 "check point"라고 부릅니다. 즉, 설정된 expectation들이 만족되었는지 한 차례 확인한 후에 다시 새로운 expectation들을 지정하는 것입니다. 이러한 방법은 mock object가 "phases" 개념 위에서 동작하도록 만들어 줍니다. 쉽게 말해서 단계별로 검증해야 할 항목들을 분류하는 것이 가능해집니다.
+때때로 mock object에 설정된 내용들을 "reset" 하고 싶을 수도 있다. 그러한 시점을 "check point"라고 부른다. 즉, 설정된 expectation들이 만족되었는지 한 차례 확인한 후에 다시 새로운 expectation들을 지정하는 것이다. 이러한 방법은 mock object가 "phases" 개념 위에서 동작하도록 만들어 준다. 쉽게 말해서 단계별로 검증해야 할 항목들을 분류하는 것이 가능해진다.
 
-가능한 예상 시나리오는 먼저 `SetUp()`에서 1차적인 검증을 수행한 후에 개별 `TEST_F`를 정의할 때는 `SetUp()`에서 사용한 기존의 expectation들을 초기화하고 새롭게 지정하는 것입니다.
+가능한 예상 시나리오는 먼저 `SetUp()`에서 1차적인 검증을 수행한 후에 개별 `TEST_F`를 정의할 때는 `SetUp()`에서 사용한 기존의 expectation들을 초기화하고 새롭게 지정하는 것이다.
 
-위에서 확인한 것처럼 `Mock::VerifyAndClearExpectations()`함수는 호출되는 시점에 바로 검증을 수행하므로 이러한 경우에 사용하기 적합합니다. 혹시, `ON_CALL()`을 사용해서 default action을 지정했다가 특정시점에 변경하는 방법을 사용하고 있다면 `Mock::VerifyAndClear(&mock_object)`를 사용하기를 추천합니다. 이 함수는 `Mock::VerfiyAndClearExpectations(&mock_object)`와 동일한 동작을 함과 동시에 추가적으로 `ON_CALL()`을 통해 설정한 내용도 초기화 해주기 때문입니다.
+위에서 확인한 것처럼 `Mock::VerifyAndClearExpectations()` 함수는 호출되는 시점에 바로 검증을 수행하므로 이러한 경우에 사용하기 적합하다. 혹시, `ON_CALL()`을 사용해서 default action을 지정했다가 특정시점에 변경하는 방법을 사용하고 있다면 `Mock::VerifyAndClear(&mock_object)`를 사용하기를 추천한다. 이 함수는 `Mock::VerfiyAndClearExpectations(&mock_object)`와 동일한 동작을 함과 동시에 추가적으로 `ON_CALL()`을 통해 설정한 내용도 초기화 해주기 때문이다.
 
-또 다른 방법은 expectation을 sequence안에 두는 것입니다. 그런 다음 dummy "check-point"를 만들어서 검증하려는 함수의 호출순서를 강제화하기 위해 사용할 수 있습니다. 예를 들어 아래코드를 검증한다고 해봅시다.
+또 다른 방법은 expectation을 sequence안에 두는 것이다. 그런 다음 dummy "check-point"를 만들어서 검증하려는 함수의 호출순서를 강제화하기 위해 사용할 수 있다. 예를 들어 아래코드를 검증한다고 해보자.
 
 ```cpp
   Foo(1);
@@ -2294,7 +2294,7 @@ TEST(MyServerTest, ProcessesRequest) {
   Foo(3);
 ```
 
-위의 function들을 통해서 검증하려는 것은 `Foo(1)`과 `Foo(3)`이 `mock.Bar("a")`를 호출해야 한다는 것과 `Foo(2)`는 아무것도 호출하지 않기를 바란다는 것입니다. 이제 아래처럼 구현하면 됩니다.
+위의 function들을 통해서 검증하려는 것은 `Foo(1)`과 `Foo(3)`이 `mock.Bar("a")`를 호출해야 한다는 것과 `Foo(2)`는 아무것도 호출하지 않기를 바란다는 것이다. 이제 아래처럼 구현하면 된다.
 
 ```cpp
 using ::testing::MockFunction;
@@ -2320,19 +2320,19 @@ TEST(FooTest, InvokesBarCorrectly) {
 }
 ```
 
-위의 expectation은 첫번째 `Bar("a")`가 check point "1" 이전에 수행되기를 기대하고 두번째 `Bar("a")`는 check point "2" 이후에 수행되기를 기대합니다. check point "1" 과 check point "2" 사이에는 `Bar("a")` 가 호출되면 안됩니다. 이렇게 명시적으로 check point를 만들어서 `Bar("a")`가 3개의 `Foo()` 호출 중 어느것에 매칭되어야 하는지 표현할 수 있습니다.
+위의 expectation은 첫번째 `Bar("a")`가 check point "1" 이전에 수행되기를 기대하고 두번째 `Bar("a")`는 check point "2" 이후에 수행되기를 기대한다. check point "1" 과 check point "2" 사이에는 `Bar("a")` 가 호출되면 안 된다. 이렇게 명시적으로 check point를 만들어서 `Bar("a")`가 3개의 `Foo()` 호출 중 어느 것에 매칭되어야 하는지 표현할 수 있다.
 
 ### Destructor Mocking하기
 
-때때로 mock object가 원하는 시점에 딱 소멸되기를 바랄 수 있습니다. 이를 위해서는 destructor가 언제 호출되는지 확인하는 것이 가장 좋은 방법일 것입니다. 그럼 mock object가 `bar->A()`, `bar->B()` 호출의 중간시점에 소멸되기를 기대한다고 해보겠습니다. Mock function이 호출되는 순서에 대해서는 이미 배웠기 때문에 destructor를 mocking하는 방법만 배우면 구현할 수 있을 것입니다.
+때때로 mock object가 원하는 시점에 딱 소멸되기를 바랄 수 있다. 이를 위해서는 destructor가 언제 호출되는지 확인하는 것이 가장 좋은 방법일 것이다. 그럼 mock object가 `bar->A()`, `bar->B()` 호출의 중간시점에 소멸되기를 기대한다고 해보자. Mock function이 호출되는 순서에 대해서는 이미 배웠기 때문에 destructor를 mocking하는 방법만 배우면 구현할 수 있을 것이다.
 
-한 가지만 제외하면 그다지 어렵지 않습니다. 먼저 destructor는 일반적인 함수와는 문법이 좀 다릅니다. 따라서 `MOCK_METHOD`를 사용할 수가 없습니다.
+한 가지만 제외하면 그다지 어렵지 않다. 먼저 destructor는 일반적인 함수와는 문법이 좀 다르다. 따라서 `MOCK_METHOD`를 사용할 수가 없다.
 
 ```cpp
 MOCK_METHOD(void, ~MockFoo, ());  // Won't compile!
 ```
 
-좋은 소식은 간단한 패턴을 적용하면 동일한 효과를 얻을 수 있다는 것입니다. 먼저 `Die()`라는 mock function을 하나 생성합니다. 그런 다음 `Die()`를 destructor에서 호출하도록 구현합니다.
+좋은 소식은 간단한 패턴을 적용하면 동일한 효과를 얻을 수 있다는 것이다. 먼저 `Die()`라는 mock function을 하나 생성한다. 그런 다음 `Die()`를 destructor에서 호출하도록 구현한다.
 
 ```cpp
 class MockFoo : public Foo {
@@ -2343,7 +2343,7 @@ class MockFoo : public Foo {
 };
 ```
 
-`Die()`라는 이름을 이미 사용중이면 다른 이름을 사용해도 됩니다. 이제 끝났습니다. `MockFoo` class의 destructor가 호출되는 시점을 확인할 수 있게 되었습니다. 아래와 같이 구현하면 `Die()`가 `bar->A()`, `bar->B()` 중간에 호출되는지를 검증할 수 있습니다.
+`Die()`라는 이름을 이미 사용 중이면 다른 이름을 사용해도 된다. 그럼 끝이다. 이제 `MockFoo` class의 destructor가 호출되는 시점을 확인할 수 있다. 아래와 같이 구현하면 `Die()`가 `bar->A()`, `bar->B()` 중간에 호출되는지를 검증할 수 있을 것이다.
 
 ```cpp
   MockFoo* foo = new MockFoo;
@@ -2361,28 +2361,28 @@ class MockFoo : public Foo {
 
 ### gMock과 Thread 사용하기
 
-사실 **unit** test는 single-threaded context에 구현하는 것이 제일 좋습니다. 그렇게 해야 race condition과 deadlock을 피할 수 있고, 디버깅하기가 훨씬 쉽기 때문입니다.
+사실 **unit** test는 single-threaded context에 구현하는 것이 제일 좋다. 그렇게 해야 race condition과 deadlock을 피할 수 있고 디버깅하기가 훨씬 쉽기 때문이다.
 
-그러나 실제로 많은 프로그램은 multi-threaded context로 구현되어 있고 이를 위한 테스트도 필요한 것이 사실입니다. gMock은 관련한 테스트 방법들도 제공하고 있습니다.
+그러나 실제로 많은 프로그램은 multi-threaded context로 구현되어 있고 이를 위한 테스트도 필요한 것이 사실이다. gMock은 그러한 테스트 방법들도 제공하고 있다.
 
-먼저 Mock을 사용하는 과정을 떠올려 봅시다.
+먼저 Mock을 사용하는 과정을 떠올려 보자.
 
-1. `foo`라는 mock object를 생성합니다.
-2. `ON_CALL()` 또는 `EXPECT_CALL()`을 이용해서 `foo`의 method들에 기대하는 내용(default action, expectation)을 지정합니다.
-3. 테스트 대상코드가 `foo`의 method를 실제로 호출합니다.
-4. (선택사항) 검증하고 mock을 초기화합니다.
-5. Mock을 직접 소멸시키거나 테스트 대상코드에서 소멸시키도록 합니다. 이제 destructor가 검증을 수행하게 됩니다.
+1. `foo`라는 mock object를 생성한다.
+2. `ON_CALL()` 또는 `EXPECT_CALL()`을 이용해서 `foo`의 method들에 기대하는 내용(default action, expectation)을 지정한다.
+3. 테스트 대상코드가 `foo`의 method를 실제로 호출한다.
+4. (선택사항) 검증하고 mock을 초기화한다.
+5. Mock을 직접 소멸시키거나 테스트 대상코드에서 소멸시키도록 한다. 이제 destructor가 검증을 수행하게 된다.
 
-이러한 다섯 단계를 진행하는 과정에서 아래 규칙들만 잘 지켜진다면 multi-threads를 적용하는데도 큰 무리는 없습니다.
+이러한 다섯 단계를 진행하는 과정에서 아래 규칙들만 잘 지켜진다면 multi-threads를 적용하는데도 큰 무리는 없다.
 
-- 테스트 코드는 하나의 thread에서 시작합니다.(테스트 대상코드는 아닐수도 있지만)
-- 위 1단계에서 동기화도구(lock 종류)는 사용하지 않습니다.
-- 위 2단계, 5단계를 수행할 때, 다른 thread가 `foo`에 접근하지 못하도록 합니다.
-- 위 3단계, 4단계는 원하는 환경으로 수행할 수 있습니다.(single thread 혹은 multi-threads) gMock이 내부적으로 동기화 해주기 때문에 테스트코드에서 필요한 것이 아니라면 굳이 직접 동기화를 구현할 필요는 없습니다.
+- 테스트 코드는 하나의 thread에서 시작한다. (테스트 대상코드는 아닐수도 있지만)
+- 위 1단계에서 동기화도구(lock 종류)는 사용하지 않는다.
+- 위 2단계, 5단계를 수행할 때, 다른 thread가 `foo`에 접근하지 못하도록 한다.
+- 위 3단계, 4단계는 원하는 환경으로 수행할 수 있다. (single thread 혹은 multi-threads) gMock이 내부적으로 동기화 해주기 때문에 테스트코드에서 필요한 것이 아니라면 굳이 직접 동기화를 구현할 필요는 없다.
 
-규칙 위반에 대해서는 미정의 동작이기 때문에 문제가 발생할 수 있습니다. 예를 들어 `foo`의 어떤 method에 대해 expectation을 설정하고 있을 때, 다른 thread가 해당 method를 호출하면 안됩니다. Multi-threaded context에서는 이러한 내용들을 항상 주의하시기 바랍니다.
+이러한 규칙이 위반되는 것은 미정의 동작이기 때문에 문제가 발생할 수 있다. 예를 들어 `foo`의 어떤 method에 대해 expectation을 설정하고 있을 때, 다른 thread가 해당 method를 호출하면 안 된다. Multi-threaded context에서는 이러한 내용들을 항상 주의해야 한다.
 
-다음으로 gMock은 어떤 mock function의 action이 해당 mock function을 호출한 thread와 동일한 thread에서 수행되는 것을 보장합니다. 아래 예제를 보겠습니다.
+다음으로 gMock은 어떤 mock function의 action이 해당 mock function을 호출한 thread와 동일한 thread에서 수행되는 것을 보장한다. 아래 예제를 보자.
 
 ```cpp
   EXPECT_CALL(mock, Foo(1))
@@ -2391,31 +2391,31 @@ class MockFoo : public Foo {
       .WillOnce(action2);
 ```
 
-위의 코드에서 `Foo(1)`이 thread #1에서 호출되고 `Foo(2)`가 thread #2에서 호출된다면 `action1`은 thread #1에서 수행되고 `action2`는 thread #2에서 수행됨이 보장됩니다.
+위의 코드에서 `Foo(1)`이 thread #1에서 호출되고 `Foo(2)`가 thread #2에서 호출된다면 `action1`은 thread #1에서 수행되고 `action2`는 thread #2에서 수행됨이 보장된다.
 
-gMock은 같은 sequence에 속한 action들이 서로 다른 thread에서 수행되는 것을 *허용하지 않습니다.* 만약 그렇게 되면 action간에 협력이 필요한 경우에 deadlock을 유발할 수도 있기 때문입니다. 반대로 생각하면 위 예제의 `action1`과 `action2`에는 sequence를 사용하지 않았기 때문에 서로 다른 thread에서 수행해도 된다는 것을 의미하기도 합니다. 이러한 내용들과는 별개로 사용자의 구현 과정에서 발생하는 동기화 문제들에 대해서는 사용자가 직접 동기화 로직을 추가하고 thread-safe로 만들어줘야 합니다.
+gMock은 같은 sequence에 속한 action들이 서로 다른 thread에서 수행되는 것을 *허용하지 않는다.* 만약 그렇게 되면 action 간에 협력이 필요한 경우에 deadlock을 유발할 수도 있기 때문이다. 반대로 생각하면 위 예제의 `action1`과 `action2`에는 sequence를 사용하지 않았기 때문에 서로 다른 thread에서 수행해도 된다는 것을 의미하기도 한다. 이러한 내용들과는 별개로 사용자의 구현 과정에서 발생하는 동기화 문제들에 대해서는 사용자가 직접 동기화 로직을 추가하고 thread-safe로 만들어줘야 한다.
 
-마지막으로 `DefaultValue<T>`를 사용하면 현재 test program에서 살아있는 모든 mock object에 영향을 준다는 것입니다. 따라서 multiple threads 환경이거나 수행중인 action이 있을 때는 사용하지 않는 것이 좋습니다.
+마지막으로 `DefaultValue<T>`를 사용하면 현재 test program에서 살아있는 모든 mock object에 영향을 준다는 것이다. 따라서 multiple threads 환경이거나 수행 중인 action이 있을 때는 사용하지 않는 것이 좋다.
 
 ### gMock이 출력할 정보의 양 조절하기
 
-gMock은 잠재적으로 error 가능성이 있는 부분에 대해 warning message를 출력해 줍니다. 대표적인 예로 uninteresting call이 있습니다. 즉, expectation이 없는 mock function에 대해서 error로 여기지는 않지만 사용자가 실수했을 수도 있음을 알리기 위해 warning message로 알려주는 것입니다. 이 때, 해당 uninteresting function에 전달된 argument와 return value 등의 정보를 출력해줌으로써 사용자는 이것이 실제로 문제인지 아닌지 다시 한 번 검토해 볼 수 있습니다.
+gMock은 잠재적으로 error 가능성이 있는 부분에 대해 warning message를 출력해 준다. 대표적인 예로 uninteresting call이 있다. 즉, expectation이 없는 mock function에 대해서 error로 여기지는 않지만 사용자가 실수했을 수도 있음을 알리기 위해 warning message를 출력해준다. 이 때, 해당 uninteresting function에 전달된 argument와 return value 등의 정보를 출력해줌으로써 사용자는 이것이 실제로 문제인지 아닌지를 검토할 수 있게 된다.
 
-만약, 현재 테스트코드에 문제가 없다고 생각되는 순간이 오면 이와 같은 정보가 달갑지 않을 것입니다. 출력물이 지저분해지기 때문이죠. 하지만 반대로 테스트코드를 디버깅하고 있거나 googletest를 통해 테스트대상의 동작을 공부하는 중이라면 그러한 정보가 많을 수록 좋을 것입니다. 쉽게 말해서 사람마다 필요한 정보의 양의 다르다는 것입니다.
+만약, 현재 테스트코드에 문제가 없다고 생각되는 순간이 오면 이와 같은 정보가 달갑지 않을 것이다. 출력물이 지저분해지기 때문이다. 하지만 반대로 테스트코드를 디버깅하고 있거나 googletest를 통해 테스트대상의 동작을 공부하는 중이라면 그러한 정보가 많을수록 좋을 것이다. 쉽게 말하면 사람마다 필요한 정보의 양의 다르다는 것이다.
 
-따라서 gMock은 이러한 정보의 양을 조절하는 방법을 제공합니다. 실행시점에 `--gmock_verbose=LEVEL`이라는 flag를 사용하면 됩니다. 여기서 `LEVEL`에는 3개의 값을 지정할 수 있습니다.
+따라서 gMock은 이러한 정보의 양을 조절하는 방법을 제공한다. 실행시점에 `--gmock_verbose=LEVEL`이라는 flag를 사용하면 된다. 여기서 `LEVEL`에는 3개의 값을 지정할 수 있다.
 
-- `info`: gMock은 warning, error등의 모든 정보를 최대한 자세하게 출력합니다. 또한, `ON_CALL()/EXPECT_CALL()` 사용에 대한 log도 출력해 줍니다.
-- `warning`: gMock은 warning, error를 출력해 줍니다. 단, 그 내용이 `info` 모드보다 자세하지는 않습니다. 현재 gMock의 기본설정입니다.
-- `error`: gMock은 error만 출력해줍니다.
+- `info`: gMock은 warning, error 등의 모든 정보를 최대한 자세하게 출력한다. 또한, `ON_CALL()/EXPECT_CALL()` 사용에 대한 log도 출력해 준다.
+- `warning`: gMock은 warning, error를 출력해 준다. 단, 그 내용이 `info` 모드보다 자세하지는 않다. 현재 gMock의 기본설정이기도 하다.
+- `error`: gMock은 error만 출력해준다.
 
-Flag 외에 코드에서 아래와 같은 변수를 수정해도 동일한 기능을 적용할 수 있습니다.
+Flag 외에 코드에서 아래와 같은 변수를 수정해도 동일한 기능을 적용할 수 있다.
 
 ```cpp
   ::testing::FLAGS_gmock_verbose = "error";
 ```
 
-이제, 어떤 모드가 본인에게 제일 적합한지 잘 판단하고 사용하기 바랍니다.
+이제, 어떤 모드가 본인에게 제일 적합한지 잘 판단하고 사용하기 바란다.
 
 ### Mock 호출을 자세하게 들여다보기
 
@@ -3110,7 +3110,7 @@ ActionName<t1, ..., t_m, u1, ..., u_k>(v1, ..., v_n)
 위 코드를 overloading 할 때, template parameter의 개수가 아닌 value parameter의 개수에 따라 overloading함을 주의하십시오. 왜냐하면 template parameter를 기준으로 하면 아래와 같이 2가지 해석이 가능해지므로 문제가 됩니다. 즉, 모호함이 발생할 수 있으므로 안됩니다.
 
 * template parameter 1개 (`int`) + value paramter 1개 (`bool x`)
-* template parameter 2개 (`int`, `bool`) + value parameter 1개 (임의의 타입 `x` , 컴파일러가 나중에 추론)
+* template parameter 2개 (`int`, `bool`) + value parameter 1개 (임의의 타입 `x` , compiler가 나중에 추론)
 
 ### ACTION Object의 타입 확인하기
 
