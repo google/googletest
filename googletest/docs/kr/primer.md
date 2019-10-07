@@ -306,9 +306,9 @@ Test program을 모두 구현했다면 이제 `main()` function에서 `RUN_ALL_T
 
 ## main() function 작성하기
 
-마지막으로 test program의 `main()` function을 작성하는 방법을 소개한다.
+마지막으로 test program의 `main()` function 구현방법에 대해서 소개한다.
 
-사용자가 테스트코드를 구현할 때, 처음 시작으로 아래 코드를 복사해서 사용하는 것을 추천한다.
+사용자가 테스트코드를 구현을 시작할 때는 아래 코드를 복사해서 사용하는 것을 추천한다.
 
 ```c++
 #include "this/package/foo.h"
