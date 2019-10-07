@@ -3283,4 +3283,4 @@ TEST(FooTest, RunsCallbackWithBarArgument) {
 
 위 코드에서 주의할 점은 `mock_function.AsStdFunction()`를 통해서 생성된 function object는 본체인 `mock_function`에 대한 proxy라는 점이다. 따라서 proxy가 아무리 여러개 생성되고 호출된다고 하더라도 이들은 모두 `EXPECT_CALL(mock_function, Call("bar")).WillOnce(Return(1));`을 공통적으로 사용하게 된다.
 
-마지막으로 C++의 `std::function` argument 개수에 제한이 없지만 `MockFunction`은 10개로 제한하고 있다는 점도 유의하자.
+마지막으로 C++의 `std::function`은 argument 개수에 제한이 없지만 `MockFunction`은 10개로 제한하고 있다는 점도 유의하자.
