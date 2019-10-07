@@ -271,7 +271,7 @@ b and c (4 and 10) are not mutually prime, as they have a common divisor 2.
 
 위 표에서 "almost equal"이란, googletest 기본설정에 따라 2개의 값이 오차범위 4 ULP's 내에서 같음을 의미한다.
 
-만약, 사용자가 오차범위를 직접 지정하고 싶다면 아래의 assertion을 사용하기 바란다.
+만약, 오차범위를 직접 지정하고 싶다면 아래의 assertion을 사용하면 된다.
 
 | Fatal assertion                       | Nonfatal assertion                    | Verifies                                                     |
 | ------------------------------------- | ------------------------------------- | ------------------------------------------------------------ |
@@ -580,7 +580,7 @@ TEST_F(FooDeathTest, DoesThat) {
 
 ### 정규식 문법
 
-POSIX system(e.g. Linux, Cygwin, Mac) 환경에서는 [POSIX extended regular expression](http://www.opengroup.org/onlinepubs/009695399/basedefs/xbd_chap09.html#tag_09_04) 문법을 사용한다. 관련 문법을 공부하려면 [Wikipedia entry](http://en.wikipedia.org/wiki/Regular_expression#POSIX_Extended_Regular_Expressions)를 참조하기 바란다.
+POSIX system(e.g. Linux, Cygwin, Mac) 환경에서는 [POSIX extended regular expression](http://www.opengroup.org/onlinepubs/009695399/basedefs/xbd_chap09.html#tag_09_04) 문법을 사용한다. 관련 문법은 [Wikipedia entry](http://en.wikipedia.org/wiki/Regular_expression#POSIX_Extended_Regular_Expressions)서 확인할 수 있다.
 
 Windows 환경에서는 googletest 자체적으로 간단한 문법을 구현하여 사용하고 있다. 따라서 기능이 약간 부족할 수도 있다. 예를 들어 (`"x|y"`), (`"(xy)"`), (`"[xy]"`), (`"{5,7}"`) 과 같은 문법은 지원하지 않고 있다. 아래 표에서 사용가능한 문법을 확인할 수 있다. (`A`와 `.`는 문자, `\\`은 escape sequnce, `x`, `y`는 정규식을 의미한다.)
 
@@ -1521,7 +1521,7 @@ int main(int argc, char** argv) {
 
 ### Listeners에서 failure 발생시키기
 
-Event를 처리할 때에도 `EXPECT_*()`, `ASSERT_*()`, `FAIL()`와 같은 assertion을 사용할 수 있다. 단, 아래 내용들을 주의하기 바란다.
+Event를 처리할 때에도 `EXPECT_*()`, `ASSERT_*()`, `FAIL()`와 같은 assertion을 사용할 수 있다. 단, 아래 내용들은 주의가 필요하다.
 
 1.  `OnTestPartResult()` 안에서는 어떤 failure라도 발생시키면 안 된다. 만약 `OnTestPartResult()`에서 failure가 발생하면 무한히 재귀호출할 것이다.
 1.  `OnTestPartResult()`를 처리하는 listener도 failure를 발생시키면 안 된다.
