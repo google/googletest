@@ -656,5 +656,26 @@ TEST(MockMethodMockFunctionTest, MockMethodSizeOverhead) {
   EXPECT_EQ(sizeof(MockMethodSizes0), sizeof(MockMethodSizes4));
 }
 
+struct MockMethodNoexceptSpecifier {
+  MOCK_METHOD(void, func1, (), (noexcept));
+  MOCK_METHOD(void, func2, (), (noexcept(true)));
+  MOCK_METHOD(void, func3, (), (noexcept(false)));
+  MOCK_METHOD(void, func4, (), (noexcept(noexcept(1+1))));
+  MOCK_METHOD(void, func5, (), (const, noexcept(noexcept(1+1))));
+  MOCK_METHOD(void, func6, (), (noexcept(noexcept(1+1)), const));
+  // Put commas in the noexcept expression
+  MOCK_METHOD(void, func7, (), (noexcept(noexcept(1,2,3)), const));
+};
+
+TEST(MockMethodMockFunctionTest, NoexceptSpecifierPreserved) {
+  EXPECT_TRUE(noexcept(MockMethodNoexceptSpecifier{}.func1()));
+  EXPECT_TRUE(noexcept(MockMethodNoexceptSpecifier{}.func2()));
+  EXPECT_FALSE(noexcept(MockMethodNoexceptSpecifier{}.func3()));
+  EXPECT_EQ(noexcept(MockMethodNoexceptSpecifier{}.func4()), noexcept(1+1));
+  EXPECT_EQ(noexcept(MockMethodNoexceptSpecifier{}.func5()), noexcept(1+1));
+  EXPECT_EQ(noexcept(MockMethodNoexceptSpecifier{}.func6()), noexcept(1+1));
+  EXPECT_EQ(noexcept(MockMethodNoexceptSpecifier{}.func7()), noexcept(1,2,3));
+}
+
 }  // namespace gmock_function_mocker_test
 }  // namespace testing
