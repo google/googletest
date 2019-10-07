@@ -42,6 +42,7 @@
 
 #include <map>
 #include <string>
+#include <type_traits>
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -669,13 +670,13 @@ struct MockMethodNoexceptSpecifier {
 };
 
 TEST(MockMethodMockFunctionTest, NoexceptSpecifierPreserved) {
-  EXPECT_TRUE(noexcept(MockMethodNoexceptSpecifier{}.func1()));
-  EXPECT_TRUE(noexcept(MockMethodNoexceptSpecifier{}.func2()));
-  EXPECT_FALSE(noexcept(MockMethodNoexceptSpecifier{}.func3()));
-  EXPECT_EQ(noexcept(MockMethodNoexceptSpecifier{}.func4()), noexcept(1+1));
-  EXPECT_EQ(noexcept(MockMethodNoexceptSpecifier{}.func5()), noexcept(1+1));
-  EXPECT_EQ(noexcept(MockMethodNoexceptSpecifier{}.func6()), noexcept(1+1));
-  EXPECT_EQ(noexcept(MockMethodNoexceptSpecifier{}.func7()), noexcept(hasTwoParams(1,2)));
+  EXPECT_TRUE(noexcept(std::declval<MockMethodNoexceptSpecifier>().func1()));
+  EXPECT_TRUE(noexcept(std::declval<MockMethodNoexceptSpecifier>().func2()));
+  EXPECT_FALSE(noexcept(std::declval<MockMethodNoexceptSpecifier>().func3()));
+  EXPECT_EQ(noexcept(std::declval<MockMethodNoexceptSpecifier>().func4()), noexcept(1+1));
+  EXPECT_EQ(noexcept(std::declval<MockMethodNoexceptSpecifier>().func5()), noexcept(1+1));
+  EXPECT_EQ(noexcept(std::declval<MockMethodNoexceptSpecifier>().func6()), noexcept(1+1));
+  EXPECT_EQ(noexcept(std::declval<MockMethodNoexceptSpecifier>().func7()), noexcept(hasTwoParams(1,2)));
 }
 
 }  // namespace gmock_function_mocker_test
