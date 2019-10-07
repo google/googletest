@@ -139,3 +139,81 @@ export PKG_CONFIG_PATH=/usr/local/lib64/pkgconfig
 ```
 
 pkg-config will also try to look in `PKG_CONFIG_PATH` to find `gtest_main.pc`.
+
+### Using pkg-config in a cross-compilation setting
+
+Pkg-config can be used in a cross-compilation setting too. To do this, let's
+assume the final prefix of the cross-compiled installation will be `/usr`, and
+your sysroot is `/home/MYUSER/sysroot`. Configure and install GTest using
+
+```
+mkdir build && cmake -DCMAKE_INSTALL_PREFIX=/usr ..
+```
+
+Install into the sysroot using `DESTDIR`:
+
+```
+make -j install DESTDIR=/home/MYUSER/sysroot
+```
+
+Before we continue, it is recommended to **always** define the following two
+variables for pkg-config in a cross-compilation setting:
+
+```
+export PKG_CONFIG_ALLOW_SYSTEM_CFLAGS=yes
+export PKG_CONFIG_ALLOW_SYSTEM_LIBS=yes
+```
+
+otherwise `pkg-config` will filter `-I` and `-L` flags against standard prefixes
+such as `/usr` (see https://bugs.freedesktop.org/show_bug.cgi?id=28264#c3 for
+reasons why this stripping needs to occur usually).
+
+If you look at the generated pkg-config file, it will look something like
+
+```
+libdir=/usr/lib64
+includedir=/usr/include
+
+Name: gtest
+Description: GoogleTest (without main() function)
+Version: 1.10.0
+URL: https://github.com/google/googletest
+Libs: -L${libdir} -lgtest -lpthread
+Cflags: -I${includedir} -DGTEST_HAS_PTHREAD=1 -lpthread
+```
+
+Notice that the sysroot is not included in `libdir` and `includedir`! If you try
+to run `pkg-config` with the correct
+`PKG_CONFIG_LIBDIR=/home/MYUSER/sysroot/usr/lib64/pkgconfig` against this `.pc`
+file, you will get
+
+```
+$ pkg-config --cflags gtest
+-DGTEST_HAS_PTHREAD=1 -lpthread -I/usr/include
+$ pkg-config --libs gtest
+-L/usr/lib64 -lgtest -lpthread
+```
+
+which is obviously wrong and points to the `CBUILD` and not `CHOST` root. In
+order to use this in a cross-compilation setting, we need to tell pkg-config to
+inject the actual sysroot into `-I` and `-L` variables. Let us now tell
+pkg-config about the actual sysroot
+
+```
+export PKG_CONFIG_DIR=
+export PKG_CONFIG_SYSROOT_DIR=/home/MYUSER/sysroot
+export PKG_CONFIG_LIBDIR=${PKG_CONFIG_SYSROOT_DIR}/usr/lib64/pkgconfig
+```
+
+and running `pkg-config` again we get
+
+```
+$ pkg-config --cflags gtest
+-DGTEST_HAS_PTHREAD=1 -lpthread -I/home/MYUSER/sysroot/usr/include
+$ pkg-config --libs gtest
+-L/home/MYUSER/sysroot/usr/lib64 -lgtest -lpthread
+```
+
+which contains the correct sysroot now. For a more comprehensive guide to also
+including `${CHOST}` in build system calls, see the excellent tutorial by Diego
+Elio Pettenò: https://autotools.io/pkgconfig/cross-compiling.html
