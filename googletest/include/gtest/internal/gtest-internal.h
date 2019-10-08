@@ -1358,7 +1358,7 @@ constexpr bool InstantiateTypedTestCase_P_IsDeprecated() { return true; }
     GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)() {}                   \
                                                                               \
    private:                                                                   \
-    virtual void TestBody();                                                  \
+    void TestBody() override;                                                 \
     static ::testing::TestInfo* const test_info_ GTEST_ATTRIBUTE_UNUSED_;     \
     GTEST_DISALLOW_COPY_AND_ASSIGN_(GTEST_TEST_CLASS_NAME_(test_suite_name,   \
                                                            test_name));       \
