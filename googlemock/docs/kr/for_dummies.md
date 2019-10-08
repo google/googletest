@@ -7,7 +7,7 @@
 **Note**: Mock object라는 용어와 *fake object*라는 용어는 혼동하기 쉽다. 그러나 TDD(Test-Driven Development) 관점에서 보면 fake와 mock의 의미는 매우 다르다.
 
 - **Fake** object는 동작에 필요한 실제 구현부가 있고 그 결과도 real object와 동일해야 한다. 다만, real object보다 간단하거나 빠르게 동작할 수 있도록 구현해야 한다. 대표적인 예로는 데이터베이스 혹은 파일시스템 처리를 메모리에서 수행하도록 구현하는 것이 있다.
-- **Mock** object는 *expectation*을 통해 수행할 동작을 지정할 수 있다. 여기서 expectation이란 mock object(엄밀히는 mock object의 method)가 어떤 일을 하고 또 어떤 결과를 만들어내야 하는지 그 기대하는 바를 미리 지정하는 것을 의미한다.
+- **Mock** object는 *expectation*을 통해 수행할 동작을 지정할 수 있다. 여기서 expectation이란 mock object(엄밀히는 mock object의 method)가 어떤 일을 하고 또 어떤 결과를 만들어내야 하는지에 대해서 기대하고 있는 바를 미리 지정하는 것이다.
 
 지금 시점에서 위의 개념이 추상적이고 구별이 안될 수도 있지만 너무 걱정할 필요는 없다. 일단은 mock이 테스트 대상코드와 mock 간의 상호작용(interaction) 검증이 가능하도록 도와준다는 것만 기억하면 된다. 앞으로 mock을 사용하다 보면 fake와 mock의 차이를 좀 더 명확히 알게 될 것이다.
 
