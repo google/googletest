@@ -663,7 +663,7 @@ class ActionHelper {
       typedef typename ::testing::internal::Function<F>::ArgumentTuple\
           args_type;\
       explicit gmock_Impl GMOCK_INTERNAL_INIT_##value_params {}\
-      virtual return_type Perform(const args_type& args) {\
+      return_type Perform(const args_type& args) override {\
         return ::testing::internal::ActionHelper<return_type, gmock_Impl>::\
             Perform(this, args);\
       }\
@@ -726,7 +726,7 @@ class ActionHelper {
       typedef typename ::testing::internal::Function<F>::ArgumentTuple\
           args_type;\
       gmock_Impl() {}\
-      virtual return_type Perform(const args_type& args) {\
+      return_type Perform(const args_type& args) override {\
         return ::testing::internal::ActionHelper<return_type, gmock_Impl>::\
             Perform(this, args);\
       }\
@@ -776,7 +776,7 @@ class ActionHelper {
           args_type;\
       explicit gmock_Impl(p0##_type gmock_p0) : \
           p0(::std::forward<p0##_type>(gmock_p0)) {}\
-      virtual return_type Perform(const args_type& args) {\
+      return_type Perform(const args_type& args) override {\
         return ::testing::internal::ActionHelper<return_type, gmock_Impl>::\
             Perform(this, args);\
       }\
@@ -832,7 +832,7 @@ class ActionHelper {
       gmock_Impl(p0##_type gmock_p0, \
           p1##_type gmock_p1) : p0(::std::forward<p0##_type>(gmock_p0)), \
           p1(::std::forward<p1##_type>(gmock_p1)) {}\
-      virtual return_type Perform(const args_type& args) {\
+      return_type Perform(const args_type& args) override {\
         return ::testing::internal::ActionHelper<return_type, gmock_Impl>::\
             Perform(this, args);\
       }\
@@ -893,7 +893,7 @@ class ActionHelper {
           p2##_type gmock_p2) : p0(::std::forward<p0##_type>(gmock_p0)), \
           p1(::std::forward<p1##_type>(gmock_p1)), \
           p2(::std::forward<p2##_type>(gmock_p2)) {}\
-      virtual return_type Perform(const args_type& args) {\
+      return_type Perform(const args_type& args) override {\
         return ::testing::internal::ActionHelper<return_type, gmock_Impl>::\
             Perform(this, args);\
       }\
@@ -961,7 +961,7 @@ class ActionHelper {
           p1(::std::forward<p1##_type>(gmock_p1)), \
           p2(::std::forward<p2##_type>(gmock_p2)), \
           p3(::std::forward<p3##_type>(gmock_p3)) {}\
-      virtual return_type Perform(const args_type& args) {\
+      return_type Perform(const args_type& args) override {\
         return ::testing::internal::ActionHelper<return_type, gmock_Impl>::\
             Perform(this, args);\
       }\
@@ -1038,7 +1038,7 @@ class ActionHelper {
           p2(::std::forward<p2##_type>(gmock_p2)), \
           p3(::std::forward<p3##_type>(gmock_p3)), \
           p4(::std::forward<p4##_type>(gmock_p4)) {}\
-      virtual return_type Perform(const args_type& args) {\
+      return_type Perform(const args_type& args) override {\
         return ::testing::internal::ActionHelper<return_type, gmock_Impl>::\
             Perform(this, args);\
       }\
@@ -1119,7 +1119,7 @@ class ActionHelper {
           p3(::std::forward<p3##_type>(gmock_p3)), \
           p4(::std::forward<p4##_type>(gmock_p4)), \
           p5(::std::forward<p5##_type>(gmock_p5)) {}\
-      virtual return_type Perform(const args_type& args) {\
+      return_type Perform(const args_type& args) override {\
         return ::testing::internal::ActionHelper<return_type, gmock_Impl>::\
             Perform(this, args);\
       }\
@@ -1206,7 +1206,7 @@ class ActionHelper {
           p4(::std::forward<p4##_type>(gmock_p4)), \
           p5(::std::forward<p5##_type>(gmock_p5)), \
           p6(::std::forward<p6##_type>(gmock_p6)) {}\
-      virtual return_type Perform(const args_type& args) {\
+      return_type Perform(const args_type& args) override {\
         return ::testing::internal::ActionHelper<return_type, gmock_Impl>::\
             Perform(this, args);\
       }\
@@ -1302,7 +1302,7 @@ class ActionHelper {
           p5(::std::forward<p5##_type>(gmock_p5)), \
           p6(::std::forward<p6##_type>(gmock_p6)), \
           p7(::std::forward<p7##_type>(gmock_p7)) {}\
-      virtual return_type Perform(const args_type& args) {\
+      return_type Perform(const args_type& args) override {\
         return ::testing::internal::ActionHelper<return_type, gmock_Impl>::\
             Perform(this, args);\
       }\
@@ -1404,7 +1404,7 @@ class ActionHelper {
           p6(::std::forward<p6##_type>(gmock_p6)), \
           p7(::std::forward<p7##_type>(gmock_p7)), \
           p8(::std::forward<p8##_type>(gmock_p8)) {}\
-      virtual return_type Perform(const args_type& args) {\
+      return_type Perform(const args_type& args) override {\
         return ::testing::internal::ActionHelper<return_type, gmock_Impl>::\
             Perform(this, args);\
       }\
@@ -1513,7 +1513,7 @@ class ActionHelper {
           p7(::std::forward<p7##_type>(gmock_p7)), \
           p8(::std::forward<p8##_type>(gmock_p8)), \
           p9(::std::forward<p9##_type>(gmock_p9)) {}\
-      virtual return_type Perform(const args_type& args) {\
+      return_type Perform(const args_type& args) override {\
         return ::testing::internal::ActionHelper<return_type, gmock_Impl>::\
             Perform(this, args);\
       }\

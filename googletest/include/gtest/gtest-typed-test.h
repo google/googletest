@@ -201,7 +201,7 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes);
    private:                                                                   \
     typedef CaseName<gtest_TypeParam_> TestFixture;                           \
     typedef gtest_TypeParam_ TypeParam;                                       \
-    virtual void TestBody();                                                  \
+    void TestBody() override;                                                 \
   };                                                                          \
   static bool gtest_##CaseName##_##TestName##_registered_                     \
         GTEST_ATTRIBUTE_UNUSED_ =                                             \
@@ -276,7 +276,7 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes);
      private:                                                         \
       typedef SuiteName<gtest_TypeParam_> TestFixture;                \
       typedef gtest_TypeParam_ TypeParam;                             \
-      virtual void TestBody();                                        \
+      void TestBody() override;                                       \
     };                                                                \
     static bool gtest_##TestName##_defined_ GTEST_ATTRIBUTE_UNUSED_ = \
         GTEST_TYPED_TEST_SUITE_P_STATE_(SuiteName).AddTestName(       \
