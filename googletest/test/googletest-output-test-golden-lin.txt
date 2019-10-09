@@ -966,9 +966,9 @@ Expected equality of these values:
 Stack trace: (omitted)
 
 [0;31m[  FAILED  ] [mPrintingFailingParams/FailingParamTest.Fails/0, where GetParam() = 2
-[0;32m[----------] [m1 test from EmptyBasenameParamInst
-[0;32m[ RUN      ] [mEmptyBasenameParamInst.Passes/0
-[0;32m[       OK ] [mEmptyBasenameParamInst.Passes/0
+[0;32m[----------] [m1 test from All/EmptyBasenameParamInst
+[0;32m[ RUN      ] [mAll/EmptyBasenameParamInst.Passes/0
+[0;32m[       OK ] [mAll/EmptyBasenameParamInst.Passes/0
 [0;32m[----------] [m2 tests from PrintingStrings/ParamTest
 [0;32m[ RUN      ] [mPrintingStrings/ParamTest.Success/a
 [0;32m[       OK ] [mPrintingStrings/ParamTest.Success/a
