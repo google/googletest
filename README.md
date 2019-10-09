@@ -102,6 +102,9 @@ runs tests from your binary in parallel to provide significant speed-up.
 is a VS Code extension allowing to view Google Tests in a tree view, and
 run/debug your tests.
 
+[Cornichon](https://pypi.org/project/cornichon/) is a small Gherkin DSL parser
+that generates stub code for Google Test.
+
 ## Requirements
 
 Google Test is designed to have fairly minimal requirements to build and use
