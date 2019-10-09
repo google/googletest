@@ -102,7 +102,7 @@ class EmptyBasenameParamInst : public testing::TestWithParam<int> {};
 
 TEST_P(EmptyBasenameParamInst, Passes) { EXPECT_EQ(1, GetParam()); }
 
-INSTANTIATE_TEST_SUITE_P(, EmptyBasenameParamInst, testing::Values(1));
+INSTANTIATE_TEST_SUITE_P(All, EmptyBasenameParamInst, testing::Values(1));
 
 static const char kGoldenString[] = "\"Line\0 1\"\nLine 2";
 

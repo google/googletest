@@ -58,7 +58,9 @@ class FooTest : public ::testing::TestWithParam<const char*> {
 
 // Then, use the TEST_P macro to define as many parameterized tests
 // for this fixture as you want. The _P suffix is for "parameterized"
-// or "pattern", whichever you prefer to think.
+// or "pattern", whichever you prefer to think. The arguments to the
+// TEST_P macro are the test_suite_name and test_case (both which must be
+// non-empty) that will form the test name.
 
 TEST_P(FooTest, DoesBlah) {
   // Inside a test, access the test parameter with the GetParam() method
@@ -101,10 +103,10 @@ INSTANTIATE_TEST_SUITE_P(InstantiationName,
 
 // To distinguish different instances of the pattern, (yes, you
 // can instantiate it more than once) the first argument to the
-// INSTANTIATE_TEST_SUITE_P macro is a prefix that will be added to the
-// actual test suite name. Remember to pick unique prefixes for different
-// instantiations. The tests from the instantiation above will have
-// these names:
+// INSTANTIATE_TEST_SUITE_P macro is a prefix (which must be non-empty) that
+// will be added to the actual test suite name. Remember to pick unique prefixes
+// for different instantiations. The tests from the instantiation above will
+// have these names:
 //
 //    * InstantiationName/FooTest.DoesBlah/0 for "meeny"
 //    * InstantiationName/FooTest.DoesBlah/1 for "miny"
@@ -412,6 +414,10 @@ internal::CartesianProductHolder<Generator...> Combine(const Generator&... g) {
 }
 
 #define TEST_P(test_suite_name, test_name)                                     \
+  static_assert(sizeof(GTEST_STRINGIFY_(test_suite_name)) > 1,                 \
+                "test_suite_name must not be empty");                          \
+  static_assert(sizeof(GTEST_STRINGIFY_(test_name)) > 1,                       \
+                "test_name must not be empty");                                \
   class GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)                     \
       : public test_suite_name {                                               \
    public:                                                                     \
@@ -458,6 +464,10 @@ internal::CartesianProductHolder<Generator...> Combine(const Generator&... g) {
 #define GTEST_GET_SECOND_(first, second, ...) second
 
 #define INSTANTIATE_TEST_SUITE_P(prefix, test_suite_name, ...)                \
+  static_assert(sizeof(GTEST_STRINGIFY_(test_suite_name)) > 1,                \
+                "test_suite_name must not be empty");                         \
+  static_assert(sizeof(GTEST_STRINGIFY_(prefix)) > 1,                         \
+                "prefix must not be empty");                                  \
   static ::testing::internal::ParamGenerator<test_suite_name::ParamType>      \
       gtest_##prefix##test_suite_name##_EvalGenerator_() {                    \
     return GTEST_EXPAND_(GTEST_GET_FIRST_(__VA_ARGS__, DUMMY_PARAM_));        \
