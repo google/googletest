@@ -251,7 +251,7 @@ String matcher로 전달가능한 `argument`는 C string이나 C++ string object
 | `StrEq(string)`         | `argument`가 `string`과 같은지 확인한다.                     |
 | `StrNe(string)`         | `argument`가 `string`과 다른지 확인한다.                     |
 
-`ContainsRegex()`, `MatchesRegex()`에 사용되는 정규식 문법은 [이곳](../../../googletest/docs/kr/advanced.md#정규식-문법)에 정의되어 있으며 `StrCaseEq()`, `StrCaseNe()`, `StrEq()`, `StrNe()`은 wide string 타입을 사용해도 잘 동작한다.
+`ContainsRegex()`, `MatchesRegex()`에 사용되는 정규식 문법은 [이곳](../../../../googletest/docs/translations/ko_KR/advanced.md#정규식-문법)에 정의되어 있으며 `StrCaseEq()`, `StrCaseNe()`, `StrEq()`, `StrNe()`은 wide string 타입을 사용해도 잘 동작한다.
 
 #### Container Matchers
 
@@ -382,7 +382,7 @@ EXPECT_THAT(actual_foos, Pointwise(FooEq(), expected_foos));
 
 | Matcher                      | Description                                                  |
 | :--------------------------- | :----------------------------------------------------------- |
-| `ASSERT_THAT(expression, m)` | `expression`의 값이 matcher `m`을 만족하지 않는다면 [fatal failure](../../../googletest/docs/kr/primer.md#basic-assertions)를 발생시킨다. |
+| `ASSERT_THAT(expression, m)` | `expression`의 값이 matcher `m`을 만족하지 않는다면 [fatal failure](../../../../googletest/docs/translations/ko_KR/primer.md#basic-assertions)를 발생시킨다. |
 | `EXPECT_THAT(expression, m)` | `expression`의 값이 matcher `m`을 만족하지 않는다면 non-fatal failure를 발생시킨다. |
 
 ### Actions
