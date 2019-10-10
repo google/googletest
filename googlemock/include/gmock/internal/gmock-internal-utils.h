@@ -490,8 +490,7 @@ struct Function<R(Args...)> {
   using Result = R;
   static constexpr size_t ArgumentCount = sizeof...(Args);
   template <size_t I>
-  using Arg = ElemFromList<I, typename MakeIndexSequence<sizeof...(Args)>::type,
-                           Args...>;
+  using Arg = ElemFromList<I, Args...>;
   using ArgumentTuple = std::tuple<Args...>;
   using ArgumentMatcherTuple = std::tuple<Matcher<Args>...>;
   using MakeResultVoid = void(Args...);

@@ -1124,25 +1124,29 @@ struct MakeIndexSequence
 template <>
 struct MakeIndexSequence<0> : IndexSequence<> {};
 
-// FIXME: This implementation of ElemFromList is O(1) in instantiation depth,
-// but it is O(N^2) in total instantiations. Not sure if this is the best
-// tradeoff, as it will make it somewhat slow to compile.
-template <typename T, size_t, size_t>
-struct ElemFromListImpl {};
-
-template <typename T, size_t I>
-struct ElemFromListImpl<T, I, I> {
-  using type = T;
+template <size_t>
+struct Ignore {
+  Ignore(...);  // NOLINT
 };
 
-// Get the Nth element from T...
-// It uses O(1) instantiation depth.
-template <size_t N, typename I, typename... T>
-struct ElemFromList;
+template <typename>
+struct ElemFromListImpl;
+template <size_t... I>
+struct ElemFromListImpl<IndexSequence<I...>> {
+  // We make Ignore a template to solve a problem with MSVC.
+  // A non-template Ignore would work fine with `decltype(Ignore(I))...`, but
+  // MSVC doesn't understand how to deal with that pack expansion.
+  // Use `0 * I` to have a single instantiation of Ignore.
+  template <typename R>
+  static R Apply(Ignore<0 * I>..., R (*)(), ...);
+};
 
-template <size_t N, size_t... I, typename... T>
-struct ElemFromList<N, IndexSequence<I...>, T...>
-    : ElemFromListImpl<T, N, I>... {};
+template <size_t N, typename... T>
+struct ElemFromList {
+  using type =
+      decltype(ElemFromListImpl<typename MakeIndexSequence<N>::type>::Apply(
+          static_cast<T (*)()>(nullptr)...));
+};
 
 template <typename... T>
 class FlatTuple;
@@ -1152,9 +1156,7 @@ struct FlatTupleElemBase;
 
 template <typename... T, size_t I>
 struct FlatTupleElemBase<FlatTuple<T...>, I> {
-  using value_type =
-      typename ElemFromList<I, typename MakeIndexSequence<sizeof...(T)>::type,
-                            T...>::type;
+  using value_type = typename ElemFromList<I, T...>::type;
   FlatTupleElemBase() = default;
   explicit FlatTupleElemBase(value_type t) : value(std::move(t)) {}
   value_type value;
@@ -1192,12 +1194,12 @@ class FlatTuple
   explicit FlatTuple(T... t) : FlatTuple::FlatTupleBase(std::move(t)...) {}
 
   template <size_t I>
-  const typename ElemFromList<I, Indices, T...>::type& Get() const {
+  const typename ElemFromList<I, T...>::type& Get() const {
     return static_cast<const FlatTupleElemBase<FlatTuple, I>*>(this)->value;
   }
 
   template <size_t I>
-  typename ElemFromList<I, Indices, T...>::type& Get() {
+  typename ElemFromList<I, T...>::type& Get() {
     return static_cast<FlatTupleElemBase<FlatTuple, I>*>(this)->value;
   }
 };
