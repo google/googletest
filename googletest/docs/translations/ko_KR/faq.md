@@ -154,7 +154,7 @@ TEST_F(FooTest, Baz) { ... }
 
 필요하다면, base test fixture를 상속받은 test fixture를 또 다시 상속하는 것도 가능합니다. 상속의 깊이에 특별한 제한은 없습니다.
 
-보다 상세한 예제들은 [sample5_unittest.cc](../../../../samples/sample5_unittest.cc)에서 확인하기 바랍니다.
+보다 상세한 예제들은 [sample5_unittest.cc](../../../samples/sample5_unittest.cc)에서 확인하기 바랍니다.
 
 ## "void value not ignored as it ought to be"라는 compile error가 발생합니다. 이게 무슨 뜻인가요?
 
