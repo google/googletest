@@ -658,25 +658,29 @@ TEST(MockMethodMockFunctionTest, MockMethodSizeOverhead) {
 }
 
 void hasTwoParams(int, int);
+void MaybeThrows();
+void DoesntThrow() noexcept;
 struct MockMethodNoexceptSpecifier {
   MOCK_METHOD(void, func1, (), (noexcept));
   MOCK_METHOD(void, func2, (), (noexcept(true)));
   MOCK_METHOD(void, func3, (), (noexcept(false)));
-  MOCK_METHOD(void, func4, (), (noexcept(noexcept(1+1))));
-  MOCK_METHOD(void, func5, (), (const, noexcept(noexcept(1+1))));
-  MOCK_METHOD(void, func6, (), (noexcept(noexcept(1+1)), const));
+  MOCK_METHOD(void, func4, (), (noexcept(noexcept(MaybeThrows()))));
+  MOCK_METHOD(void, func5, (), (noexcept(noexcept(DoesntThrow()))));
+  MOCK_METHOD(void, func6, (), (noexcept(noexcept(DoesntThrow())), const));
+  MOCK_METHOD(void, func7, (), (const, noexcept(noexcept(DoesntThrow()))));
   // Put commas in the noexcept expression
-  MOCK_METHOD(void, func7, (), (noexcept(noexcept(hasTwoParams(1,2))), const));
+  MOCK_METHOD(void, func8, (), (noexcept(noexcept(hasTwoParams(1,2))), const));
 };
 
 TEST(MockMethodMockFunctionTest, NoexceptSpecifierPreserved) {
   EXPECT_TRUE(noexcept(std::declval<MockMethodNoexceptSpecifier>().func1()));
   EXPECT_TRUE(noexcept(std::declval<MockMethodNoexceptSpecifier>().func2()));
   EXPECT_FALSE(noexcept(std::declval<MockMethodNoexceptSpecifier>().func3()));
-  EXPECT_EQ(noexcept(std::declval<MockMethodNoexceptSpecifier>().func4()), noexcept(1+1));
-  EXPECT_EQ(noexcept(std::declval<MockMethodNoexceptSpecifier>().func5()), noexcept(1+1));
-  EXPECT_EQ(noexcept(std::declval<MockMethodNoexceptSpecifier>().func6()), noexcept(1+1));
-  EXPECT_EQ(noexcept(std::declval<MockMethodNoexceptSpecifier>().func7()), noexcept(hasTwoParams(1,2)));
+  EXPECT_FALSE(noexcept(std::declval<MockMethodNoexceptSpecifier>().func4()));
+  EXPECT_TRUE(noexcept(std::declval<MockMethodNoexceptSpecifier>().func5()));
+  EXPECT_TRUE(noexcept(std::declval<MockMethodNoexceptSpecifier>().func6()));
+  EXPECT_TRUE(noexcept(std::declval<MockMethodNoexceptSpecifier>().func7()));
+  EXPECT_EQ(noexcept(std::declval<MockMethodNoexceptSpecifier>().func8()), noexcept(hasTwoParams(1,2)));
 }
 
 }  // namespace gmock_function_mocker_test
