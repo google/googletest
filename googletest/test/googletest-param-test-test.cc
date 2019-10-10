@@ -37,6 +37,7 @@
 # include <algorithm>
 # include <iostream>
 # include <list>
+# include <set>
 # include <sstream>
 # include <string>
 # include <vector>
@@ -802,7 +803,7 @@ TEST_P(PREFIX_WITH_MACRO(NamingTest), PREFIX_WITH_FOO(SomeTestName)) {
      ::testing::UnitTest::GetInstance()->current_test_info();
 
   EXPECT_STREQ("FortyTwo/MacroNamingTest", test_info->test_suite_name());
-  EXPECT_STREQ("FooSomeTestName", test_info->name());
+  EXPECT_STREQ("FooSomeTestName/0", test_info->name());
 }
 
 INSTANTIATE_TEST_SUITE_P(FortyTwo, MacroNamingTest, Values(42));
@@ -817,6 +818,36 @@ TEST_F(PREFIX_WITH_MACRO(NamingTestNonParametrized),
 
   EXPECT_STREQ("MacroNamingTestNonParametrized", test_info->test_suite_name());
   EXPECT_STREQ("FooSomeTestName", test_info->name());
+}
+
+TEST(MacroNameing, LookupNames) {
+  std::set<std::string> know_suite_names, know_test_names;
+
+  auto ins = testing::UnitTest::GetInstance();
+  int ts = 0;
+  while (const testing::TestSuite* suite = ins->GetTestSuite(ts++)) {
+    know_suite_names.insert(suite->name());
+
+    int ti = 0;
+    while (const testing::TestInfo* info = suite->GetTestInfo(ti++)) {
+      know_test_names.insert(std::string(suite->name()) + "." + info->name());
+    }
+  }
+
+  // Check that the expected form of the test suit name actualy exists.
+  EXPECT_NE(  //
+      know_suite_names.find("FortyTwo/MacroNamingTest"),
+      know_suite_names.end());
+  EXPECT_NE(
+      know_suite_names.find("MacroNamingTestNonParametrized"),
+      know_suite_names.end());
+  // Check that the expected form of the test name actualy exists.
+  EXPECT_NE(  //
+      know_test_names.find("FortyTwo/MacroNamingTest.FooSomeTestName/0"),
+      know_test_names.end());
+  EXPECT_NE(
+      know_test_names.find("MacroNamingTestNonParametrized.FooSomeTestName"),
+      know_test_names.end());
 }
 
 // Tests that user supplied custom parameter names are working correctly.

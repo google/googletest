@@ -429,7 +429,7 @@ internal::CartesianProductHolder<Generator...> Combine(const Generator&... g) {
       ::testing::UnitTest::GetInstance()                                       \
           ->parameterized_test_registry()                                      \
           .GetTestSuitePatternHolder<test_suite_name>(                         \
-              #test_suite_name,                                                \
+              GTEST_STRINGIFY_(test_suite_name),                               \
               ::testing::internal::CodeLocation(__FILE__, __LINE__))           \
           ->AddTestPattern(                                                    \
               GTEST_STRINGIFY_(test_suite_name), GTEST_STRINGIFY_(test_name),  \
@@ -493,10 +493,11 @@ internal::CartesianProductHolder<Generator...> Combine(const Generator&... g) {
           ::testing::UnitTest::GetInstance()                                  \
               ->parameterized_test_registry()                                 \
               .GetTestSuitePatternHolder<test_suite_name>(                    \
-                  #test_suite_name,                                           \
+                  GTEST_STRINGIFY_(test_suite_name),                          \
                   ::testing::internal::CodeLocation(__FILE__, __LINE__))      \
               ->AddTestSuiteInstantiation(                                    \
-                  #prefix, &gtest_##prefix##test_suite_name##_EvalGenerator_, \
+                  GTEST_STRINGIFY_(prefix),                                   \
+                  &gtest_##prefix##test_suite_name##_EvalGenerator_,          \
                   &gtest_##prefix##test_suite_name##_EvalGenerateName_,       \
                   __FILE__, __LINE__)
 
