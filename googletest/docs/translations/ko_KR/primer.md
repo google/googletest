@@ -94,7 +94,7 @@ Fatal assertion | Nonfatal assertion | Verifies
 `ASSERT_GT(val1, val2);` | `EXPECT_GT(val1, val2);` | `val1 > val2`
 `ASSERT_GE(val1, val2);` | `EXPECT_GE(val1, val2);` | `val1 >= val2`
 
-위의 assertion을 사용하려면 `val1`, `val2`와 같은 argument들이 assertion 종류에 맞는 비교연산자(`==`, `<` 등)를 제공해야 한다. `int`, `double`과 같은 산술타입들은 기본적으로 제공되겠지만 사용자 정의 타입이라면 그에 맞는 비교연산자를 구현해서 제공해야 한다. 그렇지 않으면 당연하게도 compile error가 발생한다. 이전에는 argument에 대한 정보를 출력하기 위해 `<<` 연산자도 필요했지만 현재는 그 부분은 꼭 제공하지 않아도 괜찮다. 만약 argument가 `<<`연산자를 지원한다면 assertion이 실패했을 때 정의된 연산자를 통해 관련정보를 출력하게 된다. 반대로 지원하지 않는다면 googletest 자체적으로 출력할 수 있는 방법을 최대한 찾게 될 것이다. 이러한 출력정보와 관련해서 더 자세한 내용은 [여기](../../../googlemock/docs/kr/cook_book.md#gmock이-사용자타입-정보도-출력-가능하게-만들기)에서 확인할 수 있다.
+위의 assertion을 사용하려면 `val1`, `val2`와 같은 argument들이 assertion 종류에 맞는 비교연산자(`==`, `<` 등)를 제공해야 한다. `int`, `double`과 같은 산술타입들은 기본적으로 제공되겠지만 사용자 정의 타입이라면 그에 맞는 비교연산자를 구현해서 제공해야 한다. 그렇지 않으면 당연하게도 compile error가 발생한다. 이전에는 argument에 대한 정보를 출력하기 위해 `<<` 연산자도 필요했지만 현재는 그 부분은 꼭 제공하지 않아도 괜찮다. 만약 argument가 `<<`연산자를 지원한다면 assertion이 실패했을 때 정의된 연산자를 통해 관련정보를 출력하게 된다. 반대로 지원하지 않는다면 googletest 자체적으로 출력할 수 있는 방법을 최대한 찾게 될 것이다. 이러한 출력정보와 관련해서 더 자세한 내용은 [여기](../../../../googlemock/docs/translations/ko_KR/cook_book.md#gmock이-사용자타입-정보도-출력-가능하게-만들기)에서 확인할 수 있다.
 
 이처럼 assertion을 사용자정의 타입과 함께 사용하는 것이 가능하긴 하지만 비교연산자도 함께 제공해야만 동작한다는 점을 기억하자. 사실 사용자정의 타입에 비교연산자를 제공하는 것은 Google [C++ Style Guide](https://google.github.io/styleguide/cppguide.html#Operator_Overloading)에서 권장하는 내용은 아니기 때문에 비교연산자가 아닌 별도의 function을 통해 먼저 비교를 수행한 후에 그 결과인 `bool` 값을 `ASSERT_TRUE()` 혹은 `EXPECT_TRUE()`를 통해 검사하는 방법을 더 추천한다.
 
@@ -131,7 +131,7 @@ Assertion으로 전달되는 값이 변수형태라면 assertion코드가 수행
 
 **Availability**: Linux, Windows, Mac.
 
-**See also**: 기본적인 문자열 비교 외에 추가로 제공되는 기능(substring, prefix, suffix, regular expression 비교하기 등)이 필요하다면  [여기](../../../googlemock/docs/kr/cheat_sheet.md#string-matchers)에서 확인할 수 있다.
+**See also**: 기본적인 문자열 비교 외에 추가로 제공되는 기능(substring, prefix, suffix, regular expression 비교하기 등)이 필요하다면  [여기](../../../../googlemock/docs/translations/ko_KR/cheat_sheet.md#string-matchers)에서 확인할 수 있다.
 
 ## 간단한 테스트
 
