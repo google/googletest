@@ -290,7 +290,7 @@ EXPECT_PRED_FORMAT2(::testing::DoubleLE, val1, val2);
 
 ### gMock Matchers를 이용한 Asserting
 
-C++ mocking framework인 [gMock](../../../googlemock)을 개발하면서 mock object로 전달되는 argument를 확인하기 위한 방법으로 matcher라는 것을 새로 도입했다. gMock *matcher*는 predicate와 그 원리가 같으면서도 이미 풍부한 built-in matcher들을 제공하고 있다.
+C++ mocking framework인 [gMock](../../../../googlemock)을 개발하면서 mock object로 전달되는 argument를 확인하기 위한 방법으로 matcher라는 것을 새로 도입했다. gMock *matcher*는 predicate와 그 원리가 같으면서도 이미 풍부한 built-in matcher들을 제공하고 있다.
 
 이러한 matcher들을 `*_THAT` 계열 assertion macro와 함께 사용하기만 하면 된다.
 
@@ -307,9 +307,9 @@ using ::testing::StartsWith;
     EXPECT_THAT(Foo(), StartsWith("Hello"));
 ```
 
-이렇듯 matcher를 사용하면 간단하게 새로운 assertion을 만들 수 있다. 좀 더 상세한 사용방법은 [여기](../../../googlemock/docs/kr/cook_book.md#matcher를-googletest-assertion처럼-사용하기)에서 확인할 수 있다.
+이렇듯 matcher를 사용하면 간단하게 새로운 assertion을 만들 수 있다. 좀 더 상세한 사용방법은 [여기](../../../../googlemock/docs/translations/ko_KR/cook_book.md#matcher를-googletest-assertion처럼-사용하기)에서 확인할 수 있다.
 
-gMock은 `StartsWith()` 외에도 다양한 built-in matcher를 제공하고 있다. 이러한 built-in matcher를 알아보려면 [여기](../../../googlemock/docs/kr/cook_book.md#matcher-사용하기)를 참조하라. 만약, built-in matcher 중에 원하는 기능이 없다면 matcher를 직접 구현하는 것도 가능하다. [여기](../../../googlemock/docs/kr/cook_book.md#새로운-matcher를-빠르게-구현하기)에서 그 방법을 확인할 수 있다.
+gMock은 `StartsWith()` 외에도 다양한 built-in matcher를 제공하고 있다. 이러한 built-in matcher를 알아보려면 [여기](../../../../googlemock/docs/translations/ko_KR/cook_book.md#matcher-사용하기)를 참조하라. 만약, built-in matcher 중에 원하는 기능이 없다면 matcher를 직접 구현하는 것도 가능하다. [여기](../../../../googlemock/docs/translations/ko_KR/cook_book.md#새로운-matcher를-빠르게-구현하기)에서 그 방법을 확인할 수 있다.
 
 마지막으로 gMock 자체가 googletest와 함께 제공되는 번들 소프트웨어이므로 matcher 사용을 위한 추가적인 환경설정은 따로 필요하지 않다. 헤더파일만 포함(`#include "testing/base/public/gmock.h"`)하면 바로 사용할 수 있을 것이다.
 
@@ -317,7 +317,7 @@ gMock은 `StartsWith()` 외에도 다양한 built-in matcher를 제공하고 있
 
 ([이전](#gmock-matchers를-이용한-asserting) 섹션을 먼저 읽어야 함)
 
-바로 위에서도 확인했듯이 gMock은 문자열과 관련된 [string matchers](../../../googlemock/docs/kr/cheat_sheet.md#string-matchers)를 풍부하게 제공하고 있다. 이렇게 제공되는 built-in matcher들을 `EXPECT_THAT()` 또는 `ASSERT_THAT()`과 함께 사용하기만 하면 된다. 이를 통해 sub-string, prefix, suffix, regular expression과 같은 다양한 방법의 string assertion을 수행할 수 있다. 사용방법은 아래 예제코드와 같다.
+바로 위에서도 확인했듯이 gMock은 문자열과 관련된 [string matchers](../../../../googlemock/docs/translations/ko_KR/cheat_sheet.md#string-matchers)를 풍부하게 제공하고 있다. 이렇게 제공되는 built-in matcher들을 `EXPECT_THAT()` 또는 `ASSERT_THAT()`과 함께 사용하기만 하면 된다. 이를 통해 sub-string, prefix, suffix, regular expression과 같은 다양한 방법의 string assertion을 수행할 수 있다. 사용방법은 아래 예제코드와 같다.
 
 ```c++
 using ::testing::HasSubstr;
