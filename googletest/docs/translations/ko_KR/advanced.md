@@ -1069,7 +1069,7 @@ INSTANTIATE_TEST_SUITE_P(AnotherInstantiationName, FooTest,
 
 지금까지 본 것처럼 `INSTANTIATE_TEST_SUITE_P`는 `TEST_P` macro를 통해 정의한 *모든* test case에 대해 각 parameter마다 별도의 test function들을 생성해준다. 즉 `TEST_P` x parameter 개수 만큼의 test function이 생성된다. 이 때, `INSTANTIATE_TEST_SUITE_P`와 `TEST_P`의 구현순서는 중요하지 않다.
 
-좀 더 자세한 예제가 필요하다면 [sample7_unittest.cc](../../samples/sample7_unittest.cc), [sample8_unittest.cc](../../samples/sample8_unittest.cc)에서 확인 가능하다.
+좀 더 자세한 예제가 필요하다면 [sample7_unittest.cc](../../../samples/sample7_unittest.cc), [sample8_unittest.cc](../../../samples/sample8_unittest.cc)에서 확인 가능하다.
 
 ### Value-Parameterized Abstract Tests 생성하기
 
@@ -1180,7 +1180,7 @@ TYPED_TEST(FooTest, DoesBlah) {
 TYPED_TEST(FooTest, HasPropertyA) { ... }
 ```
 
-이상의 내용이 도움되었기를 바라며 더 자세한 예제코드가 필요한 사람은 [sample6_unittest.cc](../../samples/sample6_unittest.cc)에서도 확인할 수 있다.
+이상의 내용이 도움되었기를 바라며 더 자세한 예제코드가 필요한 사람은 [sample6_unittest.cc](../../../samples/sample6_unittest.cc)에서도 확인할 수 있다.
 
 ## Type-Parameterized Tests
 
@@ -1237,7 +1237,7 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes);
 INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, int);
 ```
 
-모두 끝났다. 전체 예제코드가 필요하다면 [sample6_unittest.cc](../../samples/sample6_unittest.cc)를 참조하자.
+모두 끝났다. 전체 예제코드가 필요하다면 [sample6_unittest.cc](../../../samples/sample6_unittest.cc)를 참조하자.
 
 ## Private Code 테스트하기
 
@@ -1515,7 +1515,7 @@ int main(int argc, char** argv) {
   return RUN_ALL_TESTS();
 ```
 
-이제 모두 끝났다. 의도한 대로 결과가 출력되는지 확인해보자. 보다 상세한 내용은 [sample9_unittest.cc](../../samples/sample9_unittest.cc)에서도 확인할 수 있다.
+이제 모두 끝났다. 의도한 대로 결과가 출력되는지 확인해보자. 보다 상세한 내용은 [sample9_unittest.cc](../../../samples/sample9_unittest.cc)에서도 확인할 수 있다.
 
 앞에서 얘기한 것처럼 1개 이상의 listener를 사용하는 것도 가능하다. 따라서 동일한 event에 대해서 listener의 호출순서가 어떻게 되는지는 알아두는게 좋다. 주의할 점은 handler function의 종류에 따라서 순서가 다르다는 점이다. 먼저 `On*Start()` 또는 `OnTestPartResult()`라는 event가 발생하면 list에 등록된 listener들을 순서대로 호출해준다. 즉, 새로 등록한 listener일수록 나중에 호출된다. 이와 반대로 `On*End()`와 같은 event는 등록순서의 *역방향*으로 listener handler를 호출해준다. 따라서 사용자가 결과물을 보게 되면 먼저 등록된 listener handler의 출력물이 늦게 등록된 listener handler의 출력물을 감싸는 (프레임) 형태가 될 것이다.
 
@@ -1528,7 +1528,7 @@ Event를 처리할 때에도 `EXPECT_*()`, `ASSERT_*()`, `FAIL()`와 같은 asse
 
 만약 failure가 발생가능한 listener를 구현했다면 등록할때는 `OnTestPartResult()`를 먼저 등록한 후에 failure 발생가능한 listener를 나중에 등록해야 한다. 그렇게 해야만 failure 정보가 정상적으로 기록된다.
 
-Failure-raising listener에 대한 예제코드는 [sapmle10_unittest.cc](../../samples/sample10_unittest.cc)에서 확인할 수 있다.
+Failure-raising listener에 대한 예제코드는 [sapmle10_unittest.cc](../../../samples/sample10_unittest.cc)에서 확인할 수 있다.
 
 ## Test program을 실행하는 다양한 방법
 
