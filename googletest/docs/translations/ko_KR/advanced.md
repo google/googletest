@@ -309,7 +309,7 @@ using ::testing::StartsWith;
 
 이렇듯 matcher를 사용하면 간단하게 새로운 assertion을 만들 수 있다. 좀 더 상세한 사용방법은 [여기](../../../../googlemock/docs/translations/ko_KR/cook_book.md#matcher를-googletest-assertion처럼-사용하기)에서 확인할 수 있다.
 
-gMock은 `StartsWith()` 외에도 다양한 built-in matcher를 제공하고 있다. 이러한 built-in matcher를 알아보려면 [여기](../../../../googlemock/docs/translations/ko_KR/cook_book.md#matcher-사용하기)를 참조하라. 만약, built-in matcher 중에 원하는 기능이 없다면 matcher를 직접 구현하는 것도 가능하다. [여기](../../../../googlemock/docs/translations/ko_KR/cook_book.md#새로운-matcher를-빠르게-구현하기)에서 그 방법을 확인할 수 있다.
+gMock은 `StartsWith()` 외에도 다양한 built-in matcher를 제공하고 있다. 이러한 built-in matcher를 알아보려면 [여기](../../../../googlemock/docs/translations/ko_KR/cook_book.md#matcher-사용하기)를 참조하라. 만약, built-in matcher 중에 원하는 기능이 없다면 matcher를 직접 구현하는 것도 가능하다. [여기](../../../../googlemock/docs/translations/ko_KR/cook_book.md#새로운-matcher-구현하기)에서 그 방법을 확인할 수 있다.
 
 마지막으로 gMock 자체가 googletest와 함께 제공되는 번들 소프트웨어이므로 matcher 사용을 위한 추가적인 환경설정은 따로 필요하지 않다. 헤더파일만 포함(`#include "testing/base/public/gmock.h"`)하면 바로 사용할 수 있을 것이다.
 
