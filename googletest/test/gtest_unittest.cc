@@ -7353,20 +7353,15 @@ TEST(IndexSequence, MakeIndexSequence) {
 // ElemFromList
 TEST(ElemFromList, Basic) {
   using testing::internal::ElemFromList;
-  using Idx = testing::internal::MakeIndexSequence<3>::type;
+  EXPECT_TRUE(
+      (std::is_same<int, ElemFromList<0, int, double, char>::type>::value));
+  EXPECT_TRUE(
+      (std::is_same<double, ElemFromList<1, int, double, char>::type>::value));
+  EXPECT_TRUE(
+      (std::is_same<char, ElemFromList<2, int, double, char>::type>::value));
   EXPECT_TRUE((
-      std::is_same<int, ElemFromList<0, Idx, int, double, char>::type>::value));
-  EXPECT_TRUE(
-      (std::is_same<double,
-                    ElemFromList<1, Idx, int, double, char>::type>::value));
-  EXPECT_TRUE(
-      (std::is_same<char,
-                    ElemFromList<2, Idx, int, double, char>::type>::value));
-  EXPECT_TRUE(
-      (std::is_same<
-          char, ElemFromList<7, testing::internal::MakeIndexSequence<12>::type,
-                             int, int, int, int, int, int, int, char, int, int,
-                             int, int>::type>::value));
+      std::is_same<char, ElemFromList<7, int, int, int, int, int, int, int,
+                                      char, int, int, int, int>::type>::value));
 }
 
 // FlatTuple
