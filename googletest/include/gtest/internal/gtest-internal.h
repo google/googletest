@@ -1124,9 +1124,25 @@ struct MakeIndexSequence
 template <>
 struct MakeIndexSequence<0> : IndexSequence<> {};
 
-template <size_t>
-struct Ignore {
-  Ignore(...);  // NOLINT
+template <std::size_t, typename T>
+struct ListElem {
+  using type = T;
+};
+
+template <typename IndexSeq, typename... Ts>
+struct ElemFromListImpl;
+
+template <std::size_t... Is, typename... Ts>
+struct ElemFromListImpl<IndexSequence<Is...>, Ts...> : ListElem<Is, Ts>... {};
+
+template <std::size_t I, typename... Ts>
+struct ElemFromList {
+  template <typename Type>
+  static Type get_type(const ListElem<I, Type>&);
+
+  using type = decltype(
+      get_type(ElemFromListImpl<typename MakeIndexSequence<sizeof...(Ts)>::type,
+                                Ts...>()));
 };
 
 template <typename T>
@@ -1154,37 +1170,10 @@ struct EnableIfAll
     : EnableIfAllImpl<T, typename MakeIndexSequence<sizeof...(Cs)>::type,
                       Cs...> {};
 
-template <std::size_t>
-struct EmptyListElem {};
-
-template <typename T>
-struct ListElem {
-  using type = T;
-};
-
-template <typename>
-struct ElemFromListImpl;
-template <size_t... I>
-struct ElemFromListImpl<IndexSequence<I...>> {
-  // We make Ignore a template to solve a problem with MSVC.
-  // A non-template Ignore would work fine with `decltype(Ignore(I))...`, but
-  // MSVC doesn't understand how to deal with that pack expansion.
-  // Use `0 * I` to have a single instantiation of Ignore.
-  template <typename R>
-  static R Apply(Ignore<0 * I>..., R (*)(), ...);
-};
-
-template <size_t N, typename... T>
-struct ElemFromList {
-  using type =
-      decltype(ElemFromListImpl<typename MakeIndexSequence<N>::type>::Apply(
-          static_cast<T (*)()>(nullptr)...));
-};
-
 template <typename T, std::size_t I>
 struct FlatTupleElem {
   T value;
-  FlatTupleElem() noexcept(std::is_nothrow_constructible<T>::value) : value() {}
+  FlatTupleElem() = default;
 
   template <typename Arg, typename = typename EnableIfAll<
                               void, std::is_constructible<T, Arg>::value>::type>
@@ -1192,12 +1181,11 @@ struct FlatTupleElem {
 };
 
 template <typename IndexSeq, typename... Ts>
-class FlatTupleBase;
+struct FlatTupleBase;
 
 template <std::size_t... Is, typename... Ts>
-class FlatTupleBase<IndexSequence<Is...>, Ts...> : FlatTupleElem<Ts, Is>... {
- public:
-  FlatTupleBase() {}
+struct FlatTupleBase<IndexSequence<Is...>, Ts...> : FlatTupleElem<Ts, Is>... {
+  FlatTupleBase() = default;
 
   template <typename... Args,
             typename = typename EnableIfAll<
@@ -1251,8 +1239,7 @@ class FlatTupleBase<IndexSequence<Is...>, Ts...> : FlatTupleElem<Ts, Is>... {
 template <typename... Ts>
 struct FlatTuple
     : FlatTupleBase<typename MakeIndexSequence<sizeof...(Ts)>::type, Ts...> {
-  FlatTuple() {}
-
+  FlatTuple() = default;
   template <
       typename... Args,
       typename = typename EnableIfAll<
