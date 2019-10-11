@@ -597,7 +597,7 @@ class MockFunction<R(A1, ..., An)> {
   MOCK_METHOD(R, Call, (A1, ..., An));
 };
 ```
-이에 대한 예제코드는 [여기](cook_book.md#stdfunction-mocking하기)를 참조하자.
+이에 대한 예제코드는 [여기](cook_book.md#check-point-사용하기)를 참조하자.
 
 ### Flags
 
