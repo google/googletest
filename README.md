@@ -9,8 +9,8 @@
 
 #### Release 1.10.x
 
-[Release 1.10.x](https://github.com/google/googletest/releases/tag/v1.10.x) is
-now available.
+[Release 1.10.x](https://github.com/google/googletest/releases/tag/release-1.10.0)
+is now available.
 
 #### Coming Soon
 
