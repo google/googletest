@@ -26,10 +26,9 @@
 //   GMOCK_PP_NARG(PAIR) => 2
 //
 // Requires: the number of arguments after expansion is at most 15.
-#define GMOCK_PP_NARG(...)             \
-  GMOCK_PP_INTERNAL_EXPAND_WITH(       \
-      GMOCK_PP_INTERNAL_INTERNAL_16TH, \
-      (__VA_ARGS__, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1))
+#define GMOCK_PP_NARG(...)         \
+  GMOCK_PP_INTERNAL_INTERNAL_16TH( \
+    __VA_ARGS__, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1)
 
 // Returns 1 if the expansion of arguments has an unprotected comma. Otherwise
 // returns 0. Requires no more than 15 unprotected commas.
@@ -48,10 +47,9 @@
   GMOCK_PP_INTERNAL_EXPAND_WITH(GMOCK_PP_INTERNAL_TAIL, (__VA_ARGS__))
 
 // Calls CAT(_Macro, NARG(__VA_ARGS__))(__VA_ARGS__)
-#define GMOCK_PP_VARIADIC_CALL(_Macro, ...)             \
-  GMOCK_PP_INTERNAL_EXPAND_WITH(                        \
-      GMOCK_PP_CAT(_Macro, GMOCK_PP_NARG(__VA_ARGS__)), \
-      (__VA_ARGS__))
+#define GMOCK_PP_VARIADIC_CALL(_Macro, ...) \
+  GMOCK_PP_INTERNAL_VARIADIC_CALL(          \
+    _Macro, GMOCK_PP_NARG(__VA_ARGS__), (__VA_ARGS__))
 
 // If the arguments after expansion have no tokens, evaluates to `1`. Otherwise
 // evaluates to `0`.
@@ -165,6 +163,8 @@
 // Workaround MSVC behavior of treating __VA_ARGS__ with commas as one arg
 // _Args must be wrapped in parenthesis
 #define GMOCK_PP_INTERNAL_EXPAND_WITH(_Macro, _Args) _Macro _Args
+#define GMOCK_PP_INTERNAL_VARIADIC_CALL(_Macro, _N, ...) \
+  GMOCK_PP_INTERNAL_EXPAND_WITH(GMOCK_PP_CAT(_Macro, _N),(__VA_ARGS__))
 
 #define GMOCK_PP_INTERNAL_IBP_IS_VARIADIC_C(...) 1 _
 #define GMOCK_PP_INTERNAL_IBP_IS_VARIADIC_R_1 1,
