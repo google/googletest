@@ -26,30 +26,29 @@
 //   GMOCK_PP_NARG(PAIR) => 2
 //
 // Requires: the number of arguments after expansion is at most 15.
-#define GMOCK_PP_NARG(...)         \
-  GMOCK_PP_INTERNAL_INTERNAL_16TH( \
-    __VA_ARGS__, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1)
+#define GMOCK_PP_NARG(...) \
+  GMOCK_PP_INTERNAL_16TH(  \
+    (__VA_ARGS__, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1))
 
 // Returns 1 if the expansion of arguments has an unprotected comma. Otherwise
 // returns 0. Requires no more than 15 unprotected commas.
-#define GMOCK_PP_HAS_COMMA(...)        \
-  GMOCK_PP_INTERNAL_EXPAND_WITH(       \
-      GMOCK_PP_INTERNAL_INTERNAL_16TH, \
-      (__VA_ARGS__, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0))
+#define GMOCK_PP_HAS_COMMA(...) \
+  GMOCK_PP_INTERNAL_16TH(       \
+    (__VA_ARGS__, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0))
 
 // Returns the first argument.
 #define GMOCK_PP_HEAD(...) \
-  GMOCK_PP_INTERNAL_EXPAND_WITH(GMOCK_PP_INTERNAL_HEAD, (__VA_ARGS__))
+  GMOCK_PP_INTERNAL_HEAD((__VA_ARGS__))
 
 // Returns the tail. A variadic list of all arguments minus the first. Requires
 // at least one argument.
 #define GMOCK_PP_TAIL(...) \
-  GMOCK_PP_INTERNAL_EXPAND_WITH(GMOCK_PP_INTERNAL_TAIL, (__VA_ARGS__))
+  GMOCK_PP_INTERNAL_TAIL((__VA_ARGS__))
 
 // Calls CAT(_Macro, NARG(__VA_ARGS__))(__VA_ARGS__)
 #define GMOCK_PP_VARIADIC_CALL(_Macro, ...) \
-  GMOCK_PP_INTERNAL_VARIADIC_CALL(          \
-    _Macro, GMOCK_PP_NARG(__VA_ARGS__), __VA_ARGS__)
+  GMOCK_PP_IDENTITY(                        \
+    GMOCK_PP_CAT(_Macro,  GMOCK_PP_NARG(__VA_ARGS__))(__VA_ARGS__))
 
 // If the arguments after expansion have no tokens, evaluates to `1`. Otherwise
 // evaluates to `0`.
@@ -147,10 +146,6 @@
 #define GMOCK_PP_INTENRAL_EMPTY_TUPLE (, , , , , , , , , , , , , , , )
 #define GMOCK_PP_INTERNAL_CAT(_1, _2) _1##_2
 #define GMOCK_PP_INTERNAL_STRINGIZE(...) #__VA_ARGS__
-#define GMOCK_PP_INTERNAL_INTERNAL_16TH(_1, _2, _3, _4, _5, _6, _7, _8, _9, \
-                                        _10, _11, _12, _13, _14, _15, _16,  \
-                                        ...)                                \
-  _16
 #define GMOCK_PP_INTERNAL_CAT_5(_1, _2, _3, _4, _5) _1##_2##_3##_4##_5
 #define GMOCK_PP_INTERNAL_IS_EMPTY(_1, _2, _3, _4)                             \
   GMOCK_PP_HAS_COMMA(GMOCK_PP_INTERNAL_CAT_5(GMOCK_PP_INTERNAL_IS_EMPTY_CASE_, \
@@ -158,13 +153,24 @@
 #define GMOCK_PP_INTERNAL_IS_EMPTY_CASE_0001 ,
 #define GMOCK_PP_INTERNAL_IF_1(_Then, _Else) _Then
 #define GMOCK_PP_INTERNAL_IF_0(_Then, _Else) _Else
-#define GMOCK_PP_INTERNAL_HEAD(_1, ...) _1
-#define GMOCK_PP_INTERNAL_TAIL(_1, ...) __VA_ARGS__
-// Workaround MSVC behavior of treating __VA_ARGS__ with commas as one arg
-// _Args must be wrapped in parenthesis
-#define GMOCK_PP_INTERNAL_EXPAND_WITH(_Macro, _Args) _Macro _Args
-#define GMOCK_PP_INTERNAL_VARIADIC_CALL(_Macro, _N, ...) \
-  GMOCK_PP_INTERNAL_EXPAND_WITH(GMOCK_PP_CAT(_Macro, _N),(__VA_ARGS__))
+
+// Because of MSVC treating a token with a comma in it as a single token when passed
+// to another macro, we need to force it to evaluate it as multiple tokens. We do that
+// by using a "IDENTITY(MACRO PARENTHESIZED_ARGS)" macro.
+// We define one per possible macro that relies on this behavior.
+// Note "_Args" must be parenthesized.
+#define GMOCK_PP_INTERNAL_INTERNAL_16TH(_1, _2, _3, _4, _5, _6, _7, _8, _9, \
+                                        _10, _11, _12, _13, _14, _15, _16,  \
+                                        ...)                                \
+  _16
+#define GMOCK_PP_INTERNAL_16TH(_Args) \
+  GMOCK_PP_IDENTITY(GMOCK_PP_INTERNAL_INTERNAL_16TH _Args)
+#define GMOCK_PP_INTERNAL_INTERNAL_HEAD(_1, ...) _1
+#define GMOCK_PP_INTERNAL_HEAD(_Args) \
+  GMOCK_PP_IDENTITY(GMOCK_PP_INTERNAL_INTERNAL_HEAD _Args)
+#define GMOCK_PP_INTERNAL_INTERNAL_TAIL(_1, ...) __VA_ARGS__
+#define GMOCK_PP_INTERNAL_TAIL(_Args) \
+  GMOCK_PP_IDENTITY(GMOCK_PP_INTERNAL_INTERNAL_TAIL _Args)
 
 #define GMOCK_PP_INTERNAL_IBP_IS_VARIADIC_C(...) 1 _
 #define GMOCK_PP_INTERNAL_IBP_IS_VARIADIC_R_1 1,
