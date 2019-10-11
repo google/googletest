@@ -234,7 +234,7 @@ EXPECT_CALL(turtle, GoTo(50, _));
 
 위 코드는 "`GoTo()`라는 mock function의 첫번째 argument에는 정확히 `50`이 전달되어야 하고, 두번째 argument에는 어떤 값이라도 올 수 있다"를 의미한다. 여기서 두번째 argument에 사용한 `_`이 바로 **matcher**의 한 종류이다. 이렇듯 matcher는 어떤 값이 전달되기를 기대하는지에 대해 좀 더 세밀한 조작이 가능하도록 도와주는 기능이며 `EXPECT_CALL()`과 함께 사용하면 매우 유용하다. (꼭, `EXPECT_CALL()`이 아니더라도 사용할 수는 있다.)
 
-사실 `50`, `100`처럼 값으로 구현한 코드들도 내부적으로는 `Eq(50)`, `Eq(100)`과 같이 matcher를 사용하는 코드와 동일하게 동작한다. (`Eq()`는 값이 같은지 확인하는 matcher이다.) 한 가지 중요한 점은 `Eq()`를 사용하든 값을 사용하든 해당 타입은 `operator==`를 지원해야 한다는 점이다. 그래야만 gMock이 비교를 수행할 수 있으며 `operator==`를 지원하지 않는 타입에 `Eq()`를 사용하려면 해당 연산자를 직접 구현해서 제공해야 한다. 마지막으로 gMock은 `_`나 `Eq()` 외에도 다양한 built-in matcher들을 제공하고 있으며 이들을 확인하려면 [built-in matcher](cheat_sheet.md#matchers)를 참조하기 바란다. 더불어 새로운 matcher를 직접 구현하고자 한다면 [custom matcher](cook_book.md#새로운-matcher를-빠르게-구현하기)를 참조하면 된다.
+사실 `50`, `100`처럼 값으로 구현한 코드들도 내부적으로는 `Eq(50)`, `Eq(100)`과 같이 matcher를 사용하는 코드와 동일하게 동작한다. (`Eq()`는 값이 같은지 확인하는 matcher이다.) 한 가지 중요한 점은 `Eq()`를 사용하든 값을 사용하든 해당 타입은 `operator==`를 지원해야 한다는 점이다. 그래야만 gMock이 비교를 수행할 수 있으며 `operator==`를 지원하지 않는 타입에 `Eq()`를 사용하려면 해당 연산자를 직접 구현해서 제공해야 한다. 마지막으로 gMock은 `_`나 `Eq()` 외에도 다양한 built-in matcher들을 제공하고 있으며 이들을 확인하려면 [built-in matcher](cheat_sheet.md#matchers)를 참조하기 바란다. 더불어 새로운 matcher를 직접 구현하고자 한다면 [custom matcher](cook_book.md#새로운-matcher-구현하기)를 참조하면 된다.
 
 아래 코드는 `Ge()`라는 또 다른 built-in matcher를 사용한 예제이며 "`turtle.Foward()`로 전달되는 argument가 100보다 크거나 같아야 한다"를 의미한다.
 
