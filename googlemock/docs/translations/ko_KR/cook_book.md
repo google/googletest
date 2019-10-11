@@ -1224,6 +1224,23 @@ TEST(...) {
 
 Uninteresting call, nice mock, strict mock에 대한 더 자세한 내용은 ["The Nice, the Strict, and the Naggy"](cook_book.md#nice-모드-strict-모드-naggy-모드-naggy-잔소리가-심한)에서 확인할 수 있다.
 
+### Uninteresting Argument 무시하기
+
+구현 중인 테스트에서 mock function으로 전달되는 argument에는 관심이 없다면(즉, 호출횟수와 호출순서만 검증해도 된다면) 아래처럼 mock function의 이름만 적은 후에 argument 목록은 비워두는 방식으로 간단하게 구현할 수 있다.
+
+```c++
+  // Expect foo.Bar( ... ) twice with any arguments.
+  EXPECT_CALL(foo, Bar).Times(2);
+
+  // Delegate to the given method whenever the factory is invoked.
+  ON_CALL(foo_factory, MakeFoo)
+      .WillByDefault(&BuildFooForTest);
+```
+
+단, 위의 방법은 overloaded function이 아닐 때에만 사용 가능하며 overloaded function에 사용하게 되면 어떤 것을 호출해야 할지 모호해지기 때문에 compile error가 발생한다. 만약 overloaded function에 적용해야 한다면 [simpler mock interface](#기존코드에-영향을-주지-않고-interface를-단순하게-만들기)을 참고해서 조금 다른 방법으로 구현해야 한다.
+
+이 패턴은 argument를 검증하고 싶긴 하지만 그 양이 많고 복잡한 경우에도 유용하게 사용할 수 있다. 동일하게 argument 목록은 비워 놓은 상태에서 `SaveArg` aciton을 사용하면 된다. [여기](#복잡한-argument-검증하기)에 관련 예제가 있다. 이를 통해서 호출횟수 검증과 argument 검증을 분리할 수 있으며 코드가 좀 더 간단해진다.
+
 ### 함수의 호출순서 지정하기
 
 하나의 mock function에 대해 여러개의 `EXPECT_CALL()`을 사용했을 때, `EXPECT_CALL()`을 비교하는 순서가 있다고 바로 위에서 설명했다. 그러나 이렇게 만족하는 `EXPECT_CALL()`을 탐색하는 과정에 순서가 있다고 해서 해당 mock function이 특정한 호출순서가 가진다고 말할 수는 없다. 예를 들어 어떤 mock function에 2개의 `EXPECT_CALL()`을 설정했다면 기대를 만족하는 `EXPECT_CALL()`은 첫번째 일수도 있고, 두번째 일수도 있는 것이다. 단지 두번째 것을 먼저 비교해보는 것 뿐이다. 다시 말하면 비교순서는 정해져 있지만 호출순서는 아직 지정하지 않은 상태이다.
