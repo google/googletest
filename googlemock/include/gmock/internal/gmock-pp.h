@@ -1,19 +1,6 @@
 #ifndef THIRD_PARTY_GOOGLETEST_GOOGLEMOCK_INCLUDE_GMOCK_PP_H_
 #define THIRD_PARTY_GOOGLETEST_GOOGLEMOCK_INCLUDE_GMOCK_PP_H_
 
-#undef GMOCK_PP_INTERNAL_USE_MSVC
-#if defined(__clang__)
-#define GMOCK_PP_INTERNAL_USE_MSVC 0
-#elif defined(_MSC_VER)
-// TODO(iserna): Also verify tradional versus comformant preprocessor.
-static_assert(
-    _MSC_VER >= 1900,
-    "MSVC version not supported. There is support for MSVC 14.0 and above.");
-#define GMOCK_PP_INTERNAL_USE_MSVC 1
-#else
-#define GMOCK_PP_INTERNAL_USE_MSVC 0
-#endif
-
 // Expands and concatenates the arguments. Constructed macros reevaluate.
 #define GMOCK_PP_CAT(_1, _2) GMOCK_PP_INTERNAL_CAT(_1, _2)
 
@@ -29,10 +16,6 @@ static_assert(
 // Returns the only argument.
 #define GMOCK_PP_IDENTITY(_1) _1
 
-// MSVC preprocessor collapses __VA_ARGS__ in a single argument, we use a
-// CAT-like directive to force correct evaluation. Each macro has its own.
-#if GMOCK_PP_INTERNAL_USE_MSVC
-
 // Evaluates to the number of arguments after expansion.
 //
 //   #define PAIR x, y
@@ -43,45 +26,32 @@ static_assert(
 //   GMOCK_PP_NARG(PAIR) => 2
 //
 // Requires: the number of arguments after expansion is at most 15.
-#define GMOCK_PP_NARG(...)                                                    \
-  GMOCK_PP_INTERNAL_NARG_CAT(                                                 \
-      GMOCK_PP_INTERNAL_INTERNAL_16TH(__VA_ARGS__, 15, 14, 13, 12, 11, 10, 9, \
-                                      8, 7, 6, 5, 4, 3, 2, 1), )
+#define GMOCK_PP_NARG(...)             \
+  GMOCK_PP_INTERNAL_EXPAND_WITH(       \
+      GMOCK_PP_INTERNAL_INTERNAL_16TH, \
+      (__VA_ARGS__, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1))
 
 // Returns 1 if the expansion of arguments has an unprotected comma. Otherwise
 // returns 0. Requires no more than 15 unprotected commas.
-#define GMOCK_PP_HAS_COMMA(...)                                               \
-  GMOCK_PP_INTERNAL_HAS_COMMA_CAT(                                            \
-      GMOCK_PP_INTERNAL_INTERNAL_16TH(__VA_ARGS__, 1, 1, 1, 1, 1, 1, 1, 1, 1, \
-                                      1, 1, 1, 1, 1, 0), )
+#define GMOCK_PP_HAS_COMMA(...)        \
+  GMOCK_PP_INTERNAL_EXPAND_WITH(       \
+      GMOCK_PP_INTERNAL_INTERNAL_16TH, \
+      (__VA_ARGS__, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0))
+
 // Returns the first argument.
 #define GMOCK_PP_HEAD(...) \
-  GMOCK_PP_INTERNAL_HEAD_CAT(GMOCK_PP_INTERNAL_HEAD(__VA_ARGS__), )
+  GMOCK_PP_INTERNAL_EXPAND_WITH(GMOCK_PP_INTERNAL_HEAD, (__VA_ARGS__))
 
 // Returns the tail. A variadic list of all arguments minus the first. Requires
 // at least one argument.
 #define GMOCK_PP_TAIL(...) \
-  GMOCK_PP_INTERNAL_TAIL_CAT(GMOCK_PP_INTERNAL_TAIL(__VA_ARGS__), )
+  GMOCK_PP_INTERNAL_EXPAND_WITH(GMOCK_PP_INTERNAL_TAIL, (__VA_ARGS__))
 
 // Calls CAT(_Macro, NARG(__VA_ARGS__))(__VA_ARGS__)
-#define GMOCK_PP_VARIADIC_CALL(_Macro, ...) \
-  GMOCK_PP_INTERNAL_VARIADIC_CALL_CAT(      \
-      GMOCK_PP_CAT(_Macro, GMOCK_PP_NARG(__VA_ARGS__))(__VA_ARGS__), )
-
-#else  // GMOCK_PP_INTERNAL_USE_MSVC
-
-#define GMOCK_PP_NARG(...)                                                   \
-  GMOCK_PP_INTERNAL_INTERNAL_16TH(__VA_ARGS__, 15, 14, 13, 12, 11, 10, 9, 8, \
-                                  7, 6, 5, 4, 3, 2, 1)
-#define GMOCK_PP_HAS_COMMA(...)                                              \
-  GMOCK_PP_INTERNAL_INTERNAL_16TH(__VA_ARGS__, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, \
-                                  1, 1, 1, 1, 0)
-#define GMOCK_PP_HEAD(...) GMOCK_PP_INTERNAL_HEAD(__VA_ARGS__)
-#define GMOCK_PP_TAIL(...) GMOCK_PP_INTERNAL_TAIL(__VA_ARGS__)
-#define GMOCK_PP_VARIADIC_CALL(_Macro, ...) \
-  GMOCK_PP_CAT(_Macro, GMOCK_PP_NARG(__VA_ARGS__))(__VA_ARGS__)
-
-#endif  // GMOCK_PP_INTERNAL_USE_MSVC
+#define GMOCK_PP_VARIADIC_CALL(_Macro, ...)             \
+  GMOCK_PP_INTERNAL_EXPAND_WITH(                        \
+      GMOCK_PP_CAT(_Macro, GMOCK_PP_NARG(__VA_ARGS__)), \
+      (__VA_ARGS__))
 
 // If the arguments after expansion have no tokens, evaluates to `1`. Otherwise
 // evaluates to `0`.
@@ -192,28 +162,11 @@ static_assert(
 #define GMOCK_PP_INTERNAL_IF_0(_Then, _Else) _Else
 #define GMOCK_PP_INTERNAL_HEAD(_1, ...) _1
 #define GMOCK_PP_INTERNAL_TAIL(_1, ...) __VA_ARGS__
-
-#if GMOCK_PP_INTERNAL_USE_MSVC
-#define GMOCK_PP_INTERNAL_NARG_CAT(_1, _2) GMOCK_PP_INTERNAL_NARG_CAT_I(_1, _2)
-#define GMOCK_PP_INTERNAL_HEAD_CAT(_1, _2) GMOCK_PP_INTERNAL_HEAD_CAT_I(_1, _2)
-#define GMOCK_PP_INTERNAL_HAS_COMMA_CAT(_1, _2) \
-  GMOCK_PP_INTERNAL_HAS_COMMA_CAT_I(_1, _2)
-#define GMOCK_PP_INTERNAL_TAIL_CAT(_1, _2) GMOCK_PP_INTERNAL_TAIL_CAT_I(_1, _2)
-#define GMOCK_PP_INTERNAL_VARIADIC_CALL_CAT(_1, _2) \
-  GMOCK_PP_INTERNAL_VARIADIC_CALL_CAT_I(_1, _2)
-#define GMOCK_PP_INTERNAL_NARG_CAT_I(_1, _2) _1##_2
-#define GMOCK_PP_INTERNAL_HEAD_CAT_I(_1, _2) _1##_2
-#define GMOCK_PP_INTERNAL_HAS_COMMA_CAT_I(_1, _2) _1##_2
-#define GMOCK_PP_INTERNAL_TAIL_CAT_I(_1, _2) _1##_2
-#define GMOCK_PP_INTERNAL_VARIADIC_CALL_CAT_I(_1, _2) _1##_2
+// Workaround MSVC behavior of treating __VA_ARGS__ with commas as one arg
+// _Args must be wrapped in parenthesis
+#define GMOCK_PP_INTERNAL_EXPAND_WITH(_Macro, _Args) _Macro _Args
 #define GMOCK_PP_INTERNAL_ALTERNATE_HEAD(...) \
-  GMOCK_PP_INTERNAL_ALTERNATE_HEAD_CAT(GMOCK_PP_HEAD(__VA_ARGS__), )
-#define GMOCK_PP_INTERNAL_ALTERNATE_HEAD_CAT(_1, _2) \
-  GMOCK_PP_INTERNAL_ALTERNATE_HEAD_CAT_I(_1, _2)
-#define GMOCK_PP_INTERNAL_ALTERNATE_HEAD_CAT_I(_1, _2) _1##_2
-#else  // GMOCK_PP_INTERNAL_USE_MSVC
-#define GMOCK_PP_INTERNAL_ALTERNATE_HEAD(...) GMOCK_PP_HEAD(__VA_ARGS__)
-#endif  // GMOCK_PP_INTERNAL_USE_MSVC
+  GMOCK_PP_INTERNAL_EXPAND_WITH(GMOCK_PP_HEAD, (__VA_ARGS__))
 
 #define GMOCK_PP_INTERNAL_IBP_IS_VARIADIC_C(...) 1 _
 #define GMOCK_PP_INTERNAL_IBP_IS_VARIADIC_R_1 1,
