@@ -2,7 +2,7 @@
 
 ### Mock object의 method를 하나 호출했는데 real object의 method가 호출되어 버렸습니다. 왜 그런건가요? ###
 
-Class method를 mocking하기 위해서는 기본적으로 *virtual*로 선언해야 합니다. 그게 어려운 경우라면 [high-perf dependency injection technique](cook_book.md#nonvirtual-method-mocking-하기)을 사용해도 됩니다.
+Class method를 mocking하기 위해서는 기본적으로 *virtual*로 선언해야 합니다. 그게 어려운 경우라면 [high-perf dependency injection technique](cook_book.md#non-virtual-method-mocking-하기)을 사용해도 됩니다.
 
 ### 가변함수(variadic function)도 mocking 할 수 있나요? ###
 
