@@ -198,11 +198,11 @@ objects, you should use `ASSERT_EQ`.
 
 When doing pointer comparisons use `*_EQ(ptr, nullptr)` and `*_NE(ptr, nullptr)`
 instead of `*_EQ(ptr, NULL)` and `*_NE(ptr, NULL)`. This is because `nullptr` is
-typed, while `NULL` is not. See the [FAQ](faq.md) for more details.
+typed, while `NULL` is not. See the [FAQ](faq.md#why-does-googletest-support-expect_eqnull-ptr-and-assert_eqnull-ptr-but-not-expect_nenull-ptr-and-assert_nenull-ptr) for more details.
 
 If you're working with floating point numbers, you may want to use the floating
 point variations of some of these macros in order to avoid problems caused by
-rounding. See [Advanced googletest Topics](advanced.md) for details.
+rounding. See [Advanced googletest Topics](advanced.md#floating-point-comparison) for details.
 
 Macros in this section work with both narrow and wide string objects (`string`
 and `wstring`).
@@ -238,7 +238,7 @@ of two wide strings fails, their values will be printed as UTF-8 narrow strings.
 **Availability**: Linux, Windows, Mac.
 
 **See also**: For more string comparison tricks (substring, prefix, suffix, and
-regular expression matching, for example), see [this](advanced.md) in the
+regular expression matching, for example), see [this](advanced.md#more-string-assertions) in the
 Advanced googletest Guide.
 
 ## Simple Tests
@@ -301,7 +301,7 @@ for
 
 **Availability**: Linux, Windows, Mac.
 
-## Test Fixtures: Using the Same Data Configuration for Multiple Tests {#same-data-multiple-tests}
+## Test Fixtures: Using the Same Data Configuration for Multiple Tests
 
 If you find yourself writing two or more tests that operate on similar data, you
 can use a *test fixture*. This allows you to reuse the same configuration of
@@ -319,7 +319,7 @@ To create a fixture:
 4.  If necessary, write a destructor or `TearDown()` function to release any
     resources you allocated in `SetUp()` . To learn when you should use the
     constructor/destructor and when you should use `SetUp()/TearDown()`, read
-    the [FAQ](faq.md#CtorVsSetUp).
+    the [FAQ](faq.md#should-i-use-the-constructordestructor-of-the-test-fixture-or-setupteardown).
 5.  If needed, define subroutines for your tests to share.
 
 When using a fixture, use `TEST_F()` instead of `TEST()` as it allows you to
@@ -543,7 +543,7 @@ int main(int argc, char **argv) {
 The `::testing::InitGoogleTest()` function parses the command line for
 googletest flags, and removes all recognized flags. This allows the user to
 control a test program's behavior via various flags, which we'll cover in
-the [AdvancedGuide](advanced.md). You **must** call this function before calling
+the [AdvancedGuide](advanced.md#running-test-programs-advanced-options). You **must** call this function before calling
 `RUN_ALL_TESTS()`, or the flags won't be properly initialized.
 
 On Windows, `InitGoogleTest()` also works with wide strings, so it can be used

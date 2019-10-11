@@ -1,11 +1,11 @@
-## Legacy gMock FAQ {#GMockFaq}
+## Legacy gMock FAQ
 
 <!-- GOOGLETEST_CM0021 DO NOT DELETE -->
 
 ### When I call a method on my mock object, the method for the real object is invoked instead. What's the problem?
 
 In order for a method to be mocked, it must be *virtual*, unless you use the
-[high-perf dependency injection technique](#MockingNonVirtualMethods).
+[high-perf dependency injection technique](cook_book.md#mocking-non-virtual-methods).
 
 ### Can I mock a variadic function?
 
@@ -91,7 +91,7 @@ trace, you'll gain insights on why the expectations you set are not met.
 
 If you see the message "The mock function has no default action set, and its
 return type has no default value set.", then try
-[adding a default action](for_dummies.md#DefaultValue). Due to a known issue,
+[adding a default action](cheat_sheet.md#setting-default-actions). Due to a known issue,
 unexpected calls on mocks without default actions don't print out a detailed
 comparison between the actual arguments and the expected arguments.
 
@@ -294,9 +294,9 @@ using ::testing::_;
 
 If you find yourself needing to perform some action that's not supported by
 gMock directly, remember that you can define your own actions using
-[`MakeAction()`](#NewMonoActions) or
-[`MakePolymorphicAction()`](#NewPolyActions), or you can write a stub function
-and invoke it using [`Invoke()`](#FunctionsAsActions).
+[`MakeAction()`](cook_book.md#writing-new-monomorphic-actions) or
+[`MakePolymorphicAction()`](cook_book.md#writing-new-polymorphic-actions), or you can write a stub function
+and invoke it using [`Invoke()`](cook_book.md#using-functionsmethodsfunctorslambdas-as-actions).
 
 ```cpp
 using ::testing::_;

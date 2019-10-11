@@ -175,7 +175,7 @@ class MockStack : public StackInterface<Elem> {
 };
 ```
 
-### Mocking Non-virtual Methods {#MockingNonVirtualMethods}
+### Mocking Non-virtual Methods
 
 gMock can mock non-virtual functions to be used in Hi-perf dependency
 injection.<!-- GOOGLETEST_CM0017 DO NOT DELETE -->
@@ -277,7 +277,7 @@ syntactic overhead will be much lower.
 
 If you are concerned about the performance overhead incurred by virtual
 functions, and profiling confirms your concern, you can combine this with the
-recipe for [mocking non-virtual methods](#MockingNonVirtualMethods).
+recipe for [mocking non-virtual methods](#mocking-non-virtual-methods).
 
 ### Old-Style `MOCK_METHODn` Macros
 
@@ -337,7 +337,7 @@ Foo, bool(int))` </td> </tr> <tr> <td> New </td> <td> `MOCK_METHOD(bool, Foo,
 
 </table>
 
-### The Nice, the Strict, and the Naggy {#NiceStrictNaggy}
+### The Nice, the Strict, and the Naggy
 
 If a mock method has no `EXPECT_CALL` spec but is called, we say that it's an
 "uninteresting call", and the default action (which can be specified using
@@ -408,7 +408,7 @@ TEST(...) {
 NOTE: `NiceMock` and `StrictMock` only affects *uninteresting* calls (calls of
 *methods* with no expectations); they do not affect *unexpected* calls (calls of
 methods with expectations, but they don't match). See
-[Understanding Uninteresting vs Unexpected Calls](#uninteresting-vs-unexpected).
+[Understanding Uninteresting vs Unexpected Calls](#understanding-uninteresting-vs-unexpected-calls).
 
 There are some caveats though (I dislike them just as much as the next guy, but
 sadly they are side effects of C++'s limitations):
@@ -444,7 +444,7 @@ nice mocks (not yet the default) most of the time, use naggy mocks (the current
 default) when developing or debugging tests, and use strict mocks only as the
 last resort.
 
-### Simplifying the Interface without Breaking Existing Code {#SimplerInterfaces}
+### Simplifying the Interface without Breaking Existing Code
 
 Sometimes a method has a long list of arguments that is mostly uninteresting.
 For example:
@@ -578,7 +578,7 @@ I'd like to assure you that the Java community has been practicing this for a
 long time and it's a proven effective technique applicable in a wide variety of
 situations. :-)
 
-### Delegating Calls to a Fake {#DelegatingToFake}
+### Delegating Calls to a Fake
 
 Some times you have a non-trivial fake implementation of an interface. For
 example:
@@ -669,7 +669,7 @@ TEST(AbcTest, Xyz) {
 *   The general technique discussed here works for overloaded methods, but
     you'll need to tell the compiler which version you mean. To disambiguate a
     mock function (the one you specify inside the parentheses of `ON_CALL()`),
-    use [this technique](#SelectOverload); to disambiguate a fake function (the
+    use [this technique](#selecting-between-overloaded-functions); to disambiguate a fake function (the
     one you place inside `Invoke()`), use a `static_cast` to specify the
     function's type. For instance, if class `Foo` has methods `char DoThis(int
     n)` and `bool DoThis(double x) const`, and you want to invoke the latter,
@@ -707,7 +707,7 @@ fails in production.
 
 You can use the *delegating-to-real* technique to ensure that your mock has the
 same behavior as the real object while retaining the ability to validate calls.
-This technique is very similar to the [delegating-to-fake](#DelegatingToFake)
+This technique is very similar to the [delegating-to-fake](#delegating-calls-to-a-fake)
 technique, the difference being that we use a real object instead of a fake.
 Here's an example:
 
@@ -850,7 +850,7 @@ A frequently used matcher is `_`, which matches anything:
 ```
 <!-- GOOGLETEST_CM0022 DO NOT DELETE -->
 
-### Combining Matchers {#CombiningMatchers}
+### Combining Matchers
 
 You can build complex matchers from existing ones using `AllOf()`,
 `AllOfArray()`, `AnyOf()`, `AnyOfArray()` and `Not()`:
@@ -871,7 +871,7 @@ using ::testing::Not;
                           NULL));
 ```
 
-### Casting Matchers {#SafeMatcherCast}
+### Casting Matchers
 
 gMock matchers are statically typed, meaning that the compiler can catch your
 mistake if you use a matcher of the wrong type (for example, if you use `Eq(5)`
@@ -926,7 +926,7 @@ can `static_cast` type `T` to type `U`.
 always safe as it could throw away information, for example), so be careful not
 to misuse/abuse it.
 
-### Selecting Between Overloaded Functions {#SelectOverload}
+### Selecting Between Overloaded Functions
 
 If you expect an overloaded function to be called, the compiler may need some
 help on which overloaded version it is.
@@ -1049,7 +1049,7 @@ z`. Note that in this example, it wasn't necessary specify the positional
 matchers.
 
 As a convenience and example, gMock provides some matchers for 2-tuples,
-including the `Lt()` matcher above. See [here](#MultiArgMatchers) for the
+including the `Lt()` matcher above. See [here](cheat_sheet.md#multi-argument-matchers) for the
 complete list.
 
 Note that if you want to pass the arguments to a predicate of your own (e.g.
@@ -1145,7 +1145,7 @@ Hamcrest project, which adds `assertThat()` to JUnit.
 
 ### Using Predicates as Matchers
 
-gMock provides a [built-in set](#MatcherList) of matchers. In case you find them
+gMock provides a [built-in set](cheat_sheet.md#matchers) of matchers. In case you find them
 lacking, you can use an arbitrary unary predicate function or functor as a
 matcher - as long as the predicate accepts a value of the type you want. You do
 this by wrapping the predicate inside the `Truly()` function, for example:
@@ -1243,7 +1243,7 @@ matches a plain pointer `p` where `p->number >= 3`. If `p` is `NULL`, the match
 will always fail regardless of the inner matcher.
 
 What if you want to validate more than one members at the same time? Remember
-that there are [`AllOf()` and `AllOfArray()`](#CombiningMatchers).
+that there are [`AllOf()` and `AllOfArray()`](cheat_sheet.md#composite-matchers).
 
 Finally `Field()` and `Property()` provide overloads that take the field or
 property names as the first argument to include it in the error message. This
@@ -1308,7 +1308,7 @@ to a number less than 3 (what a mouthful...).
 
 Sometimes you want to specify that an object argument has a certain property,
 but there is no existing matcher that does this. If you want good error
-messages, you should [define a matcher](#NewMatchers). If you want to do it
+messages, you should [define a matcher](#writing-new-matchers-quickly). If you want to do it
 quick and dirty, you could get away with writing an ordinary function.
 
 Let's say you have a mock function that takes an object of type `Foo`, which has
@@ -1467,7 +1467,7 @@ using ::testing::Matcher;
   ... use in_range as a matcher in multiple EXPECT_CALLs ...
 ```
 
-### Matchers must have no side-effects {#PureMatchers}
+### Matchers must have no side-effects
 
 WARNING: gMock does not guarantee when or how many times a matcher will be
 invoked. Therefore, all matchers must be *purely functional*: they cannot have
@@ -1481,7 +1481,7 @@ mock object and gMock.
 
 ## Setting Expectations
 
-### Knowing When to Expect {#UseOnCall}
+### Knowing When to Expect
 
 <!-- GOOGLETEST_CM0018 DO NOT DELETE -->
 
@@ -1540,7 +1540,7 @@ If you are not interested in how a mock method is called, just don't say
 anything about it. In this case, if the method is ever called, gMock will
 perform its default action to allow the test program to continue. If you are not
 happy with the default action taken by gMock, you can override it using
-`DefaultValue<T>::Set()` (described [here](#DefaultValue)) or `ON_CALL()`.
+`DefaultValue<T>::Set()` (described [here](#setting-the-default-value-for-a-return-type)) or `ON_CALL()`.
 
 Please note that once you expressed interest in a particular mock method (via
 `EXPECT_CALL()`), all invocations to it must match some expectation. If this
@@ -1573,7 +1573,7 @@ using ::testing::Gt;
 A call to `foo.Bar()` that doesn't match any of the `EXPECT_CALL()` statements
 will be an error.
 
-### Understanding Uninteresting vs Unexpected Calls {#uninteresting-vs-unexpected}
+### Understanding Uninteresting vs Unexpected Calls
 
 *Uninteresting* calls and *unexpected* calls are different concepts in gMock.
 *Very* different.
@@ -1646,9 +1646,9 @@ Note that the order of the two `EXPECT_CALL`s is important, as a newer
 `EXPECT_CALL` takes precedence over an older one.
 
 For more on uninteresting calls, nice mocks, and strict mocks, read
-["The Nice, the Strict, and the Naggy"](#NiceStrictNaggy).
+["The Nice, the Strict, and the Naggy"](#the-nice-the-strict-and-the-naggy).
 
-### Ignoring Uninteresting Arguments {#ParameterlessExpectations}
+### Ignoring Uninteresting Arguments
 
 If your test doesn't care about the parameters (it only cares about the number
 or order of calls), you can often simply omit the parameter list:
@@ -1665,16 +1665,16 @@ or order of calls), you can often simply omit the parameter list:
 This functionality is only available when a method is not overloaded; to prevent
 unexpected behavior it is a compilation error to try to set an expectation on a
 method where the specific overload is ambiguous. You can work around this by
-supplying a [simpler mock interface](#SimplerInterfaces) than the mocked class
+supplying a [simpler mock interface](#simplifying-the-interface-without-breaking-existing-code) than the mocked class
 provides.
 
 This pattern is also useful when the arguments are interesting, but match logic
 is substantially complex. You can leave the argument list unspecified and use
-SaveArg actions to [save the values for later verification](#SaveArgVerify). If
+SaveArg actions to [save the values for later verification](#verifying-complex-arguments). If
 you do that, you can easily differentiate calling the method the wrong number of
 times from calling it with the wrong arguments.
 
-### Expecting Ordered Calls {#OrderedCalls}
+### Expecting Ordered Calls
 
 Although an `EXPECT_CALL()` statement defined earlier takes precedence when
 gMock tries to match a function call with an expectation, by default calls don't
@@ -1705,7 +1705,7 @@ In this example, we expect a call to `foo.DoThis(5)`, followed by two calls to
 a call to `foo.DoThis(6)`. If a call occurred out-of-order, gMock will report an
 error.
 
-### Expecting Partially Ordered Calls {#PartialOrder}
+### Expecting Partially Ordered Calls
 
 Sometimes requiring everything to occur in a predetermined order can lead to
 brittle tests. For example, we may care about `A` occurring before both `B` and
@@ -1713,7 +1713,7 @@ brittle tests. For example, we may care about `A` occurring before both `B` and
 the test should reflect our real intent, instead of being overly constraining.
 
 gMock allows you to impose an arbitrary DAG (directed acyclic graph) on the
-calls. One way to express the DAG is to use the [After](#AfterClause) clause of
+calls. One way to express the DAG is to use the [After](cheat_sheet.md#the-after-clause) clause of
 `EXPECT_CALL`.
 
 Another way is via the `InSequence()` clause (not the same as the `InSequence`
@@ -1922,7 +1922,7 @@ class MockFoo : public Foo {
                       action_n));
 ```
 
-### Verifying Complex Arguments {#SaveArgVerify}
+### Verifying Complex Arguments
 
 If you want to verify that a method is called with a particular argument but the
 match criteria is complex, it can be difficult to distinguish between
@@ -1946,7 +1946,7 @@ You can instead save the arguments and test them individually:
   EXPECT_THAT(actual_proto, EqualsProto( ... ));
 ```
 
-### Mocking Side Effects {#MockingSideEffects}
+### Mocking Side Effects
 
 Sometimes a method exhibits its effect not via returning a value but via side
 effects. For example, it may change some global state or modify an output
@@ -2091,7 +2091,7 @@ ACTION_P(ReturnPointee, p) { return *p; }
 Here `my_mock.GetPrevValue()` will always return the argument of the last
 `UpdateValue()` call.
 
-### Setting the Default Value for a Return Type {#DefaultValue}
+### Setting the Default Value for a Return Type
 
 If a mock method's return type is a built-in C++ type or pointer, by default it
 will return 0 when invoked. Also, in C++ 11 and above, a mock method whose
@@ -2172,7 +2172,7 @@ Note that both `ON_CALL` and `EXPECT_CALL` have the same "later statements take
 precedence" rule, but they don't interact. That is, `EXPECT_CALL`s have their
 own precedence order distinct from the `ON_CALL` precedence order.
 
-### Using Functions/Methods/Functors/Lambdas as Actions {#FunctionsAsActions}
+### Using Functions/Methods/Functors/Lambdas as Actions
 
 If the built-in actions don't suit you, you can use an existing callable
 (function, `std::function`, method, functor, lambda as an action.
@@ -2459,7 +2459,7 @@ class MockFoo : public Foo {
 Note that you **cannot** use `IgnoreResult()` on an action that already returns
 `void`. Doing so will lead to ugly compiler errors.
 
-### Selecting an Action's Arguments {#SelectingArgs}
+### Selecting an Action's Arguments
 
 Say you have a mock function `Foo()` that takes seven arguments, and you have a
 custom action that you want to invoke when `Foo()` is called. Trouble is, the
@@ -2545,7 +2545,7 @@ Here are more tips:
 
 ### Ignoring Arguments in Action Functions
 
-The [selecting-an-action's-arguments](#SelectingArgs) recipe showed us one way
+The [selecting-an-action's-arguments](#selecting-an-actions-arguments) recipe showed us one way
 to make a mock function and an action with incompatible argument lists fit
 together. The downside is that wrapping the action in `WithArgs<...>()` can get
 tedious for people writing the tests.
@@ -2717,7 +2717,7 @@ Mocking a method that takes and/or returns move-only types presents some
 challenges, but nothing insurmountable. This recipe shows you how you can do it.
 Note that the support for move-only method arguments was only introduced to
 gMock in April 2017; in older code, you may find more complex
-[workarounds](#LegacyMoveOnly) for lack of this feature.
+[workarounds](#legacy-workarounds-for-move-only-types) for lack of this feature.
 
 Let’s say we are working on a fictional project that lets one post and share
 snippets called “buzzes”. Your code uses these types:
@@ -2783,7 +2783,7 @@ action:
 ```
 
 If you are not happy with the default action, you can tweak it as usual; see
-[Setting Default Actions](#OnCall).
+[Setting Default Actions](#setting-the-default-actions-for-a-mock-method).
 
 If you just need to return a pre-defined move-only value, you can use the
 `Return(ByMove(...))` action:
@@ -2826,7 +2826,7 @@ and returned. You cannot do this with `Return(ByMove(...))`.
 That covers returning move-only values; but how do we work with methods
 accepting move-only arguments? The answer is that they work normally, although
 some actions will not compile when any of method's arguments are move-only. You
-can always use `Return`, or a [lambda or functor](#FunctionsAsActions):
+can always use `Return`, or a [lambda or functor](#using-functionsmethodsfunctorslambdas-as-actions):
 
 ```cpp
   using ::testing::Unused;
@@ -2847,7 +2847,7 @@ implemented yet. If this is blocking you, please file a bug.
 A few actions (e.g. `DoAll`) copy their arguments internally, so they can never
 work with non-copyable objects; you'll have to use functors instead.
 
-#### Legacy workarounds for move-only types {#LegacyMoveOnly}
+#### Legacy workarounds for move-only types
 
 Support for move-only function arguments was only introduced to gMock in April
 2017. In older code, you may encounter the following workaround for the lack of
@@ -2984,7 +2984,7 @@ indicate whether the verification was successful (`true` for yes), so you can
 wrap that function call inside a `ASSERT_TRUE()` if there is no point going
 further when the verification has failed.
 
-### Using Check Points {#UsingCheckPoints}
+### Using Check Points
 
 Sometimes you may want to "reset" a mock object at various check points in your
 test: at each check point, you verify that all existing expectations on the mock
@@ -3052,7 +3052,7 @@ easy to tell which `Bar("a")` is called by which call to `Foo()`.
 
 Sometimes you want to make sure a mock object is destructed at the right time,
 e.g. after `bar->A()` is called but before `bar->B()` is called. We already know
-that you can specify constraints on the [order](#OrderedCalls) of mock function
+that you can specify constraints on the [order](#expecting-ordered-calls) of mock function
 calls, so all we need to do is to mock the destructor of the mock function.
 
 This sounds simple, except for one problem: a destructor is a special function
@@ -3096,7 +3096,7 @@ testing when its `Die()` method is called:
 
 And that's that.
 
-### Using gMock and Threads {#UsingThreads}
+### Using gMock and Threads
 
 In a **unit** test, it's best if you could isolate and test a piece of code in a
 single-threaded context. That avoids race conditions and dead locks, and makes
@@ -3295,11 +3295,11 @@ after typing `M-m`), or `M-up`/`M-down` to move back and forth between errors.
 
 ## Extending gMock
 
-### Writing New Matchers Quickly {#NewMatchers}
+### Writing New Matchers Quickly
 
 WARNING: gMock does not guarantee when or how many times a matcher will be
 invoked. Therefore, all matchers must be functionally pure. See
-[this section](#PureMatchers) for more details.
+[this section](#matchers-must-have-no-side-effects) for more details.
 
 The `MATCHER*` family of macros can be used to define custom matchers easily.
 The syntax:
@@ -3718,7 +3718,7 @@ A cardinality is used in `Times()` to tell gMock how many times you expect a
 call to occur. It doesn't have to be exact. For example, you can say
 `AtLeast(5)` or `Between(2, 4)`.
 
-If the [built-in set](cheat_sheet.md#CardinalityList) of cardinalities doesn't
+If the [built-in set](cheat_sheet.md#cardinalities) of cardinalities doesn't
 suit you, you are free to define your own by implementing the following
 interface (in namespace `testing`):
 
@@ -3771,7 +3771,7 @@ Cardinality EvenNumber() {
       .Times(EvenNumber());
 ```
 
-### Writing New Actions Quickly {#QuickNewActions}
+### Writing New Actions Quickly
 
 If the built-in actions don't work for you, you can easily define your own one.
 Just define a functor class with a (possibly templated) call operator, matching
@@ -4063,7 +4063,7 @@ Note that we have to pick different suffixes (`Action`, `ActionP`, `ActionP2`,
 and etc) for actions with different numbers of value parameters, or the action
 definitions cannot be overloaded on the number of them.
 
-### Writing New Monomorphic Actions {#NewMonoActions}
+### Writing New Monomorphic Actions
 
 While the `ACTION*` macros are very convenient, sometimes they are
 inappropriate. For example, despite the tricks shown in the previous recipes,
@@ -4120,7 +4120,7 @@ Action<IncrementMethod> IncrementArgument() {
   foo.Baz(&n);  // Should return 5 and change n to 6.
 ```
 
-### Writing New Polymorphic Actions {#NewPolyActions}
+### Writing New Polymorphic Actions
 
 The previous recipe showed you how to define your own action. This is all good,
 except that you need to know the type of the function in which the action will
@@ -4216,7 +4216,7 @@ particular type than to dump the bytes.
 <!--#include file="includes/g3_testing_LOGs.md"-->
 <!--#include file="includes/g3_mock_callbacks.md"-->
 
-### Mock std::function {#MockFunction}
+### Mock std::function
 
 `std::function` is a general function type introduced in C++11. It is a
 preferred way of passing callbacks to new interfaces. Functions are copiable,

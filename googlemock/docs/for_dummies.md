@@ -1,4 +1,4 @@
-## gMock for Dummies {#GMockForDummies}
+## gMock for Dummies
 
 <!-- GOOGLETEST_CM0013 DO NOT DELETE -->
 
@@ -53,7 +53,7 @@ them fast and reliable, using mocks manually in C++ is *hard*:
     one.
 
 In contrast, Java and Python programmers have some fine mock frameworks (jMock,
-EasyMock, [Mox](http://wtf/mox), etc), which automate the creation of mocks. As
+EasyMock, [Mox](https://code.google.com/archive/p/pymox/wikis/MoxDocumentation.wiki), etc), which automate the creation of mocks. As
 a result, mocking is a proven effective technique and widely adopted practice in
 those communities. Having the right tool absolutely makes the difference.
 
@@ -148,7 +148,7 @@ follow:
 
 *   Derive a class `MockTurtle` from `Turtle`.
 *   Take a *virtual* function of `Turtle` (while it's possible to
-    [mock non-virtual methods using templates](cook_book.md#MockingNonVirtualMethods),
+    [mock non-virtual methods using templates](cook_book.md#mocking-non-virtual-methods),
     it's much more involved).
 *   In the `public:` section of the child class, write `MOCK_METHOD();`
 *   Now comes the fun part: you take the function signature, cut-and-paste it
@@ -374,8 +374,8 @@ convenient way of saying "any value".
 In the above examples, `100` and `50` are also matchers; implicitly, they are
 the same as `Eq(100)` and `Eq(50)`, which specify that the argument must be
 equal (using `operator==`) to the matcher argument. There are many
-[built-in matchers](#MatcherList) for common types (as well as
-[custom matchers](cook_book.md#NewMatchers)); for example:
+[built-in matchers](cheat_sheet.md#matchers) for common types (as well as
+[custom matchers](cook_book.md#writing-new-matchers-quickly)); for example:
 
 ```cpp
 using ::testing::Ge;
@@ -397,7 +397,7 @@ EXPECT_CALL(turtle, GoTo);
 This works for all non-overloaded methods; if a method is overloaded, you need
 to help gMock resolve which overload is expected by specifying the number of
 arguments and possibly also the
-[types of the arguments](cook_book.md#SelectOverload).
+[types of the arguments](cook_book.md#selecting-between-overloaded-functions).
 
 #### Cardinalities: How Many Times Will It Be Called?
 
@@ -414,7 +414,7 @@ called.
 
 We've seen `AtLeast(n)` as an example of fuzzy cardinalities earlier. For the
 list of built-in cardinalities you can use, see
-[here](cheat_sheet.md#CardinalityList).
+[here](cheat_sheet.md#cardinalities).
 
 The `Times()` clause can be omitted. **If you omit `Times()`, gMock will infer
 the cardinality for you.** The rules are easy to remember:
@@ -522,7 +522,7 @@ will be taken afterwards. So the right answer is that `turtle.GetY()` will
 return 100 the first time, but **return 0 from the second time on**, as
 returning 0 is the default action for `int` functions.
 
-#### Using Multiple Expectations {#MultiExpectations}
+#### Using Multiple Expectations
 
 So far we've only shown examples where you have a single expectation. More
 realistically, you'll specify expectations on multiple mock methods which may be
@@ -561,9 +561,9 @@ overloaded). This makes any calls to the method expected. This is not necessary
 for methods that are not mentioned at all (these are "uninteresting"), but is
 useful for methods that have some expectations, but for which other calls are
 ok. See
-[Understanding Uninteresting vs Unexpected Calls](cook_book.md#uninteresting-vs-unexpected).
+[Understanding Uninteresting vs Unexpected Calls](cook_book.md#understanding-uninteresting-vs-unexpected-calls).
 
-#### Ordered vs Unordered Calls {#OrderedCalls}
+#### Ordered vs Unordered Calls
 
 By default, an expectation can match a call even though an earlier expectation
 hasn't been satisfied. In other words, the calls don't have to occur in the
@@ -598,9 +598,9 @@ order as written. If a call is made out-of-order, it will be an error.
 
 (What if you care about the relative order of some of the calls, but not all of
 them? Can you specify an arbitrary partial order? The answer is ... yes! The
-details can be found [here](cook_book.md#OrderedCalls).)
+details can be found [here](cook_book.md#expecting-partially-ordered-calls).)
 
-#### All Expectations Are Sticky (Unless Said Otherwise) {#StickyExpectations}
+#### All Expectations Are Sticky (Unless Said Otherwise)
 
 Now let's do a quick quiz to see how well you can use this mock stuff already.
 How would you test that the turtle is asked to go to the origin *exactly twice*
@@ -623,7 +623,7 @@ Suppose `turtle.GoTo(0, 0)` is called three times. In the third time, gMock will
 see that the arguments match expectation #2 (remember that we always pick the
 last matching expectation). Now, since we said that there should be only two
 such calls, gMock will report an error immediately. This is basically what we've
-told you in the [Using Multiple Expectations](#MultiExpectations) section above.
+told you in the [Using Multiple Expectations](#using-multiple-expectations) section above.
 
 This example shows that **expectations in gMock are "sticky" by default**, in
 the sense that they remain active even after we have reached their invocation
@@ -697,4 +697,4 @@ For example, in some tests we may not care about how many times `GetX()` and
 In gMock, if you are not interested in a method, just don't say anything about
 it. If a call to this method occurs, you'll see a warning in the test output,
 but it won't be a failure. This is called "naggy" behavior; to change, see
-[The Nice, the Strict, and the Naggy](cook_book.md#NiceStrictNaggy).
+[The Nice, the Strict, and the Naggy](cook_book.md#the-nice-the-strict-and-the-naggy).

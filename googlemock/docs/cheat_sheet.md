@@ -6,7 +6,7 @@
 
 ### Defining a Mock Class
 
-#### Mocking a Normal Class {#MockClass}
+#### Mocking a Normal Class
 
 Given
 
@@ -52,7 +52,7 @@ StrictMock<MockFoo> strict_foo;  // The type is a subclass of MockFoo.
 **Note:** A mock object is currently naggy by default. We may make it nice by
 default in the future.
 
-#### Mocking a Class Template {#MockTemplate}
+#### Mocking a Class Template
 
 Class templates can be mocked just like any class.
 
@@ -94,7 +94,7 @@ For example,
 
 where `STDMETHODCALLTYPE` is defined by `<objbase.h>` on Windows.
 
-### Using Mocks in Tests {#UsingMocks}
+### Using Mocks in Tests
 
 The typical work flow is:
 
@@ -130,7 +130,7 @@ TEST(BarTest, DoesThis) {
 }                                                 // #6
 ```
 
-### Setting Default Actions {#OnCall}
+### Setting Default Actions
 
 gMock has a **built-in default action** for any function that returns `void`,
 `bool`, a numeric value, or a pointer. In C++11, it will additionally returns
@@ -177,7 +177,7 @@ Example usage:
 To customize the default action for a particular method of a specific mock
 object, use `ON_CALL()`. `ON_CALL()` has a similar syntax to `EXPECT_CALL()`,
 but it is used for setting default behaviors (when you do not require that the
-mock method is called). See [here](cook_book.md#UseOnCall) for a more detailed
+mock method is called). See [here](cook_book.md#knowing-when-to-expect) for a more detailed
 discussion.
 
 ```cpp
@@ -186,7 +186,7 @@ ON_CALL(mock-object, method(matchers))
     .WillByDefault(action);
 ```
 
-### Setting Expectations {#ExpectCall}
+### Setting Expectations
 
 `EXPECT_CALL()` sets **expectations** on a mock method (How will it be called?
 What will it do?):
@@ -225,7 +225,7 @@ If `Times()` is omitted, the cardinality is assumed to be:
 A method with no `EXPECT_CALL()` is free to be invoked *any number of times*,
 and the default action will be taken each time.
 
-### Matchers {#MatcherList}
+### Matchers
 
 <!-- GOOGLETEST_CM0020 DO NOT DELETE -->
 
@@ -278,7 +278,7 @@ copy constructor, try wrap it in `ByRef()`, e.g.
 `Eq(ByRef(non_copyable_value))`. If you do that, make sure `non_copyable_value`
 is not changed afterwards, or the meaning of your matcher will be changed.
 
-#### Floating-Point Matchers {#FpMatchers}
+#### Floating-Point Matchers
 
 <!-- mdformat off(no multiline tables) -->
 | Matcher                          | Description                        |
@@ -363,7 +363,7 @@ messages, you can use:
     1.  a native array passed by reference (e.g. in `Foo(const int (&a)[5])`),
         and
     2.  an array passed as a pointer and a count (e.g. in `Bar(const T* buffer,
-        int len)` -- see [Multi-argument Matchers](#MultiArgMatchers)).
+        int len)` -- see [Multi-argument Matchers](#multi-argument-matchers)).
 *   The array being matched may be multi-dimensional (i.e. its elements can be
     arrays).
 *   `m` in `Pointwise(m, ...)` should be a matcher for `::std::tuple<T, U>`
@@ -412,7 +412,7 @@ messages, you can use:
 
 <!-- GOOGLETEST_CM0027 DO NOT DELETE -->
 
-#### Multi-argument Matchers {#MultiArgMatchers}
+#### Multi-argument Matchers
 
 Technically, all matchers match a *single* value. A "multi-argument" matcher is
 just one that matches a *tuple*. The following matchers can be used to match a
@@ -466,7 +466,7 @@ You can make a matcher from one or more other matchers:
 `AddressSatisfies(callback)` and `Truly(callback)` take ownership of `callback`,
 which must be a permanent callback.
 
-#### Using Matchers as Predicates {#MatchersAsPredicatesCheat}
+#### Using Matchers as Predicates
 
 <!-- mdformat off(no multiline tables) -->
 | Matcher                       | Description                                 |
@@ -495,7 +495,7 @@ which must be a permanent callback.
 3.  You can use `PrintToString(x)` to convert a value `x` of any type to a
     string.
 
-### Actions {#ActionList}
+### Actions
 
 **Actions** specify what a mock function should do when invoked.
 
@@ -635,7 +635,7 @@ composite action - trying to do so will result in a run-time error.
 
 The `ACTION*` macros cannot be used inside a function or class.
 
-### Cardinalities {#CardinalityList}
+### Cardinalities
 
 These are used in `Times()` to specify how many times a mock function will be
 called:
@@ -656,7 +656,7 @@ By default, the expectations can be matched in *any* order. If some or all
 expectations must be matched in a given order, there are two ways to specify it.
 They can be used either independently or together.
 
-#### The After Clause {#AfterClause}
+#### The After Clause
 
 ```cpp
 using ::testing::Expectation;
@@ -690,7 +690,7 @@ says that `Bar()` can be called only after all elements have been initialized
 Modifying an `ExpectationSet` after using it in an `.After()` doesn't affect the
 meaning of the `.After()`.
 
-#### Sequences {#UsingSequences}
+#### Sequences
 
 When you have a long chain of sequential expectations, it's easier to specify
 the order using **sequences**, which don't require you to given each expectation

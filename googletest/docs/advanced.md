@@ -151,7 +151,7 @@ c is 10
 >
 > 1.  If you see a compiler error "no matching function to call" when using
 >     `ASSERT_PRED*` or `EXPECT_PRED*`, please see
->     [this](faq.md#the-compiler-complains-no-matching-function-to-call-when-i-use-assert-pred-how-do-i-fix-it)
+>     [this](faq.md#the-compiler-complains-no-matching-function-to-call-when-i-use-assert_pred-how-do-i-fix-it)
 >     for how to resolve it.
 
 #### Using a Function That Returns an AssertionResult
@@ -397,8 +397,8 @@ in the gMock Cookbook for more details.
 
 gMock has a rich set of matchers. You can do many things googletest cannot do
 alone with them. For a list of matchers gMock provides, read
-[this](../../googlemock/docs/cook_book.md##using-matchers). It's easy to write
-your [own matchers](../../googlemock/docs/cook_book.md#NewMatchers) too.
+[this](../../googlemock/docs/cheat_sheet.md#matchers). It's easy to write
+your [own matchers](../../googlemock/docs/cook_book.md#writing-new-matchers-quickly) too.
 
 gMock is bundled with googletest, so you don't need to add any build dependency
 in order to take advantage of this. Just include `"testing/base/public/gmock.h"`
@@ -521,7 +521,7 @@ according to the C++ language specification, and so you may not use fatal
 assertions in them; you'll get a compilation error if you try. Instead, either
 call `abort` and crash the entire test executable, or put the fatal assertion in
 a `SetUp`/`TearDown` function; see
-[constructor/destructor vs. `SetUp`/`TearDown`](faq.md#CtorVsSetUp)
+[constructor/destructor vs. `SetUp`/`TearDown`](faq.md#should-i-use-the-constructordestructor-of-the-test-fixture-or-setupteardown)
 
 WARNING: A fatal assertion in a helper function (private void-returning method)
 called from a constructor or destructor does not does not terminate the current
@@ -625,7 +625,7 @@ _death tests_. More generally, any test that checks that a program terminates
 Note that if a piece of code throws an exception, we don't consider it "death"
 for the purpose of death tests, as the caller of the code could catch the
 exception and avoid the crash. If you want to verify exceptions thrown by your
-code, see [Exception Assertions](#ExceptionAssertions).
+code, see [Exception Assertions](#exception-assertions).
 
 If you want to test `EXPECT_*()/ASSERT_*()` failures in your test code, see
 Catching Failures
