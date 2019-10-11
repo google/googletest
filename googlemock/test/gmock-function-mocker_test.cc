@@ -656,5 +656,12 @@ TEST(MockMethodMockFunctionTest, MockMethodSizeOverhead) {
   EXPECT_EQ(sizeof(MockMethodSizes0), sizeof(MockMethodSizes4));
 }
 
+// TODO(thejcannon): This just tests that this will compile, as gmock repeating the
+// noexcept specifier isn't supported yet
+struct MockUsesNoexceptWithParenthesis
+{
+  MOCK_METHOD(void, func, (), (noexcept(false)));
+};
+
 }  // namespace gmock_function_mocker_test
 }  // namespace testing
