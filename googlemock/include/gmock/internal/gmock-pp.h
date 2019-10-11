@@ -110,7 +110,7 @@
 // Expands to 1 if the first argument starts with something in parentheses,
 // otherwise to 0.
 #define GMOCK_PP_IS_BEGIN_PARENS(...)                    \
-  GMOCK_PP_INTERNAL_ALTERNATE_HEAD(                      \
+  GMOCK_PP_HEAD(                                         \
       GMOCK_PP_CAT(GMOCK_PP_INTERNAL_IBP_IS_VARIADIC_R_, \
                    GMOCK_PP_INTERNAL_IBP_IS_VARIADIC_C __VA_ARGS__))
 
@@ -165,8 +165,6 @@
 // Workaround MSVC behavior of treating __VA_ARGS__ with commas as one arg
 // _Args must be wrapped in parenthesis
 #define GMOCK_PP_INTERNAL_EXPAND_WITH(_Macro, _Args) _Macro _Args
-#define GMOCK_PP_INTERNAL_ALTERNATE_HEAD(...) \
-  GMOCK_PP_INTERNAL_EXPAND_WITH(GMOCK_PP_HEAD, (__VA_ARGS__))
 
 #define GMOCK_PP_INTERNAL_IBP_IS_VARIADIC_C(...) 1 _
 #define GMOCK_PP_INTERNAL_IBP_IS_VARIADIC_R_1 1,
