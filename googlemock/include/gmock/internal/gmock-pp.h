@@ -49,7 +49,7 @@
 // Calls CAT(_Macro, NARG(__VA_ARGS__))(__VA_ARGS__)
 #define GMOCK_PP_VARIADIC_CALL(_Macro, ...) \
   GMOCK_PP_INTERNAL_VARIADIC_CALL(          \
-    _Macro, GMOCK_PP_NARG(__VA_ARGS__), (__VA_ARGS__))
+    _Macro, GMOCK_PP_NARG(__VA_ARGS__), __VA_ARGS__)
 
 // If the arguments after expansion have no tokens, evaluates to `1`. Otherwise
 // evaluates to `0`.
