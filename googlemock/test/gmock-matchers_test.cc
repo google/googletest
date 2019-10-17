@@ -2054,6 +2054,114 @@ TEST(PairMatchBaseTest, WorksWithMoveOnly) {
   EXPECT_TRUE(matcher.Matches(pointers));
 }
 
+// Tests that IsNan() matches a NaN, with float.
+TEST(IsNan, FloatMatchesNan) {
+  float quiet_nan = std::numeric_limits<float>::quiet_NaN();
+  float other_nan = std::nan("1");
+  float real_value = 1.0f;
+
+  Matcher<float> m = IsNan();
+  EXPECT_TRUE(m.Matches(quiet_nan));
+  EXPECT_TRUE(m.Matches(other_nan));
+  EXPECT_FALSE(m.Matches(real_value));
+
+  Matcher<float&> m_ref = IsNan();
+  EXPECT_TRUE(m_ref.Matches(quiet_nan));
+  EXPECT_TRUE(m_ref.Matches(other_nan));
+  EXPECT_FALSE(m_ref.Matches(real_value));
+
+  Matcher<const float&> m_cref = IsNan();
+  EXPECT_TRUE(m_cref.Matches(quiet_nan));
+  EXPECT_TRUE(m_cref.Matches(other_nan));
+  EXPECT_FALSE(m_cref.Matches(real_value));
+}
+
+// Tests that IsNan() matches a NaN, with double.
+TEST(IsNan, DoubleMatchesNan) {
+  double quiet_nan = std::numeric_limits<double>::quiet_NaN();
+  double other_nan = std::nan("1");
+  double real_value = 1.0;
+
+  Matcher<double> m = IsNan();
+  EXPECT_TRUE(m.Matches(quiet_nan));
+  EXPECT_TRUE(m.Matches(other_nan));
+  EXPECT_FALSE(m.Matches(real_value));
+
+  Matcher<double&> m_ref = IsNan();
+  EXPECT_TRUE(m_ref.Matches(quiet_nan));
+  EXPECT_TRUE(m_ref.Matches(other_nan));
+  EXPECT_FALSE(m_ref.Matches(real_value));
+
+  Matcher<const double&> m_cref = IsNan();
+  EXPECT_TRUE(m_cref.Matches(quiet_nan));
+  EXPECT_TRUE(m_cref.Matches(other_nan));
+  EXPECT_FALSE(m_cref.Matches(real_value));
+}
+
+// Tests that IsNan() matches a NaN, with long double.
+TEST(IsNan, LongDoubleMatchesNan) {
+  long double quiet_nan = std::numeric_limits<long double>::quiet_NaN();
+  long double other_nan = std::nan("1");
+  long double real_value = 1.0;
+
+  Matcher<long double> m = IsNan();
+  EXPECT_TRUE(m.Matches(quiet_nan));
+  EXPECT_TRUE(m.Matches(other_nan));
+  EXPECT_FALSE(m.Matches(real_value));
+
+  Matcher<long double&> m_ref = IsNan();
+  EXPECT_TRUE(m_ref.Matches(quiet_nan));
+  EXPECT_TRUE(m_ref.Matches(other_nan));
+  EXPECT_FALSE(m_ref.Matches(real_value));
+
+  Matcher<const long double&> m_cref = IsNan();
+  EXPECT_TRUE(m_cref.Matches(quiet_nan));
+  EXPECT_TRUE(m_cref.Matches(other_nan));
+  EXPECT_FALSE(m_cref.Matches(real_value));
+}
+
+// Tests that IsNan() works with Not.
+TEST(IsNan, NotMatchesNan) {
+  Matcher<float> mf = Not(IsNan());
+  EXPECT_FALSE(mf.Matches(std::numeric_limits<float>::quiet_NaN()));
+  EXPECT_FALSE(mf.Matches(std::nan("1")));
+  EXPECT_TRUE(mf.Matches(1.0));
+
+  Matcher<double> md = Not(IsNan());
+  EXPECT_FALSE(md.Matches(std::numeric_limits<double>::quiet_NaN()));
+  EXPECT_FALSE(md.Matches(std::nan("1")));
+  EXPECT_TRUE(md.Matches(1.0));
+
+  Matcher<long double> mld = Not(IsNan());
+  EXPECT_FALSE(mld.Matches(std::numeric_limits<long double>::quiet_NaN()));
+  EXPECT_FALSE(mld.Matches(std::nan("1")));
+  EXPECT_TRUE(mld.Matches(1.0));
+}
+
+// Tests that IsNan() can describe itself.
+TEST(IsNan, CanDescribeSelf) {
+  Matcher<float> mf = IsNan();
+  EXPECT_EQ("is NaN", Describe(mf));
+
+  Matcher<double> md = IsNan();
+  EXPECT_EQ("is NaN", Describe(md));
+
+  Matcher<long double> mld = IsNan();
+  EXPECT_EQ("is NaN", Describe(mld));
+}
+
+// Tests that IsNan() can describe itself with Not.
+TEST(IsNan, CanDescribeSelfWithNot) {
+  Matcher<float> mf = Not(IsNan());
+  EXPECT_EQ("isn't NaN", Describe(mf));
+
+  Matcher<double> md = Not(IsNan());
+  EXPECT_EQ("isn't NaN", Describe(md));
+
+  Matcher<long double> mld = Not(IsNan());
+  EXPECT_EQ("isn't NaN", Describe(mld));
+}
+
 // Tests that FloatEq() matches a 2-tuple where
 // FloatEq(first field) matches the second field.
 TEST(FloatEq2Test, MatchesEqualArguments) {
