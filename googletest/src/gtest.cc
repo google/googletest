@@ -3224,9 +3224,7 @@ void PrettyUnitTestResultPrinter::OnTestStart(const TestInfo& test_info) {
 void PrettyUnitTestResultPrinter::OnTestPartResult(
     const TestPartResult& result) {
   switch (result.type()) {
-    // If the test part succeeded, or was skipped,
-    // we don't need to do anything.
-    case TestPartResult::kSkip:
+    // If the test part succeeded, we don't need to do anything.
     case TestPartResult::kSuccess:
       return;
     default:
