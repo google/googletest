@@ -101,6 +101,10 @@ class FooInterface {
   virtual int TypeWithComma(const std::map<int, std::string>& a_map) = 0;
   virtual int TypeWithTemplatedCopyCtor(const TemplatedCopyable<int>&) = 0;
 
+  virtual int (*ReturnsFunctionPointer1(int))(bool) = 0;
+  using fn_ptr = int (*)(bool);
+  virtual fn_ptr ReturnsFunctionPointer2(int) = 0;
+
 #if GTEST_OS_WINDOWS
   STDMETHOD_(int, CTNullary)() = 0;
   STDMETHOD_(bool, CTUnary)(int x) = 0;
@@ -158,6 +162,9 @@ class MockFoo : public FooInterface {
   MOCK_METHOD(int, TypeWithComma, ((const std::map<int, std::string>&)));
   MOCK_METHOD(int, TypeWithTemplatedCopyCtor,
               (const TemplatedCopyable<int>&));  // NOLINT
+
+  MOCK_METHOD(int (*)(bool), ReturnsFunctionPointer1, (int), ());
+  MOCK_METHOD(fn_ptr, ReturnsFunctionPointer2, (int), ());
 
 #if GTEST_OS_WINDOWS
   MOCK_METHOD(int, CTNullary, (), (Calltype(STDMETHODCALLTYPE)));
