@@ -16,7 +16,6 @@
 
 """Driver for starting up Google Mock class generator."""
 
-__author__ = 'nnorwitz@google.com (Neal Norwitz)'
 
 import os
 import sys

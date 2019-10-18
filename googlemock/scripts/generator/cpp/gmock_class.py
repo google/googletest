@@ -26,9 +26,6 @@ Usage:
 Output is sent to stdout.
 """
 
-__author__ = 'nnorwitz@google.com (Neal Norwitz)'
-
-
 import os
 import re
 import sys
@@ -48,6 +45,50 @@ _VERSION = (1, 0, 1)  # The version of this script.
 _INDENT = 2
 
 
+def _RenderType(ast_type):
+  """Renders the potentially recursively templated type into a string.
+
+  Args:
+    ast_type: The AST of the type.
+
+  Returns:
+    Rendered string and a boolean to indicate whether we have multiple args
+    (which is not handled correctly).
+  """
+  has_multiarg_error = False
+  # Add modifiers like 'const'.
+  modifiers = ''
+  if ast_type.modifiers:
+    modifiers = ' '.join(ast_type.modifiers) + ' '
+  return_type = modifiers + ast_type.name
+  if ast_type.templated_types:
+    # Collect template args.
+    template_args = []
+    for arg in ast_type.templated_types:
+      rendered_arg, e = _RenderType(arg)
+      if e: has_multiarg_error = True
+      template_args.append(rendered_arg)
+    return_type += '<' + ', '.join(template_args) + '>'
+    # We are actually not handling multi-template-args correctly. So mark it.
+    if len(template_args) > 1:
+      has_multiarg_error = True
+  if ast_type.pointer:
+    return_type += '*'
+  if ast_type.reference:
+    return_type += '&'
+  return return_type, has_multiarg_error
+
+
+def _GetNumParameters(parameters, source):
+  num_parameters = len(parameters)
+  if num_parameters == 1:
+    first_param = parameters[0]
+    if source[first_param.start:first_param.end].strip() == 'void':
+      # We must treat T(void) as a function with no parameters.
+      return 0
+  return num_parameters
+
+
 def _GenerateMethods(output_lines, source, class_node):
   function_type = (ast.FUNCTION_VIRTUAL | ast.FUNCTION_PURE_VIRTUAL |
                    ast.FUNCTION_OVERRIDE)
@@ -63,32 +104,16 @@ def _GenerateMethods(output_lines, source, class_node):
       const = ''
       if node.modifiers & ast.FUNCTION_CONST:
         const = 'CONST_'
+      num_parameters = _GetNumParameters(node.parameters, source)
       return_type = 'void'
       if node.return_type:
-        # Add modifiers like 'const'.
-        modifiers = ''
-        if node.return_type.modifiers:
-          modifiers = ' '.join(node.return_type.modifiers) + ' '
-        return_type = modifiers + node.return_type.name
-        template_args = [arg.name for arg in node.return_type.templated_types]
-        if template_args:
-          return_type += '<' + ', '.join(template_args) + '>'
-          if len(template_args) > 1:
-            for line in [
-                '// The following line won\'t really compile, as the return',
-                '// type has multiple template arguments.  To fix it, use a',
-                '// typedef for the return type.']:
-              output_lines.append(indent + line)
-        if node.return_type.pointer:
-          return_type += '*'
-        if node.return_type.reference:
-          return_type += '&'
-        num_parameters = len(node.parameters)
-        if len(node.parameters) == 1:
-          first_param = node.parameters[0]
-          if source[first_param.start:first_param.end].strip() == 'void':
-            # We must treat T(void) as a function with no parameters.
-            num_parameters = 0
+        return_type, has_multiarg_error = _RenderType(node.return_type)
+        if has_multiarg_error:
+          for line in [
+              '// The following line won\'t really compile, as the return',
+              '// type has multiple template arguments.  To fix it, use a',
+              '// typedef for the return type.']:
+            output_lines.append(indent + line)
       tmpl = ''
       if class_node.templated_types:
         tmpl = '_T'

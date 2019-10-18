@@ -17,9 +17,6 @@
 
 """Tests for gmock.scripts.generator.cpp.gmock_class."""
 
-__author__ = 'nnorwitz@google.com (Neal Norwitz)'
-
-
 import os
 import sys
 import unittest
@@ -444,19 +441,63 @@ void(const FooType& test_arg));
     self.assertEqualIgnoreLeadingWhitespace(
         expected, self.GenerateMocks(source))
 
-  def testEnumClass(self):
+  def testEnumType(self):
     source = """
 class Test {
  public:
-  enum class Baz { BAZINGA };
-  virtual void Bar(const FooType& test_arg);
+  enum Bar {
+    BAZ, QUX, QUUX, QUUUX
+  };
+  virtual void Foo();
 };
 """
     expected = """\
 class MockTest : public Test {
 public:
-MOCK_METHOD1(Bar,
-void(const FooType& test_arg));
+MOCK_METHOD0(Foo,
+void());
+};
+"""
+    self.assertEqualIgnoreLeadingWhitespace(
+        expected, self.GenerateMocks(source))
+
+  def testEnumClassType(self):
+    source = """
+class Test {
+ public:
+  enum class Bar {
+    BAZ, QUX, QUUX, QUUUX
+  };
+  virtual void Foo();
+};
+"""
+    expected = """\
+class MockTest : public Test {
+public:
+MOCK_METHOD0(Foo,
+void());
+};
+"""
+    self.assertEqualIgnoreLeadingWhitespace(
+        expected, self.GenerateMocks(source))
+
+  def testStdFunction(self):
+    source = """
+class Test {
+ public:
+  Test(std::function<int(std::string)> foo) : foo_(foo) {}
+
+  virtual std::function<int(std::string)> foo();
+
+ private:
+  std::function<int(std::string)> foo_;
+};
+"""
+    expected = """\
+class MockTest : public Test {
+public:
+MOCK_METHOD0(foo,
+std::function<int (std::string)>());
 };
 """
     self.assertEqualIgnoreLeadingWhitespace(
