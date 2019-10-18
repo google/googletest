@@ -83,8 +83,11 @@
 # include <windows.h>  // NOLINT
 # undef min
 
+#ifdef _MSC_VER
 # include <crtdbg.h>  // NOLINT
 # include <debugapi.h>  // NOLINT
+#endif
+
 # include <io.h>  // NOLINT
 # include <sys/timeb.h>  // NOLINT
 # include <sys/types.h>  // NOLINT
@@ -4908,7 +4911,6 @@ int UnitTest::Run() {
       _set_abort_behavior(
           0x0,                                    // Clear the following flags:
           _WRITE_ABORT_MSG | _CALL_REPORTFAULT);  // pop-up window, core dump.
-# endif
 
     // In debug mode, the Windows CRT can crash with an assertion over invalid
     // input (e.g. passing an invalid file descriptor).  The default handling
@@ -4919,6 +4921,7 @@ int UnitTest::Run() {
                               _CRTDBG_MODE_FILE | _CRTDBG_MODE_DEBUG);
       (void)_CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDERR);
     }
+# endif
   }
 #endif  // GTEST_OS_WINDOWS
 
