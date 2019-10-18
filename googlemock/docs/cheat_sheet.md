@@ -287,7 +287,6 @@ is not changed afterwards, or the meaning of your matcher will be changed.
 | `FloatEq(a_float)`               | `argument` is a `float` value approximately equal to `a_float`, treating two NaNs as unequal. |
 | `NanSensitiveDoubleEq(a_double)` | `argument` is a `double` value approximately equal to `a_double`, treating two NaNs as equal. |
 | `NanSensitiveFloatEq(a_float)`   | `argument` is a `float` value approximately equal to `a_float`, treating two NaNs as equal. |
-| `IsNan()`   | `argument` is any floating-point type with a NaN value. |
 <!-- mdformat on -->
 
 The above matchers use ULP-based comparison (the same as used in googletest).
