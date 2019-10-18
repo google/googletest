@@ -42,8 +42,8 @@
 #ifndef GMOCK_INCLUDE_GMOCK_GMOCK_MATCHERS_H_
 #define GMOCK_INCLUDE_GMOCK_GMOCK_MATCHERS_H_
 
+#include <math.h>
 #include <algorithm>
-#include <cmath>
 #include <initializer_list>
 #include <iterator>
 #include <limits>
@@ -54,7 +54,6 @@
 #include <type_traits>
 #include <utility>
 #include <vector>
-
 #include "gmock/internal/gmock-internal-utils.h"
 #include "gmock/internal/gmock-port.h"
 #include "gtest/gtest.h"
@@ -1350,22 +1349,6 @@ MakePredicateFormatterFromMatcher(M matcher) {
   return PredicateFormatterFromMatcher<M>(std::move(matcher));
 }
 
-// Implements the polymorphic IsNan() matcher, which matches any floating type
-// value that is Nan.
-class IsNanMatcher {
- public:
-  template <typename FloatType>
-  bool MatchAndExplain(const FloatType& f,
-                       MatchResultListener* /* listener */) const {
-    return (::std::isnan)(f);
-  }
-
-  void DescribeTo(::std::ostream* os) const { *os << "is NaN"; }
-  void DescribeNegationTo(::std::ostream* os) const {
-    *os << "isn't NaN";
-  }
-};
-
 // Implements the polymorphic floating point equality matcher, which matches
 // two float values using ULP-based approximation or, optionally, a
 // user-specified epsilon.  The template is meant to be instantiated with
@@ -1426,7 +1409,7 @@ class FloatingEqMatcher {
         }
 
         const FloatType diff = value - expected_;
-        if (::std::fabs(diff) <= max_abs_error_) {
+        if (fabs(diff) <= max_abs_error_) {
           return true;
         }
 
@@ -3641,11 +3624,6 @@ inline PolymorphicMatcher<internal::NotNullMatcher > NotNull() {
 template <typename T>
 inline internal::RefMatcher<T&> Ref(T& x) {  // NOLINT
   return internal::RefMatcher<T&>(x);
-}
-
-// Creates a polymorphic matcher that matches any NaN floating point.
-inline PolymorphicMatcher<internal::IsNanMatcher> IsNan() {
-  return MakePolymorphicMatcher(internal::IsNanMatcher());
 }
 
 // Creates a matcher that matches any double argument approximately
