@@ -6,4 +6,4 @@ Description: GoogleTest (without main() function)
 Version: @PROJECT_VERSION@
 URL: https://github.com/google/googletest
 Libs: -L${libdir} -lgtest @CMAKE_THREAD_LIBS_INIT@
-Cflags: -I${includedir} @GTEST_HAS_PTHREAD_MACRO@ @CMAKE_THREAD_LIBS_INIT@
+Cflags: -I${includedir} @GTEST_HAS_PTHREAD_MACRO@
