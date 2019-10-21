@@ -1875,9 +1875,6 @@ class GTEST_API_ ThreadLocal {
 // we cannot detect it.
 GTEST_API_ size_t GetThreadCount();
 
-template <bool B>
-using bool_constant = std::integral_constant<bool, B>;
-
 #if GTEST_OS_WINDOWS
 # define GTEST_PATH_SEP_ "\\"
 # define GTEST_HAS_ALT_PATH_SEP_ 1
