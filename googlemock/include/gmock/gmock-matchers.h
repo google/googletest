@@ -142,7 +142,7 @@ class MatcherCastImpl {
   template <bool Ignore>
   static Matcher<T> CastImpl(const M& polymorphic_matcher_or_value,
                              std::true_type /* convertible_to_matcher */,
-                             bool_constant<Ignore>) {
+                             std::integral_constant<bool, Ignore>) {
     // M is implicitly convertible to Matcher<T>, which means that either
     // M is a polymorphic matcher or Matcher<T> has an implicit constructor
     // from M.  In both cases using the implicit conversion will produce a

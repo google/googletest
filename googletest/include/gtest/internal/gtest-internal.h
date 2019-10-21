@@ -855,8 +855,7 @@ class GTEST_API_ Random {
 // true if and only if T is type proto2::Message or a subclass of it.
 template <typename T>
 struct IsAProtocolMessage
-    : public bool_constant<
-          std::is_convertible<const T*, const ::proto2::Message*>::value> {};
+    : public std::is_convertible<const T*, const ::proto2::Message*> {};
 
 // When the compiler sees expression IsContainerTest<C>(0), if C is an
 // STL-style container class, the first overload of IsContainerTest
