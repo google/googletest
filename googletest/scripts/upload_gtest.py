@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright 2008, Google Inc.
+# Copyright 2009, Google Inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,44 +28,50 @@
 # THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+"""upload_gtest.py v0.1.0 -- uploads a Google Test patch for review.
 
-"""C++ keywords and helper utilities for determining keywords."""
+This simple wrapper passes all command line flags and
+--cc=googletestframework@googlegroups.com to upload.py.
 
-try:
-  # Python 3.x
-  import builtins
-except ImportError:
-  # Python 2.x
-  import __builtin__ as builtins
+USAGE: upload_gtest.py [options for upload.py]
+"""
 
+__author__ = 'wan@google.com (Zhanyong Wan)'
 
-if not hasattr(builtins, 'set'):
-  # Nominal support for Python 2.3.
-  from sets import Set as set
+import os
+import sys
 
-
-TYPES = set('bool char int long short double float void wchar_t unsigned signed'.split())
-TYPE_MODIFIERS = set('auto register const inline extern static virtual volatile mutable'.split())
-ACCESS = set('public protected private friend'.split())
-
-CASTS = set('static_cast const_cast dynamic_cast reinterpret_cast'.split())
-
-OTHERS = set('true false asm class namespace using explicit this operator sizeof'.split())
-OTHER_TYPES = set('new delete typedef struct union enum typeid typename template'.split())
-
-CONTROL = set('case switch default if else return goto'.split())
-EXCEPTION = set('try catch throw'.split())
-LOOP = set('while do for break continue'.split())
-
-ALL = TYPES | TYPE_MODIFIERS | ACCESS | CASTS | OTHERS | OTHER_TYPES | CONTROL | EXCEPTION | LOOP
+CC_FLAG = '--cc='
+GTEST_GROUP = 'googletestframework@googlegroups.com'
 
 
-def IsKeyword(token):
-  return token in ALL
+def main():
+  # Finds the path to upload.py, assuming it is in the same directory
+  # as this file.
+  my_dir = os.path.dirname(os.path.abspath(__file__))
+  upload_py_path = os.path.join(my_dir, 'upload.py')
+
+  # Adds Google Test discussion group to the cc line if it's not there
+  # already.
+  upload_py_argv = [upload_py_path]
+  found_cc_flag = False
+  for arg in sys.argv[1:]:
+    if arg.startswith(CC_FLAG):
+      found_cc_flag = True
+      cc_line = arg[len(CC_FLAG):]
+      cc_list = [addr for addr in cc_line.split(',') if addr]
+      if GTEST_GROUP not in cc_list:
+        cc_list.append(GTEST_GROUP)
+      upload_py_argv.append(CC_FLAG + ','.join(cc_list))
+    else:
+      upload_py_argv.append(arg)
+
+  if not found_cc_flag:
+    upload_py_argv.append(CC_FLAG + GTEST_GROUP)
+
+  # Invokes upload.py with the modified command line flags.
+  os.execv(upload_py_path, upload_py_argv)
 
 
-def IsBuiltinType(token):
-  if token in ('virtual', 'inline'):
-    # These only apply to methods, they can't be types by themselves.
-    return False
-  return token in TYPES or token in TYPE_MODIFIERS
+if __name__ == '__main__':
+  main()

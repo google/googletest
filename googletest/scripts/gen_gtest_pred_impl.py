@@ -46,8 +46,7 @@ directory where the script is.  It also generates the accompanying
 unit test in file gtest_pred_impl_unittest.cc.
 """
 
-__author__ = 'wan@google.com (Zhanyong Wan)'
-
+from __future__ import print_function
 import os
 import sys
 import time
@@ -77,8 +76,7 @@ def HeaderPreamble(n):
     'n' : n
     }
 
-  return (
-"""// Copyright 2006, Google Inc.
+  return ("""// Copyright 2006, Google Inc.
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -111,8 +109,6 @@ def HeaderPreamble(n):
 // '%(command)s'.  DO NOT EDIT BY HAND!
 //
 // Implements a family of generic predicate assertion macros.
-// GOOGLETEST_CM0001 DO NOT DELETE
-
 
 #ifndef GTEST_INCLUDE_GTEST_GTEST_PRED_IMPL_H_
 #define GTEST_INCLUDE_GTEST_GTEST_PRED_IMPL_H_
@@ -250,8 +246,7 @@ AssertionResult AssertPred%(n)sHelper(const char* pred_text""" % DEFS
 
   impl += Iter(
       n, """
-      << "\\n" << e%s << " evaluates to " << ::testing::PrintToString(v%s)"""
-  )
+                            << "\\n" << e%s << " evaluates to " << v%s""")
 
   impl += """;
 }
@@ -308,12 +303,12 @@ def GenerateFile(path, content):
   """Given a file path and a content string
      overwrites it with the given content.
   """
-  print 'Updating file %s . . .' % path
+  print('Updating file %s . . .' % path)
   f = file(path, 'w+')
-  print >>f, content,
+  print(content, end=' ', file=f)
   f.close()
 
-  print 'File %s has been updated.' % path
+  print('File %s has been updated.' % path)
 
 
 def GenerateHeader(n):
@@ -336,8 +331,7 @@ def UnitTestPreamble():
     'command' : '%s %s' % (os.path.basename(sys.argv[0]), sys.argv[1]),
     }
 
-  return (
-"""// Copyright 2006, Google Inc.
+  return ("""// Copyright 2006, Google Inc.
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -431,7 +425,7 @@ def TestsForArity(n):
     }
 
   tests = (
-"""// Sample functions/functors for testing %(arity)s predicate assertions.
+      """// Sample functions/functors for testing %(arity)s predicate assertions.
 
 // A %(arity)s predicate function.
 template <%(types)s>
@@ -514,7 +508,7 @@ struct PredFormatFunctor%(n)s {
 
 class Predicate%(n)sTest : public testing::Test {
  protected:
-  void SetUp() override {
+  virtual void SetUp() {
     expected_to_finish_ = true;
     finished_ = false;""" % DEFS
 
@@ -524,7 +518,7 @@ class Predicate%(n)sTest : public testing::Test {
 """
 
   tests += """
-  void TearDown() override {
+  virtual void TearDown() {
     // Verifies that each of the predicate's arguments was evaluated
     // exactly once."""
 
@@ -721,8 +715,8 @@ def _Main():
   unit test."""
 
   if len(sys.argv) != 2:
-    print __doc__
-    print 'Author: ' + __author__
+    print(__doc__)
+    print('Author: ' + __author__)
     sys.exit(1)
 
   n = int(sys.argv[1])
