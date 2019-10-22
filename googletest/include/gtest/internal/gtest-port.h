@@ -248,7 +248,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <memory>
 #include <type_traits>
 
 #ifndef _WIN32_WCE
@@ -261,16 +260,14 @@
 # include <TargetConditionals.h>
 #endif
 
-#include <algorithm>  // NOLINT
-#include <iostream>   // NOLINT
-#include <sstream>    // NOLINT
-#include <string>     // NOLINT
+#include <iostream>  // NOLINT
+#include <memory>
+#include <string>  // NOLINT
 #include <tuple>
-#include <utility>
 #include <vector>  // NOLINT
 
-#include "gtest/internal/gtest-port-arch.h"
 #include "gtest/internal/custom/gtest-port.h"
+#include "gtest/internal/gtest-port-arch.h"
 
 #if !defined(GTEST_DEV_EMAIL_)
 # define GTEST_DEV_EMAIL_ "googletestframework@@googlegroups.com"
@@ -846,9 +843,6 @@ class Secret;
 // The second argument to the macro must be a valid C++ identifier. If the
 // expression is false, compiler will issue an error containing this identifier.
 #define GTEST_COMPILE_ASSERT_(expr, msg) static_assert(expr, #msg)
-
-// Evaluates to the number of elements in 'array'.
-#define GTEST_ARRAY_SIZE_(array) (sizeof(array) / sizeof(array[0]))
 
 // A helper for suppressing warnings on constant condition.  It just
 // returns 'condition'.
@@ -1590,7 +1584,7 @@ class ThreadLocal : public ThreadLocalBase {
   class DefaultValueHolderFactory : public ValueHolderFactory {
    public:
     DefaultValueHolderFactory() {}
-    virtual ValueHolder* MakeNewHolder() const { return new ValueHolder(); }
+    ValueHolder* MakeNewHolder() const override { return new ValueHolder(); }
 
    private:
     GTEST_DISALLOW_COPY_AND_ASSIGN_(DefaultValueHolderFactory);
@@ -1599,7 +1593,7 @@ class ThreadLocal : public ThreadLocalBase {
   class InstanceValueHolderFactory : public ValueHolderFactory {
    public:
     explicit InstanceValueHolderFactory(const T& value) : value_(value) {}
-    virtual ValueHolder* MakeNewHolder() const {
+    ValueHolder* MakeNewHolder() const override {
       return new ValueHolder(value_);
     }
 
@@ -1878,9 +1872,6 @@ class GTEST_API_ ThreadLocal {
 // we cannot detect it.
 GTEST_API_ size_t GetThreadCount();
 
-template <bool B>
-using bool_constant = std::integral_constant<bool, B>;
-
 #if GTEST_OS_WINDOWS
 # define GTEST_PATH_SEP_ "\\"
 # define GTEST_HAS_ALT_PATH_SEP_ 1
@@ -2019,10 +2010,6 @@ inline bool IsDir(const StatStruct& st) { return S_ISDIR(st.st_mode); }
 // Functions deprecated by MSVC 8.0.
 
 GTEST_DISABLE_MSC_DEPRECATED_PUSH_()
-
-inline const char* StrNCpy(char* dest, const char* src, size_t n) {
-  return strncpy(dest, src, n);
-}
 
 // ChDir(), FReopen(), FDOpen(), Read(), Write(), Close(), and
 // StrError() aren't needed on Windows CE at this time and thus not

@@ -287,6 +287,7 @@ is not changed afterwards, or the meaning of your matcher will be changed.
 | `FloatEq(a_float)`               | `argument` is a `float` value approximately equal to `a_float`, treating two NaNs as unequal. |
 | `NanSensitiveDoubleEq(a_double)` | `argument` is a `double` value approximately equal to `a_double`, treating two NaNs as equal. |
 | `NanSensitiveFloatEq(a_float)`   | `argument` is a `float` value approximately equal to `a_float`, treating two NaNs as equal. |
+| `IsNan()`   | `argument` is any floating-point type with a NaN value. |
 <!-- mdformat on -->
 
 The above matchers use ULP-based comparison (the same as used in googletest).
@@ -325,9 +326,9 @@ The `argument` can be either a C string or a C++ string object:
 
 `ContainsRegex()` and `MatchesRegex()` take ownership of the `RE` object. They
 use the regular expression syntax defined
-[here](../../googletest/docs/advanced.md#regular-expression-syntax).
-`StrCaseEq()`, `StrCaseNe()`, `StrEq()`, and `StrNe()` work for wide strings as
-well.
+[here](../../googletest/docs/advanced.md#regular-expression-syntax). All of
+these matchers, except `ContainsRegex()` and `MatchesRegex()` work for wide
+strings as well.
 
 #### Container Matchers
 

@@ -302,13 +302,13 @@ $var param_field_decls2 = [[$for j
      public:\
       [[$if i==1 [[explicit ]]]]gmock_Impl($impl_ctor_param_list)\
           $impl_inits {}\
-      virtual bool MatchAndExplain(\
+      bool MatchAndExplain(\
           GTEST_REFERENCE_TO_CONST_(arg_type) arg,\
-          ::testing::MatchResultListener* result_listener) const;\
-      virtual void DescribeTo(::std::ostream* gmock_os) const {\
+          ::testing::MatchResultListener* result_listener) const override;\
+      void DescribeTo(::std::ostream* gmock_os) const override {\
         *gmock_os << FormatDescription(false);\
       }\
-      virtual void DescribeNegationTo(::std::ostream* gmock_os) const {\
+      void DescribeNegationTo(::std::ostream* gmock_os) const override {\
         *gmock_os << FormatDescription(true);\
       }\$param_field_decls
      private:\
