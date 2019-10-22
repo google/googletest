@@ -42,8 +42,8 @@
 #ifndef GMOCK_INCLUDE_GMOCK_GMOCK_MATCHERS_H_
 #define GMOCK_INCLUDE_GMOCK_GMOCK_MATCHERS_H_
 
-#include <math.h>
 #include <algorithm>
+#include <cmath>
 #include <initializer_list>
 #include <iterator>
 #include <limits>
@@ -54,6 +54,7 @@
 #include <type_traits>
 #include <utility>
 #include <vector>
+
 #include "gmock/internal/gmock-internal-utils.h"
 #include "gmock/internal/gmock-port.h"
 #include "gtest/gtest.h"
@@ -358,8 +359,8 @@ template <size_t N>
 class TuplePrefix {
  public:
   // TuplePrefix<N>::Matches(matcher_tuple, value_tuple) returns true
-  // if the first N fields of matcher_tuple matches the first N
-  // fields of value_tuple, respectively.
+  // if and only if the first N fields of matcher_tuple matches
+  // the first N fields of value_tuple, respectively.
   template <typename MatcherTuple, typename ValueTuple>
   static bool Matches(const MatcherTuple& matcher_tuple,
                       const ValueTuple& value_tuple) {
@@ -417,8 +418,8 @@ class TuplePrefix<0> {
                                      ::std::ostream* /* os */) {}
 };
 
-// TupleMatches(matcher_tuple, value_tuple) returns true if all
-// matchers in matcher_tuple match the corresponding fields in
+// TupleMatches(matcher_tuple, value_tuple) returns true if and only if
+// all matchers in matcher_tuple match the corresponding fields in
 // value_tuple.  It is a compiler error if matcher_tuple and
 // value_tuple have different number of fields or incompatible field
 // types.
@@ -1349,6 +1350,22 @@ MakePredicateFormatterFromMatcher(M matcher) {
   return PredicateFormatterFromMatcher<M>(std::move(matcher));
 }
 
+// Implements the polymorphic IsNan() matcher, which matches any floating type
+// value that is Nan.
+class IsNanMatcher {
+ public:
+  template <typename FloatType>
+  bool MatchAndExplain(const FloatType& f,
+                       MatchResultListener* /* listener */) const {
+    return (::std::isnan)(f);
+  }
+
+  void DescribeTo(::std::ostream* os) const { *os << "is NaN"; }
+  void DescribeNegationTo(::std::ostream* os) const {
+    *os << "isn't NaN";
+  }
+};
+
 // Implements the polymorphic floating point equality matcher, which matches
 // two float values using ULP-based approximation or, optionally, a
 // user-specified epsilon.  The template is meant to be instantiated with
@@ -1409,7 +1426,7 @@ class FloatingEqMatcher {
         }
 
         const FloatType diff = value - expected_;
-        if (fabs(diff) <= max_abs_error_) {
+        if (::std::fabs(diff) <= max_abs_error_) {
           return true;
         }
 
@@ -1607,8 +1624,8 @@ class PointeeMatcher {
   template <typename Pointer>
   class Impl : public MatcherInterface<Pointer> {
    public:
-    typedef typename PointeeOf<typename std::remove_const<
-        typename std::remove_reference<Pointer>::type>::type>::type Pointee;
+    typedef typename PointeeOf<GTEST_REMOVE_REFERENCE_AND_CONST_(Pointer)>::type
+        Pointee;
 
     explicit Impl(const InnerMatcher& matcher)
         : matcher_(MatcherCast<const Pointee&>(matcher)) {}
@@ -1858,7 +1875,9 @@ struct CallableTraits {
   static void CheckIsValid(Functor /* functor */) {}
 
   template <typename T>
-  static auto Invoke(Functor f, T arg) -> decltype(f(arg)) { return f(arg); }
+  static auto Invoke(Functor f, const T& arg) -> decltype(f(arg)) {
+    return f(arg);
+  }
 };
 
 // Specialization for function pointers.
@@ -1889,7 +1908,7 @@ class ResultOfMatcher {
 
   template <typename T>
   operator Matcher<T>() const {
-    return Matcher<T>(new Impl<T>(callable_, matcher_));
+    return Matcher<T>(new Impl<const T&>(callable_, matcher_));
   }
 
  private:
@@ -2068,15 +2087,15 @@ class ContainerEqMatcher {
   typedef typename View::type StlContainer;
   typedef typename View::const_reference StlContainerReference;
 
+  static_assert(!std::is_const<Container>::value,
+                "Container type must not be const");
+  static_assert(!std::is_reference<Container>::value,
+                "Container type must not be a reference");
+
   // We make a copy of expected in case the elements in it are modified
   // after this matcher is created.
   explicit ContainerEqMatcher(const Container& expected)
-      : expected_(View::Copy(expected)) {
-    // Makes sure the user doesn't instantiate this class template
-    // with a const or reference type.
-    (void)testing::StaticAssertTypeEq<Container,
-        GTEST_REMOVE_REFERENCE_AND_CONST_(Container)>();
-  }
+      : expected_(View::Copy(expected)) {}
 
   void DescribeTo(::std::ostream* os) const {
     *os << "equals ";
@@ -2243,15 +2262,15 @@ class PointwiseMatcher {
   typedef typename RhsView::type RhsStlContainer;
   typedef typename RhsStlContainer::value_type RhsValue;
 
+  static_assert(!std::is_const<RhsContainer>::value,
+                "RhsContainer type must not be const");
+  static_assert(!std::is_reference<RhsContainer>::value,
+                "RhsContainer type must not be a reference");
+
   // Like ContainerEq, we make a copy of rhs in case the elements in
   // it are modified after this matcher is created.
   PointwiseMatcher(const TupleMatcher& tuple_matcher, const RhsContainer& rhs)
-      : tuple_matcher_(tuple_matcher), rhs_(RhsView::Copy(rhs)) {
-    // Makes sure the user doesn't instantiate this class template
-    // with a const or reference type.
-    (void)testing::StaticAssertTypeEq<RhsContainer,
-        GTEST_REMOVE_REFERENCE_AND_CONST_(RhsContainer)>();
-  }
+      : tuple_matcher_(tuple_matcher), rhs_(RhsView::Copy(rhs)) {}
 
   template <typename LhsContainer>
   operator Matcher<LhsContainer>() const {
@@ -2530,7 +2549,8 @@ class KeyMatcherImpl : public MatcherInterface<PairType> {
           testing::SafeMatcherCast<const KeyType&>(inner_matcher)) {
   }
 
-  // Returns true if 'key_value.first' (the key) matches the inner matcher.
+  // Returns true if and only if 'key_value.first' (the key) matches the inner
+  // matcher.
   bool MatchAndExplain(PairType key_value,
                        MatchResultListener* listener) const override {
     StringMatchResultListener inner_listener;
@@ -2612,8 +2632,8 @@ class PairMatcherImpl : public MatcherInterface<PairType> {
     second_matcher_.DescribeNegationTo(os);
   }
 
-  // Returns true if 'a_pair.first' matches first_matcher and 'a_pair.second'
-  // matches second_matcher.
+  // Returns true if and only if 'a_pair.first' matches first_matcher and
+  // 'a_pair.second' matches second_matcher.
   bool MatchAndExplain(PairType a_pair,
                        MatchResultListener* listener) const override {
     if (!listener->IsInterested()) {
@@ -3148,8 +3168,8 @@ class ElementsAreArrayMatcher {
 
 // Given a 2-tuple matcher tm of type Tuple2Matcher and a value second
 // of type Second, BoundSecondMatcher<Tuple2Matcher, Second>(tm,
-// second) is a polymorphic matcher that matches a value x if tm
-// matches tuple (x, second).  Useful for implementing
+// second) is a polymorphic matcher that matches a value x if and only if
+// tm matches tuple (x, second).  Useful for implementing
 // UnorderedPointwise() in terms of UnorderedElementsAreArray().
 //
 // BoundSecondMatcher is copyable and assignable, as we need to put
@@ -3213,8 +3233,8 @@ class BoundSecondMatcher {
 
 // Given a 2-tuple matcher tm and a value second,
 // MatcherBindSecond(tm, second) returns a matcher that matches a
-// value x if tm matches tuple (x, second).  Useful for implementing
-// UnorderedPointwise() in terms of UnorderedElementsAreArray().
+// value x if and only if tm matches tuple (x, second).  Useful for
+// implementing UnorderedPointwise() in terms of UnorderedElementsAreArray().
 template <typename Tuple2Matcher, typename Second>
 BoundSecondMatcher<Tuple2Matcher, Second> MatcherBindSecond(
     const Tuple2Matcher& tm, const Second& second) {
@@ -3623,6 +3643,11 @@ inline internal::RefMatcher<T&> Ref(T& x) {  // NOLINT
   return internal::RefMatcher<T&>(x);
 }
 
+// Creates a polymorphic matcher that matches any NaN floating point.
+inline PolymorphicMatcher<internal::IsNanMatcher> IsNan() {
+  return MakePolymorphicMatcher(internal::IsNanMatcher());
+}
+
 // Creates a matcher that matches any double argument approximately
 // equal to rhs, where two NANs are considered unequal.
 inline internal::FloatingEqMatcher<double> DoubleEq(double rhs) {
@@ -3705,7 +3730,7 @@ WhenDynamicCastTo(const Matcher<To>& inner_matcher) {
 // Creates a matcher that matches an object whose given field matches
 // 'matcher'.  For example,
 //   Field(&Foo::number, Ge(5))
-// matches a Foo object x if x.number >= 5.
+// matches a Foo object x if and only if x.number >= 5.
 template <typename Class, typename FieldType, typename FieldMatcher>
 inline PolymorphicMatcher<
   internal::FieldMatcher<Class, FieldType> > Field(
@@ -3732,7 +3757,7 @@ inline PolymorphicMatcher<internal::FieldMatcher<Class, FieldType> > Field(
 // Creates a matcher that matches an object whose given property
 // matches 'matcher'.  For example,
 //   Property(&Foo::str, StartsWith("hi"))
-// matches a Foo object x if x.str() starts with "hi".
+// matches a Foo object x if and only if x.str() starts with "hi".
 template <typename Class, typename PropertyType, typename PropertyMatcher>
 inline PolymorphicMatcher<internal::PropertyMatcher<
     Class, PropertyType, PropertyType (Class::*)() const> >
@@ -3787,11 +3812,10 @@ Property(const std::string& property_name,
           property_name, property, MatcherCast<const PropertyType&>(matcher)));
 }
 
-// Creates a matcher that matches an object if the result of applying
-// a callable to x matches 'matcher'.
-// For example,
+// Creates a matcher that matches an object if and only if the result of
+// applying a callable to x matches 'matcher'. For example,
 //   ResultOf(f, StartsWith("hi"))
-// matches a Foo object x if f(x) starts with "hi".
+// matches a Foo object x if and only if f(x) starts with "hi".
 // `callable` parameter can be a function, function pointer, or a functor. It is
 // required to keep no state affecting the results of the calls on it and make
 // no assumptions about how many calls will be made. Any state it keeps must be
@@ -4341,7 +4365,7 @@ inline internal::MatcherAsPredicate<M> Matches(M matcher) {
   return internal::MatcherAsPredicate<M>(matcher);
 }
 
-// Returns true if the value matches the matcher.
+// Returns true if and only if the value matches the matcher.
 template <typename T, typename M>
 inline bool Value(const T& value, M matcher) {
   return testing::Matches(matcher)(value);
@@ -4547,8 +4571,8 @@ PolymorphicMatcher<internal::variant_matcher::VariantMatcher<T> > VariantWith(
 
 // These macros allow using matchers to check values in Google Test
 // tests.  ASSERT_THAT(value, matcher) and EXPECT_THAT(value, matcher)
-// succeed if the value matches the matcher.  If the assertion fails,
-// the value and the description of the matcher will be printed.
+// succeed if and only if the value matches the matcher.  If the assertion
+// fails, the value and the description of the matcher will be printed.
 #define ASSERT_THAT(value, matcher) ASSERT_PRED_FORMAT1(\
     ::testing::internal::MakePredicateFormatterFromMatcher(matcher), value)
 #define EXPECT_THAT(value, matcher) EXPECT_PRED_FORMAT1(\

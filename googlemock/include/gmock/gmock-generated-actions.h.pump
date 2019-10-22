@@ -395,7 +395,7 @@ $range k 0..n-1
       typedef typename ::testing::internal::Function<F>::ArgumentTuple\
           args_type;\
       explicit gmock_Impl GMOCK_INTERNAL_INIT_##value_params {}\
-      virtual return_type Perform(const args_type& args) {\
+      return_type Perform(const args_type& args) override {\
         return ::testing::internal::ActionHelper<return_type, gmock_Impl>::\
             Perform(this, args);\
       }\
@@ -482,7 +482,7 @@ $var macro_name = [[$if i==0 [[ACTION]] $elif i==1 [[ACTION_P]]
       typedef typename ::testing::internal::Function<F>::ArgumentTuple\
           args_type;\
       [[$if i==1 [[explicit ]]]]gmock_Impl($ctor_param_list)$inits {}\
-      virtual return_type Perform(const args_type& args) {\
+      return_type Perform(const args_type& args) override {\
         return ::testing::internal::ActionHelper<return_type, gmock_Impl>::\
             Perform(this, args);\
       }\

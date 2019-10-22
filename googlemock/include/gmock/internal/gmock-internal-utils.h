@@ -157,11 +157,11 @@ GMOCK_DECLARE_KIND_(long double, kFloatingPoint);
   static_cast< ::testing::internal::TypeKind>( \
       ::testing::internal::KindOf<type>::value)
 
-// Evaluates to true if integer type T is signed.
+// Evaluates to true if and only if integer type T is signed.
 #define GMOCK_IS_SIGNED_(T) (static_cast<T>(-1) < 0)
 
 // LosslessArithmeticConvertibleImpl<kFromKind, From, kToKind, To>::value
-// is true if arithmetic type From can be losslessly converted to
+// is true if and only if arithmetic type From can be losslessly converted to
 // arithmetic type To.
 //
 // It's the user's responsibility to ensure that both From and To are
@@ -192,8 +192,8 @@ template <typename From>
 struct LosslessArithmeticConvertibleImpl<kInteger, From, kBool, bool>
     : public std::false_type {};
 
-// Converting an integer to another non-bool integer is lossless if
-// the target type's range encloses the source type's range.
+// Converting an integer to another non-bool integer is lossless
+// if and only if the target type's range encloses the source type's range.
 template <typename From, typename To>
 struct LosslessArithmeticConvertibleImpl<kInteger, From, kInteger, To>
     : public bool_constant<
@@ -224,14 +224,14 @@ struct LosslessArithmeticConvertibleImpl<kFloatingPoint, From, kInteger, To>
     : public std::false_type {};
 
 // Converting a floating-point to another floating-point is lossless
-// if the target type is at least as big as the source type.
+// if and only if the target type is at least as big as the source type.
 template <typename From, typename To>
 struct LosslessArithmeticConvertibleImpl<
   kFloatingPoint, From, kFloatingPoint, To>
     : public bool_constant<sizeof(From) <= sizeof(To)> {};  // NOLINT
 
-// LosslessArithmeticConvertible<From, To>::value is true if arithmetic
-// type From can be losslessly converted to arithmetic type To.
+// LosslessArithmeticConvertible<From, To>::value is true if and only if
+// arithmetic type From can be losslessly converted to arithmetic type To.
 //
 // It's the user's responsibility to ensure that both From and To are
 // raw (i.e. has no CV modifier, is not a pointer, and is not a
@@ -305,11 +305,11 @@ const char kWarningVerbosity[] = "warning";
 // No logs are printed.
 const char kErrorVerbosity[] = "error";
 
-// Returns true if a log with the given severity is visible according
-// to the --gmock_verbose flag.
+// Returns true if and only if a log with the given severity is visible
+// according to the --gmock_verbose flag.
 GTEST_API_ bool LogIsVisible(LogSeverity severity);
 
-// Prints the given message to stdout if 'severity' >= the level
+// Prints the given message to stdout if and only if 'severity' >= the level
 // specified by the --gmock_verbose flag.  If stack_frames_to_skip >=
 // 0, also prints the stack trace excluding the top
 // stack_frames_to_skip frames.  In opt mode, any positive
@@ -333,8 +333,6 @@ class WithoutMatchers {
 
 // Internal use only: access the singleton instance of WithoutMatchers.
 GTEST_API_ WithoutMatchers GetWithoutMatchers();
-
-// Type traits.
 
 // Disable MSVC warnings for infinite recursion, since in this case the
 // the recursion is unreachable.
@@ -384,9 +382,8 @@ class StlContainerView {
   typedef const type& const_reference;
 
   static const_reference ConstReference(const RawContainer& container) {
-    // Ensures that RawContainer is not a const type.
-    testing::StaticAssertTypeEq<
-        RawContainer, typename std::remove_const<RawContainer>::type>();
+    static_assert(!std::is_const<RawContainer>::value,
+                  "RawContainer type must not be const");
     return container;
   }
   static type Copy(const RawContainer& container) { return container; }
@@ -406,8 +403,8 @@ class StlContainerView<Element[N]> {
   typedef const type const_reference;
 
   static const_reference ConstReference(const Element (&array)[N]) {
-    // Ensures that Element is not a const type.
-    testing::StaticAssertTypeEq<Element, RawElement>();
+    static_assert(std::is_same<Element, RawElement>::value,
+                  "Element type must not be const");
     return type(array, N, RelationToSourceReference());
   }
   static type Copy(const Element (&array)[N]) {
@@ -493,8 +490,7 @@ struct Function<R(Args...)> {
   using Result = R;
   static constexpr size_t ArgumentCount = sizeof...(Args);
   template <size_t I>
-  using Arg = ElemFromList<I, typename MakeIndexSequence<sizeof...(Args)>::type,
-                           Args...>;
+  using Arg = ElemFromList<I, Args...>;
   using ArgumentTuple = std::tuple<Args...>;
   using ArgumentMatcherTuple = std::tuple<Matcher<Args>...>;
   using MakeResultVoid = void(Args...);

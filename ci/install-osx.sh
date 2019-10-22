@@ -37,4 +37,4 @@ if [ "${TRAVIS_OS_NAME}" != "osx" ]; then
 fi
 
 brew update
-brew install ccache gcc@4.9 llvm@3.9
+brew install ccache gcc@4.9

@@ -202,6 +202,15 @@ EXPECT_CALL(mock-object, method (matchers)?)
      .RetiresOnSaturation();        ?
 ```
 
+For each item above, `?` means it can be used at most once, while `*` means it
+can be used any number of times.
+
+In order to pass, `EXPECT_CALL` must be used before the calls are actually made.
+
+The `(matchers)` is a comma-separated list of matchers that correspond to each
+of the arguments of `method`, and sets the expectation only for calls of
+`method` that matches all of the matchers.
+
 If `(matchers)` is omitted, the expectation is the same as if the matchers were
 set to anything matchers (for example, `(_, _, _, _)` for a four-arg method).
 
@@ -221,17 +230,19 @@ and the default action will be taken each time.
 <!-- GOOGLETEST_CM0020 DO NOT DELETE -->
 
 A **matcher** matches a *single* argument. You can use it inside `ON_CALL()` or
-`EXPECT_CALL()`, or use it to validate a value directly:
+`EXPECT_CALL()`, or use it to validate a value directly using two macros:
 
 <!-- mdformat off(github rendering does not support multiline tables) -->
-| Matcher                              | Description                           |
+| Macro                                | Description                           |
 | :----------------------------------- | :------------------------------------ |
 | `EXPECT_THAT(actual_value, matcher)` | Asserts that `actual_value` matches `matcher`. |
 | `ASSERT_THAT(actual_value, matcher)` | The same as `EXPECT_THAT(actual_value, matcher)`, except that it generates a **fatal** failure. |
 <!-- mdformat on -->
 
-Built-in matchers (where `argument` is the function argument) are divided into
-several categories:
+Built-in matchers (where `argument` is the function argument, e.g.
+`actual_value` in the example above, or when used in the context of
+`EXPECT_CALL(mock_object, method(matchers))`, the arguments of `method`) are
+divided into several categories:
 
 #### Wildcard
 
@@ -251,6 +262,8 @@ Matcher                     | Description
 | `Le(value)`            | `argument <= value`                                 |
 | `Lt(value)`            | `argument < value`                                  |
 | `Ne(value)`            | `argument != value`                                 |
+| `IsFalse()`            | `argument` evaluates to `false` in a Boolean context. |
+| `IsTrue()`             | `argument` evaluates to `true` in a Boolean context. |
 | `IsNull()`             | `argument` is a `NULL` pointer (raw or smart).      |
 | `NotNull()`            | `argument` is a non-null pointer (raw or smart).    |
 | `Optional(m)`          | `argument` is `optional<>` that contains a value matching `m`. |
@@ -274,6 +287,7 @@ is not changed afterwards, or the meaning of your matcher will be changed.
 | `FloatEq(a_float)`               | `argument` is a `float` value approximately equal to `a_float`, treating two NaNs as unequal. |
 | `NanSensitiveDoubleEq(a_double)` | `argument` is a `double` value approximately equal to `a_double`, treating two NaNs as equal. |
 | `NanSensitiveFloatEq(a_float)`   | `argument` is a `float` value approximately equal to `a_float`, treating two NaNs as equal. |
+| `IsNan()`   | `argument` is any floating-point type with a NaN value. |
 <!-- mdformat on -->
 
 The above matchers use ULP-based comparison (the same as used in googletest).
@@ -312,9 +326,9 @@ The `argument` can be either a C string or a C++ string object:
 
 `ContainsRegex()` and `MatchesRegex()` take ownership of the `RE` object. They
 use the regular expression syntax defined
-[here](../../googletest/docs/advanced.md#regular-expression-syntax).
-`StrCaseEq()`, `StrCaseNe()`, `StrEq()`, and `StrNe()` work for wide strings as
-well.
+[here](../../googletest/docs/advanced.md#regular-expression-syntax). All of
+these matchers, except `ContainsRegex()` and `MatchesRegex()` work for wide
+strings as well.
 
 #### Container Matchers
 
@@ -333,10 +347,8 @@ messages, you can use:
 | `ElementsAre(e0, e1, ..., en)` | `argument` has `n + 1` elements, where the *i*-th element matches `ei`, which can be a value or a matcher. |
 | `ElementsAreArray({e0, e1, ..., en})`, `ElementsAreArray(a_container)`, `ElementsAreArray(begin, end)`, `ElementsAreArray(array)`, or `ElementsAreArray(array, count)` | The same as `ElementsAre()` except that the expected element values/matchers come from an initializer list, STL-style container, iterator range, or C-style array. |
 | `IsEmpty()` | `argument` is an empty container (`container.empty()`). |
-| `IsFalse()` | `argument` evaluates to `false` in a Boolean context. |
 | `IsSubsetOf({e0, e1, ..., en})`, `IsSubsetOf(a_container)`, `IsSubsetOf(begin, end)`, `IsSubsetOf(array)`, or `IsSubsetOf(array, count)` | `argument` matches `UnorderedElementsAre(x0, x1, ..., xk)` for some subset `{x0, x1, ..., xk}` of the expected matchers. |
 | `IsSupersetOf({e0, e1, ..., en})`, `IsSupersetOf(a_container)`, `IsSupersetOf(begin, end)`, `IsSupersetOf(array)`, or `IsSupersetOf(array, count)` | Some subset of `argument` matches `UnorderedElementsAre(`expected matchers`)`. |
-| `IsTrue()` | `argument` evaluates to `true` in a Boolean context. |
 | `Pointwise(m, container)`, `Pointwise(m, {e0, e1, ..., en})` | `argument` contains the same number of elements as in `container`, and for all i, (the i-th element in `argument`, the i-th element in `container`) match `m`, which is a matcher on 2-tuples. E.g. `Pointwise(Le(), upper_bounds)` verifies that each element in `argument` doesn't exceed the corresponding element in `upper_bounds`. See more detail below. |
 | `SizeIs(m)` | `argument` is a container whose size matches `m`. E.g. `SizeIs(2)` or `SizeIs(Lt(2))`. |
 | `UnorderedElementsAre(e0, e1, ..., en)` | `argument` has `n + 1` elements, and under *some* permutation of the elements, each element matches an `ei` (for a different `i`), which can be a value or a matcher. |
@@ -731,12 +743,12 @@ you can do it earlier:
 using ::testing::Mock;
 ...
 // Verifies and removes the expectations on mock_obj;
-// returns true if successful.
+// returns true if and only if successful.
 Mock::VerifyAndClearExpectations(&mock_obj);
 ...
 // Verifies and removes the expectations on mock_obj;
 // also removes the default actions set by ON_CALL();
-// returns true if successful.
+// returns true if and only if successful.
 Mock::VerifyAndClear(&mock_obj);
 ```
 
