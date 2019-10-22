@@ -1022,6 +1022,10 @@ inline internal::ReturnRefAction<R> ReturnRef(R& x) {  // NOLINT
   return internal::ReturnRefAction<R>(x);
 }
 
+// Prevent using ReturnRef on reference to temporary.
+template <typename R>
+internal::ReturnRefAction<R> ReturnRef(R&&) = delete;
+
 // Creates an action that returns the reference to a copy of the
 // argument.  The copy is created when the action is constructed and
 // lives as long as the action.
