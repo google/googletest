@@ -1803,7 +1803,7 @@ For technical reasons, there are some caveats:
 ## Registering tests programmatically
 
 The `TEST` macros handle the vast majority of all use cases, but there are few
-were runtime registration logic is required. For those cases, the framework
+where runtime registration logic is required. For those cases, the framework
 provides the `::testing::RegisterTest` that allows callers to register arbitrary
 tests dynamically.
 
