@@ -918,6 +918,8 @@ the `SCOPED_TRACE` macro or the `ScopedTrace` utility:
 
 ```c++
 SCOPED_TRACE(message);
+```
+```c++
 ScopedTrace trace("file_path", line_number, message);
 ```
 
