@@ -22,30 +22,18 @@
         ],
         "exclude": [
             "ci",
-            "googlemock/build-aux",
             "googlemock/cmake",
-            "googlemock/make",
-            "googlemock/msvc",
             "googlemock/scripts",
             "googlemock/src/gmock-all.cc",
             "googlemock/src/gmock_main.cc",
             "googlemock/test",
             "googlemock/CMakeLists.txt",
-            "googlemock/Makefile.am",
-            "googlemock/configure.ac",
             "googletest/cmake",
-            "googletest/codegear",
-            "googletest/m4",
-            "googletest/make",
-            "googletest/msvc",
             "googletest/scripts",
             "googletest/src/gtest-all.cc",
             "googletest/src/gtest_main.cc",
             "googletest/test",
-            "googletest/xcode",
-            "googletest/CMakeLists.txt",
-            "googletest/Makefile.am",
-            "googletest/configure.ac"
+            "googletest/CMakeLists.txt"
           ]
   },
   "build": {
