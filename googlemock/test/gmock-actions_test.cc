@@ -646,6 +646,30 @@ TEST(ReturnRefTest, IsCovariant) {
   EXPECT_EQ(&derived, &a.Perform(std::make_tuple()));
 }
 
+namespace
+{
+template <typename T, typename = decltype(ReturnRef(std::declval<T&&>()))>
+bool CanCallReturnRef(T&&) { return true; }
+bool CanCallReturnRef(Unused) { return false; }
+}
+
+// Tests that ReturnRef(v) is not working with temporaries (T&&)
+TEST(ReturnRefTest, WillNotAcceptTemporaryAkaRValueRef) {
+  int value = 13;
+  EXPECT_TRUE(CanCallReturnRef(value));
+  EXPECT_FALSE(CanCallReturnRef(std::move(value)));
+  EXPECT_FALSE(CanCallReturnRef(value + 1));
+  EXPECT_FALSE(CanCallReturnRef(123));
+}
+
+// Tests that ReturnRef(v) is not working with const temporaries (const T&&)
+TEST(ReturnRefTest, WillNotAcceptConstTemporaryAkaContRValueRef) {
+  const int value = 42;
+  EXPECT_TRUE(CanCallReturnRef(value));
+  EXPECT_FALSE(CanCallReturnRef(std::move(value)));
+}
+
+
 // Tests that ReturnRefOfCopy(v) works for reference types.
 TEST(ReturnRefOfCopyTest, WorksForReference) {
   int n = 42;
