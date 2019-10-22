@@ -1022,6 +1022,10 @@ inline internal::ReturnRefAction<R> ReturnRef(R& x) {  // NOLINT
   return internal::ReturnRefAction<R>(x);
 }
 
+// Prevent creates an action that returns the reference to a variable to operate on temporaries
+template <typename R>
+internal::ReturnRefAction<R> ReturnRef(R&& x) = delete;
+
 // Creates an action that returns the reference to a copy of the
 // argument.  The copy is created when the action is constructed and
 // lives as long as the action.
