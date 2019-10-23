@@ -162,7 +162,6 @@ using identity_t = T;
 #define GMOCK_INTERNAL_NOEXCEPT_SPEC_IF_NOEXCEPT(_i, _, _elem) \
   GMOCK_PP_IF(                                                 \
     GMOCK_PP_HAS_COMMA(GMOCK_INTERNAL_DETECT_NOEXCEPT(_i, _, _elem)), _elem, )
-
 #define GMOCK_INTERNAL_GET_CALLTYPE(_Tuple) \
   GMOCK_PP_FOR_EACH(GMOCK_INTERNAL_GET_CALLTYPE_IMPL, ~, _Tuple)
 
