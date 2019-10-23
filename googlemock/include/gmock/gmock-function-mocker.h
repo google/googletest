@@ -58,16 +58,17 @@ using identity_t = T;
 #define GMOCK_INTERNAL_MOCK_METHOD_ARG_3(_Ret, _MethodName, _Args) \
   GMOCK_INTERNAL_MOCK_METHOD_ARG_4(_Ret, _MethodName, _Args, ())
 
-#define GMOCK_INTERNAL_MOCK_METHOD_ARG_4(_Ret, _MethodName, _Args, _Spec)     \
-  GMOCK_INTERNAL_ASSERT_PARENTHESIS(_Args);                                   \
-  GMOCK_INTERNAL_ASSERT_PARENTHESIS(_Spec);                                   \
-  GMOCK_INTERNAL_ASSERT_VALID_SIGNATURE(                                      \
-      GMOCK_PP_NARG0 _Args, GMOCK_INTERNAL_SIGNATURE(_Ret, _Args));           \
-  GMOCK_INTERNAL_ASSERT_VALID_SPEC(_Spec)                                     \
-  GMOCK_INTERNAL_MOCK_METHOD_IMPL(                                            \
-      GMOCK_PP_NARG0 _Args, _MethodName, GMOCK_INTERNAL_HAS_CONST(_Spec),     \
-      GMOCK_INTERNAL_HAS_OVERRIDE(_Spec), GMOCK_INTERNAL_HAS_FINAL(_Spec),    \
-      GMOCK_INTERNAL_HAS_NOEXCEPT(_Spec), GMOCK_INTERNAL_GET_CALLTYPE(_Spec), \
+#define GMOCK_INTERNAL_MOCK_METHOD_ARG_4(_Ret, _MethodName, _Args, _Spec)  \
+  GMOCK_INTERNAL_ASSERT_PARENTHESIS(_Args);                                \
+  GMOCK_INTERNAL_ASSERT_PARENTHESIS(_Spec);                                \
+  GMOCK_INTERNAL_ASSERT_VALID_SIGNATURE(                                   \
+      GMOCK_PP_NARG0 _Args, GMOCK_INTERNAL_SIGNATURE(_Ret, _Args));        \
+  GMOCK_INTERNAL_ASSERT_VALID_SPEC(_Spec)                                  \
+  GMOCK_INTERNAL_MOCK_METHOD_IMPL(                                         \
+      GMOCK_PP_NARG0 _Args, _MethodName, GMOCK_INTERNAL_HAS_CONST(_Spec),  \
+      GMOCK_INTERNAL_HAS_OVERRIDE(_Spec), GMOCK_INTERNAL_HAS_FINAL(_Spec), \
+      GMOCK_INTERNAL_GET_NOEXCEPT_SPEC(_Spec),                             \
+      GMOCK_INTERNAL_GET_CALLTYPE(_Spec),                                  \
       (GMOCK_INTERNAL_SIGNATURE(_Ret, _Args)))
 
 #define GMOCK_INTERNAL_MOCK_METHOD_ARG_5(...) \
@@ -107,15 +108,14 @@ using identity_t = T;
   GMOCK_PP_FOR_EACH(GMOCK_INTERNAL_ASSERT_VALID_SPEC_ELEMENT, ~, _Spec)
 
 #define GMOCK_INTERNAL_MOCK_METHOD_IMPL(_N, _MethodName, _Constness,           \
-                                        _Override, _Final, _Noexcept,          \
+                                        _Override, _Final, _NoexceptSpec,      \
                                         _CallType, _Signature)                 \
   typename ::testing::internal::Function<GMOCK_PP_REMOVE_PARENS(               \
       _Signature)>::Result                                                     \
   GMOCK_INTERNAL_EXPAND(_CallType)                                             \
       _MethodName(GMOCK_PP_REPEAT(GMOCK_INTERNAL_PARAMETER, _Signature, _N))   \
-          GMOCK_PP_IF(_Constness, const, ) GMOCK_PP_IF(_Noexcept, noexcept, )  \
-              GMOCK_PP_IF(_Override, override, )                               \
-                  GMOCK_PP_IF(_Final, final, ) {                               \
+          GMOCK_PP_IF(_Constness, const, ) _NoexceptSpec                       \
+          GMOCK_PP_IF(_Override, override, ) GMOCK_PP_IF(_Final, final, ) {    \
     GMOCK_MOCKER_(_N, _Constness, _MethodName)                                 \
         .SetOwnerAndName(this, #_MethodName);                                  \
     return GMOCK_MOCKER_(_N, _Constness, _MethodName)                          \
@@ -131,8 +131,7 @@ using identity_t = T;
   ::testing::MockSpec<GMOCK_PP_REMOVE_PARENS(_Signature)> gmock_##_MethodName( \
       const ::testing::internal::WithoutMatchers&,                             \
       GMOCK_PP_IF(_Constness, const, )::testing::internal::Function<           \
-          GMOCK_PP_REMOVE_PARENS(_Signature)>*)                                \
-      const GMOCK_PP_IF(_Noexcept, noexcept, ) {                               \
+          GMOCK_PP_REMOVE_PARENS(_Signature)>*) const _NoexceptSpec {          \
     return GMOCK_PP_CAT(::testing::internal::AdjustConstness_,                 \
                         GMOCK_PP_IF(_Constness, const, ))(this)                \
         ->gmock_##_MethodName(GMOCK_PP_REPEAT(                                 \
@@ -154,9 +153,13 @@ using identity_t = T;
 #define GMOCK_INTERNAL_HAS_FINAL(_Tuple) \
   GMOCK_PP_HAS_COMMA(GMOCK_PP_FOR_EACH(GMOCK_INTERNAL_DETECT_FINAL, ~, _Tuple))
 
-#define GMOCK_INTERNAL_HAS_NOEXCEPT(_Tuple) \
-  GMOCK_PP_HAS_COMMA(                       \
-      GMOCK_PP_FOR_EACH(GMOCK_INTERNAL_DETECT_NOEXCEPT, ~, _Tuple))
+#define GMOCK_INTERNAL_GET_NOEXCEPT_SPEC(_Tuple) \
+  GMOCK_PP_FOR_EACH(GMOCK_INTERNAL_NOEXCEPT_SPEC_IF_NOEXCEPT, ~, _Tuple)
+
+#define GMOCK_INTERNAL_NOEXCEPT_SPEC_IF_NOEXCEPT(_i, _, _elem)          \
+  GMOCK_PP_IF(                                                          \
+      GMOCK_PP_HAS_COMMA(GMOCK_INTERNAL_DETECT_NOEXCEPT(_i, _, _elem)), \
+      _elem, )
 
 #define GMOCK_INTERNAL_GET_CALLTYPE(_Tuple) \
   GMOCK_PP_FOR_EACH(GMOCK_INTERNAL_GET_CALLTYPE_IMPL, ~, _Tuple)
@@ -187,7 +190,6 @@ using identity_t = T;
 
 #define GMOCK_INTERNAL_DETECT_FINAL_I_final ,
 
-// TODO(iserna): Maybe noexcept should accept an argument here as well.
 #define GMOCK_INTERNAL_DETECT_NOEXCEPT(_i, _, _elem) \
   GMOCK_PP_CAT(GMOCK_INTERNAL_DETECT_NOEXCEPT_I_, _elem)
 
