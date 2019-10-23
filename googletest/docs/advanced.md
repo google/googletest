@@ -1531,10 +1531,10 @@ each type in the list:
 
 ```c++
 using MyTypes = ::testing::Types<char, int, unsigned int>;
-TYPED_TEST_SUITE(FooTest, MyTypes);
+TYPED_TEST_CASE(FooTest, MyTypes);
 ```
 
-The type alias (`using` or `typedef`) is necessary for the `TYPED_TEST_SUITE`
+The type alias (`using` or `typedef`) is necessary for the `TYPED_TEST_CASE`
 macro to parse correctly. Otherwise the compiler will think that each comma in
 the type list introduces a new macro argument.
 
