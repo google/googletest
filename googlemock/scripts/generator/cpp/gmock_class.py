@@ -1,18 +1,33 @@
 #!/usr/bin/env python
 #
-# Copyright 2008 Google Inc.  All Rights Reserved.
+# Copyright 2008, Google Inc.
+# All rights reserved.
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are
+# met:
 #
-#      http://www.apache.org/licenses/LICENSE-2.0
+#     * Redistributions of source code must retain the above copyright
+# notice, this list of conditions and the following disclaimer.
+#     * Redistributions in binary form must reproduce the above
+# copyright notice, this list of conditions and the following disclaimer
+# in the documentation and/or other materials provided with the
+# distribution.
+#     * Neither the name of Google Inc. nor the names of its
+# contributors may be used to endorse or promote products derived from
+# this software without specific prior written permission.
 #
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+# OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 """Generate Google Mock classes from base classes.
 
@@ -25,9 +40,6 @@ Usage:
 
 Output is sent to stdout.
 """
-
-__author__ = 'nnorwitz@google.com (Neal Norwitz)'
-
 
 import os
 import re
@@ -48,6 +60,50 @@ _VERSION = (1, 0, 1)  # The version of this script.
 _INDENT = 2
 
 
+def _RenderType(ast_type):
+  """Renders the potentially recursively templated type into a string.
+
+  Args:
+    ast_type: The AST of the type.
+
+  Returns:
+    Rendered string and a boolean to indicate whether we have multiple args
+    (which is not handled correctly).
+  """
+  has_multiarg_error = False
+  # Add modifiers like 'const'.
+  modifiers = ''
+  if ast_type.modifiers:
+    modifiers = ' '.join(ast_type.modifiers) + ' '
+  return_type = modifiers + ast_type.name
+  if ast_type.templated_types:
+    # Collect template args.
+    template_args = []
+    for arg in ast_type.templated_types:
+      rendered_arg, e = _RenderType(arg)
+      if e: has_multiarg_error = True
+      template_args.append(rendered_arg)
+    return_type += '<' + ', '.join(template_args) + '>'
+    # We are actually not handling multi-template-args correctly. So mark it.
+    if len(template_args) > 1:
+      has_multiarg_error = True
+  if ast_type.pointer:
+    return_type += '*'
+  if ast_type.reference:
+    return_type += '&'
+  return return_type, has_multiarg_error
+
+
+def _GetNumParameters(parameters, source):
+  num_parameters = len(parameters)
+  if num_parameters == 1:
+    first_param = parameters[0]
+    if source[first_param.start:first_param.end].strip() == 'void':
+      # We must treat T(void) as a function with no parameters.
+      return 0
+  return num_parameters
+
+
 def _GenerateMethods(output_lines, source, class_node):
   function_type = (ast.FUNCTION_VIRTUAL | ast.FUNCTION_PURE_VIRTUAL |
                    ast.FUNCTION_OVERRIDE)
@@ -63,32 +119,16 @@ def _GenerateMethods(output_lines, source, class_node):
       const = ''
       if node.modifiers & ast.FUNCTION_CONST:
         const = 'CONST_'
+      num_parameters = _GetNumParameters(node.parameters, source)
       return_type = 'void'
       if node.return_type:
-        # Add modifiers like 'const'.
-        modifiers = ''
-        if node.return_type.modifiers:
-          modifiers = ' '.join(node.return_type.modifiers) + ' '
-        return_type = modifiers + node.return_type.name
-        template_args = [arg.name for arg in node.return_type.templated_types]
-        if template_args:
-          return_type += '<' + ', '.join(template_args) + '>'
-          if len(template_args) > 1:
-            for line in [
-                '// The following line won\'t really compile, as the return',
-                '// type has multiple template arguments.  To fix it, use a',
-                '// typedef for the return type.']:
-              output_lines.append(indent + line)
-        if node.return_type.pointer:
-          return_type += '*'
-        if node.return_type.reference:
-          return_type += '&'
-        num_parameters = len(node.parameters)
-        if len(node.parameters) == 1:
-          first_param = node.parameters[0]
-          if source[first_param.start:first_param.end].strip() == 'void':
-            # We must treat T(void) as a function with no parameters.
-            num_parameters = 0
+        return_type, has_multiarg_error = _RenderType(node.return_type)
+        if has_multiarg_error:
+          for line in [
+              '// The following line won\'t really compile, as the return',
+              '// type has multiple template arguments.  To fix it, use a',
+              '// typedef for the return type.']:
+            output_lines.append(indent + line)
       tmpl = ''
       if class_node.templated_types:
         tmpl = '_T'
