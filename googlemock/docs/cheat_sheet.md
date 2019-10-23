@@ -503,16 +503,17 @@ which must be a permanent callback.
 #### Returning a Value
 
 <!-- mdformat off(no multiline tables) -->
-|                             |                                               |
-| :-------------------------- | :-------------------------------------------- |
-| `Return()`                  | Return from a `void` mock function.           |
-| `Return(value)`             | Return `value`. If the type of `value` is     different to the mock function's return type, `value` is converted to the latter type <i>at the time the expectation is set</i>, not when the action is executed. |
-| `ReturnArg<N>()`            | Return the `N`-th (0-based) argument.         |
-| `ReturnNew<T>(a1, ..., ak)` | Return `new T(a1, ..., ak)`; a different      object is created each time. |
-| `ReturnNull()`              | Return a null pointer.                        |
-| `ReturnPointee(ptr)`        | Return the value pointed to by `ptr`.         |
-| `ReturnRef(variable)`       | Return a reference to `variable`.             |
-| `ReturnRefOfCopy(value)`    | Return a reference to a copy of `value`; the  copy lives as long as the action. |
+|                                   |                                               |
+| :-------------------------------- | :-------------------------------------------- |
+| `Return()`                        | Return from a `void` mock function.           |
+| `Return(value)`                   | Return `value`. If the type of `value` is     different to the mock function's return type, `value` is converted to the latter type <i>at the time the expectation is set</i>, not when the action is executed. |
+| `ReturnArg<N>()`                  | Return the `N`-th (0-based) argument.         |
+| `ReturnNew<T>(a1, ..., ak)`       | Return `new T(a1, ..., ak)`; a different      object is created each time. |
+| `ReturnNull()`                    | Return a null pointer.                        |
+| `ReturnPointee(ptr)`              | Return the value pointed to by `ptr`.         |
+| `ReturnRef(variable)`             | Return a reference to `variable`.             |
+| `ReturnRefOfCopy(value)`          | Return a reference to a copy of `value`; the  copy lives as long as the action. |
+| `ReturnRoundRobin({a1, ..., ak})` | Each call will return the next `ai` in the list, starting at the beginning when the end of the list is reached. |
 <!-- mdformat on -->
 
 #### Side Effects
