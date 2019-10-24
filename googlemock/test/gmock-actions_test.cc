@@ -651,65 +651,34 @@ template <typename T, typename = decltype(ReturnRef(std::declval<T&&>()))>
 bool CanCallReturnRef(T&&) { return true; }
 bool CanCallReturnRef(Unused) { return false; }
 
-// Defined here, because gmock has to work with C++11 (std::void_t is from C++17)
-template<typename... Ts> struct precpp17_make_void { typedef void type;};
-template<typename... Ts> using precpp17_void_t = typename precpp17_make_void<Ts...>::type;
-
-template <typename T, typename = void>
-struct HasReturnRefAction : std::false_type {};
-template <typename T>
-struct HasReturnRefAction<T, precpp17_void_t<decltype(ReturnRef(std::declval<T>()))>>
-    : std::true_type {};
-
-// Just an example of non-POD type
-class MyNonPodType {
- public:
-  MyNonPodType(int a_value) : value_(a_value) {}
-
- private:
-  int value_;
-};
-// Just an example of POD type
-using MyPodType = int;
-
 // Tests that ReturnRef(v) is working with non-temporaries (T&)
-TEST(ReturnRefTest, IsAcceptingNonTemporary) {
-  EXPECT_TRUE(HasReturnRefAction<MyPodType&>::value);
-  EXPECT_TRUE(HasReturnRefAction<const MyPodType&>::value);
-  EXPECT_TRUE(HasReturnRefAction<MyNonPodType&>::value);
-  EXPECT_TRUE(HasReturnRefAction<const MyNonPodType&>::value);
+TEST(ReturnRefTest, WorksForNonTemporary) {
+  int scalarValue = 123;
+  EXPECT_TRUE(CanCallReturnRef(scalarValue));
 
-  MyNonPodType nonPodValue{123};
-  EXPECT_TRUE(CanCallReturnRef(nonPodValue));
+  std::string nonScalarValue("ABC");
+  EXPECT_TRUE(CanCallReturnRef(nonScalarValue));
 
-  MyPodType podValue{321};
-  EXPECT_TRUE(CanCallReturnRef(podValue));
+  const int constScalarValue{321};
+  EXPECT_TRUE(CanCallReturnRef(constScalarValue));
 
-  const MyNonPodType constNonPodValue{123};
-  EXPECT_TRUE(CanCallReturnRef(constNonPodValue));
-
-  const MyPodType constPodValue{321};
-  EXPECT_TRUE(CanCallReturnRef(constPodValue));
+  const std::string constNonScalarValue("CBA");
+  EXPECT_TRUE(CanCallReturnRef(constNonScalarValue));
 }
 
 // Tests that ReturnRef(v) is not working with temporaries (T&&)
-TEST(ReturnRefTest, IsNotAcceptingTemporary) {
-    EXPECT_FALSE(HasReturnRefAction<MyPodType&&>::value);
-    EXPECT_FALSE(HasReturnRefAction<const MyPodType&&>::value);
-    EXPECT_FALSE(HasReturnRefAction<MyNonPodType&&>::value);
-    EXPECT_FALSE(HasReturnRefAction<const MyNonPodType&&>::value);
+TEST(ReturnRefTest, DoesNotWorkForTemporary) {
+  auto scalarValue = []()  -> int { return 123; };
+  EXPECT_FALSE(CanCallReturnRef(scalarValue()));
 
-    auto nonPodValue = []()  -> MyNonPodType { return MyNonPodType{123}; };
-    EXPECT_FALSE(CanCallReturnRef(nonPodValue()));
+  auto nonScalarValue = []() -> std::string { return "ABC"; };
+  EXPECT_FALSE(CanCallReturnRef(nonScalarValue()));
 
-    auto podValue = []() -> MyPodType { return MyPodType{321}; };
-    EXPECT_FALSE(CanCallReturnRef(podValue()));
+  // cannot use here callable returning "const scalar type" because C++ ignores such const for scalar return type, so the static_cast
+  EXPECT_FALSE(CanCallReturnRef(static_cast<const int>(321)));
 
-    auto constNonPodValue = []() -> const MyNonPodType { return MyNonPodType{123}; };
-    EXPECT_FALSE(CanCallReturnRef(constNonPodValue()));
-
-    // cannot use here callable returning "const POD" because C++ ignores such const for POD return type, so the static_cast
-    EXPECT_FALSE(CanCallReturnRef(static_cast<const MyPodType>(42)));
+  auto constNonScalarValue = []() -> const std::string { return "CBA"; };
+  EXPECT_FALSE(CanCallReturnRef(constNonScalarValue()));
 }
 
 // Tests that ReturnRefOfCopy(v) works for reference types.
