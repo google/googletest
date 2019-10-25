@@ -653,33 +653,33 @@ bool CanCallReturnRef(Unused) { return false; }
 
 // Tests that ReturnRef(v) is working with non-temporaries (T&)
 TEST(ReturnRefTest, WorksForNonTemporary) {
-  int scalarValue = 123;
-  EXPECT_TRUE(CanCallReturnRef(scalarValue));
+  int scalar_value = 123;
+  EXPECT_TRUE(CanCallReturnRef(scalar_value));
 
-  std::string nonScalarValue("ABC");
-  EXPECT_TRUE(CanCallReturnRef(nonScalarValue));
+  std::string non_scalar_value("ABC");
+  EXPECT_TRUE(CanCallReturnRef(non_scalar_value));
 
-  const int constScalarValue{321};
-  EXPECT_TRUE(CanCallReturnRef(constScalarValue));
+  const int const_scalar_value{321};
+  EXPECT_TRUE(CanCallReturnRef(const_scalar_value));
 
-  const std::string constNonScalarValue("CBA");
-  EXPECT_TRUE(CanCallReturnRef(constNonScalarValue));
+  const std::string const_non_scalar_value("CBA");
+  EXPECT_TRUE(CanCallReturnRef(const_non_scalar_value));
 }
 
 // Tests that ReturnRef(v) is not working with temporaries (T&&)
 TEST(ReturnRefTest, DoesNotWorkForTemporary) {
-  auto scalarValue = []()  -> int { return 123; };
-  EXPECT_FALSE(CanCallReturnRef(scalarValue()));
+  auto scalar_value = []()  -> int { return 123; };
+  EXPECT_FALSE(CanCallReturnRef(scalar_value()));
 
-  auto nonScalarValue = []() -> std::string { return "ABC"; };
-  EXPECT_FALSE(CanCallReturnRef(nonScalarValue()));
+  auto non_scalar_value = []() -> std::string { return "ABC"; };
+  EXPECT_FALSE(CanCallReturnRef(non_scalar_value()));
 
   // cannot use here callable returning "const scalar type",
   // because such const for scalar return type is ignored
   EXPECT_FALSE(CanCallReturnRef(static_cast<const int>(321)));
 
-  auto constNonScalarValue = []() -> const std::string { return "CBA"; };
-  EXPECT_FALSE(CanCallReturnRef(constNonScalarValue()));
+  auto const_non_scalar_value = []() -> const std::string { return "CBA"; };
+  EXPECT_FALSE(CanCallReturnRef(const_non_scalar_value()));
 }
 
 // Tests that ReturnRefOfCopy(v) works for reference types.
