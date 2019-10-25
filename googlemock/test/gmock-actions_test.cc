@@ -674,7 +674,8 @@ TEST(ReturnRefTest, DoesNotWorkForTemporary) {
   auto nonScalarValue = []() -> std::string { return "ABC"; };
   EXPECT_FALSE(CanCallReturnRef(nonScalarValue()));
 
-  // cannot use here callable returning "const scalar type" because C++ ignores such const for scalar return type, so the static_cast
+  // cannot use here callable returning "const scalar type",
+  // because such const for scalar return type is ignored
   EXPECT_FALSE(CanCallReturnRef(static_cast<const int>(321)));
 
   auto constNonScalarValue = []() -> const std::string { return "CBA"; };
