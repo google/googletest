@@ -11,7 +11,8 @@
   "version": "1.10.0",
   "frameworks": "arduino",
   "platforms": [
-        "espressif32"
+        "espressif32",
+        "espressif8266"
   ],
   "export": {
         "include": [
@@ -42,6 +43,24 @@
             "-Igooglemock",
             "-Igoogletest/include",
             "-Igoogletest"
+        ],
+        "srcFilter": [
+          "+<*>",
+          "-<.git/>",
+          "-<googlemock>",
+          "-<googlemock/test/>",
+          "-<googlemock/src>",
+          "+<googlemock/src/gmock-all.cc>",
+          "+<googletest/src/gtest-all.cc>",
+          "+<googlemock/src/gmock_main.cc>",
+          "-<googletest>",
+          "-<googletest/codegear/>",
+          "-<googletest/samples>",
+          "-<googletest/test/>",
+          "-<googletest/xcode>",
+          "-<googletest/src>",
+          "+<googletest/src/gtest-all.cc>",
+          "+<googletest/src/gtest_main.cc>"
         ]
   }
 }
