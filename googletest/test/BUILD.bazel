@@ -296,6 +296,14 @@ cc_test(
 )
 
 py_test(
+    name = "gtest_skip_check_output_test",
+    size = "small",
+    srcs = ["gtest_skip_check_output_test.py"],
+    data = [":gtest_skip_test"],
+    deps = [":gtest_test_utils"],
+)
+
+py_test(
     name = "gtest_skip_environment_check_output_test",
     size = "small",
     srcs = ["gtest_skip_environment_check_output_test.py"],

@@ -855,8 +855,7 @@ class GTEST_API_ Random {
 // true if and only if T is type proto2::Message or a subclass of it.
 template <typename T>
 struct IsAProtocolMessage
-    : public bool_constant<
-          std::is_convertible<const T*, const ::proto2::Message*>::value> {};
+    : public std::is_convertible<const T*, const ::proto2::Message*> {};
 
 // When the compiler sees expression IsContainerTest<C>(0), if C is an
 // STL-style container class, the first overload of IsContainerTest
@@ -1124,25 +1123,29 @@ struct MakeIndexSequence
 template <>
 struct MakeIndexSequence<0> : IndexSequence<> {};
 
-// FIXME: This implementation of ElemFromList is O(1) in instantiation depth,
-// but it is O(N^2) in total instantiations. Not sure if this is the best
-// tradeoff, as it will make it somewhat slow to compile.
-template <typename T, size_t, size_t>
-struct ElemFromListImpl {};
-
-template <typename T, size_t I>
-struct ElemFromListImpl<T, I, I> {
-  using type = T;
+template <size_t>
+struct Ignore {
+  Ignore(...);  // NOLINT
 };
 
-// Get the Nth element from T...
-// It uses O(1) instantiation depth.
-template <size_t N, typename I, typename... T>
-struct ElemFromList;
+template <typename>
+struct ElemFromListImpl;
+template <size_t... I>
+struct ElemFromListImpl<IndexSequence<I...>> {
+  // We make Ignore a template to solve a problem with MSVC.
+  // A non-template Ignore would work fine with `decltype(Ignore(I))...`, but
+  // MSVC doesn't understand how to deal with that pack expansion.
+  // Use `0 * I` to have a single instantiation of Ignore.
+  template <typename R>
+  static R Apply(Ignore<0 * I>..., R (*)(), ...);
+};
 
-template <size_t N, size_t... I, typename... T>
-struct ElemFromList<N, IndexSequence<I...>, T...>
-    : ElemFromListImpl<T, N, I>... {};
+template <size_t N, typename... T>
+struct ElemFromList {
+  using type =
+      decltype(ElemFromListImpl<typename MakeIndexSequence<N>::type>::Apply(
+          static_cast<T (*)()>(nullptr)...));
+};
 
 template <typename... T>
 class FlatTuple;
@@ -1152,9 +1155,7 @@ struct FlatTupleElemBase;
 
 template <typename... T, size_t I>
 struct FlatTupleElemBase<FlatTuple<T...>, I> {
-  using value_type =
-      typename ElemFromList<I, typename MakeIndexSequence<sizeof...(T)>::type,
-                            T...>::type;
+  using value_type = typename ElemFromList<I, T...>::type;
   FlatTupleElemBase() = default;
   explicit FlatTupleElemBase(value_type t) : value(std::move(t)) {}
   value_type value;
@@ -1192,12 +1193,12 @@ class FlatTuple
   explicit FlatTuple(T... t) : FlatTuple::FlatTupleBase(std::move(t)...) {}
 
   template <size_t I>
-  const typename ElemFromList<I, Indices, T...>::type& Get() const {
+  const typename ElemFromList<I, T...>::type& Get() const {
     return static_cast<const FlatTupleElemBase<FlatTuple, I>*>(this)->value;
   }
 
   template <size_t I>
-  typename ElemFromList<I, Indices, T...>::type& Get() {
+  typename ElemFromList<I, T...>::type& Get() {
     return static_cast<FlatTupleElemBase<FlatTuple, I>*>(this)->value;
   }
 };
@@ -1348,13 +1349,17 @@ constexpr bool InstantiateTypedTestCase_P_IsDeprecated() { return true; }
 
 // Helper macro for defining tests.
 #define GTEST_TEST_(test_suite_name, test_name, parent_class, parent_id)      \
+  static_assert(sizeof(GTEST_STRINGIFY_(test_suite_name)) > 1,                \
+                "test_suite_name must not be empty");                         \
+  static_assert(sizeof(GTEST_STRINGIFY_(test_name)) > 1,                      \
+                "test_name must not be empty");                               \
   class GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)                    \
       : public parent_class {                                                 \
    public:                                                                    \
     GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)() {}                   \
                                                                               \
    private:                                                                   \
-    virtual void TestBody();                                                  \
+    void TestBody() override;                                                 \
     static ::testing::TestInfo* const test_info_ GTEST_ATTRIBUTE_UNUSED_;     \
     GTEST_DISALLOW_COPY_AND_ASSIGN_(GTEST_TEST_CLASS_NAME_(test_suite_name,   \
                                                            test_name));       \

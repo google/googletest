@@ -1889,7 +1889,7 @@ class TestWithParam : public Test, public WithParamInterface<T> {
 // Skips test in runtime.
 // Skipping test aborts current function.
 // Skipped tests are neither successful nor failed.
-#define GTEST_SKIP() GTEST_SKIP_("Skipped")
+#define GTEST_SKIP() GTEST_SKIP_("")
 
 // ADD_FAILURE unconditionally adds a failure to the current test.
 // SUCCEED generates a success - it doesn't automatically make the
@@ -2298,8 +2298,7 @@ class GTEST_API_ ScopedTrace {
 // to cause a compiler error.
 template <typename T1, typename T2>
 constexpr bool StaticAssertTypeEq() noexcept {
-  static_assert(std::is_same<T1, T2>::value,
-                "type1 and type2 are not the same type");
+  static_assert(std::is_same<T1, T2>::value, "T1 and T2 are not the same type");
   return true;
 }
 

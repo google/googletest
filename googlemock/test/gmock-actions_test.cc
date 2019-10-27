@@ -73,6 +73,7 @@ using testing::Return;
 using testing::ReturnNull;
 using testing::ReturnRef;
 using testing::ReturnRefOfCopy;
+using testing::ReturnRoundRobin;
 using testing::SetArgPointee;
 using testing::SetArgumentPointee;
 using testing::Unused;
@@ -668,6 +669,31 @@ TEST(ReturnRefOfCopyTest, IsCovariant) {
 
   a = ReturnRefOfCopy(derived);
   EXPECT_NE(&derived, &a.Perform(std::make_tuple()));
+}
+
+// Tests that ReturnRoundRobin(v) works with initializer lists
+TEST(ReturnRoundRobinTest, WorksForInitList) {
+  Action<int()> ret = ReturnRoundRobin({1, 2, 3});
+
+  EXPECT_EQ(1, ret.Perform(std::make_tuple()));
+  EXPECT_EQ(2, ret.Perform(std::make_tuple()));
+  EXPECT_EQ(3, ret.Perform(std::make_tuple()));
+  EXPECT_EQ(1, ret.Perform(std::make_tuple()));
+  EXPECT_EQ(2, ret.Perform(std::make_tuple()));
+  EXPECT_EQ(3, ret.Perform(std::make_tuple()));
+}
+
+// Tests that ReturnRoundRobin(v) works with vectors
+TEST(ReturnRoundRobinTest, WorksForVector) {
+  std::vector<double> v = {4.4, 5.5, 6.6};
+  Action<double()> ret = ReturnRoundRobin(v);
+
+  EXPECT_EQ(4.4, ret.Perform(std::make_tuple()));
+  EXPECT_EQ(5.5, ret.Perform(std::make_tuple()));
+  EXPECT_EQ(6.6, ret.Perform(std::make_tuple()));
+  EXPECT_EQ(4.4, ret.Perform(std::make_tuple()));
+  EXPECT_EQ(5.5, ret.Perform(std::make_tuple()));
+  EXPECT_EQ(6.6, ret.Perform(std::make_tuple()));
 }
 
 // Tests that DoDefault() does the default action for the mock method.

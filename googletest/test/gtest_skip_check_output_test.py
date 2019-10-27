@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright 2008, Google Inc.
-# All rights reserved.
+# Copyright 2019 Google LLC.  All Rights Reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
@@ -28,18 +27,33 @@
 # THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+"""Tests Google Test's gtest skip in environment setup  behavior.
 
-"""Driver for starting up Google Mock class generator."""
+This script invokes gtest_skip_in_environment_setup_test_ and verifies its
+output.
+"""
+
+import re
+
+import gtest_test_utils
+
+# Path to the gtest_skip_in_environment_setup_test binary
+EXE_PATH = gtest_test_utils.GetTestExecutablePath('gtest_skip_test')
+
+OUTPUT = gtest_test_utils.Subprocess([EXE_PATH]).output
 
 
-import os
-import sys
+# Test.
+class SkipEntireEnvironmentTest(gtest_test_utils.TestCase):
+
+  def testSkipEntireEnvironmentTest(self):
+    self.assertIn('Skipped\nskipping single test\n', OUTPUT)
+    skip_fixture = 'Skipped\nskipping all tests for this fixture\n'
+    self.assertIsNotNone(
+        re.search(skip_fixture + '.*' + skip_fixture, OUTPUT, flags=re.DOTALL),
+        repr(OUTPUT))
+    self.assertNotIn('FAILED', OUTPUT)
+
 
 if __name__ == '__main__':
-  # Add the directory of this script to the path so we can import gmock_class.
-  sys.path.append(os.path.dirname(__file__))
-
-  from cpp import gmock_class
-  # Fix the docstring in case they require the usage.
-  gmock_class.__doc__ = gmock_class.__doc__.replace('gmock_class.py', __file__)
-  gmock_class.main()
+  gtest_test_utils.Main()

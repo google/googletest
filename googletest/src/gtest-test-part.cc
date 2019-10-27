@@ -31,6 +31,8 @@
 // The Google C++ Testing and Mocking Framework (Google Test)
 
 #include "gtest/gtest-test-part.h"
+
+#include "gtest/internal/gtest-port.h"
 #include "src/gtest-internal-inl.h"
 
 namespace testing {
@@ -46,7 +48,9 @@ std::string TestPartResult::ExtractSummary(const char* message) {
 
 // Prints a TestPartResult object.
 std::ostream& operator<<(std::ostream& os, const TestPartResult& result) {
-  return os << result.file_name() << ":" << result.line_number() << ": "
+  return os << internal::FormatFileLocation(result.file_name(),
+                                            result.line_number())
+            << " "
             << (result.type() == TestPartResult::kSuccess
                     ? "Success"
                     : result.type() == TestPartResult::kSkip

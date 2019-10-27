@@ -1,5 +1,10 @@
 #include "gmock/internal/gmock-pp.h"
 
+// Used to test MSVC treating __VA_ARGS__ with a comma in it as one value
+#define GMOCK_TEST_REPLACE_comma_WITH_COMMA_I_comma ,
+#define GMOCK_TEST_REPLACE_comma_WITH_COMMA(x) \
+  GMOCK_PP_CAT(GMOCK_TEST_REPLACE_comma_WITH_COMMA_I_, x)
+
 // Static assertions.
 namespace testing {
 namespace internal {
@@ -17,6 +22,11 @@ static_assert(GMOCK_PP_NARG(x, y, z, w) == 4, "");
 static_assert(!GMOCK_PP_HAS_COMMA(), "");
 static_assert(GMOCK_PP_HAS_COMMA(b, ), "");
 static_assert(!GMOCK_PP_HAS_COMMA((, )), "");
+static_assert(GMOCK_PP_HAS_COMMA(GMOCK_TEST_REPLACE_comma_WITH_COMMA(comma)),
+              "");
+static_assert(
+    GMOCK_PP_HAS_COMMA(GMOCK_TEST_REPLACE_comma_WITH_COMMA(comma(unrelated))),
+    "");
 static_assert(!GMOCK_PP_IS_EMPTY(, ), "");
 static_assert(!GMOCK_PP_IS_EMPTY(a), "");
 static_assert(!GMOCK_PP_IS_EMPTY(()), "");
