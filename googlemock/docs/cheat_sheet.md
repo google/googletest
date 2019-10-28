@@ -614,19 +614,6 @@ composite action - trying to do so will result in a run-time error.
 
 #### Defining Actions
 
-<table border="1" cellspacing="0" cellpadding="1">
-  <tr>
-    <td>`struct SumAction {` <br>
-        &emsp;`template <typename T>` <br>
-        &emsp;`T operator()(T x, Ty) { return x + y; }` <br>
-        `};`
-    </td>
-    <td> Defines a generic functor that can be used as an action summing its
-    arguments. </td> </tr>
-  <tr>
-  </tr>
-</table>
-
 <!-- mdformat off(no multiline tables) -->
 |                                    |                                         |
 | :--------------------------------- | :-------------------------------------- |
