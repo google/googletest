@@ -1,19 +1,33 @@
 #!/usr/bin/env python
 #
-# Copyright 2007 Neal Norwitz
-# Portions Copyright 2007 Google Inc.
+# Copyright 2008, Google Inc.
+# All rights reserved.
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are
+# met:
 #
-#      http://www.apache.org/licenses/LICENSE-2.0
+#     * Redistributions of source code must retain the above copyright
+# notice, this list of conditions and the following disclaimer.
+#     * Redistributions in binary form must reproduce the above
+# copyright notice, this list of conditions and the following disclaimer
+# in the documentation and/or other materials provided with the
+# distribution.
+#     * Neither the name of Google Inc. nor the names of its
+# contributors may be used to endorse or promote products derived from
+# this software without specific prior written permission.
 #
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+# OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 """Generate an Abstract Syntax Tree (AST) for C++."""
 
@@ -518,7 +532,7 @@ class TypeConverter(object):
             elif token.name == '&':
                 reference = True
             elif token.name == '[':
-               pointer = True
+                pointer = True
             elif token.name == ']':
                 pass
             else:
@@ -576,7 +590,7 @@ class TypeConverter(object):
             elif p.name not in ('*', '&', '>'):
                 # Ensure that names have a space between them.
                 if (type_name and type_name[-1].token_type == tokenize.NAME and
-                    p.token_type == tokenize.NAME):
+                        p.token_type == tokenize.NAME):
                     type_name.append(tokenize.Token(tokenize.SYNTAX, ' ', 0, 0))
                 type_name.append(p)
             else:
@@ -652,7 +666,7 @@ class TypeConverter(object):
         start = return_type_seq[0].start
         end = return_type_seq[-1].end
         _, name, templated_types, modifiers, default, other_tokens = \
-           self.DeclarationToParts(return_type_seq, False)
+            self.DeclarationToParts(return_type_seq, False)
         names = [n.name for n in other_tokens]
         reference = '&' in names
         pointer = '*' in names
@@ -816,7 +830,7 @@ class AstBuilder(object):
                 # self.in_class can contain A::Name, but the dtor will only
                 # be Name.  Make sure to compare against the right value.
                 if (token.token_type == tokenize.NAME and
-                    token.name == self.in_class_name_only):
+                        token.name == self.in_class_name_only):
                     return self._GetMethod([token], FUNCTION_DTOR, None, True)
             # TODO(nnorwitz): handle a lot more syntax.
         elif token.token_type == tokenize.PREPROCESSOR:
@@ -929,7 +943,10 @@ class AstBuilder(object):
     def _GetNextToken(self):
         if self.token_queue:
             return self.token_queue.pop()
-        return next(self.tokens)
+        try:
+            return next(self.tokens)
+        except StopIteration:
+            return
 
     def _AddBackToken(self, token):
         if token.whence == tokenize.WHENCE_STREAM:
@@ -1129,7 +1146,7 @@ class AstBuilder(object):
         # Looks like we got a method, not a function.
         if len(return_type) > 2 and return_type[-1].name == '::':
             return_type, in_class = \
-                         self._GetReturnTypeAndClassName(return_type)
+                self._GetReturnTypeAndClassName(return_type)
             return Method(indices.start, indices.end, name.name, in_class,
                           return_type, parameters, modifiers, templated_types,
                           body, self.namespace_stack)
@@ -1374,7 +1391,7 @@ class AstBuilder(object):
     def handle_typedef(self):
         token = self._GetNextToken()
         if (token.token_type == tokenize.NAME and
-            keywords.IsKeyword(token.name)):
+                keywords.IsKeyword(token.name)):
             # Token must be struct/enum/union/class.
             method = getattr(self, 'handle_' + token.name)
             self._handling_typedef = True
@@ -1397,7 +1414,7 @@ class AstBuilder(object):
         if name.name == ')':
             # HACK(nnorwitz): Handle pointers to functions "properly".
             if (len(tokens) >= 4 and
-                tokens[1].name == '(' and tokens[2].name == '*'):
+                    tokens[1].name == '(' and tokens[2].name == '*'):
                 tokens.append(name)
                 name = tokens[3]
         elif name.name == ']':
