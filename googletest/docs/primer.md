@@ -478,7 +478,13 @@ If a fatal failure happens the subsequent steps will be skipped.
 
 ## Writing the main() Function
 
-Write your own main() function, which should return the value of
+Most users should _not_ need to write their own `main` function and instead link
+with `gtest_main` (as opposed to with `gtest`), which defines a suitable entry
+point. See the end of this section for details. The remainder of this section
+should only apply when you need to do something custom before the tests run that
+cannot be expressed within the framework of fixtures and test suites.
+
+If you write your own `main` function, it should return the value of
 `RUN_ALL_TESTS()`.
 
 You can start from this boilerplate:
