@@ -34,14 +34,10 @@
 #include "gtest/internal/custom/gtest.h"
 #include "gtest/gtest-spi.h"
 
-#include <ctype.h>
-#include <math.h>
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-#include <wchar.h>
-#include <wctype.h>
+#include <cmath>
+#include <cstdarg>
+#include <cstdio>
+#include <cstdlib>
 
 #include <algorithm>
 #include <iomanip>
@@ -49,7 +45,6 @@
 #include <list>
 #include <map>
 #include <ostream>  // NOLINT
-#include <sstream>
 #include <vector>
 
 #if GTEST_OS_LINUX

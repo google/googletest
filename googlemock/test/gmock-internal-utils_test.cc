@@ -34,7 +34,7 @@
 
 #include "gmock/internal/gmock-internal-utils.h"
 
-#include <stdlib.h>
+#include <cstdlib>
 
 #include <map>
 #include <memory>

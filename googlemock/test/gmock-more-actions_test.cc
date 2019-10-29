@@ -36,7 +36,6 @@
 
 #include <functional>
 #include <memory>
-#include <sstream>
 #include <string>
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"

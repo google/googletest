@@ -42,7 +42,6 @@
 #endif
 
 #include "gmock/gmock-actions.h"
-#include <algorithm>
 #include <iterator>
 #include <memory>
 #include <string>

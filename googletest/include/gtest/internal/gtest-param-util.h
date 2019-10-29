@@ -35,7 +35,7 @@
 #ifndef GTEST_INCLUDE_GTEST_INTERNAL_GTEST_PARAM_UTIL_H_
 #define GTEST_INCLUDE_GTEST_INTERNAL_GTEST_PARAM_UTIL_H_
 
-#include <ctype.h>
+#include <cctype>
 
 #include <cassert>
 #include <iterator>

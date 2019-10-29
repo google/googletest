@@ -42,7 +42,6 @@
 #endif  // GTEST_OS_WINDOWS
 
 #include <map>
-#include <string>
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 

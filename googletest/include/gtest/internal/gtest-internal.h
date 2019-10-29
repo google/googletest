@@ -40,7 +40,7 @@
 #include "gtest/internal/gtest-port.h"
 
 #if GTEST_OS_LINUX
-# include <stdlib.h>
+# include <cstdlib>
 # include <sys/types.h>
 # include <sys/wait.h>
 # include <unistd.h>
@@ -50,9 +50,9 @@
 # include <stdexcept>
 #endif
 
-#include <ctype.h>
-#include <float.h>
-#include <string.h>
+#include <cctype>
+#include <cfloat>
+#include <cstring>
 #include <iomanip>
 #include <limits>
 #include <map>

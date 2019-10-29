@@ -35,8 +35,6 @@
 
 #include "gmock/gmock-spec-builders.h"
 
-#include <stdlib.h>
-
 #include <iostream>  // NOLINT
 #include <map>
 #include <memory>

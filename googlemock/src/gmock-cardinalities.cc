@@ -34,9 +34,8 @@
 
 #include "gmock/gmock-cardinalities.h"
 
-#include <limits.h>
+#include <climits>
 #include <ostream>  // NOLINT
-#include <sstream>
 #include <string>
 #include "gmock/internal/gmock-internal-utils.h"
 #include "gtest/gtest.h"

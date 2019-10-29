@@ -40,8 +40,8 @@
 #ifndef GMOCK_INCLUDE_GMOCK_INTERNAL_GMOCK_PORT_H_
 #define GMOCK_INCLUDE_GMOCK_INTERNAL_GMOCK_PORT_H_
 
-#include <assert.h>
-#include <stdlib.h>
+#include <cassert>
+#include <cstdlib>
 #include <iostream>
 
 // Most of the utilities needed for porting Google Mock are also

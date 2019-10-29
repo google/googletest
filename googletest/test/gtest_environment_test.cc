@@ -30,8 +30,7 @@
 //
 // Tests using global test environments.
 
-#include <stdlib.h>
-#include <stdio.h>
+#include <cstdio>
 #include "gtest/gtest.h"
 #include "src/gtest-internal-inl.h"
 

@@ -28,7 +28,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 // This file tests the internal cross-platform support utilities.
-#include <stdio.h>
+#include <cstdio>
 
 #include "gtest/internal/gtest-port.h"
 

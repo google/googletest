@@ -32,8 +32,8 @@
 // exceptions, and the output is verified by
 // googletest-catch-exceptions-test.py.
 
-#include <stdio.h>  // NOLINT
-#include <stdlib.h>  // For exit().
+#include <cstdlib>  // For exit().
+#include <cstdio>  // NOLINT
 
 #include "gtest/gtest.h"
 

@@ -49,9 +49,12 @@ using testing::internal::AlwaysTrue;
 #  include <sys/wait.h>        // For waitpid.
 # endif  // GTEST_OS_WINDOWS
 
-# include <limits.h>
-# include <signal.h>
-# include <stdio.h>
+# if !GTEST_OS_LINUX
+#  include <csignal>
+# endif  // !GTEST_OS_LINUX
+
+# include <climits>
+# include <cstdio>
 
 # if GTEST_OS_LINUX
 #  include <sys/time.h>

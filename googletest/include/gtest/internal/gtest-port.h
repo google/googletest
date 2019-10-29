@@ -243,11 +243,11 @@
 //                                        deprecated; calling a marked function
 //                                        should generate a compiler warning
 
-#include <ctype.h>   // for isspace, etc
-#include <stddef.h>  // for ptrdiff_t
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cctype>   // for isspace, etc
+#include <cstddef>  // for ptrdiff_t
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <type_traits>
 
 #ifndef _WIN32_WCE

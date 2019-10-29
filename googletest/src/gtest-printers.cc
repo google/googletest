@@ -42,7 +42,6 @@
 // defines Foo.
 
 #include "gtest/gtest-printers.h"
-#include <stdio.h>
 #include <cctype>
 #include <cwchar>
 #include <ostream>  // NOLINT
