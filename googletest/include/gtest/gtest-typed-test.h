@@ -27,7 +27,6 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
 // GOOGLETEST_CM0001 DO NOT DELETE
 
 #ifndef GTEST_INCLUDE_GTEST_GTEST_TYPED_TEST_H_
@@ -188,13 +187,13 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes);
 #define GTEST_NAME_GENERATOR_(TestSuiteName) \
   gtest_type_params_##TestSuiteName##_NameGenerator
 
-#define TYPED_TEST_SUITE(CaseName, Types, ...)                           \
-  typedef ::testing::internal::TypeList<Types>::type GTEST_TYPE_PARAMS_( \
-      CaseName);                                                         \
-  typedef ::testing::internal::NameGeneratorSelector<__VA_ARGS__>::type  \
+#define TYPED_TEST_SUITE(CaseName, Types, ...)                          \
+  typedef ::testing::internal::GenerateTypeList<Types>::type            \
+      GTEST_TYPE_PARAMS_(CaseName);                                     \
+  typedef ::testing::internal::NameGeneratorSelector<__VA_ARGS__>::type \
       GTEST_NAME_GENERATOR_(CaseName)
 
-# define TYPED_TEST(CaseName, TestName)                                       \
+#define TYPED_TEST(CaseName, TestName)                                        \
   template <typename gtest_TypeParam_>                                        \
   class GTEST_TEST_CLASS_NAME_(CaseName, TestName)                            \
       : public CaseName<gtest_TypeParam_> {                                   \
@@ -204,8 +203,7 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes);
     void TestBody() override;                                                 \
   };                                                                          \
   static bool gtest_##CaseName##_##TestName##_registered_                     \
-        GTEST_ATTRIBUTE_UNUSED_ =                                             \
-      ::testing::internal::TypeParameterizedTest<                             \
+      GTEST_ATTRIBUTE_UNUSED_ = ::testing::internal::TypeParameterizedTest<   \
           CaseName,                                                           \
           ::testing::internal::TemplateSel<GTEST_TEST_CLASS_NAME_(CaseName,   \
                                                                   TestName)>, \
@@ -286,13 +284,13 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes);
   void GTEST_SUITE_NAMESPACE_(                                        \
       SuiteName)::TestName<gtest_TypeParam_>::TestBody()
 
-#define REGISTER_TYPED_TEST_SUITE_P(SuiteName, ...)                            \
-  namespace GTEST_SUITE_NAMESPACE_(SuiteName) {                                \
-    typedef ::testing::internal::Templates<__VA_ARGS__>::type gtest_AllTests_; \
-  }                                                                            \
-  static const char* const GTEST_REGISTERED_TEST_NAMES_(                       \
-      SuiteName) GTEST_ATTRIBUTE_UNUSED_ =                                     \
-      GTEST_TYPED_TEST_SUITE_P_STATE_(SuiteName).VerifyRegisteredTestNames(    \
+#define REGISTER_TYPED_TEST_SUITE_P(SuiteName, ...)                         \
+  namespace GTEST_SUITE_NAMESPACE_(SuiteName) {                             \
+    typedef ::testing::internal::Templates<__VA_ARGS__> gtest_AllTests_;    \
+  }                                                                         \
+  static const char* const GTEST_REGISTERED_TEST_NAMES_(                    \
+      SuiteName) GTEST_ATTRIBUTE_UNUSED_ =                                  \
+      GTEST_TYPED_TEST_SUITE_P_STATE_(SuiteName).VerifyRegisteredTestNames( \
           __FILE__, __LINE__, #__VA_ARGS__)
 
 // Legacy API is deprecated but still available
@@ -307,7 +305,7 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes);
   static bool gtest_##Prefix##_##SuiteName GTEST_ATTRIBUTE_UNUSED_ =        \
       ::testing::internal::TypeParameterizedTestSuite<                      \
           SuiteName, GTEST_SUITE_NAMESPACE_(SuiteName)::gtest_AllTests_,    \
-          ::testing::internal::TypeList<Types>::type>::                     \
+          ::testing::internal::GenerateTypeList<Types>::type>::             \
           Register(#Prefix,                                                 \
                    ::testing::internal::CodeLocation(__FILE__, __LINE__),   \
                    &GTEST_TYPED_TEST_SUITE_P_STATE_(SuiteName), #SuiteName, \
@@ -315,7 +313,7 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes);
                    ::testing::internal::GenerateNames<                      \
                        ::testing::internal::NameGeneratorSelector<          \
                            __VA_ARGS__>::type,                              \
-                       ::testing::internal::TypeList<Types>::type>())
+                       ::testing::internal::GenerateTypeList<Types>::type>())
 
 // Legacy API is deprecated but still available
 #ifndef GTEST_REMOVE_LEGACY_TEST_CASEAPI_
