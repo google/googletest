@@ -758,8 +758,7 @@ class HasSubstrMatcher {
   template <typename MatcheeStringType>
   bool MatchAndExplain(const MatcheeStringType& s,
                        MatchResultListener* /* listener */) const {
-    const StringType& s2(s);
-    return s2.find(substring_) != StringType::npos;
+    return StringType(s).find(substring_) != StringType::npos;
   }
 
   // Describes what this matcher matches.
