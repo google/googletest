@@ -39,7 +39,7 @@
 #include "gtest/gtest-matchers.h"
 #include "gtest/internal/gtest-internal.h"
 
-#include <stdio.h>
+#include <cstdio>
 #include <memory>
 
 namespace testing {

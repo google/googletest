@@ -32,9 +32,9 @@
 
 #include "gtest/gtest.h"
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstdio>
+#include <cstring>
 #include <stdexcept>
 
 class ThrowListener : public testing::EmptyTestEventListener {

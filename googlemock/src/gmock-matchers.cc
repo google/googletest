@@ -36,9 +36,7 @@
 #include "gmock/gmock-matchers.h"
 #include "gmock/gmock-generated-matchers.h"
 
-#include <string.h>
 #include <iostream>
-#include <sstream>
 #include <string>
 
 namespace testing {

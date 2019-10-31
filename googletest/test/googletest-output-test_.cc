@@ -37,8 +37,6 @@
 #include "gtest/gtest.h"
 #include "src/gtest-internal-inl.h"
 
-#include <stdlib.h>
-
 #if _MSC_VER
 GTEST_DISABLE_MSC_WARNINGS_PUSH_(4127 /* conditional expression is constant */)
 #endif  //  _MSC_VER

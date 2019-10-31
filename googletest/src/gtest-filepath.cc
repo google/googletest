@@ -29,7 +29,7 @@
 
 #include "gtest/internal/gtest-filepath.h"
 
-#include <stdlib.h>
+#include <cstdlib>
 #include "gtest/internal/gtest-port.h"
 #include "gtest/gtest-message.h"
 
@@ -39,8 +39,7 @@
 # include <direct.h>
 # include <io.h>
 #else
-# include <limits.h>
-# include <climits>  // Some Linux distributions define PATH_MAX here.
+# include <climits>
 #endif  // GTEST_OS_WINDOWS_MOBILE
 
 #include "gtest/internal/gtest-string.h"

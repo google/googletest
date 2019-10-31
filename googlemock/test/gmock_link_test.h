@@ -118,7 +118,7 @@
 #include "gmock/gmock.h"
 
 #if !GTEST_OS_WINDOWS_MOBILE
-# include <errno.h>
+# include <cerrno>
 #endif
 
 #include <iostream>

@@ -46,7 +46,7 @@
 # include <mem.h>
 #endif
 
-#include <string.h>
+#include <cstring>
 #include <string>
 
 #include "gtest/internal/gtest-port.h"

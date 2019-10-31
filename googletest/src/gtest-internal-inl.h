@@ -35,11 +35,11 @@
 #define GTEST_SRC_GTEST_INTERNAL_INL_H_
 
 #ifndef _WIN32_WCE
-# include <errno.h>
+# include <cerrno>
 #endif  // !_WIN32_WCE
-#include <stddef.h>
-#include <stdlib.h>  // For strtoll/_strtoul64/malloc/free.
-#include <string.h>  // For memmove.
+#include <cstddef>
+#include <cstdlib>  // For strtoll/_strtoul64/malloc/free.
+#include <cstring>  // For memmove.
 
 #include <algorithm>
 #include <memory>

@@ -33,7 +33,6 @@
 
 #include "gmock/gmock.h"
 
-#include <stdio.h>
 #include <string>
 
 #include "gtest/gtest.h"

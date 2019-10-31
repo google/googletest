@@ -36,7 +36,6 @@
 
 #include "gmock/internal/gmock-internal-utils.h"
 
-#include <ctype.h>
 #include <ostream>  // NOLINT
 #include <string>
 #include "gmock/gmock.h"

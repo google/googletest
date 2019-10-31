@@ -42,21 +42,19 @@
 
 #include "gmock/gmock-matchers.h"
 
-#include <string.h>
-#include <time.h>
+#include <cstring>
+#include <ctime>
 
 #include <array>
 #include <deque>
 #include <forward_list>
 #include <functional>
 #include <iostream>
-#include <iterator>
 #include <limits>
 #include <list>
 #include <map>
 #include <memory>
 #include <set>
-#include <sstream>
 #include <string>
 #include <type_traits>
 #include <utility>

@@ -30,7 +30,6 @@
 
 // Tests the --gtest_repeat=number flag.
 
-#include <stdlib.h>
 #include <iostream>
 #include "gtest/gtest.h"
 #include "src/gtest-internal-inl.h"

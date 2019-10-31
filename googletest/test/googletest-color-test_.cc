@@ -32,7 +32,7 @@
 // colors in the output.  It prints "YES" and returns 1 if Google Test
 // decides to use colors, and prints "NO" and returns 0 otherwise.
 
-#include <stdio.h>
+#include <cstdio>
 
 #include "gtest/gtest.h"
 #include "src/gtest-internal-inl.h"

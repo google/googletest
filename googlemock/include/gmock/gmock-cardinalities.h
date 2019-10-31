@@ -39,7 +39,7 @@
 #ifndef GMOCK_INCLUDE_GMOCK_GMOCK_CARDINALITIES_H_
 #define GMOCK_INCLUDE_GMOCK_GMOCK_CARDINALITIES_H_
 
-#include <limits.h>
+#include <climits>
 #include <memory>
 #include <ostream>  // NOLINT
 #include "gmock/internal/gmock-port.h"

@@ -38,7 +38,7 @@
 #define GMOCK_INCLUDE_GMOCK_GMOCK_ACTIONS_H_
 
 #ifndef _WIN32_WCE
-# include <errno.h>
+# include <cerrno>
 #endif
 
 #include <algorithm>

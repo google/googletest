@@ -43,15 +43,8 @@
 #  include <crt_externs.h>
 # endif  // GTEST_OS_MAC
 
-# include <errno.h>
+# include <cerrno>
 # include <fcntl.h>
-# include <limits.h>
-
-# if GTEST_OS_LINUX
-#  include <signal.h>
-# endif  // GTEST_OS_LINUX
-
-# include <stdarg.h>
 
 # if GTEST_OS_WINDOWS
 #  include <windows.h>
