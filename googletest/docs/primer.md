@@ -478,22 +478,31 @@ If a fatal failure happens the subsequent steps will be skipped.
 
 ## Writing the main() Function
 
-Write your own main() function, which should return the value of
+Most users should _not_ need to write their own `main` function and instead link
+with `gtest_main` (as opposed to with `gtest`), which defines a suitable entry
+point. See the end of this section for details. The remainder of this section
+should only apply when you need to do something custom before the tests run that
+cannot be expressed within the framework of fixtures and test suites.
+
+If you write your own `main` function, it should return the value of
 `RUN_ALL_TESTS()`.
 
 You can start from this boilerplate:
 
 ```c++
 #include "this/package/foo.h"
+
 #include "gtest/gtest.h"
 
+namespace my {
+namespace project {
 namespace {
 
 // The fixture for testing class Foo.
 class FooTest : public ::testing::Test {
  protected:
-  // You can remove any or all of the following functions if its body
-  // is empty.
+  // You can remove any or all of the following functions if their bodies would
+  // be empty.
 
   FooTest() {
      // You can do set-up work for each test here.
@@ -516,7 +525,8 @@ class FooTest : public ::testing::Test {
      // before the destructor).
   }
 
-  // Objects declared here can be used by all tests in the test suite for Foo.
+  // Class members declared here can be used by all tests in the test suite
+  // for Foo.
 };
 
 // Tests that the Foo::Bar() method does Abc.
@@ -533,6 +543,8 @@ TEST_F(FooTest, DoesXyz) {
 }
 
 }  // namespace
+}  // namespace project
+}  // namespace my
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
@@ -549,10 +561,10 @@ the [AdvancedGuide](advanced.md). You **must** call this function before calling
 On Windows, `InitGoogleTest()` also works with wide strings, so it can be used
 in programs compiled in `UNICODE` mode as well.
 
-But maybe you think that writing all those main() functions is too much work? We
+But maybe you think that writing all those `main` functions is too much work? We
 agree with you completely, and that's why Google Test provides a basic
 implementation of main(). If it fits your needs, then just link your test with
-gtest\_main library and you are good to go.
+the `gtest_main` library and you are good to go.
 
 NOTE: `ParseGUnitFlags()` is deprecated in favor of `InitGoogleTest()`.
 

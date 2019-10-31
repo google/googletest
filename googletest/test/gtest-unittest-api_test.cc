@@ -188,7 +188,7 @@ TEST(ApiTest, TestSuiteImmutableAccessorsWork) {
   ASSERT_TRUE(test_suite != nullptr);
 
   EXPECT_STREQ("TestSuiteWithCommentTest/0", test_suite->name());
-  EXPECT_STREQ(GetTypeName<int>().c_str(), test_suite->type_param());
+  EXPECT_STREQ(GetTypeName<Types<int>>().c_str(), test_suite->type_param());
   EXPECT_TRUE(test_suite->should_run());
   EXPECT_EQ(0, test_suite->disabled_test_count());
   EXPECT_EQ(1, test_suite->test_to_run_count());
@@ -199,7 +199,7 @@ TEST(ApiTest, TestSuiteImmutableAccessorsWork) {
   EXPECT_STREQ("Dummy", tests[0]->name());
   EXPECT_STREQ("TestSuiteWithCommentTest/0", tests[0]->test_suite_name());
   EXPECT_TRUE(IsNull(tests[0]->value_param()));
-  EXPECT_STREQ(GetTypeName<int>().c_str(), tests[0]->type_param());
+  EXPECT_STREQ(GetTypeName<Types<int>>().c_str(), tests[0]->type_param());
   EXPECT_TRUE(tests[0]->should_run());
 
   delete[] tests;
@@ -265,7 +265,8 @@ class FinalSuccessChecker : public Environment {
 
 #if GTEST_HAS_TYPED_TEST
     EXPECT_STREQ("TestSuiteWithCommentTest/0", test_suites[2]->name());
-    EXPECT_STREQ(GetTypeName<int>().c_str(), test_suites[2]->type_param());
+    EXPECT_STREQ(GetTypeName<Types<int>>().c_str(),
+                 test_suites[2]->type_param());
     EXPECT_TRUE(test_suites[2]->should_run());
     EXPECT_EQ(0, test_suites[2]->disabled_test_count());
     ASSERT_EQ(1, test_suites[2]->total_test_count());
@@ -317,7 +318,7 @@ class FinalSuccessChecker : public Environment {
     EXPECT_STREQ("Dummy", tests[0]->name());
     EXPECT_STREQ("TestSuiteWithCommentTest/0", tests[0]->test_suite_name());
     EXPECT_TRUE(IsNull(tests[0]->value_param()));
-    EXPECT_STREQ(GetTypeName<int>().c_str(), tests[0]->type_param());
+    EXPECT_STREQ(GetTypeName<Types<int>>().c_str(), tests[0]->type_param());
     EXPECT_TRUE(tests[0]->should_run());
     EXPECT_TRUE(tests[0]->result()->Passed());
     EXPECT_EQ(0, tests[0]->result()->test_property_count());
