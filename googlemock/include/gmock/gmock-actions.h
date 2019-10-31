@@ -1098,14 +1098,14 @@ inline internal::DoDefaultAction DoDefault() {
 // Creates an action that sets the variable pointed by the N-th
 // (0-based) function argument to 'value'.
 template <size_t N, typename T>
-internal::SetArgumentPointeeAction<N, T> SetArgPointee(T x) {
-  return {std::move(x)};
+internal::SetArgumentPointeeAction<N, T> SetArgPointee(T value) {
+  return {std::move(value)};
 }
 
 // The following version is DEPRECATED.
 template <size_t N, typename T>
-internal::SetArgumentPointeeAction<N, T> SetArgumentPointee(T x) {
-  return {std::move(x)};
+internal::SetArgumentPointeeAction<N, T> SetArgumentPointee(T value) {
+  return {std::move(value)};
 }
 
 // Creates an action that sets a pointer referent to a given value.
