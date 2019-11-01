@@ -1531,13 +1531,11 @@ AssertionResult CmpHelperEQ(const char* lhs_expression,
   return CmpHelperEQFailure(lhs_expression, rhs_expression, lhs, rhs);
 }
 
-// With this overloaded version, we allow anonymous enums to be used
-// in {ASSERT|EXPECT}_EQ when compiled with gcc 4, as anonymous enums
-// can be implicitly cast to BiggestInt.
+// With this overloaded version, we allow anonymous enums to be used in
+// {ASSERT|EXPECT}_EQ as anonymous enums can be implicitly cast to integers.
 GTEST_API_ AssertionResult CmpHelperEQ(const char* lhs_expression,
                                        const char* rhs_expression,
-                                       BiggestInt lhs,
-                                       BiggestInt rhs);
+                                       std::intmax_t lhs, std::intmax_t rhs);
 
 class EqHelper {
  public:
@@ -1554,16 +1552,14 @@ class EqHelper {
     return CmpHelperEQ(lhs_expression, rhs_expression, lhs, rhs);
   }
 
-  // With this overloaded version, we allow anonymous enums to be used
-  // in {ASSERT|EXPECT}_EQ when compiled with gcc 4, as anonymous
-  // enums can be implicitly cast to BiggestInt.
+  // With this overloaded version, we allow anonymous enums to be used in
+  // {ASSERT|EXPECT}_EQ as anonymous enums can be implicitly cast to integers.
   //
   // Even though its body looks the same as the above version, we
   // cannot merge the two, as it will make anonymous enums unhappy.
   static AssertionResult Compare(const char* lhs_expression,
-                                 const char* rhs_expression,
-                                 BiggestInt lhs,
-                                 BiggestInt rhs) {
+                                 const char* rhs_expression, std::intmax_t lhs,
+                                 std::intmax_t rhs) {
     return CmpHelperEQ(lhs_expression, rhs_expression, lhs, rhs);
   }
 
@@ -1596,24 +1592,24 @@ AssertionResult CmpHelperOpFailure(const char* expr1, const char* expr2,
 // of similar code.
 //
 // For each templatized helper function, we also define an overloaded
-// version for BiggestInt in order to reduce code bloat and allow
-// anonymous enums to be used with {ASSERT|EXPECT}_?? when compiled
-// with gcc 4.
+// version for std::intmax_t in order to reduce code bloat and allow
+// anonymous enums to be used with {ASSERT|EXPECT}_??.
 //
 // INTERNAL IMPLEMENTATION - DO NOT USE IN A USER PROGRAM.
 
-#define GTEST_IMPL_CMP_HELPER_(op_name, op)\
-template <typename T1, typename T2>\
-AssertionResult CmpHelper##op_name(const char* expr1, const char* expr2, \
-                                   const T1& val1, const T2& val2) {\
-  if (val1 op val2) {\
-    return AssertionSuccess();\
-  } else {\
-    return CmpHelperOpFailure(expr1, expr2, val1, val2, #op);\
-  }\
-}\
-GTEST_API_ AssertionResult CmpHelper##op_name(\
-    const char* expr1, const char* expr2, BiggestInt val1, BiggestInt val2)
+#define GTEST_IMPL_CMP_HELPER_(op_name, op)                                \
+  template <typename T1, typename T2>                                      \
+  AssertionResult CmpHelper##op_name(const char* expr1, const char* expr2, \
+                                     const T1& val1, const T2& val2) {     \
+    if (val1 op val2) {                                                    \
+      return AssertionSuccess();                                           \
+    } else {                                                               \
+      return CmpHelperOpFailure(expr1, expr2, val1, val2, #op);            \
+    }                                                                      \
+  }                                                                        \
+  GTEST_API_ AssertionResult CmpHelper##op_name(                           \
+      const char* expr1, const char* expr2, std::intmax_t val1,            \
+      std::intmax_t val2)
 
 // INTERNAL IMPLEMENTATION - DO NOT USE IN A USER PROGRAM.
 
