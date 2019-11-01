@@ -83,10 +83,12 @@ void PrintTo(EnumWithPrintTo e, std::ostream* os) {
   *os << (e == kEWPT1 ? "kEWPT1" : "invalid");
 }
 
-// A class implicitly convertible to BiggestInt.
-class BiggestIntConvertible {
+// A class implicitly convertible to std::intmax_t.
+class IntMaxConvertible {
  public:
-  operator ::testing::internal::BiggestInt() const { return 42; }
+  constexpr operator std::intmax_t() const {  // NOLINT(runtime/explicit)
+    return 42;
+  }
 };
 
 // A user-defined unprintable class template in the global namespace.
@@ -267,10 +269,10 @@ TEST(PrintEnumTest, EnumWithPrintTo) {
   EXPECT_EQ("invalid", Print(static_cast<EnumWithPrintTo>(0)));
 }
 
-// Tests printing a class implicitly convertible to BiggestInt.
+// Tests printing a class implicitly convertible to std::intmax_t.
 
-TEST(PrintClassTest, BiggestIntConvertible) {
-  EXPECT_EQ("42", Print(BiggestIntConvertible()));
+TEST(PrintClassTest, IntMaxConvertible) {
+  EXPECT_EQ("42", Print(IntMaxConvertible()));
 }
 
 // Tests printing various char types.
@@ -525,10 +527,9 @@ TEST(PrintPointerTest, NonMemberFunctionPointer) {
   // standard disallows casting between pointers to functions and
   // pointers to objects, and some compilers (e.g. GCC 3.4) enforce
   // this limitation.
-  EXPECT_EQ(
-      PrintPointer(reinterpret_cast<const void*>(
-          reinterpret_cast<internal::BiggestInt>(&MyFunction))),
-      Print(&MyFunction));
+  EXPECT_EQ(PrintPointer(reinterpret_cast<const void*>(
+                reinterpret_cast<std::intptr_t>(&MyFunction))),
+            Print(&MyFunction));
   int (*p)(bool) = NULL;  // NOLINT
   EXPECT_EQ("NULL", Print(p));
 }
@@ -1120,8 +1121,8 @@ TEST(PrintReferenceTest, HandlesFunctionPointer) {
   // standard disallows casting between pointers to functions and
   // pointers to objects, and some compilers (e.g. GCC 3.4) enforce
   // this limitation.
-  const std::string fp_string = PrintPointer(reinterpret_cast<const void*>(
-      reinterpret_cast<internal::BiggestInt>(fp)));
+  const std::string fp_string = PrintPointer(
+      reinterpret_cast<const void*>(reinterpret_cast<std::intptr_t>(fp)));
   EXPECT_EQ("@" + fp_pointer_string + " " + fp_string,
             PrintByRef(fp));
 }

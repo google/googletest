@@ -1442,9 +1442,8 @@ namespace internal {
 // The helper function for {ASSERT|EXPECT}_EQ with int or enum
 // arguments.
 AssertionResult CmpHelperEQ(const char* lhs_expression,
-                            const char* rhs_expression,
-                            BiggestInt lhs,
-                            BiggestInt rhs) {
+                            const char* rhs_expression, std::intmax_t lhs,
+                            std::intmax_t rhs) {
   if (lhs == rhs) {
     return AssertionSuccess();
   }
@@ -1457,20 +1456,20 @@ AssertionResult CmpHelperEQ(const char* lhs_expression,
 }
 
 // A macro for implementing the helper functions needed to implement
-// ASSERT_?? and EXPECT_?? with integer or enum arguments.  It is here
+// ASSERT_?? and EXPECT_?? with integer or enum arguments. It is here
 // just to avoid copy-and-paste of similar code.
-#define GTEST_IMPL_CMP_HELPER_(op_name, op)\
-AssertionResult CmpHelper##op_name(const char* expr1, const char* expr2, \
-                                   BiggestInt val1, BiggestInt val2) {\
-  if (val1 op val2) {\
-    return AssertionSuccess();\
-  } else {\
-    return AssertionFailure() \
-        << "Expected: (" << expr1 << ") " #op " (" << expr2\
-        << "), actual: " << FormatForComparisonFailureMessage(val1, val2)\
-        << " vs " << FormatForComparisonFailureMessage(val2, val1);\
-  }\
-}
+#define GTEST_IMPL_CMP_HELPER_(op_name, op)                                    \
+  AssertionResult CmpHelper##op_name(const char* expr1, const char* expr2,     \
+                                     std::intmax_t val1, std::intmax_t val2) { \
+    if (val1 op val2) {                                                        \
+      return AssertionSuccess();                                               \
+    } else {                                                                   \
+      return AssertionFailure()                                                \
+             << "Expected: (" << expr1 << ") " #op " (" << expr2               \
+             << "), actual: " << FormatForComparisonFailureMessage(val1, val2) \
+             << " vs " << FormatForComparisonFailureMessage(val2, val1);       \
+    }                                                                          \
+  }
 
 // Implements the helper function for {ASSERT|EXPECT}_NE with int or
 // enum arguments.
