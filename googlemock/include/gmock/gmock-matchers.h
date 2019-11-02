@@ -1323,7 +1323,7 @@ class PredicateFormatterFromMatcher {
        << "Expected: ";
     matcher.DescribeTo(&ss);
 
-    // Rerun the matcher to "PrintAndExain" the failure.
+    // Rerun the matcher to "PrintAndExplain" the failure.
     StringMatchResultListener listener;
     if (MatchPrintAndExplain(x, matcher, &listener)) {
       ss << "\n  The matcher failed on the initial attempt; but passed when "
