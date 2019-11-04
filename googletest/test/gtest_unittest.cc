@@ -55,11 +55,11 @@ TEST(CommandLineFlagsTest, CanBeAccessedInCodeOnceGTestHIsIncluded) {
   EXPECT_TRUE(dummy || !dummy);  // Suppresses warning that dummy is unused.
 }
 
+#include <limits.h>  // For INT_MAX.
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
 
-#include <limits>
 #include <map>
 #include <ostream>
 #include <type_traits>
@@ -3952,11 +3952,11 @@ enum {
   // On Linux, kCaseB and kCaseA have the same value when truncated to
   // int size.  We want to test whether this will confuse the
   // assertions.
-  kCaseB = (std::numeric_limits<std::intmax_t>::max)(),
+  kCaseB = testing::internal::kMaxBiggestInt,
 
 # else
 
-  kCaseB = (std::numeric_limits<int>::max)(),
+  kCaseB = INT_MAX,
 
 # endif  // GTEST_OS_LINUX
 

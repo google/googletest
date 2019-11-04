@@ -225,6 +225,7 @@
 //   TypeWithSize   - maps an integer to a int type.
 //   Int32, UInt32, Int64, UInt64, TimeInMillis
 //                  - integers of known sizes.
+//   BiggestInt     - the biggest signed integer type.
 //
 // Command-line utilities:
 //   GTEST_DECLARE_*()  - declares a flag.
@@ -1875,9 +1876,12 @@ GTEST_API_ size_t GetThreadCount();
 #if GTEST_OS_WINDOWS
 # define GTEST_PATH_SEP_ "\\"
 # define GTEST_HAS_ALT_PATH_SEP_ 1
+// The biggest signed integer type the compiler supports.
+typedef __int64 BiggestInt;
 #else
 # define GTEST_PATH_SEP_ "/"
 # define GTEST_HAS_ALT_PATH_SEP_ 0
+typedef long long BiggestInt;  // NOLINT
 #endif  // GTEST_OS_WINDOWS
 
 // Utilities for char.
@@ -2079,6 +2083,16 @@ GTEST_DISABLE_MSC_DEPRECATED_POP_()
 #else
 # define GTEST_SNPRINTF_ snprintf
 #endif
+
+// The maximum number a BiggestInt can represent.  This definition
+// works no matter BiggestInt is represented in one's complement or
+// two's complement.
+//
+// We cannot rely on numeric_limits in STL, as __int64 and long long
+// are not part of standard C++ and numeric_limits doesn't need to be
+// defined for them.
+const BiggestInt kMaxBiggestInt =
+    ~(static_cast<BiggestInt>(1) << (8*sizeof(BiggestInt) - 1));
 
 // This template class serves as a compile-time function from size to
 // type.  It maps a size in bytes to a primitive type with that
