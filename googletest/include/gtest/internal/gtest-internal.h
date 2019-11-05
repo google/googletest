@@ -825,6 +825,16 @@ struct GTEST_API_ ConstCharPtr {
   const char* value;
 };
 
+// Helper for declaring std::string within 'if' statement
+// in pre C++17 build environment.
+struct GTEST_API_ TrueWithString {
+  TrueWithString() = default;
+  explicit TrueWithString(const char* str) : value(str) {}
+  explicit TrueWithString(const std::string& str) : value(str) {}
+  explicit operator bool() const { return true; }
+  std::string value;
+};
+
 // A simple Linear Congruential Generator for generating random
 // numbers with a uniform distribution.  Unlike rand() and srand(), it
 // doesn't use global state (and therefore can't interfere with user
@@ -1284,19 +1294,39 @@ constexpr bool InstantiateTypedTestCase_P_IsDeprecated() { return true; }
     GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__): \
       fail(gtest_msg.value)
 
+#if GTEST_HAS_EXCEPTIONS
+
+#define GTEST_TEST_NO_THROW_CATCH_STD_EXCEPTION_() \
+  catch (std::exception const& e) { \
+    gtest_msg.value = ( \
+      "it throws std::exception-derived exception with description: \"" \
+    ); \
+    gtest_msg.value += e.what(); \
+    gtest_msg.value += "\"."; \
+    goto GTEST_CONCAT_TOKEN_(gtest_label_testnothrow_, __LINE__); \
+  }
+
+#else  // GTEST_HAS_EXCEPTIONS
+
+#define GTEST_TEST_NO_THROW_CATCH_STD_EXCEPTION_()
+
+#endif  // GTEST_HAS_EXCEPTIONS
+
 #define GTEST_TEST_NO_THROW_(statement, fail) \
   GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
-  if (::testing::internal::AlwaysTrue()) { \
+  if (::testing::internal::TrueWithString gtest_msg{}) { \
     try { \
       GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement); \
     } \
+    GTEST_TEST_NO_THROW_CATCH_STD_EXCEPTION_() \
     catch (...) { \
+      gtest_msg.value = "it throws."; \
       goto GTEST_CONCAT_TOKEN_(gtest_label_testnothrow_, __LINE__); \
     } \
   } else \
     GTEST_CONCAT_TOKEN_(gtest_label_testnothrow_, __LINE__): \
-      fail("Expected: " #statement " doesn't throw an exception.\n" \
-           "  Actual: it throws.")
+      fail(("Expected: " #statement " doesn't throw an exception.\n" \
+            "  Actual: " + gtest_msg.value).c_str())
 
 #define GTEST_TEST_ANY_THROW_(statement, fail) \
   GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
