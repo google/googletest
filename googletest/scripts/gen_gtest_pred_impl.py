@@ -439,9 +439,8 @@ bool PredFunction%(n)s(%(tvs)s) {
   return %(v_sum)s > 0;
 }
 
-// The following two functions are needed to circumvent a bug in
-// gcc 2.95.3, which sometimes has problem with the above template
-// function.
+// The following two functions are needed because a compiler doesn't have
+// a context yet to know which template function must be instantiated.
 bool PredFunction%(n)sInt(%(int_vs)s) {
   return %(v_sum)s > 0;
 }
