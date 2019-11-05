@@ -3348,6 +3348,9 @@ TEST_F(SingleEvaluationTest, OtherCases) {
 void ThrowAnInteger() {
   throw 1;
 }
+void ThrowRuntimeError(const char* what) {
+  throw std::runtime_error(what);
+}
 
 // Tests that assertion arguments are evaluated exactly once.
 TEST_F(SingleEvaluationTest, ExceptionTests) {
@@ -3827,6 +3830,11 @@ TEST(AssertionTest, ASSERT_NO_THROW) {
   EXPECT_FATAL_FAILURE(ASSERT_NO_THROW(ThrowAnInteger()),
                        "Expected: ThrowAnInteger() doesn't throw an exception."
                        "\n  Actual: it throws.");
+  EXPECT_FATAL_FAILURE(ASSERT_NO_THROW(ThrowRuntimeError("A description")),
+                       "Expected: ThrowRuntimeError(\"A description\") "
+                       "doesn't throw an exception.\n  "
+                       "Actual: it throws std::exception-derived exception "
+                       "with description: \"A description\".");
 }
 
 // Tests ASSERT_ANY_THROW.
@@ -4564,6 +4572,11 @@ TEST(ExpectTest, EXPECT_NO_THROW) {
   EXPECT_NONFATAL_FAILURE(EXPECT_NO_THROW(ThrowAnInteger()),
                           "Expected: ThrowAnInteger() doesn't throw an "
                           "exception.\n  Actual: it throws.");
+  EXPECT_NONFATAL_FAILURE(EXPECT_NO_THROW(ThrowRuntimeError("A description")),
+                          "Expected: ThrowRuntimeError(\"A description\") "
+                          "doesn't throw an exception.\n  "
+                          "Actual: it throws std::exception-derived exception "
+                          "with description: \"A description\".");
 }
 
 // Tests EXPECT_ANY_THROW.
