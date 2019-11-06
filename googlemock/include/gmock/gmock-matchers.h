@@ -3283,7 +3283,7 @@ class OptionalMatcher {
 
     bool MatchAndExplain(Optional optional,
                          MatchResultListener* listener) const override {
-      if (!optional) {
+      if (!optional.has_value()) {
         *listener << "which is not engaged";
         return false;
       }
