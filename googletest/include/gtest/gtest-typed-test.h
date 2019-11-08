@@ -169,6 +169,7 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes);
 
 #endif  // 0
 
+#include "gtest/internal/gtest-internal.h"
 #include "gtest/internal/gtest-port.h"
 #include "gtest/internal/gtest-type-util.h"
 
@@ -194,6 +195,8 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes);
       GTEST_NAME_GENERATOR_(CaseName)
 
 #define TYPED_TEST(CaseName, TestName)                                        \
+  static_assert(sizeof(GTEST_STRINGIFY_(TestName)) > 1,                       \
+                "test-name must not be empty");                               \
   template <typename gtest_TypeParam_>                                        \
   class GTEST_TEST_CLASS_NAME_(CaseName, TestName)                            \
       : public CaseName<gtest_TypeParam_> {                                   \
@@ -211,7 +214,8 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes);
               CaseName)>::Register("",                                        \
                                    ::testing::internal::CodeLocation(         \
                                        __FILE__, __LINE__),                   \
-                                   #CaseName, #TestName, 0,                   \
+                                   GTEST_STRINGIFY_(CaseName),                \
+                                   GTEST_STRINGIFY_(TestName), 0,             \
                                    ::testing::internal::GenerateNames<        \
                                        GTEST_NAME_GENERATOR_(CaseName),       \
                                        GTEST_TYPE_PARAMS_(CaseName)>());      \
@@ -278,12 +282,14 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes);
     };                                                                \
     static bool gtest_##TestName##_defined_ GTEST_ATTRIBUTE_UNUSED_ = \
         GTEST_TYPED_TEST_SUITE_P_STATE_(SuiteName).AddTestName(       \
-            __FILE__, __LINE__, #SuiteName, #TestName);               \
+            __FILE__, __LINE__, GTEST_STRINGIFY_(SuiteName),          \
+            GTEST_STRINGIFY_(TestName));                              \
   }                                                                   \
   template <typename gtest_TypeParam_>                                \
   void GTEST_SUITE_NAMESPACE_(                                        \
       SuiteName)::TestName<gtest_TypeParam_>::TestBody()
 
+// Note: this won't work correctly if the trailing arguments are macros.
 #define REGISTER_TYPED_TEST_SUITE_P(SuiteName, ...)                         \
   namespace GTEST_SUITE_NAMESPACE_(SuiteName) {                             \
     typedef ::testing::internal::Templates<__VA_ARGS__> gtest_AllTests_;    \
@@ -302,13 +308,16 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes);
 #endif  // GTEST_REMOVE_LEGACY_TEST_CASEAPI_
 
 #define INSTANTIATE_TYPED_TEST_SUITE_P(Prefix, SuiteName, Types, ...)       \
+  static_assert(sizeof(GTEST_STRINGIFY_(Prefix)) > 1,                       \
+                "test-suit-prefix must not be empty");                      \
   static bool gtest_##Prefix##_##SuiteName GTEST_ATTRIBUTE_UNUSED_ =        \
       ::testing::internal::TypeParameterizedTestSuite<                      \
           SuiteName, GTEST_SUITE_NAMESPACE_(SuiteName)::gtest_AllTests_,    \
           ::testing::internal::GenerateTypeList<Types>::type>::             \
-          Register(#Prefix,                                                 \
+          Register(GTEST_STRINGIFY_(Prefix),                                \
                    ::testing::internal::CodeLocation(__FILE__, __LINE__),   \
-                   &GTEST_TYPED_TEST_SUITE_P_STATE_(SuiteName), #SuiteName, \
+                   &GTEST_TYPED_TEST_SUITE_P_STATE_(SuiteName),             \
+                   GTEST_STRINGIFY_(SuiteName),                             \
                    GTEST_REGISTERED_TEST_NAMES_(SuiteName),                 \
                    ::testing::internal::GenerateNames<                      \
                        ::testing::internal::NameGeneratorSelector<          \
