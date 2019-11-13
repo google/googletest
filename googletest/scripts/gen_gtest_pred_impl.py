@@ -78,7 +78,7 @@ def HeaderPreamble(n):
     }
 
   return (
-"""// Copyright 2006, Google Inc.
+  """// Copyright 2006, Google Inc.
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -337,7 +337,7 @@ def UnitTestPreamble():
     }
 
   return (
-"""// Copyright 2006, Google Inc.
+  """// Copyright 2006, Google Inc.
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -431,7 +431,7 @@ def TestsForArity(n):
     }
 
   tests = (
-"""// Sample functions/functors for testing %(arity)s predicate assertions.
+  """// Sample functions/functors for testing %(arity)s predicate assertions.
 
 // A %(arity)s predicate function.
 template <%(types)s>
@@ -544,10 +544,10 @@ class Predicate%(n)sTest : public testing::Test {
     }
   }
 
-  // true iff the test function is expected to run to finish.
+  // true if and only if the test function is expected to run to finish.
   static bool expected_to_finish_;
 
-  // true iff the test function did run to finish.
+  // true if and only if the test function did run to finish.
   static bool finished_;
 """ % DEFS
 
@@ -576,12 +576,12 @@ typedef Predicate%(n)sTest ASSERT_PRED%(n)sTest;
     """Returns the test for a predicate assertion macro.
 
     Args:
-      use_format:     true iff the assertion is a *_PRED_FORMAT*.
-      use_assert:     true iff the assertion is a ASSERT_*.
-      expect_failure: true iff the assertion is expected to fail.
-      use_functor:    true iff the first argument of the assertion is
+      use_format:     true if and only if the assertion is a *_PRED_FORMAT*.
+      use_assert:     true if and only if the assertion is a ASSERT_*.
+      expect_failure: true if and only if the assertion is expected to fail.
+      use_functor:    true if and only if the first argument of the assertion is
                       a functor (as opposed to a function)
-      use_user_type:  true iff the predicate functor/function takes
+      use_user_type:  true if and only if the predicate functor/function takes
                       argument(s) of a user-defined type.
 
     Example:
