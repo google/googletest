@@ -536,6 +536,9 @@ class ThreadLocalRegistryImpl {
   // Returns a value that can be used to identify the thread from other threads.
   static ThreadLocalValueHolderBase* GetValueOnCurrentThread(
       const ThreadLocalBase* thread_local_instance) {
+#ifdef _MSC_VER
+    MemoryIsNotDeallocated memory_is_not_deallocated;
+#endif  // _MSC_VER
     DWORD current_thread = ::GetCurrentThreadId();
     MutexLock lock(&mutex_);
     ThreadIdToThreadLocals* const thread_to_thread_locals =
