@@ -1073,49 +1073,39 @@ class CapturedStream {
  public:
   // The ctor redirects the stream to a temporary file.
   explicit CapturedStream(int fd) : fd_(fd), uncaptured_fd_(dup(fd)) {
-# if GTEST_OS_WINDOWS
-    char temp_dir_path[MAX_PATH + 1] = { '\0' };  // NOLINT
-    char temp_file_path[MAX_PATH + 1] = { '\0' };  // NOLINT
+    std::string temp_dir = ::testing::TempDir();
 
-    ::GetTempPathA(sizeof(temp_dir_path), temp_dir_path);
-    const UINT success = ::GetTempFileNameA(temp_dir_path,
-                                            "gtest_redir",
+    // testing::TempDir() should return a directory without a path separator.
+    // However, this rule was documented fairly recently, so we normalize across
+    // implementations with and without a trailing path separator.
+    if (temp_dir.back() != GTEST_PATH_SEP_[0])
+      temp_dir.push_back(GTEST_PATH_SEP_[0]);
+
+# if GTEST_OS_WINDOWS
+    char temp_file_path[MAX_PATH + 1] = { '\0' };  // NOLINT
+    const UINT success = ::GetTempFileNameA(temp_dir.c_str(), "gtest_redir",
                                             0,  // Generate unique file name.
                                             temp_file_path);
     GTEST_CHECK_(success != 0)
-        << "Unable to create a temporary file in " << temp_dir_path;
+        << "Unable to create a temporary file in " << temp_dir;
     const int captured_fd = creat(temp_file_path, _S_IREAD | _S_IWRITE);
     GTEST_CHECK_(captured_fd != -1) << "Unable to open temporary file "
                                     << temp_file_path;
     filename_ = temp_file_path;
 # else
-    // There's no guarantee that a test has write access to the current
-    // directory, so we create the temporary file in the /tmp directory
-    // instead. We use /tmp on most systems, and /sdcard on Android.
-    // That's because Android doesn't have /tmp.
-#  if GTEST_OS_LINUX_ANDROID
-    // Note: Android applications are expected to call the framework's
-    // Context.getExternalStorageDirectory() method through JNI to get
-    // the location of the world-writable SD Card directory. However,
-    // this requires a Context handle, which cannot be retrieved
-    // globally from native code. Doing so also precludes running the
-    // code as part of a regular standalone executable, which doesn't
-    // run in a Dalvik process (e.g. when running it through 'adb shell').
+    std::string name_template = temp_dir + "gtest_captured_stream.XXXXXX";
+
+    // mkstemp() modifies the string bytes in place, and does not go beyond the
+    // string's length. This results in well-defined behavior in C++17.
     //
-    // The location /data/local/tmp is directly accessible from native code.
-    // '/sdcard' and other variants cannot be relied on, as they are not
-    // guaranteed to be mounted, or may have a delay in mounting.
-    char name_template[] = "/data/local/tmp/gtest_captured_stream.XXXXXX";
-#  else
-    char name_template[] = "/tmp/captured_stream.XXXXXX";
-#  endif  // GTEST_OS_LINUX_ANDROID
-    const int captured_fd = mkstemp(name_template);
-    if (captured_fd == -1) {
-      GTEST_LOG_(WARNING)
-          << "Failed to create tmp file " << name_template
-          << " for test; does the test have access to the /tmp directory?";
-    }
-    filename_ = name_template;
+    // The const_cast is needed below C++17. The constraints on std::string
+    // implementations in C++11 and above make assumption behind the const_cast
+    // fairly safe.
+    const int captured_fd = ::mkstemp(const_cast<char*>(name_template.data()));
+    GTEST_CHECK_(captured_fd != -1)
+        << "Failed to create tmp file " << name_template
+        << " for test; does the test have write access to the directory?";
+    filename_ = std::move(name_template);
 # endif  // GTEST_OS_WINDOWS
     fflush(nullptr);
     dup2(captured_fd, fd_);

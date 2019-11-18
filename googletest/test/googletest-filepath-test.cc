@@ -479,7 +479,7 @@ class DirectoryCreationTest : public Test {
  protected:
   void SetUp() override {
     testdata_path_.Set(FilePath(
-        TempDir() + GetCurrentExecutableName().string() +
+        TempDir() + GTEST_PATH_SEP_ + GetCurrentExecutableName().string() +
         "_directory_creation" GTEST_PATH_SEP_ "test" GTEST_PATH_SEP_));
     testdata_file_.Set(testdata_path_.RemoveTrailingPathSeparator());
 

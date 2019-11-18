@@ -6136,26 +6136,85 @@ void InitGoogleTest() {
 #endif  // defined(GTEST_CUSTOM_INIT_GOOGLE_TEST_FUNCTION_)
 }
 
+#if !defined(GTEST_CUSTOM_TEMPDIR_FUNCTION_)
+namespace {
+
+// The temporary directory read from the OS canonical environment variable.
+//
+// Returns an empty string if the environment variable is not set. The returned
+// string may or may not end with the OS-specific path separator. The path is
+// not guaranteed to point to an existing directory. The directory it points to
+// is not guaranteed to be writable by the application.
+std::string GetEnvTempDir() {
+#if GTEST_OS_WINDOWS_MOBILE
+  const char* env_result = internal::posix::GetEnv("TEMP");
+#elif GTEST_OS_WINDOWS
+  char temp_dir_path[MAX_PATH + 1] = {'\0'};  // NOLINT
+  if (::GetTempPathA(sizeof(temp_dir_path), temp_dir_path) != 0)
+    return temp_dir_path;
+  const char* env_result = internal::posix::GetEnv("TEMP");
+#else
+  const char* env_result = internal::posix::GetEnv("TMPDIR");
+#endif  // GETST_OS_WINDOWS
+
+  if (env_result == nullptr) return std::string();
+  return env_result;
+}
+
+}  // namespace
+#endif  // !defined(GTEST_CUSTOM_TEMPDIR_FUNCTION_)
+
+// A directory suitable for storing temporary files.
+//
+// The returned string will not end with the OS-specific path separator. The
+// path is not guaranteed to point to an existing directory. The directory it
+// points to is not guaranteed to be writable by the application.
+//
+// The built-in implementation attempts to read from an OS-specific environment
+// variable, then falls back to a hard-coded default.
 std::string TempDir() {
 #if defined(GTEST_CUSTOM_TEMPDIR_FUNCTION_)
   return GTEST_CUSTOM_TEMPDIR_FUNCTION_();
-#endif
-
-#if GTEST_OS_WINDOWS_MOBILE
-  return "\\temp\\";
-#elif GTEST_OS_WINDOWS
-  const char* temp_dir = internal::posix::GetEnv("TEMP");
-  if (temp_dir == nullptr || temp_dir[0] == '\0')
-    return "\\temp\\";
-  else if (temp_dir[strlen(temp_dir) - 1] == '\\')
-    return temp_dir;
-  else
-    return std::string(temp_dir) + "\\";
-#elif GTEST_OS_LINUX_ANDROID
-  return "/sdcard/";
 #else
-  return "/tmp/";
+
+  std::string temp_dir = GetEnvTempDir();
+  if (!temp_dir.empty()) {
+    if (temp_dir.back() == GTEST_PATH_SEP_[0])
+      temp_dir.pop_back();
+    return temp_dir;
+  }
+
+#if GTEST_OS_WINDOWS_MOBILE || GTEST_OS_WINDOWS
+  return "\\temp";
+#elif GTEST_OS_LINUX_ANDROID
+  // Android applications are expected to call the framework's
+  // Context.getExternalStorageDirectory() method through JNI to get the
+  // location of the world-writable SD Card directory. However, this requires a
+  // Context handle, which cannot be retrieved globally from native code. Doing
+  // so also precludes running the code as part of a regular standalone
+  // executable, which doesn't run in a Dalvik process (e.g. when running it
+  // through 'adb shell').
+  //
+  // Starting from Android O, the recommended generic temporary directory is
+  // '/data/local/tmp'. The recommended fallback is the current directory,
+  // which is usually accessible in app context.
+  if (::access("/data/local/tmp", R_OK | W_OK | X_OK) == 0)
+    return "/data/local/tmp";
+  const char* current_dir = ::getcwd(nullptr, 0);
+  if (current_dir != nullptr &&
+      ::access(current_dir, R_OK | W_OK | X_OK) == 0) {
+    temp_dir = current_dir;
+    return temp_dir;
+  }
+  // Before Android O, /sdcard is usually available.
+  if (::access("/sdcard", R_OK | W_OK | X_OK) == 0) return "/sdcard";
+  // Generic POSIX fallback.
+  return "/tmp";
+#else
+  return "/tmp";
 #endif  // GTEST_OS_WINDOWS_MOBILE
+
+#endif  // defined(GTEST_CUSTOM_TEMPDIR_FUNCTION_)
 }
 
 // Class ScopedTrace
