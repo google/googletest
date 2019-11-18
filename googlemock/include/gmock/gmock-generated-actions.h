@@ -1638,7 +1638,7 @@ struct AdlTag {};
 // InvokeArgumentAdl - a helper for InvokeArgument.
 // The basic overloads are provided here for generic functors.
 // Overloads for other custom-callables are provided in the
-// internal/custom/callback-actions.h header.
+// internal/custom/gmock-generated-actions.h header.
 
 template <typename R, typename F>
 R InvokeArgumentAdl(AdlTag, F f) {
