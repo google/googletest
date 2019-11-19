@@ -83,8 +83,11 @@
 # include <windows.h>  // NOLINT
 # undef min
 
+#ifdef _MSC_VER
 # include <crtdbg.h>  // NOLINT
 # include <debugapi.h>  // NOLINT
+#endif
+
 # include <io.h>  // NOLINT
 # include <sys/timeb.h>  // NOLINT
 # include <sys/types.h>  // NOLINT
@@ -3220,9 +3223,7 @@ void PrettyUnitTestResultPrinter::OnTestStart(const TestInfo& test_info) {
 void PrettyUnitTestResultPrinter::OnTestPartResult(
     const TestPartResult& result) {
   switch (result.type()) {
-    // If the test part succeeded, or was skipped,
-    // we don't need to do anything.
-    case TestPartResult::kSkip:
+    // If the test part succeeded, we don't need to do anything.
     case TestPartResult::kSuccess:
       return;
     default:
@@ -4508,6 +4509,7 @@ class ScopedPrematureExitFile {
   }
 
   ~ScopedPrematureExitFile() {
+#if !defined GTEST_OS_ESP8266
     if (!premature_exit_filepath_.empty()) {
       int retval = remove(premature_exit_filepath_.c_str());
       if (retval) {
@@ -4516,6 +4518,7 @@ class ScopedPrematureExitFile {
                           << retval;
       }
     }
+#endif
   }
 
  private:
@@ -4908,7 +4911,6 @@ int UnitTest::Run() {
       _set_abort_behavior(
           0x0,                                    // Clear the following flags:
           _WRITE_ABORT_MSG | _CALL_REPORTFAULT);  // pop-up window, core dump.
-# endif
 
     // In debug mode, the Windows CRT can crash with an assertion over invalid
     // input (e.g. passing an invalid file descriptor).  The default handling
@@ -4919,6 +4921,7 @@ int UnitTest::Run() {
                               _CRTDBG_MODE_FILE | _CRTDBG_MODE_DEBUG);
       (void)_CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDERR);
     }
+# endif
   }
 #endif  // GTEST_OS_WINDOWS
 

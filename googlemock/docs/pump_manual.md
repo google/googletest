@@ -6,18 +6,15 @@ Template and macro libraries often need to define many classes, functions, or
 macros that vary only (or almost only) in the number of arguments they take.
 It's a lot of repetitive, mechanical, and error-prone work.
 
-Variadic templates and variadic macros can alleviate the problem. However, while
-both are being considered by the C++ committee, neither is in the standard yet
-or widely supported by compilers. Thus they are often not a good choice,
-especially when your code needs to be portable. And their capabilities are still
-limited.
+Our experience is that it's tedious to write custom scripts, which tend to
+reflect the structure of the generated code poorly and are often hard to read
+and edit. For example, a small change needed in the generated code may require
+some non-intuitive, non-trivial changes in the script. This is especially
+painful when experimenting with the code.
 
-As a result, authors of such libraries often have to write scripts to generate
-their implementation. However, our experience is that it's tedious to write such
-scripts, which tend to reflect the structure of the generated code poorly and
-are often hard to read and edit. For example, a small change needed in the
-generated code may require some non-intuitive, non-trivial changes in the
-script. This is especially painful when experimenting with the code.
+This script may be useful for generating meta code, for example a series of
+macros of FOO1, FOO2, etc. Nevertheless, please make it your last resort
+technique by favouring C++ template metaprogramming or variadic macros.
 
 # Our Solution
 

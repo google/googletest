@@ -102,6 +102,10 @@
 # define GTEST_OS_QNX 1
 #elif defined(__HAIKU__)
 #define GTEST_OS_HAIKU 1
+#elif defined ESP8266
+#define GTEST_OS_ESP8266 1
+#elif defined ESP32
+#define GTEST_OS_ESP32 1
 #endif  // __CYGWIN__
 
 #endif  // GTEST_INCLUDE_GTEST_INTERNAL_GTEST_PORT_ARCH_H_

@@ -716,6 +716,36 @@ class ReturnRefOfCopyAction {
   GTEST_DISALLOW_ASSIGN_(ReturnRefOfCopyAction);
 };
 
+// Implements the polymorphic ReturnRoundRobin(v) action, which can be
+// used in any function that returns the element_type of v.
+template <typename T>
+class ReturnRoundRobinAction {
+ public:
+  explicit ReturnRoundRobinAction(std::vector<T> values) {
+    GTEST_CHECK_(!values.empty())
+        << "ReturnRoundRobin requires at least one element.";
+    state_->values = std::move(values);
+  }
+
+  template <typename... Args>
+  T operator()(Args&&...) const {
+     return state_->Next();
+  }
+
+ private:
+  struct State {
+    T Next() {
+      T ret_val = values[i++];
+      if (i == values.size()) i = 0;
+      return ret_val;
+    }
+
+    std::vector<T> values;
+    size_t i = 0;
+  };
+  std::shared_ptr<State> state_ = std::make_shared<State>();
+};
+
 // Implements the polymorphic DoDefault() action.
 class DoDefaultAction {
  public:
@@ -1022,6 +1052,10 @@ inline internal::ReturnRefAction<R> ReturnRef(R& x) {  // NOLINT
   return internal::ReturnRefAction<R>(x);
 }
 
+// Prevent using ReturnRef on reference to temporary.
+template <typename R, R* = nullptr>
+internal::ReturnRefAction<R> ReturnRef(R&&) = delete;
+
 // Creates an action that returns the reference to a copy of the
 // argument.  The copy is created when the action is constructed and
 // lives as long as the action.
@@ -1039,6 +1073,23 @@ internal::ByMoveWrapper<R> ByMove(R x) {
   return internal::ByMoveWrapper<R>(std::move(x));
 }
 
+// Creates an action that returns an element of `vals`. Calling this action will
+// repeatedly return the next value from `vals` until it reaches the end and
+// will restart from the beginning.
+template <typename T>
+internal::ReturnRoundRobinAction<T> ReturnRoundRobin(std::vector<T> vals) {
+  return internal::ReturnRoundRobinAction<T>(std::move(vals));
+}
+
+// Creates an action that returns an element of `vals`. Calling this action will
+// repeatedly return the next value from `vals` until it reaches the end and
+// will restart from the beginning.
+template <typename T>
+internal::ReturnRoundRobinAction<T> ReturnRoundRobin(
+    std::initializer_list<T> vals) {
+  return internal::ReturnRoundRobinAction<T>(std::vector<T>(vals));
+}
+
 // Creates an action that does the default action for the give mock function.
 inline internal::DoDefaultAction DoDefault() {
   return internal::DoDefaultAction();
@@ -1047,14 +1098,14 @@ inline internal::DoDefaultAction DoDefault() {
 // Creates an action that sets the variable pointed by the N-th
 // (0-based) function argument to 'value'.
 template <size_t N, typename T>
-internal::SetArgumentPointeeAction<N, T> SetArgPointee(T x) {
-  return {std::move(x)};
+internal::SetArgumentPointeeAction<N, T> SetArgPointee(T value) {
+  return {std::move(value)};
 }
 
 // The following version is DEPRECATED.
 template <size_t N, typename T>
-internal::SetArgumentPointeeAction<N, T> SetArgumentPointee(T x) {
-  return {std::move(x)};
+internal::SetArgumentPointeeAction<N, T> SetArgumentPointee(T value) {
+  return {std::move(value)};
 }
 
 // Creates an action that sets a pointer referent to a given value.

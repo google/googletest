@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright 2009, Google Inc.
-# All rights reserved.
+# Copyright 2019 Google LLC.  All Rights Reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
@@ -28,51 +27,33 @@
 # THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+"""Tests Google Test's gtest skip in environment setup  behavior.
 
-"""upload_gmock.py v0.1.0 -- uploads a Google Mock patch for review.
-
-This simple wrapper passes all command line flags and
---cc=googlemock@googlegroups.com to upload.py.
-
-USAGE: upload_gmock.py [options for upload.py]
+This script invokes gtest_skip_in_environment_setup_test_ and verifies its
+output.
 """
 
-__author__ = 'wan@google.com (Zhanyong Wan)'
+import re
 
-import os
-import sys
+import gtest_test_utils
 
-CC_FLAG = '--cc='
-GMOCK_GROUP = 'googlemock@googlegroups.com'
+# Path to the gtest_skip_in_environment_setup_test binary
+EXE_PATH = gtest_test_utils.GetTestExecutablePath('gtest_skip_test')
+
+OUTPUT = gtest_test_utils.Subprocess([EXE_PATH]).output
 
 
-def main():
-  # Finds the path to upload.py, assuming it is in the same directory
-  # as this file.
-  my_dir = os.path.dirname(os.path.abspath(__file__))
-  upload_py_path = os.path.join(my_dir, 'upload.py')
+# Test.
+class SkipEntireEnvironmentTest(gtest_test_utils.TestCase):
 
-  # Adds Google Mock discussion group to the cc line if it's not there
-  # already.
-  upload_py_argv = [upload_py_path]
-  found_cc_flag = False
-  for arg in sys.argv[1:]:
-    if arg.startswith(CC_FLAG):
-      found_cc_flag = True
-      cc_line = arg[len(CC_FLAG):]
-      cc_list = [addr for addr in cc_line.split(',') if addr]
-      if GMOCK_GROUP not in cc_list:
-        cc_list.append(GMOCK_GROUP)
-      upload_py_argv.append(CC_FLAG + ','.join(cc_list))
-    else:
-      upload_py_argv.append(arg)
-
-  if not found_cc_flag:
-    upload_py_argv.append(CC_FLAG + GMOCK_GROUP)
-
-  # Invokes upload.py with the modified command line flags.
-  os.execv(upload_py_path, upload_py_argv)
+  def testSkipEntireEnvironmentTest(self):
+    self.assertIn('Skipped\nskipping single test\n', OUTPUT)
+    skip_fixture = 'Skipped\nskipping all tests for this fixture\n'
+    self.assertIsNotNone(
+        re.search(skip_fixture + '.*' + skip_fixture, OUTPUT, flags=re.DOTALL),
+        repr(OUTPUT))
+    self.assertNotIn('FAILED', OUTPUT)
 
 
 if __name__ == '__main__':
-  main()
+  gtest_test_utils.Main()

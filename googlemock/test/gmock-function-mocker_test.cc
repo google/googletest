@@ -42,6 +42,8 @@
 
 #include <map>
 #include <string>
+#include <type_traits>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -101,6 +103,10 @@ class FooInterface {
   virtual int TypeWithComma(const std::map<int, std::string>& a_map) = 0;
   virtual int TypeWithTemplatedCopyCtor(const TemplatedCopyable<int>&) = 0;
 
+  virtual int (*ReturnsFunctionPointer1(int))(bool) = 0;
+  using fn_ptr = int (*)(bool);
+  virtual fn_ptr ReturnsFunctionPointer2(int) = 0;
+
 #if GTEST_OS_WINDOWS
   STDMETHOD_(int, CTNullary)() = 0;
   STDMETHOD_(bool, CTUnary)(int x) = 0;
@@ -158,6 +164,9 @@ class MockFoo : public FooInterface {
   MOCK_METHOD(int, TypeWithComma, ((const std::map<int, std::string>&)));
   MOCK_METHOD(int, TypeWithTemplatedCopyCtor,
               (const TemplatedCopyable<int>&));  // NOLINT
+
+  MOCK_METHOD(int (*)(bool), ReturnsFunctionPointer1, (int), ());
+  MOCK_METHOD(fn_ptr, ReturnsFunctionPointer2, (int), ());
 
 #if GTEST_OS_WINDOWS
   MOCK_METHOD(int, CTNullary, (), (Calltype(STDMETHODCALLTYPE)));
@@ -654,6 +663,33 @@ TEST(MockMethodMockFunctionTest, MockMethodSizeOverhead) {
   EXPECT_EQ(sizeof(MockMethodSizes0), sizeof(MockMethodSizes2));
   EXPECT_EQ(sizeof(MockMethodSizes0), sizeof(MockMethodSizes3));
   EXPECT_EQ(sizeof(MockMethodSizes0), sizeof(MockMethodSizes4));
+}
+
+void hasTwoParams(int, int);
+void MaybeThrows();
+void DoesntThrow() noexcept;
+struct MockMethodNoexceptSpecifier {
+  MOCK_METHOD(void, func1, (), (noexcept));
+  MOCK_METHOD(void, func2, (), (noexcept(true)));
+  MOCK_METHOD(void, func3, (), (noexcept(false)));
+  MOCK_METHOD(void, func4, (), (noexcept(noexcept(MaybeThrows()))));
+  MOCK_METHOD(void, func5, (), (noexcept(noexcept(DoesntThrow()))));
+  MOCK_METHOD(void, func6, (), (noexcept(noexcept(DoesntThrow())), const));
+  MOCK_METHOD(void, func7, (), (const, noexcept(noexcept(DoesntThrow()))));
+  // Put commas in the noexcept expression
+  MOCK_METHOD(void, func8, (), (noexcept(noexcept(hasTwoParams(1, 2))), const));
+};
+
+TEST(MockMethodMockFunctionTest, NoexceptSpecifierPreserved) {
+  EXPECT_TRUE(noexcept(std::declval<MockMethodNoexceptSpecifier>().func1()));
+  EXPECT_TRUE(noexcept(std::declval<MockMethodNoexceptSpecifier>().func2()));
+  EXPECT_FALSE(noexcept(std::declval<MockMethodNoexceptSpecifier>().func3()));
+  EXPECT_FALSE(noexcept(std::declval<MockMethodNoexceptSpecifier>().func4()));
+  EXPECT_TRUE(noexcept(std::declval<MockMethodNoexceptSpecifier>().func5()));
+  EXPECT_TRUE(noexcept(std::declval<MockMethodNoexceptSpecifier>().func6()));
+  EXPECT_TRUE(noexcept(std::declval<MockMethodNoexceptSpecifier>().func7()));
+  EXPECT_EQ(noexcept(std::declval<MockMethodNoexceptSpecifier>().func8()),
+            noexcept(hasTwoParams(1, 2)));
 }
 
 }  // namespace gmock_function_mocker_test
