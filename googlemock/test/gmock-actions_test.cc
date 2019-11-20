@@ -80,8 +80,6 @@ using testing::SetArgumentPointee;
 using testing::Unused;
 using testing::WithArgs;
 using testing::internal::BuiltInDefaultValue;
-using testing::internal::Int64;
-using testing::internal::UInt64;
 
 #if !GTEST_OS_WINDOWS_MOBILE
 using testing::SetErrnoAndReturn;
@@ -123,8 +121,9 @@ TEST(BuiltInDefaultValueTest, IsZeroForNumericTypes) {
   EXPECT_EQ(0U, BuiltInDefaultValue<unsigned long>::Get());  // NOLINT
   EXPECT_EQ(0, BuiltInDefaultValue<signed long>::Get());  // NOLINT
   EXPECT_EQ(0, BuiltInDefaultValue<long>::Get());  // NOLINT
-  EXPECT_EQ(0U, BuiltInDefaultValue<UInt64>::Get());
-  EXPECT_EQ(0, BuiltInDefaultValue<Int64>::Get());
+  EXPECT_EQ(0U, BuiltInDefaultValue<unsigned long long>::Get());  // NOLINT
+  EXPECT_EQ(0, BuiltInDefaultValue<signed long long>::Get());  // NOLINT
+  EXPECT_EQ(0, BuiltInDefaultValue<long long>::Get());  // NOLINT
   EXPECT_EQ(0, BuiltInDefaultValue<float>::Get());
   EXPECT_EQ(0, BuiltInDefaultValue<double>::Get());
 }
@@ -147,8 +146,9 @@ TEST(BuiltInDefaultValueTest, ExistsForNumericTypes) {
   EXPECT_TRUE(BuiltInDefaultValue<unsigned long>::Exists());  // NOLINT
   EXPECT_TRUE(BuiltInDefaultValue<signed long>::Exists());  // NOLINT
   EXPECT_TRUE(BuiltInDefaultValue<long>::Exists());  // NOLINT
-  EXPECT_TRUE(BuiltInDefaultValue<UInt64>::Exists());
-  EXPECT_TRUE(BuiltInDefaultValue<Int64>::Exists());
+  EXPECT_TRUE(BuiltInDefaultValue<unsigned long long>::Exists());  // NOLINT
+  EXPECT_TRUE(BuiltInDefaultValue<signed long long>::Exists());  // NOLINT
+  EXPECT_TRUE(BuiltInDefaultValue<long long>::Exists());  // NOLINT
   EXPECT_TRUE(BuiltInDefaultValue<float>::Exists());
   EXPECT_TRUE(BuiltInDefaultValue<double>::Exists());
 }

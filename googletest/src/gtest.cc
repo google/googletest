@@ -44,6 +44,7 @@
 #include <wctype.h>
 
 #include <algorithm>
+#include <cstdint>
 #include <iomanip>
 #include <limits>
 #include <list>
@@ -333,10 +334,10 @@ namespace internal {
 // Generates a random number from [0, range), using a Linear
 // Congruential Generator (LCG).  Crashes if 'range' is 0 or greater
 // than kMaxRange.
-UInt32 Random::Generate(UInt32 range) {
+uint32_t Random::Generate(uint32_t range) {
   // These constants are the same as are used in glibc's rand(3).
   // Use wider types than necessary to prevent unsigned overflow diagnostics.
-  state_ = static_cast<UInt32>(1103515245ULL*state_ + 12345U) % kMaxRange;
+  state_ = static_cast<uint32_t>(1103515245ULL*state_ + 12345U) % kMaxRange;
 
   GTEST_CHECK_(range > 0)
       << "Cannot generate a number in the range [0, 0).";
@@ -1738,33 +1739,33 @@ AssertionResult IsHRESULTFailure(const char* expr, long hr) {  // NOLINT
 //  17 - 21 bits       11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
 
 // The maximum code-point a one-byte UTF-8 sequence can represent.
-const UInt32 kMaxCodePoint1 = (static_cast<UInt32>(1) <<  7) - 1;
+constexpr uint32_t kMaxCodePoint1 = (static_cast<uint32_t>(1) <<  7) - 1;
 
 // The maximum code-point a two-byte UTF-8 sequence can represent.
-const UInt32 kMaxCodePoint2 = (static_cast<UInt32>(1) << (5 + 6)) - 1;
+constexpr uint32_t kMaxCodePoint2 = (static_cast<uint32_t>(1) << (5 + 6)) - 1;
 
 // The maximum code-point a three-byte UTF-8 sequence can represent.
-const UInt32 kMaxCodePoint3 = (static_cast<UInt32>(1) << (4 + 2*6)) - 1;
+constexpr uint32_t kMaxCodePoint3 = (static_cast<uint32_t>(1) << (4 + 2*6)) - 1;
 
 // The maximum code-point a four-byte UTF-8 sequence can represent.
-const UInt32 kMaxCodePoint4 = (static_cast<UInt32>(1) << (3 + 3*6)) - 1;
+constexpr uint32_t kMaxCodePoint4 = (static_cast<uint32_t>(1) << (3 + 3*6)) - 1;
 
 // Chops off the n lowest bits from a bit pattern.  Returns the n
 // lowest bits.  As a side effect, the original bit pattern will be
 // shifted to the right by n bits.
-inline UInt32 ChopLowBits(UInt32* bits, int n) {
-  const UInt32 low_bits = *bits & ((static_cast<UInt32>(1) << n) - 1);
+inline uint32_t ChopLowBits(uint32_t* bits, int n) {
+  const uint32_t low_bits = *bits & ((static_cast<uint32_t>(1) << n) - 1);
   *bits >>= n;
   return low_bits;
 }
 
 // Converts a Unicode code point to a narrow string in UTF-8 encoding.
-// code_point parameter is of type UInt32 because wchar_t may not be
+// code_point parameter is of type uint32_t because wchar_t may not be
 // wide enough to contain a code point.
 // If the code_point is not a valid Unicode code point
 // (i.e. outside of Unicode range U+0 to U+10FFFF) it will be converted
 // to "(Invalid Unicode 0xXXXXXXXX)".
-std::string CodePointToUtf8(UInt32 code_point) {
+std::string CodePointToUtf8(uint32_t code_point) {
   if (code_point > kMaxCodePoint4) {
     return "(Invalid Unicode 0x" + String::FormatHexUInt32(code_point) + ")";
   }
@@ -1805,11 +1806,11 @@ inline bool IsUtf16SurrogatePair(wchar_t first, wchar_t second) {
 }
 
 // Creates a Unicode code point from UTF16 surrogate pair.
-inline UInt32 CreateCodePointFromUtf16SurrogatePair(wchar_t first,
-                                                    wchar_t second) {
-  const auto first_u = static_cast<UInt32>(first);
-  const auto second_u = static_cast<UInt32>(second);
-  const UInt32 mask = (1 << 10) - 1;
+inline uint32_t CreateCodePointFromUtf16SurrogatePair(wchar_t first,
+                                                      wchar_t second) {
+  const auto first_u = static_cast<uint32_t>(first);
+  const auto second_u = static_cast<uint32_t>(second);
+  const uint32_t mask = (1 << 10) - 1;
   return (sizeof(wchar_t) == 2)
              ? (((first_u & mask) << 10) | (second_u & mask)) + 0x10000
              :
@@ -1837,7 +1838,7 @@ std::string WideStringToUtf8(const wchar_t* str, int num_chars) {
 
   ::std::stringstream stream;
   for (int i = 0; i < num_chars; ++i) {
-    UInt32 unicode_code_point;
+    uint32_t unicode_code_point;
 
     if (str[i] == L'\0') {
       break;
@@ -1846,7 +1847,7 @@ std::string WideStringToUtf8(const wchar_t* str, int num_chars) {
                                                                  str[i + 1]);
       i++;
     } else {
-      unicode_code_point = static_cast<UInt32>(str[i]);
+      unicode_code_point = static_cast<uint32_t>(str[i]);
     }
 
     stream << CodePointToUtf8(unicode_code_point);
@@ -1972,7 +1973,7 @@ std::string String::FormatIntWidth2(int value) {
 }
 
 // Formats an int value as "%X".
-std::string String::FormatHexUInt32(UInt32 value) {
+std::string String::FormatHexUInt32(uint32_t value) {
   std::stringstream ss;
   ss << std::hex << std::uppercase << value;
   return ss.str();
@@ -1980,7 +1981,7 @@ std::string String::FormatHexUInt32(UInt32 value) {
 
 // Formats an int value as "%X".
 std::string String::FormatHexInt(int value) {
-  return FormatHexUInt32(static_cast<UInt32>(value));
+  return FormatHexUInt32(static_cast<uint32_t>(value));
 }
 
 // Formats a byte as "%02X".
@@ -3156,7 +3157,7 @@ void PrettyUnitTestResultPrinter::OnTestIterationStart(
   }
 
   if (internal::ShouldShard(kTestTotalShards, kTestShardIndex, false)) {
-    const Int32 shard_index = Int32FromEnvOrDie(kTestShardIndex, -1);
+    const int32_t shard_index = Int32FromEnvOrDie(kTestShardIndex, -1);
     ColoredPrintf(COLOR_YELLOW,
                   "Note: This is test shard %d of %s.\n",
                   static_cast<int>(shard_index) + 1,
@@ -5302,7 +5303,7 @@ bool UnitTestImpl::RunAllTests() {
 
     // Shuffles test suites and tests if requested.
     if (has_tests_to_run && GTEST_FLAG(shuffle)) {
-      random()->Reseed(static_cast<UInt32>(random_seed_));
+      random()->Reseed(static_cast<uint32_t>(random_seed_));
       // This should be done before calling OnTestIterationStart(),
       // such that a test event listener can see the actual test order
       // in the event.
@@ -5425,8 +5426,8 @@ bool ShouldShard(const char* total_shards_env,
     return false;
   }
 
-  const Int32 total_shards = Int32FromEnvOrDie(total_shards_env, -1);
-  const Int32 shard_index = Int32FromEnvOrDie(shard_index_env, -1);
+  const int32_t total_shards = Int32FromEnvOrDie(total_shards_env, -1);
+  const int32_t shard_index = Int32FromEnvOrDie(shard_index_env, -1);
 
   if (total_shards == -1 && shard_index == -1) {
     return false;
@@ -5463,13 +5464,13 @@ bool ShouldShard(const char* total_shards_env,
 // Parses the environment variable var as an Int32. If it is unset,
 // returns default_val. If it is not an Int32, prints an error
 // and aborts.
-Int32 Int32FromEnvOrDie(const char* var, Int32 default_val) {
+int32_t Int32FromEnvOrDie(const char* var, int32_t default_val) {
   const char* str_val = posix::GetEnv(var);
   if (str_val == nullptr) {
     return default_val;
   }
 
-  Int32 result;
+  int32_t result;
   if (!ParseInt32(Message() << "The value of environment variable " << var,
                   str_val, &result)) {
     exit(EXIT_FAILURE);
@@ -5493,9 +5494,9 @@ bool ShouldRunTestOnShard(int total_shards, int shard_index, int test_id) {
 // https://github.com/google/googletest/blob/master/googletest/docs/advanced.md
 // . Returns the number of tests that should run.
 int UnitTestImpl::FilterTests(ReactionToSharding shard_tests) {
-  const Int32 total_shards = shard_tests == HONOR_SHARDING_PROTOCOL ?
+  const int32_t total_shards = shard_tests == HONOR_SHARDING_PROTOCOL ?
       Int32FromEnvOrDie(kTestTotalShards, -1) : -1;
-  const Int32 shard_index = shard_tests == HONOR_SHARDING_PROTOCOL ?
+  const int32_t shard_index = shard_tests == HONOR_SHARDING_PROTOCOL ?
       Int32FromEnvOrDie(kTestShardIndex, -1) : -1;
 
   // num_runnable_tests are the number of tests that will
@@ -5784,12 +5785,11 @@ static bool ParseBoolFlag(const char* str, const char* flag, bool* value) {
   return true;
 }
 
-// Parses a string for an Int32 flag, in the form of
-// "--flag=value".
+// Parses a string for an int32_t flag, in the form of "--flag=value".
 //
 // On success, stores the value of the flag in *value, and returns
 // true.  On failure, returns false without changing *value.
-bool ParseInt32Flag(const char* str, const char* flag, Int32* value) {
+bool ParseInt32Flag(const char* str, const char* flag, int32_t* value) {
   // Gets the value of the flag as a string.
   const char* const value_str = ParseFlagValue(str, flag, false);
 
@@ -5801,8 +5801,7 @@ bool ParseInt32Flag(const char* str, const char* flag, Int32* value) {
                     value_str, value);
 }
 
-// Parses a string for a string flag, in the form of
-// "--flag=value".
+// Parses a string for a string flag, in the form of "--flag=value".
 //
 // On success, stores the value of the flag in *value, and returns
 // true.  On failure, returns false without changing *value.
