@@ -46,6 +46,7 @@
 #include <time.h>
 
 #include <array>
+#include <cstdint>
 #include <deque>
 #include <forward_list>
 #include <functional>
@@ -6028,9 +6029,9 @@ TEST_P(BipartiteRandomTest, LargerNets) {
   int iters = GetParam().second;
   MatchMatrix graph(static_cast<size_t>(nodes), static_cast<size_t>(nodes));
 
-  auto seed = static_cast<testing::internal::UInt32>(GTEST_FLAG(random_seed));
+  auto seed = static_cast<uint32_t>(GTEST_FLAG(random_seed));
   if (seed == 0) {
-    seed = static_cast<testing::internal::UInt32>(time(nullptr));
+    seed = static_cast<uint32_t>(time(nullptr));
   }
 
   for (; iters > 0; --iters, ++seed) {
