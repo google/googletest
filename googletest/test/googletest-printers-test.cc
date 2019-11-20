@@ -33,11 +33,12 @@
 // This file tests the universal value printer.
 
 #include <ctype.h>
-#include <limits.h>
 #include <string.h>
 #include <algorithm>
+#include <cstdint>
 #include <deque>
 #include <forward_list>
+#include <limits>
 #include <list>
 #include <map>
 #include <set>
@@ -339,23 +340,25 @@ TEST(PrintBuiltInTypeTest, Wchar_t) {
   EXPECT_EQ("L'\\xC74D' (51021)", Print(static_cast<wchar_t>(0xC74D)));
 }
 
-// Test that Int64 provides more storage than wchar_t.
+// Test that int64_t provides more storage than wchar_t.
 TEST(PrintTypeSizeTest, Wchar_t) {
-  EXPECT_LT(sizeof(wchar_t), sizeof(testing::internal::Int64));
+  EXPECT_LT(sizeof(wchar_t), sizeof(int64_t));
 }
 
 // Various integer types.
 TEST(PrintBuiltInTypeTest, Integer) {
   EXPECT_EQ("'\\xFF' (255)", Print(static_cast<unsigned char>(255)));  // uint8
   EXPECT_EQ("'\\x80' (-128)", Print(static_cast<signed char>(-128)));  // int8
-  EXPECT_EQ("65535", Print(USHRT_MAX));  // uint16
-  EXPECT_EQ("-32768", Print(SHRT_MIN));  // int16
-  EXPECT_EQ("4294967295", Print(UINT_MAX));  // uint32
-  EXPECT_EQ("-2147483648", Print(INT_MIN));  // int32
+  EXPECT_EQ("65535", Print(std::numeric_limits<uint16_t>::max()));  // uint16
+  EXPECT_EQ("-32768", Print(std::numeric_limits<int16_t>::min()));  // int16
+  EXPECT_EQ("4294967295",
+            Print(std::numeric_limits<uint32_t>::max()));  // uint32
+  EXPECT_EQ("-2147483648",
+            Print(std::numeric_limits<int32_t>::min()));  // int32
   EXPECT_EQ("18446744073709551615",
-            Print(static_cast<testing::internal::UInt64>(-1)));  // uint64
+            Print(std::numeric_limits<uint64_t>::max()));  // uint64
   EXPECT_EQ("-9223372036854775808",
-            Print(static_cast<testing::internal::Int64>(1) << 63));  // int64
+            Print(std::numeric_limits<int64_t>::min()));  // int64
 }
 
 // Size types.
@@ -977,9 +980,8 @@ TEST(PrintStdTupleTest, VariousSizes) {
   EXPECT_EQ("(false, 2, 3, 4)", Print(t4));
 
   const char* const str = "8";
-  ::std::tuple<bool, char, short, testing::internal::Int32,  // NOLINT
-               testing::internal::Int64, float, double, const char*, void*,
-               std::string>
+  ::std::tuple<bool, char, short, int32_t, int64_t, float, double,  // NOLINT
+               const char*, void*, std::string>
       t10(false, 'a', static_cast<short>(3), 4, 5, 1.5F, -2.5, str,  // NOLINT
           nullptr, "10");
   EXPECT_EQ("(false, 'a' (97, 0x61), 3, 4, 5, 1.5, -2.5, " + PrintPointer(str) +

@@ -136,14 +136,12 @@ GMOCK_DECLARE_KIND_(int, kInteger);
 GMOCK_DECLARE_KIND_(unsigned int, kInteger);
 GMOCK_DECLARE_KIND_(long, kInteger);  // NOLINT
 GMOCK_DECLARE_KIND_(unsigned long, kInteger);  // NOLINT
+GMOCK_DECLARE_KIND_(long long, kInteger);  // NOLINT
+GMOCK_DECLARE_KIND_(unsigned long long, kInteger);  // NOLINT
 
 #if GMOCK_WCHAR_T_IS_NATIVE_
 GMOCK_DECLARE_KIND_(wchar_t, kInteger);
 #endif
-
-// Non-standard integer types.
-GMOCK_DECLARE_KIND_(Int64, kInteger);
-GMOCK_DECLARE_KIND_(UInt64, kInteger);
 
 // All standard floating-point types.
 GMOCK_DECLARE_KIND_(float, kFloatingPoint);

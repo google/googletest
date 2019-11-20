@@ -249,7 +249,6 @@ using testing::internal::GetTestTypeId;
 using testing::internal::GetTimeInMillis;
 using testing::internal::GetTypeId;
 using testing::internal::GetUnitTestImpl;
-using testing::internal::Int32;
 using testing::internal::Int32FromEnvOrDie;
 using testing::internal::IsAProtocolMessage;
 using testing::internal::IsContainer;
@@ -271,7 +270,6 @@ using testing::internal::StreamableToString;
 using testing::internal::String;
 using testing::internal::TestEventListenersAccessor;
 using testing::internal::TestResultAccessor;
-using testing::internal::UInt32;
 using testing::internal::UnitTestImpl;
 using testing::internal::WideStringToUtf8;
 using testing::internal::edit_distance::CalculateOptimalEdits;
@@ -788,7 +786,7 @@ TEST(RandomDeathTest, GeneratesCrashesOnInvalidRange) {
 }
 
 TEST(RandomTest, GeneratesNumbersWithinRange) {
-  const UInt32 kRange = 10000;
+  constexpr uint32_t kRange = 10000;
   testing::internal::Random random(12345);
   for (int i = 0; i < 10; i++) {
     EXPECT_LT(random.Generate(kRange), kRange) << " for iteration " << i;
@@ -801,10 +799,10 @@ TEST(RandomTest, GeneratesNumbersWithinRange) {
 }
 
 TEST(RandomTest, RepeatsWhenReseeded) {
-  const int kSeed = 123;
-  const int kArraySize = 10;
-  const UInt32 kRange = 10000;
-  UInt32 values[kArraySize];
+  constexpr int kSeed = 123;
+  constexpr int kArraySize = 10;
+  constexpr uint32_t kRange = 10000;
+  uint32_t values[kArraySize];
 
   testing::internal::Random random(kSeed);
   for (int i = 0; i < kArraySize; i++) {
@@ -1769,7 +1767,7 @@ TEST(Int32FromGTestEnvTest, ParsesAndReturnsValidValue) {
 // Tests that ParseInt32Flag() returns false and doesn't change the
 // output value when the flag has wrong format
 TEST(ParseInt32FlagTest, ReturnsFalseForInvalidFlag) {
-  Int32 value = 123;
+  int32_t value = 123;
   EXPECT_FALSE(ParseInt32Flag("--a=100", "b", &value));
   EXPECT_EQ(123, value);
 
@@ -1782,7 +1780,7 @@ TEST(ParseInt32FlagTest, ReturnsFalseForInvalidFlag) {
 TEST(ParseInt32FlagTest, ReturnsDefaultWhenValueOverflows) {
   printf("(expecting 2 warnings)\n");
 
-  Int32 value = 123;
+  int32_t value = 123;
   EXPECT_FALSE(ParseInt32Flag("--abc=12345678987654321", "abc", &value));
   EXPECT_EQ(123, value);
 
@@ -1796,7 +1794,7 @@ TEST(ParseInt32FlagTest, ReturnsDefaultWhenValueOverflows) {
 TEST(ParseInt32FlagTest, ReturnsDefaultWhenValueIsInvalid) {
   printf("(expecting 2 warnings)\n");
 
-  Int32 value = 123;
+  int32_t value = 123;
   EXPECT_FALSE(ParseInt32Flag("--abc=A1", "abc", &value));
   EXPECT_EQ(123, value);
 
@@ -1808,7 +1806,7 @@ TEST(ParseInt32FlagTest, ReturnsDefaultWhenValueIsInvalid) {
 // returns true when the flag represents a valid decimal integer in
 // the range of an Int32.
 TEST(ParseInt32FlagTest, ParsesAndReturnsValidValue) {
-  Int32 value = 123;
+  int32_t value = 123;
   EXPECT_TRUE(ParseInt32Flag("--" GTEST_FLAG_PREFIX_ "abc=456", "abc", &value));
   EXPECT_EQ(456, value);
 
@@ -1831,7 +1829,7 @@ TEST(Int32FromEnvOrDieTest, ParsesAndReturnsValidValue) {
 #endif  // !GTEST_OS_WINDOWS_MOBILE
 
 // Tests that Int32FromEnvOrDie() aborts with an error message
-// if the variable is not an Int32.
+// if the variable is not an int32_t.
 TEST(Int32FromEnvOrDieDeathTest, AbortsOnFailure) {
   SetEnv(GTEST_FLAG_PREFIX_UPPER_ "VAR", "xxx");
   EXPECT_DEATH_IF_SUPPORTED(
@@ -1840,7 +1838,7 @@ TEST(Int32FromEnvOrDieDeathTest, AbortsOnFailure) {
 }
 
 // Tests that Int32FromEnvOrDie() aborts with an error message
-// if the variable cannot be represented by an Int32.
+// if the variable cannot be represented by an int32_t.
 TEST(Int32FromEnvOrDieDeathTest, AbortsOnInt32Overflow) {
   SetEnv(GTEST_FLAG_PREFIX_UPPER_ "VAR", "1234567891234567891234");
   EXPECT_DEATH_IF_SUPPORTED(
@@ -5594,7 +5592,7 @@ struct Flags {
 
   // Creates a Flags struct where the gtest_random_seed flag has the given
   // value.
-  static Flags RandomSeed(Int32 random_seed) {
+  static Flags RandomSeed(int32_t random_seed) {
     Flags flags;
     flags.random_seed = random_seed;
     return flags;
@@ -5602,7 +5600,7 @@ struct Flags {
 
   // Creates a Flags struct where the gtest_repeat flag has the given
   // value.
-  static Flags Repeat(Int32 repeat) {
+  static Flags Repeat(int32_t repeat) {
     Flags flags;
     flags.repeat = repeat;
     return flags;
@@ -5618,7 +5616,7 @@ struct Flags {
 
   // Creates a Flags struct where the GTEST_FLAG(stack_trace_depth) flag has
   // the given value.
-  static Flags StackTraceDepth(Int32 stack_trace_depth) {
+  static Flags StackTraceDepth(int32_t stack_trace_depth) {
     Flags flags;
     flags.stack_trace_depth = stack_trace_depth;
     return flags;
@@ -5649,10 +5647,10 @@ struct Flags {
   bool list_tests;
   const char* output;
   bool print_time;
-  Int32 random_seed;
-  Int32 repeat;
+  int32_t random_seed;
+  int32_t repeat;
   bool shuffle;
-  Int32 stack_trace_depth;
+  int32_t stack_trace_depth;
   const char* stream_result_to;
   bool throw_on_failure;
 };
