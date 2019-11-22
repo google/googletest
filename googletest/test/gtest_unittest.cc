@@ -2924,22 +2924,18 @@ TEST_F(FloatTest, Commutative) {
 TEST_F(FloatTest, EXPECT_NEAR) {
   EXPECT_NEAR(-1.0f, -1.1f, 0.2f);
   EXPECT_NEAR(2.0f, 3.0f, 1.0f);
-  EXPECT_NONFATAL_FAILURE(EXPECT_NEAR(1.0f,1.5f, 0.25f),  // NOLINT
+  EXPECT_NONFATAL_FAILURE(EXPECT_NEAR(1.0f, 1.5f, 0.25f),  // NOLINT
                           "The difference between 1.0f and 1.5f is 0.5, "
                           "which exceeds 0.25f");
-  // To work around a bug in gcc 2.95.0, there is intentionally no
-  // space after the first comma in the previous line.
 }
 
 // Tests ASSERT_NEAR.
 TEST_F(FloatTest, ASSERT_NEAR) {
   ASSERT_NEAR(-1.0f, -1.1f, 0.2f);
   ASSERT_NEAR(2.0f, 3.0f, 1.0f);
-  EXPECT_FATAL_FAILURE(ASSERT_NEAR(1.0f,1.5f, 0.25f),  // NOLINT
+  EXPECT_FATAL_FAILURE(ASSERT_NEAR(1.0f, 1.5f, 0.25f),  // NOLINT
                        "The difference between 1.0f and 1.5f is 0.5, "
                        "which exceeds 0.25f");
-  // To work around a bug in gcc 2.95.0, there is intentionally no
-  // space after the first comma in the previous line.
 }
 
 // Tests the cases where FloatLE() should succeed.
@@ -4314,10 +4310,8 @@ TEST(AssertionWithMessageTest, ASSERT_STR) {
 TEST(AssertionWithMessageTest, ASSERT_FLOATING) {
   ASSERT_FLOAT_EQ(1, 1) << "This should succeed.";
   ASSERT_DOUBLE_EQ(1, 1) << "This should succeed.";
-  EXPECT_FATAL_FAILURE(ASSERT_NEAR(1,1.2, 0.1) << "Expect failure.",  // NOLINT
+  EXPECT_FATAL_FAILURE(ASSERT_NEAR(1, 1.2, 0.1) << "Expect failure.",  // NOLINT
                        "Expect failure.");
-  // To work around a bug in gcc 2.95.0, there is intentionally no
-  // space after the first comma in the previous statement.
 }
 
 // Tests using ASSERT_FALSE with a streamed message.
