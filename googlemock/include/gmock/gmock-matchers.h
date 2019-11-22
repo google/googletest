@@ -258,7 +258,7 @@ class SafeMatcherCastImpl {
   // monomorphic matchers are handled by the next one.
   template <typename M>
   static inline Matcher<T> Cast(const M& polymorphic_matcher_or_value) {
-    return internal::MatcherCastImpl<T, M>::Cast(polymorphic_matcher_or_value);
+    return MatcherCast<T>(polymorphic_matcher_or_value);
   }
 
   // This overload handles monomorphic matchers.
