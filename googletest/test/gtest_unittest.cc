@@ -3080,8 +3080,6 @@ TEST_F(DoubleTest, EXPECT_NEAR) {
   EXPECT_NONFATAL_FAILURE(EXPECT_NEAR(1.0, 1.5, 0.25),  // NOLINT
                           "The difference between 1.0 and 1.5 is 0.5, "
                           "which exceeds 0.25");
-  // To work around a bug in gcc 2.95.0, there is intentionally no
-  // space after the first comma in the previous statement.
 }
 
 // Tests ASSERT_NEAR.
@@ -3091,8 +3089,6 @@ TEST_F(DoubleTest, ASSERT_NEAR) {
   EXPECT_FATAL_FAILURE(ASSERT_NEAR(1.0, 1.5, 0.25),  // NOLINT
                        "The difference between 1.0 and 1.5 is 0.5, "
                        "which exceeds 0.25");
-  // To work around a bug in gcc 2.95.0, there is intentionally no
-  // space after the first comma in the previous statement.
 }
 
 // Tests the cases where DoubleLE() should succeed.
@@ -3734,10 +3730,6 @@ TEST(AssertionTest, ASSERT_EQ) {
 TEST(AssertionTest, ASSERT_EQ_NULL) {
   // A success.
   const char* p = nullptr;
-  // Some older GCC versions may issue a spurious warning in this or the next
-  // assertion statement. This warning should not be suppressed with
-  // static_cast since the test verifies the ability to use bare NULL as the
-  // expected parameter to the macro.
   ASSERT_EQ(nullptr, p);
 
   // A failure.
@@ -4458,10 +4450,6 @@ TEST(ExpectTest, EXPECT_EQ_Double) {
 TEST(ExpectTest, EXPECT_EQ_NULL) {
   // A success.
   const char* p = nullptr;
-  // Some older GCC versions may issue a spurious warning in this or the next
-  // assertion statement. This warning should not be suppressed with
-  // static_cast since the test verifies the ability to use bare NULL as the
-  // expected parameter to the macro.
   EXPECT_EQ(nullptr, p);
 
   // A failure.
