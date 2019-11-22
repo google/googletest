@@ -1160,7 +1160,7 @@ static void AddNonfatalFailure() {
 }
 
 class ScopedFakeTestPartResultReporterTest : public Test {
- public:  // Must be public and not protected due to a bug in g++ 3.4.2.
+ protected:
   enum FailureMode {
     FATAL_FAILURE,
     NONFATAL_FAILURE
@@ -3243,7 +3243,7 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, DISABLED_TypedTestP, NumericTypes);
 // Tests that assertion macros evaluate their arguments exactly once.
 
 class SingleEvaluationTest : public Test {
- public:  // Must be public and not protected due to a bug in g++ 3.4.2.
+ protected:
   // This helper function is needed by the FailedASSERT_STREQ test
   // below.  It's public to work around C++Builder's bug with scoping local
   // classes.

@@ -914,7 +914,7 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, ATypeParamDeathTest, NumericTypes);
 // Tests various failure conditions of
 // EXPECT_{,NON}FATAL_FAILURE{,_ON_ALL_THREADS}.
 class ExpectFailureTest : public testing::Test {
- public:  // Must be public and not protected due to a bug in g++ 3.4.2.
+ protected:
   enum FailureMode {
     FATAL_FAILURE,
     NONFATAL_FAILURE
