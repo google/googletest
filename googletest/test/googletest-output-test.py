@@ -331,7 +331,7 @@ if __name__ == '__main__':
     if CAN_GENERATE_GOLDEN_FILE:
       output = GetOutputOfAllCommands()
       golden_file = open(GOLDEN_PATH, 'wb')
-      golden_file.write(output)
+      golden_file.write(output.encode())
       golden_file.close()
     else:
       message = (
