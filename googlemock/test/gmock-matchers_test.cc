@@ -2988,18 +2988,13 @@ TEST(MatcherAssertionTest, WorksWhenMatcherIsNotSatisfied) {
   static unsigned short n;  // NOLINT
   n = 5;
 
-  // VC++ prior to version 8.0 SP1 has a bug where it will not see any
-  // functions declared in the namespace scope from within nested classes.
-  // EXPECT/ASSERT_(NON)FATAL_FAILURE macros use nested classes so that all
-  // namespace-level functions invoked inside them need to be explicitly
-  // resolved.
-  EXPECT_FATAL_FAILURE(ASSERT_THAT(n, ::testing::Gt(10)),
+  EXPECT_FATAL_FAILURE(ASSERT_THAT(n, Gt(10)),
                        "Value of: n\n"
                        "Expected: is > 10\n"
                        "  Actual: 5" + OfType("unsigned short"));
   n = 0;
   EXPECT_NONFATAL_FAILURE(
-      EXPECT_THAT(n, ::testing::AllOf(::testing::Le(7), ::testing::Ge(5))),
+      EXPECT_THAT(n, AllOf(Le(7), Ge(5))),
       "Value of: n\n"
       "Expected: (is <= 7) and (is >= 5)\n"
       "  Actual: 0" + OfType("unsigned short"));
@@ -3013,11 +3008,11 @@ TEST(MatcherAssertionTest, WorksForByRefArguments) {
   static int n;
   n = 0;
   EXPECT_THAT(n, AllOf(Le(7), Ref(n)));
-  EXPECT_FATAL_FAILURE(ASSERT_THAT(n, ::testing::Not(::testing::Ref(n))),
+  EXPECT_FATAL_FAILURE(ASSERT_THAT(n, Not(Ref(n))),
                        "Value of: n\n"
                        "Expected: does not reference the variable @");
   // Tests the "Actual" part.
-  EXPECT_FATAL_FAILURE(ASSERT_THAT(n, ::testing::Not(::testing::Ref(n))),
+  EXPECT_FATAL_FAILURE(ASSERT_THAT(n, Not(Ref(n))),
                        "Actual: 0" + OfType("int") + ", which is located @");
 }
 
