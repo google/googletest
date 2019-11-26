@@ -2088,7 +2088,7 @@ GTEST_DISABLE_MSC_DEPRECATED_POP_()
 using BiggestInt = long long;  // NOLINT
 
 // The maximum number a BiggestInt can represent.
-constexpr BiggestInt kMaxBiggestInt = std::numeric_limits<BiggestInt>::max();
+constexpr BiggestInt kMaxBiggestInt = (std::numeric_limits<BiggestInt>::max)();
 
 // This template class serves as a compile-time function from size to
 // type.  It maps a size in bytes to a primitive type with that
