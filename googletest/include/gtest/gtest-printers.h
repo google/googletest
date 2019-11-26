@@ -266,10 +266,8 @@ void DefaultPrintNonContainerTo(const T& value, ::std::ostream* os) {
   // 7.3.4-1 [namespace.udir].  This allows us to fall back onto
   // testing::internal2::operator<< in case T doesn't come with a <<
   // operator.
-  //
-  // We cannot write 'using ::testing::internal2::operator<<;', which
-  // gcc 3.3 fails to compile due to a compiler bug.
-  using namespace ::testing::internal2;  // NOLINT
+
+  using ::testing::internal2::operator<<;
 
   // Assuming T is defined in namespace foo, in the next statement,
   // the compiler will consider all of:
