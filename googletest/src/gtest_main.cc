@@ -27,7 +27,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <cstdio>
+#include <iostream>
 #include "gtest/gtest.h"
 
 #if GTEST_OS_ESP8266 || GTEST_OS_ESP32
@@ -45,9 +45,14 @@ void loop() { RUN_ALL_TESTS(); }
 #endif
 
 #else
+#if __MSC_VER
+# include <tchar.h>  // NOLINT
 
-GTEST_API_ int main(int argc, char **argv) {
-  printf("Running main() from %s\n", __FILE__);
+GTEST_API_ int _tmain(int argc, TCHAR** argv) {
+#else
+GTEST_API_ int main(int argc, char** argv) {
+#endif  // __MSC_VER
+  std::cout << "Running main() from " << __FILE__ << '\n';
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
