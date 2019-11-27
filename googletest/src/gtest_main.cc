@@ -45,13 +45,13 @@ void loop() { RUN_ALL_TESTS(); }
 #endif
 
 #else
-#if __MSC_VER
+#if _MSC_VER
 # include <tchar.h>  // NOLINT
 
 GTEST_API_ int _tmain(int argc, TCHAR** argv) {
 #else
 GTEST_API_ int main(int argc, char** argv) {
-#endif  // __MSC_VER
+#endif  // _MSC_VER
   std::cout << "Running main() from " << __FILE__ << '\n';
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
