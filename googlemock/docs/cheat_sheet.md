@@ -278,6 +278,12 @@ copy constructor, try wrap it in `ByRef()`, e.g.
 `Eq(ByRef(non_copyable_value))`. If you do that, make sure `non_copyable_value`
 is not changed afterwards, or the meaning of your matcher will be changed.
 
+`IsTrue` and `IsFalse` are useful when you need to use a matcher, or for types
+that can be explicitly converted to Boolean, but are not implicitly converted to
+Boolean. In other cases, you can use the basic
+[`EXPECT_TRUE` and `EXPECT_FALSE`](../../googletest/docs/primer#basic-assertions)
+assertions.
+
 #### Floating-Point Matchers {#FpMatchers}
 
 <!-- mdformat off(no multiline tables) -->
