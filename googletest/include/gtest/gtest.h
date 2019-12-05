@@ -412,8 +412,6 @@ class GTEST_API_ Test {
   // test in test case Foo.  Hence a sub-class can define its own
   // SetUpTestSuite() method to shadow the one defined in the super
   // class.
-  // Failures that happen during SetUpTestSuite are logged but otherwise
-  // ignored.
   static void SetUpTestSuite() {}
 
   // Tears down the stuff shared by all tests in this test suite.
@@ -422,8 +420,6 @@ class GTEST_API_ Test {
   // test in test case Foo.  Hence a sub-class can define its own
   // TearDownTestSuite() method to shadow the one defined in the super
   // class.
-  // Failures that happen during TearDownTestSuite are logged but otherwise
-  // ignored.
   static void TearDownTestSuite() {}
 
   // Legacy API is deprecated but still available
@@ -889,7 +885,9 @@ class GTEST_API_ TestSuite {
   bool Passed() const { return !Failed(); }
 
   // Returns true if and only if the test suite failed.
-  bool Failed() const { return failed_test_count() > 0; }
+  bool Failed() const {
+    return failed_test_count() > 0 || ad_hoc_test_result().Failed();
+  }
 
   // Returns the elapsed time, in milliseconds.
   TimeInMillis elapsed_time() const { return elapsed_time_; }
