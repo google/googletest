@@ -7446,22 +7446,7 @@ TEST(SkipPrefixTest, DoesNotSkipWhenPrefixDoesNotMatch) {
 }
 
 // Tests ad_hoc_test_result().
-
-class AdHocTestResultTest : public testing::Test {
- protected:
-  static void SetUpTestSuite() {
-    FAIL() << "A failure happened inside SetUpTestSuite().";
-  }
-};
-
-TEST_F(AdHocTestResultTest, AdHocTestResultForTestSuiteShowsFailure) {
-  const testing::TestResult& test_result = testing::UnitTest::GetInstance()
-                                               ->current_test_suite()
-                                               ->ad_hoc_test_result();
-  EXPECT_TRUE(test_result.Failed());
-}
-
-TEST_F(AdHocTestResultTest, AdHocTestResultTestForUnitTestDoesNotShowFailure) {
+TEST(AdHocTestResultTest, AdHocTestResultForUnitTestDoesNotShowFailure) {
   const testing::TestResult& test_result =
       testing::UnitTest::GetInstance()->ad_hoc_test_result();
   EXPECT_FALSE(test_result.Failed());
