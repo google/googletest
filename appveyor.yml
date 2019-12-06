@@ -8,6 +8,7 @@ environment:
       generator: "Visual Studio 15 2017"
       build_system: cmake
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      enabled_on_pr: yes
 
     - compiler: msvc-15-seh
       generator: "Visual Studio 15 2017 Win64"
@@ -28,6 +29,7 @@ environment:
     - compiler: msvc-14-seh
       build_system: cmake
       generator: "Visual Studio 14 2015 Win64"
+      enabled_on_pr: yes
 
     - compiler: gcc-6.3.0-posix
       build_system: cmake
