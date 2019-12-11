@@ -49,54 +49,6 @@ $$}} This meta comment fixes auto-indentation in editors.
 #include "gmock/gmock-actions.h"
 #include "gmock/internal/gmock-port.h"
 
-namespace testing {
-namespace internal {
-
-// A macro from the ACTION* family (defined later in this file)
-// defines an action that can be used in a mock function.  Typically,
-// these actions only care about a subset of the arguments of the mock
-// function.  For example, if such an action only uses the second
-// argument, it can be used in any mock function that takes >= 2
-// arguments where the type of the second argument is compatible.
-//
-// Therefore, the action implementation must be prepared to take more
-// arguments than it needs.  The ExcessiveArg type is used to
-// represent those excessive arguments.  In order to keep the compiler
-// error messages tractable, we define it in the testing namespace
-// instead of testing::internal.  However, this is an INTERNAL TYPE
-// and subject to change without notice, so a user MUST NOT USE THIS
-// TYPE DIRECTLY.
-struct ExcessiveArg {};
-
-// A helper class needed for implementing the ACTION* macros.
-template <typename Result, class Impl>
-class ActionHelper {
- public:
-$range i 0..n
-$for i
-
-[[
-$var template = [[$if i==0 [[]] $else [[
-$range j 0..i-1
-  template <$for j, [[typename A$j]]>
-]]]]
-$range j 0..i-1
-$var As = [[$for j, [[A$j]]]]
-$var as = [[$for j, [[std::get<$j>(args)]]]]
-$range k 1..n-i
-$var eas = [[$for k, [[ExcessiveArg()]]]]
-$var arg_list = [[$if (i==0) | (i==n) [[$as$eas]] $else [[$as, $eas]]]]
-$template
-  static Result Perform(Impl* impl, const ::std::tuple<$As>& args) {
-    return impl->template gmock_PerformImpl<$As>(args, $arg_list);
-  }
-
-]]
-};
-
-}  // namespace internal
-}  // namespace testing
-
 // The ACTION* family of macros can be used in a namespace scope to
 // define custom actions easily.  The syntax:
 //
