@@ -782,6 +782,13 @@ INSTANTIATE_TEST_SUITE_P(PrintingStrings,
                          testing::Values(std::string("a")),
                          ParamNameFunc);
 
+// fails under kErrorOnUninstantiatedParameterizedTest=true
+class DetectNotInstantiatedTest : public testing::TestWithParam<int> {};
+TEST_P(DetectNotInstantiatedTest, Used) { }
+
+// This would make the test failure from the above go away.
+// INSTANTIATE_TEST_SUITE_P(Fix, DetectNotInstantiatedTest, testing::Values(1));
+
 // This #ifdef block tests the output of typed tests.
 #if GTEST_HAS_TYPED_TEST
 
