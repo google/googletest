@@ -474,7 +474,8 @@ class ParameterizedTestSuiteInfoBase {
   GTEST_DISALLOW_COPY_AND_ASSIGN_(ParameterizedTestSuiteInfoBase);
 };
 
-void InsertSyntheticTestCase(const std::string &name, CodeLocation location);
+GTEST_API_ void InsertSyntheticTestCase(const std::string& name,
+                                        CodeLocation location);
 
 // INTERNAL IMPLEMENTATION - DO NOT USE IN USER CODE.
 //
