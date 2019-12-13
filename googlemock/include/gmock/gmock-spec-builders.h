@@ -1350,12 +1350,6 @@ class ReferenceOrValueWrapper<T&> {
   T* value_ptr_;
 };
 
-// MSVC warns about using 'this' in base member initializer list, so
-// we need to temporarily disable the warning.  We have to do it for
-// the entire class to suppress the warning, even though it's about
-// the constructor only.
-GTEST_DISABLE_MSC_WARNINGS_PUSH_(4355)
-
 // C++ treats the void type specially.  For example, you cannot define
 // a void-typed variable or pass a void value to a function.
 // ActionResultHolder<T> holds a value of type T, where T must be a
@@ -1785,8 +1779,6 @@ class FunctionMocker<R(Args...)> final : public UntypedFunctionMockerBase {
     }
   }
 };  // class FunctionMocker
-
-GTEST_DISABLE_MSC_WARNINGS_POP_()  //  4355
 
 // Reports an uninteresting call (whose description is in msg) in the
 // manner specified by 'reaction'.
