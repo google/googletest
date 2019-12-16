@@ -1731,9 +1731,13 @@ class FunctionMocker<R(Args...)> final : public UntypedFunctionMockerBase {
     g_gmock_mutex.AssertHeld();
     // See the definition of untyped_expectations_ for why access to
     // it is unprotected here.
-    for (auto& untyped_expectations : untyped_expectations_) {
+    for (typename UntypedExpectations::const_iterator it =
+            untyped_expectations_.end();
+        it != untyped_expectations_.begin(); --it) {
+      typename UntypedExpectations::const_iterator tmp = it;
+      --tmp;
       TypedExpectation<F>* const exp =
-          static_cast<TypedExpectation<F>*>(untyped_expectations.get());
+          static_cast<TypedExpectation<F>*>(tmp->get());
       if (exp->ShouldHandleArguments(args)) {
         return exp;
       }
