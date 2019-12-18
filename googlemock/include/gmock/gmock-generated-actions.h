@@ -1501,6 +1501,78 @@ namespace testing {
 //   InvokeArgument action from temporary values and have it performed
 //   later.
 
+namespace internal {
+namespace invoke_argument {
+
+// Appears in InvokeArgumentAdl's argument list to help avoid
+// accidental calls to user functions of the same name.
+struct AdlTag {};
+
+// InvokeArgumentAdl - a helper for InvokeArgument.
+// The basic overloads are provided here for generic functors.
+// Overloads for other custom-callables are provided in the
+// internal/custom/gmock-generated-actions.h header.
+
+template <typename R, typename F>
+R InvokeArgumentAdl(AdlTag, F f) {
+  return f();
+}
+template <typename R, typename F, typename A1>
+R InvokeArgumentAdl(AdlTag, F f, A1 a1) {
+  return f(a1);
+}
+template <typename R, typename F, typename A1, typename A2>
+R InvokeArgumentAdl(AdlTag, F f, A1 a1, A2 a2) {
+  return f(a1, a2);
+}
+template <typename R, typename F, typename A1, typename A2, typename A3>
+R InvokeArgumentAdl(AdlTag, F f, A1 a1, A2 a2, A3 a3) {
+  return f(a1, a2, a3);
+}
+template <typename R, typename F, typename A1, typename A2, typename A3,
+    typename A4>
+R InvokeArgumentAdl(AdlTag, F f, A1 a1, A2 a2, A3 a3, A4 a4) {
+  return f(a1, a2, a3, a4);
+}
+template <typename R, typename F, typename A1, typename A2, typename A3,
+    typename A4, typename A5>
+R InvokeArgumentAdl(AdlTag, F f, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) {
+  return f(a1, a2, a3, a4, a5);
+}
+template <typename R, typename F, typename A1, typename A2, typename A3,
+    typename A4, typename A5, typename A6>
+R InvokeArgumentAdl(AdlTag, F f, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) {
+  return f(a1, a2, a3, a4, a5, a6);
+}
+template <typename R, typename F, typename A1, typename A2, typename A3,
+    typename A4, typename A5, typename A6, typename A7>
+R InvokeArgumentAdl(AdlTag, F f, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6,
+    A7 a7) {
+  return f(a1, a2, a3, a4, a5, a6, a7);
+}
+template <typename R, typename F, typename A1, typename A2, typename A3,
+    typename A4, typename A5, typename A6, typename A7, typename A8>
+R InvokeArgumentAdl(AdlTag, F f, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6,
+    A7 a7, A8 a8) {
+  return f(a1, a2, a3, a4, a5, a6, a7, a8);
+}
+template <typename R, typename F, typename A1, typename A2, typename A3,
+    typename A4, typename A5, typename A6, typename A7, typename A8,
+    typename A9>
+R InvokeArgumentAdl(AdlTag, F f, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6,
+    A7 a7, A8 a8, A9 a9) {
+  return f(a1, a2, a3, a4, a5, a6, a7, a8, a9);
+}
+template <typename R, typename F, typename A1, typename A2, typename A3,
+    typename A4, typename A5, typename A6, typename A7, typename A8,
+    typename A9, typename A10>
+R InvokeArgumentAdl(AdlTag, F f, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6,
+    A7 a7, A8 a8, A9 a9, A10 a10) {
+  return f(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
+}
+}  // namespace invoke_argument
+}  // namespace internal
+
 ACTION_TEMPLATE(InvokeArgument,
                 HAS_1_TEMPLATE_PARAMS(int, k),
                 AND_0_VALUE_PARAMS()) {
