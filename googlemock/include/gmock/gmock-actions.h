@@ -1222,23 +1222,6 @@ class ActionHelper {
   }
 };
 
-namespace invoke_argument {
-
-// Appears in InvokeArgumentAdl's argument list to help avoid
-// accidental calls to user functions of the same name.
-struct AdlTag {};
-
-// InvokeArgumentAdl - a helper for InvokeArgument.
-// The basic overloads are provided here for generic functors.
-// Overloads for other custom-callables are provided in the
-// internal/custom/gmock-generated-actions.h header.
-
-template <typename R, typename F, typename... Args>
-R InvokeArgumentAdl(AdlTag, F f, Args&&... args) {
-  return f(std::forward<Args>(args)...);
-}
-
-}  // namespace invoke_argument
 }  // namespace internal
 
 }  // namespace testing
