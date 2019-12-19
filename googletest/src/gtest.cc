@@ -415,6 +415,7 @@ namespace {
 //
 // This configuration bit will likely be removed at some point.
 constexpr bool kErrorOnUninstantiatedParameterizedTest = false;
+constexpr bool kErrorOnUninstantiatedTypeParameterizedTest = false;
 
 // A test that fails at a given file/line location with a given message.
 class FailureTest : public Test {
@@ -465,6 +466,63 @@ void InsertSyntheticTestCase(const std::string &name, CodeLocation location) {
         return new FailureTest(location, message,
                                kErrorOnUninstantiatedParameterizedTest);
       });
+}
+
+void RegisterTypeParameterizedTestSuite(const char* test_suite_name,
+                                        CodeLocation code_location) {
+  GetUnitTestImpl()->type_parameterized_test_registry().RegisterTestSuite(
+      test_suite_name, code_location);
+}
+
+void RegisterTypeParameterizedTestSuiteInstantiation(const char* case_name) {
+  GetUnitTestImpl()
+      ->type_parameterized_test_registry()
+      .RegisterInstantiation(case_name);
+}
+
+void TypeParameterizedTestSuiteRegistry::RegisterTestSuite(
+    const char* test_suite_name, CodeLocation code_location) {
+  suites_.emplace(std::string(test_suite_name),
+                 TypeParameterizedTestSuiteInfo(code_location));
+}
+
+void TypeParameterizedTestSuiteRegistry::RegisterInstantiation(
+        const char* test_suite_name) {
+  auto it = suites_.find(std::string(test_suite_name));
+  if (it != suites_.end()) {
+    it->second.instantiated = true;
+  } else {
+    GTEST_LOG_(ERROR) << "Unknown type parameterized test suit '"
+                      << test_suite_name << "'";
+  }
+}
+
+void TypeParameterizedTestSuiteRegistry::CheckForInstantiations() {
+  for (const auto& testcase : suites_) {
+    if (testcase.second.instantiated) continue;
+
+    std::string message =
+        "Type paramaterized test suite " + testcase.first +
+        " is defined via REGISTER_TYPED_TEST_SUITE_P, but never instantiated "
+        "via INSTANTIATE_TYPED_TEST_SUITE_P. None of the test cases will run."
+        "\n\n"
+        "Ideally, TYPED_TEST_P definitions should only ever be included as "
+        "part of binaries that intend to use them. (As opposed to, for "
+        "example, being placed in a library that may be linked in to get other "
+        "utilities.)";
+
+    std::string full_name =
+        "UninstantiatedTypeParamaterizedTestSuite<" + testcase.first + ">";
+    RegisterTest(  //
+        "GoogleTestVerification", full_name.c_str(),
+        nullptr,  // No type parameter.
+        nullptr,  // No value parameter.
+        testcase.second.code_location.file.c_str(),
+        testcase.second.code_location.line, [message, testcase] {
+          return new FailureTest(testcase.second.code_location, message,
+                                 kErrorOnUninstantiatedTypeParameterizedTest);
+        });
+  }
 }
 
 // A copy of all command line arguments.  Set by InitGoogleTest().
@@ -2710,6 +2768,7 @@ namespace internal {
 void UnitTestImpl::RegisterParameterizedTests() {
   if (!parameterized_tests_registered_) {
     parameterized_test_registry_.RegisterTests();
+    type_parameterized_test_registry_.CheckForInstantiations();
     parameterized_tests_registered_ = true;
   }
 }
