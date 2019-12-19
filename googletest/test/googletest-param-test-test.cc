@@ -1072,6 +1072,11 @@ namespace works_here {
 // Never used not instantiated, this should work.
 class NotUsedTest : public testing::TestWithParam<int> {};
 
+///////
+// Never used not instantiated, this should work.
+template <typename T>
+class NotUsedTypeTest : public testing::Test {};
+TYPED_TEST_SUITE_P(NotUsedTypeTest);
 }  // namespace works_here
 
 int main(int argc, char **argv) {

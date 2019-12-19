@@ -876,6 +876,21 @@ class TypedTestPNames {
 INSTANTIATE_TYPED_TEST_SUITE_P(UnsignedCustomName, TypedTestP, UnsignedTypes,
                               TypedTestPNames);
 
+template <typename T>
+class DetectNotInstantiatedTypesTest : public testing::Test {};
+TYPED_TEST_SUITE_P(DetectNotInstantiatedTypesTest);
+TYPED_TEST_P(DetectNotInstantiatedTypesTest, Used) {
+  TypeParam instantiate;
+  (void)instantiate;
+}
+REGISTER_TYPED_TEST_SUITE_P(DetectNotInstantiatedTypesTest, Used);
+
+// kErrorOnUninstantiatedTypeParameterizedTest=true would make the above fail.
+// Adding the following would make that test failure go away.
+//
+// typedef ::testing::Types<char, int, unsigned int> MyTypes;
+// INSTANTIATE_TYPED_TEST_SUITE_P(All, DetectNotInstantiatedTypesTest, MyTypes);
+
 #endif  // GTEST_HAS_TYPED_TEST_P
 
 #if GTEST_HAS_DEATH_TEST
