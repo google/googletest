@@ -671,7 +671,7 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 // A macro to disallow copy operator=
 // This should be used in the private: declarations for a class.
 #define GTEST_DISALLOW_ASSIGN_(type) \
-  void operator=(type const &) = delete
+  type& operator=(type const &) = delete
 
 // A macro to disallow copy constructor and operator=
 // This should be used in the private: declarations for a class.
@@ -682,7 +682,7 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 // A macro to disallow move operator=
 // This should be used in the private: declarations for a class.
 #define GTEST_DISALLOW_MOVE_ASSIGN_(type) \
-  void operator=(type &&) = delete
+  type& operator=(type &&) = delete
 
 // A macro to disallow move constructor and operator=
 // This should be used in the private: declarations for a class.
