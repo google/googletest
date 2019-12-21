@@ -266,7 +266,7 @@ Matcher                     | Description
 | `IsTrue()`             | `argument` evaluates to `true` in a Boolean context. |
 | `IsNull()`             | `argument` is a `NULL` pointer (raw or smart).      |
 | `NotNull()`            | `argument` is a non-null pointer (raw or smart).    |
-| `Optional(m)`          | `argument` is `optional<>` that contains a value matching `m`. |
+| `Optional(m)`          | `argument` is `optional<>` that contains a value matching `m`. (For testing whether an `optional<>` is set, check for equality with `nullopt`. You may need to use `Eq(nullopt)` if the inner type doesn't have `==`.)|
 | `VariantWith<T>(m)`    | `argument` is `variant<>` that holds the alternative of type T with a value matching `m`. |
 | `Ref(variable)`        | `argument` is a reference to `variable`.            |
 | `TypedEq<type>(value)` | `argument` has type `type` and is equal to `value`. You may need to use this instead of `Eq(value)` when the mock function is overloaded. |
@@ -277,6 +277,12 @@ destructed later. If the compiler complains that `value` doesn't have a public
 copy constructor, try wrap it in `ByRef()`, e.g.
 `Eq(ByRef(non_copyable_value))`. If you do that, make sure `non_copyable_value`
 is not changed afterwards, or the meaning of your matcher will be changed.
+
+`IsTrue` and `IsFalse` are useful when you need to use a matcher, or for types
+that can be explicitly converted to Boolean, but are not implicitly converted to
+Boolean. In other cases, you can use the basic
+[`EXPECT_TRUE` and `EXPECT_FALSE`](../../googletest/docs/primer#basic-assertions)
+assertions.
 
 #### Floating-Point Matchers
 
@@ -327,7 +333,7 @@ The `argument` can be either a C string or a C++ string object:
 `ContainsRegex()` and `MatchesRegex()` take ownership of the `RE` object. They
 use the regular expression syntax defined
 [here](../../googletest/docs/advanced.md#regular-expression-syntax). All of
-these matchers, except `ContainsRegex()` and `MatchesRegex()` work for wide
+these matchers, except `ContainsRegex()` and `MatchesRegex()` work for wide<<<<<<< link
 strings as well.
 
 #### Container Matchers

@@ -29,7 +29,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-"""Tests the text output of Google C++ Testing and Mocking Framework.
+r"""Tests the text output of Google C++ Testing and Mocking Framework.
 
 To update the golden file:
 googletest_output_test.py --build_dir=BUILD/DIR --gengolden
@@ -331,7 +331,7 @@ if __name__ == '__main__':
     if CAN_GENERATE_GOLDEN_FILE:
       output = GetOutputOfAllCommands()
       golden_file = open(GOLDEN_PATH, 'wb')
-      golden_file.write(output)
+      golden_file.write(output.encode())
       golden_file.close()
     else:
       message = (

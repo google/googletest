@@ -65,6 +65,7 @@ cc_test(
             "googletest-output-test_.cc",
             "googletest-list-tests-unittest_.cc",
             "googletest-shuffle-test_.cc",
+            "googletest-setuptestsuite-test_.cc",
             "googletest-uninitialized-test_.cc",
             "googletest-death-test_ex_test.cc",
             "googletest-param-test-test",
@@ -420,6 +421,21 @@ py_test(
         ":gtest_xml_outfile1_test_",
         ":gtest_xml_outfile2_test_",
     ],
+    deps = [":gtest_test_utils"],
+)
+
+cc_binary(
+    name = "googletest-setuptestsuite-test_",
+    testonly = 1,
+    srcs = ["googletest-setuptestsuite-test_.cc"],
+    deps = ["//:gtest_main"],
+)
+
+py_test(
+    name = "googletest-setuptestsuite-test",
+    size = "medium",
+    srcs = ["googletest-setuptestsuite-test.py"],
+    data = [":googletest-setuptestsuite-test_"],
     deps = [":gtest_test_utils"],
 )
 

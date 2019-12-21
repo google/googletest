@@ -162,8 +162,8 @@ GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE_(unsigned int, 0U);
 GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE_(signed int, 0);
 GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE_(unsigned long, 0UL);  // NOLINT
 GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE_(signed long, 0L);     // NOLINT
-GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE_(UInt64, 0);
-GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE_(Int64, 0);
+GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE_(unsigned long long, 0);  // NOLINT
+GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE_(signed long long, 0);  // NOLINT
 GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE_(float, 0);
 GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE_(double, 0);
 
@@ -916,7 +916,8 @@ struct WithArgsAction {
   // We use the conversion operator to detect the signature of the inner Action.
   template <typename R, typename... Args>
   operator Action<R(Args...)>() const {  // NOLINT
-    Action<R(typename std::tuple_element<I, std::tuple<Args...>>::type...)>
+    using TupleType = std::tuple<Args...>;
+    Action<R(typename std::tuple_element<I, TupleType>::type...)>
         converted(action);
 
     return [converted](Args... args) -> R {
@@ -1182,6 +1183,46 @@ template <typename T>
 inline ::std::reference_wrapper<T> ByRef(T& l_value) {  // NOLINT
   return ::std::reference_wrapper<T>(l_value);
 }
+
+namespace internal {
+
+// A macro from the ACTION* family (defined later in gmock-generated-actions.h)
+// defines an action that can be used in a mock function.  Typically,
+// these actions only care about a subset of the arguments of the mock
+// function.  For example, if such an action only uses the second
+// argument, it can be used in any mock function that takes >= 2
+// arguments where the type of the second argument is compatible.
+//
+// Therefore, the action implementation must be prepared to take more
+// arguments than it needs.  The ExcessiveArg type is used to
+// represent those excessive arguments.  In order to keep the compiler
+// error messages tractable, we define it in the testing namespace
+// instead of testing::internal.  However, this is an INTERNAL TYPE
+// and subject to change without notice, so a user MUST NOT USE THIS
+// TYPE DIRECTLY.
+struct ExcessiveArg {};
+
+// A helper class needed for implementing the ACTION* macros.
+template <typename Result, class Impl>
+class ActionHelper {
+ public:
+  template <typename... Ts>
+  static Result Perform(Impl* impl, const std::tuple<Ts...>& args) {
+    return Apply(impl, args, MakeIndexSequence<sizeof...(Ts)>{},
+                 MakeIndexSequence<10 - sizeof...(Ts)>{});
+  }
+
+ private:
+  template <typename... Ts, std::size_t... tuple_ids, std::size_t... rest_ids>
+  static Result Apply(Impl* impl, const std::tuple<Ts...>& args,
+                      IndexSequence<tuple_ids...>, IndexSequence<rest_ids...>) {
+    return impl->template gmock_PerformImpl<Ts...>(
+        args, std::get<tuple_ids>(args)...,
+        ((void)rest_ids, ExcessiveArg())...);
+  }
+};
+
+}  // namespace internal
 
 }  // namespace testing
 

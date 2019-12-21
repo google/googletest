@@ -261,7 +261,7 @@ TEST(TestSuiteName, TestName) {
 
 `TEST()` arguments go from general to specific. The *first* argument is the name
 of the test suite, and the *second* argument is the test's name within the test
-case. Both names must be valid C++ identifiers, and they should not contain
+suite. Both names must be valid C++ identifiers, and they should not contain
 any underscores (`_`). A test's *full name* consists of its containing test suite and
 its individual name. Tests from different test suites can have the same
 individual name.

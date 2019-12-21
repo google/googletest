@@ -1024,9 +1024,8 @@ using ::testing::Lt;
 says that the first argument of `InRange()` must not be 0, and must be less than
 the second argument.
 
-The expression inside `With()` must be a matcher of type
-`Matcher< ::std::tuple<A1, ..., An> >`, where `A1`, ..., `An` are the types of
-the function arguments.
+The expression inside `With()` must be a matcher of type `Matcher<std::tuple<A1,
+..., An>>`, where `A1`, ..., `An` are the types of the function arguments.
 
 You can also write `AllArgs(m)` instead of `m` inside `.With()`. The two forms
 are equivalent, but `.With(AllArgs(Lt()))` is more readable than `.With(Lt())`.
@@ -1054,8 +1053,8 @@ complete list.
 
 Note that if you want to pass the arguments to a predicate of your own (e.g.
 `.With(Args<0, 1>(Truly(&MyPredicate)))`), that predicate MUST be written to
-take a `::std::tuple` as its argument; gMock will pass the `n` selected
-arguments as *one* single tuple to the predicate.
+take a `std::tuple` as its argument; gMock will pass the `n` selected arguments
+as *one* single tuple to the predicate.
 
 ### Using Matchers as Predicates
 
@@ -1331,11 +1330,11 @@ class BarPlusBazEqMatcher : public MatcherInterface<const Foo&> {
     return (foo.bar() + foo.baz()) == expected_sum_;
   }
 
-  void DescribeTo(::std::ostream* os) const override {
+  void DescribeTo(std::ostream* os) const override {
     *os << "bar() + baz() equals " << expected_sum_;
   }
 
-  void DescribeNegationTo(::std::ostream* os) const override {
+  void DescribeNegationTo(std::ostream* os) const override {
     *os << "bar() + baz() does not equal " << expected_sum_;
   }
  private:
@@ -3565,7 +3564,7 @@ class MatchResultListener {
   MatchResultListener& operator<<(const T& x);
 
   // Returns the underlying ostream.
-  ::std::ostream* stream();
+  std::ostream* stream();
 };
 
 template <typename T>
@@ -3578,10 +3577,10 @@ class MatcherInterface {
   virtual bool MatchAndExplain(T x, MatchResultListener* listener) const = 0;
 
   // Describes this matcher to an ostream.
-  virtual void DescribeTo(::std::ostream* os) const = 0;
+  virtual void DescribeTo(std::ostream* os) const = 0;
 
   // Describes the negation of this matcher to an ostream.
-  virtual void DescribeNegationTo(::std::ostream* os) const;
+  virtual void DescribeNegationTo(std::ostream* os) const;
 };
 ```
 
@@ -3609,11 +3608,11 @@ class DivisibleBy7Matcher : public MatcherInterface<int> {
     return (n % 7) == 0;
   }
 
-  void DescribeTo(::std::ostream* os) const override {
+  void DescribeTo(std::ostream* os) const override {
     *os << "is divisible by 7";
   }
 
-  void DescribeNegationTo(::std::ostream* os) const override {
+  void DescribeNegationTo(std::ostream* os) const override {
     *os << "is not divisible by 7";
   }
 };
@@ -3995,7 +3994,7 @@ ACTION_TEMPLATE(DuplicateArg,
                 // Note the comma between int and k:
                 HAS_2_TEMPLATE_PARAMS(int, k, typename, T),
                 AND_1_VALUE_PARAMS(output)) {
-  *output = T(::std::get<k>(args));
+  *output = T(std::get<k>(args));
 }
 ```
 
@@ -4087,7 +4086,7 @@ class ActionInterface {
   //
 
   // For example, if F is int(bool, const string&), then Result would
-  // be int, and ArgumentTuple would be ::std::tuple<bool, const string&>.
+  // be int, and ArgumentTuple would be std::tuple<bool, const string&>.
   virtual Result Perform(const ArgumentTuple& args) = 0;
 };
 ```
@@ -4102,8 +4101,8 @@ typedef int IncrementMethod(int*);
 
 class IncrementArgumentAction : public ActionInterface<IncrementMethod> {
  public:
-  int Perform(const ::std::tuple<int*>& args) override {
-    int* p = ::std::get<0>(args);  // Grabs the first argument.
+  int Perform(const std::tuple<int*>& args) override {
+    int* p = std::get<0>(args);  // Grabs the first argument.
     return *p++;
   }
 };
@@ -4148,8 +4147,8 @@ class ReturnSecondArgumentAction {
  public:
   template <typename Result, typename ArgumentTuple>
   Result Perform(const ArgumentTuple& args) const {
-    // To get the i-th (0-based) argument, use ::std::get(args).
-    return ::std::get<1>(args);
+    // To get the i-th (0-based) argument, use std::get(args).
+    return std::get<1>(args);
   }
 };
 ```

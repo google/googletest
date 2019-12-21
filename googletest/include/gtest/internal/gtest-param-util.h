@@ -42,12 +42,14 @@
 #include <memory>
 #include <set>
 #include <tuple>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
 #include "gtest/internal/gtest-internal.h"
 #include "gtest/internal/gtest-port.h"
 #include "gtest/gtest-printers.h"
+#include "gtest/gtest-test-part.h"
 
 namespace testing {
 // Input to a parameterized test name generator, describing a test parameter.
@@ -472,6 +474,9 @@ class ParameterizedTestSuiteInfoBase {
   GTEST_DISALLOW_COPY_AND_ASSIGN_(ParameterizedTestSuiteInfoBase);
 };
 
+GTEST_API_ void InsertSyntheticTestCase(const std::string& name,
+                                        CodeLocation location);
+
 // INTERNAL IMPLEMENTATION - DO NOT USE IN USER CODE.
 //
 // ParameterizedTestSuiteInfo accumulates tests obtained from TEST_P
@@ -522,11 +527,13 @@ class ParameterizedTestSuiteInfo : public ParameterizedTestSuiteInfoBase {
     return 0;  // Return value used only to run this method in namespace scope.
   }
   // UnitTest class invokes this method to register tests in this test suite
-  // test suites right before running tests in RUN_ALL_TESTS macro.
+  // right before running tests in RUN_ALL_TESTS macro.
   // This method should not be called more than once on any single
   // instance of a ParameterizedTestSuiteInfoBase derived class.
   // UnitTest has a guard to prevent from calling this method more than once.
   void RegisterTests() override {
+    bool generated_instantiations = false;
+
     for (typename TestInfoContainer::iterator test_it = tests_.begin();
          test_it != tests_.end(); ++test_it) {
       std::shared_ptr<TestInfo> test_info = *test_it;
@@ -549,6 +556,8 @@ class ParameterizedTestSuiteInfo : public ParameterizedTestSuiteInfoBase {
         for (typename ParamGenerator<ParamType>::iterator param_it =
                  generator.begin();
              param_it != generator.end(); ++param_it, ++i) {
+          generated_instantiations = true;
+
           Message test_name_stream;
 
           std::string param_name = name_func(
@@ -577,6 +586,11 @@ class ParameterizedTestSuiteInfo : public ParameterizedTestSuiteInfoBase {
         }  // for param_it
       }  // for gen_it
     }  // for test_it
+
+    if (!generated_instantiations) {
+      // There are no generaotrs, or they all generate nothing ...
+      InsertSyntheticTestCase(GetTestSuiteName(), code_location_);
+    }
   }    // RegisterTests
 
  private:
