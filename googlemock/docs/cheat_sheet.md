@@ -333,7 +333,7 @@ The `argument` can be either a C string or a C++ string object:
 `ContainsRegex()` and `MatchesRegex()` take ownership of the `RE` object. They
 use the regular expression syntax defined
 [here](../../googletest/docs/advanced.md#regular-expression-syntax). All of
-these matchers, except `ContainsRegex()` and `MatchesRegex()` work for wide<<<<<<< link
+these matchers, except `ContainsRegex()` and `MatchesRegex()` work for wide
 strings as well.
 
 #### Container Matchers
