@@ -706,6 +706,7 @@ class GTEST_API_ ExpectationBase {
   const char* file() const { return file_; }
   int line() const { return line_; }
   const char* source_text() const { return source_text_.c_str(); }
+  std::string extra_info() const { return extra_info_.str(); }
   // Returns the cardinality specified in the expectation spec.
   const Cardinality& cardinality() const { return cardinality_; }
 
@@ -718,6 +719,11 @@ class GTEST_API_ ExpectationBase {
   // expectation has occurred.
   void DescribeCallCountTo(::std::ostream* os) const
       GTEST_EXCLUSIVE_LOCK_REQUIRED_(g_gmock_mutex);
+
+  template<typename TYPE>
+  ::std::ostream& operator<<(const TYPE& obj) {
+      return extra_info_ << obj;
+  }
 
   // If this mock method has an extra matcher (i.e. .With(matcher)),
   // describes it to the ostream.
@@ -857,6 +863,7 @@ class GTEST_API_ ExpectationBase {
   const char* file_;          // The file that contains the expectation.
   int line_;                  // The line number of the expectation.
   const std::string source_text_;  // The EXPECT_CALL(...) source text.
+  ::std::ostringstream extra_info_; // extra context attached to the expectation.
   // True if and only if the cardinality is specified explicitly.
   bool cardinality_specified_;
   Cardinality cardinality_;            // The cardinality of the expectation.
@@ -1173,7 +1180,15 @@ class TypedExpectation : public ExpectationBase {
       // we warn the user when the WillOnce() clauses ran out.
       ::std::stringstream ss;
       DescribeLocationTo(&ss);
-      ss << "Actions ran out in " << source_text() << "...\n"
+
+      ss << "Actions ran out in " << source_text();
+
+      std::string context(extra_info());
+      if (context.size() > 0) {
+        ss << " with [" + context + "]";
+      }
+
+      ss << "...\n"
          << "Called " << count << " times, but only "
          << action_count << " WillOnce()"
          << (action_count == 1 ? " is" : "s are") << " specified - ";
@@ -1218,7 +1233,14 @@ class TypedExpectation : public ExpectationBase {
     }
 
     // Must be done after IncrementCount()!
-    *what << "Mock function call matches " << source_text() <<"...\n";
+    *what << "Mock function call matches " << source_text();
+
+    std::string context(extra_info());
+    if (context.size() > 0) {
+      *what << " with [" + context + "]";
+    }
+
+    *what << "...\n";
     return &(GetCurrentAction(mocker, args));
   }
 
@@ -1779,7 +1801,14 @@ class FunctionMocker<R(Args...)> final : public UntypedFunctionMockerBase {
       if (count > 1) {
         *why << "tried expectation #" << i << ": ";
       }
-      *why << expectation->source_text() << "...\n";
+      *why << expectation->source_text();
+
+      std::string context(expectation->extra_info());
+      if (context.size() > 0) {
+        *why << " with [" + context + "]";
+      }
+
+      *why << "...\n";
       expectation->ExplainMatchResultTo(args, why);
       expectation->DescribeCallCountTo(why);
     }
