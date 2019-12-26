@@ -779,6 +779,36 @@ TEST(MockMethodMockFunctionTest, AsStdFunctionWithReferenceParameter) {
 }
 
 
+namespace {
+
+template <typename Expected, typename F>
+static constexpr bool IsMockFunctionTemplateArgumentDeducedTo(const MockFunction<F>&) {
+  return std::is_same<F, Expected>::value;
+}
+
+} // namespace
+
+template <typename F>
+class MockMethodMockFunctionSignatureTest : public Test {
+};
+
+using MockMethodMockFunctionSignatureTypes = Types<
+  void(),
+  int(),
+  void(int),
+  int(int),
+  int(bool, int),
+  int(bool, char, int, int, int, int, int, char, int, bool)
+>;
+TYPED_TEST_SUITE(MockMethodMockFunctionSignatureTest, MockMethodMockFunctionSignatureTypes);
+
+TYPED_TEST(MockMethodMockFunctionSignatureTest, IsMockFunctionTemplateArgumentDeduced) {
+  using Argument = TypeParam;
+  MockFunction<Argument> foo;
+  EXPECT_TRUE(IsMockFunctionTemplateArgumentDeducedTo<Argument>(foo));
+}
+
+
 struct MockMethodSizes0 {
   MOCK_METHOD(void, func, ());
 };
