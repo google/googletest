@@ -2202,7 +2202,7 @@ class Helper {
       .WillOnce(&CalculateSum)
       .WillRepeatedly(Invoke(NewPermanentCallback(Sum3, 1)));
   EXPECT_CALL(foo, ComplexJob(_))
-      .WillOnce(Invoke(&helper, &Helper::ComplexJob));
+      .WillOnce(Invoke(&helper, &Helper::ComplexJob))
       .WillRepeatedly([](int x) { return x > 0; });
 
   foo.Sum(5, 6);         // Invokes CalculateSum(5, 6).
