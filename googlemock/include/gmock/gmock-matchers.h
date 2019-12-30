@@ -3169,6 +3169,8 @@ class BoundSecondMatcher {
   BoundSecondMatcher(const Tuple2Matcher& tm, const Second& second)
       : tuple2_matcher_(tm), second_value_(second) {}
 
+  BoundSecondMatcher(const BoundSecondMatcher& other) = default;
+
   template <typename T>
   operator Matcher<T>() const {
     return MakeMatcher(new Impl<T>(tuple2_matcher_, second_value_));
