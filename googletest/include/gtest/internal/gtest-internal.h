@@ -79,7 +79,16 @@
 #define GTEST_CONCAT_TOKEN_IMPL_(foo, bar) foo ## bar
 
 // Stringifies its argument.
-#define GTEST_STRINGIFY_(name) #name
+// Work around a bug in visual studio which doesn't accept code like this:
+//
+//   #define GTEST_STRINGIFY_(name) #name
+//   #define MACRO(a, b, c) ... GTEST_STRINGIFY_(a) ...
+//   MACRO(, x, y)
+//
+// Complaining about the argument to GTEST_STRINGIFY_ being empty.
+// This is allowed by the spec.
+#define GTEST_STRINGIFY_HELPER_(name, ...) #name
+#define GTEST_STRINGIFY_(...) GTEST_STRINGIFY_HELPER_(__VA_ARGS__, )
 
 namespace proto2 { class Message; }
 
