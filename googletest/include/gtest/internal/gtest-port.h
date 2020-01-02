@@ -190,8 +190,10 @@
 //   GTEST_AMBIGUOUS_ELSE_BLOCKER_ - for disabling a gcc warning.
 //   GTEST_ATTRIBUTE_UNUSED_  - declares that a class' instances or a
 //                              variable don't have to be used.
-//   GTEST_DISALLOW_ASSIGN_   - disables operator=.
+//   GTEST_DISALLOW_ASSIGN_   - disables copy operator=.
 //   GTEST_DISALLOW_COPY_AND_ASSIGN_ - disables copy ctor and operator=.
+//   GTEST_DISALLOW_MOVE_ASSIGN_   - disables move operator=.
+//   GTEST_DISALLOW_MOVE_AND_ASSIGN_ - disables move ctor and operator=.
 //   GTEST_MUST_USE_RESULT_   - declares that a function's result must be used.
 //   GTEST_INTENTIONAL_CONST_COND_PUSH_ - start code section where MSVC C4127 is
 //                                        suppressed (constant conditional).
@@ -666,16 +668,27 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 #endif
 
 
-// A macro to disallow operator=
+// A macro to disallow copy operator=
 // This should be used in the private: declarations for a class.
 #define GTEST_DISALLOW_ASSIGN_(type) \
-  void operator=(type const &) = delete
+  type& operator=(type const &) = delete
 
 // A macro to disallow copy constructor and operator=
 // This should be used in the private: declarations for a class.
 #define GTEST_DISALLOW_COPY_AND_ASSIGN_(type) \
   type(type const &) = delete; \
   GTEST_DISALLOW_ASSIGN_(type)
+
+// A macro to disallow move operator=
+// This should be used in the private: declarations for a class.
+#define GTEST_DISALLOW_MOVE_ASSIGN_(type) \
+  type& operator=(type &&) noexcept = delete
+
+// A macro to disallow move constructor and operator=
+// This should be used in the private: declarations for a class.
+#define GTEST_DISALLOW_MOVE_AND_ASSIGN_(type) \
+  type(type &&) noexcept = delete; \
+  GTEST_DISALLOW_MOVE_ASSIGN_(type)
 
 // Tell the compiler to warn about unused return values for functions declared
 // with this macro.  The macro should be used on function declarations
