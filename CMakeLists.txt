@@ -10,14 +10,14 @@ endif (POLICY CMP0048)
 project(googletest-distribution)
 set(GOOGLETEST_VERSION 1.10.0)
 
+
 if (CMAKE_VERSION VERSION_LESS "3.1")
-  add_definitions(-std=c++11)
+  add_definitions(-std=c++11 -D_POSIX_C_SOURCE=200809L)
 else()
   set(CMAKE_CXX_STANDARD 11)
   set(CMAKE_CXX_STANDARD_REQUIRED ON)
-  if(NOT CYGWIN)
-    set(CMAKE_CXX_EXTENSIONS OFF)
-  endif()
+  set(CMAKE_CXX_EXTENSIONS OFF)
+  add_compile_definitions(_POSIX_C_SOURCE=200809L)
 endif()
 
 enable_testing()
