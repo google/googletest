@@ -5337,7 +5337,7 @@ TEST_P(CodeLocationForTESTP, Verify) {
   VERIFY_CODE_LOCATION;
 }
 
-INSTANTIATE_TEST_SUITE_P(All, CodeLocationForTESTP, Values(0));
+INSTANTIATE_TEST_SUITE_P(, CodeLocationForTESTP, Values(0));
 
 template <typename T>
 class CodeLocationForTYPEDTEST : public Test {

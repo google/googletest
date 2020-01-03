@@ -96,6 +96,14 @@ INSTANTIATE_TEST_SUITE_P(PrintingFailingParams,
                          FailingParamTest,
                          testing::Values(2));
 
+// Tests that an empty value for the test suite basename yields just
+// the test name without any prior /
+class EmptyBasenameParamInst : public testing::TestWithParam<int> {};
+
+TEST_P(EmptyBasenameParamInst, Passes) { EXPECT_EQ(1, GetParam()); }
+
+INSTANTIATE_TEST_SUITE_P(, EmptyBasenameParamInst, testing::Values(1));
+
 static const char kGoldenString[] = "\"Line\0 1\"\nLine 2";
 
 TEST(NonfatalFailureTest, EscapesStringOperands) {
@@ -867,6 +875,21 @@ class TypedTestPNames {
 
 INSTANTIATE_TYPED_TEST_SUITE_P(UnsignedCustomName, TypedTestP, UnsignedTypes,
                               TypedTestPNames);
+
+template <typename T>
+class DetectNotInstantiatedTypesTest : public testing::Test {};
+TYPED_TEST_SUITE_P(DetectNotInstantiatedTypesTest);
+TYPED_TEST_P(DetectNotInstantiatedTypesTest, Used) {
+  TypeParam instantiate;
+  (void)instantiate;
+}
+REGISTER_TYPED_TEST_SUITE_P(DetectNotInstantiatedTypesTest, Used);
+
+// kErrorOnUninstantiatedTypeParameterizedTest=true would make the above fail.
+// Adding the following would make that test failure go away.
+//
+// typedef ::testing::Types<char, int, unsigned int> MyTypes;
+// INSTANTIATE_TYPED_TEST_SUITE_P(All, DetectNotInstantiatedTypesTest, MyTypes);
 
 #endif  // GTEST_HAS_TYPED_TEST_P
 

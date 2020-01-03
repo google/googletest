@@ -12,7 +12,7 @@ Expected equality of these values:
   3
 Stack trace: (omitted)
 
-[0;32m[==========] [mRunning 85 tests from 40 test suites.
+[0;32m[==========] [mRunning 87 tests from 41 test suites.
 [0;32m[----------] [mGlobal test environment set-up.
 FooEnvironment::SetUp() called.
 BarEnvironment::SetUp() called.
@@ -966,6 +966,9 @@ Expected equality of these values:
 Stack trace: (omitted)
 
 [0;31m[  FAILED  ] [mPrintingFailingParams/FailingParamTest.Fails/0, where GetParam() = 2
+[0;32m[----------] [m1 test from EmptyBasenameParamInst
+[0;32m[ RUN      ] [mEmptyBasenameParamInst.Passes/0
+[0;32m[       OK ] [mEmptyBasenameParamInst.Passes/0
 [0;32m[----------] [m2 tests from PrintingStrings/ParamTest
 [0;32m[ RUN      ] [mPrintingStrings/ParamTest.Success/a
 [0;32m[       OK ] [mPrintingStrings/ParamTest.Success/a
@@ -979,12 +982,17 @@ Expected failure
 Stack trace: (omitted)
 
 [0;31m[  FAILED  ] [mPrintingStrings/ParamTest.Failure/a, where GetParam() = "a"
-[0;32m[----------] [m1 test from GoogleTestVerification
+[0;32m[----------] [m2 tests from GoogleTestVerification
 [0;32m[ RUN      ] [mGoogleTestVerification.UninstantiatedParamaterizedTestSuite<DetectNotInstantiatedTest>
 Paramaterized test suite DetectNotInstantiatedTest is defined via TEST_P, but never instantiated. None of the test cases will run. Either no INSTANTIATE_TEST_SUITE_P is provided or the only ones provided expand to nothing.
 
 Ideally, TEST_P definitions should only ever be included as part of binaries that intend to use them. (As opposed to, for example, being placed in a library that may be linked in to get other utilities.)
 [0;32m[       OK ] [mGoogleTestVerification.UninstantiatedParamaterizedTestSuite<DetectNotInstantiatedTest>
+[0;32m[ RUN      ] [mGoogleTestVerification.UninstantiatedTypeParamaterizedTestSuite<DetectNotInstantiatedTypesTest>
+Type paramaterized test suite DetectNotInstantiatedTypesTest is defined via REGISTER_TYPED_TEST_SUITE_P, but never instantiated via INSTANTIATE_TYPED_TEST_SUITE_P. None of the test cases will run.
+
+Ideally, TYPED_TEST_P definitions should only ever be included as part of binaries that intend to use them. (As opposed to, for example, being placed in a library that may be linked in to get other utilities.)
+[0;32m[       OK ] [mGoogleTestVerification.UninstantiatedTypeParamaterizedTestSuite<DetectNotInstantiatedTypesTest>
 [0;32m[----------] [mGlobal test environment tear-down
 BarEnvironment::TearDown() called.
 googletest-output-test_.cc:#: Failure
@@ -998,8 +1006,8 @@ Failed
 Expected fatal failure.
 Stack trace: (omitted)
 
-[0;32m[==========] [m85 tests from 40 test suites ran.
-[0;32m[  PASSED  ] [m31 tests.
+[0;32m[==========] [m87 tests from 41 test suites ran.
+[0;32m[  PASSED  ] [m33 tests.
 [0;31m[  FAILED  ] [m54 tests, listed below:
 [0;31m[  FAILED  ] [mNonfatalFailureTest.EscapesStringOperands
 [0;31m[  FAILED  ] [mNonfatalFailureTest.DiffForLongStrings

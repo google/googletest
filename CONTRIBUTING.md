@@ -80,7 +80,7 @@ fairly rigid coding style, as defined by the
 will be expected to conform to the style outlined
 [here](https://google.github.io/styleguide/cppguide.html). Use
 [.clang-format](https://github.com/google/googletest/blob/master/.clang-format)
-to check your formatting
+to check your formatting.
 
 ## Requirements for Contributors
 
