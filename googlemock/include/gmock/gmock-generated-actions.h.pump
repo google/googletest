@@ -506,32 +506,6 @@ namespace testing {
 //   InvokeArgument action from temporary values and have it performed
 //   later.
 
-namespace internal {
-namespace invoke_argument {
-
-// Appears in InvokeArgumentAdl's argument list to help avoid
-// accidental calls to user functions of the same name.
-struct AdlTag {};
-
-// InvokeArgumentAdl - a helper for InvokeArgument.
-// The basic overloads are provided here for generic functors.
-// Overloads for other custom-callables are provided in the
-// internal/custom/gmock-generated-actions.h header.
-
-$range i 0..n
-$for i
-[[
-$range j 1..i
-
-template <typename R, typename F[[$for j [[, typename A$j]]]]>
-R InvokeArgumentAdl(AdlTag, F f[[$for j [[, A$j a$j]]]]) {
-  return f([[$for j, [[a$j]]]]);
-}
-]]
-
-}  // namespace invoke_argument
-}  // namespace internal
-
 $range i 0..n
 $for i [[
 $range j 0..i-1
@@ -540,9 +514,8 @@ ACTION_TEMPLATE(InvokeArgument,
                 HAS_1_TEMPLATE_PARAMS(int, k),
                 AND_$i[[]]_VALUE_PARAMS($for j, [[p$j]])) {
   using internal::invoke_argument::InvokeArgumentAdl;
-  return InvokeArgumentAdl<return_type>(
-      internal::invoke_argument::AdlTag(),
-      ::std::get<k>(args)$for j [[, p$j]]);
+  return InvokeArgumentAdl(internal::invoke_argument::AdlTag(),
+                           ::std::get<k>(args)$for j[[, p$j]]);
 }
 
 ]]
