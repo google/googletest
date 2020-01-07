@@ -29,7 +29,7 @@ class MockFoo : public Foo {
 };
 ```
 
-이 때, uninteresting call을 무시하려면 "nice" mock object로 생성하면 된다. 반대로 모든 uninteresting call을 failure로 처리하려면 "strict" mock object로 생성하면 된다.
+이 때, uninteresting call을 아예 무시하려면 "nice" mock으로 생성해야 하고 uninteresting call을 경고로 처리하려면 "naggy" mock으로 생성하면 된다. 마지막으로 모든 uninteresting call을 failure로 처리하려면 "strict" mock으로 생성해야 한다.
 
 ```cpp
 using ::testing::NiceMock;
@@ -40,6 +40,8 @@ NiceMock<MockFoo> nice_foo;      // The type is a subclass of MockFoo.
 NaggyMock<MockFoo> naggy_foo;    // The type is a subclass of MockFoo.
 StrictMock<MockFoo> strict_foo;  // The type is a subclass of MockFoo.
 ```
+
+**Note:** 현 시점에서 mock object의 기본설정은 naggy이지만 미래에 nice로 변경될 가능성도 있다.
 
 #### Class Template Mocking하기
 
@@ -64,9 +66,9 @@ class MockStack : public StackInterface<Elem> {
 };
 ```
 
-#### Mock Function의 호출방식 명세하기
+#### Mock Function의 호출 규약 명세하기
 
-만약 mocking 대상이 기본적인 호출방식을 사용하지 않는다면, 이를 gMock에 알려줘야 한다. 예를 들어 Windows의 `STDMETHODCALLTYPE` 같은 경우에는 `ULONG STDMETHODCALLTYPE AddRef()`과 같은 형태로 function이 선언된다. 사용자는 gMock이 이러한 내용을 알 수 있도록 `MOCK_METHOD`의 4번째 parameter를 통해 관련내용을 전달해야 한다.
+만약 mocking 대상이 기본적인 호출 규약을 사용하지 않는다면, 이를 gMock에 알려줘야 한다. 예를 들어 Windows의 `STDMETHODCALLTYPE` 같은 경우에는 `ULONG STDMETHODCALLTYPE AddRef()`과 같은 형태로 function이 선언된다. 사용자는 gMock이 이러한 내용을 알 수 있도록 `MOCK_METHOD`의 4번째 parameter를 통해 관련내용을 전달해야 한다.
 
 ```cpp
   MOCK_METHOD(bool, Foo, (int n), (Calltype(STDMETHODCALLTYPE)));
@@ -108,7 +110,7 @@ TEST(BarTest, DoesThis) {
 
 ### Default Action 설정하기
 
-gMock은 `void`, `bool`, 숫자형, 포인터 등을 return type으로 하는 function에 대해서는 **built-in default action**을 기본적으로 제공하고 있다.
+gMock은 `void`, `bool`, 숫자형, 포인터 등을 return type으로 하는 function에 대해서는 **built-in default action**을 기본적으로 제공하고 있다. 또한, 빌드환경이 C++11 이면서 주어진 타입에 대한 default-constructed value가 존재한다면 그 값을 반환해준다.
 
 다음으로 임의의 타입 `T`에 대한 default action을 전역적으로 변경하려면 아래 기능을 사용하면 된다.
 
@@ -171,11 +173,17 @@ EXPECT_CALL(mock-object, method (matchers)?)
      .RetiresOnSaturation();        ?
 ```
 
-만약 `(matchers)` 부분이 없다면 어떤 argument가 와도 괜찮다는 의미의 `(_,_,_,_)`와 동일하게 동작한다.
+위 예시의 `?`는 해당 clause가 최대 한 번 사용될 수 있음을 의미하며 `*`는 횟수에 제한이 없음을 의미한다.
+
+`EXPECT_CALL`은 expectation을 설정하는 역할을 수행한다. 따라서 `EXPECT_CALL`은 실제 호출보다 앞서서 수행되어야만 한다. 
+
+`(matchers)`에는 `method`의 argument의 개수와 동일한 개수의 matcher들이 comma로 구분되어 들어간다. 이것은 expectation이 사용되는 시점에 `(matchers)`에 포함된 모든 matcher를 만족해야만 `method`가 호출됨을 뜻한다.
+
+만약 `(matchers)` 부분이 없다면 어떤 argument가 와도 괜찮다는 의미의 anything matcher가 expectation으로 설정된다. (예를 들어서 argument가 4개라면 `(_,_,_,_)`와 같이 설정된다.)
 
 위에서 `Times()`를 설정하지 않은 경우에는 아래와 같이 호출횟수가 결정된다.
 
-- `WillOnce()`와 `WillRepeatedly()` 둘 다 없는 경우, `Times(1)`이 된다.
+- `WillOnce()`와 `WillRepeatedly()` 둘 다 없는 경우에는 `Times(1)`이 된다.
 - `WillOnce()`가 `n`개 있고 `WillRepeatedly()`가 없다면 `Times(n)`이 된다. (`n` >=1)
 - `WillOnce() `가 `n`개 있고 `WillRepeatedly()`가 있다면 `Times(AtLeast(n))`이 된다. (`n` >=0)
 
@@ -184,6 +192,8 @@ EXPECT_CALL(mock-object, method (matchers)?)
 ### Matchers
 
 하나의 **Matcher**는 *하나의* argument를 비교하기 위한 목적으로 사용한다. 주로 `ON_CALL()`이나 `EXPECT_CALL()`과 함께 사용하며 `EXPECT_THAT()`을 통해 값을 직접 검증하는 것도 가능하다.
+
+#### Matcher를 Test Assertion처럼 사용하기
 
 | Matcher                              | Description                                                  |
 | :----------------------------------- | :----------------------------------------------------------- |
@@ -255,7 +265,7 @@ String matcher로 전달가능한 `argument`는 C string이나 C++ string object
 
 #### Container Matchers
 
-STL-style container들은 대부분 `==` 연산자를 제공하고 있다. 따라서 `Eq(expected_container)` 또는 `foo(expected_container)`와 같이 구현하면 별다른 조치를 취하지 않더라도 잘 동작할 것이다. 혹시나 보다 다양한 방법으로 container를 비교하고 싶은 사용자는 아래 표를 확인하기 바란다. 이렇게 추가적으로 제공되는 matcher를 통해서 사용자가 처한 상황에 맞게 좀 더 유연한 방법을 선택할 수 있을 것이다.
+STL-style container들은 대부분 `==` 연산자를 제공하고 있다. 따라서 `Eq(expected_container)` 또는 간단하게 `expected_container`만 사용해도 container 비교를 정확하게 수행할 것이다. 혹시나 보다 다양한 방법으로 container를 비교하고 싶은 사용자는 아래 표를 확인하기 바란다. 이렇게 추가적으로 제공되는 matcher를 통해서 사용자가 처한 상황에 맞게 좀 더 유연한 방법을 선택할 수 있을 것이다.
 
 
 | Matcher                                                      | Description                                                  |
@@ -264,17 +274,15 @@ STL-style container들은 대부분 `==` 연산자를 제공하고 있다. 따�
 | `ContainerEq(container)`                                     | 기본적인 동작은 `Eq(container)`와 유사하다. 단, failure message에 어떤 element가 서로 다른지와 같은 추가정보를 출력해준다. |
 | `Contains(e)`                                                | argument로 전달된 container에 `e`를 만족하는 element가 있는지 확인한다. 여기서 `e`는 값일 수도 있고 matcher일 수도 있다. |
 | `Each(e)`                                                    | argument로 전달된 container의 *모든* element가 `e`를 만족해야 한다. 여기서 `e`는 값일 수도 있고 matcher일 수도 있다. |
-| `IsEmpty()`                                                  | argument로 전달된 container에 element가 하나도 없기를 기대한다. (`container.empty()`) |
-| `IsTrue()`                                                   | argument로 전달된 container가 `true`이기를 기대한다. 단, container가 boolean 타입으로 사용가능한 경우만 해당된다. |
-| `IsFalse()`                                                  | argument로 전달된 container가 `false`이기를 기대한다. 단, container가 boolean 타입으로 사용가능한 경우만 해당된다. |
-| `SizeIs(m)`                                                  | argument로 전달된 container의 size가 matcher `m`을 만족하는지 확인한다. `SizeIs(2)` 또는 `SizeIs(Lt(2))`와 같이 사용할 수 있다. |
 | `ElementsAre(e0, e1, ..., en)`                               | argument로 전달된 container의 element들이 `e0`, `...`, `en`을 각각 만족하는지 비교한다. 여기서 `e`는 값일 수도 있고 matcher일 수도 있다. 허용되는 element 개수는 0~10개 까지이다. |
 | `ElementsAreArray({ e0, e1, ..., en })`, `ElementsAreArray(a_container)`, `ElementsAreArray(begin, end)`, `ElementsAreArray(array)`, `ElementsAreArray(array, count)` | 기본적인 동작은 `ElementsAre()`과 유사하다. 단, `e0`, `e1`과 같은 expected element를 initializer_list, STL-style container, C-style array와 같은 다양한 방법으로 전달할 수 있다. |
-| `UnorderedElementsAre(e0, e1, ..., en)`                      | 기본적인 동작은 `ElementsAre()`과 유사하다. 단, `argument`와 parameter의 element들을 순서대로 비교하지는 않는다. |
-| `UnorderedElementsAreArray({ e0, e1, ..., en })`, `UnorderedElementsAreArray(a_container)`, `UnorderedElementsAreArray(begin, end)`, `UnorderedElementsAreArray(array)`, `UnorderedElementsAreArray(array, count)` | 기본적인 동작은 `UnorderedElementsAre()`과 유사하다. 단, `e0`, `e1`과 같은 expected element를 initializer_list, STL-style container, C-style array와 같은 다양한 방법으로 전달할 수 있다. |
+| `IsEmpty()`                                                  | argument로 전달된 container에 element가 하나도 없기를 기대한다. (`container.empty()`) |
 | `IsSubsetOf({e0, e1, ..., en})`, `IsSubsetOf(a_container)`, `IsSubsetOf(begin, end)`,  `IsSubsetOf(array)`, `IsSubsetOf(array, count)` | "argument container" ⊂ "expected container"                  |
 | `IsSupersetOf({e0, e1, ..., en})`, `IsSupersetOf(a_container)`, `IsSupersetOf(begin, end)`, `IsSupersetOf(array)`, `IsSupersetOf(array, count)` | "argument container" ⊃ "expected container"                  |
-| `Pointwise(m, container)`                                    | argument로 전달된 container의 element 개수와 `container`의 element 개수가 같아야 한다. 이 때 2개의 container에 속한 모든 element들이 matcher `m`을 통해 비교된다. 이 때, 양측의 element는 2-tuples 형태로 matcher `m`에 전달된다. 예를 들어 `Pointwise(Le(), upper_bounds)`라는 코드가 있다면 이는 argument로 전달된 container의 element가 `upper_bounds`에 속한 element보다 작은지를 확인하게 된다. `Pointwise`와 관련해서는 표 아랫부분에도 추가적인 설명이 있다. |
+| `Pointwise(m, container)`, `Pointwise(m, {e0, e1, ..., en})` | argument로 전달된 container의 element 개수와 `container`의 element 개수가 같아야 한다. 이 때 2개의 container에 속한 모든 element들이 matcher `m`을 통해 비교된다. 이 때, 양측의 element는 2-tuples 형태로 matcher `m`에 전달된다. 예를 들어 `Pointwise(Le(), upper_bounds)`라는 코드가 있다면 이는 argument로 전달된 container의 element가 `upper_bounds`에 속한 element보다 작은지를 확인하게 된다. `Pointwise`와 관련해서는 표 아랫부분에도 추가적인 설명이 있다. |
+| `SizeIs(m)`                                                  | argument로 전달된 container의 size가 matcher `m`을 만족하는지 확인한다. `SizeIs(2)` 또는 `SizeIs(Lt(2))`와 같이 사용할 수 있다. |
+| `UnorderedElementsAre(e0, e1, ..., en)`                      | 기본적인 동작은 `ElementsAre()`과 유사하다. 단, `argument`와 parameter의 element들을 순서대로 비교하지는 않는다. |
+| `UnorderedElementsAreArray({ e0, e1, ..., en })`, `UnorderedElementsAreArray(a_container)`, `UnorderedElementsAreArray(begin, end)`, `UnorderedElementsAreArray(array)`, `UnorderedElementsAreArray(array, count)` | 기본적인 동작은 `UnorderedElementsAre()`과 유사하다. 단, `e0`, `e1`과 같은 expected element를 initializer_list, STL-style container, C-style array와 같은 다양한 방법으로 전달할 수 있다. |
 | `UnorderedPointwise(m, container)`, `UnorderedPointwise(m, {e0, e1, ..., en})` | 기본적인 동작은 `Pointwise(m, container)`와 유사하다. 단, element들을 순서대로 비교하지 않는다. 순서에 관계없이 matcher `m`을 만족하면 된다. |
 | `WhenSorted(m)`                                              | argument로 전달된 container의 element들을 `<`operator 를 통해서 정렬하고(오름차순) 그 결과를 matcher `m`을 통해 비교한다. 이 때, 정렬은 gMock에서 자동으로 해준다. 예를 들어 `WhenSorted(ElementsAre(1,2,3))`라는 코드는 argument로 `1, 2, 3` 혹은 `2, 3, 1`과 같은 값들이 전달되어야 만족하게 된다. |
 | `WhenSortedBy(comparator, m)`                                | 기본적인 동작은 `WhenSorted(m)`와 유사하지만 정렬방식을 변경할 수 있다. 예를 들어 `WhenSortedBy(std::greater<int>(), ElementsAre(3,2,1))`과 같이 사용하면 내림차순으로 정렬한 결과를 비교하게 된다. |
@@ -285,7 +293,7 @@ STL-style container들은 대부분 `==` 연산자를 제공하고 있다. 따�
   1. 참조형식으로 전달되는 native array (예: `Foo(const int (&a)[5])`)
   2. pointer + array size 형태로 array를 사용할 때 (예: `Bar(const T* buffer, int len)` -- 자세한 사용방법은 [multi-argument matchers](#multi-argument-matchers)에서 확인)
 - Multi-dimensional array에도 사용 가능 (예: container의 element 각각이 array인 경우)
-- `Pointwise(m, ...)`에 사용하기 위한 `m`을 구현할 때는 `::testing::tuple<T, U>`라는 tuple을 전달받아서 `T`, `U`를 비교하는 형태가 되어야 한다. 여기서 `T`와 `U`는 각각 actual container(argument)의 element type과 expected container(parameter)의 element type을 의미한다. 예를 들어, `Foo`라는 타입이 `operator==` 없이 `Equals()`이라는 method만 제공한다면 해당 타입 2개를 비교하는 matcher는 아래처럼 구현하면 된다.
+- `Pointwise(m, ...)`에 사용하기 위한 `m`을 구현할 때는 `::std::tuple<T, U>`라는 tuple을 전달받아서 `T`, `U`를 비교하는 형태가 되어야 한다. 여기서 `T`와 `U`는 각각 actual container(argument)의 element type과 expected container(parameter)의 element type을 의미한다. 예를 들어, `Foo`라는 타입이 `operator==` 없이 `Equals()`이라는 method만 제공한다면 해당 타입 2개를 비교하는 matcher는 아래처럼 구현하면 된다.
 
 ```cpp
 using ::std::get;
@@ -370,20 +378,13 @@ EXPECT_THAT(actual_foos, Pointwise(FooEq(), expected_foos));
 | :----------------------------------------------------------- | :----------------------------------------------------------- |
 | `MATCHER(IsEven, "") { return (arg % 2) == 0; }`             | argument가 짝수인지 확인하는 `IsEven()`이라는 matcher를 정의한 것이다. |
 | `MATCHER_P(IsDivisibleBy, n, "") { *result_listener << "where the remainder is " << (arg % n); return (arg % n) == 0; }` | argument가 `n`으로 나누어 떨어지는지 확인하는 `IsDivisibleBy(n)`이라는 matcher를 정의한 것이다. |
-| `MATCHER_P2(IsBetween, a, b, std::string(negation ? "isn't" : "is") + " between " + PrintToString(a) + " and " + PrintToString(b)) { return a <= arg && arg <= b; }` | argument가 a보다 크고, b보다 작은지 확인하는 `IsBetween(a, b)`이라는 matcher를 정의한 것이다. |
+| `MATCHER_P2(IsBetween, a, b, std::string(negation ? "isn't" : "is") + " between " + PrintToString(a) + " and " + PrintToString(b)) { return a <= arg && arg <= b; }` | argument가 a보다 크고, b보다 작거나 같은지 확인하는 `IsBetween(a, b)`이라는 matcher를 정의한 것이다. |
 
 **Notes:**
 
   1. `MATCHER*` macro는 function이나 class 내부에서는 사용하면 안 된다.
   1. Matcher의 body`{}`를 구현할때는 *purely functional*하게 구현해야 하며 어떤 side-effect도 가지면 안 된다. 즉, 순수하게 matcher로 전달되는 argument와 parameter의 값을 읽고 비교해서 그 결과를 알려주는 동작만 수행해야 한다. 또한, 프로그램의 다른 부분을 수정해서는 안 되며 argument, parameter를 제외한 외부의 다른 정보에 영향을 받아서도 안 된다. 자신의 기능만 독립적으로 수행해야 한다.
   1. `PrintToString(x)`를 사용하면 `x`가 어떤 타입이라도 string으로 변환시킬 수 있다.
-
-#### Matcher를 Test Assertion처럼 사용하기
-
-| Matcher                      | Description                                                  |
-| :--------------------------- | :----------------------------------------------------------- |
-| `ASSERT_THAT(expression, m)` | `expression`의 값이 matcher `m`을 만족하지 않는다면 [fatal failure](../../../../googletest/docs/translations/ko_KR/primer.md#basic-assertions)를 발생시킨다. |
-| `EXPECT_THAT(expression, m)` | `expression`의 값이 matcher `m`을 만족하지 않는다면 non-fatal failure를 발생시킨다. |
 
 ### Actions
 
@@ -394,7 +395,7 @@ EXPECT_THAT(actual_foos, Pointwise(FooEq(), expected_foos));
 | Action                      | Description                                                  |
 | :-------------------------- | :----------------------------------------------------------- |
 | `Return()`                  | Mock function은 `void` 타입을 반환하면서 종료한다.           |
-| `Return(value)`             | Mock function은 `value`를 반환하면서 종료한다. 만약, mock function의 본래 return type과 `value`의 타입이 서로 다르다면, value의 타입을 선택하게 된다. |
+| `Return(value)`             | Mock function은 `value`를 반환하면서 종료한다. 만약, mock function의 본래 return type과 `value`의 타입이 다르다면 `value`의 타입이 mock function의 return type으로 변환된다. 더불어 이러한 형변환은 action이 실행되는 시점이 아니라 expectation이 설정되는 시점에 이뤄진다. |
 | `ReturnArg<N>()`            | Mock function으로 전달된 `N`번째(0부터 시작) argument를 반환한다. |
 | `ReturnNew<T>(a1, ..., ak)` | `new T(a1, ..., ak)`를 반환한다. Action이 수행될 때마다 매번 새로 생성된다. |
 | `ReturnNull()`              | Null pointer를 반환한다.                                     |
@@ -414,17 +415,18 @@ EXPECT_THAT(actual_foos, Pointwise(FooEq(), expected_foos));
 | `SetArgPointee<N>(value)`          | `N`번째(0부터 시작) argument가 가리키는 변수에 `value`를 저장한다. |
 | `SetArgumentPointee<N>(value)`     | `SetArgPointee<N>(value)`과 동일하지만 deprecated 되었습니다. gMock v1.7.0 이후에 삭제될 예정이다. |
 | `SetArrayArgument<N>(first, last)` | [`first`, `last`)에 저장되어 있는 값을 `N`번째(0부터 시작) argument가 가리키는 array에 저장한다. Array는 pointer 혹은 iterator가 될 수 있다. 이 때, action은 [`first`, `last`) 가 가리키는 값을 직접 소유하지는 않는다. |
-| `SetErrnoAndReturn(error, value)`  | `error`에 `errno`를 저장하고, `value`를 반환한다.            |
+| `SetErrnoAndReturn(error, value)`  | `errno`에 `error`를 저장하고 `value`를 반환한다.             |
 | `Throw(exception)`                 | `expection`을 던진다. 이 때, `exception`은 복사가능해야 한다. (gMock v1.1.0 이후부터 적용) |
 
 #### Callable(Function, Functor, Lambda, Callback)을 Action처럼 사용하기
 
 | Action                                              | Description                                                  |
 | :-------------------------------------------------- | :----------------------------------------------------------- |
-| `Invoke(f)`                                         | `f`를 호출한다. mock function이 전달받은 argument를 `f`에 그대로 전달한다. |
-| `Invoke(object_pointer, &class::method)`            | `class::method`를 호출한다. mock function이 전달받은 argument를 `class:method`에 그대로 전달한다. |
-| `InvokeWithoutArgs(f)`                              | `f`를 호출한다. 이 때 mock function이 전달받은 argument는 전달하지 않는다. |
-| `InvokeWithoutArgs(object_pointer, &class::method)` | `class::method`를 호출한다. 이 때 mock function이 전달받은 argument는 전달하지 않는다. |
+| `f`                                                 | `f`를 호출한다. 이 때 mock function이 전달받은 argument를 `f`에 그대로 전달한다. `f`가 callable인 경우이다. |
+| `Invoke(f)`                                         | `f`를 호출한다. 이 때 mock function이 전달받은 argument를 `f`에 그대로 전달한다. `f`는 global/static function 또는 functor가 될 수 있다. |
+| `Invoke(object_pointer, &class::method)`            | `class::method`를 호출한다. 이 때 mock function이 전달받은 argument를 `class:method`에 그대로 전달한다. |
+| `InvokeWithoutArgs(f)`                              | `f`를 호출한다. 이 때 mock function이 전달받은 argument를 전달하지는 않는다. |
+| `InvokeWithoutArgs(object_pointer, &class::method)` | `class::method`를 호출한다. 이 때 mock function이 전달받은 argument는 전달하지는 않는다. |
 | `InvokeArgument<N>(arg1, arg2, ..., argk)`          | Mock function의 `N`번째 argument(0부터 시작)를 호출한다. 이 때, k개의 argument도 함께 전달한다. |
 
 `Invoked*`를 통해서 호출된 callable의 반환값을 action 전체의 반환값으로도 사용할 수 있다. 즉, `Return*`과 동일한 역할을 수행하게 된다.
