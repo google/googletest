@@ -423,9 +423,10 @@ $var macro_name = [[$if i==0 [[ACTION]] $elif i==1 [[ACTION_P]]
                                         $else [[ACTION_P$i]]]]
 
 #define $macro_name(name$for j [[, p$j]])\$template
-  class $class_name {\
+  class $class_name : public ::testing::internal::ActionImpl<$class_name$param_types> {\
+    using base_type = ::testing::internal::ActionImpl<$class_name>;\
    public:\
-    [[$if i==1 [[explicit ]]]]$class_name($ctor_param_list)$inits {}\
+    using base_type::base_type;\
     template <typename F>\
     class gmock_Impl : public ::testing::ActionInterface<F> {\
      public:\
@@ -444,9 +445,6 @@ $arg_types_and_names) const;\$param_field_decls
      private:\
       GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
-    template <typename F> operator ::testing::Action<F>() const {\
-      return ::testing::Action<F>(new gmock_Impl<F>($params));\
-    }\$param_field_decls2
    private:\
     GTEST_DISALLOW_ASSIGN_($class_name);\
   };\$template
