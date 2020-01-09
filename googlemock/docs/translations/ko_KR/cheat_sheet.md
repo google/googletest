@@ -429,9 +429,9 @@ EXPECT_THAT(actual_foos, Pointwise(FooEq(), expected_foos));
 | `InvokeWithoutArgs(object_pointer, &class::method)` | `class::method`를 호출한다. 이 때 mock function이 전달받은 argument는 전달하지는 않는다. |
 | `InvokeArgument<N>(arg1, arg2, ..., argk)`          | Mock function의 `N`번째 argument(0부터 시작)를 호출한다. 이 때, k개의 argument도 함께 전달한다. |
 
-`Invoked*`를 통해서 호출된 callable의 반환값을 action 전체의 반환값으로도 사용할 수 있다. 즉, `Return*`과 동일한 역할을 수행하게 된다.
+`Invoke*`를 통해서 호출된 function의 return value는 action의 return value로 사용된다.
 
-만약, `Invoked*`에 사용할 callabe을 구현해야 한다면 사용하지 않을 parameter는 `Unused`로 선언하는 것을 추천한다.
+만약, `Invoke*()`에 사용할 callable을 구현해야 한다면 사용하지 않을 parameter는 `Unused`로 선언하는 것을 추천한다.
 
 ```cpp
 using ::testing::Invoke;

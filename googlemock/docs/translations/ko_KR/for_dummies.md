@@ -119,11 +119,11 @@ Mock class를 정의할 때, 해당 class를 실제로 어디에 저장해야 �
 
 Mock class를 생성한 이후에는 아래와 같은 방법으로 진행한다.
 
-- gMock 관련 기능을 사용하기 위해서 `testing` namespace를 포함시킨다. (한 파일에 한 번씩만)
-- Mock object를 생성한다.
-- Mock object에 expectation을 지정한다. (어떤 method를 호출할지, 어떤 argument를 전달받을지, 어떤 동작을 할지 등)
-- Mock object를 사용하는 실제코드를 수행한다. 이 때 expectation으로 지정된 횟수 및 argument 정보와 다르게 호출되는 부분이 있다면 즉시 에러로 검출된다. (결과확인을 위해 googletest assertion을 추가로 사용하는 것도 좋다.)
-- Mock object가 소멸될 때, gMock은 설정한 *모든* expectation들이 만족되었는지 확인해준다.
+1. gMock 관련 기능을 사용하기 위해서 `testing` namespace를 포함시킨다. (한 파일에 한 번씩만)
+2. Mock object를 생성한다.
+3. Mock object에 expectation을 지정한다. (어떤 method를 호출할지, 어떤 argument를 전달받을지, 어떤 동작을 할지 등)
+4. Mock object를 사용하는 실제코드를 수행한다. 이 때 expectation으로 지정된 횟수 및 argument 정보와 다르게 호출되는 부분이 있다면 즉시 에러로 검출된다. (결과확인을 위해 googletest assertion을 추가로 사용하는 것도 좋다.)
+5. Mock object가 소멸될 때, gMock은 설정한 *모든* expectation들이 만족되었는지 확인해준다.
 
 4단계는 각각의 expectation이 호출될 때마다 잘못된 부분을 검출해서 알려주는 것이고 5단계는 해당 mock object에 지정했던 모든 expectation들을 다시 한 번 확인해주는 것이기 때문에 다른 항목이다. 출력되는 내용도 조금 다르며 디버깅에 필요한 정보는 일반적으로 4단계에서 더 많이 출력된다.
 
@@ -212,7 +212,7 @@ EXPECT_CALL(turtle, GetX())
 
 이것은 곧 "`turtle` object의 `GetX()`라는 함수는 총 5번 호출되는데, 첫 번째 호출에서는 100을 반환하고, 두 번째 호출에서는 150을 반환하고, 그 다음부터는 계속해서 200을 반환한다"라는 expectation을 의미한다. 어떤 사람들은 이러한 스타일을 Domain Specific Language(DSL)라고 부르기도 한다.
 
-**Note:** `EXPECT_CALL`은 왜 macro 형태로 구현되었을까? 여기에는 두 가지 이유가 있다. 첫 번째로 검색하기가 편리하다. 원하는 `EXPECT_CALL`을 찾을 때, `gsearch`와 같은 도구와 연동해서 쉽게 찾아낼 수 있다. 더불어 사람의 눈으로 직접 확인할 때도 macro 형태의 코드가 더 알아보기 쉽다. 두 번째로 테스트가 실패했을 때, gMock이 해당 expectation의 위치를 알려주기가 용이하다. 그로 인해서 그 위치를 참고하는 사용자 입장에서도 더 편리해진다. 물론, 소소한 이유들이긴 하지만 이런 부분들이 모이면 언젠가 테스트가 실패하고 디버깅을 해야할 때 도움을 줄 것이다.
+**Note:** `EXPECT_CALL`은 왜 macro 형태로 구현되었을까? 여기에는 두 가지 이유가 있다. 첫 번째로 검색하기가 편리하다. 원하는 `EXPECT_CALL`을 찾을 때, `gsearch`와 같은 도구와 연동해서 쉽게 찾아낼 수 있다. 더불어 사람의 눈으로 직접 확인할 때도 macro 형태의 코드가 더 알아보기 쉽다. 두 번째로 테스트가 실패했을 때, gMock이 해당 expectation의 위치를 알려주기가 용이하다. 그로 인해서 그 위치를 참고하는 사용자 입장에서도 더 편리해진다. 이런 부분들은 테스트가 실패해서 디버깅을 해야할 때 도움이 될 것이다.
 
 #### Matchers: 전달되기를 바라는 argument 지정하기
 
@@ -304,7 +304,7 @@ EXPECT_CALL(turtle, GetY())
 
 `Return()`말고도 다양한 action이 존재한다. 예를 들면, `ReturnRef(variable)`을 사용해서 참조타입을 반환할 수도 있고 미리 구현해놓은 다른 함수를 연계적으로 호출할 수도 있다. 더 자세한 내용은 [여기](cheat_sheet.md#actions)를 확인하자.
 
-**Important note**: `EXPECT_CALL()`에 action을 지정할 때, 값이 아니라 변수(또는 참조, 포인터)를 사용하면 어떻게 될까? 과연 사용자가 원하는 대로 잘 동작할까? 아래 예제를 보자.
+**Important note**: `EXPECT_CALL()`는 action clause를 한 번 확인한 후에 그 내용을 저장해둔다. 그런 후에는 action이 수행 될 때마다 처음에 저장해 놓은 것을 계속 사용한다. 이러한 동작방식을 알고 있어야만 의도치 않은 실수를 방지할 수 있을 것이다. 아래 예제를 보자.
 
 ```cpp
 using ::testing::Return;
@@ -397,7 +397,7 @@ EXPECT_CALL(turtle, GoTo(0, 0))  // #2
 
 이 예제는 사실 gMock의 **expectation들이 "sticky" 모드로 설정되어 있음**을 보여준다. "sticky" 모드는 호출횟수가 초과된 expectation들이 active 상태로 남아있는 모드를 의미한다. 이것은 매우 중요한 규칙인데 왜냐하면 다른 mocking framework들과 **구별되는** gMock의 특징이기 때문이다. 그럼 gMock에서는 왜 그렇게 했을까? 그 이유는 이러한 방식이 테스트를 구현하고 이해하는데 있어서 더 유리하다고 판단했기 때문이다.
 
-이유가 너무 간단한지도 모르겠다. 예제를 통해서 sticky 모드가 무엇인지 그리고 왜 유리한지에 대해 자세히 알아보자.
+이제 좀 더 복잡한 예제를 통해서 자세히 알아보자. 아래 예제의 결과를 어떻게 될까?
 
 ```cpp
 using ::testing::Return;
@@ -408,7 +408,7 @@ for (int i = n; i > 0; i--) {
 }
 ```
 
-위 예제 코드는 `GetX()`를 호출하면 10, 20, 30, ...  같은 순서로 반환하기를 기대하고 구현한 코드이다. 코드가 조금 헷갈릴 수 있는데 반복문(`for`)의 초기값이 `n`이기 때문에 `EXPECT_CALL().WillOnce(Return(10*n))`, `EXPECT_CALL().WillOnce(Return(30))`, `EXPECT_CALL().WillOnce(Return(20))`, `EXPECT_CALL().WillOnce(Return(10))`과 같은 순서로 수행될 것이다. 그리고 expectation은 reverse order로 탐색되기 때문에 `GetX()`가 호출되면 10, 20, 30, ... 을 반환해 줄 것이다. 결과는 어떻게 될지 모르지만 일단 구현한 사람의 처음 의도는 그렇다고 봐야할 것이다.
+위 예제 코드는 `GetX()`를 호출하면 10, 20, 30, ... 과 같은 순서로 반환하기를 기대하고 구현한 코드이다. 코드가 조금 헷갈릴 수 있는데 반복문(`for`)의 초기값이 `n`이기 때문에 `EXPECT_CALL().WillOnce(Return(10*n))`, `EXPECT_CALL().WillOnce(Return(30))`, `EXPECT_CALL().WillOnce(Return(20))`, `EXPECT_CALL().WillOnce(Return(10))`과 같은 순서로 expectation이 설정된다.
 
 이제 문제점을 분석해 보자. 과연 `GetX()`가 10, 20, 30, ... 을 순서대로 잘 반환할까? 그렇지 않다. 먼저 expectation들은 기본적으로 sticky 모드로 설정되어 있다. 따라서 `GetX()`가 처음 호출되면 `EXPECT_CALL().WillOnce(Return(10))`을 사용하여 원하는 대로 10을 반환하지만 두번째로 호출되었을 때는 원하던 값인 20을 반환하지 못 한다. 왜냐하면 `EXPECT_CALL().WillOnce(Return(10))`이 여전히 active상태이기 때문에 두 번째 호출시점에도 `EXPECT_CALL().WillOnce(Return(10))`을 사용하려고 시도하게 된다. 더군다나 gMock의 cardinality 추론규칙에 의하면 `WillOnce()`는 곧 `Times(1)`을 의미하기 때문에 해당 expectation은 upper bound violated failure를 발생시키게 된다.
 
