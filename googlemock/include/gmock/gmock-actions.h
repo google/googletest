@@ -1222,6 +1222,43 @@ class ActionHelper {
   }
 };
 
+// A helper base class needed for implementing the ACTION* macros.
+// Implements constructor and conversion operator for Action.
+//
+// Template specialization for parameterless Action.
+template <typename Derived>
+class ActionImpl {
+ public:
+  ActionImpl() = default;
+
+  template <typename F>
+  operator ::testing::Action<F>() const {  // NOLINT(runtime/explicit)
+    return ::testing::Action<F>(new typename Derived::template gmock_Impl<F>());
+  }
+};
+
+// Template specialization for parameterized Action.
+template <template <typename...> class Derived, typename... Ts>
+class ActionImpl<Derived<Ts...>> {
+ public:
+  explicit ActionImpl(Ts... params) : params_(std::forward<Ts>(params)...) {}
+
+  template <typename F>
+  operator ::testing::Action<F>() const {  // NOLINT(runtime/explicit)
+    return Apply<F>(MakeIndexSequence<sizeof...(Ts)>{});
+  }
+
+ private:
+  template <typename F, std::size_t... tuple_ids>
+  ::testing::Action<F> Apply(IndexSequence<tuple_ids...>) const {
+    return ::testing::Action<F>(new
+                                typename Derived<Ts...>::template gmock_Impl<F>(
+                                    std::get<tuple_ids>(params_)...));
+  }
+
+  std::tuple<Ts...> params_;
+};
+
 namespace invoke_argument {
 
 // Appears in InvokeArgumentAdl's argument list to help avoid

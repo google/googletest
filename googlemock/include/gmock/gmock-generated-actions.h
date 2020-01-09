@@ -588,9 +588,10 @@
           GMOCK_ACTION_ARG_TYPES_AND_NAMES_UNUSED_) const
 
 #define ACTION(name)\
-  class name##Action {\
+  class name##Action : public ::testing::internal::ActionImpl<name##Action> {\
+    using base_type = ::testing::internal::ActionImpl<name##Action>;\
    public:\
-    name##Action() {}\
+    using base_type::base_type;\
     template <typename F>\
     class gmock_Impl : public ::testing::ActionInterface<F> {\
      public:\
@@ -616,9 +617,6 @@
      private:\
       GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
-    template <typename F> operator ::testing::Action<F>() const {\
-      return ::testing::Action<F>(new gmock_Impl<F>());\
-    }\
    private:\
     GTEST_DISALLOW_ASSIGN_(name##Action);\
   };\
@@ -636,10 +634,11 @@
 
 #define ACTION_P(name, p0)\
   template <typename p0##_type>\
-  class name##ActionP {\
+  class name##ActionP : public \
+      ::testing::internal::ActionImpl<name##ActionP<p0##_type>> {\
+    using base_type = ::testing::internal::ActionImpl<name##ActionP>;\
    public:\
-    explicit name##ActionP(p0##_type gmock_p0) : \
-        p0(::std::forward<p0##_type>(gmock_p0)) {}\
+    using base_type::base_type;\
     template <typename F>\
     class gmock_Impl : public ::testing::ActionInterface<F> {\
      public:\
@@ -667,10 +666,6 @@
      private:\
       GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
-    template <typename F> operator ::testing::Action<F>() const {\
-      return ::testing::Action<F>(new gmock_Impl<F>(p0));\
-    }\
-    p0##_type p0;\
    private:\
     GTEST_DISALLOW_ASSIGN_(name##ActionP);\
   };\
@@ -690,11 +685,12 @@
 
 #define ACTION_P2(name, p0, p1)\
   template <typename p0##_type, typename p1##_type>\
-  class name##ActionP2 {\
+  class name##ActionP2 : public \
+      ::testing::internal::ActionImpl<name##ActionP2<p0##_type, \
+      p1##_type>> {\
+    using base_type = ::testing::internal::ActionImpl<name##ActionP2>;\
    public:\
-    name##ActionP2(p0##_type gmock_p0, \
-        p1##_type gmock_p1) : p0(::std::forward<p0##_type>(gmock_p0)), \
-        p1(::std::forward<p1##_type>(gmock_p1)) {}\
+    using base_type::base_type;\
     template <typename F>\
     class gmock_Impl : public ::testing::ActionInterface<F> {\
      public:\
@@ -724,11 +720,6 @@
      private:\
       GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
-    template <typename F> operator ::testing::Action<F>() const {\
-      return ::testing::Action<F>(new gmock_Impl<F>(p0, p1));\
-    }\
-    p0##_type p0;\
-    p1##_type p1;\
    private:\
     GTEST_DISALLOW_ASSIGN_(name##ActionP2);\
   };\
@@ -749,12 +740,12 @@
 
 #define ACTION_P3(name, p0, p1, p2)\
   template <typename p0##_type, typename p1##_type, typename p2##_type>\
-  class name##ActionP3 {\
+  class name##ActionP3 : public \
+      ::testing::internal::ActionImpl<name##ActionP3<p0##_type, p1##_type, \
+      p2##_type>> {\
+    using base_type = ::testing::internal::ActionImpl<name##ActionP3>;\
    public:\
-    name##ActionP3(p0##_type gmock_p0, p1##_type gmock_p1, \
-        p2##_type gmock_p2) : p0(::std::forward<p0##_type>(gmock_p0)), \
-        p1(::std::forward<p1##_type>(gmock_p1)), \
-        p2(::std::forward<p2##_type>(gmock_p2)) {}\
+    using base_type::base_type;\
     template <typename F>\
     class gmock_Impl : public ::testing::ActionInterface<F> {\
      public:\
@@ -786,12 +777,6 @@
      private:\
       GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
-    template <typename F> operator ::testing::Action<F>() const {\
-      return ::testing::Action<F>(new gmock_Impl<F>(p0, p1, p2));\
-    }\
-    p0##_type p0;\
-    p1##_type p1;\
-    p2##_type p2;\
    private:\
     GTEST_DISALLOW_ASSIGN_(name##ActionP3);\
   };\
@@ -814,14 +799,12 @@
 #define ACTION_P4(name, p0, p1, p2, p3)\
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
       typename p3##_type>\
-  class name##ActionP4 {\
+  class name##ActionP4 : public \
+      ::testing::internal::ActionImpl<name##ActionP4<p0##_type, p1##_type, \
+      p2##_type, p3##_type>> {\
+    using base_type = ::testing::internal::ActionImpl<name##ActionP4>;\
    public:\
-    name##ActionP4(p0##_type gmock_p0, p1##_type gmock_p1, \
-        p2##_type gmock_p2, \
-        p3##_type gmock_p3) : p0(::std::forward<p0##_type>(gmock_p0)), \
-        p1(::std::forward<p1##_type>(gmock_p1)), \
-        p2(::std::forward<p2##_type>(gmock_p2)), \
-        p3(::std::forward<p3##_type>(gmock_p3)) {}\
+    using base_type::base_type;\
     template <typename F>\
     class gmock_Impl : public ::testing::ActionInterface<F> {\
      public:\
@@ -855,13 +838,6 @@
      private:\
       GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
-    template <typename F> operator ::testing::Action<F>() const {\
-      return ::testing::Action<F>(new gmock_Impl<F>(p0, p1, p2, p3));\
-    }\
-    p0##_type p0;\
-    p1##_type p1;\
-    p2##_type p2;\
-    p3##_type p3;\
    private:\
     GTEST_DISALLOW_ASSIGN_(name##ActionP4);\
   };\
@@ -888,15 +864,12 @@
 #define ACTION_P5(name, p0, p1, p2, p3, p4)\
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
       typename p3##_type, typename p4##_type>\
-  class name##ActionP5 {\
+  class name##ActionP5 : public \
+      ::testing::internal::ActionImpl<name##ActionP5<p0##_type, p1##_type, \
+      p2##_type, p3##_type, p4##_type>> {\
+    using base_type = ::testing::internal::ActionImpl<name##ActionP5>;\
    public:\
-    name##ActionP5(p0##_type gmock_p0, p1##_type gmock_p1, \
-        p2##_type gmock_p2, p3##_type gmock_p3, \
-        p4##_type gmock_p4) : p0(::std::forward<p0##_type>(gmock_p0)), \
-        p1(::std::forward<p1##_type>(gmock_p1)), \
-        p2(::std::forward<p2##_type>(gmock_p2)), \
-        p3(::std::forward<p3##_type>(gmock_p3)), \
-        p4(::std::forward<p4##_type>(gmock_p4)) {}\
+    using base_type::base_type;\
     template <typename F>\
     class gmock_Impl : public ::testing::ActionInterface<F> {\
      public:\
@@ -933,14 +906,6 @@
      private:\
       GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
-    template <typename F> operator ::testing::Action<F>() const {\
-      return ::testing::Action<F>(new gmock_Impl<F>(p0, p1, p2, p3, p4));\
-    }\
-    p0##_type p0;\
-    p1##_type p1;\
-    p2##_type p2;\
-    p3##_type p3;\
-    p4##_type p4;\
    private:\
     GTEST_DISALLOW_ASSIGN_(name##ActionP5);\
   };\
@@ -967,16 +932,12 @@
 #define ACTION_P6(name, p0, p1, p2, p3, p4, p5)\
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
       typename p3##_type, typename p4##_type, typename p5##_type>\
-  class name##ActionP6 {\
+  class name##ActionP6 : public \
+      ::testing::internal::ActionImpl<name##ActionP6<p0##_type, p1##_type, \
+      p2##_type, p3##_type, p4##_type, p5##_type>> {\
+    using base_type = ::testing::internal::ActionImpl<name##ActionP6>;\
    public:\
-    name##ActionP6(p0##_type gmock_p0, p1##_type gmock_p1, \
-        p2##_type gmock_p2, p3##_type gmock_p3, p4##_type gmock_p4, \
-        p5##_type gmock_p5) : p0(::std::forward<p0##_type>(gmock_p0)), \
-        p1(::std::forward<p1##_type>(gmock_p1)), \
-        p2(::std::forward<p2##_type>(gmock_p2)), \
-        p3(::std::forward<p3##_type>(gmock_p3)), \
-        p4(::std::forward<p4##_type>(gmock_p4)), \
-        p5(::std::forward<p5##_type>(gmock_p5)) {}\
+    using base_type::base_type;\
     template <typename F>\
     class gmock_Impl : public ::testing::ActionInterface<F> {\
      public:\
@@ -1015,15 +976,6 @@
      private:\
       GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
-    template <typename F> operator ::testing::Action<F>() const {\
-      return ::testing::Action<F>(new gmock_Impl<F>(p0, p1, p2, p3, p4, p5));\
-    }\
-    p0##_type p0;\
-    p1##_type p1;\
-    p2##_type p2;\
-    p3##_type p3;\
-    p4##_type p4;\
-    p5##_type p5;\
    private:\
     GTEST_DISALLOW_ASSIGN_(name##ActionP6);\
   };\
@@ -1051,18 +1003,12 @@
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
       typename p3##_type, typename p4##_type, typename p5##_type, \
       typename p6##_type>\
-  class name##ActionP7 {\
+  class name##ActionP7 : public \
+      ::testing::internal::ActionImpl<name##ActionP7<p0##_type, p1##_type, \
+      p2##_type, p3##_type, p4##_type, p5##_type, p6##_type>> {\
+    using base_type = ::testing::internal::ActionImpl<name##ActionP7>;\
    public:\
-    name##ActionP7(p0##_type gmock_p0, p1##_type gmock_p1, \
-        p2##_type gmock_p2, p3##_type gmock_p3, p4##_type gmock_p4, \
-        p5##_type gmock_p5, \
-        p6##_type gmock_p6) : p0(::std::forward<p0##_type>(gmock_p0)), \
-        p1(::std::forward<p1##_type>(gmock_p1)), \
-        p2(::std::forward<p2##_type>(gmock_p2)), \
-        p3(::std::forward<p3##_type>(gmock_p3)), \
-        p4(::std::forward<p4##_type>(gmock_p4)), \
-        p5(::std::forward<p5##_type>(gmock_p5)), \
-        p6(::std::forward<p6##_type>(gmock_p6)) {}\
+    using base_type::base_type;\
     template <typename F>\
     class gmock_Impl : public ::testing::ActionInterface<F> {\
      public:\
@@ -1103,17 +1049,6 @@
      private:\
       GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
-    template <typename F> operator ::testing::Action<F>() const {\
-      return ::testing::Action<F>(new gmock_Impl<F>(p0, p1, p2, p3, p4, p5, \
-          p6));\
-    }\
-    p0##_type p0;\
-    p1##_type p1;\
-    p2##_type p2;\
-    p3##_type p3;\
-    p4##_type p4;\
-    p5##_type p5;\
-    p6##_type p6;\
    private:\
     GTEST_DISALLOW_ASSIGN_(name##ActionP7);\
   };\
@@ -1144,19 +1079,12 @@
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
       typename p3##_type, typename p4##_type, typename p5##_type, \
       typename p6##_type, typename p7##_type>\
-  class name##ActionP8 {\
+  class name##ActionP8 : public \
+      ::testing::internal::ActionImpl<name##ActionP8<p0##_type, p1##_type, \
+      p2##_type, p3##_type, p4##_type, p5##_type, p6##_type, p7##_type>> {\
+    using base_type = ::testing::internal::ActionImpl<name##ActionP8>;\
    public:\
-    name##ActionP8(p0##_type gmock_p0, p1##_type gmock_p1, \
-        p2##_type gmock_p2, p3##_type gmock_p3, p4##_type gmock_p4, \
-        p5##_type gmock_p5, p6##_type gmock_p6, \
-        p7##_type gmock_p7) : p0(::std::forward<p0##_type>(gmock_p0)), \
-        p1(::std::forward<p1##_type>(gmock_p1)), \
-        p2(::std::forward<p2##_type>(gmock_p2)), \
-        p3(::std::forward<p3##_type>(gmock_p3)), \
-        p4(::std::forward<p4##_type>(gmock_p4)), \
-        p5(::std::forward<p5##_type>(gmock_p5)), \
-        p6(::std::forward<p6##_type>(gmock_p6)), \
-        p7(::std::forward<p7##_type>(gmock_p7)) {}\
+    using base_type::base_type;\
     template <typename F>\
     class gmock_Impl : public ::testing::ActionInterface<F> {\
      public:\
@@ -1200,18 +1128,6 @@
      private:\
       GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
-    template <typename F> operator ::testing::Action<F>() const {\
-      return ::testing::Action<F>(new gmock_Impl<F>(p0, p1, p2, p3, p4, p5, \
-          p6, p7));\
-    }\
-    p0##_type p0;\
-    p1##_type p1;\
-    p2##_type p2;\
-    p3##_type p3;\
-    p4##_type p4;\
-    p5##_type p5;\
-    p6##_type p6;\
-    p7##_type p7;\
    private:\
     GTEST_DISALLOW_ASSIGN_(name##ActionP8);\
   };\
@@ -1244,20 +1160,13 @@
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
       typename p3##_type, typename p4##_type, typename p5##_type, \
       typename p6##_type, typename p7##_type, typename p8##_type>\
-  class name##ActionP9 {\
+  class name##ActionP9 : public \
+      ::testing::internal::ActionImpl<name##ActionP9<p0##_type, p1##_type, \
+      p2##_type, p3##_type, p4##_type, p5##_type, p6##_type, p7##_type, \
+      p8##_type>> {\
+    using base_type = ::testing::internal::ActionImpl<name##ActionP9>;\
    public:\
-    name##ActionP9(p0##_type gmock_p0, p1##_type gmock_p1, \
-        p2##_type gmock_p2, p3##_type gmock_p3, p4##_type gmock_p4, \
-        p5##_type gmock_p5, p6##_type gmock_p6, p7##_type gmock_p7, \
-        p8##_type gmock_p8) : p0(::std::forward<p0##_type>(gmock_p0)), \
-        p1(::std::forward<p1##_type>(gmock_p1)), \
-        p2(::std::forward<p2##_type>(gmock_p2)), \
-        p3(::std::forward<p3##_type>(gmock_p3)), \
-        p4(::std::forward<p4##_type>(gmock_p4)), \
-        p5(::std::forward<p5##_type>(gmock_p5)), \
-        p6(::std::forward<p6##_type>(gmock_p6)), \
-        p7(::std::forward<p7##_type>(gmock_p7)), \
-        p8(::std::forward<p8##_type>(gmock_p8)) {}\
+    using base_type::base_type;\
     template <typename F>\
     class gmock_Impl : public ::testing::ActionInterface<F> {\
      public:\
@@ -1303,19 +1212,6 @@
      private:\
       GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
-    template <typename F> operator ::testing::Action<F>() const {\
-      return ::testing::Action<F>(new gmock_Impl<F>(p0, p1, p2, p3, p4, p5, \
-          p6, p7, p8));\
-    }\
-    p0##_type p0;\
-    p1##_type p1;\
-    p2##_type p2;\
-    p3##_type p3;\
-    p4##_type p4;\
-    p5##_type p5;\
-    p6##_type p6;\
-    p7##_type p7;\
-    p8##_type p8;\
    private:\
     GTEST_DISALLOW_ASSIGN_(name##ActionP9);\
   };\
@@ -1350,22 +1246,13 @@
       typename p3##_type, typename p4##_type, typename p5##_type, \
       typename p6##_type, typename p7##_type, typename p8##_type, \
       typename p9##_type>\
-  class name##ActionP10 {\
+  class name##ActionP10 : public \
+      ::testing::internal::ActionImpl<name##ActionP10<p0##_type, p1##_type, \
+      p2##_type, p3##_type, p4##_type, p5##_type, p6##_type, p7##_type, \
+      p8##_type, p9##_type>> {\
+    using base_type = ::testing::internal::ActionImpl<name##ActionP10>;\
    public:\
-    name##ActionP10(p0##_type gmock_p0, p1##_type gmock_p1, \
-        p2##_type gmock_p2, p3##_type gmock_p3, p4##_type gmock_p4, \
-        p5##_type gmock_p5, p6##_type gmock_p6, p7##_type gmock_p7, \
-        p8##_type gmock_p8, \
-        p9##_type gmock_p9) : p0(::std::forward<p0##_type>(gmock_p0)), \
-        p1(::std::forward<p1##_type>(gmock_p1)), \
-        p2(::std::forward<p2##_type>(gmock_p2)), \
-        p3(::std::forward<p3##_type>(gmock_p3)), \
-        p4(::std::forward<p4##_type>(gmock_p4)), \
-        p5(::std::forward<p5##_type>(gmock_p5)), \
-        p6(::std::forward<p6##_type>(gmock_p6)), \
-        p7(::std::forward<p7##_type>(gmock_p7)), \
-        p8(::std::forward<p8##_type>(gmock_p8)), \
-        p9(::std::forward<p9##_type>(gmock_p9)) {}\
+    using base_type::base_type;\
     template <typename F>\
     class gmock_Impl : public ::testing::ActionInterface<F> {\
      public:\
@@ -1413,20 +1300,6 @@
      private:\
       GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
-    template <typename F> operator ::testing::Action<F>() const {\
-      return ::testing::Action<F>(new gmock_Impl<F>(p0, p1, p2, p3, p4, p5, \
-          p6, p7, p8, p9));\
-    }\
-    p0##_type p0;\
-    p1##_type p1;\
-    p2##_type p2;\
-    p3##_type p3;\
-    p4##_type p4;\
-    p5##_type p5;\
-    p6##_type p6;\
-    p7##_type p7;\
-    p8##_type p8;\
-    p9##_type p9;\
    private:\
     GTEST_DISALLOW_ASSIGN_(name##ActionP10);\
   };\
