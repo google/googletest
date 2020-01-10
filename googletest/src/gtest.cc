@@ -6289,7 +6289,11 @@ std::string TempDir() {
   else
     return std::string(temp_dir) + "\\";
 #elif GTEST_OS_LINUX_ANDROID
-  return "/sdcard/";
+  const char* temp_dir = internal::posix::GetEnv("TEST_TMPDIR");
+  if (temp_dir == nullptr || temp_dir[0] == '\0')
+    return "/data/local/tmp/";
+  else
+    return temp_dir;
 #else
   return "/tmp/";
 #endif  // GTEST_OS_WINDOWS_MOBILE
