@@ -6885,7 +6885,7 @@ TEST_F(PredicateFormatterFromMatcherTest, NoShortCircuitOnFailure) {
   EXPECT_FALSE(result);  // Implicit cast to bool.
   std::string expect =
       "Value of: dummy-name\nExpected: [DescribeTo]\n"
-      "  Actual: 1, [MatchAndExplain]";
+      "  Actual: 1" + OfType(internal::GetTypeName<Behavior>()) + ", [MatchAndExplain]";
   EXPECT_EQ(expect, result.message());
 }
 
@@ -6896,7 +6896,7 @@ TEST_F(PredicateFormatterFromMatcherTest, DetectsFlakyShortCircuit) {
       "Value of: dummy-name\nExpected: [DescribeTo]\n"
       "  The matcher failed on the initial attempt; but passed when rerun to "
       "generate the explanation.\n"
-      "  Actual: 2, [MatchAndExplain]";
+      "  Actual: 2" + OfType(internal::GetTypeName<Behavior>()) + ", [MatchAndExplain]";
   EXPECT_EQ(expect, result.message());
 }
 
