@@ -140,7 +140,7 @@ Matcher<int> GreaterThan(int n) {
 
 std::string OfType(const std::string& type_name) {
 #if GTEST_HAS_RTTI
-  return " (of type " + type_name + ")";
+  return IsReadableTypeName(type_name) ? " (of type " + type_name + ")" : "";
 #else
   return "";
 #endif
