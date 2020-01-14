@@ -491,6 +491,13 @@ internal::CartesianProductHolder<Generator...> Combine(const Generator&... g) {
                   &gtest_##prefix##test_suite_name##_EvalGenerateName_,       \
                   __FILE__, __LINE__)
 
+
+// Allow Marking a Parameterized test class as not needing to be instantiated.
+#define GTEST_ALLOW_UNINSTANTIATED_PARAMTERIZED_TEST(T)                   \
+  namespace gtest_do_not_use_outside_namespace_scope {}                   \
+  static const ::testing::internal::MarkAsIgnored gtest_allow_ignore_##T( \
+      GTEST_STRINGIFY_(T))
+
 // Legacy API is deprecated but still available
 #ifndef GTEST_REMOVE_LEGACY_TEST_CASEAPI_
 #define INSTANTIATE_TEST_CASE_P                                            \

@@ -474,6 +474,14 @@ class ParameterizedTestSuiteInfoBase {
   GTEST_DISALLOW_COPY_AND_ASSIGN_(ParameterizedTestSuiteInfoBase);
 };
 
+// INTERNAL IMPLEMENTATION - DO NOT USE IN USER CODE.
+//
+// Report a the name of a test_suit as safe to ignore
+// as the side effect of construction of this type.
+struct MarkAsIgnored {
+  explicit MarkAsIgnored(const char* test_suite);
+};
+
 GTEST_API_ void InsertSyntheticTestCase(const std::string& name,
                                         CodeLocation location);
 
