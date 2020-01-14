@@ -177,6 +177,7 @@ class FuchsiaDeathTest;
 class UnitTestImpl* GetUnitTestImpl();
 void ReportFailureInUnknownLocation(TestPartResult::Type result_type,
                                     const std::string& message);
+std::set<std::string>* GetIgnoredParameterizedTestSuites();
 
 }  // namespace internal
 
@@ -1418,6 +1419,7 @@ class GTEST_API_ UnitTest {
   friend class internal::StreamingListenerTest;
   friend class internal::UnitTestRecordPropertyTestHelper;
   friend Environment* AddGlobalTestEnvironment(Environment* env);
+  friend std::set<std::string>* internal::GetIgnoredParameterizedTestSuites();
   friend internal::UnitTestImpl* internal::GetUnitTestImpl();
   friend void internal::ReportFailureInUnknownLocation(
       TestPartResult::Type result_type,
