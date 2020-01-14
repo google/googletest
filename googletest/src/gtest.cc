@@ -444,9 +444,21 @@ class FailureTest : public Test {
 
 }  // namespace
 
+std::set<std::string>* GetIgnoredParameterizedTestSuites() {
+  return UnitTest::GetInstance()->impl()->ignored_parameterized_test_suites();
+}
+
+// Add a given test_suit to the list of them allow to go un-instantiated.
+MarkAsIgnored::MarkAsIgnored(const char* test_suite) {
+  GetIgnoredParameterizedTestSuites()->insert(test_suite);
+}
+
 // If this parameterized test suite has no instantiations (and that
 // has not been marked as okay), emit a test case reporting that.
 void InsertSyntheticTestCase(const std::string &name, CodeLocation location) {
+  const auto& ignored = *GetIgnoredParameterizedTestSuites();
+  if (ignored.find(name) != ignored.end()) return;
+
   std::string message =
       "Paramaterized test suite " + name +
       " is defined via TEST_P, but never instantiated. None of the test cases "
@@ -455,7 +467,12 @@ void InsertSyntheticTestCase(const std::string &name, CodeLocation location) {
       "\n\n"
       "Ideally, TEST_P definitions should only ever be included as part of "
       "binaries that intend to use them. (As opposed to, for example, being "
-      "placed in a library that may be linked in to get other utilities.)";
+      "placed in a library that may be linked in to get other utilities.)"
+      "\n\n"
+      "To suppress this error for this test suite, insert the following line "
+      "(in a non-header) in the namespace it is defined in:"
+      "\n\n"
+      "GTEST_ALLOW_UNINSTANTIATED_PARAMTERIZED_TEST(" + name + ");";
 
   std::string full_name = "UninstantiatedParamaterizedTestSuite<" + name + ">";
   RegisterTest(  //
