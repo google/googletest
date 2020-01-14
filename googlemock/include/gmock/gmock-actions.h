@@ -50,6 +50,7 @@
 
 #include "gmock/internal/gmock-internal-utils.h"
 #include "gmock/internal/gmock-port.h"
+#include "gmock/internal/gmock-pp.h"
 
 #ifdef _MSC_VER
 # pragma warning(push)
@@ -1275,6 +1276,21 @@ auto InvokeArgumentAdl(AdlTag, F f, Args... args) -> decltype(f(args...)) {
 }
 
 }  // namespace invoke_argument
+
+#define GMOCK_INTERNAL_ARG_UNUSED(N, data, el) \
+  , const arg##N##_type& arg##N GTEST_ATTRIBUTE_UNUSED_
+#define GMOCK_ACTION_ARG_TYPES_AND_NAMES_UNUSED_                 \
+  const args_type& args GTEST_ATTRIBUTE_UNUSED_ GMOCK_PP_REPEAT( \
+      GMOCK_INTERNAL_ARG_UNUSED, , 10)
+
+#define GMOCK_INTERNAL_ARG(N, data, el) , const arg##N##_type& arg##N
+#define GMOCK_ACTION_ARG_TYPES_AND_NAMES_ \
+  const args_type& args GMOCK_PP_REPEAT(GMOCK_INTERNAL_ARG, , 10)
+
+#define GMOCK_INTERNAL_TEMPLATE_ARG(N, data, el) , typename arg##N##_type
+#define GMOCK_ACTION_TEMPLATE_ARGS_NAMES_ \
+  GMOCK_PP_TAIL(GMOCK_PP_REPEAT(GMOCK_INTERNAL_TEMPLATE_ARG, , 10))
+
 }  // namespace internal
 
 }  // namespace testing

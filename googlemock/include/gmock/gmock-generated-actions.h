@@ -142,19 +142,6 @@
 // To learn more about using these macros, please search for 'ACTION' on
 // https://github.com/google/googletest/blob/master/googlemock/docs/cook_book.md
 
-// An internal macro needed for implementing ACTION*().
-#define GMOCK_ACTION_ARG_TYPES_AND_NAMES_UNUSED_\
-    const args_type& args GTEST_ATTRIBUTE_UNUSED_, \
-    const arg0_type& arg0 GTEST_ATTRIBUTE_UNUSED_, \
-    const arg1_type& arg1 GTEST_ATTRIBUTE_UNUSED_, \
-    const arg2_type& arg2 GTEST_ATTRIBUTE_UNUSED_, \
-    const arg3_type& arg3 GTEST_ATTRIBUTE_UNUSED_, \
-    const arg4_type& arg4 GTEST_ATTRIBUTE_UNUSED_, \
-    const arg5_type& arg5 GTEST_ATTRIBUTE_UNUSED_, \
-    const arg6_type& arg6 GTEST_ATTRIBUTE_UNUSED_, \
-    const arg7_type& arg7 GTEST_ATTRIBUTE_UNUSED_, \
-    const arg8_type& arg8 GTEST_ATTRIBUTE_UNUSED_, \
-    const arg9_type& arg9 GTEST_ATTRIBUTE_UNUSED_
 
 // Sometimes you want to give an action explicit template parameters
 // that cannot be inferred from its value parameters.  ACTION() and
@@ -540,16 +527,8 @@
         return ::testing::internal::ActionHelper<return_type, gmock_Impl>::\
             Perform(this, args);\
       }\
-      template <typename arg0_type, typename arg1_type, typename arg2_type, \
-          typename arg3_type, typename arg4_type, typename arg5_type, \
-          typename arg6_type, typename arg7_type, typename arg8_type, \
-          typename arg9_type>\
-      return_type gmock_PerformImpl(const args_type& args, \
-          const arg0_type& arg0, const arg1_type& arg1, \
-          const arg2_type& arg2, const arg3_type& arg3, \
-          const arg4_type& arg4, const arg5_type& arg5, \
-          const arg6_type& arg6, const arg7_type& arg7, \
-          const arg8_type& arg8, const arg9_type& arg9) const;\
+      template <GMOCK_ACTION_TEMPLATE_ARGS_NAMES_>\
+      return_type gmock_PerformImpl(GMOCK_ACTION_ARG_TYPES_AND_NAMES_) const;\
       GMOCK_INTERNAL_DEFN_##value_params\
      private:\
       GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
@@ -576,10 +555,7 @@
   template <GMOCK_INTERNAL_DECL_##template_params\
             GMOCK_INTERNAL_DECL_TYPE_##value_params>\
   template <typename F>\
-  template <typename arg0_type, typename arg1_type, typename arg2_type, \
-      typename arg3_type, typename arg4_type, typename arg5_type, \
-      typename arg6_type, typename arg7_type, typename arg8_type, \
-      typename arg9_type>\
+  template <GMOCK_ACTION_TEMPLATE_ARGS_NAMES_>\
   typename ::testing::internal::Function<F>::Result\
       GMOCK_ACTION_CLASS_(name, value_params)<\
           GMOCK_INTERNAL_LIST_##template_params\
@@ -604,16 +580,8 @@
         return ::testing::internal::ActionHelper<return_type, gmock_Impl>::\
             Perform(this, args);\
       }\
-      template <typename arg0_type, typename arg1_type, typename arg2_type, \
-          typename arg3_type, typename arg4_type, typename arg5_type, \
-          typename arg6_type, typename arg7_type, typename arg8_type, \
-          typename arg9_type>\
-      return_type gmock_PerformImpl(const args_type& args, \
-          const arg0_type& arg0, const arg1_type& arg1, \
-          const arg2_type& arg2, const arg3_type& arg3, \
-          const arg4_type& arg4, const arg5_type& arg5, \
-          const arg6_type& arg6, const arg7_type& arg7, \
-          const arg8_type& arg8, const arg9_type& arg9) const;\
+      template <GMOCK_ACTION_TEMPLATE_ARGS_NAMES_>\
+      return_type gmock_PerformImpl(GMOCK_ACTION_ARG_TYPES_AND_NAMES_) const;\
      private:\
       GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
@@ -624,10 +592,7 @@
     return name##Action();\
   }\
   template <typename F>\
-  template <typename arg0_type, typename arg1_type, typename arg2_type, \
-      typename arg3_type, typename arg4_type, typename arg5_type, \
-      typename arg6_type, typename arg7_type, typename arg8_type, \
-      typename arg9_type>\
+  template <GMOCK_ACTION_TEMPLATE_ARGS_NAMES_>\
   typename ::testing::internal::Function<F>::Result\
       name##Action::gmock_Impl<F>::gmock_PerformImpl(\
           GMOCK_ACTION_ARG_TYPES_AND_NAMES_UNUSED_) const
@@ -652,16 +617,8 @@
         return ::testing::internal::ActionHelper<return_type, gmock_Impl>::\
             Perform(this, args);\
       }\
-      template <typename arg0_type, typename arg1_type, typename arg2_type, \
-          typename arg3_type, typename arg4_type, typename arg5_type, \
-          typename arg6_type, typename arg7_type, typename arg8_type, \
-          typename arg9_type>\
-      return_type gmock_PerformImpl(const args_type& args, \
-          const arg0_type& arg0, const arg1_type& arg1, \
-          const arg2_type& arg2, const arg3_type& arg3, \
-          const arg4_type& arg4, const arg5_type& arg5, \
-          const arg6_type& arg6, const arg7_type& arg7, \
-          const arg8_type& arg8, const arg9_type& arg9) const;\
+      template <GMOCK_ACTION_TEMPLATE_ARGS_NAMES_>\
+      return_type gmock_PerformImpl(GMOCK_ACTION_ARG_TYPES_AND_NAMES_) const;\
       p0##_type p0;\
      private:\
       GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
@@ -675,10 +632,7 @@
   }\
   template <typename p0##_type>\
   template <typename F>\
-  template <typename arg0_type, typename arg1_type, typename arg2_type, \
-      typename arg3_type, typename arg4_type, typename arg5_type, \
-      typename arg6_type, typename arg7_type, typename arg8_type, \
-      typename arg9_type>\
+  template <GMOCK_ACTION_TEMPLATE_ARGS_NAMES_>\
   typename ::testing::internal::Function<F>::Result\
       name##ActionP<p0##_type>::gmock_Impl<F>::gmock_PerformImpl(\
           GMOCK_ACTION_ARG_TYPES_AND_NAMES_UNUSED_) const
@@ -705,16 +659,8 @@
         return ::testing::internal::ActionHelper<return_type, gmock_Impl>::\
             Perform(this, args);\
       }\
-      template <typename arg0_type, typename arg1_type, typename arg2_type, \
-          typename arg3_type, typename arg4_type, typename arg5_type, \
-          typename arg6_type, typename arg7_type, typename arg8_type, \
-          typename arg9_type>\
-      return_type gmock_PerformImpl(const args_type& args, \
-          const arg0_type& arg0, const arg1_type& arg1, \
-          const arg2_type& arg2, const arg3_type& arg3, \
-          const arg4_type& arg4, const arg5_type& arg5, \
-          const arg6_type& arg6, const arg7_type& arg7, \
-          const arg8_type& arg8, const arg9_type& arg9) const;\
+      template <GMOCK_ACTION_TEMPLATE_ARGS_NAMES_>\
+      return_type gmock_PerformImpl(GMOCK_ACTION_ARG_TYPES_AND_NAMES_) const;\
       p0##_type p0;\
       p1##_type p1;\
      private:\
@@ -730,10 +676,7 @@
   }\
   template <typename p0##_type, typename p1##_type>\
   template <typename F>\
-  template <typename arg0_type, typename arg1_type, typename arg2_type, \
-      typename arg3_type, typename arg4_type, typename arg5_type, \
-      typename arg6_type, typename arg7_type, typename arg8_type, \
-      typename arg9_type>\
+  template <GMOCK_ACTION_TEMPLATE_ARGS_NAMES_>\
   typename ::testing::internal::Function<F>::Result\
       name##ActionP2<p0##_type, p1##_type>::gmock_Impl<F>::gmock_PerformImpl(\
           GMOCK_ACTION_ARG_TYPES_AND_NAMES_UNUSED_) const
@@ -761,16 +704,8 @@
         return ::testing::internal::ActionHelper<return_type, gmock_Impl>::\
             Perform(this, args);\
       }\
-      template <typename arg0_type, typename arg1_type, typename arg2_type, \
-          typename arg3_type, typename arg4_type, typename arg5_type, \
-          typename arg6_type, typename arg7_type, typename arg8_type, \
-          typename arg9_type>\
-      return_type gmock_PerformImpl(const args_type& args, \
-          const arg0_type& arg0, const arg1_type& arg1, \
-          const arg2_type& arg2, const arg3_type& arg3, \
-          const arg4_type& arg4, const arg5_type& arg5, \
-          const arg6_type& arg6, const arg7_type& arg7, \
-          const arg8_type& arg8, const arg9_type& arg9) const;\
+      template <GMOCK_ACTION_TEMPLATE_ARGS_NAMES_>\
+      return_type gmock_PerformImpl(GMOCK_ACTION_ARG_TYPES_AND_NAMES_) const;\
       p0##_type p0;\
       p1##_type p1;\
       p2##_type p2;\
@@ -787,10 +722,7 @@
   }\
   template <typename p0##_type, typename p1##_type, typename p2##_type>\
   template <typename F>\
-  template <typename arg0_type, typename arg1_type, typename arg2_type, \
-      typename arg3_type, typename arg4_type, typename arg5_type, \
-      typename arg6_type, typename arg7_type, typename arg8_type, \
-      typename arg9_type>\
+  template <GMOCK_ACTION_TEMPLATE_ARGS_NAMES_>\
   typename ::testing::internal::Function<F>::Result\
       name##ActionP3<p0##_type, p1##_type, \
           p2##_type>::gmock_Impl<F>::gmock_PerformImpl(\
@@ -821,16 +753,8 @@
         return ::testing::internal::ActionHelper<return_type, gmock_Impl>::\
             Perform(this, args);\
       }\
-      template <typename arg0_type, typename arg1_type, typename arg2_type, \
-          typename arg3_type, typename arg4_type, typename arg5_type, \
-          typename arg6_type, typename arg7_type, typename arg8_type, \
-          typename arg9_type>\
-      return_type gmock_PerformImpl(const args_type& args, \
-          const arg0_type& arg0, const arg1_type& arg1, \
-          const arg2_type& arg2, const arg3_type& arg3, \
-          const arg4_type& arg4, const arg5_type& arg5, \
-          const arg6_type& arg6, const arg7_type& arg7, \
-          const arg8_type& arg8, const arg9_type& arg9) const;\
+      template <GMOCK_ACTION_TEMPLATE_ARGS_NAMES_>\
+      return_type gmock_PerformImpl(GMOCK_ACTION_ARG_TYPES_AND_NAMES_) const;\
       p0##_type p0;\
       p1##_type p1;\
       p2##_type p2;\
@@ -852,10 +776,7 @@
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
       typename p3##_type>\
   template <typename F>\
-  template <typename arg0_type, typename arg1_type, typename arg2_type, \
-      typename arg3_type, typename arg4_type, typename arg5_type, \
-      typename arg6_type, typename arg7_type, typename arg8_type, \
-      typename arg9_type>\
+  template <GMOCK_ACTION_TEMPLATE_ARGS_NAMES_>\
   typename ::testing::internal::Function<F>::Result\
       name##ActionP4<p0##_type, p1##_type, p2##_type, \
           p3##_type>::gmock_Impl<F>::gmock_PerformImpl(\
@@ -888,16 +809,8 @@
         return ::testing::internal::ActionHelper<return_type, gmock_Impl>::\
             Perform(this, args);\
       }\
-      template <typename arg0_type, typename arg1_type, typename arg2_type, \
-          typename arg3_type, typename arg4_type, typename arg5_type, \
-          typename arg6_type, typename arg7_type, typename arg8_type, \
-          typename arg9_type>\
-      return_type gmock_PerformImpl(const args_type& args, \
-          const arg0_type& arg0, const arg1_type& arg1, \
-          const arg2_type& arg2, const arg3_type& arg3, \
-          const arg4_type& arg4, const arg5_type& arg5, \
-          const arg6_type& arg6, const arg7_type& arg7, \
-          const arg8_type& arg8, const arg9_type& arg9) const;\
+      template <GMOCK_ACTION_TEMPLATE_ARGS_NAMES_>\
+      return_type gmock_PerformImpl(GMOCK_ACTION_ARG_TYPES_AND_NAMES_) const;\
       p0##_type p0;\
       p1##_type p1;\
       p2##_type p2;\
@@ -920,10 +833,7 @@
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
       typename p3##_type, typename p4##_type>\
   template <typename F>\
-  template <typename arg0_type, typename arg1_type, typename arg2_type, \
-      typename arg3_type, typename arg4_type, typename arg5_type, \
-      typename arg6_type, typename arg7_type, typename arg8_type, \
-      typename arg9_type>\
+  template <GMOCK_ACTION_TEMPLATE_ARGS_NAMES_>\
   typename ::testing::internal::Function<F>::Result\
       name##ActionP5<p0##_type, p1##_type, p2##_type, p3##_type, \
           p4##_type>::gmock_Impl<F>::gmock_PerformImpl(\
@@ -957,16 +867,8 @@
         return ::testing::internal::ActionHelper<return_type, gmock_Impl>::\
             Perform(this, args);\
       }\
-      template <typename arg0_type, typename arg1_type, typename arg2_type, \
-          typename arg3_type, typename arg4_type, typename arg5_type, \
-          typename arg6_type, typename arg7_type, typename arg8_type, \
-          typename arg9_type>\
-      return_type gmock_PerformImpl(const args_type& args, \
-          const arg0_type& arg0, const arg1_type& arg1, \
-          const arg2_type& arg2, const arg3_type& arg3, \
-          const arg4_type& arg4, const arg5_type& arg5, \
-          const arg6_type& arg6, const arg7_type& arg7, \
-          const arg8_type& arg8, const arg9_type& arg9) const;\
+      template <GMOCK_ACTION_TEMPLATE_ARGS_NAMES_>\
+      return_type gmock_PerformImpl(GMOCK_ACTION_ARG_TYPES_AND_NAMES_) const;\
       p0##_type p0;\
       p1##_type p1;\
       p2##_type p2;\
@@ -990,10 +892,7 @@
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
       typename p3##_type, typename p4##_type, typename p5##_type>\
   template <typename F>\
-  template <typename arg0_type, typename arg1_type, typename arg2_type, \
-      typename arg3_type, typename arg4_type, typename arg5_type, \
-      typename arg6_type, typename arg7_type, typename arg8_type, \
-      typename arg9_type>\
+  template <GMOCK_ACTION_TEMPLATE_ARGS_NAMES_>\
   typename ::testing::internal::Function<F>::Result\
       name##ActionP6<p0##_type, p1##_type, p2##_type, p3##_type, p4##_type, \
           p5##_type>::gmock_Impl<F>::gmock_PerformImpl(\
@@ -1029,16 +928,8 @@
         return ::testing::internal::ActionHelper<return_type, gmock_Impl>::\
             Perform(this, args);\
       }\
-      template <typename arg0_type, typename arg1_type, typename arg2_type, \
-          typename arg3_type, typename arg4_type, typename arg5_type, \
-          typename arg6_type, typename arg7_type, typename arg8_type, \
-          typename arg9_type>\
-      return_type gmock_PerformImpl(const args_type& args, \
-          const arg0_type& arg0, const arg1_type& arg1, \
-          const arg2_type& arg2, const arg3_type& arg3, \
-          const arg4_type& arg4, const arg5_type& arg5, \
-          const arg6_type& arg6, const arg7_type& arg7, \
-          const arg8_type& arg8, const arg9_type& arg9) const;\
+      template <GMOCK_ACTION_TEMPLATE_ARGS_NAMES_>\
+      return_type gmock_PerformImpl(GMOCK_ACTION_ARG_TYPES_AND_NAMES_) const;\
       p0##_type p0;\
       p1##_type p1;\
       p2##_type p2;\
@@ -1066,10 +957,7 @@
       typename p3##_type, typename p4##_type, typename p5##_type, \
       typename p6##_type>\
   template <typename F>\
-  template <typename arg0_type, typename arg1_type, typename arg2_type, \
-      typename arg3_type, typename arg4_type, typename arg5_type, \
-      typename arg6_type, typename arg7_type, typename arg8_type, \
-      typename arg9_type>\
+  template <GMOCK_ACTION_TEMPLATE_ARGS_NAMES_>\
   typename ::testing::internal::Function<F>::Result\
       name##ActionP7<p0##_type, p1##_type, p2##_type, p3##_type, p4##_type, \
           p5##_type, p6##_type>::gmock_Impl<F>::gmock_PerformImpl(\
@@ -1107,16 +995,8 @@
         return ::testing::internal::ActionHelper<return_type, gmock_Impl>::\
             Perform(this, args);\
       }\
-      template <typename arg0_type, typename arg1_type, typename arg2_type, \
-          typename arg3_type, typename arg4_type, typename arg5_type, \
-          typename arg6_type, typename arg7_type, typename arg8_type, \
-          typename arg9_type>\
-      return_type gmock_PerformImpl(const args_type& args, \
-          const arg0_type& arg0, const arg1_type& arg1, \
-          const arg2_type& arg2, const arg3_type& arg3, \
-          const arg4_type& arg4, const arg5_type& arg5, \
-          const arg6_type& arg6, const arg7_type& arg7, \
-          const arg8_type& arg8, const arg9_type& arg9) const;\
+      template <GMOCK_ACTION_TEMPLATE_ARGS_NAMES_>\
+      return_type gmock_PerformImpl(GMOCK_ACTION_ARG_TYPES_AND_NAMES_) const;\
       p0##_type p0;\
       p1##_type p1;\
       p2##_type p2;\
@@ -1146,10 +1026,7 @@
       typename p3##_type, typename p4##_type, typename p5##_type, \
       typename p6##_type, typename p7##_type>\
   template <typename F>\
-  template <typename arg0_type, typename arg1_type, typename arg2_type, \
-      typename arg3_type, typename arg4_type, typename arg5_type, \
-      typename arg6_type, typename arg7_type, typename arg8_type, \
-      typename arg9_type>\
+  template <GMOCK_ACTION_TEMPLATE_ARGS_NAMES_>\
   typename ::testing::internal::Function<F>::Result\
       name##ActionP8<p0##_type, p1##_type, p2##_type, p3##_type, p4##_type, \
           p5##_type, p6##_type, \
@@ -1190,16 +1067,8 @@
         return ::testing::internal::ActionHelper<return_type, gmock_Impl>::\
             Perform(this, args);\
       }\
-      template <typename arg0_type, typename arg1_type, typename arg2_type, \
-          typename arg3_type, typename arg4_type, typename arg5_type, \
-          typename arg6_type, typename arg7_type, typename arg8_type, \
-          typename arg9_type>\
-      return_type gmock_PerformImpl(const args_type& args, \
-          const arg0_type& arg0, const arg1_type& arg1, \
-          const arg2_type& arg2, const arg3_type& arg3, \
-          const arg4_type& arg4, const arg5_type& arg5, \
-          const arg6_type& arg6, const arg7_type& arg7, \
-          const arg8_type& arg8, const arg9_type& arg9) const;\
+      template <GMOCK_ACTION_TEMPLATE_ARGS_NAMES_>\
+      return_type gmock_PerformImpl(GMOCK_ACTION_ARG_TYPES_AND_NAMES_) const;\
       p0##_type p0;\
       p1##_type p1;\
       p2##_type p2;\
@@ -1231,10 +1100,7 @@
       typename p3##_type, typename p4##_type, typename p5##_type, \
       typename p6##_type, typename p7##_type, typename p8##_type>\
   template <typename F>\
-  template <typename arg0_type, typename arg1_type, typename arg2_type, \
-      typename arg3_type, typename arg4_type, typename arg5_type, \
-      typename arg6_type, typename arg7_type, typename arg8_type, \
-      typename arg9_type>\
+  template <GMOCK_ACTION_TEMPLATE_ARGS_NAMES_>\
   typename ::testing::internal::Function<F>::Result\
       name##ActionP9<p0##_type, p1##_type, p2##_type, p3##_type, p4##_type, \
           p5##_type, p6##_type, p7##_type, \
@@ -1277,16 +1143,8 @@
         return ::testing::internal::ActionHelper<return_type, gmock_Impl>::\
             Perform(this, args);\
       }\
-      template <typename arg0_type, typename arg1_type, typename arg2_type, \
-          typename arg3_type, typename arg4_type, typename arg5_type, \
-          typename arg6_type, typename arg7_type, typename arg8_type, \
-          typename arg9_type>\
-      return_type gmock_PerformImpl(const args_type& args, \
-          const arg0_type& arg0, const arg1_type& arg1, \
-          const arg2_type& arg2, const arg3_type& arg3, \
-          const arg4_type& arg4, const arg5_type& arg5, \
-          const arg6_type& arg6, const arg7_type& arg7, \
-          const arg8_type& arg8, const arg9_type& arg9) const;\
+      template <GMOCK_ACTION_TEMPLATE_ARGS_NAMES_>\
+      return_type gmock_PerformImpl(GMOCK_ACTION_ARG_TYPES_AND_NAMES_) const;\
       p0##_type p0;\
       p1##_type p1;\
       p2##_type p2;\
@@ -1321,10 +1179,7 @@
       typename p6##_type, typename p7##_type, typename p8##_type, \
       typename p9##_type>\
   template <typename F>\
-  template <typename arg0_type, typename arg1_type, typename arg2_type, \
-      typename arg3_type, typename arg4_type, typename arg5_type, \
-      typename arg6_type, typename arg7_type, typename arg8_type, \
-      typename arg9_type>\
+  template <GMOCK_ACTION_TEMPLATE_ARGS_NAMES_>\
   typename ::testing::internal::Function<F>::Result\
       name##ActionP10<p0##_type, p1##_type, p2##_type, p3##_type, p4##_type, \
           p5##_type, p6##_type, p7##_type, p8##_type, \
