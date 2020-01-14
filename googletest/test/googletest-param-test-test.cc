@@ -1077,6 +1077,17 @@ class NotUsedTest : public testing::TestWithParam<int> {};
 template <typename T>
 class NotUsedTypeTest : public testing::Test {};
 TYPED_TEST_SUITE_P(NotUsedTypeTest);
+
+// Used but not instantiated, this would fail. but...
+class NotInstantiatedTest : public testing::TestWithParam<int> {};
+// ... we mark is as allowed.
+GTEST_ALLOW_UNINSTANTIATED_PARAMTERIZED_TEST(NotInstantiatedTest);
+
+TEST_P(NotInstantiatedTest, Used) { }
+
+using OtherName = NotInstantiatedTest;
+GTEST_ALLOW_UNINSTANTIATED_PARAMTERIZED_TEST(OtherName);
+TEST_P(OtherName, Used) { }
 }  // namespace works_here
 
 int main(int argc, char **argv) {

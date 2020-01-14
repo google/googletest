@@ -698,6 +698,10 @@ class GTEST_API_ UnitTestImpl {
     return parameterized_test_registry_;
   }
 
+  std::set<std::string>* ignored_parameterized_test_suites() {
+    return &ignored_parameterized_test_suites_;
+  }
+
   // Returns TypeParameterizedTestSuiteRegistry object used to keep track of
   // type-parameterized tests and instantiations of them.
   internal::TypeParameterizedTestSuiteRegistry&
@@ -883,6 +887,10 @@ class GTEST_API_ UnitTestImpl {
   internal::ParameterizedTestSuiteRegistry parameterized_test_registry_;
   internal::TypeParameterizedTestSuiteRegistry
       type_parameterized_test_registry_;
+
+  // The set holding the name of parameterized
+  // test suites that may go uninstantiated.
+  std::set<std::string> ignored_parameterized_test_suites_;
 
   // Indicates whether RegisterParameterizedTests() has been called already.
   bool parameterized_tests_registered_;
