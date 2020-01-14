@@ -1088,6 +1088,16 @@ TEST_P(NotInstantiatedTest, Used) { }
 using OtherName = NotInstantiatedTest;
 GTEST_ALLOW_UNINSTANTIATED_PARAMTERIZED_TEST(OtherName);
 TEST_P(OtherName, Used) { }
+
+// Used but not instantiated, this would fail. but...
+template <typename T>
+class NotInstantiatedTypeTest : public testing::Test {};
+TYPED_TEST_SUITE_P(NotInstantiatedTypeTest);
+// ... we mark is as allowed.
+GTEST_ALLOW_UNINSTANTIATED_PARAMTERIZED_TEST(NotInstantiatedTypeTest);
+
+TYPED_TEST_P(NotInstantiatedTypeTest, Used) { }
+REGISTER_TYPED_TEST_SUITE_P(NotInstantiatedTypeTest, Used);
 }  // namespace works_here
 
 int main(int argc, char **argv) {
