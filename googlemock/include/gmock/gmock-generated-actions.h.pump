@@ -147,12 +147,6 @@ $$}} This meta comment fixes auto-indentation in editors.
 $range i 0..n
 $range k 0..n-1
 
-// An internal macro needed for implementing ACTION*().
-#define GMOCK_ACTION_ARG_TYPES_AND_NAMES_UNUSED_\
-    const args_type& args GTEST_ATTRIBUTE_UNUSED_
-$for k [[, \
-    const arg$k[[]]_type& arg$k GTEST_ATTRIBUTE_UNUSED_]]
-
 
 // Sometimes you want to give an action explicit template parameters
 // that cannot be inferred from its value parameters.  ACTION() and
@@ -351,9 +345,8 @@ $range k 0..n-1
         return ::testing::internal::ActionHelper<return_type, gmock_Impl>::\
             Perform(this, args);\
       }\
-      template <$for k, [[typename arg$k[[]]_type]]>\
-      return_type gmock_PerformImpl(const args_type& args[[]]
-$for k [[, const arg$k[[]]_type& arg$k]]) const;\
+      template <GMOCK_ACTION_TEMPLATE_ARGS_NAMES_>\
+      return_type gmock_PerformImpl(GMOCK_ACTION_ARG_TYPES_AND_NAMES_) const;\
       GMOCK_INTERNAL_DEFN_##value_params\
      private:\
       GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
@@ -380,10 +373,7 @@ $for k [[, const arg$k[[]]_type& arg$k]]) const;\
   template <GMOCK_INTERNAL_DECL_##template_params\
             GMOCK_INTERNAL_DECL_TYPE_##value_params>\
   template <typename F>\
-  template <typename arg0_type, typename arg1_type, typename arg2_type, \
-      typename arg3_type, typename arg4_type, typename arg5_type, \
-      typename arg6_type, typename arg7_type, typename arg8_type, \
-      typename arg9_type>\
+  template <GMOCK_ACTION_TEMPLATE_ARGS_NAMES_>\
   typename ::testing::internal::Function<F>::Result\
       GMOCK_ACTION_CLASS_(name, value_params)<\
           GMOCK_INTERNAL_LIST_##template_params\
@@ -439,9 +429,8 @@ $var macro_name = [[$if i==0 [[ACTION]] $elif i==1 [[ACTION_P]]
         return ::testing::internal::ActionHelper<return_type, gmock_Impl>::\
             Perform(this, args);\
       }\
-      template <$typename_arg_types>\
-      return_type gmock_PerformImpl(const args_type& args, [[]]
-$arg_types_and_names) const;\$param_field_decls
+      template <GMOCK_ACTION_TEMPLATE_ARGS_NAMES_>\
+      return_type gmock_PerformImpl(GMOCK_ACTION_ARG_TYPES_AND_NAMES_) const;\$param_field_decls
      private:\
       GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
@@ -452,7 +441,7 @@ $arg_types_and_names) const;\$param_field_decls
     return $class_name$param_types($params);\
   }\$template
   template <typename F>\
-  template <$typename_arg_types>\
+  template <GMOCK_ACTION_TEMPLATE_ARGS_NAMES_>\
   typename ::testing::internal::Function<F>::Result\
       $class_name$param_types::gmock_Impl<F>::gmock_PerformImpl(\
           GMOCK_ACTION_ARG_TYPES_AND_NAMES_UNUSED_) const
