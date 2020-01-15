@@ -472,7 +472,7 @@ void InsertSyntheticTestCase(const std::string &name, CodeLocation location) {
       "To suppress this error for this test suite, insert the following line "
       "(in a non-header) in the namespace it is defined in:"
       "\n\n"
-      "GTEST_ALLOW_UNINSTANTIATED_PARAMTERIZED_TEST(" + name + ");";
+      "GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(" + name + ");";
 
   std::string full_name = "UninstantiatedParamaterizedTestSuite<" + name + ">";
   RegisterTest(  //
@@ -533,7 +533,8 @@ void TypeParameterizedTestSuiteRegistry::CheckForInstantiations() {
         "To suppress this error for this test suite, insert the following line "
         "(in a non-header) in the namespace it is definedin in:"
         "\n\n"
-        "GTEST_ALLOW_UNINSTANTIATED_PARAMTERIZED_TEST(" + testcase.first + ");";
+        "GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(" +
+        testcase.first + ");";
 
     std::string full_name =
         "UninstantiatedTypeParamaterizedTestSuite<" + testcase.first + ">";

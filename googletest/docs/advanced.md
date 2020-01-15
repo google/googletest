@@ -1385,7 +1385,7 @@ cases is dynamic and may be empty, then this check can be suppressed by tagging
 the test suite:
 
 ```c++
-GTEST_ALLOW_UNINSTANTIATED_PARAMTERIZED_TEST(FooTest);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(FooTest);
 ```
 
 To distinguish different instances of the pattern (yes, you can instantiate it
