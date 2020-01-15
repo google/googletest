@@ -31,8 +31,6 @@
             "googlemock/CMakeLists.txt",
             "googletest/cmake",
             "googletest/scripts",
-            "googletest/src/gtest-all.cc",
-            "googletest/src/gtest_main.cc",
             "googletest/test",
             "googletest/CMakeLists.txt",
           ]
