@@ -990,7 +990,7 @@ Ideally, TEST_P definitions should only ever be included as part of binaries tha
 
 To suppress this error for this test suite, insert the following line (in a non-header) in the namespace it is defined in:
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMTERIZED_TEST(DetectNotInstantiatedTest);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(DetectNotInstantiatedTest);
 [0;32m[       OK ] [mGoogleTestVerification.UninstantiatedParamaterizedTestSuite<DetectNotInstantiatedTest>
 [0;32m[ RUN      ] [mGoogleTestVerification.UninstantiatedTypeParamaterizedTestSuite<DetectNotInstantiatedTypesTest>
 Type paramaterized test suite DetectNotInstantiatedTypesTest is defined via REGISTER_TYPED_TEST_SUITE_P, but never instantiated via INSTANTIATE_TYPED_TEST_SUITE_P. None of the test cases will run.
@@ -999,7 +999,7 @@ Ideally, TYPED_TEST_P definitions should only ever be included as part of binari
 
 To suppress this error for this test suite, insert the following line (in a non-header) in the namespace it is definedin in:
 
-GTEST_ALLOW_UNINSTANTIATED_PARAMTERIZED_TEST(DetectNotInstantiatedTypesTest);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(DetectNotInstantiatedTypesTest);
 [0;32m[       OK ] [mGoogleTestVerification.UninstantiatedTypeParamaterizedTestSuite<DetectNotInstantiatedTypesTest>
 [0;32m[----------] [mGlobal test environment tear-down
 BarEnvironment::TearDown() called.
