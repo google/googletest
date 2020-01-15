@@ -1081,12 +1081,12 @@ TYPED_TEST_SUITE_P(NotUsedTypeTest);
 // Used but not instantiated, this would fail. but...
 class NotInstantiatedTest : public testing::TestWithParam<int> {};
 // ... we mark is as allowed.
-GTEST_ALLOW_UNINSTANTIATED_PARAMTERIZED_TEST(NotInstantiatedTest);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(NotInstantiatedTest);
 
 TEST_P(NotInstantiatedTest, Used) { }
 
 using OtherName = NotInstantiatedTest;
-GTEST_ALLOW_UNINSTANTIATED_PARAMTERIZED_TEST(OtherName);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(OtherName);
 TEST_P(OtherName, Used) { }
 
 // Used but not instantiated, this would fail. but...
@@ -1094,7 +1094,7 @@ template <typename T>
 class NotInstantiatedTypeTest : public testing::Test {};
 TYPED_TEST_SUITE_P(NotInstantiatedTypeTest);
 // ... we mark is as allowed.
-GTEST_ALLOW_UNINSTANTIATED_PARAMTERIZED_TEST(NotInstantiatedTypeTest);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(NotInstantiatedTypeTest);
 
 TYPED_TEST_P(NotInstantiatedTypeTest, Used) { }
 REGISTER_TYPED_TEST_SUITE_P(NotInstantiatedTypeTest, Used);
