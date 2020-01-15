@@ -30,7 +30,100 @@
 
 // Google Mock - a framework for writing C++ mock classes.
 //
-// This file implements some commonly used actions.
+// The ACTION* family of macros can be used in a namespace scope to
+// define custom actions easily.  The syntax:
+//
+//   ACTION(name) { statements; }
+//
+// will define an action with the given name that executes the
+// statements.  The value returned by the statements will be used as
+// the return value of the action.  Inside the statements, you can
+// refer to the K-th (0-based) argument of the mock function by
+// 'argK', and refer to its type by 'argK_type'.  For example:
+//
+//   ACTION(IncrementArg1) {
+//     arg1_type temp = arg1;
+//     return ++(*temp);
+//   }
+//
+// allows you to write
+//
+//   ...WillOnce(IncrementArg1());
+//
+// You can also refer to the entire argument tuple and its type by
+// 'args' and 'args_type', and refer to the mock function type and its
+// return type by 'function_type' and 'return_type'.
+//
+// Note that you don't need to specify the types of the mock function
+// arguments.  However rest assured that your code is still type-safe:
+// you'll get a compiler error if *arg1 doesn't support the ++
+// operator, or if the type of ++(*arg1) isn't compatible with the
+// mock function's return type, for example.
+//
+// Sometimes you'll want to parameterize the action.   For that you can use
+// another macro:
+//
+//   ACTION_P(name, param_name) { statements; }
+//
+// For example:
+//
+//   ACTION_P(Add, n) { return arg0 + n; }
+//
+// will allow you to write:
+//
+//   ...WillOnce(Add(5));
+//
+// Note that you don't need to provide the type of the parameter
+// either.  If you need to reference the type of a parameter named
+// 'foo', you can write 'foo_type'.  For example, in the body of
+// ACTION_P(Add, n) above, you can write 'n_type' to refer to the type
+// of 'n'.
+//
+// We also provide ACTION_P2, ACTION_P3, ..., up to ACTION_P10 to support
+// multi-parameter actions.
+//
+// For the purpose of typing, you can view
+//
+//   ACTION_Pk(Foo, p1, ..., pk) { ... }
+//
+// as shorthand for
+//
+//   template <typename p1_type, ..., typename pk_type>
+//   FooActionPk<p1_type, ..., pk_type> Foo(p1_type p1, ..., pk_type pk) { ... }
+//
+// In particular, you can provide the template type arguments
+// explicitly when invoking Foo(), as in Foo<long, bool>(5, false);
+// although usually you can rely on the compiler to infer the types
+// for you automatically.  You can assign the result of expression
+// Foo(p1, ..., pk) to a variable of type FooActionPk<p1_type, ...,
+// pk_type>.  This can be useful when composing actions.
+//
+// You can also overload actions with different numbers of parameters:
+//
+//   ACTION_P(Plus, a) { ... }
+//   ACTION_P2(Plus, a, b) { ... }
+//
+// While it's tempting to always use the ACTION* macros when defining
+// a new action, you should also consider implementing ActionInterface
+// or using MakePolymorphicAction() instead, especially if you need to
+// use the action a lot.  While these approaches require more work,
+// they give you more control on the types of the mock function
+// arguments and the action parameters, which in general leads to
+// better compiler error messages that pay off in the long run.  They
+// also allow overloading actions based on parameter types (as opposed
+// to just based on the number of parameters).
+//
+// CAVEAT:
+//
+// ACTION*() can only be used in a namespace scope as templates cannot be
+// declared inside of a local class.
+// Users can, however, define any local functors (e.g. a lambda) that
+// can be used as actions.
+//
+// MORE INFORMATION:
+//
+// To learn more about using these macros, please search for 'ACTION' on
+// https://github.com/google/googletest/blob/master/googlemock/docs/cook_book.md
 
 // GOOGLETEST_CM0002 DO NOT DELETE
 
@@ -1277,21 +1370,161 @@ auto InvokeArgumentAdl(AdlTag, F f, Args... args) -> decltype(f(args...)) {
 
 }  // namespace invoke_argument
 
-#define GMOCK_INTERNAL_ARG_UNUSED(N, data, el) \
-  , const arg##N##_type& arg##N GTEST_ATTRIBUTE_UNUSED_
+#define GMOCK_INTERNAL_ARG_UNUSED(i, data, el) \
+  , const arg##i##_type& arg##i GTEST_ATTRIBUTE_UNUSED_
 #define GMOCK_ACTION_ARG_TYPES_AND_NAMES_UNUSED_                 \
   const args_type& args GTEST_ATTRIBUTE_UNUSED_ GMOCK_PP_REPEAT( \
       GMOCK_INTERNAL_ARG_UNUSED, , 10)
 
-#define GMOCK_INTERNAL_ARG(N, data, el) , const arg##N##_type& arg##N
+#define GMOCK_INTERNAL_ARG(i, data, el) , const arg##i##_type& arg##i
 #define GMOCK_ACTION_ARG_TYPES_AND_NAMES_ \
   const args_type& args GMOCK_PP_REPEAT(GMOCK_INTERNAL_ARG, , 10)
 
-#define GMOCK_INTERNAL_TEMPLATE_ARG(N, data, el) , typename arg##N##_type
+#define GMOCK_INTERNAL_TEMPLATE_ARG(i, data, el) , typename arg##i##_type
 #define GMOCK_ACTION_TEMPLATE_ARGS_NAMES_ \
   GMOCK_PP_TAIL(GMOCK_PP_REPEAT(GMOCK_INTERNAL_TEMPLATE_ARG, , 10))
 
+#define GMOCK_INTERNAL_TYPENAME_PARAM(i, data, param) , typename param##_type
+#define GMOCK_ACTION_TYPENAME_PARAMS_(params) \
+  GMOCK_PP_TAIL(GMOCK_PP_FOR_EACH(GMOCK_INTERNAL_TYPENAME_PARAM, , params))
+
+#define GMOCK_INTERNAL_TYPE_PARAM(i, data, param) , param##_type
+#define GMOCK_ACTION_TYPE_PARAMS_(params) \
+  GMOCK_PP_TAIL(GMOCK_PP_FOR_EACH(GMOCK_INTERNAL_TYPE_PARAM, , params))
+
+#define GMOCK_INTERNAL_TYPE_GVALUE_PARAM(i, data, param) \
+  , param##_type gmock_p##i
+#define GMOCK_ACTION_TYPE_GVALUE_PARAMS_(params) \
+  GMOCK_PP_TAIL(GMOCK_PP_FOR_EACH(GMOCK_INTERNAL_TYPE_GVALUE_PARAM, , params))
+
+#define GMOCK_INTERNAL_GVALUE_PARAM(i, data, param) \
+  , std::forward<param##_type>(gmock_p##i)
+#define GMOCK_ACTION_GVALUE_PARAMS_(params) \
+  GMOCK_PP_TAIL(GMOCK_PP_FOR_EACH(GMOCK_INTERNAL_GVALUE_PARAM, , params))
+
+#define GMOCK_INTERNAL_INIT_PARAM(i, data, param) \
+  , param(::std::forward<param##_type>(gmock_p##i))
+#define GMOCK_ACTION_INIT_PARAMS_(params) \
+  GMOCK_PP_TAIL(GMOCK_PP_FOR_EACH(GMOCK_INTERNAL_INIT_PARAM, , params))
+
+#define GMOCK_INTERNAL_FIELD_PARAM(i, data, param) param##_type param;
+#define GMOCK_ACTION_FIELD_PARAMS_(params) \
+  GMOCK_PP_FOR_EACH(GMOCK_INTERNAL_FIELD_PARAM, , params)
+
+#define GMOCK_INTERNAL_ACTION(name, full_name, params)                        \
+  template <GMOCK_ACTION_TYPENAME_PARAMS_(params)>                            \
+  class full_name : public ::testing::internal::ActionImpl<                   \
+                        full_name<GMOCK_ACTION_TYPE_PARAMS_(params)>> {       \
+    using base_type = ::testing::internal::ActionImpl<full_name>;             \
+                                                                              \
+   public:                                                                    \
+    using base_type::base_type;                                               \
+    template <typename F>                                                     \
+    class gmock_Impl : public ::testing::ActionInterface<F> {                 \
+     public:                                                                  \
+      typedef F function_type;                                                \
+      typedef typename ::testing::internal::Function<F>::Result return_type;  \
+      typedef                                                                 \
+          typename ::testing::internal::Function<F>::ArgumentTuple args_type; \
+      gmock_Impl(GMOCK_ACTION_TYPE_GVALUE_PARAMS_(params))                    \
+          : GMOCK_ACTION_INIT_PARAMS_(params) {}                              \
+      return_type Perform(const args_type& args) override {                   \
+        return ::testing::internal::ActionHelper<return_type,                 \
+                                                 gmock_Impl>::Perform(this,   \
+                                                                      args);  \
+      }                                                                       \
+      template <GMOCK_ACTION_TEMPLATE_ARGS_NAMES_>                            \
+      return_type gmock_PerformImpl(GMOCK_ACTION_ARG_TYPES_AND_NAMES_) const; \
+      GMOCK_ACTION_FIELD_PARAMS_(params)                                      \
+                                                                              \
+     private:                                                                 \
+      GTEST_DISALLOW_ASSIGN_(gmock_Impl);                                     \
+    };                                                                        \
+                                                                              \
+   private:                                                                   \
+    GTEST_DISALLOW_ASSIGN_(full_name);                                        \
+  };                                                                          \
+  template <GMOCK_ACTION_TYPENAME_PARAMS_(params)>                            \
+  inline full_name<GMOCK_ACTION_TYPE_PARAMS_(params)> name(                   \
+      GMOCK_ACTION_TYPE_GVALUE_PARAMS_(params)) {                             \
+    return full_name<GMOCK_ACTION_TYPE_PARAMS_(params)>(                      \
+        GMOCK_ACTION_GVALUE_PARAMS_(params));                                 \
+  }                                                                           \
+  template <GMOCK_ACTION_TYPENAME_PARAMS_(params)>                            \
+  template <typename F>                                                       \
+  template <GMOCK_ACTION_TEMPLATE_ARGS_NAMES_>                                \
+  typename ::testing::internal::Function<F>::Result                           \
+      full_name<GMOCK_ACTION_TYPE_PARAMS_(params)>::gmock_Impl<               \
+          F>::gmock_PerformImpl(GMOCK_ACTION_ARG_TYPES_AND_NAMES_UNUSED_)     \
+          const
+
 }  // namespace internal
+
+#define ACTION(name)                                                          \
+  class name##Action : public ::testing::internal::ActionImpl<name##Action> { \
+    using base_type = ::testing::internal::ActionImpl<name##Action>;          \
+                                                                              \
+   public:                                                                    \
+    using base_type::base_type;                                               \
+    template <typename F>                                                     \
+    class gmock_Impl : public ::testing::ActionInterface<F> {                 \
+     public:                                                                  \
+      typedef F function_type;                                                \
+      typedef typename ::testing::internal::Function<F>::Result return_type;  \
+      typedef                                                                 \
+          typename ::testing::internal::Function<F>::ArgumentTuple args_type; \
+      gmock_Impl() {}                                                         \
+      return_type Perform(const args_type& args) override {                   \
+        return ::testing::internal::ActionHelper<return_type,                 \
+                                                 gmock_Impl>::Perform(this,   \
+                                                                      args);  \
+      }                                                                       \
+      template <GMOCK_ACTION_TEMPLATE_ARGS_NAMES_>                            \
+      return_type gmock_PerformImpl(GMOCK_ACTION_ARG_TYPES_AND_NAMES_) const; \
+                                                                              \
+     private:                                                                 \
+      GTEST_DISALLOW_ASSIGN_(gmock_Impl);                                     \
+    };                                                                        \
+                                                                              \
+   private:                                                                   \
+    GTEST_DISALLOW_ASSIGN_(name##Action);                                     \
+  };                                                                          \
+  inline name##Action name() { return name##Action(); }                       \
+  template <typename F>                                                       \
+  template <GMOCK_ACTION_TEMPLATE_ARGS_NAMES_>                                \
+  typename ::testing::internal::Function<F>::Result                           \
+      name##Action::gmock_Impl<F>::gmock_PerformImpl(                         \
+          GMOCK_ACTION_ARG_TYPES_AND_NAMES_UNUSED_) const
+
+#define ACTION_P(name, ...) \
+  GMOCK_INTERNAL_ACTION(name, name##ActionP, (__VA_ARGS__))
+
+#define ACTION_P2(name, ...) \
+  GMOCK_INTERNAL_ACTION(name, name##ActionP2, (__VA_ARGS__))
+
+#define ACTION_P3(name, ...) \
+  GMOCK_INTERNAL_ACTION(name, name##ActionP3, (__VA_ARGS__))
+
+#define ACTION_P4(name, ...) \
+  GMOCK_INTERNAL_ACTION(name, name##ActionP4, (__VA_ARGS__))
+
+#define ACTION_P5(name, ...) \
+  GMOCK_INTERNAL_ACTION(name, name##ActionP5, (__VA_ARGS__))
+
+#define ACTION_P6(name, ...) \
+  GMOCK_INTERNAL_ACTION(name, name##ActionP6, (__VA_ARGS__))
+
+#define ACTION_P7(name, ...) \
+  GMOCK_INTERNAL_ACTION(name, name##ActionP7, (__VA_ARGS__))
+
+#define ACTION_P8(name, ...) \
+  GMOCK_INTERNAL_ACTION(name, name##ActionP8, (__VA_ARGS__))
+
+#define ACTION_P9(name, ...) \
+  GMOCK_INTERNAL_ACTION(name, name##ActionP9, (__VA_ARGS__))
+
+#define ACTION_P10(name, ...) \
+  GMOCK_INTERNAL_ACTION(name, name##ActionP10, (__VA_ARGS__))
 
 }  // namespace testing
 
