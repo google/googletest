@@ -633,6 +633,8 @@ class ParameterizedTestSuiteInfo : public ParameterizedTestSuiteInfoBase {
       int line;
   };
   typedef ::std::vector<InstantiationInfo> InstantiationContainer;
+  
+  static std::string validParamChars = "_-:/";
 
   static bool IsValidParamName(const std::string& name) {
     // Check for empty string
@@ -641,7 +643,7 @@ class ParameterizedTestSuiteInfo : public ParameterizedTestSuiteInfoBase {
 
     // Check for invalid characters
     for (std::string::size_type index = 0; index < name.size(); ++index) {
-      if (!isalnum(name[index]) && name[index] != '_')
+      if (!isalnum(name[index]) && validParamChars.find(name[index]) == std::string::npos)
         return false;
     }
 
