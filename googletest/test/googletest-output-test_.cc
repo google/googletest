@@ -790,6 +790,10 @@ INSTANTIATE_TEST_SUITE_P(PrintingStrings,
                          testing::Values(std::string("a")),
                          ParamNameFunc);
 
+// The case where a suite has INSTANTIATE_TEST_SUITE_P but not TEST_P.
+using NoTests = ParamTest;
+INSTANTIATE_TEST_SUITE_P(ThisIsOdd, NoTests, ::testing::Values("Hello"));
+
 // fails under kErrorOnUninstantiatedParameterizedTest=true
 class DetectNotInstantiatedTest : public testing::TestWithParam<int> {};
 TEST_P(DetectNotInstantiatedTest, Used) { }

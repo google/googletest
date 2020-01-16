@@ -12,7 +12,7 @@ Expected equality of these values:
   3
 Stack trace: (omitted)
 
-[0;32m[==========] [mRunning 87 tests from 41 test suites.
+[0;32m[==========] [mRunning 88 tests from 41 test suites.
 [0;32m[----------] [mGlobal test environment set-up.
 FooEnvironment::SetUp() called.
 BarEnvironment::SetUp() called.
@@ -982,7 +982,16 @@ Expected failure
 Stack trace: (omitted)
 
 [0;31m[  FAILED  ] [mPrintingStrings/ParamTest.Failure/a, where GetParam() = "a"
-[0;32m[----------] [m2 tests from GoogleTestVerification
+[0;32m[----------] [m3 tests from GoogleTestVerification
+[0;32m[ RUN      ] [mGoogleTestVerification.UninstantiatedParamaterizedTestSuite<NoTests>
+Paramaterized test suite NoTests is instantiated via INSTANTIATE_TEST_SUITE_P, but no tests are defined via TEST_P . No test cases will run.
+
+Ideally, INSTANTIATE_TEST_SUITE_P should only ever be invoked from code that always depend on code that provides TEST_P. Failing to do so is often an indication of dead code, e.g. the last TEST_P was removed but the rest got left behind.
+
+To suppress this error for this test suite, insert the following line (in a non-header) in the namespace it is defined in:
+
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(NoTests);
+[0;32m[       OK ] [mGoogleTestVerification.UninstantiatedParamaterizedTestSuite<NoTests>
 [0;32m[ RUN      ] [mGoogleTestVerification.UninstantiatedParamaterizedTestSuite<DetectNotInstantiatedTest>
 Paramaterized test suite DetectNotInstantiatedTest is defined via TEST_P, but never instantiated. None of the test cases will run. Either no INSTANTIATE_TEST_SUITE_P is provided or the only ones provided expand to nothing.
 
@@ -1014,8 +1023,8 @@ Failed
 Expected fatal failure.
 Stack trace: (omitted)
 
-[0;32m[==========] [m87 tests from 41 test suites ran.
-[0;32m[  PASSED  ] [m33 tests.
+[0;32m[==========] [m88 tests from 41 test suites ran.
+[0;32m[  PASSED  ] [m34 tests.
 [0;31m[  FAILED  ] [m54 tests, listed below:
 [0;31m[  FAILED  ] [mNonfatalFailureTest.EscapesStringOperands
 [0;31m[  FAILED  ] [mNonfatalFailureTest.DiffForLongStrings

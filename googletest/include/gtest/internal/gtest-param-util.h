@@ -483,7 +483,7 @@ struct MarkAsIgnored {
 };
 
 GTEST_API_ void InsertSyntheticTestCase(const std::string& name,
-                                        CodeLocation location);
+                                        CodeLocation location, bool has_test_p);
 
 // INTERNAL IMPLEMENTATION - DO NOT USE IN USER CODE.
 //
@@ -600,7 +600,8 @@ class ParameterizedTestSuiteInfo : public ParameterizedTestSuiteInfoBase {
 
     if (!generated_instantiations) {
       // There are no generaotrs, or they all generate nothing ...
-      InsertSyntheticTestCase(GetTestSuiteName(), code_location_);
+      InsertSyntheticTestCase(GetTestSuiteName(), code_location_,
+                              !tests_.empty());
     }
   }    // RegisterTests
 
