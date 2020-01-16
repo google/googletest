@@ -455,19 +455,32 @@ MarkAsIgnored::MarkAsIgnored(const char* test_suite) {
 
 // If this parameterized test suite has no instantiations (and that
 // has not been marked as okay), emit a test case reporting that.
-void InsertSyntheticTestCase(const std::string &name, CodeLocation location) {
+void InsertSyntheticTestCase(const std::string& name, CodeLocation location,
+                             bool has_test_p) {
   const auto& ignored = *GetIgnoredParameterizedTestSuites();
   if (ignored.find(name) != ignored.end()) return;
 
-  std::string message =
-      "Paramaterized test suite " + name +
+  const char kMissingInstantiation[] =  //
       " is defined via TEST_P, but never instantiated. None of the test cases "
       "will run. Either no INSTANTIATE_TEST_SUITE_P is provided or the only "
       "ones provided expand to nothing."
       "\n\n"
       "Ideally, TEST_P definitions should only ever be included as part of "
       "binaries that intend to use them. (As opposed to, for example, being "
-      "placed in a library that may be linked in to get other utilities.)"
+      "placed in a library that may be linked in to get other utilities.)";
+
+  const char kMissingTestCase[] =  //
+      " is instantiated via INSTANTIATE_TEST_SUITE_P, but no tests are "
+      "defined via TEST_P . No test cases will run."
+      "\n\n"
+      "Ideally, INSTANTIATE_TEST_SUITE_P should only ever be invoked from "
+      "code that always depend on code that provides TEST_P. Failing to do "
+      "so is often an indication of dead code, e.g. the last TEST_P was "
+      "removed but the rest got left behind.";
+
+  std::string message =
+      "Paramaterized test suite " + name +
+      (has_test_p ? kMissingInstantiation : kMissingTestCase) +
       "\n\n"
       "To suppress this error for this test suite, insert the following line "
       "(in a non-header) in the namespace it is defined in:"
