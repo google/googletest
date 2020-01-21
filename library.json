@@ -25,14 +25,10 @@
             "ci",
             "googlemock/cmake",
             "googlemock/scripts",
-            "googlemock/src/gmock-all.cc",
-            "googlemock/src/gmock_main.cc",
             "googlemock/test",
             "googlemock/CMakeLists.txt",
             "googletest/cmake",
             "googletest/scripts",
-            "googletest/src/gtest-all.cc",
-            "googletest/src/gtest_main.cc",
             "googletest/test",
             "googletest/CMakeLists.txt"
           ]
