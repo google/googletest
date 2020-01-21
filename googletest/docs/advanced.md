@@ -955,7 +955,7 @@ path/to/foo_test.cc:11: Failure
 Value of: Bar(n)
 Expected: 1
   Actual: 2
-   Trace:
+Google Test trace:
 path/to/foo_test.cc:17: A
 
 path/to/foo_test.cc:12: Failure
