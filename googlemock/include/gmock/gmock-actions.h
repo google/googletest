@@ -1426,7 +1426,7 @@ auto InvokeArgumentAdl(AdlTag, F f, Args... args) -> decltype(f(args...)) {
       typedef typename ::testing::internal::Function<F>::Result return_type;  \
       typedef                                                                 \
           typename ::testing::internal::Function<F>::ArgumentTuple args_type; \
-      gmock_Impl(GMOCK_ACTION_TYPE_GVALUE_PARAMS_(params))                    \
+      explicit gmock_Impl(GMOCK_ACTION_TYPE_GVALUE_PARAMS_(params))           \
           : GMOCK_ACTION_INIT_PARAMS_(params) {}                              \
       return_type Perform(const args_type& args) override {                   \
         return ::testing::internal::ActionHelper<return_type,                 \
