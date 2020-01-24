@@ -261,8 +261,12 @@
 // https://github.com/google/googletest/blob/master/googlemock/docs/cook_book.md
 
 #define MATCHER(name, description)\
-  class name##Matcher {\
+  class name##Matcher : public \
+      ::testing::internal::MatcherBaseImpl<name##Matcher> {\
+    using __internal_base_type = \
+        ::testing::internal::MatcherBaseImpl<name##Matcher>;\
    public:\
+    using __internal_base_type::__internal_base_type;\
     template <typename arg_type>\
     class gmock_Impl : public ::testing::MatcherInterface<\
         GTEST_REFERENCE_TO_CONST_(arg_type)> {\
@@ -290,14 +294,6 @@
                 ::std::tuple<>()));\
       }\
     };\
-    template <typename arg_type>\
-    operator ::testing::Matcher<arg_type>() const {\
-      return ::testing::Matcher<arg_type>(\
-          new gmock_Impl<arg_type>());\
-    }\
-    name##Matcher() {\
-    }\
-   private:\
   };\
   inline name##Matcher name() {\
     return name##Matcher();\
@@ -310,8 +306,12 @@
 
 #define MATCHER_P(name, p0, description)\
   template <typename p0##_type>\
-  class name##MatcherP {\
+  class name##MatcherP : public \
+      ::testing::internal::MatcherBaseImpl<name##MatcherP<p0##_type>> {\
+    using __internal_base_type = \
+        ::testing::internal::MatcherBaseImpl<name##MatcherP>;\
    public:\
+    using __internal_base_type::__internal_base_type;\
     template <typename arg_type>\
     class gmock_Impl : public ::testing::MatcherInterface<\
         GTEST_REFERENCE_TO_CONST_(arg_type)> {\
@@ -340,15 +340,6 @@
                 ::std::tuple<p0##_type>(p0)));\
       }\
     };\
-    template <typename arg_type>\
-    operator ::testing::Matcher<arg_type>() const {\
-      return ::testing::Matcher<arg_type>(\
-          new gmock_Impl<arg_type>(p0));\
-    }\
-    explicit name##MatcherP(p0##_type gmock_p0) : p0(::std::move(gmock_p0)) {\
-    }\
-    p0##_type const p0;\
-   private:\
   };\
   template <typename p0##_type>\
   inline name##MatcherP<p0##_type> name(p0##_type p0) {\
@@ -363,8 +354,13 @@
 
 #define MATCHER_P2(name, p0, p1, description)\
   template <typename p0##_type, typename p1##_type>\
-  class name##MatcherP2 {\
+  class name##MatcherP2 : public \
+      ::testing::internal::MatcherBaseImpl<name##MatcherP2<p0##_type, \
+      p1##_type>> {\
+    using __internal_base_type = \
+        ::testing::internal::MatcherBaseImpl<name##MatcherP2>;\
    public:\
+    using __internal_base_type::__internal_base_type;\
     template <typename arg_type>\
     class gmock_Impl : public ::testing::MatcherInterface<\
         GTEST_REFERENCE_TO_CONST_(arg_type)> {\
@@ -394,18 +390,6 @@
                 ::std::tuple<p0##_type, p1##_type>(p0, p1)));\
       }\
     };\
-    template <typename arg_type>\
-    operator ::testing::Matcher<arg_type>() const {\
-      return ::testing::Matcher<arg_type>(\
-          new gmock_Impl<arg_type>(p0, p1));\
-    }\
-    name##MatcherP2(p0##_type gmock_p0, \
-        p1##_type gmock_p1) : p0(::std::move(gmock_p0)), \
-        p1(::std::move(gmock_p1)) {\
-    }\
-    p0##_type const p0;\
-    p1##_type const p1;\
-   private:\
   };\
   template <typename p0##_type, typename p1##_type>\
   inline name##MatcherP2<p0##_type, p1##_type> name(p0##_type p0, \
@@ -422,8 +406,13 @@
 
 #define MATCHER_P3(name, p0, p1, p2, description)\
   template <typename p0##_type, typename p1##_type, typename p2##_type>\
-  class name##MatcherP3 {\
+  class name##MatcherP3 : public \
+      ::testing::internal::MatcherBaseImpl<name##MatcherP3<p0##_type, \
+      p1##_type, p2##_type>> {\
+    using __internal_base_type = \
+        ::testing::internal::MatcherBaseImpl<name##MatcherP3>;\
    public:\
+    using __internal_base_type::__internal_base_type;\
     template <typename arg_type>\
     class gmock_Impl : public ::testing::MatcherInterface<\
         GTEST_REFERENCE_TO_CONST_(arg_type)> {\
@@ -455,19 +444,6 @@
                 ::std::tuple<p0##_type, p1##_type, p2##_type>(p0, p1, p2)));\
       }\
     };\
-    template <typename arg_type>\
-    operator ::testing::Matcher<arg_type>() const {\
-      return ::testing::Matcher<arg_type>(\
-          new gmock_Impl<arg_type>(p0, p1, p2));\
-    }\
-    name##MatcherP3(p0##_type gmock_p0, p1##_type gmock_p1, \
-        p2##_type gmock_p2) : p0(::std::move(gmock_p0)), \
-        p1(::std::move(gmock_p1)), p2(::std::move(gmock_p2)) {\
-    }\
-    p0##_type const p0;\
-    p1##_type const p1;\
-    p2##_type const p2;\
-   private:\
   };\
   template <typename p0##_type, typename p1##_type, typename p2##_type>\
   inline name##MatcherP3<p0##_type, p1##_type, p2##_type> name(p0##_type p0, \
@@ -485,8 +461,13 @@
 #define MATCHER_P4(name, p0, p1, p2, p3, description)\
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
       typename p3##_type>\
-  class name##MatcherP4 {\
+  class name##MatcherP4 : public \
+      ::testing::internal::MatcherBaseImpl<name##MatcherP4<p0##_type, \
+      p1##_type, p2##_type, p3##_type>> {\
+    using __internal_base_type = \
+        ::testing::internal::MatcherBaseImpl<name##MatcherP4>;\
    public:\
+    using __internal_base_type::__internal_base_type;\
     template <typename arg_type>\
     class gmock_Impl : public ::testing::MatcherInterface<\
         GTEST_REFERENCE_TO_CONST_(arg_type)> {\
@@ -521,21 +502,6 @@
                     p1, p2, p3)));\
       }\
     };\
-    template <typename arg_type>\
-    operator ::testing::Matcher<arg_type>() const {\
-      return ::testing::Matcher<arg_type>(\
-          new gmock_Impl<arg_type>(p0, p1, p2, p3));\
-    }\
-    name##MatcherP4(p0##_type gmock_p0, p1##_type gmock_p1, \
-        p2##_type gmock_p2, p3##_type gmock_p3) : p0(::std::move(gmock_p0)), \
-        p1(::std::move(gmock_p1)), p2(::std::move(gmock_p2)), \
-        p3(::std::move(gmock_p3)) {\
-    }\
-    p0##_type const p0;\
-    p1##_type const p1;\
-    p2##_type const p2;\
-    p3##_type const p3;\
-   private:\
   };\
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
       typename p3##_type>\
@@ -557,8 +523,13 @@
 #define MATCHER_P5(name, p0, p1, p2, p3, p4, description)\
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
       typename p3##_type, typename p4##_type>\
-  class name##MatcherP5 {\
+  class name##MatcherP5 : public \
+      ::testing::internal::MatcherBaseImpl<name##MatcherP5<p0##_type, \
+      p1##_type, p2##_type, p3##_type, p4##_type>> {\
+    using __internal_base_type = \
+        ::testing::internal::MatcherBaseImpl<name##MatcherP5>;\
    public:\
+    using __internal_base_type::__internal_base_type;\
     template <typename arg_type>\
     class gmock_Impl : public ::testing::MatcherInterface<\
         GTEST_REFERENCE_TO_CONST_(arg_type)> {\
@@ -595,23 +566,6 @@
                     p4##_type>(p0, p1, p2, p3, p4)));\
       }\
     };\
-    template <typename arg_type>\
-    operator ::testing::Matcher<arg_type>() const {\
-      return ::testing::Matcher<arg_type>(\
-          new gmock_Impl<arg_type>(p0, p1, p2, p3, p4));\
-    }\
-    name##MatcherP5(p0##_type gmock_p0, p1##_type gmock_p1, \
-        p2##_type gmock_p2, p3##_type gmock_p3, \
-        p4##_type gmock_p4) : p0(::std::move(gmock_p0)), \
-        p1(::std::move(gmock_p1)), p2(::std::move(gmock_p2)), \
-        p3(::std::move(gmock_p3)), p4(::std::move(gmock_p4)) {\
-    }\
-    p0##_type const p0;\
-    p1##_type const p1;\
-    p2##_type const p2;\
-    p3##_type const p3;\
-    p4##_type const p4;\
-   private:\
   };\
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
       typename p3##_type, typename p4##_type>\
@@ -633,8 +587,13 @@
 #define MATCHER_P6(name, p0, p1, p2, p3, p4, p5, description)\
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
       typename p3##_type, typename p4##_type, typename p5##_type>\
-  class name##MatcherP6 {\
+  class name##MatcherP6 : public \
+      ::testing::internal::MatcherBaseImpl<name##MatcherP6<p0##_type, \
+      p1##_type, p2##_type, p3##_type, p4##_type, p5##_type>> {\
+    using __internal_base_type = \
+        ::testing::internal::MatcherBaseImpl<name##MatcherP6>;\
    public:\
+    using __internal_base_type::__internal_base_type;\
     template <typename arg_type>\
     class gmock_Impl : public ::testing::MatcherInterface<\
         GTEST_REFERENCE_TO_CONST_(arg_type)> {\
@@ -672,25 +631,6 @@
                     p4##_type, p5##_type>(p0, p1, p2, p3, p4, p5)));\
       }\
     };\
-    template <typename arg_type>\
-    operator ::testing::Matcher<arg_type>() const {\
-      return ::testing::Matcher<arg_type>(\
-          new gmock_Impl<arg_type>(p0, p1, p2, p3, p4, p5));\
-    }\
-    name##MatcherP6(p0##_type gmock_p0, p1##_type gmock_p1, \
-        p2##_type gmock_p2, p3##_type gmock_p3, p4##_type gmock_p4, \
-        p5##_type gmock_p5) : p0(::std::move(gmock_p0)), \
-        p1(::std::move(gmock_p1)), p2(::std::move(gmock_p2)), \
-        p3(::std::move(gmock_p3)), p4(::std::move(gmock_p4)), \
-        p5(::std::move(gmock_p5)) {\
-    }\
-    p0##_type const p0;\
-    p1##_type const p1;\
-    p2##_type const p2;\
-    p3##_type const p3;\
-    p4##_type const p4;\
-    p5##_type const p5;\
-   private:\
   };\
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
       typename p3##_type, typename p4##_type, typename p5##_type>\
@@ -713,8 +653,13 @@
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
       typename p3##_type, typename p4##_type, typename p5##_type, \
       typename p6##_type>\
-  class name##MatcherP7 {\
+  class name##MatcherP7 : public \
+      ::testing::internal::MatcherBaseImpl<name##MatcherP7<p0##_type, \
+      p1##_type, p2##_type, p3##_type, p4##_type, p5##_type, p6##_type>> {\
+    using __internal_base_type = \
+        ::testing::internal::MatcherBaseImpl<name##MatcherP7>;\
    public:\
+    using __internal_base_type::__internal_base_type;\
     template <typename arg_type>\
     class gmock_Impl : public ::testing::MatcherInterface<\
         GTEST_REFERENCE_TO_CONST_(arg_type)> {\
@@ -756,26 +701,6 @@
                     p6)));\
       }\
     };\
-    template <typename arg_type>\
-    operator ::testing::Matcher<arg_type>() const {\
-      return ::testing::Matcher<arg_type>(\
-          new gmock_Impl<arg_type>(p0, p1, p2, p3, p4, p5, p6));\
-    }\
-    name##MatcherP7(p0##_type gmock_p0, p1##_type gmock_p1, \
-        p2##_type gmock_p2, p3##_type gmock_p3, p4##_type gmock_p4, \
-        p5##_type gmock_p5, p6##_type gmock_p6) : p0(::std::move(gmock_p0)), \
-        p1(::std::move(gmock_p1)), p2(::std::move(gmock_p2)), \
-        p3(::std::move(gmock_p3)), p4(::std::move(gmock_p4)), \
-        p5(::std::move(gmock_p5)), p6(::std::move(gmock_p6)) {\
-    }\
-    p0##_type const p0;\
-    p1##_type const p1;\
-    p2##_type const p2;\
-    p3##_type const p3;\
-    p4##_type const p4;\
-    p5##_type const p5;\
-    p6##_type const p6;\
-   private:\
   };\
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
       typename p3##_type, typename p4##_type, typename p5##_type, \
@@ -801,8 +726,14 @@
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
       typename p3##_type, typename p4##_type, typename p5##_type, \
       typename p6##_type, typename p7##_type>\
-  class name##MatcherP8 {\
+  class name##MatcherP8 : public \
+      ::testing::internal::MatcherBaseImpl<name##MatcherP8<p0##_type, \
+      p1##_type, p2##_type, p3##_type, p4##_type, p5##_type, p6##_type, \
+      p7##_type>> {\
+    using __internal_base_type = \
+        ::testing::internal::MatcherBaseImpl<name##MatcherP8>;\
    public:\
+    using __internal_base_type::__internal_base_type;\
     template <typename arg_type>\
     class gmock_Impl : public ::testing::MatcherInterface<\
         GTEST_REFERENCE_TO_CONST_(arg_type)> {\
@@ -845,29 +776,6 @@
                     p3, p4, p5, p6, p7)));\
       }\
     };\
-    template <typename arg_type>\
-    operator ::testing::Matcher<arg_type>() const {\
-      return ::testing::Matcher<arg_type>(\
-          new gmock_Impl<arg_type>(p0, p1, p2, p3, p4, p5, p6, p7));\
-    }\
-    name##MatcherP8(p0##_type gmock_p0, p1##_type gmock_p1, \
-        p2##_type gmock_p2, p3##_type gmock_p3, p4##_type gmock_p4, \
-        p5##_type gmock_p5, p6##_type gmock_p6, \
-        p7##_type gmock_p7) : p0(::std::move(gmock_p0)), \
-        p1(::std::move(gmock_p1)), p2(::std::move(gmock_p2)), \
-        p3(::std::move(gmock_p3)), p4(::std::move(gmock_p4)), \
-        p5(::std::move(gmock_p5)), p6(::std::move(gmock_p6)), \
-        p7(::std::move(gmock_p7)) {\
-    }\
-    p0##_type const p0;\
-    p1##_type const p1;\
-    p2##_type const p2;\
-    p3##_type const p3;\
-    p4##_type const p4;\
-    p5##_type const p5;\
-    p6##_type const p6;\
-    p7##_type const p7;\
-   private:\
   };\
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
       typename p3##_type, typename p4##_type, typename p5##_type, \
@@ -895,8 +803,14 @@
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
       typename p3##_type, typename p4##_type, typename p5##_type, \
       typename p6##_type, typename p7##_type, typename p8##_type>\
-  class name##MatcherP9 {\
+  class name##MatcherP9 : public \
+      ::testing::internal::MatcherBaseImpl<name##MatcherP9<p0##_type, \
+      p1##_type, p2##_type, p3##_type, p4##_type, p5##_type, p6##_type, \
+      p7##_type, p8##_type>> {\
+    using __internal_base_type = \
+        ::testing::internal::MatcherBaseImpl<name##MatcherP9>;\
    public:\
+    using __internal_base_type::__internal_base_type;\
     template <typename arg_type>\
     class gmock_Impl : public ::testing::MatcherInterface<\
         GTEST_REFERENCE_TO_CONST_(arg_type)> {\
@@ -941,30 +855,6 @@
                     p8##_type>(p0, p1, p2, p3, p4, p5, p6, p7, p8)));\
       }\
     };\
-    template <typename arg_type>\
-    operator ::testing::Matcher<arg_type>() const {\
-      return ::testing::Matcher<arg_type>(\
-          new gmock_Impl<arg_type>(p0, p1, p2, p3, p4, p5, p6, p7, p8));\
-    }\
-    name##MatcherP9(p0##_type gmock_p0, p1##_type gmock_p1, \
-        p2##_type gmock_p2, p3##_type gmock_p3, p4##_type gmock_p4, \
-        p5##_type gmock_p5, p6##_type gmock_p6, p7##_type gmock_p7, \
-        p8##_type gmock_p8) : p0(::std::move(gmock_p0)), \
-        p1(::std::move(gmock_p1)), p2(::std::move(gmock_p2)), \
-        p3(::std::move(gmock_p3)), p4(::std::move(gmock_p4)), \
-        p5(::std::move(gmock_p5)), p6(::std::move(gmock_p6)), \
-        p7(::std::move(gmock_p7)), p8(::std::move(gmock_p8)) {\
-    }\
-    p0##_type const p0;\
-    p1##_type const p1;\
-    p2##_type const p2;\
-    p3##_type const p3;\
-    p4##_type const p4;\
-    p5##_type const p5;\
-    p6##_type const p6;\
-    p7##_type const p7;\
-    p8##_type const p8;\
-   private:\
   };\
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
       typename p3##_type, typename p4##_type, typename p5##_type, \
@@ -994,8 +884,14 @@
       typename p3##_type, typename p4##_type, typename p5##_type, \
       typename p6##_type, typename p7##_type, typename p8##_type, \
       typename p9##_type>\
-  class name##MatcherP10 {\
+  class name##MatcherP10 : public \
+      ::testing::internal::MatcherBaseImpl<name##MatcherP10<p0##_type, \
+      p1##_type, p2##_type, p3##_type, p4##_type, p5##_type, p6##_type, \
+      p7##_type, p8##_type, p9##_type>> {\
+    using __internal_base_type = \
+        ::testing::internal::MatcherBaseImpl<name##MatcherP10>;\
    public:\
+    using __internal_base_type::__internal_base_type;\
     template <typename arg_type>\
     class gmock_Impl : public ::testing::MatcherInterface<\
         GTEST_REFERENCE_TO_CONST_(arg_type)> {\
@@ -1042,32 +938,6 @@
                     p9##_type>(p0, p1, p2, p3, p4, p5, p6, p7, p8, p9)));\
       }\
     };\
-    template <typename arg_type>\
-    operator ::testing::Matcher<arg_type>() const {\
-      return ::testing::Matcher<arg_type>(\
-          new gmock_Impl<arg_type>(p0, p1, p2, p3, p4, p5, p6, p7, p8, p9));\
-    }\
-    name##MatcherP10(p0##_type gmock_p0, p1##_type gmock_p1, \
-        p2##_type gmock_p2, p3##_type gmock_p3, p4##_type gmock_p4, \
-        p5##_type gmock_p5, p6##_type gmock_p6, p7##_type gmock_p7, \
-        p8##_type gmock_p8, p9##_type gmock_p9) : p0(::std::move(gmock_p0)), \
-        p1(::std::move(gmock_p1)), p2(::std::move(gmock_p2)), \
-        p3(::std::move(gmock_p3)), p4(::std::move(gmock_p4)), \
-        p5(::std::move(gmock_p5)), p6(::std::move(gmock_p6)), \
-        p7(::std::move(gmock_p7)), p8(::std::move(gmock_p8)), \
-        p9(::std::move(gmock_p9)) {\
-    }\
-    p0##_type const p0;\
-    p1##_type const p1;\
-    p2##_type const p2;\
-    p3##_type const p3;\
-    p4##_type const p4;\
-    p5##_type const p5;\
-    p6##_type const p6;\
-    p7##_type const p7;\
-    p8##_type const p8;\
-    p9##_type const p9;\
-   private:\
   };\
   template <typename p0##_type, typename p1##_type, typename p2##_type, \
       typename p3##_type, typename p4##_type, typename p5##_type, \
