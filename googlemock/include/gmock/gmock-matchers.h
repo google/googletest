@@ -236,6 +236,58 @@ class MatcherCastImpl<T, Matcher<T> > {
   static Matcher<T> Cast(const Matcher<T>& matcher) { return matcher; }
 };
 
+// Template specialization for parameterless Matcher.
+template <typename Derived>
+class MatcherBaseImpl {
+ public:
+  MatcherBaseImpl() = default;
+
+  template <typename T>
+  operator ::testing::Matcher<T>() const {  // NOLINT(runtime/explicit)
+    return ::testing::Matcher<T>(new
+                                 typename Derived::template gmock_Impl<T>());
+  }
+};
+
+// Template specialization for Matcher with 1 parameter.
+template <template <typename...> class Derived, typename T>
+class MatcherBaseImpl<Derived<T>> {
+ public:
+  explicit MatcherBaseImpl(T param) : param_(std::move(param)) {}
+
+  template <typename F>
+  operator ::testing::Matcher<F>() const {  // NOLINT(runtime/explicit)
+    return ::testing::Matcher<F>(
+        new typename Derived<T>::template gmock_Impl<F>(param_));
+  }
+
+ private:
+  const T param_;
+};
+
+// Template specialization for Matcher with multiple parameters.
+template <template <typename...> class Derived, typename... Ts>
+class MatcherBaseImpl<Derived<Ts...>> {
+ public:
+  MatcherBaseImpl(Ts... params)
+      : params_(std::move(params)...) {}  // NOLINT(runtime/explicit)
+
+  template <typename F>
+  operator ::testing::Matcher<F>() const {  // NOLINT(runtime/explicit)
+    return Apply<F>(MakeIndexSequence<sizeof...(Ts)>{});
+  }
+
+ private:
+  template <typename F, std::size_t... tuple_ids>
+  ::testing::Matcher<F> Apply(IndexSequence<tuple_ids...>) const {
+    return ::testing::Matcher<F>(
+        new typename Derived<Ts...>::template gmock_Impl<F>(
+            std::get<tuple_ids>(params_)...));
+  }
+
+  const std::tuple<Ts...> params_;
+};
+
 }  // namespace internal
 
 // In order to be safe and clear, casting between different matcher
