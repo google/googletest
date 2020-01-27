@@ -36,6 +36,9 @@
 #ifndef THIRD_PARTY_GOOGLETEST_GOOGLEMOCK_INCLUDE_GMOCK_INTERNAL_GMOCK_FUNCTION_MOCKER_H_  // NOLINT
 #define THIRD_PARTY_GOOGLETEST_GOOGLEMOCK_INCLUDE_GMOCK_INTERNAL_GMOCK_FUNCTION_MOCKER_H_  // NOLINT
 
+#include <type_traits>  // IWYU pragma: keep
+#include <utility>  // IWYU pragma: keep
+
 #include "gmock/gmock-generated-function-mockers.h"  // NOLINT
 #include "gmock/internal/gmock-pp.h"
 
