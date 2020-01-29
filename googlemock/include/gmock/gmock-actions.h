@@ -927,7 +927,7 @@ class SetErrnoAndReturnAction {
 // Implements the SetArgPointee<N>(x) action for any function
 // whose N-th argument (0-based) is a pointer to x's type.
 template <size_t N, typename A, typename = void>
-struct SetArgumentPointeeAction {
+struct SetArgPointeeAction {
   A value;
 
   template <typename... Args>
@@ -1225,7 +1225,7 @@ inline internal::DoDefaultAction DoDefault() {
 // Creates an action that sets the variable pointed by the N-th
 // (0-based) function argument to 'value'.
 template <size_t N, typename T>
-internal::SetArgumentPointeeAction<N, T> SetArgPointee(T value) {
+internal::SetArgPointeeAction<N, T> SetArgPointee(T value) {
   return {std::move(value)};
 }
 
