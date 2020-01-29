@@ -75,7 +75,6 @@ using ::testing::ReturnRef;
 using ::testing::ReturnRefOfCopy;
 using ::testing::ReturnRoundRobin;
 using ::testing::SetArgPointee;
-using ::testing::SetArgumentPointee;
 using ::testing::Unused;
 using ::testing::WithArgs;
 using ::testing::internal::BuiltInDefaultValue;
@@ -917,26 +916,6 @@ TEST(SetArgPointeeTest, AcceptsWideCharPointer) {
   a2.Perform(std::make_tuple(true, &str));
   EXPECT_EQ(world_array, str);
 # endif
-}
-
-// Tests that SetArgumentPointee<N>(v) sets the variable pointed to by
-// the N-th (0-based) argument to v.
-TEST(SetArgumentPointeeTest, SetsTheNthPointee) {
-  typedef void MyFunction(bool, int*, char*);
-  Action<MyFunction> a = SetArgumentPointee<1>(2);
-
-  int n = 0;
-  char ch = '\0';
-  a.Perform(std::make_tuple(true, &n, &ch));
-  EXPECT_EQ(2, n);
-  EXPECT_EQ('\0', ch);
-
-  a = SetArgumentPointee<2>('a');
-  n = 0;
-  ch = '\0';
-  a.Perform(std::make_tuple(true, &n, &ch));
-  EXPECT_EQ(0, n);
-  EXPECT_EQ('a', ch);
 }
 
 // Sample functions and functors for testing Invoke() and etc.

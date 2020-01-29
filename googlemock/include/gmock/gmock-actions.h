@@ -544,7 +544,7 @@ class Action {
 //
 // Then the user creates the polymorphic action using
 // MakePolymorphicAction(object) where object has type FooAction.  See
-// the definition of Return(void) and SetArgumentPointee<N>(value) for
+// the definition of Return(void) and SetArgPointee<N>(value) for
 // complete examples.
 template <typename Impl>
 class PolymorphicAction {
@@ -924,7 +924,7 @@ class SetErrnoAndReturnAction {
 
 #endif  // !GTEST_OS_WINDOWS_MOBILE
 
-// Implements the SetArgumentPointee<N>(x) action for any function
+// Implements the SetArgPointee<N>(x) action for any function
 // whose N-th argument (0-based) is a pointer to x's type.
 template <size_t N, typename A, typename = void>
 struct SetArgumentPointeeAction {
@@ -1226,12 +1226,6 @@ inline internal::DoDefaultAction DoDefault() {
 // (0-based) function argument to 'value'.
 template <size_t N, typename T>
 internal::SetArgumentPointeeAction<N, T> SetArgPointee(T value) {
-  return {std::move(value)};
-}
-
-// The following version is DEPRECATED.
-template <size_t N, typename T>
-internal::SetArgumentPointeeAction<N, T> SetArgumentPointee(T value) {
   return {std::move(value)};
 }
 
