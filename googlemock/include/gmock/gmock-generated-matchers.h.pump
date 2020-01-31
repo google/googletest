@@ -80,9 +80,8 @@ $var param_field_decls2 = [[$for j
 
 #define $macro_name(name, description$for j [[, p$j]])\$template
   class $class_name : public ::testing::internal::MatcherBaseImpl<$class_name$param_types> {\
-    using __internal_base_type = ::testing::internal::MatcherBaseImpl<$class_name>;\
    public:\
-    using __internal_base_type::__internal_base_type;\
+    using $class_name::MatcherBaseImpl::MatcherBaseImpl;\
     template <typename arg_type>\
     class gmock_Impl : public ::testing::MatcherInterface<\
         GTEST_REFERENCE_TO_CONST_(arg_type)> {\
