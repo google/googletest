@@ -279,7 +279,11 @@ class GTEST_API_ AssertionResult {
   // Used in EXPECT_TRUE/FALSE(assertion_result).
   AssertionResult(const AssertionResult& other);
 
-#if defined(_MSC_VER) && _MSC_VER < 1910
+// C4800 is a level 3 warning in Visual Studio 2015 and earlier.
+// This warning is not emitted in Visual Studio 2017.
+// This warning is off by default starting in Visual Studio 2019 but can be
+// enabled with command-line options.
+#if defined(_MSC_VER) && (_MSC_VER < 1910 || _MSC_VER >= 1920)
   GTEST_DISABLE_MSC_WARNINGS_PUSH_(4800 /* forcing value to bool */)
 #endif
 
@@ -299,7 +303,7 @@ class GTEST_API_ AssertionResult {
       = nullptr)
       : success_(success) {}
 
-#if defined(_MSC_VER) && _MSC_VER < 1910
+#if defined(_MSC_VER) && (_MSC_VER < 1910 || _MSC_VER >= 1920)
   GTEST_DISABLE_MSC_WARNINGS_POP_()
 #endif
 
