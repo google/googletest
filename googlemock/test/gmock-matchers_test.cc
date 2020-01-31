@@ -2875,6 +2875,33 @@ TEST(ExplainMatchResultTest, WorksWithMonomorphicMatcher) {
   EXPECT_EQ("", listener2.str());
 }
 
+MATCHER(ConstructNoArg, "") { return true; }
+MATCHER_P(Construct1Arg, arg1, "") { return true; }
+MATCHER_P2(Construct2Args, arg1, arg2, "") { return true; }
+
+TEST(MatcherConstruct, ExplicitVsImplicit) {
+  {
+    // No arg constructor can be constructed with empty brace.
+    ConstructNoArgMatcher m = {};
+    (void)m;
+    // And with no args
+    ConstructNoArgMatcher m2;
+    (void)m2;
+  }
+  {
+    // The one arg constructor has an explicit constructor.
+    // This is to prevent the implicit conversion.
+    using M = Construct1ArgMatcherP<int>;
+    EXPECT_TRUE((std::is_constructible<M, int>::value));
+    EXPECT_FALSE((std::is_convertible<int, M>::value));
+  }
+  {
+    // Multiple arg matchers can be constructed with an implicit construction.
+    Construct2ArgsMatcherP2<int, double> m = {1, 2.2};
+    (void)m;
+  }
+}
+
 MATCHER_P(Really, inner_matcher, "") {
   return ExplainMatchResult(inner_matcher, arg, result_listener);
 }
