@@ -462,28 +462,18 @@ class MatcherBaseImpl {
   }
 };
 
-// Template specialization for Matcher with 1 parameter.
-template <template <typename...> class Derived, typename T>
-class MatcherBaseImpl<Derived<T>> {
- public:
-  explicit MatcherBaseImpl(T param) : param_(std::move(param)) {}
-
-  template <typename F>
-  operator ::testing::Matcher<F>() const {  // NOLINT(runtime/explicit)
-    return ::testing::Matcher<F>(
-        new typename Derived<T>::template gmock_Impl<F>(param_));
-  }
-
- private:
-  const T param_;
-};
-
-// Template specialization for Matcher with multiple parameters.
+// Template specialization for Matcher with parameters.
 template <template <typename...> class Derived, typename... Ts>
 class MatcherBaseImpl<Derived<Ts...>> {
  public:
-  MatcherBaseImpl(Ts... params)
-      : params_(std::move(params)...) {}  // NOLINT(runtime/explicit)
+  // Mark the constructor explicit for single argument T to avoid implicit
+  // conversions.
+  template <typename E = std::enable_if<sizeof...(Ts) == 1>,
+            typename E::type* = nullptr>
+  explicit MatcherBaseImpl(Ts... params) : params_(std::move(params)...) {}
+  template <typename E = std::enable_if<sizeof...(Ts) != 1>,
+            typename = typename E::type>
+  MatcherBaseImpl(Ts... params) : params_(std::move(params)...) {}  // NOLINT
 
   template <typename F>
   operator ::testing::Matcher<F>() const {  // NOLINT(runtime/explicit)
