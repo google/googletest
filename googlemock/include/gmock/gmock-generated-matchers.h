@@ -50,10 +50,8 @@
 #define GMOCK_INTERNAL_MATCHER(name, description)\
   class name##Matcher : public \
       ::testing::internal::MatcherBaseImpl<name##Matcher> {\
-    using __internal_base_type = \
-        ::testing::internal::MatcherBaseImpl<name##Matcher>;\
    public:\
-    using __internal_base_type::__internal_base_type;\
+    using name##Matcher::MatcherBaseImpl::MatcherBaseImpl;\
     template <typename arg_type>\
     class gmock_Impl : public ::testing::MatcherInterface<\
         GTEST_REFERENCE_TO_CONST_(arg_type)> {\
@@ -95,10 +93,8 @@
   template <typename p0##_type>\
   class name##MatcherP : public \
       ::testing::internal::MatcherBaseImpl<name##MatcherP<p0##_type>> {\
-    using __internal_base_type = \
-        ::testing::internal::MatcherBaseImpl<name##MatcherP>;\
    public:\
-    using __internal_base_type::__internal_base_type;\
+    using name##MatcherP::MatcherBaseImpl::MatcherBaseImpl;\
     template <typename arg_type>\
     class gmock_Impl : public ::testing::MatcherInterface<\
         GTEST_REFERENCE_TO_CONST_(arg_type)> {\
@@ -144,10 +140,8 @@
   class name##MatcherP2 : public \
       ::testing::internal::MatcherBaseImpl<name##MatcherP2<p0##_type, \
       p1##_type>> {\
-    using __internal_base_type = \
-        ::testing::internal::MatcherBaseImpl<name##MatcherP2>;\
    public:\
-    using __internal_base_type::__internal_base_type;\
+    using name##MatcherP2::MatcherBaseImpl::MatcherBaseImpl;\
     template <typename arg_type>\
     class gmock_Impl : public ::testing::MatcherInterface<\
         GTEST_REFERENCE_TO_CONST_(arg_type)> {\
@@ -196,10 +190,8 @@
   class name##MatcherP3 : public \
       ::testing::internal::MatcherBaseImpl<name##MatcherP3<p0##_type, \
       p1##_type, p2##_type>> {\
-    using __internal_base_type = \
-        ::testing::internal::MatcherBaseImpl<name##MatcherP3>;\
    public:\
-    using __internal_base_type::__internal_base_type;\
+    using name##MatcherP3::MatcherBaseImpl::MatcherBaseImpl;\
     template <typename arg_type>\
     class gmock_Impl : public ::testing::MatcherInterface<\
         GTEST_REFERENCE_TO_CONST_(arg_type)> {\
@@ -251,10 +243,8 @@
   class name##MatcherP4 : public \
       ::testing::internal::MatcherBaseImpl<name##MatcherP4<p0##_type, \
       p1##_type, p2##_type, p3##_type>> {\
-    using __internal_base_type = \
-        ::testing::internal::MatcherBaseImpl<name##MatcherP4>;\
    public:\
-    using __internal_base_type::__internal_base_type;\
+    using name##MatcherP4::MatcherBaseImpl::MatcherBaseImpl;\
     template <typename arg_type>\
     class gmock_Impl : public ::testing::MatcherInterface<\
         GTEST_REFERENCE_TO_CONST_(arg_type)> {\
@@ -313,10 +303,8 @@
   class name##MatcherP5 : public \
       ::testing::internal::MatcherBaseImpl<name##MatcherP5<p0##_type, \
       p1##_type, p2##_type, p3##_type, p4##_type>> {\
-    using __internal_base_type = \
-        ::testing::internal::MatcherBaseImpl<name##MatcherP5>;\
    public:\
-    using __internal_base_type::__internal_base_type;\
+    using name##MatcherP5::MatcherBaseImpl::MatcherBaseImpl;\
     template <typename arg_type>\
     class gmock_Impl : public ::testing::MatcherInterface<\
         GTEST_REFERENCE_TO_CONST_(arg_type)> {\
@@ -377,10 +365,8 @@
   class name##MatcherP6 : public \
       ::testing::internal::MatcherBaseImpl<name##MatcherP6<p0##_type, \
       p1##_type, p2##_type, p3##_type, p4##_type, p5##_type>> {\
-    using __internal_base_type = \
-        ::testing::internal::MatcherBaseImpl<name##MatcherP6>;\
    public:\
-    using __internal_base_type::__internal_base_type;\
+    using name##MatcherP6::MatcherBaseImpl::MatcherBaseImpl;\
     template <typename arg_type>\
     class gmock_Impl : public ::testing::MatcherInterface<\
         GTEST_REFERENCE_TO_CONST_(arg_type)> {\
@@ -444,10 +430,8 @@
   class name##MatcherP7 : public \
       ::testing::internal::MatcherBaseImpl<name##MatcherP7<p0##_type, \
       p1##_type, p2##_type, p3##_type, p4##_type, p5##_type, p6##_type>> {\
-    using __internal_base_type = \
-        ::testing::internal::MatcherBaseImpl<name##MatcherP7>;\
    public:\
-    using __internal_base_type::__internal_base_type;\
+    using name##MatcherP7::MatcherBaseImpl::MatcherBaseImpl;\
     template <typename arg_type>\
     class gmock_Impl : public ::testing::MatcherInterface<\
         GTEST_REFERENCE_TO_CONST_(arg_type)> {\
@@ -519,10 +503,8 @@
       ::testing::internal::MatcherBaseImpl<name##MatcherP8<p0##_type, \
       p1##_type, p2##_type, p3##_type, p4##_type, p5##_type, p6##_type, \
       p7##_type>> {\
-    using __internal_base_type = \
-        ::testing::internal::MatcherBaseImpl<name##MatcherP8>;\
    public:\
-    using __internal_base_type::__internal_base_type;\
+    using name##MatcherP8::MatcherBaseImpl::MatcherBaseImpl;\
     template <typename arg_type>\
     class gmock_Impl : public ::testing::MatcherInterface<\
         GTEST_REFERENCE_TO_CONST_(arg_type)> {\
@@ -597,10 +579,8 @@
       ::testing::internal::MatcherBaseImpl<name##MatcherP9<p0##_type, \
       p1##_type, p2##_type, p3##_type, p4##_type, p5##_type, p6##_type, \
       p7##_type, p8##_type>> {\
-    using __internal_base_type = \
-        ::testing::internal::MatcherBaseImpl<name##MatcherP9>;\
    public:\
-    using __internal_base_type::__internal_base_type;\
+    using name##MatcherP9::MatcherBaseImpl::MatcherBaseImpl;\
     template <typename arg_type>\
     class gmock_Impl : public ::testing::MatcherInterface<\
         GTEST_REFERENCE_TO_CONST_(arg_type)> {\
@@ -679,10 +659,8 @@
       ::testing::internal::MatcherBaseImpl<name##MatcherP10<p0##_type, \
       p1##_type, p2##_type, p3##_type, p4##_type, p5##_type, p6##_type, \
       p7##_type, p8##_type, p9##_type>> {\
-    using __internal_base_type = \
-        ::testing::internal::MatcherBaseImpl<name##MatcherP10>;\
    public:\
-    using __internal_base_type::__internal_base_type;\
+    using name##MatcherP10::MatcherBaseImpl::MatcherBaseImpl;\
     template <typename arg_type>\
     class gmock_Impl : public ::testing::MatcherInterface<\
         GTEST_REFERENCE_TO_CONST_(arg_type)> {\
