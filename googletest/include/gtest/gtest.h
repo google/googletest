@@ -2458,6 +2458,145 @@ TestInfo* RegisterTest(const char* test_suite_name, const char* test_name,
 
 }  // namespace testing
 
+// `EXPECT(expr)` and `ASSERT(expr)` can replace corresponding gtest macros to
+// make the code more readable. Here is the translation table:
+//
+// * `EXPECT(val1 == val2)` ==> `EXPECT_EQ(val1, val2)`
+// * `EXPECT(val1 != val2)` ==> `EXPECT_NE(val1, val2)`
+// * `EXPECT(val1 <  val2)` ==> `EXPECT_LT(val1, val2)`
+// * `EXPECT(val1 <= val2)` ==> `EXPECT_LE(val1, val2)`
+// * `EXPECT(val1 >  val2)` ==> `EXPECT_GT(val1, val2)`
+// * `EXPECT(val1 >= val2)` ==> `EXPECT_GE(val1, val2)`
+// * `EXPECT(condition)`    ==> `EXPECT_TRUE(condition)`
+//
+// For example
+//
+//     TEST(Test, Example) {
+//       int a = 2, b = 5;
+//       EXPECT_GE(a + a, b);
+//       EXPECT(a + a >= b);
+//       EXPECT_TRUE(a + a >= b);
+//     }
+//
+// This test case prints following error message
+//
+//     test/Testing.cpp:11: Failure
+//     Expected: (a + a) >= (b), actual: 4 vs 5
+//     test/Testing.cpp:12: Failure
+//     Expected: a + a >= b, actual: 4 vs 5
+//     test/Testing.cpp:13: Failure
+//     Value of: a + a >= b
+//       Actual: false
+//     Expected: true
+//
+// TODO
+// * Implement generic Monad to save lhs and rhs of last operation for
+//   arbitrary expression to make the code more reuseable
+// * Once __builtin_choose_expr gets into GNU C++, we can get rid of lambda
+// * Use Boost.YAP to simplify code
+#if __cplusplus >= 201703L
+namespace testing::internal {
+template <class T>
+struct LeftHandSideData {
+  const char* expr;
+  T lhs;
+
+#define GTEST_INTERNAL_MAKE_COMP(OP)                                   \
+  template <class U>                                                     \
+  auto operator OP(U&& rhs) {                                            \
+    return AssertionResult(lhs OP rhs)                                   \
+           << "Expected: " << expr << ", actual: " << PrintToString(lhs) \
+           << " vs " << PrintToString(rhs);                              \
+  }
+  GTEST_INTERNAL_MAKE_COMP(==);
+  GTEST_INTERNAL_MAKE_COMP(!=);
+  GTEST_INTERNAL_MAKE_COMP(>=);
+  GTEST_INTERNAL_MAKE_COMP(<=);
+  GTEST_INTERNAL_MAKE_COMP(>);
+  GTEST_INTERNAL_MAKE_COMP(<);
+#undef GTEST_INTERNAL_MAKE_COMP
+
+#define GTEST_INTERNAL_MAKE_OP(OP)                                 \
+  template <class U>                                                 \
+  auto operator OP(U&& rhs) {                                        \
+    return LeftHandSideData<decltype(lhs OP rhs)>{expr, lhs OP rhs}; \
+  }
+
+  GTEST_INTERNAL_MAKE_OP(+);
+  GTEST_INTERNAL_MAKE_OP(-);
+  GTEST_INTERNAL_MAKE_OP(*);
+  GTEST_INTERNAL_MAKE_OP(/);
+  GTEST_INTERNAL_MAKE_OP(%);
+  GTEST_INTERNAL_MAKE_OP(^);
+  GTEST_INTERNAL_MAKE_OP(&);
+  GTEST_INTERNAL_MAKE_OP(|);
+  GTEST_INTERNAL_MAKE_OP(=);
+  GTEST_INTERNAL_MAKE_OP(+=);
+  GTEST_INTERNAL_MAKE_OP(-=);
+  GTEST_INTERNAL_MAKE_OP(*=);
+  GTEST_INTERNAL_MAKE_OP(/=);
+  GTEST_INTERNAL_MAKE_OP(%=);
+  GTEST_INTERNAL_MAKE_OP(^=);
+  GTEST_INTERNAL_MAKE_OP(&=);
+  GTEST_INTERNAL_MAKE_OP(|=);
+  GTEST_INTERNAL_MAKE_OP(<<);
+  GTEST_INTERNAL_MAKE_OP(>>);
+  GTEST_INTERNAL_MAKE_OP(>>=);
+  GTEST_INTERNAL_MAKE_OP(<<=);
+  GTEST_INTERNAL_MAKE_OP(&&);
+  GTEST_INTERNAL_MAKE_OP(||);
+
+#undef GTEST_INTERNAL_MAKE_OP
+
+  template <class U>
+  auto operator,(U&& rhs) {
+    return LeftHandSideData<decltype(lhs, rhs)>{expr, (lhs, rhs)};
+  }
+
+  // This function is intentionally not implemented since it's only used to
+  // handle ternary operator. It should only be used in unevaluated contexts
+  operator bool();
+};
+
+struct Start {
+  const char* expr;
+  template <class T>
+  auto operator+(T&& lhs) {
+    return LeftHandSideData<T&>{expr, lhs};
+  }
+};
+}  // namespace testing::internal
+
+#define GTEST_INTERNAL_EVAL(...) \
+  (::testing::internal::Start{#__VA_ARGS__} + __VA_ARGS__)
+
+// If compare operator was not found, we evaluate expression directly since
+// these are corner cases we couldn't handle currently:
+// * Expression contains ternary operator (:?), which can't be overloaded
+// * Expression contains "&&" and "||", overloading them loses short circuit
+//   evaluation
+#define GTEST_ASSERTION_RESULT(...)                                          \
+  ([&] {                                                                     \
+    static_assert(!__builtin_constant_p((__VA_ARGS__)) || (__VA_ARGS__),     \
+                  #__VA_ARGS__);                                             \
+    if constexpr (std::is_same_v<decltype(GTEST_INTERNAL_EVAL(__VA_ARGS__)), \
+                                 ::testing::AssertionResult>) {              \
+      return GTEST_INTERNAL_EVAL(__VA_ARGS__);                               \
+    } else {                                                                 \
+      return ::testing::AssertionResult((__VA_ARGS__))                       \
+             << "Assertion failed: " << #__VA_ARGS__;                        \
+    }                                                                        \
+  }())
+
+#define GTEST_ASSERT_EXPR_(on_failure, ...) \
+  GTEST_ASSERT_(GTEST_ASSERTION_RESULT(__VA_ARGS__), on_failure)
+
+// Use __VA_ARGS__ in case expr contains ','
+#define EXPECT(...) GTEST_ASSERT_EXPR_(GTEST_NONFATAL_FAILURE_, __VA_ARGS__)
+#define ASSERT(...) GTEST_ASSERT_EXPR_(GTEST_FATAL_FAILURE_, __VA_ARGS__)
+
+#endif // __cplusplus >= 201703L
+
 // Use this function in main() to run all tests.  It returns 0 if all
 // tests are successful, or 1 otherwise.
 //

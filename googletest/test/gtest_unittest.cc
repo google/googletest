@@ -7460,3 +7460,80 @@ TEST(RegisterTest, WasRegistered) {
 
   FAIL() << "Didn't find the test!";
 }
+
+#ifdef EXPECT
+TEST(ExpectTest, Simple) {
+  EXPECT(1 + 1 == 2) << "0";
+  EXPECT((3 | 2) == 3);
+  EXPECT(1 + 1);
+  EXPECT(true || false);
+  int a = 2, b = 5;
+  EXPECT(a <= b);
+  EXPECT(a * a <= b);
+  EXPECT(a - -1 - -a == b);
+
+  const auto ret = GTEST_ASSERTION_RESULT(2 + a >= b);
+  EXPECT_FALSE(ret);
+  EXPECT_STREQ(ret.message(), "Expected: 2 + a >= b, actual: 4 vs 5");
+
+  // EXPECT(2 + 2 == 5); compile-error. static_assert failed "2 + 2 == 5"
+  // EXPECT(1 <= a <= b); compile-error
+}
+
+TEST(ExpectTest, SideEffect) {
+  int i = 0;
+  EXPECT(!(i++));
+  EXPECT_EQ(i, 1);
+}
+
+TEST(ExpectTest, ShortCircuit) {
+  auto f = [] {
+    std::terminate();
+    return true;
+  };
+  bool x = true;
+  EXPECT(x || f());
+  EXPECT_DEATH(x && f(), "");
+  EXPECT(!x ? f() : x);
+}
+
+TEST(ExpectTest, Stl) {
+  EXPECT(std::set<int>{1, 2} == std::set<int>{2, 1});
+  const auto ret = GTEST_ASSERTION_RESULT(
+      std::map<int, int>{{1, 2}} == std::map<int, int>{{2, 3}, {1, 2}});
+  EXPECT_FALSE(ret);
+  EXPECT_STREQ(
+      ret.message(),
+      "Expected: std::map<int, int>{{1, 2}} == std::map<int, int>{{2, "
+      "3}, {1, 2}}, actual: { (1, 2) } vs { (1, 2), (2, 3) }");
+}
+
+TEST(ExpectTest, nonmoveable) {
+  struct A {
+    A() = default;
+    A(A&&) = delete;
+    bool operator==(const A&) {
+      return true;
+    }
+    bool operator!=(const A&) {
+      return false;
+    }
+    A operator+(const A& a) {
+      return {};
+    }
+    uint32_t dummy = 0xCB0CEFA;
+  } a;
+  static_assert(sizeof(a) == sizeof(uint32_t), "Make sure no padding");
+  static_assert(!std::is_copy_constructible_v<A>);
+  static_assert(!std::is_move_constructible_v<A>);
+  static_assert(!std::is_copy_assignable_v<A>);
+  static_assert(!std::is_move_assignable_v<A>);
+  EXPECT(a + (A{} + a) == A{});
+  const auto ret = GTEST_ASSERTION_RESULT(A{} != a);
+  EXPECT_FALSE(ret);
+  EXPECT_STREQ(
+      ret.message(),
+      "Expected: A{} != a, actual: "
+      "4-byte object <FA-CE B0-0C> vs 4-byte object <FA-CE B0-0C>");
+}
+#endif // defined EXPECT
