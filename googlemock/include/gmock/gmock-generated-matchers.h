@@ -100,7 +100,7 @@
         GTEST_REFERENCE_TO_CONST_(arg_type)> {\
      public:\
       explicit gmock_Impl(p0##_type gmock_p0)\
-           : p0(::std::move(gmock_p0)) {}\
+           : p0(::std::forward<p0##_type>(gmock_p0)) {}\
       bool MatchAndExplain(\
           GTEST_REFERENCE_TO_CONST_(arg_type) arg,\
           ::testing::MatchResultListener* result_listener) const override;\
@@ -147,7 +147,8 @@
         GTEST_REFERENCE_TO_CONST_(arg_type)> {\
      public:\
       gmock_Impl(p0##_type gmock_p0, p1##_type gmock_p1)\
-           : p0(::std::move(gmock_p0)), p1(::std::move(gmock_p1)) {}\
+           : p0(::std::forward<p0##_type>(gmock_p0)), \
+               p1(::std::forward<p1##_type>(gmock_p1)) {}\
       bool MatchAndExplain(\
           GTEST_REFERENCE_TO_CONST_(arg_type) arg,\
           ::testing::MatchResultListener* result_listener) const override;\
@@ -197,8 +198,9 @@
         GTEST_REFERENCE_TO_CONST_(arg_type)> {\
      public:\
       gmock_Impl(p0##_type gmock_p0, p1##_type gmock_p1, p2##_type gmock_p2)\
-           : p0(::std::move(gmock_p0)), p1(::std::move(gmock_p1)), \
-               p2(::std::move(gmock_p2)) {}\
+           : p0(::std::forward<p0##_type>(gmock_p0)), \
+               p1(::std::forward<p1##_type>(gmock_p1)), \
+               p2(::std::forward<p2##_type>(gmock_p2)) {}\
       bool MatchAndExplain(\
           GTEST_REFERENCE_TO_CONST_(arg_type) arg,\
           ::testing::MatchResultListener* result_listener) const override;\
@@ -251,8 +253,10 @@
      public:\
       gmock_Impl(p0##_type gmock_p0, p1##_type gmock_p1, p2##_type gmock_p2, \
           p3##_type gmock_p3)\
-           : p0(::std::move(gmock_p0)), p1(::std::move(gmock_p1)), \
-               p2(::std::move(gmock_p2)), p3(::std::move(gmock_p3)) {}\
+           : p0(::std::forward<p0##_type>(gmock_p0)), \
+               p1(::std::forward<p1##_type>(gmock_p1)), \
+               p2(::std::forward<p2##_type>(gmock_p2)), \
+               p3(::std::forward<p3##_type>(gmock_p3)) {}\
       bool MatchAndExplain(\
           GTEST_REFERENCE_TO_CONST_(arg_type) arg,\
           ::testing::MatchResultListener* result_listener) const override;\
@@ -311,9 +315,11 @@
      public:\
       gmock_Impl(p0##_type gmock_p0, p1##_type gmock_p1, p2##_type gmock_p2, \
           p3##_type gmock_p3, p4##_type gmock_p4)\
-           : p0(::std::move(gmock_p0)), p1(::std::move(gmock_p1)), \
-               p2(::std::move(gmock_p2)), p3(::std::move(gmock_p3)), \
-               p4(::std::move(gmock_p4)) {}\
+           : p0(::std::forward<p0##_type>(gmock_p0)), \
+               p1(::std::forward<p1##_type>(gmock_p1)), \
+               p2(::std::forward<p2##_type>(gmock_p2)), \
+               p3(::std::forward<p3##_type>(gmock_p3)), \
+               p4(::std::forward<p4##_type>(gmock_p4)) {}\
       bool MatchAndExplain(\
           GTEST_REFERENCE_TO_CONST_(arg_type) arg,\
           ::testing::MatchResultListener* result_listener) const override;\
@@ -373,9 +379,12 @@
      public:\
       gmock_Impl(p0##_type gmock_p0, p1##_type gmock_p1, p2##_type gmock_p2, \
           p3##_type gmock_p3, p4##_type gmock_p4, p5##_type gmock_p5)\
-           : p0(::std::move(gmock_p0)), p1(::std::move(gmock_p1)), \
-               p2(::std::move(gmock_p2)), p3(::std::move(gmock_p3)), \
-               p4(::std::move(gmock_p4)), p5(::std::move(gmock_p5)) {}\
+           : p0(::std::forward<p0##_type>(gmock_p0)), \
+               p1(::std::forward<p1##_type>(gmock_p1)), \
+               p2(::std::forward<p2##_type>(gmock_p2)), \
+               p3(::std::forward<p3##_type>(gmock_p3)), \
+               p4(::std::forward<p4##_type>(gmock_p4)), \
+               p5(::std::forward<p5##_type>(gmock_p5)) {}\
       bool MatchAndExplain(\
           GTEST_REFERENCE_TO_CONST_(arg_type) arg,\
           ::testing::MatchResultListener* result_listener) const override;\
@@ -439,10 +448,13 @@
       gmock_Impl(p0##_type gmock_p0, p1##_type gmock_p1, p2##_type gmock_p2, \
           p3##_type gmock_p3, p4##_type gmock_p4, p5##_type gmock_p5, \
           p6##_type gmock_p6)\
-           : p0(::std::move(gmock_p0)), p1(::std::move(gmock_p1)), \
-               p2(::std::move(gmock_p2)), p3(::std::move(gmock_p3)), \
-               p4(::std::move(gmock_p4)), p5(::std::move(gmock_p5)), \
-               p6(::std::move(gmock_p6)) {}\
+           : p0(::std::forward<p0##_type>(gmock_p0)), \
+               p1(::std::forward<p1##_type>(gmock_p1)), \
+               p2(::std::forward<p2##_type>(gmock_p2)), \
+               p3(::std::forward<p3##_type>(gmock_p3)), \
+               p4(::std::forward<p4##_type>(gmock_p4)), \
+               p5(::std::forward<p5##_type>(gmock_p5)), \
+               p6(::std::forward<p6##_type>(gmock_p6)) {}\
       bool MatchAndExplain(\
           GTEST_REFERENCE_TO_CONST_(arg_type) arg,\
           ::testing::MatchResultListener* result_listener) const override;\
@@ -512,10 +524,14 @@
       gmock_Impl(p0##_type gmock_p0, p1##_type gmock_p1, p2##_type gmock_p2, \
           p3##_type gmock_p3, p4##_type gmock_p4, p5##_type gmock_p5, \
           p6##_type gmock_p6, p7##_type gmock_p7)\
-           : p0(::std::move(gmock_p0)), p1(::std::move(gmock_p1)), \
-               p2(::std::move(gmock_p2)), p3(::std::move(gmock_p3)), \
-               p4(::std::move(gmock_p4)), p5(::std::move(gmock_p5)), \
-               p6(::std::move(gmock_p6)), p7(::std::move(gmock_p7)) {}\
+           : p0(::std::forward<p0##_type>(gmock_p0)), \
+               p1(::std::forward<p1##_type>(gmock_p1)), \
+               p2(::std::forward<p2##_type>(gmock_p2)), \
+               p3(::std::forward<p3##_type>(gmock_p3)), \
+               p4(::std::forward<p4##_type>(gmock_p4)), \
+               p5(::std::forward<p5##_type>(gmock_p5)), \
+               p6(::std::forward<p6##_type>(gmock_p6)), \
+               p7(::std::forward<p7##_type>(gmock_p7)) {}\
       bool MatchAndExplain(\
           GTEST_REFERENCE_TO_CONST_(arg_type) arg,\
           ::testing::MatchResultListener* result_listener) const override;\
@@ -588,11 +604,15 @@
       gmock_Impl(p0##_type gmock_p0, p1##_type gmock_p1, p2##_type gmock_p2, \
           p3##_type gmock_p3, p4##_type gmock_p4, p5##_type gmock_p5, \
           p6##_type gmock_p6, p7##_type gmock_p7, p8##_type gmock_p8)\
-           : p0(::std::move(gmock_p0)), p1(::std::move(gmock_p1)), \
-               p2(::std::move(gmock_p2)), p3(::std::move(gmock_p3)), \
-               p4(::std::move(gmock_p4)), p5(::std::move(gmock_p5)), \
-               p6(::std::move(gmock_p6)), p7(::std::move(gmock_p7)), \
-               p8(::std::move(gmock_p8)) {}\
+           : p0(::std::forward<p0##_type>(gmock_p0)), \
+               p1(::std::forward<p1##_type>(gmock_p1)), \
+               p2(::std::forward<p2##_type>(gmock_p2)), \
+               p3(::std::forward<p3##_type>(gmock_p3)), \
+               p4(::std::forward<p4##_type>(gmock_p4)), \
+               p5(::std::forward<p5##_type>(gmock_p5)), \
+               p6(::std::forward<p6##_type>(gmock_p6)), \
+               p7(::std::forward<p7##_type>(gmock_p7)), \
+               p8(::std::forward<p8##_type>(gmock_p8)) {}\
       bool MatchAndExplain(\
           GTEST_REFERENCE_TO_CONST_(arg_type) arg,\
           ::testing::MatchResultListener* result_listener) const override;\
@@ -669,11 +689,16 @@
           p3##_type gmock_p3, p4##_type gmock_p4, p5##_type gmock_p5, \
           p6##_type gmock_p6, p7##_type gmock_p7, p8##_type gmock_p8, \
           p9##_type gmock_p9)\
-           : p0(::std::move(gmock_p0)), p1(::std::move(gmock_p1)), \
-               p2(::std::move(gmock_p2)), p3(::std::move(gmock_p3)), \
-               p4(::std::move(gmock_p4)), p5(::std::move(gmock_p5)), \
-               p6(::std::move(gmock_p6)), p7(::std::move(gmock_p7)), \
-               p8(::std::move(gmock_p8)), p9(::std::move(gmock_p9)) {}\
+           : p0(::std::forward<p0##_type>(gmock_p0)), \
+               p1(::std::forward<p1##_type>(gmock_p1)), \
+               p2(::std::forward<p2##_type>(gmock_p2)), \
+               p3(::std::forward<p3##_type>(gmock_p3)), \
+               p4(::std::forward<p4##_type>(gmock_p4)), \
+               p5(::std::forward<p5##_type>(gmock_p5)), \
+               p6(::std::forward<p6##_type>(gmock_p6)), \
+               p7(::std::forward<p7##_type>(gmock_p7)), \
+               p8(::std::forward<p8##_type>(gmock_p8)), \
+               p9(::std::forward<p9##_type>(gmock_p9)) {}\
       bool MatchAndExplain(\
           GTEST_REFERENCE_TO_CONST_(arg_type) arg,\
           ::testing::MatchResultListener* result_listener) const override;\
