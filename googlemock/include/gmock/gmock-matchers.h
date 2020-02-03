@@ -470,10 +470,12 @@ class MatcherBaseImpl<Derived<Ts...>> {
   // conversions.
   template <typename E = std::enable_if<sizeof...(Ts) == 1>,
             typename E::type* = nullptr>
-  explicit MatcherBaseImpl(Ts... params) : params_(std::move(params)...) {}
+  explicit MatcherBaseImpl(Ts... params)
+      : params_(std::forward<Ts>(params)...) {}
   template <typename E = std::enable_if<sizeof...(Ts) != 1>,
             typename = typename E::type>
-  MatcherBaseImpl(Ts... params) : params_(std::move(params)...) {}  // NOLINT
+  MatcherBaseImpl(Ts... params)  // NOLINT
+      : params_(std::forward<Ts>(params)...) {}
 
   template <typename F>
   operator ::testing::Matcher<F>() const {  // NOLINT(runtime/explicit)
