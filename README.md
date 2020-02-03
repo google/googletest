@@ -1,4 +1,4 @@
-# Google Test aaaaa
+# Google Test
 
 #### OSS Builds Status:
 
