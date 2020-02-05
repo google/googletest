@@ -37,16 +37,35 @@
 #define THIRD_PARTY_GOOGLETEST_GOOGLEMOCK_INCLUDE_GMOCK_INTERNAL_GMOCK_FUNCTION_MOCKER_H_  // NOLINT
 
 #include <type_traits>  // IWYU pragma: keep
-#include <utility>  // IWYU pragma: keep
+#include <utility>      // IWYU pragma: keep
 
-#include "gmock/gmock-generated-function-mockers.h"  // NOLINT
+#include "gmock/gmock-spec-builders.h"
+#include "gmock/internal/gmock-internal-utils.h"
 #include "gmock/internal/gmock-pp.h"
 
 namespace testing {
 namespace internal {
 template <typename T>
 using identity_t = T;
+
+template <typename MockType>
+const MockType* AdjustConstness_const(const MockType* mock) {
+  return mock;
+}
+
+template <typename MockType>
+MockType* AdjustConstness_(const MockType* mock) {
+  return const_cast<MockType*>(mock);
+}
+
 }  // namespace internal
+
+// The style guide prohibits "using" statements in a namespace scope
+// inside a header file.  However, the FunctionMocker class template
+// is meant to be defined in the ::testing namespace.  The following
+// line is just a trick for working around a bug in MSVC 8.0, which
+// cannot handle it if we define FunctionMocker in ::testing.
+using internal::FunctionMocker;
 }  // namespace testing
 
 #define MOCK_METHOD(...) \
@@ -244,20 +263,19 @@ using identity_t = T;
               GMOCK_PP_IDENTITY)                                       \
   (_elem)
 
-#define GMOCK_INTERNAL_PARAMETER(_i, _Signature, _)                          \
-  GMOCK_PP_COMMA_IF(_i)                                                      \
-  GMOCK_INTERNAL_ARG_O(GMOCK_PP_INC(_i), GMOCK_PP_REMOVE_PARENS(_Signature)) \
+#define GMOCK_INTERNAL_PARAMETER(_i, _Signature, _)            \
+  GMOCK_PP_COMMA_IF(_i)                                        \
+  GMOCK_INTERNAL_ARG_O(_i, GMOCK_PP_REMOVE_PARENS(_Signature)) \
   gmock_a##_i
 
 #define GMOCK_INTERNAL_FORWARD_ARG(_i, _Signature, _) \
   GMOCK_PP_COMMA_IF(_i)                               \
   ::std::forward<GMOCK_INTERNAL_ARG_O(                \
-      GMOCK_PP_INC(_i), GMOCK_PP_REMOVE_PARENS(_Signature))>(gmock_a##_i)
+      _i, GMOCK_PP_REMOVE_PARENS(_Signature))>(gmock_a##_i)
 
-#define GMOCK_INTERNAL_MATCHER_PARAMETER(_i, _Signature, _)    \
-  GMOCK_PP_COMMA_IF(_i)                                        \
-  GMOCK_INTERNAL_MATCHER_O(GMOCK_PP_INC(_i),                   \
-                           GMOCK_PP_REMOVE_PARENS(_Signature)) \
+#define GMOCK_INTERNAL_MATCHER_PARAMETER(_i, _Signature, _)        \
+  GMOCK_PP_COMMA_IF(_i)                                            \
+  GMOCK_INTERNAL_MATCHER_O(_i, GMOCK_PP_REMOVE_PARENS(_Signature)) \
   gmock_a##_i
 
 #define GMOCK_INTERNAL_MATCHER_ARGUMENT(_i, _1, _2) \
@@ -266,12 +284,14 @@ using identity_t = T;
 
 #define GMOCK_INTERNAL_A_MATCHER_ARGUMENT(_i, _Signature, _) \
   GMOCK_PP_COMMA_IF(_i)                                      \
-  ::testing::A<GMOCK_INTERNAL_ARG_O(GMOCK_PP_INC(_i),        \
-                                    GMOCK_PP_REMOVE_PARENS(_Signature))>()
+  ::testing::A<GMOCK_INTERNAL_ARG_O(_i, GMOCK_PP_REMOVE_PARENS(_Signature))>()
 
-#define GMOCK_INTERNAL_ARG_O(_i, ...) GMOCK_ARG_(_i, __VA_ARGS__)
+#define GMOCK_INTERNAL_ARG_O(_i, ...) \
+  typename ::testing::internal::Function<__VA_ARGS__>::template Arg<_i>::type
 
-#define GMOCK_INTERNAL_MATCHER_O(_i, ...) GMOCK_MATCHER_(_i, __VA_ARGS__)
+#define GMOCK_INTERNAL_MATCHER_O(_i, ...)                          \
+  const ::testing::Matcher<typename ::testing::internal::Function< \
+      __VA_ARGS__>::template Arg<_i>::type>&
 
 #define MOCK_METHOD0(m, ...) GMOCK_INTERNAL_MOCK_METHODN(, , m, 0, __VA_ARGS__)
 #define MOCK_METHOD1(m, ...) GMOCK_INTERNAL_MOCK_METHODN(, , m, 1, __VA_ARGS__)
@@ -426,6 +446,13 @@ using identity_t = T;
   MOCK_CONST_METHOD10_WITH_CALLTYPE(ct, m, __VA_ARGS__)
 
 #define GMOCK_INTERNAL_MOCK_METHODN(constness, ct, Method, args_num, ...) \
-  GMOCK_METHOD##args_num##_(constness, ct, Method, __VA_ARGS__)
+  GMOCK_INTERNAL_ASSERT_VALID_SIGNATURE(                                  \
+      args_num, ::testing::internal::identity_t<__VA_ARGS__>);            \
+  GMOCK_INTERNAL_MOCK_METHOD_IMPL(                                        \
+      args_num, Method, GMOCK_PP_NARG0(constness), 0, 0, , ct,            \
+      (::testing::internal::identity_t<__VA_ARGS__>))
+
+#define GMOCK_MOCKER_(arity, constness, Method) \
+  GTEST_CONCAT_TOKEN_(gmock##constness##arity##_##Method##_, __LINE__)
 
 #endif  // THIRD_PARTY_GOOGLETEST_GOOGLEMOCK_INCLUDE_GMOCK_INTERNAL_GMOCK_FUNCTION_MOCKER_H_
