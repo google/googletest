@@ -80,7 +80,7 @@
       }\
     };\
   };\
-  inline name##Matcher name() {\
+  GTEST_ATTRIBUTE_UNUSED_ inline name##Matcher name() {\
     return name##Matcher();\
   }\
   template <typename arg_type>\
