@@ -86,6 +86,14 @@
 #define GMOCK_PP_IF(_Cond, _Then, _Else) \
   GMOCK_PP_CAT(GMOCK_PP_INTERNAL_IF_, _Cond)(_Then, _Else)
 
+// Similar to GMOCK_PP_IF but takes _Then and _Else in parentheses.
+//
+// GMOCK_PP_GENERIC_IF(1, (a, b, c), (d, e, f)) => a, b, c
+// GMOCK_PP_GENERIC_IF(0, (a, b, c), (d, e, f)) => d, e, f
+//
+#define GMOCK_PP_GENERIC_IF(_Cond, _Then, _Else) \
+  GMOCK_PP_REMOVE_PARENS(GMOCK_PP_IF(_Cond, _Then, _Else))
+
 // Evaluates to the number of arguments after expansion. Identifies 'empty' as
 // 0.
 //

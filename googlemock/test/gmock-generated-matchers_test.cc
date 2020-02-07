@@ -39,7 +39,7 @@
 # pragma warning(disable:4100)
 #endif
 
-#include "gmock/gmock-generated-matchers.h"
+#include "gmock/gmock-matchers.h"
 
 #include <array>
 #include <iterator>
