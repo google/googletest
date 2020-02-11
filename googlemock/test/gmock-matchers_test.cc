@@ -351,43 +351,43 @@ TEST(StringMatcherTest, CanBeImplicitlyConstructedFromString) {
   EXPECT_FALSE(m2.Matches("hello"));
 }
 
-#if GTEST_HAS_ABSL
+#if GTEST_INTERNAL_HAS_STRING_VIEW
 // Tests that a C-string literal can be implicitly converted to a
-// Matcher<absl::string_view> or Matcher<const absl::string_view&>.
+// Matcher<StringView> or Matcher<const StringView&>.
 TEST(StringViewMatcherTest, CanBeImplicitlyConstructedFromCStringLiteral) {
-  Matcher<absl::string_view> m1 = "cats";
+  Matcher<internal::StringView> m1 = "cats";
   EXPECT_TRUE(m1.Matches("cats"));
   EXPECT_FALSE(m1.Matches("dogs"));
 
-  Matcher<const absl::string_view&> m2 = "cats";
+  Matcher<const internal::StringView&> m2 = "cats";
   EXPECT_TRUE(m2.Matches("cats"));
   EXPECT_FALSE(m2.Matches("dogs"));
 }
 
 // Tests that a std::string object can be implicitly converted to a
-// Matcher<absl::string_view> or Matcher<const absl::string_view&>.
+// Matcher<StringView> or Matcher<const StringView&>.
 TEST(StringViewMatcherTest, CanBeImplicitlyConstructedFromString) {
-  Matcher<absl::string_view> m1 = std::string("cats");
+  Matcher<internal::StringView> m1 = std::string("cats");
   EXPECT_TRUE(m1.Matches("cats"));
   EXPECT_FALSE(m1.Matches("dogs"));
 
-  Matcher<const absl::string_view&> m2 = std::string("cats");
+  Matcher<const internal::StringView&> m2 = std::string("cats");
   EXPECT_TRUE(m2.Matches("cats"));
   EXPECT_FALSE(m2.Matches("dogs"));
 }
 
-// Tests that a absl::string_view object can be implicitly converted to a
-// Matcher<absl::string_view> or Matcher<const absl::string_view&>.
+// Tests that a StringView object can be implicitly converted to a
+// Matcher<StringView> or Matcher<const StringView&>.
 TEST(StringViewMatcherTest, CanBeImplicitlyConstructedFromStringView) {
-  Matcher<absl::string_view> m1 = absl::string_view("cats");
+  Matcher<internal::StringView> m1 = internal::StringView("cats");
   EXPECT_TRUE(m1.Matches("cats"));
   EXPECT_FALSE(m1.Matches("dogs"));
 
-  Matcher<const absl::string_view&> m2 = absl::string_view("cats");
+  Matcher<const internal::StringView&> m2 = internal::StringView("cats");
   EXPECT_TRUE(m2.Matches("cats"));
   EXPECT_FALSE(m2.Matches("dogs"));
 }
-#endif  // GTEST_HAS_ABSL
+#endif  // GTEST_INTERNAL_HAS_STRING_VIEW
 
 // Tests that a std::reference_wrapper<std::string> object can be implicitly
 // converted to a Matcher<std::string> or Matcher<const std::string&> via Eq().
@@ -1235,17 +1235,17 @@ TEST(StrEqTest, MatchesEqualString) {
   EXPECT_TRUE(m2.Matches("Hello"));
   EXPECT_FALSE(m2.Matches("Hi"));
 
-#if GTEST_HAS_ABSL
-  Matcher<const absl::string_view&> m3 = StrEq("Hello");
-  EXPECT_TRUE(m3.Matches(absl::string_view("Hello")));
-  EXPECT_FALSE(m3.Matches(absl::string_view("hello")));
-  EXPECT_FALSE(m3.Matches(absl::string_view()));
+#if GTEST_INTERNAL_HAS_STRING_VIEW
+  Matcher<const internal::StringView&> m3 = StrEq("Hello");
+  EXPECT_TRUE(m3.Matches(internal::StringView("Hello")));
+  EXPECT_FALSE(m3.Matches(internal::StringView("hello")));
+  EXPECT_FALSE(m3.Matches(internal::StringView()));
 
-  Matcher<const absl::string_view&> m_empty = StrEq("");
-  EXPECT_TRUE(m_empty.Matches(absl::string_view("")));
-  EXPECT_TRUE(m_empty.Matches(absl::string_view()));
-  EXPECT_FALSE(m_empty.Matches(absl::string_view("hello")));
-#endif  // GTEST_HAS_ABSL
+  Matcher<const internal::StringView&> m_empty = StrEq("");
+  EXPECT_TRUE(m_empty.Matches(internal::StringView("")));
+  EXPECT_TRUE(m_empty.Matches(internal::StringView()));
+  EXPECT_FALSE(m_empty.Matches(internal::StringView("hello")));
+#endif  // GTEST_INTERNAL_HAS_STRING_VIEW
 }
 
 TEST(StrEqTest, CanDescribeSelf) {
@@ -1272,12 +1272,12 @@ TEST(StrNeTest, MatchesUnequalString) {
   EXPECT_TRUE(m2.Matches("hello"));
   EXPECT_FALSE(m2.Matches("Hello"));
 
-#if GTEST_HAS_ABSL
-  Matcher<const absl::string_view> m3 = StrNe("Hello");
-  EXPECT_TRUE(m3.Matches(absl::string_view("")));
-  EXPECT_TRUE(m3.Matches(absl::string_view()));
-  EXPECT_FALSE(m3.Matches(absl::string_view("Hello")));
-#endif  // GTEST_HAS_ABSL
+#if GTEST_INTERNAL_HAS_STRING_VIEW
+  Matcher<const internal::StringView> m3 = StrNe("Hello");
+  EXPECT_TRUE(m3.Matches(internal::StringView("")));
+  EXPECT_TRUE(m3.Matches(internal::StringView()));
+  EXPECT_FALSE(m3.Matches(internal::StringView("Hello")));
+#endif  // GTEST_INTERNAL_HAS_STRING_VIEW
 }
 
 TEST(StrNeTest, CanDescribeSelf) {
@@ -1296,13 +1296,13 @@ TEST(StrCaseEqTest, MatchesEqualStringIgnoringCase) {
   EXPECT_TRUE(m2.Matches("hello"));
   EXPECT_FALSE(m2.Matches("Hi"));
 
-#if GTEST_HAS_ABSL
-  Matcher<const absl::string_view&> m3 = StrCaseEq(std::string("Hello"));
-  EXPECT_TRUE(m3.Matches(absl::string_view("Hello")));
-  EXPECT_TRUE(m3.Matches(absl::string_view("hello")));
-  EXPECT_FALSE(m3.Matches(absl::string_view("Hi")));
-  EXPECT_FALSE(m3.Matches(absl::string_view()));
-#endif  // GTEST_HAS_ABSL
+#if GTEST_INTERNAL_HAS_STRING_VIEW
+  Matcher<const internal::StringView&> m3 = StrCaseEq(std::string("Hello"));
+  EXPECT_TRUE(m3.Matches(internal::StringView("Hello")));
+  EXPECT_TRUE(m3.Matches(internal::StringView("hello")));
+  EXPECT_FALSE(m3.Matches(internal::StringView("Hi")));
+  EXPECT_FALSE(m3.Matches(internal::StringView()));
+#endif  // GTEST_INTERNAL_HAS_STRING_VIEW
 }
 
 TEST(StrCaseEqTest, MatchesEqualStringWith0IgnoringCase) {
@@ -1346,13 +1346,13 @@ TEST(StrCaseNeTest, MatchesUnequalStringIgnoringCase) {
   EXPECT_TRUE(m2.Matches(""));
   EXPECT_FALSE(m2.Matches("Hello"));
 
-#if GTEST_HAS_ABSL
-  Matcher<const absl::string_view> m3 = StrCaseNe("Hello");
-  EXPECT_TRUE(m3.Matches(absl::string_view("Hi")));
-  EXPECT_TRUE(m3.Matches(absl::string_view()));
-  EXPECT_FALSE(m3.Matches(absl::string_view("Hello")));
-  EXPECT_FALSE(m3.Matches(absl::string_view("hello")));
-#endif  // GTEST_HAS_ABSL
+#if GTEST_INTERNAL_HAS_STRING_VIEW
+  Matcher<const internal::StringView> m3 = StrCaseNe("Hello");
+  EXPECT_TRUE(m3.Matches(internal::StringView("Hi")));
+  EXPECT_TRUE(m3.Matches(internal::StringView()));
+  EXPECT_FALSE(m3.Matches(internal::StringView("Hello")));
+  EXPECT_FALSE(m3.Matches(internal::StringView("hello")));
+#endif  // GTEST_INTERNAL_HAS_STRING_VIEW
 }
 
 TEST(StrCaseNeTest, CanDescribeSelf) {
@@ -1393,25 +1393,25 @@ TEST(HasSubstrTest, WorksForCStrings) {
   EXPECT_FALSE(m_empty.Matches(nullptr));
 }
 
-#if GTEST_HAS_ABSL
-// Tests that HasSubstr() works for matching absl::string_view-typed values.
+#if GTEST_INTERNAL_HAS_STRING_VIEW
+// Tests that HasSubstr() works for matching StringView-typed values.
 TEST(HasSubstrTest, WorksForStringViewClasses) {
-  const Matcher<absl::string_view> m1 = HasSubstr("foo");
-  EXPECT_TRUE(m1.Matches(absl::string_view("I love food.")));
-  EXPECT_FALSE(m1.Matches(absl::string_view("tofo")));
-  EXPECT_FALSE(m1.Matches(absl::string_view()));
+  const Matcher<internal::StringView> m1 = HasSubstr("foo");
+  EXPECT_TRUE(m1.Matches(internal::StringView("I love food.")));
+  EXPECT_FALSE(m1.Matches(internal::StringView("tofo")));
+  EXPECT_FALSE(m1.Matches(internal::StringView()));
 
-  const Matcher<const absl::string_view&> m2 = HasSubstr("foo");
-  EXPECT_TRUE(m2.Matches(absl::string_view("I love food.")));
-  EXPECT_FALSE(m2.Matches(absl::string_view("tofo")));
-  EXPECT_FALSE(m2.Matches(absl::string_view()));
+  const Matcher<const internal::StringView&> m2 = HasSubstr("foo");
+  EXPECT_TRUE(m2.Matches(internal::StringView("I love food.")));
+  EXPECT_FALSE(m2.Matches(internal::StringView("tofo")));
+  EXPECT_FALSE(m2.Matches(internal::StringView()));
 
-  const Matcher<const absl::string_view&> m3 = HasSubstr("");
-  EXPECT_TRUE(m3.Matches(absl::string_view("foo")));
-  EXPECT_TRUE(m3.Matches(absl::string_view("")));
-  EXPECT_TRUE(m3.Matches(absl::string_view()));
+  const Matcher<const internal::StringView&> m3 = HasSubstr("");
+  EXPECT_TRUE(m3.Matches(internal::StringView("foo")));
+  EXPECT_TRUE(m3.Matches(internal::StringView("")));
+  EXPECT_TRUE(m3.Matches(internal::StringView()));
 }
-#endif  // GTEST_HAS_ABSL
+#endif  // GTEST_INTERNAL_HAS_STRING_VIEW
 
 // Tests that HasSubstr(s) describes itself properly.
 TEST(HasSubstrTest, CanDescribeSelf) {
@@ -1648,12 +1648,12 @@ TEST(StartsWithTest, MatchesStringWithGivenPrefix) {
   EXPECT_FALSE(m2.Matches("H"));
   EXPECT_FALSE(m2.Matches(" Hi"));
 
-#if GTEST_HAS_ABSL
-  const Matcher<absl::string_view> m_empty = StartsWith("");
-  EXPECT_TRUE(m_empty.Matches(absl::string_view()));
-  EXPECT_TRUE(m_empty.Matches(absl::string_view("")));
-  EXPECT_TRUE(m_empty.Matches(absl::string_view("not empty")));
-#endif  // GTEST_HAS_ABSL
+#if GTEST_INTERNAL_HAS_STRING_VIEW
+  const Matcher<internal::StringView> m_empty = StartsWith("");
+  EXPECT_TRUE(m_empty.Matches(internal::StringView()));
+  EXPECT_TRUE(m_empty.Matches(internal::StringView("")));
+  EXPECT_TRUE(m_empty.Matches(internal::StringView("not empty")));
+#endif  // GTEST_INTERNAL_HAS_STRING_VIEW
 }
 
 TEST(StartsWithTest, CanDescribeSelf) {
@@ -1676,13 +1676,13 @@ TEST(EndsWithTest, MatchesStringWithGivenSuffix) {
   EXPECT_FALSE(m2.Matches("i"));
   EXPECT_FALSE(m2.Matches("Hi "));
 
-#if GTEST_HAS_ABSL
-  const Matcher<const absl::string_view&> m4 = EndsWith("");
+#if GTEST_INTERNAL_HAS_STRING_VIEW
+  const Matcher<const internal::StringView&> m4 = EndsWith("");
   EXPECT_TRUE(m4.Matches("Hi"));
   EXPECT_TRUE(m4.Matches(""));
-  EXPECT_TRUE(m4.Matches(absl::string_view()));
-  EXPECT_TRUE(m4.Matches(absl::string_view("")));
-#endif  // GTEST_HAS_ABSL
+  EXPECT_TRUE(m4.Matches(internal::StringView()));
+  EXPECT_TRUE(m4.Matches(internal::StringView("")));
+#endif  // GTEST_INTERNAL_HAS_STRING_VIEW
 }
 
 TEST(EndsWithTest, CanDescribeSelf) {
@@ -1703,16 +1703,16 @@ TEST(MatchesRegexTest, MatchesStringMatchingGivenRegex) {
   EXPECT_FALSE(m2.Matches("az1"));
   EXPECT_FALSE(m2.Matches("1az"));
 
-#if GTEST_HAS_ABSL
-  const Matcher<const absl::string_view&> m3 = MatchesRegex("a.*z");
-  EXPECT_TRUE(m3.Matches(absl::string_view("az")));
-  EXPECT_TRUE(m3.Matches(absl::string_view("abcz")));
-  EXPECT_FALSE(m3.Matches(absl::string_view("1az")));
-  EXPECT_FALSE(m3.Matches(absl::string_view()));
-  const Matcher<const absl::string_view&> m4 = MatchesRegex("");
-  EXPECT_TRUE(m4.Matches(absl::string_view("")));
-  EXPECT_TRUE(m4.Matches(absl::string_view()));
-#endif  // GTEST_HAS_ABSL
+#if GTEST_INTERNAL_HAS_STRING_VIEW
+  const Matcher<const internal::StringView&> m3 = MatchesRegex("a.*z");
+  EXPECT_TRUE(m3.Matches(internal::StringView("az")));
+  EXPECT_TRUE(m3.Matches(internal::StringView("abcz")));
+  EXPECT_FALSE(m3.Matches(internal::StringView("1az")));
+  EXPECT_FALSE(m3.Matches(internal::StringView()));
+  const Matcher<const internal::StringView&> m4 = MatchesRegex("");
+  EXPECT_TRUE(m4.Matches(internal::StringView("")));
+  EXPECT_TRUE(m4.Matches(internal::StringView()));
+#endif  // GTEST_INTERNAL_HAS_STRING_VIEW
 }
 
 TEST(MatchesRegexTest, CanDescribeSelf) {
@@ -1722,10 +1722,10 @@ TEST(MatchesRegexTest, CanDescribeSelf) {
   Matcher<const char*> m2 = MatchesRegex(new RE("a.*"));
   EXPECT_EQ("matches regular expression \"a.*\"", Describe(m2));
 
-#if GTEST_HAS_ABSL
-  Matcher<const absl::string_view> m3 = MatchesRegex(new RE("0.*"));
+#if GTEST_INTERNAL_HAS_STRING_VIEW
+  Matcher<const internal::StringView> m3 = MatchesRegex(new RE("0.*"));
   EXPECT_EQ("matches regular expression \"0.*\"", Describe(m3));
-#endif  // GTEST_HAS_ABSL
+#endif  // GTEST_INTERNAL_HAS_STRING_VIEW
 }
 
 // Tests ContainsRegex().
@@ -1741,16 +1741,17 @@ TEST(ContainsRegexTest, MatchesStringContainingGivenRegex) {
   EXPECT_TRUE(m2.Matches("az1"));
   EXPECT_FALSE(m2.Matches("1a"));
 
-#if GTEST_HAS_ABSL
-  const Matcher<const absl::string_view&> m3 = ContainsRegex(new RE("a.*z"));
-  EXPECT_TRUE(m3.Matches(absl::string_view("azbz")));
-  EXPECT_TRUE(m3.Matches(absl::string_view("az1")));
-  EXPECT_FALSE(m3.Matches(absl::string_view("1a")));
-  EXPECT_FALSE(m3.Matches(absl::string_view()));
-  const Matcher<const absl::string_view&> m4 = ContainsRegex("");
-  EXPECT_TRUE(m4.Matches(absl::string_view("")));
-  EXPECT_TRUE(m4.Matches(absl::string_view()));
-#endif  // GTEST_HAS_ABSL
+#if GTEST_INTERNAL_HAS_STRING_VIEW
+  const Matcher<const internal::StringView&> m3 =
+      ContainsRegex(new RE("a.*z"));
+  EXPECT_TRUE(m3.Matches(internal::StringView("azbz")));
+  EXPECT_TRUE(m3.Matches(internal::StringView("az1")));
+  EXPECT_FALSE(m3.Matches(internal::StringView("1a")));
+  EXPECT_FALSE(m3.Matches(internal::StringView()));
+  const Matcher<const internal::StringView&> m4 = ContainsRegex("");
+  EXPECT_TRUE(m4.Matches(internal::StringView("")));
+  EXPECT_TRUE(m4.Matches(internal::StringView()));
+#endif  // GTEST_INTERNAL_HAS_STRING_VIEW
 }
 
 TEST(ContainsRegexTest, CanDescribeSelf) {
@@ -1760,10 +1761,10 @@ TEST(ContainsRegexTest, CanDescribeSelf) {
   Matcher<const char*> m2 = ContainsRegex(new RE("a.*"));
   EXPECT_EQ("contains regular expression \"a.*\"", Describe(m2));
 
-#if GTEST_HAS_ABSL
-  Matcher<const absl::string_view> m3 = ContainsRegex(new RE("0.*"));
+#if GTEST_INTERNAL_HAS_STRING_VIEW
+  Matcher<const internal::StringView> m3 = ContainsRegex(new RE("0.*"));
   EXPECT_EQ("contains regular expression \"0.*\"", Describe(m3));
-#endif  // GTEST_HAS_ABSL
+#endif  // GTEST_INTERNAL_HAS_STRING_VIEW
 }
 
 // Tests for wide strings.
