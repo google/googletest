@@ -384,18 +384,18 @@ class GTEST_API_ Matcher<std::string>
   Matcher(const char* s);  // NOLINT
 };
 
-#if GTEST_HAS_ABSL
+#if GTEST_INTERNAL_HAS_STRING_VIEW
 // The following two specializations allow the user to write str
 // instead of Eq(str) and "foo" instead of Eq("foo") when a absl::string_view
 // matcher is expected.
 template <>
-class GTEST_API_ Matcher<const absl::string_view&>
-    : public internal::MatcherBase<const absl::string_view&> {
+class GTEST_API_ Matcher<const internal::StringView&>
+    : public internal::MatcherBase<const internal::StringView&> {
  public:
   Matcher() {}
 
-  explicit Matcher(const MatcherInterface<const absl::string_view&>* impl)
-      : internal::MatcherBase<const absl::string_view&>(impl) {}
+  explicit Matcher(const MatcherInterface<const internal::StringView&>* impl)
+      : internal::MatcherBase<const internal::StringView&>(impl) {}
 
   // Allows the user to write str instead of Eq(str) sometimes, where
   // str is a std::string object.
@@ -404,20 +404,20 @@ class GTEST_API_ Matcher<const absl::string_view&>
   // Allows the user to write "foo" instead of Eq("foo") sometimes.
   Matcher(const char* s);  // NOLINT
 
-  // Allows the user to pass absl::string_views directly.
-  Matcher(absl::string_view s);  // NOLINT
+  // Allows the user to pass absl::string_views or std::string_views directly.
+  Matcher(internal::StringView s);  // NOLINT
 };
 
 template <>
-class GTEST_API_ Matcher<absl::string_view>
-    : public internal::MatcherBase<absl::string_view> {
+class GTEST_API_ Matcher<internal::StringView>
+    : public internal::MatcherBase<internal::StringView> {
  public:
   Matcher() {}
 
-  explicit Matcher(const MatcherInterface<const absl::string_view&>* impl)
-      : internal::MatcherBase<absl::string_view>(impl) {}
-  explicit Matcher(const MatcherInterface<absl::string_view>* impl)
-      : internal::MatcherBase<absl::string_view>(impl) {}
+  explicit Matcher(const MatcherInterface<const internal::StringView&>* impl)
+      : internal::MatcherBase<internal::StringView>(impl) {}
+  explicit Matcher(const MatcherInterface<internal::StringView>* impl)
+      : internal::MatcherBase<internal::StringView>(impl) {}
 
   // Allows the user to write str instead of Eq(str) sometimes, where
   // str is a std::string object.
@@ -426,10 +426,10 @@ class GTEST_API_ Matcher<absl::string_view>
   // Allows the user to write "foo" instead of Eq("foo") sometimes.
   Matcher(const char* s);  // NOLINT
 
-  // Allows the user to pass absl::string_views directly.
-  Matcher(absl::string_view s);  // NOLINT
+  // Allows the user to pass absl::string_views or std::string_views directly.
+  Matcher(internal::StringView s);  // NOLINT
 };
-#endif  // GTEST_HAS_ABSL
+#endif  // GTEST_INTERNAL_HAS_STRING_VIEW
 
 // Prints a matcher in a human-readable format.
 template <typename T>
@@ -620,12 +620,12 @@ class MatchesRegexMatcher {
   MatchesRegexMatcher(const RE* regex, bool full_match)
       : regex_(regex), full_match_(full_match) {}
 
-#if GTEST_HAS_ABSL
-  bool MatchAndExplain(const absl::string_view& s,
+#if GTEST_INTERNAL_HAS_STRING_VIEW
+  bool MatchAndExplain(const internal::StringView& s,
                        MatchResultListener* listener) const {
     return MatchAndExplain(std::string(s), listener);
   }
-#endif  // GTEST_HAS_ABSL
+#endif  // GTEST_INTERNAL_HAS_STRING_VIEW
 
   // Accepts pointer types, particularly:
   //   const char*
