@@ -257,6 +257,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <complex>
 #include <initializer_list>
 #include <iterator>
 #include <limits>
@@ -1841,6 +1842,239 @@ class FloatingEq2Matcher {
   }
   FloatType max_abs_error_;
   bool nan_eq_nan_;
+};
+
+// Implements the polymorphic complex floating point equality matcher, which
+// matches both real part and imaginary part of two complex float values using
+// ULP-based approximation or, optionally, a user-specified epsilon.  The
+// template is meant to be instantiated with FloatType being either float or
+// double.
+template <typename FloatType>
+class ComplexFloatingEqMatcher {
+ public:
+  // Constructor for ComplexFloatingEqMatcher.
+  // The matcher's input will be compared with expected. They are both equals if
+  // real and imaginary parts are equals.  The matcher treats two NANs as equal
+  // if nan_eq_nan is true.  Otherwise, under IEEE standards, equality
+  // comparisons between NANs will always return false.  We specify a negative
+  // max_abs_error_ term to indicate that ULP-based approximation will be used
+  // for comparison.
+  ComplexFloatingEqMatcher(std::complex<FloatType> expected, bool nan_eq_nan)
+      : expected_(expected), nan_eq_nan_(nan_eq_nan), max_abs_error_(-1) {}
+
+  // Constructor that supports a user-specified max_abs_error that will be used
+  // for comparison instead of ULP-based approximation.  The max absolute
+  // should be non-negative.
+  ComplexFloatingEqMatcher(std::complex<FloatType> expected, bool nan_eq_nan,
+                           FloatType max_abs_error)
+      : expected_(expected),
+        nan_eq_nan_(nan_eq_nan),
+        max_abs_error_(max_abs_error) {
+    GTEST_CHECK_(max_abs_error >= 0)
+        << ", where max_abs_error is" << max_abs_error;
+  }
+
+  template <typename T>
+  class Impl : public ::testing::MatcherInterface<T> {
+   public:
+    explicit Impl(std::complex<FloatType> z, bool nan_eq_nan,
+                  FloatType max_abs_error)
+        : expected_real_(z.real()),
+          expected_imag_(z.imag()),
+          expected_(z),
+          max_abs_error_(max_abs_error),
+          max_squared_error_(max_abs_error * max_abs_error),
+          nan_eq_nan_(nan_eq_nan),
+          expected_is_nan_(expected_real_.is_nan() || expected_imag_.is_nan()) {
+    }
+
+    bool MatchAndExplain(T z, MatchResultListener* listener) const override {
+      const ::testing::internal::FloatingPoint<FloatType> z_real(z.real());
+      const ::testing::internal::FloatingPoint<FloatType> z_imag(z.imag());
+      // Compares NaNs first, if nan_eq_nan_ is true.
+      const bool z_is_nan = z_real.is_nan() || z_imag.is_nan();
+      if (z_is_nan || expected_is_nan_) {
+        if (z_is_nan && expected_is_nan_) {
+          return nan_eq_nan_;
+        }
+        // One is nan; the other is not nan.
+        return false;
+      }
+      if (HasMaxAbsError()) {
+        // We perform an equality check so that inf will match inf, regardless
+        // of error bounds.  If the result of value - expected_ would result in
+        // overflow or if either value is inf, the default result is infinity,
+        // which should only match if max_abs_error_ is also infinity.
+        if (z == expected_) {
+          return true;
+        }
+
+        const std::complex<FloatType> diff = z - expected_;
+        if (::std::norm(diff) <= max_squared_error_) {
+          return true;
+        }
+
+        if (listener->IsInterested()) {
+          *listener << "which is " << diff << " from " << expected_;
+        }
+        return false;
+      } else {
+        return expected_real_.AlmostEquals(z_real) &&
+               expected_imag_.AlmostEquals(z_imag);
+      }
+    }
+
+    void DescribeTo(std::ostream* os) const override {
+      const ::std::streamsize old_precision =
+          os->precision(::std::numeric_limits<FloatType>::digits10 + 2);
+      if (expected_is_nan_) {
+        if (nan_eq_nan_) {
+          *os << "is NaN";
+        } else {
+          *os << "never matches";
+        }
+      } else {
+        *os << "is approximately " << expected_;
+        if (HasMaxAbsError()) {
+          *os << " (absolute error <= " << max_abs_error_ << ")";
+        }
+      }
+      // Restore original precision.
+      os->precision(old_precision);
+    }
+
+    void DescribeNegationTo(std::ostream* os) const override {
+      const ::std::streamsize old_precision =
+          os->precision(::std::numeric_limits<FloatType>::digits10 + 2);
+      if (expected_is_nan_) {
+        if (nan_eq_nan_) {
+          *os << "isn't NaN";
+        } else {
+          *os << "is anything";
+        }
+      } else {
+        *os << "is not approximately" << expected_;
+        if (HasMaxAbsError()) {
+          *os << " (absolute error > " << max_abs_error_ << ")";
+        }
+      }
+      // Restore original precision.
+      os->precision(old_precision);
+    }
+
+   private:
+    bool HasMaxAbsError() const { return max_abs_error_ >= 0; }
+
+    const ::testing::internal::FloatingPoint<FloatType> expected_real_;
+    const ::testing::internal::FloatingPoint<FloatType> expected_imag_;
+    const std::complex<FloatType> expected_;
+    const FloatType max_abs_error_;
+    const FloatType max_squared_error_;
+    const bool nan_eq_nan_;
+    const bool expected_is_nan_;
+  };
+
+  // The following 3 type conversion operators allow ComplexFloatEq(expected)
+  // and NanSensitiveComplexFloatEq(expected) to be used as a
+  // Matcher<std::complex<float>>, a Matcher<const std::complex<float>&>, or a
+  // Matcher<std::complex<float>&>, but nothing else. (While Google's C++ coding
+  // style doesn't allow arguments passed by non-const reference, we may see
+  // them in code not conforming to the style.  Therefore Google Mock needs to
+  // support them.)
+  operator Matcher<std::complex<FloatType>>() const {
+    return MakeMatcher(new Impl<std::complex<FloatType>>(expected_, nan_eq_nan_,
+                                                         max_abs_error_));
+  }
+
+  operator Matcher<const std::complex<FloatType>&>() const {
+    return MakeMatcher(new Impl<const std::complex<FloatType>&>(
+        expected_, nan_eq_nan_, max_abs_error_));
+  }
+
+  operator Matcher<std::complex<FloatType>&>() const {
+    return MakeMatcher(new Impl<std::complex<FloatType>&>(
+        expected_, nan_eq_nan_, max_abs_error_));
+  }
+
+ private:
+  const std::complex<FloatType> expected_;
+  const bool nan_eq_nan_;
+  // max_abs_error will be used for value comparison when >= 0.
+  const FloatType max_abs_error_;
+
+  GTEST_DISALLOW_ASSIGN_(ComplexFloatingEqMatcher);
+};
+
+// A 2-tuple ("binary") wrapper around ComplexFloatingEqMatcher:
+// ComplexFloatingEq2Matcher() matches (x, y) by matching
+// ComplexFloatingEqMatcher(x, false) against y, and
+// ComplexFloatingEq2Matcher(e) matches ComplexFloatingEqMatcher(x, false, e)
+// against y. The former implements "Eq", the latter "Near". At present, there
+// is no version that compares NaNs as equal.
+template <typename FloatType>
+class ComplexFloatingEq2Matcher {
+ public:
+  ComplexFloatingEq2Matcher() : max_abs_error_(-1), nan_eq_nan_(false) {}
+
+  explicit ComplexFloatingEq2Matcher(bool nan_eq_nan)
+      : max_abs_error_(-1), nan_eq_nan_(nan_eq_nan) {}
+
+  explicit ComplexFloatingEq2Matcher(FloatType max_abs_error)
+      : max_abs_error_(max_abs_error), nan_eq_nan_(false) {}
+
+  ComplexFloatingEq2Matcher(FloatType max_abs_error, bool nan_eq_nan)
+      : max_abs_error_(max_abs_error), nan_eq_nan_(nan_eq_nan) {}
+
+  template <typename T1, typename T2>
+  operator Matcher<::std::tuple<T1, T2>>() const {
+    return MakeMatcher(
+        new Impl<::std::tuple<T1, T2>>(max_abs_error_, nan_eq_nan_));
+  }
+  template <typename T1, typename T2>
+  operator Matcher<const ::std::tuple<T1, T2>&>() const {
+    return MakeMatcher(
+        new Impl<const ::std::tuple<T1, T2>&>(max_abs_error_, nan_eq_nan_));
+  }
+
+ private:
+  static ::std::ostream& GetDesc(::std::ostream& os) {  // NOLINT
+    return os << "an almost-equal pair";
+  }
+
+  template <typename Tuple>
+  class Impl : public MatcherInterface<Tuple> {
+   public:
+    Impl(FloatType max_abs_error, bool nan_eq_nan)
+        : max_abs_error_(max_abs_error), nan_eq_nan_(nan_eq_nan) {}
+
+    bool MatchAndExplain(Tuple args,
+                         MatchResultListener* listener) const override {
+      if (max_abs_error_ == -1) {
+        ComplexFloatingEqMatcher<FloatType> cfm(::std::get<0>(args),
+                                                nan_eq_nan_);
+        return static_cast<Matcher<std::complex<FloatType>>>(cfm)
+            .MatchAndExplain(::std::get<1>(args), listener);
+      } else {
+        ComplexFloatingEqMatcher<FloatType> cfm(::std::get<0>(args),
+                                                nan_eq_nan_, max_abs_error_);
+        return static_cast<Matcher<std::complex<FloatType>>>(cfm)
+            .MatchAndExplain(::std::get<1>(args), listener);
+      }
+    }
+    void DescribeTo(::std::ostream* os) const override {
+      *os << "are " << GetDesc;
+    }
+    void DescribeNegationTo(::std::ostream* os) const override {
+      *os << "aren't " << GetDesc;
+    }
+
+   private:
+    FloatType max_abs_error_;
+    const bool nan_eq_nan_;
+  };
+
+  const FloatType max_abs_error_;
+  const bool nan_eq_nan_;
 };
 
 // Implements the Pointee(m) matcher for matching a pointer whose
@@ -3952,6 +4186,70 @@ inline internal::FloatingEqMatcher<float> NanSensitiveFloatNear(
   return internal::FloatingEqMatcher<float>(rhs, true, max_abs_error);
 }
 
+// Creates a matcher that matches any std::complex<double> argument
+// approximately equal to rhs, where two NANs are considered unequal.
+inline internal::ComplexFloatingEqMatcher<double> ComplexDoubleEq(
+    std::complex<double> rhs) {
+  return internal::ComplexFloatingEqMatcher<double>(rhs, false);
+}
+
+// Creates a matcher that matches any std::complex<double> argument
+// approximately equal to rhs, including NaN values when rhs is NaN.
+inline internal::ComplexFloatingEqMatcher<double> NanSensitiveComplexDoubleEq(
+    std::complex<double> rhs) {
+  return internal::ComplexFloatingEqMatcher<double>(rhs, true);
+}
+
+// Creates a matcher that matches any std::complex<double> argument
+// approximately equal to rhs, up to the specified max absolute error bound,
+// where two NANs are considered unequal.  The max absolute error bound must be
+// non-negative.
+inline internal::ComplexFloatingEqMatcher<double> ComplexDoubleNear(
+    std::complex<double> rhs, double max_abs_error) {
+  return internal::ComplexFloatingEqMatcher<double>(rhs, false, max_abs_error);
+}
+
+// Creates a matcher that matches any std::complex<double> argument
+// approximately equal to rhs, up to the specified max absolute error bound,
+// including NaN values when rhs is NaN.  The max absolute error bound must be
+// non-negative.
+inline internal::ComplexFloatingEqMatcher<double> NanSensitiveComplexDoubleNear(
+    std::complex<double> rhs, double max_abs_error) {
+  return internal::ComplexFloatingEqMatcher<double>(rhs, true, max_abs_error);
+}
+
+// Creates a matcher that matches any std::complex<float> argument
+// approximately equal to rhs, where two NANs are considered unequal.
+inline internal::ComplexFloatingEqMatcher<float> ComplexFloatEq(
+    std::complex<float> rhs) {
+  return internal::ComplexFloatingEqMatcher<float>(rhs, false);
+}
+
+// Creates a matcher that matches any std::complex<float> argument
+// approximately equal to rhs, including NaN values when rhs is NaN.
+inline internal::ComplexFloatingEqMatcher<float> NanSensitiveComplexFloatEq(
+    std::complex<float> rhs) {
+  return internal::ComplexFloatingEqMatcher<float>(rhs, true);
+}
+
+// Creates a matcher that matches any std::complex<float> argument
+// approximately equal to rhs, up to the specified max absolute error bound,
+// where two NANs are considered unequal.  The max absolute error bound must be
+// non-negative.
+inline internal::ComplexFloatingEqMatcher<float> ComplexFloatNear(
+    std::complex<float> rhs, float max_abs_error) {
+  return internal::ComplexFloatingEqMatcher<float>(rhs, false, max_abs_error);
+}
+
+// Creates a matcher that matches any std::complex<float> argument
+// approximately equal to rhs, up to the specified max absolute error bound,
+// including NaN values when rhs is NaN.  The max absolute error bound must be
+// non-negative.
+inline internal::ComplexFloatingEqMatcher<float> NanSensitiveComplexFloatNear(
+    std::complex<float> rhs, float max_abs_error) {
+  return internal::ComplexFloatingEqMatcher<float>(rhs, true, max_abs_error);
+}
+
 // Creates a matcher that matches a pointer (raw or smart) that points
 // to a value that matches inner_matcher.
 template <typename InnerMatcher>
@@ -4255,6 +4553,61 @@ inline internal::FloatingEq2Matcher<float> NanSensitiveFloatNear(
 inline internal::FloatingEq2Matcher<double> NanSensitiveDoubleNear(
     double max_abs_error) {
   return internal::FloatingEq2Matcher<double>(max_abs_error, true);
+}
+
+// Creates a polymorphic matcher that matches a 2-tuple where
+// ComplexDoubleEq(first field) matches the second field.
+inline internal::ComplexFloatingEq2Matcher<double> ComplexDoubleEq() {
+  return internal::ComplexFloatingEq2Matcher<double>(false);
+}
+
+// Creates a polymorphic matcher that matches a 2-tuple where
+// ComplexFloatEq(first field) matches the second field.
+inline internal::ComplexFloatingEq2Matcher<float> ComplexFloatEq() {
+  return internal::ComplexFloatingEq2Matcher<float>(false);
+}
+
+// Creates a polymorphic matcher that matches a 2-tuple where
+// ComplexDoubleEq(first field) matches the second field with NaN equality.
+inline internal::ComplexFloatingEq2Matcher<double>
+NanSensitiveComplexDoubleEq() {
+  return internal::ComplexFloatingEq2Matcher<double>(true);
+}
+
+// Creates a polymorphic matcher that matches a 2-tuple where
+// ComplexFloatEq(first field) matches the second field with NaN equality.
+inline internal::ComplexFloatingEq2Matcher<float> NanSensitiveComplexFloatEq() {
+  return internal::ComplexFloatingEq2Matcher<float>(true);
+}
+
+// Creates a polymorphic matcher that matches a 2-tuple where
+// ComplexDoubleNear(first field, max_abs_error) matches the second field.
+inline internal::ComplexFloatingEq2Matcher<double> ComplexDoubleNear(
+    double max_abs_error) {
+  return internal::ComplexFloatingEq2Matcher<double>(max_abs_error, false);
+}
+
+// Creates a polymorphic matcher that matches a 2-tuple where
+// ComplexFloatNear(first field, max_abs_error) matches the second field.
+inline internal::ComplexFloatingEq2Matcher<float> ComplexFloatNear(
+    float max_abs_error) {
+  return internal::ComplexFloatingEq2Matcher<float>(max_abs_error, false);
+}
+
+// Creates a polymorphic matcher that matches a 2-tuple where
+// ComplexDoubleNear(first field, max_abs_error) matches the second field with
+// NaN equality.
+inline internal::ComplexFloatingEq2Matcher<double>
+NanSensitiveComplexDoubleNear(double max_abs_error) {
+  return internal::ComplexFloatingEq2Matcher<double>(max_abs_error, true);
+}
+
+// Creates a polymorphic matcher that matches a 2-tuple where
+// ComplexFloatNear(first field, max_abs_error) matches the second field with
+// NaN equality.
+inline internal::ComplexFloatingEq2Matcher<float> NanSensitiveComplexFloatNear(
+    float max_abs_error) {
+  return internal::ComplexFloatingEq2Matcher<float>(max_abs_error, true);
 }
 
 // Creates a matcher that matches any value of type T that m doesn't

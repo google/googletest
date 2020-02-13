@@ -312,6 +312,34 @@ user wants.
 | `NanSensitiveFloatNear(a_float, max_abs_error)`   | `argument` is a `float` value close to `a_float` (absolute error <= `max_abs_error`), treating two NaNs as equal. |
 <!-- mdformat on -->
 
+#### Complex Floating-Point Matchers {#CpxFpMatchers}
+
+<!-- mdformat off(no multiline tables) -->
+| Matcher                                         | Description                                                                                                           |
+| :---------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------- |
+| `ComplexDoubleEq(a_complex_double)`             | `argument` is a `std::complex<double>` value approximately equal to `a_complex_double`, treating two NaNs as unequal. |
+| `ComplexFloatEq(a_complex_float)`               | `argument` is a `std::complex<float>` value approximately equal to `a_complex_float`, treating two NaNs as unequal.   |
+| `NanSensitiveComplexDoubleEq(a_complex_double)` | `argument` is a `std::complex<double>` value approximately equal to `a_complex_double`, treating two NaNs as equal.   |
+| `NanSensitiveComplexFloatEq(a_complex_float)`   | `argument` is a `std::complex<float>` value approximately equal to `a_complex_float`, treating two NaNs as equal.     |
+<!-- mdformat on -->
+
+The above matchers use ULP-based comparison (the same as used in googletest) on 
+both real and imaginary parts. They automatically pick a reasonable error bound
+based on the absolute value of the expected value. `ComplexDoubleEq()` and 
+`ComplexFloatEq()` conform to the IEEE standard, which requires comparing two 
+NaNs for equality to return false. The `NanSensitive*` version instead treats two 
+NaNs as equal, which is often what a user wants.
+A complex number is NaN if either its real part or imaginary part is NaN.
+
+<!-- mdformat off(no multiline tables) -->
+| Matcher                                                          | Description                                                                                                                                 |
+| :--------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------ |
+| `ComplexDoubleNear(a_complex_double, max_abs_error)`             | `argument` is a `std::complex<double>` value close to `a_complex_double` (absolute error <= `max_abs_error`), treating two NaNs as unequal. |
+| `ComplexFloatNear(a_complex_float, max_abs_error)`               | `argument` is a `std::complex<float>` value close to `a_complex_float` (absolute error <= `max_abs_error`), treating two NaNs as unequal.   |
+| `NanSensitiveComplexDoubleNear(a_complex_double, max_abs_error)` | `argument` is a `std::complex<double>` value close to `a_complex_double` (absolute error <= `max_abs_error`), treating two NaNs as equal.   |
+| `NanSensitiveComplexFloatNear(a_complex_float, max_abs_error)`   | `argument` is a `std::complex<float>` value close to `a_complex_float` (absolute error <= `max_abs_error`), treating two NaNs as equal.     |
+<!-- mdformat on -->
+
 #### String Matchers
 
 The `argument` can be either a C string or a C++ string object:

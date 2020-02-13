@@ -47,6 +47,7 @@
 
 #include <array>
 #include <cstdint>
+#include <complex>
 #include <deque>
 #include <forward_list>
 #include <functional>
@@ -2306,6 +2307,172 @@ TEST(NanSensitiveDoubleNearTest, MatchesNearbyArgumentsWithNaN) {
 // Tests that NanSensitiveDoubleNear() describes itself properly.
 TEST(NanSensitiveDoubleNearTest, CanDescribeSelfWithNaNs) {
   Matcher<const ::std::tuple<double, double>&> m = NanSensitiveDoubleNear(0.5f);
+  EXPECT_EQ("are an almost-equal pair", Describe(m));
+}
+
+constexpr std::complex<float> kIf(0.0f, 1.0f);
+constexpr std::complex<double> kI(0.0, 1.0);
+
+// Tests that ComplexFloatEq() matches a 2-tuple where
+// ComplexFloatEq(first field) matches the second field.
+TEST(ComplexFloatEq2Test, MatchesEqualArguments) {
+  typedef ::std::tuple<std::complex<float>, std::complex<float>> Tpl;
+  Matcher<const Tpl&> m = ComplexFloatEq();
+  EXPECT_TRUE(m.Matches(Tpl(1.0f + kIf, 1.0f + kIf)));
+  EXPECT_TRUE(
+      m.Matches(Tpl(0.3f + 0.3f * kIf, 0.1f + 0.1f + 0.1f + 0.3f * kIf)));
+  EXPECT_FALSE(m.Matches(Tpl(1.1f, 1.0f + 0.3f * kIf)));
+}
+
+// Tests that ComplexFloatEq() describes itself properly.
+TEST(ComplexFloatEq2Test, CanDescribeSelf) {
+  Matcher<const ::std::tuple<std::complex<float>, std::complex<float>>&> m =
+      ComplexFloatEq();
+  EXPECT_EQ("are an almost-equal pair", Describe(m));
+}
+
+// Tests that NanSensitiveComplexFloatEq() matches a 2-tuple where
+// NanSensitiveComplexFloatEq(first field) matches the second field.
+TEST(NanSensitiveComplexFloatEqTest, MatchesEqualArgumentsWithNaN) {
+  typedef ::std::tuple<std::complex<float>, std::complex<float>> Tpl;
+  Matcher<const Tpl&> m = NanSensitiveComplexFloatEq();
+  EXPECT_TRUE(m.Matches(Tpl(1.0f + 0.3f * kIf, 1.0f + 0.3f * kIf)));
+  EXPECT_TRUE(
+      m.Matches(Tpl(std::numeric_limits<float>::quiet_NaN() + 0.3f * kIf,
+                    std::numeric_limits<float>::quiet_NaN() + 0.3f * kIf)));
+  EXPECT_FALSE(m.Matches(Tpl(1.1f, 1.0f + 0.3f * kIf)));
+  EXPECT_FALSE(m.Matches(
+      Tpl(1.0f, std::numeric_limits<float>::quiet_NaN() + 0.3f * kIf)));
+  EXPECT_FALSE(m.Matches(
+      Tpl(std::numeric_limits<float>::quiet_NaN() + 0.3f * kIf, 1.0f)));
+}
+
+// Tests that NanSensitiveComplexFloatEq() describes itself properly.
+TEST(NanSensitiveComplexFloatEqTest, CanDescribeSelfWithNaNs) {
+  Matcher<const ::std::tuple<std::complex<float>, std::complex<float>>&> m =
+      NanSensitiveComplexFloatEq();
+  EXPECT_EQ("are an almost-equal pair", Describe(m));
+}
+
+// Tests that ComplexFloatNear() matches a 2-tuple where
+// FloatNear(first field, max_abs_error) matches the second field.
+TEST(ComplexFloatNear2Test, MatchesEqualArguments) {
+  typedef ::std::tuple<std::complex<float>, std::complex<float>> Tpl;
+  Matcher<const Tpl&> m = ComplexFloatNear(0.5f);
+  EXPECT_TRUE(m.Matches(Tpl(1.0f + 0.3f * kIf, 1.0f + 0.3f * kIf)));
+  EXPECT_TRUE(m.Matches(Tpl(1.3f + 0.3f * kIf, 1.1f + 0.3f * kIf)));
+  EXPECT_FALSE(m.Matches(Tpl(1.8f + 0.3f * kIf, 1.0f - 0.3f * kIf)));
+}
+
+// Tests that ComplexFloatNear() describes itself properly.
+TEST(ComplexFloatNear2Test, CanDescribeSelf) {
+  Matcher<const ::std::tuple<std::complex<float>, std::complex<float>>&> m =
+      ComplexFloatNear(0.5f);
+  EXPECT_EQ("are an almost-equal pair", Describe(m));
+}
+
+// Tests that NanSensitiveComplexFloatNear() matches a 2-tuple where
+// NanSensitiveFloatNear(first field) matches the second field.
+TEST(NanSensitiveComplexFloatNearTest, MatchesNearbyArgumentsWithNaN) {
+  typedef ::std::tuple<std::complex<float>, std::complex<float>> Tpl;
+  Matcher<const Tpl&> m = NanSensitiveComplexFloatNear(0.5f);
+  EXPECT_TRUE(m.Matches(Tpl(1.0f + 0.3f * kIf, 1.0f + 0.3f * kIf)));
+  EXPECT_TRUE(m.Matches(Tpl(1.1f + 0.3f * kIf, 1.0f + 0.3f * kIf)));
+  EXPECT_TRUE(
+      m.Matches(Tpl(std::numeric_limits<float>::quiet_NaN() + 0.3f * kIf,
+                    std::numeric_limits<float>::quiet_NaN() + 0.3f * kIf)));
+  EXPECT_FALSE(m.Matches(Tpl(1.6f, 1.0f - 0.3f * kIf)));
+  EXPECT_FALSE(m.Matches(
+      Tpl(1.0f + 0.3f * kIf, std::numeric_limits<float>::quiet_NaN())));
+  EXPECT_FALSE(m.Matches(
+      Tpl(std::numeric_limits<float>::quiet_NaN() + 0.3f * kIf, 1.0f)));
+}
+
+// Tests that NanSensitiveFloatNear() describes itself properly.
+TEST(NanSensitiveComplexFloatNearTest, CanDescribeSelfWithNaNs) {
+  Matcher<const ::std::tuple<std::complex<float>, std::complex<float>>&> m =
+      NanSensitiveComplexFloatNear(0.5f);
+  EXPECT_EQ("are an almost-equal pair", Describe(m));
+}
+
+// Tests that ComplexDoubleEq() matches a 2-tuple where
+// ComplexDoubleEq(first field) matches the second field.
+TEST(ComplexDoubleEq2Test, MatchesEqualArguments) {
+  typedef ::std::tuple<std::complex<double>, std::complex<double>> Tpl;
+  Matcher<const Tpl&> m = ComplexDoubleEq();
+  EXPECT_TRUE(m.Matches(Tpl(1.0 + kI, 1.0 + kI)));
+  EXPECT_TRUE(m.Matches(Tpl(0.3 + 0.3 * kI, 0.1 + 0.1 + 0.1 + 0.3 * kI)));
+  EXPECT_FALSE(m.Matches(Tpl(1.1, 1.0 + 0.3 * kI)));
+}
+
+// Tests that ComplexDoubleEq() describes itself properly.
+TEST(ComplexDoubleEq2Test, CanDescribeSelf) {
+  Matcher<const ::std::tuple<std::complex<double>, std::complex<double>>&> m =
+      ComplexDoubleEq();
+  EXPECT_EQ("are an almost-equal pair", Describe(m));
+}
+
+// Tests that NanSensitiveComplexDoubleEq() matches a 2-tuple where
+// NanSensitiveComplexDoubleEq(first field) matches the second field.
+TEST(NanSensitiveComplexDoubleEqTest, MatchesEqualArgumentsWithNaN) {
+  typedef ::std::tuple<std::complex<double>, std::complex<double>> Tpl;
+  Matcher<const Tpl&> m = NanSensitiveComplexDoubleEq();
+  EXPECT_TRUE(m.Matches(Tpl(1.0 + 0.3 * kI, 1.0 + 0.3 * kI)));
+  EXPECT_TRUE(
+      m.Matches(Tpl(std::numeric_limits<double>::quiet_NaN() + 0.3 * kI,
+                    std::numeric_limits<double>::quiet_NaN() + 0.3 * kI)));
+  EXPECT_FALSE(m.Matches(Tpl(1.1, 1.0 + 0.3 * kI)));
+  EXPECT_FALSE(m.Matches(
+      Tpl(1.0f, std::numeric_limits<double>::quiet_NaN() + 0.3 * kI)));
+  EXPECT_FALSE(
+      m.Matches(Tpl(std::numeric_limits<double>::quiet_NaN() + 0.3 * kI, 1.0)));
+}
+
+// Tests that NanSensitiveComplexDoubleEq() describes itself properly.
+TEST(NanSensitiveComplexDoubleEqTest, CanDescribeSelfWithNaNs) {
+  Matcher<const ::std::tuple<std::complex<double>, std::complex<double>>&> m =
+      NanSensitiveComplexDoubleEq();
+  EXPECT_EQ("are an almost-equal pair", Describe(m));
+}
+
+// Tests that ComplexDoubleNear() matches a 2-tuple where
+// FloatNear(first field, max_abs_error) matches the second field.
+TEST(ComplexDoubleNear2Test, MatchesEqualArguments) {
+  typedef ::std::tuple<std::complex<double>, std::complex<double>> Tpl;
+  Matcher<const Tpl&> m = ComplexDoubleNear(0.5f);
+  EXPECT_TRUE(m.Matches(Tpl(1.0 + 0.3 * kI, 1.0 + 0.3 * kI)));
+  EXPECT_TRUE(m.Matches(Tpl(1.3 + 0.3 * kI, 1.1 + 0.3 * kI)));
+  EXPECT_FALSE(m.Matches(Tpl(1.8 + 0.3 * kI, 1.0 - 0.3 * kI)));
+}
+
+// Tests that DoubleNear() describes itself properly.
+TEST(ComplexDoubleNear2Test, CanDescribeSelf) {
+  Matcher<const ::std::tuple<std::complex<double>, std::complex<double>>&> m =
+      ComplexDoubleNear(0.5f);
+  EXPECT_EQ("are an almost-equal pair", Describe(m));
+}
+
+// Tests that NanSensitiveComplexDoubleNear() matches a 2-tuple where
+// NanSensitiveDoubleNear(first field) matches the second field.
+TEST(NanSensitiveComplexDoubleNearTest, MatchesNearbyArgumentsWithNaN) {
+  typedef ::std::tuple<std::complex<double>, std::complex<double>> Tpl;
+  Matcher<const Tpl&> m = NanSensitiveComplexDoubleNear(0.5);
+  EXPECT_TRUE(m.Matches(Tpl(1.0 + 0.3 * kI, 1.0 + 0.3 * kI)));
+  EXPECT_TRUE(m.Matches(Tpl(1.1 + 0.3 * kI, 1.0 + 0.3 * kI)));
+  EXPECT_TRUE(
+      m.Matches(Tpl(std::numeric_limits<double>::quiet_NaN() + 0.3 * kI,
+                    std::numeric_limits<double>::quiet_NaN() + 0.3 * kI)));
+  EXPECT_FALSE(m.Matches(Tpl(1.6, 1.0 - 0.3 * kI)));
+  EXPECT_FALSE(
+      m.Matches(Tpl(1.0 + 0.3 * kI, std::numeric_limits<double>::quiet_NaN())));
+  EXPECT_FALSE(
+      m.Matches(Tpl(std::numeric_limits<double>::quiet_NaN() + 0.3 * kI, 1.0)));
+}
+
+// Tests that NanSensitiveDoubleNear() describes itself properly.
+TEST(NanSensitiveComplexDoubleNearTest, CanDescribeSelfWithNaNs) {
+  Matcher<const ::std::tuple<std::complex<double>, std::complex<double>>&> m =
+      NanSensitiveComplexDoubleNear(0.5);
   EXPECT_EQ("are an almost-equal pair", Describe(m));
 }
 
