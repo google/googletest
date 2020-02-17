@@ -34,7 +34,6 @@
 // utilities for defining matchers.
 
 #include "gmock/gmock-matchers.h"
-#include "gmock/gmock-generated-matchers.h"
 
 #include <string.h>
 #include <iostream>

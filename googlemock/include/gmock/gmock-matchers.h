@@ -30,7 +30,220 @@
 
 // Google Mock - a framework for writing C++ mock classes.
 //
-// This file implements some commonly used argument matchers.  More
+// The MATCHER* family of macros can be used in a namespace scope to
+// define custom matchers easily.
+//
+// Basic Usage
+// ===========
+//
+// The syntax
+//
+//   MATCHER(name, description_string) { statements; }
+//
+// defines a matcher with the given name that executes the statements,
+// which must return a bool to indicate if the match succeeds.  Inside
+// the statements, you can refer to the value being matched by 'arg',
+// and refer to its type by 'arg_type'.
+//
+// The description string documents what the matcher does, and is used
+// to generate the failure message when the match fails.  Since a
+// MATCHER() is usually defined in a header file shared by multiple
+// C++ source files, we require the description to be a C-string
+// literal to avoid possible side effects.  It can be empty, in which
+// case we'll use the sequence of words in the matcher name as the
+// description.
+//
+// For example:
+//
+//   MATCHER(IsEven, "") { return (arg % 2) == 0; }
+//
+// allows you to write
+//
+//   // Expects mock_foo.Bar(n) to be called where n is even.
+//   EXPECT_CALL(mock_foo, Bar(IsEven()));
+//
+// or,
+//
+//   // Verifies that the value of some_expression is even.
+//   EXPECT_THAT(some_expression, IsEven());
+//
+// If the above assertion fails, it will print something like:
+//
+//   Value of: some_expression
+//   Expected: is even
+//     Actual: 7
+//
+// where the description "is even" is automatically calculated from the
+// matcher name IsEven.
+//
+// Argument Type
+// =============
+//
+// Note that the type of the value being matched (arg_type) is
+// determined by the context in which you use the matcher and is
+// supplied to you by the compiler, so you don't need to worry about
+// declaring it (nor can you).  This allows the matcher to be
+// polymorphic.  For example, IsEven() can be used to match any type
+// where the value of "(arg % 2) == 0" can be implicitly converted to
+// a bool.  In the "Bar(IsEven())" example above, if method Bar()
+// takes an int, 'arg_type' will be int; if it takes an unsigned long,
+// 'arg_type' will be unsigned long; and so on.
+//
+// Parameterizing Matchers
+// =======================
+//
+// Sometimes you'll want to parameterize the matcher.  For that you
+// can use another macro:
+//
+//   MATCHER_P(name, param_name, description_string) { statements; }
+//
+// For example:
+//
+//   MATCHER_P(HasAbsoluteValue, value, "") { return abs(arg) == value; }
+//
+// will allow you to write:
+//
+//   EXPECT_THAT(Blah("a"), HasAbsoluteValue(n));
+//
+// which may lead to this message (assuming n is 10):
+//
+//   Value of: Blah("a")
+//   Expected: has absolute value 10
+//     Actual: -9
+//
+// Note that both the matcher description and its parameter are
+// printed, making the message human-friendly.
+//
+// In the matcher definition body, you can write 'foo_type' to
+// reference the type of a parameter named 'foo'.  For example, in the
+// body of MATCHER_P(HasAbsoluteValue, value) above, you can write
+// 'value_type' to refer to the type of 'value'.
+//
+// We also provide MATCHER_P2, MATCHER_P3, ..., up to MATCHER_P$n to
+// support multi-parameter matchers.
+//
+// Describing Parameterized Matchers
+// =================================
+//
+// The last argument to MATCHER*() is a string-typed expression.  The
+// expression can reference all of the matcher's parameters and a
+// special bool-typed variable named 'negation'.  When 'negation' is
+// false, the expression should evaluate to the matcher's description;
+// otherwise it should evaluate to the description of the negation of
+// the matcher.  For example,
+//
+//   using testing::PrintToString;
+//
+//   MATCHER_P2(InClosedRange, low, hi,
+//       std::string(negation ? "is not" : "is") + " in range [" +
+//       PrintToString(low) + ", " + PrintToString(hi) + "]") {
+//     return low <= arg && arg <= hi;
+//   }
+//   ...
+//   EXPECT_THAT(3, InClosedRange(4, 6));
+//   EXPECT_THAT(3, Not(InClosedRange(2, 4)));
+//
+// would generate two failures that contain the text:
+//
+//   Expected: is in range [4, 6]
+//   ...
+//   Expected: is not in range [2, 4]
+//
+// If you specify "" as the description, the failure message will
+// contain the sequence of words in the matcher name followed by the
+// parameter values printed as a tuple.  For example,
+//
+//   MATCHER_P2(InClosedRange, low, hi, "") { ... }
+//   ...
+//   EXPECT_THAT(3, InClosedRange(4, 6));
+//   EXPECT_THAT(3, Not(InClosedRange(2, 4)));
+//
+// would generate two failures that contain the text:
+//
+//   Expected: in closed range (4, 6)
+//   ...
+//   Expected: not (in closed range (2, 4))
+//
+// Types of Matcher Parameters
+// ===========================
+//
+// For the purpose of typing, you can view
+//
+//   MATCHER_Pk(Foo, p1, ..., pk, description_string) { ... }
+//
+// as shorthand for
+//
+//   template <typename p1_type, ..., typename pk_type>
+//   FooMatcherPk<p1_type, ..., pk_type>
+//   Foo(p1_type p1, ..., pk_type pk) { ... }
+//
+// When you write Foo(v1, ..., vk), the compiler infers the types of
+// the parameters v1, ..., and vk for you.  If you are not happy with
+// the result of the type inference, you can specify the types by
+// explicitly instantiating the template, as in Foo<long, bool>(5,
+// false).  As said earlier, you don't get to (or need to) specify
+// 'arg_type' as that's determined by the context in which the matcher
+// is used.  You can assign the result of expression Foo(p1, ..., pk)
+// to a variable of type FooMatcherPk<p1_type, ..., pk_type>.  This
+// can be useful when composing matchers.
+//
+// While you can instantiate a matcher template with reference types,
+// passing the parameters by pointer usually makes your code more
+// readable.  If, however, you still want to pass a parameter by
+// reference, be aware that in the failure message generated by the
+// matcher you will see the value of the referenced object but not its
+// address.
+//
+// Explaining Match Results
+// ========================
+//
+// Sometimes the matcher description alone isn't enough to explain why
+// the match has failed or succeeded.  For example, when expecting a
+// long string, it can be very helpful to also print the diff between
+// the expected string and the actual one.  To achieve that, you can
+// optionally stream additional information to a special variable
+// named result_listener, whose type is a pointer to class
+// MatchResultListener:
+//
+//   MATCHER_P(EqualsLongString, str, "") {
+//     if (arg == str) return true;
+//
+//     *result_listener << "the difference: "
+///                     << DiffStrings(str, arg);
+//     return false;
+//   }
+//
+// Overloading Matchers
+// ====================
+//
+// You can overload matchers with different numbers of parameters:
+//
+//   MATCHER_P(Blah, a, description_string1) { ... }
+//   MATCHER_P2(Blah, a, b, description_string2) { ... }
+//
+// Caveats
+// =======
+//
+// When defining a new matcher, you should also consider implementing
+// MatcherInterface or using MakePolymorphicMatcher().  These
+// approaches require more work than the MATCHER* macros, but also
+// give you more control on the types of the value being matched and
+// the matcher parameters, which may leads to better compiler error
+// messages when the matcher is used wrong.  They also allow
+// overloading matchers based on parameter types (as opposed to just
+// based on the number of parameters).
+//
+// MATCHER*() can only be used in a namespace scope as templates cannot be
+// declared inside of a local class.
+//
+// More Information
+// ================
+//
+// To learn more about using these macros, please search for 'MATCHER'
+// on
+// https://github.com/google/googletest/blob/master/googlemock/docs/cook_book.md
+//
+// This file also implements some commonly used argument matchers.  More
 // matchers can be defined by the user implementing the
 // MatcherInterface<T> interface if necessary.
 //
@@ -57,6 +270,7 @@
 
 #include "gmock/internal/gmock-internal-utils.h"
 #include "gmock/internal/gmock-port.h"
+#include "gmock/internal/gmock-pp.h"
 #include "gtest/gtest.h"
 
 // MSVC warning C5046 is new as of VS2017 version 15.8.
@@ -234,6 +448,50 @@ template <typename T>
 class MatcherCastImpl<T, Matcher<T> > {
  public:
   static Matcher<T> Cast(const Matcher<T>& matcher) { return matcher; }
+};
+
+// Template specialization for parameterless Matcher.
+template <typename Derived>
+class MatcherBaseImpl {
+ public:
+  MatcherBaseImpl() = default;
+
+  template <typename T>
+  operator ::testing::Matcher<T>() const {  // NOLINT(runtime/explicit)
+    return ::testing::Matcher<T>(new
+                                 typename Derived::template gmock_Impl<T>());
+  }
+};
+
+// Template specialization for Matcher with parameters.
+template <template <typename...> class Derived, typename... Ts>
+class MatcherBaseImpl<Derived<Ts...>> {
+ public:
+  // Mark the constructor explicit for single argument T to avoid implicit
+  // conversions.
+  template <typename E = std::enable_if<sizeof...(Ts) == 1>,
+            typename E::type* = nullptr>
+  explicit MatcherBaseImpl(Ts... params)
+      : params_(std::forward<Ts>(params)...) {}
+  template <typename E = std::enable_if<sizeof...(Ts) != 1>,
+            typename = typename E::type>
+  MatcherBaseImpl(Ts... params)  // NOLINT
+      : params_(std::forward<Ts>(params)...) {}
+
+  template <typename F>
+  operator ::testing::Matcher<F>() const {  // NOLINT(runtime/explicit)
+    return Apply<F>(MakeIndexSequence<sizeof...(Ts)>{});
+  }
+
+ private:
+  template <typename F, std::size_t... tuple_ids>
+  ::testing::Matcher<F> Apply(IndexSequence<tuple_ids...>) const {
+    return ::testing::Matcher<F>(
+        new typename Derived<Ts...>::template gmock_Impl<F>(
+            std::get<tuple_ids>(params_)...));
+  }
+
+  const std::tuple<Ts...> params_;
 };
 
 }  // namespace internal
@@ -648,15 +906,15 @@ class StrEqualityMatcher {
                      bool case_sensitive)
       : string_(str), expect_eq_(expect_eq), case_sensitive_(case_sensitive) {}
 
-#if GTEST_HAS_ABSL
-  bool MatchAndExplain(const absl::string_view& s,
+#if GTEST_INTERNAL_HAS_STRING_VIEW
+  bool MatchAndExplain(const internal::StringView& s,
                        MatchResultListener* listener) const {
-    // This should fail to compile if absl::string_view is used with wide
+    // This should fail to compile if StringView is used with wide
     // strings.
     const StringType& str = std::string(s);
     return MatchAndExplain(str, listener);
   }
-#endif  // GTEST_HAS_ABSL
+#endif  // GTEST_INTERNAL_HAS_STRING_VIEW
 
   // Accepts pointer types, particularly:
   //   const char*
@@ -674,7 +932,7 @@ class StrEqualityMatcher {
   // Matches anything that can convert to StringType.
   //
   // This is a template, not just a plain function with const StringType&,
-  // because absl::string_view has some interfering non-explicit constructors.
+  // because StringView has some interfering non-explicit constructors.
   template <typename MatcheeStringType>
   bool MatchAndExplain(const MatcheeStringType& s,
                        MatchResultListener* /* listener */) const {
@@ -718,15 +976,15 @@ class HasSubstrMatcher {
   explicit HasSubstrMatcher(const StringType& substring)
       : substring_(substring) {}
 
-#if GTEST_HAS_ABSL
-  bool MatchAndExplain(const absl::string_view& s,
+#if GTEST_INTERNAL_HAS_STRING_VIEW
+  bool MatchAndExplain(const internal::StringView& s,
                        MatchResultListener* listener) const {
-    // This should fail to compile if absl::string_view is used with wide
+    // This should fail to compile if StringView is used with wide
     // strings.
     const StringType& str = std::string(s);
     return MatchAndExplain(str, listener);
   }
-#endif  // GTEST_HAS_ABSL
+#endif  // GTEST_INTERNAL_HAS_STRING_VIEW
 
   // Accepts pointer types, particularly:
   //   const char*
@@ -741,7 +999,7 @@ class HasSubstrMatcher {
   // Matches anything that can convert to StringType.
   //
   // This is a template, not just a plain function with const StringType&,
-  // because absl::string_view has some interfering non-explicit constructors.
+  // because StringView has some interfering non-explicit constructors.
   template <typename MatcheeStringType>
   bool MatchAndExplain(const MatcheeStringType& s,
                        MatchResultListener* /* listener */) const {
@@ -774,15 +1032,15 @@ class StartsWithMatcher {
   explicit StartsWithMatcher(const StringType& prefix) : prefix_(prefix) {
   }
 
-#if GTEST_HAS_ABSL
-  bool MatchAndExplain(const absl::string_view& s,
+#if GTEST_INTERNAL_HAS_STRING_VIEW
+  bool MatchAndExplain(const internal::StringView& s,
                        MatchResultListener* listener) const {
-    // This should fail to compile if absl::string_view is used with wide
+    // This should fail to compile if StringView is used with wide
     // strings.
     const StringType& str = std::string(s);
     return MatchAndExplain(str, listener);
   }
-#endif  // GTEST_HAS_ABSL
+#endif  // GTEST_INTERNAL_HAS_STRING_VIEW
 
   // Accepts pointer types, particularly:
   //   const char*
@@ -797,7 +1055,7 @@ class StartsWithMatcher {
   // Matches anything that can convert to StringType.
   //
   // This is a template, not just a plain function with const StringType&,
-  // because absl::string_view has some interfering non-explicit constructors.
+  // because StringView has some interfering non-explicit constructors.
   template <typename MatcheeStringType>
   bool MatchAndExplain(const MatcheeStringType& s,
                        MatchResultListener* /* listener */) const {
@@ -830,15 +1088,15 @@ class EndsWithMatcher {
  public:
   explicit EndsWithMatcher(const StringType& suffix) : suffix_(suffix) {}
 
-#if GTEST_HAS_ABSL
-  bool MatchAndExplain(const absl::string_view& s,
+#if GTEST_INTERNAL_HAS_STRING_VIEW
+  bool MatchAndExplain(const internal::StringView& s,
                        MatchResultListener* listener) const {
-    // This should fail to compile if absl::string_view is used with wide
+    // This should fail to compile if StringView is used with wide
     // strings.
     const StringType& str = std::string(s);
     return MatchAndExplain(str, listener);
   }
-#endif  // GTEST_HAS_ABSL
+#endif  // GTEST_INTERNAL_HAS_STRING_VIEW
 
   // Accepts pointer types, particularly:
   //   const char*
@@ -853,7 +1111,7 @@ class EndsWithMatcher {
   // Matches anything that can convert to StringType.
   //
   // This is a template, not just a plain function with const StringType&,
-  // because absl::string_view has some interfering non-explicit constructors.
+  // because StringView has some interfering non-explicit constructors.
   template <typename MatcheeStringType>
   bool MatchAndExplain(const MatcheeStringType& s,
                        MatchResultListener* /* listener */) const {
@@ -4554,6 +4812,156 @@ PolymorphicMatcher<internal::variant_matcher::VariantMatcher<T> > VariantWith(
     ::testing::internal::MakePredicateFormatterFromMatcher(matcher), value)
 #define EXPECT_THAT(value, matcher) EXPECT_PRED_FORMAT1(\
     ::testing::internal::MakePredicateFormatterFromMatcher(matcher), value)
+
+// MATCHER* macroses itself are listed below.
+#define MATCHER(name, description)                                             \
+  class name##Matcher                                                          \
+      : public ::testing::internal::MatcherBaseImpl<name##Matcher> {           \
+   public:                                                                     \
+    template <typename arg_type>                                               \
+    class gmock_Impl : public ::testing::MatcherInterface<const arg_type&> {   \
+     public:                                                                   \
+      gmock_Impl() {}                                                          \
+      bool MatchAndExplain(                                                    \
+          const arg_type& arg,                                                 \
+          ::testing::MatchResultListener* result_listener) const override;     \
+      void DescribeTo(::std::ostream* gmock_os) const override {               \
+        *gmock_os << FormatDescription(false);                                 \
+      }                                                                        \
+      void DescribeNegationTo(::std::ostream* gmock_os) const override {       \
+        *gmock_os << FormatDescription(true);                                  \
+      }                                                                        \
+                                                                               \
+     private:                                                                  \
+      ::std::string FormatDescription(bool negation) const {                   \
+        ::std::string gmock_description = (description);                       \
+        if (!gmock_description.empty()) {                                      \
+          return gmock_description;                                            \
+        }                                                                      \
+        return ::testing::internal::FormatMatcherDescription(negation, #name,  \
+                                                             {});              \
+      }                                                                        \
+    };                                                                         \
+  };                                                                           \
+  GTEST_ATTRIBUTE_UNUSED_ inline name##Matcher name() { return {}; }           \
+  template <typename arg_type>                                                 \
+  bool name##Matcher::gmock_Impl<arg_type>::MatchAndExplain(                   \
+      const arg_type& arg,                                                     \
+      ::testing::MatchResultListener* result_listener GTEST_ATTRIBUTE_UNUSED_) \
+      const
+
+#define MATCHER_P(name, p0, description) \
+  GMOCK_INTERNAL_MATCHER(name, name##MatcherP, description, (p0))
+#define MATCHER_P2(name, p0, p1, description) \
+  GMOCK_INTERNAL_MATCHER(name, name##MatcherP2, description, (p0, p1))
+#define MATCHER_P3(name, p0, p1, p2, description) \
+  GMOCK_INTERNAL_MATCHER(name, name##MatcherP3, description, (p0, p1, p2))
+#define MATCHER_P4(name, p0, p1, p2, p3, description) \
+  GMOCK_INTERNAL_MATCHER(name, name##MatcherP4, description, (p0, p1, p2, p3))
+#define MATCHER_P5(name, p0, p1, p2, p3, p4, description)    \
+  GMOCK_INTERNAL_MATCHER(name, name##MatcherP5, description, \
+                         (p0, p1, p2, p3, p4))
+#define MATCHER_P6(name, p0, p1, p2, p3, p4, p5, description) \
+  GMOCK_INTERNAL_MATCHER(name, name##MatcherP6, description,  \
+                         (p0, p1, p2, p3, p4, p5))
+#define MATCHER_P7(name, p0, p1, p2, p3, p4, p5, p6, description) \
+  GMOCK_INTERNAL_MATCHER(name, name##MatcherP7, description,      \
+                         (p0, p1, p2, p3, p4, p5, p6))
+#define MATCHER_P8(name, p0, p1, p2, p3, p4, p5, p6, p7, description) \
+  GMOCK_INTERNAL_MATCHER(name, name##MatcherP8, description,          \
+                         (p0, p1, p2, p3, p4, p5, p6, p7))
+#define MATCHER_P9(name, p0, p1, p2, p3, p4, p5, p6, p7, p8, description) \
+  GMOCK_INTERNAL_MATCHER(name, name##MatcherP9, description,              \
+                         (p0, p1, p2, p3, p4, p5, p6, p7, p8))
+#define MATCHER_P10(name, p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, description) \
+  GMOCK_INTERNAL_MATCHER(name, name##MatcherP10, description,                  \
+                         (p0, p1, p2, p3, p4, p5, p6, p7, p8, p9))
+
+#define GMOCK_INTERNAL_MATCHER(name, full_name, description, args)             \
+  template <GMOCK_INTERNAL_MATCHER_TEMPLATE_PARAMS(args)>                      \
+  class full_name : public ::testing::internal::MatcherBaseImpl<               \
+                        full_name<GMOCK_INTERNAL_MATCHER_TYPE_PARAMS(args)>> { \
+   public:                                                                     \
+    using full_name::MatcherBaseImpl::MatcherBaseImpl;                         \
+    template <typename arg_type>                                               \
+    class gmock_Impl : public ::testing::MatcherInterface<const arg_type&> {   \
+     public:                                                                   \
+      explicit gmock_Impl(GMOCK_INTERNAL_MATCHER_FUNCTION_ARGS(args))          \
+          : GMOCK_INTERNAL_MATCHER_FORWARD_ARGS(args) {}                       \
+      bool MatchAndExplain(                                                    \
+          const arg_type& arg,                                                 \
+          ::testing::MatchResultListener* result_listener) const override;     \
+      void DescribeTo(::std::ostream* gmock_os) const override {               \
+        *gmock_os << FormatDescription(false);                                 \
+      }                                                                        \
+      void DescribeNegationTo(::std::ostream* gmock_os) const override {       \
+        *gmock_os << FormatDescription(true);                                  \
+      }                                                                        \
+      GMOCK_INTERNAL_MATCHER_MEMBERS(args)                                     \
+                                                                               \
+     private:                                                                  \
+      ::std::string FormatDescription(bool negation) const {                   \
+        ::std::string gmock_description = (description);                       \
+        if (!gmock_description.empty()) {                                      \
+          return gmock_description;                                            \
+        }                                                                      \
+        return ::testing::internal::FormatMatcherDescription(                  \
+            negation, #name,                                                   \
+            ::testing::internal::UniversalTersePrintTupleFieldsToStrings(      \
+                ::std::tuple<GMOCK_INTERNAL_MATCHER_TYPE_PARAMS(args)>(        \
+                    GMOCK_INTERNAL_MATCHER_MEMBERS_USAGE(args))));             \
+      }                                                                        \
+    };                                                                         \
+  };                                                                           \
+  template <GMOCK_INTERNAL_MATCHER_TEMPLATE_PARAMS(args)>                      \
+  inline full_name<GMOCK_INTERNAL_MATCHER_TYPE_PARAMS(args)> name(             \
+      GMOCK_INTERNAL_MATCHER_FUNCTION_ARGS(args)) {                            \
+    return full_name<GMOCK_INTERNAL_MATCHER_TYPE_PARAMS(args)>(                \
+        GMOCK_INTERNAL_MATCHER_ARGS_USAGE(args));                              \
+  }                                                                            \
+  template <GMOCK_INTERNAL_MATCHER_TEMPLATE_PARAMS(args)>                      \
+  template <typename arg_type>                                                 \
+  bool full_name<GMOCK_INTERNAL_MATCHER_TYPE_PARAMS(args)>::gmock_Impl<        \
+      arg_type>::MatchAndExplain(const arg_type& arg,                          \
+                                 ::testing::MatchResultListener*               \
+                                     result_listener GTEST_ATTRIBUTE_UNUSED_)  \
+      const
+
+#define GMOCK_INTERNAL_MATCHER_TEMPLATE_PARAMS(args) \
+  GMOCK_PP_TAIL(                                     \
+      GMOCK_PP_FOR_EACH(GMOCK_INTERNAL_MATCHER_TEMPLATE_PARAM, , args))
+#define GMOCK_INTERNAL_MATCHER_TEMPLATE_PARAM(i_unused, data_unused, arg) \
+  , typename arg##_type
+
+#define GMOCK_INTERNAL_MATCHER_TYPE_PARAMS(args) \
+  GMOCK_PP_TAIL(GMOCK_PP_FOR_EACH(GMOCK_INTERNAL_MATCHER_TYPE_PARAM, , args))
+#define GMOCK_INTERNAL_MATCHER_TYPE_PARAM(i_unused, data_unused, arg) \
+  , arg##_type
+
+#define GMOCK_INTERNAL_MATCHER_FUNCTION_ARGS(args) \
+  GMOCK_PP_TAIL(dummy_first GMOCK_PP_FOR_EACH(     \
+      GMOCK_INTERNAL_MATCHER_FUNCTION_ARG, , args))
+#define GMOCK_INTERNAL_MATCHER_FUNCTION_ARG(i, data_unused, arg) \
+  , arg##_type gmock_p##i
+
+#define GMOCK_INTERNAL_MATCHER_FORWARD_ARGS(args) \
+  GMOCK_PP_TAIL(GMOCK_PP_FOR_EACH(GMOCK_INTERNAL_MATCHER_FORWARD_ARG, , args))
+#define GMOCK_INTERNAL_MATCHER_FORWARD_ARG(i, data_unused, arg) \
+  , arg(::std::forward<arg##_type>(gmock_p##i))
+
+#define GMOCK_INTERNAL_MATCHER_MEMBERS(args) \
+  GMOCK_PP_FOR_EACH(GMOCK_INTERNAL_MATCHER_MEMBER, , args)
+#define GMOCK_INTERNAL_MATCHER_MEMBER(i_unused, data_unused, arg) \
+  const arg##_type arg;
+
+#define GMOCK_INTERNAL_MATCHER_MEMBERS_USAGE(args) \
+  GMOCK_PP_TAIL(GMOCK_PP_FOR_EACH(GMOCK_INTERNAL_MATCHER_MEMBER_USAGE, , args))
+#define GMOCK_INTERNAL_MATCHER_MEMBER_USAGE(i_unused, data_unused, arg) , arg
+
+#define GMOCK_INTERNAL_MATCHER_ARGS_USAGE(args) \
+  GMOCK_PP_TAIL(GMOCK_PP_FOR_EACH(GMOCK_INTERNAL_MATCHER_ARG_USAGE, , args))
+#define GMOCK_INTERNAL_MATCHER_ARG_USAGE(i, data_unused, arg_unused) \
+  , gmock_p##i
 
 }  // namespace testing
 

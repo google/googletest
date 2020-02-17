@@ -638,6 +638,7 @@ Fatal assertion                                  | Nonfatal assertion           
 ------------------------------------------------ | ------------------------------------------------ | --------
 `ASSERT_DEATH(statement, matcher);`              | `EXPECT_DEATH(statement, matcher);`              | `statement` crashes with the given error
 `ASSERT_DEATH_IF_SUPPORTED(statement, matcher);` | `EXPECT_DEATH_IF_SUPPORTED(statement, matcher);` | if death tests are supported, verifies that `statement` crashes with the given error; otherwise verifies nothing
+`ASSERT_DEBUG_DEATH(statement, matcher);`        | `EXPECT_DEBUG_DEATH(statement, matcher);`        | `statement` crashes with the given error **in debug mode**. When not in debug (i.e. `NDEBUG` is defined), this just executes `statement`
 `ASSERT_EXIT(statement, predicate, matcher);`    | `EXPECT_EXIT(statement, predicate, matcher);`    | `statement` exits with the given error, and its exit code matches `predicate`
 
 where `statement` is a statement that is expected to cause the process to die,
