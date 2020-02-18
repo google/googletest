@@ -610,11 +610,11 @@ class ParameterizedTestSuiteInfo : public ParameterizedTestSuiteInfoBase {
   // with TEST_P macro.
   struct TestInfo {
     TestInfo(const char* a_test_suite_base_name, const char* a_test_base_name,
-             TestMetaFactoryBase<ParamType>* a_test_meta_factory, int line)
+             TestMetaFactoryBase<ParamType>* a_test_meta_factory, int a_line)
         : test_suite_base_name(a_test_suite_base_name),
           test_base_name(a_test_base_name),
           test_meta_factory(a_test_meta_factory),
-          line(line) {}
+          line(a_line) {}
 
     const std::string test_suite_base_name;
     const std::string test_base_name;
