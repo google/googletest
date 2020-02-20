@@ -2174,7 +2174,7 @@ own precedence order distinct from the `ON_CALL` precedence order.
 ### Using Functions/Methods/Functors/Lambdas as Actions {#FunctionsAsActions}
 
 If the built-in actions don't suit you, you can use an existing callable
-(function, `std::function`, method, functor, lambda as an action.
+(function, `std::function`, method, functor, lambda) as an action.
 
 <!-- GOOGLETEST_CM0024 DO NOT DELETE -->
 
@@ -2203,6 +2203,7 @@ class Helper {
       .WillRepeatedly(Invoke(NewPermanentCallback(Sum3, 1)));
   EXPECT_CALL(foo, ComplexJob(_))
       .WillOnce(Invoke(&helper, &Helper::ComplexJob))
+      .WillOnce([] { return true; })
       .WillRepeatedly([](int x) { return x > 0; });
 
   foo.Sum(5, 6);         // Invokes CalculateSum(5, 6).
@@ -2212,11 +2213,11 @@ class Helper {
 ```
 
 The only requirement is that the type of the function, etc must be *compatible*
-with the signature of the mock function, meaning that the latter's arguments can
-be implicitly converted to the corresponding arguments of the former, and the
-former's return type can be implicitly converted to that of the latter. So, you
-can invoke something whose type is *not* exactly the same as the mock function,
-as long as it's safe to do so - nice, huh?
+with the signature of the mock function, meaning that the latter's arguments (if
+it takes any) can be implicitly converted to the corresponding arguments of the
+former, and the former's return type can be implicitly converted to that of the
+latter. So, you can invoke something whose type is *not* exactly the same as the
+mock function, as long as it's safe to do so - nice, huh?
 
 **`Note:`{.escaped}**
 
@@ -2267,19 +2268,20 @@ TEST_F(FooTest, Test) {
 
 ### Invoking a Function/Method/Functor/Lambda/Callback Without Arguments
 
-`Invoke()` is very useful for doing actions that are more complex. It passes the
-mock function's arguments to the function, etc being invoked such that the
-callee has the full context of the call to work with. If the invoked function is
-not interested in some or all of the arguments, it can simply ignore them.
+`Invoke()` passes the mock function's arguments to the function, etc being
+invoked such that the callee has the full context of the call to work with. If
+the invoked function is not interested in some or all of the arguments, it can
+simply ignore them.
 
 Yet, a common pattern is that a test author wants to invoke a function without
-the arguments of the mock function. `Invoke()` allows her to do that using a
-wrapper function that throws away the arguments before invoking an underlining
-nullary function. Needless to say, this can be tedious and obscures the intent
-of the test.
+the arguments of the mock function. She could do that using a wrapper function
+that throws away the arguments before invoking an underlining nullary function.
+Needless to say, this can be tedious and obscures the intent of the test.
 
-`InvokeWithoutArgs()` solves this problem. It's like `Invoke()` except that it
-doesn't pass the mock function's arguments to the callee. Here's an example:
+There are two solutions to this problem. First, you can pass any callable of
+zero args as an action. Alternatively, use `InvokeWithoutArgs()`, which is like
+`Invoke()` except that it doesn't pass the mock function's arguments to the
+callee. Here's an example of each:
 
 ```cpp
 using ::testing::_;
@@ -2296,7 +2298,7 @@ bool Job2(int n, char c) { ... }
 ...
   MockFoo foo;
   EXPECT_CALL(foo, ComplexJob(_))
-      .WillOnce(InvokeWithoutArgs(Job1))
+      .WillOnce([] { Job1(); });
       .WillOnce(InvokeWithoutArgs(NewPermanentCallback(Job2, 5, 'a')));
 
   foo.ComplexJob(10);  // Invokes Job1().
