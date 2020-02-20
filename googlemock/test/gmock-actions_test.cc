@@ -1470,8 +1470,19 @@ TEST(FunctorActionTest, TypeConversion) {
   EXPECT_EQ(1, s2.Perform(std::make_tuple("hello")));
 
   // Also between the lambda and the action itself.
-  const Action<bool(std::string)> x = [](Unused) { return 42; };
-  EXPECT_TRUE(x.Perform(std::make_tuple("hello")));
+  const Action<bool(std::string)> x1 = [](Unused) { return 42; };
+  const Action<bool(std::string)> x2 = [] { return 42; };
+  EXPECT_TRUE(x1.Perform(std::make_tuple("hello")));
+  EXPECT_TRUE(x2.Perform(std::make_tuple("hello")));
+
+  // Ensure decay occurs where required.
+  std::function<int()> f = [] { return 7; };
+  Action<int(int)> d = f;
+  f = nullptr;
+  EXPECT_EQ(7, d.Perform(std::make_tuple(1)));
+
+  // Ensure creation of an empty action succeeds.
+  Action<void(int)>(nullptr);
 }
 
 TEST(FunctorActionTest, UnusedArguments) {
