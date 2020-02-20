@@ -263,6 +263,10 @@ GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE_(double, 0);
 
 #undef GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE_
 
+// Simple two-arg form of std::disjunction.
+template <typename P, typename Q>
+using disjunction = typename ::std::conditional<P::value, P, Q>::type;
+
 }  // namespace internal
 
 // When an unexpected function call is encountered, Google Mock will
@@ -456,9 +460,15 @@ class Action {
   // This cannot take std::function directly, because then Action would not be
   // directly constructible from lambda (it would require two conversions).
   template <typename G,
-            typename = typename ::std::enable_if<
-                ::std::is_constructible<::std::function<F>, G>::value>::type>
-  Action(G&& fun) : fun_(::std::forward<G>(fun)) {}  // NOLINT
+            typename IsCompatibleFunctor =
+                ::std::is_constructible<::std::function<F>, G>,
+            typename IsNoArgsFunctor =
+                ::std::is_constructible<::std::function<Result()>, G>,
+            typename = typename ::std::enable_if<internal::disjunction<
+                IsCompatibleFunctor, IsNoArgsFunctor>::value>::type>
+  Action(G&& fun) {  // NOLINT
+    Init(::std::forward<G>(fun), IsCompatibleFunctor());
+  }
 
   // Constructs an Action from its implementation.
   explicit Action(ActionInterface<F>* impl)
@@ -489,6 +499,26 @@ class Action {
  private:
   template <typename G>
   friend class Action;
+
+  template <typename G>
+  void Init(G&& g, ::std::true_type) {
+    fun_ = ::std::forward<G>(g);
+  }
+
+  template <typename G>
+  void Init(G&& g, ::std::false_type) {
+    fun_ = IgnoreArgs<typename ::std::decay<G>::type>{::std::forward<G>(g)};
+  }
+
+  template <typename FunctionImpl>
+  struct IgnoreArgs {
+    template <typename... Args>
+    Result operator()(const Args&...) const {
+      return function_impl();
+    }
+
+    FunctionImpl function_impl;
+  };
 
   // fun_ is an empty function if and only if this is the DoDefault() action.
   ::std::function<F> fun_;
