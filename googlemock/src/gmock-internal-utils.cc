@@ -115,9 +115,8 @@ GTEST_API_ FailureReporterInterface* GetFailureReporter() {
   // thread-safe.  We may need to add additional synchronization to
   // protect failure_reporter if we port Google Mock to other
   // compilers.
-  static FailureReporterInterface* const failure_reporter =
-      new GoogleTestFailureReporter();
-  return failure_reporter;
+  static GoogleTestFailureReporter failure_reporter;
+  return &failure_reporter;
 }
 
 // Protects global resources (stdout in particular) used by Log().
