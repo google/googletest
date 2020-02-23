@@ -110,11 +110,6 @@ class GoogleTestFailureReporter : public FailureReporterInterface {
 // Returns the global failure reporter.  Will create a
 // GoogleTestFailureReporter and return it the first time called.
 GTEST_API_ FailureReporterInterface* GetFailureReporter() {
-  // Points to the global failure reporter used by Google Mock.  gcc
-  // guarantees that the following use of failure_reporter is
-  // thread-safe.  We may need to add additional synchronization to
-  // protect failure_reporter if we port Google Mock to other
-  // compilers.
   static GoogleTestFailureReporter failure_reporter;
   return &failure_reporter;
 }
