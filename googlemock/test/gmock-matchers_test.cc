@@ -765,10 +765,11 @@ TEST(SafeMatcherCastTest, FromConstReferenceToReference) {
 
 // Tests that MatcherCast<const T&>(m) works when m is a Matcher<T>.
 TEST(SafeMatcherCastTest, FromNonReferenceToConstReference) {
-  Matcher<int> m1 = Eq(0);
-  Matcher<const int&> m2 = SafeMatcherCast<const int&>(m1);
-  EXPECT_TRUE(m2.Matches(0));
-  EXPECT_FALSE(m2.Matches(1));
+  Matcher<std::unique_ptr<int>> m1 = IsNull();
+  Matcher<const std::unique_ptr<int>&> m2 =
+      SafeMatcherCast<const std::unique_ptr<int>&>(m1);
+  EXPECT_TRUE(m2.Matches(std::unique_ptr<int>()));
+  EXPECT_FALSE(m2.Matches(std::unique_ptr<int>(new int)));
 }
 
 // Tests that SafeMatcherCast<T&>(m) works when m is a Matcher<T>.
