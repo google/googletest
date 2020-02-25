@@ -82,7 +82,7 @@ def TestFlagfileEnv(flag, test_val, default_val):
 
   file_path = os.path.join(gtest_test_utils.GetTempDir(),
                              'flagfile.tmp')
-  with open(file_path, 'wb') as f:
+  with open(file_path, 'w') as f:
     f.write('--gtest_%s=%s\n' % (flag, test_val))
   env_var = 'GTEST_FLAGFILE'
   SetEnvVar(env_var, file_path)
