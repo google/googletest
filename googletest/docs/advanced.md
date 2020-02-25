@@ -2062,6 +2062,10 @@ with the `--help` flag. You can also use `-h`, `-?`, or `/?` for short.
 If an option is specified both by an environment variable and by a flag, the
 latter takes precedence.
 
+If you set the `GTEST_FLAGFILE` environment variable or the `--gtest_flagfile`
+flag to a filename, googletest will read more options from that file.
+(This can be handy when running a test harness you'd rather not edit.)
+
 ### Selecting Tests
 
 #### Listing Test Names
