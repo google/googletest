@@ -424,7 +424,14 @@ class MatcherCastImpl<T, Matcher<U> > {
               !std::is_base_of<FromType, ToType>::value,
           "Can't implicitly convert from <base> to <derived>");
 
-      return source_matcher_.MatchAndExplain(static_cast<U>(x), listener);
+      // Do the cast to `U` explicitly if necessary.
+      // Otherwise, let implicit conversions do the trick.
+      using CastType =
+          typename std::conditional<std::is_convertible<T&, const U&>::value,
+                                    T&, U>::type;
+
+      return source_matcher_.MatchAndExplain(static_cast<CastType>(x),
+                                             listener);
     }
 
     void DescribeTo(::std::ostream* os) const override {
@@ -524,8 +531,8 @@ inline Matcher<T> SafeMatcherCast(const M& polymorphic_matcher_or_value) {
 template <typename T, typename U>
 inline Matcher<T> SafeMatcherCast(const Matcher<U>& matcher) {
   // Enforce that T can be implicitly converted to U.
-  GTEST_COMPILE_ASSERT_((std::is_convertible<T, U>::value),
-                        "T must be implicitly convertible to U");
+  static_assert(std::is_convertible<const T&, const U&>::value,
+                "T must be implicitly convertible to U");
   // Enforce that we are not converting a non-reference type T to a reference
   // type U.
   GTEST_COMPILE_ASSERT_(
