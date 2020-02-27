@@ -421,7 +421,7 @@ sadly they are side effects of C++'s limitations):
     `NiceMock<StrictMock<MockFoo> >`) is **not** supported.
 2.  `NiceMock<MockFoo>` and `StrictMock<MockFoo>` may not work correctly if the
     destructor of `MockFoo` is not virtual. We would like to fix this, but it
-    requires cleaning up existing tests. http://b/28934720 tracks the issue.
+    requires cleaning up existing tests.
 3.  During the constructor or destructor of `MockFoo`, the mock object is *not*
     nice or strict. This may cause surprises if the constructor or destructor
     calls a mock method on `this` object. (This behavior, however, is consistent
