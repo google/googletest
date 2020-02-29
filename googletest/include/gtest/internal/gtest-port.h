@@ -550,10 +550,7 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 // gtest-port.h guarantees to #include <pthread.h> when GTEST_HAS_PTHREAD is
 // true.
 # include <pthread.h>  // NOLINT
-
-// For timespec and nanosleep, used below.
-# include <time.h>  // NOLINT
-#endif
+#endif  // GTEST_HAS_PTHREAD
 
 // Determines whether clone(2) is supported.
 // Usually it will only be available on Linux, excluding
@@ -1156,20 +1153,13 @@ void ClearInjectableArgvs();
 
 #endif  // GTEST_HAS_DEATH_TEST
 
-// Defines synchronization primitives.
-#if GTEST_IS_THREADSAFE
-# if GTEST_HAS_PTHREAD
 // Sleeps for (roughly) n milliseconds.  This function is only for testing
 // Google Test's own constructs.  Don't use it in user tests, either
 // directly or indirectly.
-inline void SleepMilliseconds(int n) {
-  const timespec time = {
-    0,                  // 0 seconds.
-    n * 1000L * 1000L,  // And n ms.
-  };
-  nanosleep(&time, nullptr);
-}
-# endif  // GTEST_HAS_PTHREAD
+GTEST_API_ void SleepMilliseconds(int n);
+
+// Defines synchronization primitives.
+#if GTEST_IS_THREADSAFE
 
 # if GTEST_HAS_NOTIFICATION_
 // Notification has already been imported into the namespace.
@@ -1220,8 +1210,6 @@ class Notification {
 };
 
 # elif GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_PHONE && !GTEST_OS_WINDOWS_RT
-
-GTEST_API_ void SleepMilliseconds(int n);
 
 // Provides leak-safe Windows kernel handle ownership.
 // Used in death tests and in threading support.
