@@ -104,7 +104,7 @@ void PrintBytesInObjectToImpl(const unsigned char* obj_bytes, size_t count,
 
 }  // namespace
 
-namespace internal2 {
+namespace internal {
 
 // Delegates to PrintBytesInObjectToImpl() to print the bytes in the
 // given object.  The delegation simplifies the implementation, which
@@ -115,10 +115,6 @@ void PrintBytesInObjectTo(const unsigned char* obj_bytes, size_t count,
                           ostream* os) {
   PrintBytesInObjectToImpl(obj_bytes, count, os);
 }
-
-}  // namespace internal2
-
-namespace internal {
 
 // Depending on the value of a char (or wchar_t), we print it in one
 // of three formats:
