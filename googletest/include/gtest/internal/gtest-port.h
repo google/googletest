@@ -199,6 +199,8 @@
 //                                        suppressed (constant conditional).
 //   GTEST_INTENTIONAL_CONST_COND_POP_  - finish code section where MSVC C4127
 //                                        is suppressed.
+//   GTEST_INTERNAL_HAS_ANY - for enabling UniversalPrinter<std::any> or
+//                            UniversalPrinter<absl::any> specializations.
 //   GTEST_INTERNAL_HAS_OPTIONAL - for enabling UniversalPrinter<std::optional> or
 //                                 UniversalPrinter<absl::optional> specializations.
 //   GTEST_INTERNAL_HAS_STRING_VIEW - for enabling Matcher<std::string_view> or
@@ -2226,6 +2228,34 @@ const char* StringFromGTestEnv(const char* flag, const char* default_val);
 #endif
 
 #endif  // !defined(GTEST_INTERNAL_DEPRECATED)
+
+#if GTEST_HAS_ABSL
+// Always use absl::any for UniversalPrinter<> specializations if googletest
+// is built with absl support.
+# define GTEST_INTERNAL_HAS_ANY 1
+#include "absl/types/any.h"
+namespace testing {
+namespace internal {
+using Any = ::absl::any;
+}  // namespace internal
+}  // namespace testing
+#else
+# ifdef __has_include
+#   if __has_include(<any>) && __cplusplus >= 201703L
+// Otherwise for C++17 and higher use std::any for UniversalPrinter<>
+// specializations.
+#   define GTEST_INTERNAL_HAS_ANY 1
+#include <any>
+namespace testing {
+namespace internal {
+using Any = ::std::any;
+}  // namespace internal
+}  // namespace testing
+// The case where absl is configured NOT to alias std::any is not
+// supported.
+#  endif  // __has_include(<any>) && __cplusplus >= 201703L
+# endif  // __has_include
+#endif  // GTEST_HAS_ABSL
 
 #if GTEST_HAS_ABSL
 // Always use absl::optional for UniversalPrinter<> specializations if googletest

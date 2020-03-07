@@ -1531,6 +1531,27 @@ TEST(UniversalTersePrintTupleFieldsToStringsTestWithStd, PrintsTersely) {
   EXPECT_EQ("\"a\"", result[1]);
 }
 
+#if GTEST_INTERNAL_HAS_ANY
+TEST(PrintAnyTest, Empty) {
+  internal::Any any;
+  EXPECT_EQ("'any' type with no value", PrintToString(any));
+}
+
+TEST(PrintAnyTest, NonEmpty) {
+  internal::Any any;
+  constexpr int val1 = 10;
+  const std::string val2 = "content";
+
+  any = val1;
+  EXPECT_EQ("'any' type with value of type the element type",
+            PrintToString(any));
+
+  any = val2;
+  EXPECT_EQ("'any' type with value of type the element type",
+            PrintToString(any));
+}
+#endif  // GTEST_INTERNAL_HAS_ANY
+
 #if GTEST_INTERNAL_HAS_OPTIONAL
 TEST(PrintOptionalTest, Basic) {
   internal::Optional<int> value;

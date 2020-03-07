@@ -679,6 +679,26 @@ class UniversalPrinter {
   GTEST_DISABLE_MSC_WARNINGS_POP_()
 };
 
+#if GTEST_INTERNAL_HAS_ANY
+
+// Printer for std::any / absl::any
+
+template <>
+class UniversalPrinter<Any> {
+ public:
+  static void Print(const Any& value, ::std::ostream* os) {
+    if (value.has_value())
+      *os << "'any' type with value of type " << GetTypeName();
+    else
+      *os << "'any' type with no value";
+  }
+
+ private:
+  static std::string GetTypeName() { return "the element type"; }
+};
+
+#endif  // GTEST_INTERNAL_HAS_ANY
+
 #if GTEST_INTERNAL_HAS_OPTIONAL
 
 // Printer for std::optional / absl::optional
