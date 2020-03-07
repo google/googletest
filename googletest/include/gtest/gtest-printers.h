@@ -113,7 +113,6 @@
 
 #if GTEST_HAS_ABSL
 #include "absl/strings/string_view.h"
-#include "absl/types/optional.h"
 #endif  // GTEST_HAS_ABSL
 
 namespace testing {
@@ -680,14 +679,14 @@ class UniversalPrinter {
   GTEST_DISABLE_MSC_WARNINGS_POP_()
 };
 
-#if GTEST_HAS_ABSL
+#if GTEST_INTERNAL_HAS_OPTIONAL
 
-// Printer for absl::optional
+// Printer for std::optional / absl::optional
 
 template <typename T>
-class UniversalPrinter<::absl::optional<T>> {
+class UniversalPrinter<Optional<T>> {
  public:
-  static void Print(const ::absl::optional<T>& value, ::std::ostream* os) {
+  static void Print(const Optional<T>& value, ::std::ostream* os) {
     *os << '(';
     if (!value) {
       *os << "nullopt";
@@ -698,7 +697,7 @@ class UniversalPrinter<::absl::optional<T>> {
   }
 };
 
-#endif  // GTEST_HAS_ABSL
+#endif  // GTEST_INTERNAL_HAS_OPTIONAL
 
 #if GTEST_INTERNAL_HAS_VARIANT
 
