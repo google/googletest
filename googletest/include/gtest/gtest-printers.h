@@ -688,13 +688,20 @@ class UniversalPrinter<Any> {
  public:
   static void Print(const Any& value, ::std::ostream* os) {
     if (value.has_value())
-      *os << "'any' type with value of type " << GetTypeName();
+      *os << "'any' type with value of type " << GetTypeName(value);
     else
       *os << "'any' type with no value";
   }
 
  private:
-  static std::string GetTypeName() { return "the element type"; }
+  static std::string GetTypeName(const Any& value) {
+#if GTEST_HAS_RTTI
+    return internal::GetTypeName(value.type());
+#else
+    static_cast<void>(value); // possibly unused
+    return "the element type";
+#endif  // GTEST_HAS_RTTI
+  }
 };
 
 #endif  // GTEST_INTERNAL_HAS_ANY

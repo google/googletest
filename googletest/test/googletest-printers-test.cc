@@ -1532,22 +1532,34 @@ TEST(UniversalTersePrintTupleFieldsToStringsTestWithStd, PrintsTersely) {
 }
 
 #if GTEST_INTERNAL_HAS_ANY
-TEST(PrintAnyTest, Empty) {
+class PrintAnyTest : public ::testing::Test {
+ protected:
+  template <typename T>
+  static std::string ExpectedTypeName() {
+#if GTEST_HAS_RTTI
+    return internal::GetTypeName<T>();
+#else
+    return "the element type";
+#endif  // GTEST_HAS_RTTI
+  }
+};
+
+TEST_F(PrintAnyTest, Empty) {
   internal::Any any;
   EXPECT_EQ("'any' type with no value", PrintToString(any));
 }
 
-TEST(PrintAnyTest, NonEmpty) {
+TEST_F(PrintAnyTest, NonEmpty) {
   internal::Any any;
   constexpr int val1 = 10;
   const std::string val2 = "content";
 
   any = val1;
-  EXPECT_EQ("'any' type with value of type the element type",
+  EXPECT_EQ("'any' type with value of type " + ExpectedTypeName<int>(),
             PrintToString(any));
 
   any = val2;
-  EXPECT_EQ("'any' type with value of type the element type",
+  EXPECT_EQ("'any' type with value of type " + ExpectedTypeName<std::string>(),
             PrintToString(any));
 }
 #endif  // GTEST_INTERNAL_HAS_ANY
