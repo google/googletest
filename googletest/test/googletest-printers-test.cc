@@ -1542,21 +1542,24 @@ TEST(PrintOptionalTest, Basic) {
   EXPECT_EQ("(\"A\")", PrintToString(absl::optional<std::string>{"A"}));
 }
 
+#endif  // GTEST_HAS_ABSL
+
+#if GTEST_INTERNAL_HAS_VARIANT
 struct NonPrintable {
   unsigned char contents = 17;
 };
 
 TEST(PrintOneofTest, Basic) {
-  using Type = absl::variant<int, StreamableInGlobal, NonPrintable>;
-  EXPECT_EQ("('int' with value 7)", PrintToString(Type(7)));
-  EXPECT_EQ("('StreamableInGlobal' with value StreamableInGlobal)",
+  using Type = internal::Variant<int, StreamableInGlobal, NonPrintable>;
+  EXPECT_EQ("('int(0)' with value 7)", PrintToString(Type(7)));
+  EXPECT_EQ("('StreamableInGlobal(1)' with value StreamableInGlobal)",
             PrintToString(Type(StreamableInGlobal{})));
   EXPECT_EQ(
-      "('testing::gtest_printers_test::NonPrintable' with value 1-byte object "
+      "('testing::gtest_printers_test::NonPrintable(2)' with value 1-byte object "
       "<11>)",
       PrintToString(Type(NonPrintable{})));
 }
-#endif  // GTEST_HAS_ABSL
+#endif  // GTEST_INTERNAL_HAS_VARIANT
 namespace {
 class string_ref;
 
