@@ -2234,21 +2234,35 @@ using StringView = ::absl::string_view;
 }  // namespace internal
 }  // namespace testing
 #else
-# ifdef __has_include
-#   if __has_include(<string_view>) && __cplusplus >= 201703L
-// Otherwise for C++17 and higher use std::string_view for Matcher<>
-// specializations.
-#   define GTEST_INTERNAL_HAS_STRING_VIEW 1
-#include <string_view>
-namespace testing {
-namespace internal {
-using StringView = ::std::string_view;
-}  // namespace internal
-}  // namespace testing
-// The case where absl is configured NOT to alias std::string_view is not
-// supported.
-#  endif  // __has_include(<string_view>) && __cplusplus >= 201703L
-# endif  // __has_include
+  #ifdef __has_include
+    #if __has_include(<string_view>) && __cplusplus >= 201703L
+    // Otherwise for C++17 and higher use std::string_view for Matcher<>
+    // specializations.
+    #   define GTEST_INTERNAL_HAS_STRING_VIEW 1
+    #include <string_view>
+    namespace testing {
+    namespace internal {
+    using StringView = ::std::string_view;
+    }  // namespace internal
+    }  // namespace testing
+    // The case where absl is configured NOT to alias std::string_view is not
+    // supported.
+    #  endif  // __has_include(<string_view>) && __cplusplus >= 201703L
+  #else // well, what if __has_include is not supported by the compiler ? that may be the case with older msvc ?
+    #if __cplusplus >= 201703L
+    // Otherwise for C++17 and higher use std::string_view for Matcher<>
+    // specializations.
+    #   define GTEST_INTERNAL_HAS_STRING_VIEW 1
+    #include <string_view>
+    namespace testing {
+    namespace internal {
+    using StringView = ::std::string_view;
+    }  // namespace internal
+    }  // namespace testing
+    // The case where absl is configured NOT to alias std::string_view is not
+    // supported.
+    #endif
+  # endif  // __has_include
 #endif  // GTEST_HAS_ABSL
 
 #endif  // GTEST_INCLUDE_GTEST_INTERNAL_GTEST_PORT_H_
