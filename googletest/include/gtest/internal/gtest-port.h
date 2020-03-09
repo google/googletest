@@ -2223,7 +2223,7 @@ const char* StringFromGTestEnv(const char* flag, const char* default_val);
 
 #endif  // !defined(GTEST_INTERNAL_DEPRECATED)
 
-#if GTEST_HAS_ABSL && __cplusplus >= 201703L // double check for c++17 support ?
+#if GTEST_HAS_ABSL
 // Always use absl::string_view for Matcher<> specializations if googletest
 // is built with absl support.
 # define GTEST_INTERNAL_HAS_STRING_VIEW 1
