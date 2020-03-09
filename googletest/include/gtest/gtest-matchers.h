@@ -432,14 +432,6 @@ class GTEST_API_ Matcher<internal::StringView>
 #endif  // GTEST_INTERNAL_HAS_STRING_VIEW
 
 // Prints a matcher in a human-readable format.
-#if GTEST_INTERNAL_HAS_STRING_VIEW
-template <typename T = internal::StringView>
-std::ostream& operator<<(std::ostream& os, const Matcher<T>& matcher) {
-  matcher.DescribeTo(&os);
-  return os;
-}
-#endif  // GTEST_INTERNAL_HAS_STRING_VIEW
-
 template <typename T>
 std::ostream& operator<<(std::ostream& os, const Matcher<T>& matcher) {
   matcher.DescribeTo(&os);
