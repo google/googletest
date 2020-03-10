@@ -17,7 +17,7 @@ endif()
 
 if(WIN32)
   if(MSVC)
-    if(MSVC_TOOLSET_VERSION EQUAL 140 OR MSVC_TOOLSET_VERSION EQUAL 140)
+    if(MSVC_TOOLSET_VERSION EQUAL 140 OR MSVC_TOOLSET_VERSION EQUAL 141)
       # there is a bug reported on https://developercommunity.visualstudio.com/content/problem/9696/c17-not-available-by-default.html
       # string_view is not available unless we use the /std:c++latest switch
       set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++latest")
