@@ -2235,7 +2235,7 @@ using StringView = ::absl::string_view;
 }  // namespace testing
 #else
   #ifdef __has_include
-    #if __has_include(<string_view>) && __cplusplus >= 201703L
+    #if __has_include(<string_view>) && __cplusplus > 201402L
     // Otherwise for C++17 and higher use std::string_view for Matcher<>
     // specializations.
     #   define GTEST_INTERNAL_HAS_STRING_VIEW 1
@@ -2247,9 +2247,12 @@ using StringView = ::absl::string_view;
     }  // namespace testing
     // The case where absl is configured NOT to alias std::string_view is not
     // supported.
-    #  endif  // __has_include(<string_view>) && __cplusplus >= 201703L
-  #else // well, what if __has_include is not supported by the compiler ? that may be the case with older msvc ?
-    #if __cplusplus >= 201703L
+    #  endif  // __has_include(<string_view>) && __cplusplus > 201402L
+  #else 
+    // well, what if __has_include is not supported by the compiler ? that may be the case with older msvc ?
+    // it might not make sense to actually check for that, since string_view is available from c++17
+    // but uh, let me fix msvc tests for now
+    #if __cplusplus > 201402L
     // Otherwise for C++17 and higher use std::string_view for Matcher<>
     // specializations.
     #   define GTEST_INTERNAL_HAS_STRING_VIEW 1
