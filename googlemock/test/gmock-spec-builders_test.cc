@@ -1284,7 +1284,7 @@ TEST(InSequenceTest, NestedInSequence) {
   a.DoA(3);
 }
 
-TEST(InSequenceTest, ExpectationsOutOfScopeAreNotAffected) {
+TEST(InSequenceTest, ExpectationsOutOfScopeAreNotAffected1) {
   MockA a;
   {
     InSequence dummy;
@@ -1293,6 +1293,24 @@ TEST(InSequenceTest, ExpectationsOutOfScopeAreNotAffected) {
     EXPECT_CALL(a, DoA(2));
   }
   EXPECT_CALL(a, DoA(3));
+
+  EXPECT_NONFATAL_FAILURE({  // NOLINT
+    a.DoA(2);
+  }, "Unexpected mock function call");
+  a.DoA(3);
+  a.DoA(1);
+  a.DoA(2);
+}
+
+TEST(InSequenceTest, ExpectationsOutOfScopeAreNotAffected2) {
+  MockA a;
+  EXPECT_CALL(a, DoA(3));
+  {
+    InSequence dummy;
+
+    EXPECT_CALL(a, DoA(1));
+    EXPECT_CALL(a, DoA(2));
+  }
 
   EXPECT_NONFATAL_FAILURE({  // NOLINT
     a.DoA(2);
@@ -1459,6 +1477,28 @@ TEST(SequenceTest, Retirement) {
   a.DoA(1);
   a.DoA(2);
   a.DoA(1);
+}
+
+TEST(SequenceTest, RetirementLastExpectationInSequence) {
+  MockA a;
+  Sequence s;
+
+  EXPECT_CALL(a, DoA(_))
+      .Times(AnyNumber());
+
+  EXPECT_CALL(a, DoA(1))
+      .InSequence(s);
+  EXPECT_CALL(a, DoA(_))
+      .InSequence(s)
+      .RetiresOnSaturation();
+  EXPECT_CALL(a, DoA(1))
+      .InSequence(s);
+
+  a.DoA(1);
+  a.DoA(2);
+  a.DoA(1);
+  a.DoA(1);
+  a.DoA(2);
 }
 
 // Tests Expectation.

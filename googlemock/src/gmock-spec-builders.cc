@@ -127,6 +127,7 @@ void ExpectationBase::RetireAllPreRequisites()
         expectations.push_back(next);
       }
     }
+    retires_on_saturation_ = true;
   }
 }
 
