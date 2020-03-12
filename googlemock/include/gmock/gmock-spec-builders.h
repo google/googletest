@@ -1217,6 +1217,10 @@ class TypedExpectation : public ExpectationBase {
       Retire();
     }
 
+    if (immediate_prerequisites_.size() > 0 && AllPrerequisitesAreSatisfied() && IsSaturated()) {
+      Retire();
+    }
+
     // Must be done after IncrementCount()!
     *what << "Mock function call matches " << source_text() <<"...\n";
     return &(GetCurrentAction(mocker, args));
