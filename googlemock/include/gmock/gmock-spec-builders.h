@@ -119,7 +119,7 @@ class ExpectationTester;
 // expectations when InSequence() is used, and thus affect which
 // expectation gets picked.  Therefore, we sequence all mock function
 // calls to ensure the integrity of the mock objects' states.
-extern std::mutex g_gmock_mutex;
+extern GTEST_API_ std::mutex g_gmock_mutex;
 
 // Untyped base class for ActionResultHolder<R>.
 class UntypedActionResultHolderBase;
