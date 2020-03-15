@@ -36,9 +36,7 @@ The following macros can be defined:
 ### Threading:
 
 *   `GTEST_HAS_NOTIFICATION_` - Enabled if Notification is already provided.
-*   `GTEST_HAS_MUTEX_AND_THREAD_LOCAL_` - Enabled if `Mutex` and `ThreadLocal`
-    are already provided. Must also provide `GTEST_DECLARE_STATIC_MUTEX_(mutex)`
-    and `GTEST_DEFINE_STATIC_MUTEX_(mutex)`
+*   `GTEST_HAS_THREAD_LOCAL_` - Enabled if `ThreadLocal` is provided.
 *   `GTEST_EXCLUSIVE_LOCK_REQUIRED_(locks)`
 *   `GTEST_LOCK_EXCLUDED_(locks)`
 

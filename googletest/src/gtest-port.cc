@@ -341,47 +341,6 @@ void Notification::WaitForNotification() {
       ::WaitForSingleObject(event_.Get(), INFINITE) == WAIT_OBJECT_0);
 }
 
-Mutex::Mutex()
-    : owner_thread_id_(0),
-      type_(kDynamic),
-      critical_section_init_phase_(0),
-      critical_section_(new CRITICAL_SECTION) {
-  ::InitializeCriticalSection(critical_section_);
-}
-
-Mutex::~Mutex() {
-  // Static mutexes are leaked intentionally. It is not thread-safe to try
-  // to clean them up.
-  if (type_ == kDynamic) {
-    ::DeleteCriticalSection(critical_section_);
-    delete critical_section_;
-    critical_section_ = nullptr;
-  }
-}
-
-void Mutex::Lock() {
-  ThreadSafeLazyInit();
-  ::EnterCriticalSection(critical_section_);
-  owner_thread_id_ = ::GetCurrentThreadId();
-}
-
-void Mutex::Unlock() {
-  ThreadSafeLazyInit();
-  // We don't protect writing to owner_thread_id_ here, as it's the
-  // caller's responsibility to ensure that the current thread holds the
-  // mutex when this is called.
-  owner_thread_id_ = 0;
-  ::LeaveCriticalSection(critical_section_);
-}
-
-// Does nothing if the current thread holds the mutex. Otherwise, crashes
-// with high probability.
-void Mutex::AssertHeld() {
-  ThreadSafeLazyInit();
-  GTEST_CHECK_(owner_thread_id_ == ::GetCurrentThreadId())
-      << "The current thread is not holding the mutex @" << this;
-}
-
 namespace {
 
 #ifdef _MSC_VER
@@ -414,57 +373,6 @@ class MemoryIsNotDeallocated
   GTEST_DISALLOW_COPY_AND_ASSIGN_(MemoryIsNotDeallocated);
 };
 #endif  // _MSC_VER
-
-}  // namespace
-
-// Initializes owner_thread_id_ and critical_section_ in static mutexes.
-void Mutex::ThreadSafeLazyInit() {
-  // Dynamic mutexes are initialized in the constructor.
-  if (type_ == kStatic) {
-    switch (
-        ::InterlockedCompareExchange(&critical_section_init_phase_, 1L, 0L)) {
-      case 0:
-        // If critical_section_init_phase_ was 0 before the exchange, we
-        // are the first to test it and need to perform the initialization.
-        owner_thread_id_ = 0;
-        {
-          // Use RAII to flag that following mem alloc is never deallocated.
-#ifdef _MSC_VER
-          MemoryIsNotDeallocated memory_is_not_deallocated;
-#endif  // _MSC_VER
-          critical_section_ = new CRITICAL_SECTION;
-        }
-        ::InitializeCriticalSection(critical_section_);
-        // Updates the critical_section_init_phase_ to 2 to signal
-        // initialization complete.
-        GTEST_CHECK_(::InterlockedCompareExchange(
-                          &critical_section_init_phase_, 2L, 1L) ==
-                      1L);
-        break;
-      case 1:
-        // Somebody else is already initializing the mutex; spin until they
-        // are done.
-        while (::InterlockedCompareExchange(&critical_section_init_phase_,
-                                            2L,
-                                            2L) != 2L) {
-          // Possibly yields the rest of the thread's time slice to other
-          // threads.
-          ::Sleep(0);
-        }
-        break;
-
-      case 2:
-        break;  // The mutex is already initialized and ready for use.
-
-      default:
-        GTEST_CHECK_(false)
-            << "Unexpected value of critical_section_init_phase_ "
-            << "while initializing a static mutex.";
-    }
-  }
-}
-
-namespace {
 
 class ThreadWithParamSupport : public ThreadWithParamBase {
  public:
@@ -544,7 +452,7 @@ class ThreadLocalRegistryImpl {
     MemoryIsNotDeallocated memory_is_not_deallocated;
 #endif  // _MSC_VER
     DWORD current_thread = ::GetCurrentThreadId();
-    MutexLock lock(&mutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
     ThreadIdToThreadLocals* const thread_to_thread_locals =
         GetThreadLocalsMapLocked();
     ThreadIdToThreadLocals::iterator thread_local_pos =
@@ -575,7 +483,7 @@ class ThreadLocalRegistryImpl {
     // Clean up the ThreadLocalValues data structure while holding the lock, but
     // defer the destruction of the ThreadLocalValueHolderBases.
     {
-      MutexLock lock(&mutex_);
+      std::lock_guard<std::mutex> lock(mutex_);
       ThreadIdToThreadLocals* const thread_to_thread_locals =
           GetThreadLocalsMapLocked();
       for (ThreadIdToThreadLocals::iterator it =
@@ -603,7 +511,7 @@ class ThreadLocalRegistryImpl {
     // Clean up the ThreadIdToThreadLocals data structure while holding the
     // lock, but defer the destruction of the ThreadLocalValueHolderBases.
     {
-      MutexLock lock(&mutex_);
+      std::lock_guard<std::mutex> lock(mutex_);
       ThreadIdToThreadLocals* const thread_to_thread_locals =
           GetThreadLocalsMapLocked();
       ThreadIdToThreadLocals::iterator thread_local_pos =
@@ -676,7 +584,6 @@ class ThreadLocalRegistryImpl {
 
   // Returns map of thread local instances.
   static ThreadIdToThreadLocals* GetThreadLocalsMapLocked() {
-    mutex_.AssertHeld();
 #ifdef _MSC_VER
     MemoryIsNotDeallocated memory_is_not_deallocated;
 #endif  // _MSC_VER
@@ -685,13 +592,13 @@ class ThreadLocalRegistryImpl {
   }
 
   // Protects access to GetThreadLocalsMapLocked() and its return value.
-  static Mutex mutex_;
+  static std::mutex mutex_;
   // Protects access to GetThreadMapLocked() and its return value.
-  static Mutex thread_map_mutex_;
+  static std::mutex thread_map_mutex_;
 };
 
-Mutex ThreadLocalRegistryImpl::mutex_(Mutex::kStaticMutex);
-Mutex ThreadLocalRegistryImpl::thread_map_mutex_(Mutex::kStaticMutex);
+std::mutex ThreadLocalRegistryImpl::mutex_;
+std::mutex ThreadLocalRegistryImpl::thread_map_mutex_;
 
 ThreadLocalValueHolderBase* ThreadLocalRegistry::GetValueOnCurrentThread(
       const ThreadLocalBase* thread_local_instance) {

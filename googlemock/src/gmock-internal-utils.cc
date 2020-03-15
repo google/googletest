@@ -121,7 +121,7 @@ GTEST_API_ FailureReporterInterface* GetFailureReporter() {
 }
 
 // Protects global resources (stdout in particular) used by Log().
-static GTEST_DEFINE_STATIC_MUTEX_(g_log_mutex);
+static std::mutex g_log_mutex;
 
 // Returns true if and only if a log with the given severity is visible
 // according to the --gmock_verbose flag.
@@ -152,7 +152,7 @@ GTEST_API_ void Log(LogSeverity severity, const std::string& message,
     return;
 
   // Ensures that logs from different threads don't interleave.
-  MutexLock l(&g_log_mutex);
+  std::lock_guard<std::mutex> lock(g_log_mutex);
 
   if (severity == kWarning) {
     // Prints a GMOCK WARNING marker to make the warnings easily searchable.

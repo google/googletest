@@ -282,9 +282,9 @@ TEST(FormatCompilerIndependentFileLocationTest, FormatsUknownFileAndLine) {
     GTEST_OS_DRAGONFLY || GTEST_OS_FREEBSD || GTEST_OS_GNU_KFREEBSD || \
     GTEST_OS_NETBSD || GTEST_OS_OPENBSD
 void* ThreadFunc(void* data) {
-  internal::Mutex* mutex = static_cast<internal::Mutex*>(data);
-  mutex->Lock();
-  mutex->Unlock();
+  auto* mutex = static_cast<std::mutex*>(data);
+  mutex->lock();
+  mutex->unlock();
   return nullptr;
 }
 
@@ -292,9 +292,9 @@ TEST(GetThreadCountTest, ReturnsCorrectValue) {
   const size_t starting_count = GetThreadCount();
   pthread_t       thread_id;
 
-  internal::Mutex mutex;
+  std::mutex mutex;
   {
-    internal::MutexLock lock(&mutex);
+    std::lock_guard<std::mutex> lock(mutex);
     pthread_attr_t  attr;
     ASSERT_EQ(0, pthread_attr_init(&attr));
     ASSERT_EQ(0, pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE));
@@ -1000,102 +1000,6 @@ TEST(ThreadWithParamTest, ConstructorExecutesThreadFunc) {
   ThreadWithParam<int*> thread(&AddTwo, &i, nullptr);
   thread.Join();
   EXPECT_EQ(42, i);
-}
-
-TEST(MutexDeathTest, AssertHeldShouldAssertWhenNotLocked) {
-  // AssertHeld() is flaky only in the presence of multiple threads accessing
-  // the lock. In this case, the test is robust.
-  EXPECT_DEATH_IF_SUPPORTED({
-    Mutex m;
-    { MutexLock lock(&m); }
-    m.AssertHeld();
-  },
-  "thread .*hold");
-}
-
-TEST(MutexTest, AssertHeldShouldNotAssertWhenLocked) {
-  Mutex m;
-  MutexLock lock(&m);
-  m.AssertHeld();
-}
-
-class AtomicCounterWithMutex {
- public:
-  explicit AtomicCounterWithMutex(Mutex* mutex) :
-    value_(0), mutex_(mutex), random_(42) {}
-
-  void Increment() {
-    MutexLock lock(mutex_);
-    int temp = value_;
-    {
-      // We need to put up a memory barrier to prevent reads and writes to
-      // value_ rearranged with the call to SleepMilliseconds when observed
-      // from other threads.
-#if GTEST_HAS_PTHREAD
-      // On POSIX, locking a mutex puts up a memory barrier.  We cannot use
-      // Mutex and MutexLock here or rely on their memory barrier
-      // functionality as we are testing them here.
-      pthread_mutex_t memory_barrier_mutex;
-      GTEST_CHECK_POSIX_SUCCESS_(
-          pthread_mutex_init(&memory_barrier_mutex, nullptr));
-      GTEST_CHECK_POSIX_SUCCESS_(pthread_mutex_lock(&memory_barrier_mutex));
-
-      SleepMilliseconds(static_cast<int>(random_.Generate(30)));
-
-      GTEST_CHECK_POSIX_SUCCESS_(pthread_mutex_unlock(&memory_barrier_mutex));
-      GTEST_CHECK_POSIX_SUCCESS_(pthread_mutex_destroy(&memory_barrier_mutex));
-#elif GTEST_OS_WINDOWS
-      // On Windows, performing an interlocked access puts up a memory barrier.
-      volatile LONG dummy = 0;
-      ::InterlockedIncrement(&dummy);
-      SleepMilliseconds(static_cast<int>(random_.Generate(30)));
-      ::InterlockedIncrement(&dummy);
-#else
-# error "Memory barrier not implemented on this platform."
-#endif  // GTEST_HAS_PTHREAD
-    }
-    value_ = temp + 1;
-  }
-  int value() const { return value_; }
-
- private:
-  volatile int value_;
-  Mutex* const mutex_;  // Protects value_.
-  Random       random_;
-};
-
-void CountingThreadFunc(pair<AtomicCounterWithMutex*, int> param) {
-  for (int i = 0; i < param.second; ++i)
-      param.first->Increment();
-}
-
-// Tests that the mutex only lets one thread at a time to lock it.
-TEST(MutexTest, OnlyOneThreadCanLockAtATime) {
-  Mutex mutex;
-  AtomicCounterWithMutex locked_counter(&mutex);
-
-  typedef ThreadWithParam<pair<AtomicCounterWithMutex*, int> > ThreadType;
-  const int kCycleCount = 20;
-  const int kThreadCount = 7;
-  std::unique_ptr<ThreadType> counting_threads[kThreadCount];
-  Notification threads_can_start;
-  // Creates and runs kThreadCount threads that increment locked_counter
-  // kCycleCount times each.
-  for (int i = 0; i < kThreadCount; ++i) {
-    counting_threads[i].reset(new ThreadType(&CountingThreadFunc,
-                                             make_pair(&locked_counter,
-                                                       kCycleCount),
-                                             &threads_can_start));
-  }
-  threads_can_start.Notify();
-  for (int i = 0; i < kThreadCount; ++i)
-    counting_threads[i]->Join();
-
-  // If the mutex lets more than one thread to increment the counter at a
-  // time, they are likely to encounter a race condition and have some
-  // increments overwritten, resulting in the lower then expected counter
-  // value.
-  EXPECT_EQ(kCycleCount * kThreadCount, locked_counter.value());
 }
 
 template <typename T>

@@ -461,7 +461,7 @@ class OsStackTraceGetter : public OsStackTraceGetterInterface {
 
  private:
 #if GTEST_HAS_ABSL
-  Mutex mutex_;  // Protects all internal state.
+  std::mutex mutex_;  // Protects all internal state.
 
   // We save the stack frame below the frame that calls user code.
   // We do this because the address of the frame immediately below
@@ -870,7 +870,7 @@ class GTEST_API_ UnitTestImpl {
   TestPartResultReporterInterface* global_test_part_result_repoter_;
 
   // Protects read and write access to global_test_part_result_reporter_.
-  internal::Mutex global_test_part_result_reporter_mutex_;
+  std::mutex global_test_part_result_reporter_mutex_;
 
   // Points to (but doesn't own) the per-thread test part result reporter.
   internal::ThreadLocal<TestPartResultReporterInterface*>

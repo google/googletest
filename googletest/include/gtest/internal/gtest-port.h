@@ -213,8 +213,7 @@
 //                                specializations.
 //
 // Synchronization:
-//   Mutex, MutexLock, ThreadLocal, GetThreadCount()
-//                            - synchronization primitives.
+//   ThreadLocal, GetThreadCount() - synchronization primitives.
 //
 // Regular expressions:
 //   RE             - a simple regular expression class using the POSIX
@@ -348,17 +347,6 @@
 #  include <direct.h>
 #  include <io.h>
 # endif
-// In order to avoid having to include <windows.h>, use forward declaration
-#if GTEST_OS_WINDOWS_MINGW && !defined(__MINGW64_VERSION_MAJOR)
-// MinGW defined _CRITICAL_SECTION and _RTL_CRITICAL_SECTION as two
-// separate (equivalent) structs, instead of using typedef
-typedef struct _CRITICAL_SECTION GTEST_CRITICAL_SECTION;
-#else
-// Assume CRITICAL_SECTION is a typedef of _RTL_CRITICAL_SECTION.
-// This assumption is verified by
-// WindowsTypesTest.CRITICAL_SECTIONIs_RTL_CRITICAL_SECTION.
-typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
-#endif
 #else
 // This assumes that non-Windows OSes provide unistd.h. For OSes where this
 // is not the case, we need to include headers that provide the functions
@@ -745,7 +733,7 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 #ifndef GTEST_IS_THREADSAFE
 
 #define GTEST_IS_THREADSAFE                                                 \
-  (GTEST_HAS_MUTEX_AND_THREAD_LOCAL_ ||                                     \
+  (GTEST_HAS_THREAD_LOCAL_ ||                                               \
    (GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_PHONE && !GTEST_OS_WINDOWS_RT) || \
    GTEST_HAS_PTHREAD)
 
@@ -1342,92 +1330,11 @@ class ThreadWithParam : public ThreadWithParamBase {
 };
 # endif  // GTEST_HAS_PTHREAD && !GTEST_OS_WINDOWS_MINGW
 
-# if GTEST_HAS_MUTEX_AND_THREAD_LOCAL_
-// Mutex and ThreadLocal have already been imported into the namespace.
+# if GTEST_HAS_THREAD_LOCAL_
+// ThreadLocal has already been imported into the namespace.
 // Nothing to do here.
 
 # elif GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_PHONE && !GTEST_OS_WINDOWS_RT
-
-// Mutex implements mutex on Windows platforms.  It is used in conjunction
-// with class MutexLock:
-//
-//   Mutex mutex;
-//   ...
-//   MutexLock lock(&mutex);  // Acquires the mutex and releases it at the
-//                            // end of the current scope.
-//
-// A static Mutex *must* be defined or declared using one of the following
-// macros:
-//   GTEST_DEFINE_STATIC_MUTEX_(g_some_mutex);
-//   GTEST_DECLARE_STATIC_MUTEX_(g_some_mutex);
-//
-// (A non-static Mutex is defined/declared in the usual way).
-class GTEST_API_ Mutex {
- public:
-  enum MutexType { kStatic = 0, kDynamic = 1 };
-  // We rely on kStaticMutex being 0 as it is to what the linker initializes
-  // type_ in static mutexes.  critical_section_ will be initialized lazily
-  // in ThreadSafeLazyInit().
-  enum StaticConstructorSelector { kStaticMutex = 0 };
-
-  // This constructor intentionally does nothing.  It relies on type_ being
-  // statically initialized to 0 (effectively setting it to kStatic) and on
-  // ThreadSafeLazyInit() to lazily initialize the rest of the members.
-  explicit Mutex(StaticConstructorSelector /*dummy*/) {}
-
-  Mutex();
-  ~Mutex();
-
-  void Lock();
-
-  void Unlock();
-
-  // Does nothing if the current thread holds the mutex. Otherwise, crashes
-  // with high probability.
-  void AssertHeld();
-
- private:
-  // Initializes owner_thread_id_ and critical_section_ in static mutexes.
-  void ThreadSafeLazyInit();
-
-  // Per https://blogs.msdn.microsoft.com/oldnewthing/20040223-00/?p=40503,
-  // we assume that 0 is an invalid value for thread IDs.
-  unsigned int owner_thread_id_;
-
-  // For static mutexes, we rely on these members being initialized to zeros
-  // by the linker.
-  MutexType type_;
-  long critical_section_init_phase_;  // NOLINT
-  GTEST_CRITICAL_SECTION* critical_section_;
-
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(Mutex);
-};
-
-# define GTEST_DECLARE_STATIC_MUTEX_(mutex) \
-    extern ::testing::internal::Mutex mutex
-
-# define GTEST_DEFINE_STATIC_MUTEX_(mutex) \
-    ::testing::internal::Mutex mutex(::testing::internal::Mutex::kStaticMutex)
-
-// We cannot name this class MutexLock because the ctor declaration would
-// conflict with a macro named MutexLock, which is defined on some
-// platforms. That macro is used as a defensive measure to prevent against
-// inadvertent misuses of MutexLock like "MutexLock(&mu)" rather than
-// "MutexLock l(&mu)".  Hence the typedef trick below.
-class GTestMutexLock {
- public:
-  explicit GTestMutexLock(Mutex* mutex)
-      : mutex_(mutex) { mutex_->Lock(); }
-
-  ~GTestMutexLock() { mutex_->Unlock(); }
-
- private:
-  Mutex* const mutex_;
-
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(GTestMutexLock);
-};
-
-typedef GTestMutexLock MutexLock;
 
 // Base class for ValueHolder<T>.  Allows a caller to hold and delete a value
 // without knowing its type.
@@ -1625,99 +1532,6 @@ class ThreadLocal : public ThreadLocalBase {
 
 # elif GTEST_HAS_PTHREAD
 
-// MutexBase and Mutex implement mutex on pthreads-based platforms.
-class MutexBase {
- public:
-  // Acquires this mutex.
-  void Lock() {
-    GTEST_CHECK_POSIX_SUCCESS_(pthread_mutex_lock(&mutex_));
-    owner_ = pthread_self();
-    has_owner_ = true;
-  }
-
-  // Releases this mutex.
-  void Unlock() {
-    // Since the lock is being released the owner_ field should no longer be
-    // considered valid. We don't protect writing to has_owner_ here, as it's
-    // the caller's responsibility to ensure that the current thread holds the
-    // mutex when this is called.
-    has_owner_ = false;
-    GTEST_CHECK_POSIX_SUCCESS_(pthread_mutex_unlock(&mutex_));
-  }
-
-  // Does nothing if the current thread holds the mutex. Otherwise, crashes
-  // with high probability.
-  void AssertHeld() const {
-    GTEST_CHECK_(has_owner_ && pthread_equal(owner_, pthread_self()))
-        << "The current thread is not holding the mutex @" << this;
-  }
-
-  // A static mutex may be used before main() is entered.  It may even
-  // be used before the dynamic initialization stage.  Therefore we
-  // must be able to initialize a static mutex object at link time.
-  // This means MutexBase has to be a POD and its member variables
-  // have to be public.
- public:
-  pthread_mutex_t mutex_;  // The underlying pthread mutex.
-  // has_owner_ indicates whether the owner_ field below contains a valid thread
-  // ID and is therefore safe to inspect (e.g., to use in pthread_equal()). All
-  // accesses to the owner_ field should be protected by a check of this field.
-  // An alternative might be to memset() owner_ to all zeros, but there's no
-  // guarantee that a zero'd pthread_t is necessarily invalid or even different
-  // from pthread_self().
-  bool has_owner_;
-  pthread_t owner_;  // The thread holding the mutex.
-};
-
-// Forward-declares a static mutex.
-#  define GTEST_DECLARE_STATIC_MUTEX_(mutex) \
-     extern ::testing::internal::MutexBase mutex
-
-// Defines and statically (i.e. at link time) initializes a static mutex.
-// The initialization list here does not explicitly initialize each field,
-// instead relying on default initialization for the unspecified fields. In
-// particular, the owner_ field (a pthread_t) is not explicitly initialized.
-// This allows initialization to work whether pthread_t is a scalar or struct.
-// The flag -Wmissing-field-initializers must not be specified for this to work.
-#define GTEST_DEFINE_STATIC_MUTEX_(mutex) \
-  ::testing::internal::MutexBase mutex = {PTHREAD_MUTEX_INITIALIZER, false, 0}
-
-// The Mutex class can only be used for mutexes created at runtime. It
-// shares its API with MutexBase otherwise.
-class Mutex : public MutexBase {
- public:
-  Mutex() {
-    GTEST_CHECK_POSIX_SUCCESS_(pthread_mutex_init(&mutex_, nullptr));
-    has_owner_ = false;
-  }
-  ~Mutex() {
-    GTEST_CHECK_POSIX_SUCCESS_(pthread_mutex_destroy(&mutex_));
-  }
-
- private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(Mutex);
-};
-
-// We cannot name this class MutexLock because the ctor declaration would
-// conflict with a macro named MutexLock, which is defined on some
-// platforms. That macro is used as a defensive measure to prevent against
-// inadvertent misuses of MutexLock like "MutexLock(&mu)" rather than
-// "MutexLock l(&mu)".  Hence the typedef trick below.
-class GTestMutexLock {
- public:
-  explicit GTestMutexLock(MutexBase* mutex)
-      : mutex_(mutex) { mutex_->Lock(); }
-
-  ~GTestMutexLock() { mutex_->Unlock(); }
-
- private:
-  MutexBase* const mutex_;
-
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(GTestMutexLock);
-};
-
-typedef GTestMutexLock MutexLock;
-
 // Helpers for ThreadLocal.
 
 // pthread_key_create() requires DeleteThreadLocalValue() to have
@@ -1834,39 +1648,9 @@ class GTEST_API_ ThreadLocal {
   GTEST_DISALLOW_COPY_AND_ASSIGN_(ThreadLocal);
 };
 
-# endif  // GTEST_HAS_MUTEX_AND_THREAD_LOCAL_
+# endif  // GTEST_HAS_THREAD_LOCAL_
 
 #else  // GTEST_IS_THREADSAFE
-
-// A dummy implementation of synchronization primitives (mutex, lock,
-// and thread-local variable).  Necessary for compiling Google Test where
-// mutex is not supported - using Google Test in multiple threads is not
-// supported on such platforms.
-
-class Mutex {
- public:
-  Mutex() {}
-  void Lock() {}
-  void Unlock() {}
-  void AssertHeld() const {}
-};
-
-# define GTEST_DECLARE_STATIC_MUTEX_(mutex) \
-  extern ::testing::internal::Mutex mutex
-
-# define GTEST_DEFINE_STATIC_MUTEX_(mutex) ::testing::internal::Mutex mutex
-
-// We cannot name this class MutexLock because the ctor declaration would
-// conflict with a macro named MutexLock, which is defined on some
-// platforms. That macro is used as a defensive measure to prevent against
-// inadvertent misuses of MutexLock like "MutexLock(&mu)" rather than
-// "MutexLock l(&mu)".  Hence the typedef trick below.
-class GTestMutexLock {
- public:
-  explicit GTestMutexLock(Mutex*) {}  // NOLINT
-};
-
-typedef GTestMutexLock MutexLock;
 
 template <typename T>
 class GTEST_API_ ThreadLocal {
