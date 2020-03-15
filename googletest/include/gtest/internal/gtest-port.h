@@ -1352,8 +1352,7 @@ class ThreadWithParam : public ThreadWithParamBase {
 
   GTEST_DISALLOW_COPY_AND_ASSIGN_(ThreadWithParam);
 };
-# endif  // !GTEST_OS_WINDOWS && GTEST_HAS_PTHREAD ||
-         // GTEST_HAS_MUTEX_AND_THREAD_LOCAL_
+# endif  // GTEST_HAS_PTHREAD && !GTEST_OS_WINDOWS_MINGW
 
 # if GTEST_HAS_MUTEX_AND_THREAD_LOCAL_
 // Mutex and ThreadLocal have already been imported into the namespace.
