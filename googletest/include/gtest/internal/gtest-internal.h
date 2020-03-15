@@ -1299,6 +1299,29 @@ class FlatTuple
   using FlatTuple::FlatTupleBase::Get;
 };
 
+// Allows a controller thread to pause execution of newly created
+// threads until notified. Instances of this class must be created
+// and destroyed in the controller thread.
+//
+// This class is only for testing Google Test's own constructs. Do not
+// use it in user tests, either directly or indirectly.
+class Notification {
+ public:
+  Notification() : notified_(false) {}
+
+  // Notifies all threads created with this notification to start. Must
+  // be called from the controller thread.
+  void Notify();
+
+  // Blocks until the controller thread notifies. Must be called from a test
+  // thread.
+  void WaitForNotification();
+
+ private:
+  std::mutex mutex_;
+  bool notified_;
+};
+
 // Utility functions to be called with static_assert to induce deprecation
 // warnings.
 GTEST_INTERNAL_DEPRECATED(

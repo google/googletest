@@ -2683,6 +2683,22 @@ Result HandleExceptionsInMethodIfSupported(
   }
 }
 
+void Notification::Notify() {
+  std::lock_guard<std::mutex> lock(mutex_);
+  notified_ = true;
+}
+
+void Notification::WaitForNotification() {
+  while(true) {
+    mutex_.lock();
+    const bool notified = notified_;
+    mutex_.unlock();
+    if (notified)
+      break;
+    SleepMilliseconds(10);
+  }
+}
+
 }  // namespace internal
 
 // Runs the test and updates the test result.

@@ -35,7 +35,6 @@ The following macros can be defined:
 
 ### Threading:
 
-*   `GTEST_HAS_NOTIFICATION_` - Enabled if Notification is already provided.
 *   `GTEST_EXCLUSIVE_LOCK_REQUIRED_(locks)`
 *   `GTEST_LOCK_EXCLUDED_(locks)`
 

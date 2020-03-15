@@ -1148,58 +1148,10 @@ GTEST_API_ void SleepMilliseconds(int n);
 // Defines synchronization primitives.
 #if GTEST_IS_THREADSAFE
 
-# if GTEST_HAS_NOTIFICATION_
-// Notification has already been imported into the namespace.
-// Nothing to do here.
-
-# elif GTEST_HAS_PTHREAD
-// Allows a controller thread to pause execution of newly created
-// threads until notified.  Instances of this class must be created
-// and destroyed in the controller thread.
-//
-// This class is only for testing Google Test's own constructs. Do not
-// use it in user tests, either directly or indirectly.
-class Notification {
- public:
-  Notification() : notified_(false) {
-    GTEST_CHECK_POSIX_SUCCESS_(pthread_mutex_init(&mutex_, nullptr));
-  }
-  ~Notification() {
-    pthread_mutex_destroy(&mutex_);
-  }
-
-  // Notifies all threads created with this notification to start. Must
-  // be called from the controller thread.
-  void Notify() {
-    pthread_mutex_lock(&mutex_);
-    notified_ = true;
-    pthread_mutex_unlock(&mutex_);
-  }
-
-  // Blocks until the controller thread notifies. Must be called from a test
-  // thread.
-  void WaitForNotification() {
-    for (;;) {
-      pthread_mutex_lock(&mutex_);
-      const bool notified = notified_;
-      pthread_mutex_unlock(&mutex_);
-      if (notified)
-        break;
-      SleepMilliseconds(10);
-    }
-  }
-
- private:
-  pthread_mutex_t mutex_;
-  bool notified_;
-
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(Notification);
-};
-
-# elif GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_PHONE && !GTEST_OS_WINDOWS_RT
+# if GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_PHONE && !GTEST_OS_WINDOWS_RT
 
 // Provides leak-safe Windows kernel handle ownership.
-// Used in death tests and in threading support.
+// Used in death tests.
 class GTEST_API_ AutoHandle {
  public:
   // Assume that Win32 HANDLE type is equivalent to void*. Doing so allows us to
@@ -1227,24 +1179,7 @@ class GTEST_API_ AutoHandle {
   GTEST_DISALLOW_COPY_AND_ASSIGN_(AutoHandle);
 };
 
-// Allows a controller thread to pause execution of newly created
-// threads until notified.  Instances of this class must be created
-// and destroyed in the controller thread.
-//
-// This class is only for testing Google Test's own constructs. Do not
-// use it in user tests, either directly or indirectly.
-class GTEST_API_ Notification {
- public:
-  Notification();
-  void Notify();
-  void WaitForNotification();
-
- private:
-  AutoHandle event_;
-
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(Notification);
-};
-# endif  // GTEST_HAS_NOTIFICATION_
+# endif  // GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_PHONE && !GTEST_OS_WINDOWS_RT
 
 #endif  // GTEST_IS_THREADSAFE
 
