@@ -536,7 +536,8 @@ class GTEST_API_ UnitTestImpl {
       TestPartResultReporterInterface* reporter);
 
   // Returns the test part result reporter for the current thread.
-  TestPartResultReporterInterface* GetTestPartResultReporterForCurrentThread();
+  TestPartResultReporterInterface*
+  GetOrCreateTestPartResultReporterForCurrentThread();
 
   // Sets the test part result reporter for the current thread.
   void SetTestPartResultReporterForCurrentThread(
@@ -785,10 +786,10 @@ class GTEST_API_ UnitTestImpl {
 
   // Getters for the per-thread Google Test trace stack.
   std::vector<TraceInfo>& gtest_trace_stack() {
-    return *(gtest_trace_stack_.pointer());
+    return gtest_trace_stack_;
   }
   const std::vector<TraceInfo>& gtest_trace_stack() const {
-    return gtest_trace_stack_.get();
+    return gtest_trace_stack_;
   }
 
 #if GTEST_HAS_DEATH_TEST
@@ -873,7 +874,7 @@ class GTEST_API_ UnitTestImpl {
   std::mutex global_test_part_result_reporter_mutex_;
 
   // Points to (but doesn't own) the per-thread test part result reporter.
-  internal::ThreadLocal<TestPartResultReporterInterface*>
+  static thread_local TestPartResultReporterInterface*
       per_thread_test_part_result_reporter_;
 
   // The vector of environments that need to be set-up/torn-down
@@ -962,7 +963,7 @@ class GTEST_API_ UnitTestImpl {
 #endif  // GTEST_HAS_DEATH_TEST
 
   // A per-thread stack of traces created by the SCOPED_TRACE() macro.
-  internal::ThreadLocal<std::vector<TraceInfo> > gtest_trace_stack_;
+  static thread_local std::vector<TraceInfo> gtest_trace_stack_;
 
   // The value of GTEST_FLAG(catch_exceptions) at the moment RunAllTests()
   // starts.

@@ -213,7 +213,7 @@
 //                                specializations.
 //
 // Synchronization:
-//   ThreadLocal, GetThreadCount() - synchronization primitives.
+//   GetThreadCount() - synchronization primitives.
 //
 // Regular expressions:
 //   RE             - a simple regular expression class using the POSIX
@@ -733,9 +733,8 @@
 #ifndef GTEST_IS_THREADSAFE
 
 #define GTEST_IS_THREADSAFE                                                 \
-  (GTEST_HAS_THREAD_LOCAL_ ||                                               \
-   (GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_PHONE && !GTEST_OS_WINDOWS_RT) || \
-   GTEST_HAS_PTHREAD)
+  (GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_PHONE && !GTEST_OS_WINDOWS_RT) || \
+   GTEST_HAS_PTHREAD
 
 #endif  // GTEST_IS_THREADSAFE
 
@@ -1328,53 +1327,8 @@ class ThreadWithParam : public ThreadWithParamBase {
 
   GTEST_DISALLOW_COPY_AND_ASSIGN_(ThreadWithParam);
 };
-# endif  // GTEST_HAS_PTHREAD && !GTEST_OS_WINDOWS_MINGW
-
-# if GTEST_HAS_THREAD_LOCAL_
-// ThreadLocal has already been imported into the namespace.
-// Nothing to do here.
 
 # elif GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_PHONE && !GTEST_OS_WINDOWS_RT
-
-// Base class for ValueHolder<T>.  Allows a caller to hold and delete a value
-// without knowing its type.
-class ThreadLocalValueHolderBase {
- public:
-  virtual ~ThreadLocalValueHolderBase() {}
-};
-
-// Provides a way for a thread to send notifications to a ThreadLocal
-// regardless of its parameter type.
-class ThreadLocalBase {
- public:
-  // Creates a new ValueHolder<T> object holding a default value passed to
-  // this ThreadLocal<T>'s constructor and returns it.  It is the caller's
-  // responsibility not to call this when the ThreadLocal<T> instance already
-  // has a value on the current thread.
-  virtual ThreadLocalValueHolderBase* NewValueForCurrentThread() const = 0;
-
- protected:
-  ThreadLocalBase() {}
-  virtual ~ThreadLocalBase() {}
-
- private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(ThreadLocalBase);
-};
-
-// Maps a thread to a set of ThreadLocals that have values instantiated on that
-// thread and notifies them when the thread exits.  A ThreadLocal instance is
-// expected to persist until all threads it has values on have terminated.
-class GTEST_API_ ThreadLocalRegistry {
- public:
-  // Registers thread_local_instance as having value on the current thread.
-  // Returns a value that can be used to identify the thread from other threads.
-  static ThreadLocalValueHolderBase* GetValueOnCurrentThread(
-      const ThreadLocalBase* thread_local_instance);
-
-  // Invoked when a ThreadLocal instance is destroyed.
-  static void OnThreadLocalDestroyed(
-      const ThreadLocalBase* thread_local_instance);
-};
 
 class GTEST_API_ ThreadWithParamBase {
  public:
@@ -1426,244 +1380,7 @@ class ThreadWithParam : public ThreadWithParamBase {
 
   GTEST_DISALLOW_COPY_AND_ASSIGN_(ThreadWithParam);
 };
-
-// Implements thread-local storage on Windows systems.
-//
-//   // Thread 1
-//   ThreadLocal<int> tl(100);  // 100 is the default value for each thread.
-//
-//   // Thread 2
-//   tl.set(150);  // Changes the value for thread 2 only.
-//   EXPECT_EQ(150, tl.get());
-//
-//   // Thread 1
-//   EXPECT_EQ(100, tl.get());  // In thread 1, tl has the original value.
-//   tl.set(200);
-//   EXPECT_EQ(200, tl.get());
-//
-// The template type argument T must have a public copy constructor.
-// In addition, the default ThreadLocal constructor requires T to have
-// a public default constructor.
-//
-// The users of a TheadLocal instance have to make sure that all but one
-// threads (including the main one) using that instance have exited before
-// destroying it. Otherwise, the per-thread objects managed for them by the
-// ThreadLocal instance are not guaranteed to be destroyed on all platforms.
-//
-// Google Test only uses global ThreadLocal objects.  That means they
-// will die after main() has returned.  Therefore, no per-thread
-// object managed by Google Test will be leaked as long as all threads
-// using Google Test have exited when main() returns.
-template <typename T>
-class ThreadLocal : public ThreadLocalBase {
- public:
-  ThreadLocal() : default_factory_(new DefaultValueHolderFactory()) {}
-  explicit ThreadLocal(const T& value)
-      : default_factory_(new InstanceValueHolderFactory(value)) {}
-
-  ~ThreadLocal() { ThreadLocalRegistry::OnThreadLocalDestroyed(this); }
-
-  T* pointer() { return GetOrCreateValue(); }
-  const T* pointer() const { return GetOrCreateValue(); }
-  const T& get() const { return *pointer(); }
-  void set(const T& value) { *pointer() = value; }
-
- private:
-  // Holds a value of T.  Can be deleted via its base class without the caller
-  // knowing the type of T.
-  class ValueHolder : public ThreadLocalValueHolderBase {
-   public:
-    ValueHolder() : value_() {}
-    explicit ValueHolder(const T& value) : value_(value) {}
-
-    T* pointer() { return &value_; }
-
-   private:
-    T value_;
-    GTEST_DISALLOW_COPY_AND_ASSIGN_(ValueHolder);
-  };
-
-
-  T* GetOrCreateValue() const {
-    return static_cast<ValueHolder*>(
-        ThreadLocalRegistry::GetValueOnCurrentThread(this))->pointer();
-  }
-
-  virtual ThreadLocalValueHolderBase* NewValueForCurrentThread() const {
-    return default_factory_->MakeNewHolder();
-  }
-
-  class ValueHolderFactory {
-   public:
-    ValueHolderFactory() {}
-    virtual ~ValueHolderFactory() {}
-    virtual ValueHolder* MakeNewHolder() const = 0;
-
-   private:
-    GTEST_DISALLOW_COPY_AND_ASSIGN_(ValueHolderFactory);
-  };
-
-  class DefaultValueHolderFactory : public ValueHolderFactory {
-   public:
-    DefaultValueHolderFactory() {}
-    ValueHolder* MakeNewHolder() const override { return new ValueHolder(); }
-
-   private:
-    GTEST_DISALLOW_COPY_AND_ASSIGN_(DefaultValueHolderFactory);
-  };
-
-  class InstanceValueHolderFactory : public ValueHolderFactory {
-   public:
-    explicit InstanceValueHolderFactory(const T& value) : value_(value) {}
-    ValueHolder* MakeNewHolder() const override {
-      return new ValueHolder(value_);
-    }
-
-   private:
-    const T value_;  // The value for each thread.
-
-    GTEST_DISALLOW_COPY_AND_ASSIGN_(InstanceValueHolderFactory);
-  };
-
-  std::unique_ptr<ValueHolderFactory> default_factory_;
-
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(ThreadLocal);
-};
-
-# elif GTEST_HAS_PTHREAD
-
-// Helpers for ThreadLocal.
-
-// pthread_key_create() requires DeleteThreadLocalValue() to have
-// C-linkage.  Therefore it cannot be templatized to access
-// ThreadLocal<T>.  Hence the need for class
-// ThreadLocalValueHolderBase.
-class ThreadLocalValueHolderBase {
- public:
-  virtual ~ThreadLocalValueHolderBase() {}
-};
-
-// Called by pthread to delete thread-local data stored by
-// pthread_setspecific().
-extern "C" inline void DeleteThreadLocalValue(void* value_holder) {
-  delete static_cast<ThreadLocalValueHolderBase*>(value_holder);
-}
-
-// Implements thread-local storage on pthreads-based systems.
-template <typename T>
-class GTEST_API_ ThreadLocal {
- public:
-  ThreadLocal()
-      : key_(CreateKey()), default_factory_(new DefaultValueHolderFactory()) {}
-  explicit ThreadLocal(const T& value)
-      : key_(CreateKey()),
-        default_factory_(new InstanceValueHolderFactory(value)) {}
-
-  ~ThreadLocal() {
-    // Destroys the managed object for the current thread, if any.
-    DeleteThreadLocalValue(pthread_getspecific(key_));
-
-    // Releases resources associated with the key.  This will *not*
-    // delete managed objects for other threads.
-    GTEST_CHECK_POSIX_SUCCESS_(pthread_key_delete(key_));
-  }
-
-  T* pointer() { return GetOrCreateValue(); }
-  const T* pointer() const { return GetOrCreateValue(); }
-  const T& get() const { return *pointer(); }
-  void set(const T& value) { *pointer() = value; }
-
- private:
-  // Holds a value of type T.
-  class ValueHolder : public ThreadLocalValueHolderBase {
-   public:
-    ValueHolder() : value_() {}
-    explicit ValueHolder(const T& value) : value_(value) {}
-
-    T* pointer() { return &value_; }
-
-   private:
-    T value_;
-    GTEST_DISALLOW_COPY_AND_ASSIGN_(ValueHolder);
-  };
-
-  static pthread_key_t CreateKey() {
-    pthread_key_t key;
-    // When a thread exits, DeleteThreadLocalValue() will be called on
-    // the object managed for that thread.
-    GTEST_CHECK_POSIX_SUCCESS_(
-        pthread_key_create(&key, &DeleteThreadLocalValue));
-    return key;
-  }
-
-  T* GetOrCreateValue() const {
-    ThreadLocalValueHolderBase* const holder =
-        static_cast<ThreadLocalValueHolderBase*>(pthread_getspecific(key_));
-    if (holder != nullptr) {
-      return CheckedDowncastToActualType<ValueHolder>(holder)->pointer();
-    }
-
-    ValueHolder* const new_holder = default_factory_->MakeNewHolder();
-    ThreadLocalValueHolderBase* const holder_base = new_holder;
-    GTEST_CHECK_POSIX_SUCCESS_(pthread_setspecific(key_, holder_base));
-    return new_holder->pointer();
-  }
-
-  class ValueHolderFactory {
-   public:
-    ValueHolderFactory() {}
-    virtual ~ValueHolderFactory() {}
-    virtual ValueHolder* MakeNewHolder() const = 0;
-
-   private:
-    GTEST_DISALLOW_COPY_AND_ASSIGN_(ValueHolderFactory);
-  };
-
-  class DefaultValueHolderFactory : public ValueHolderFactory {
-   public:
-    DefaultValueHolderFactory() {}
-    ValueHolder* MakeNewHolder() const override { return new ValueHolder(); }
-
-   private:
-    GTEST_DISALLOW_COPY_AND_ASSIGN_(DefaultValueHolderFactory);
-  };
-
-  class InstanceValueHolderFactory : public ValueHolderFactory {
-   public:
-    explicit InstanceValueHolderFactory(const T& value) : value_(value) {}
-    ValueHolder* MakeNewHolder() const override {
-      return new ValueHolder(value_);
-    }
-
-   private:
-    const T value_;  // The value for each thread.
-
-    GTEST_DISALLOW_COPY_AND_ASSIGN_(InstanceValueHolderFactory);
-  };
-
-  // A key pthreads uses for looking up per-thread values.
-  const pthread_key_t key_;
-  std::unique_ptr<ValueHolderFactory> default_factory_;
-
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(ThreadLocal);
-};
-
-# endif  // GTEST_HAS_THREAD_LOCAL_
-
-#else  // GTEST_IS_THREADSAFE
-
-template <typename T>
-class GTEST_API_ ThreadLocal {
- public:
-  ThreadLocal() : value_() {}
-  explicit ThreadLocal(const T& value) : value_(value) {}
-  T* pointer() { return &value_; }
-  const T* pointer() const { return &value_; }
-  const T& get() const { return value_; }
-  void set(const T& value) { value_ = value; }
- private:
-  T value_;
-};
+# endif  // GTEST_HAS_PTHREAD && !GTEST_OS_WINDOWS_MINGW
 
 #endif  // GTEST_IS_THREADSAFE
 

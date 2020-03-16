@@ -775,7 +775,7 @@ void ScopedFakeTestPartResultReporter::Init() {
     old_reporter_ = impl->GetGlobalTestPartResultReporter();
     impl->SetGlobalTestPartResultReporter(this);
   } else {
-    old_reporter_ = impl->GetTestPartResultReporterForCurrentThread();
+    old_reporter_ = impl->GetOrCreateTestPartResultReporterForCurrentThread();
     impl->SetTestPartResultReporterForCurrentThread(this);
   }
 }
@@ -905,14 +905,18 @@ void UnitTestImpl::SetGlobalTestPartResultReporter(
 
 // Returns the test part result reporter for the current thread.
 TestPartResultReporterInterface*
-UnitTestImpl::GetTestPartResultReporterForCurrentThread() {
-  return per_thread_test_part_result_reporter_.get();
+UnitTestImpl::GetOrCreateTestPartResultReporterForCurrentThread() {
+  if (per_thread_test_part_result_reporter_ == nullptr)
+    SetTestPartResultReporterForCurrentThread(
+        &default_per_thread_test_part_result_reporter_);
+
+  return per_thread_test_part_result_reporter_;
 }
 
 // Sets the test part result reporter for the current thread.
 void UnitTestImpl::SetTestPartResultReporterForCurrentThread(
     TestPartResultReporterInterface* reporter) {
-  per_thread_test_part_result_reporter_.set(reporter);
+  per_thread_test_part_result_reporter_ = reporter;
 }
 
 // Gets the number of successful test suites.
@@ -2889,8 +2893,8 @@ void TestInfo::Skip() {
 
   const TestPartResult test_part_result =
       TestPartResult(TestPartResult::kSkip, this->file(), this->line(), "");
-  impl->GetTestPartResultReporterForCurrentThread()->ReportTestPartResult(
-      test_part_result);
+  impl->GetOrCreateTestPartResultReporterForCurrentThread()
+      ->ReportTestPartResult(test_part_result);
 
   // Notifies the unit test event listener that a test has just finished.
   repeater->OnTestEnd(*this);
@@ -5171,8 +5175,8 @@ void UnitTest::AddTestPartResult(
 
   const TestPartResult result = TestPartResult(
       result_type, file_name, line_number, msg.GetString().c_str());
-  impl_->GetTestPartResultReporterForCurrentThread()->
-      ReportTestPartResult(result);
+  impl_->GetOrCreateTestPartResultReporterForCurrentThread()
+      ->ReportTestPartResult(result);
 
   if (result_type != TestPartResult::kSuccess &&
       result_type != TestPartResult::kSkip) {
@@ -5376,6 +5380,10 @@ void UnitTest::PopGTestTrace()
 
 namespace internal {
 
+thread_local TestPartResultReporterInterface*
+    UnitTestImpl::per_thread_test_part_result_reporter_;
+thread_local std::vector<TraceInfo> UnitTestImpl::gtest_trace_stack_;
+
 UnitTestImpl::UnitTestImpl(UnitTest* parent)
     : parent_(parent),
       GTEST_DISABLE_MSC_WARNINGS_PUSH_(4355 /* using this in initializer */)
@@ -5383,8 +5391,6 @@ UnitTestImpl::UnitTestImpl(UnitTest* parent)
       default_per_thread_test_part_result_reporter_(this),
       GTEST_DISABLE_MSC_WARNINGS_POP_() global_test_part_result_repoter_(
           &default_global_test_part_result_reporter_),
-      per_thread_test_part_result_reporter_(
-          &default_per_thread_test_part_result_reporter_),
       parameterized_test_registry_(),
       parameterized_tests_registered_(false),
       last_death_test_suite_(-1),

@@ -272,7 +272,7 @@ void ExpectationBase::UntypedTimes(const Cardinality& a_cardinality) {
 
 // Points to the implicit sequence introduced by a living InSequence
 // object (if any) in the current thread or NULL.
-GTEST_API_ ThreadLocal<Sequence*> g_gmock_implicit_sequence;
+GTEST_API_ thread_local Sequence* g_gmock_implicit_sequence;
 
 // Reports an uninteresting call (whose description is in msg) in the
 // manner specified by 'reaction'.
@@ -873,8 +873,8 @@ void Sequence::AddExpectation(const Expectation& expectation) const {
 
 // Creates the implicit sequence if there isn't one.
 InSequence::InSequence() {
-  if (internal::g_gmock_implicit_sequence.get() == nullptr) {
-    internal::g_gmock_implicit_sequence.set(new Sequence);
+  if (internal::g_gmock_implicit_sequence == nullptr) {
+    internal::g_gmock_implicit_sequence = new Sequence;
     sequence_created_ = true;
   } else {
     sequence_created_ = false;
@@ -885,8 +885,8 @@ InSequence::InSequence() {
 // of this object.
 InSequence::~InSequence() {
   if (sequence_created_) {
-    delete internal::g_gmock_implicit_sequence.get();
-    internal::g_gmock_implicit_sequence.set(nullptr);
+    delete internal::g_gmock_implicit_sequence;
+    internal::g_gmock_implicit_sequence = nullptr;
   }
 }
 

@@ -682,7 +682,7 @@ namespace internal {
 
 // Points to the implicit sequence introduced by a living InSequence
 // object (if any) in the current thread or NULL.
-GTEST_API_ extern ThreadLocal<Sequence*> g_gmock_implicit_sequence;
+GTEST_API_ extern thread_local Sequence* g_gmock_implicit_sequence;
 
 // Base class for implementing expectations.
 //
@@ -1613,9 +1613,9 @@ class FunctionMocker<R(Args...)> final : public UntypedFunctionMockerBase {
     untyped_expectations_.push_back(untyped_expectation);
 
     // Adds this expectation into the implicit sequence if there is one.
-    Sequence* const implicit_sequence = g_gmock_implicit_sequence.get();
-    if (implicit_sequence != nullptr) {
-      implicit_sequence->AddExpectation(Expectation(untyped_expectation));
+    if (g_gmock_implicit_sequence != nullptr) {
+      g_gmock_implicit_sequence->AddExpectation(
+          Expectation(untyped_expectation));
     }
 
     return *expectation;
