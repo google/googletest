@@ -1145,44 +1145,6 @@ void ClearInjectableArgvs();
 // directly or indirectly.
 GTEST_API_ void SleepMilliseconds(int n);
 
-// Defines synchronization primitives.
-#if GTEST_IS_THREADSAFE
-
-# if GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_PHONE && !GTEST_OS_WINDOWS_RT
-
-// Provides leak-safe Windows kernel handle ownership.
-// Used in death tests.
-class GTEST_API_ AutoHandle {
- public:
-  // Assume that Win32 HANDLE type is equivalent to void*. Doing so allows us to
-  // avoid including <windows.h> in this header file. Including <windows.h> is
-  // undesirable because it defines a lot of symbols and macros that tend to
-  // conflict with client code. This assumption is verified by
-  // WindowsTypesTest.HANDLEIsVoidStar.
-  typedef void* Handle;
-  AutoHandle();
-  explicit AutoHandle(Handle handle);
-
-  ~AutoHandle();
-
-  Handle Get() const;
-  void Reset();
-  void Reset(Handle handle);
-
- private:
-  // Returns true if and only if the handle is a valid handle object that can be
-  // closed.
-  bool IsCloseable() const;
-
-  Handle handle_;
-
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(AutoHandle);
-};
-
-# endif  // GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_PHONE && !GTEST_OS_WINDOWS_RT
-
-#endif  // GTEST_IS_THREADSAFE
-
 // Returns the number of threads running in the process, or 0 to indicate that
 // we cannot detect it.
 GTEST_API_ size_t GetThreadCount();

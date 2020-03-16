@@ -156,8 +156,42 @@ bool InDeathTestChild() {
     return !GTEST_FLAG(internal_run_death_test).empty();
   else
     return g_in_fast_death_test_child;
-#endif
+# endif
 }
+
+# if GTEST_OS_WINDOWS
+
+AutoHandle::AutoHandle() : handle_(INVALID_HANDLE_VALUE) {}
+
+AutoHandle::AutoHandle(Handle handle) : handle_(handle) {}
+
+AutoHandle::~AutoHandle() { Reset(); }
+
+AutoHandle::Handle AutoHandle::Get() const { return handle_; }
+
+void AutoHandle::Reset() { Reset(INVALID_HANDLE_VALUE); }
+
+void AutoHandle::Reset(HANDLE handle) {
+  // Resetting with the same handle we already own is invalid.
+  if (handle_ != handle) {
+    if (IsCloseable()) {
+      ::CloseHandle(handle_);
+    }
+    handle_ = handle;
+  } else {
+    GTEST_CHECK_(!IsCloseable())
+        << "Resetting a valid handle to itself is likely a programmer error "
+           "and thus not allowed.";
+  }
+}
+
+bool AutoHandle::IsCloseable() const {
+  // Different Windows APIs may use either of these values to represent an
+  // invalid handle.
+  return handle_ != nullptr && handle_ != INVALID_HANDLE_VALUE;
+}
+
+# endif  // GTEST_OS_WINDOWS
 
 }  // namespace internal
 
