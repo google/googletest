@@ -942,19 +942,6 @@ TEST(CaptureDeathTest, CannotReenterStdoutCapture) {
 
 #endif  // !GTEST_OS_WINDOWS_MOBILE
 
-#if GTEST_IS_THREADSAFE
-
-void AddTwo(int* param) { *param += 2; }
-
-TEST(ThreadWithParamTest, ConstructorExecutesThreadFunc) {
-  int i = 40;
-  ThreadWithParam<int*> thread(&AddTwo, &i, nullptr);
-  thread.Join();
-  EXPECT_EQ(42, i);
-}
-
-#endif  // GTEST_IS_THREADSAFE
-
 #if GTEST_OS_WINDOWS
 TEST(WindowsTypesTest, HANDLEIsVoidStar) {
   StaticAssertTypeEq<HANDLE, void*>();

@@ -39,6 +39,8 @@
 
 #include <stdlib.h>
 
+#include <thread>
+
 #if _MSC_VER
 GTEST_DISABLE_MSC_WARNINGS_PUSH_(4127 /* conditional expression is constant */)
 #endif  //  _MSC_VER
@@ -48,7 +50,6 @@ using testing::ScopedFakeTestPartResultReporter;
 using testing::TestPartResultArray;
 
 using testing::internal::Notification;
-using testing::internal::ThreadWithParam;
 #endif
 
 namespace posix = ::testing::internal::posix;
@@ -314,8 +315,7 @@ TEST(SCOPED_TRACETest, WorksConcurrently) {
   printf("(expecting 6 failures)\n");
 
   CheckPoints check_points;
-  ThreadWithParam<CheckPoints*> thread(&ThreadWithScopedTrace, &check_points,
-                                       nullptr);
+  std::thread thread(ThreadWithScopedTrace, &check_points);
   check_points.n1.WaitForNotification();
 
   {
@@ -330,7 +330,7 @@ TEST(SCOPED_TRACETest, WorksConcurrently) {
   }  // Trace A dies here.
   ADD_FAILURE()
       << "Expected failure #6 (in thread A, no trace alive).";
-  thread.Join();
+  thread.join();
 }
 #endif  // GTEST_IS_THREADSAFE
 
@@ -937,8 +937,8 @@ TEST_F(ExpectFailureTest, ExpectNonFatalFailure) {
 class ExpectFailureWithThreadsTest : public ExpectFailureTest {
  protected:
   static void AddFailureInOtherThread(FailureMode failure) {
-    ThreadWithParam<FailureMode> thread(&AddFailure, failure, nullptr);
-    thread.Join();
+    std::thread thread(AddFailure, failure);
+    thread.join();
   }
 };
 

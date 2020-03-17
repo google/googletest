@@ -33,6 +33,7 @@
 
 #include "gtest/gtest.h"
 
+#include <thread>
 #include <vector>
 
 #include "src/gtest-internal-inl.h"
@@ -42,13 +43,7 @@
 namespace testing {
 namespace {
 
-using internal::Notification;
 using internal::TestPropertyKeyIs;
-using internal::ThreadWithParam;
-
-// In order to run tests in this file, for platforms where Google Test is
-// thread safe, implement ThreadWithParam. See the description of its API
-// in gtest-port.h, where it is defined for already supported platforms.
 
 // How many threads to create?
 const int kThreadCount = 50;
@@ -118,18 +113,13 @@ void CheckTestFailureCount(int expected_failures) {
 // concurrently.
 TEST(StressTest, CanUseScopedTraceAndAssertionsInManyThreads) {
   {
-    std::unique_ptr<ThreadWithParam<int> > threads[kThreadCount];
-    Notification threads_can_start;
+    std::thread threads[kThreadCount];
     for (int i = 0; i != kThreadCount; i++)
-      threads[i].reset(new ThreadWithParam<int>(&ManyAsserts,
-                                                i,
-                                                &threads_can_start));
-
-    threads_can_start.Notify();
+      threads[i] = std::thread(ManyAsserts, i);
 
     // Blocks until all the threads are done.
     for (int i = 0; i != kThreadCount; i++)
-      threads[i]->Join();
+      threads[i].join();
   }
 
   // Ensures that kThreadCount*kThreadCount failures have been reported.
@@ -162,8 +152,8 @@ void FailingThread(bool is_fatal) {
 }
 
 void GenerateFatalFailureInAnotherThread(bool is_fatal) {
-  ThreadWithParam<bool> thread(&FailingThread, is_fatal, nullptr);
-  thread.Join();
+  std::thread thread(FailingThread, is_fatal);
+  thread.join();
 }
 
 TEST(NoFatalFailureTest, ExpectNoFatalFailureIgnoresFailuresInOtherThreads) {

@@ -65,6 +65,7 @@ TEST(CommandLineFlagsTest, CanBeAccessedInCodeOnceGTestHIsIncluded) {
 #include <map>
 #include <ostream>
 #include <string>
+#include <thread>
 #include <type_traits>
 #include <unordered_set>
 #include <vector>
@@ -287,10 +288,6 @@ using testing::internal::edit_distance::EditType;
 #if GTEST_HAS_STREAM_REDIRECTION
 using testing::internal::CaptureStdout;
 using testing::internal::GetCapturedStdout;
-#endif
-
-#if GTEST_IS_THREADSAFE
-using testing::internal::ThreadWithParam;
 #endif
 
 class TestingVector : public std::vector<int> {
@@ -1204,14 +1201,12 @@ TEST_F(ScopedFakeTestPartResultReporterTest, DeprecatedConstructor) {
   EXPECT_EQ(1, results.size());
 }
 
-#if GTEST_IS_THREADSAFE
-
 class ScopedFakeTestPartResultReporterWithThreadsTest
   : public ScopedFakeTestPartResultReporterTest {
  protected:
   static void AddFailureInOtherThread(FailureMode failure) {
-    ThreadWithParam<FailureMode> thread(&AddFailure, failure, nullptr);
-    thread.Join();
+    std::thread thread(AddFailure, failure);
+    thread.join();
   }
 };
 
@@ -1233,8 +1228,6 @@ TEST_F(ScopedFakeTestPartResultReporterWithThreadsTest,
   EXPECT_TRUE(results.GetTestPartResult(2).nonfatally_failed());
   EXPECT_TRUE(results.GetTestPartResult(3).fatally_failed());
 }
-
-#endif  // GTEST_IS_THREADSAFE
 
 // Tests EXPECT_FATAL_FAILURE{,ON_ALL_THREADS}.  Makes sure that they
 // work even if the failure is generated in a called function rather than
