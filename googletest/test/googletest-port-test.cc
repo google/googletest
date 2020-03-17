@@ -278,54 +278,6 @@ TEST(FormatCompilerIndependentFileLocationTest, FormatsUknownFileAndLine) {
   EXPECT_EQ("unknown file", FormatCompilerIndependentFileLocation(nullptr, -1));
 }
 
-#if GTEST_OS_LINUX || GTEST_OS_MAC || GTEST_OS_QNX || GTEST_OS_FUCHSIA || \
-    GTEST_OS_DRAGONFLY || GTEST_OS_FREEBSD || GTEST_OS_GNU_KFREEBSD || \
-    GTEST_OS_NETBSD || GTEST_OS_OPENBSD
-void* ThreadFunc(void* data) {
-  auto* mutex = static_cast<std::mutex*>(data);
-  mutex->lock();
-  mutex->unlock();
-  return nullptr;
-}
-
-TEST(GetThreadCountTest, ReturnsCorrectValue) {
-  const size_t starting_count = GetThreadCount();
-  pthread_t       thread_id;
-
-  std::mutex mutex;
-  {
-    std::lock_guard<std::mutex> lock(mutex);
-    pthread_attr_t  attr;
-    ASSERT_EQ(0, pthread_attr_init(&attr));
-    ASSERT_EQ(0, pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE));
-
-    const int status = pthread_create(&thread_id, &attr, &ThreadFunc, &mutex);
-    ASSERT_EQ(0, pthread_attr_destroy(&attr));
-    ASSERT_EQ(0, status);
-    EXPECT_EQ(starting_count + 1, GetThreadCount());
-  }
-
-  void* dummy;
-  ASSERT_EQ(0, pthread_join(thread_id, &dummy));
-
-  // The OS may not immediately report the updated thread count after
-  // joining a thread, causing flakiness in this test. To counter that, we
-  // wait for up to .5 seconds for the OS to report the correct value.
-  for (int i = 0; i < 5; ++i) {
-    if (GetThreadCount() == starting_count)
-      break;
-
-    SleepMilliseconds(100);
-  }
-
-  EXPECT_EQ(starting_count, GetThreadCount());
-}
-#else
-TEST(GetThreadCountTest, ReturnsZeroWhenUnableToCountThreads) {
-  EXPECT_EQ(0U, GetThreadCount());
-}
-#endif  // GTEST_OS_LINUX || GTEST_OS_MAC || GTEST_OS_QNX || GTEST_OS_FUCHSIA
-
 TEST(GtestCheckDeathTest, DiesWithCorrectOutputOnFailure) {
   const bool a_false_condition = false;
   const char regex[] =

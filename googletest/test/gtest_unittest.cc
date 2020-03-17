@@ -1348,8 +1348,6 @@ TEST_F(ExpectNonfatalFailureTest, AcceptsMacroThatExpandsToUnprotectedComma) {
   }, "");
 }
 
-#if GTEST_IS_THREADSAFE
-
 typedef ScopedFakeTestPartResultReporterWithThreadsTest
     ExpectFailureWithThreadsTest;
 
@@ -1362,8 +1360,6 @@ TEST_F(ExpectFailureWithThreadsTest, ExpectNonFatalFailureOnAllThreads) {
   EXPECT_NONFATAL_FAILURE_ON_ALL_THREADS(
       AddFailureInOtherThread(NONFATAL_FAILURE), "Expected non-fatal failure.");
 }
-
-#endif  // GTEST_IS_THREADSAFE
 
 // Tests the TestProperty class.
 

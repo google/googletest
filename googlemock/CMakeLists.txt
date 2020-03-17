@@ -176,10 +176,7 @@ $env:Path = \"$project_bin;$env:Path\"
   cxx_test(gmock-spec-builders_test gmock_main)
   cxx_test(gmock_link_test gmock_main test/gmock_link2_test.cc)
   cxx_test(gmock_test gmock_main)
-
-  if (DEFINED GTEST_HAS_PTHREAD)
-    cxx_test(gmock_stress_test gmock)
-  endif()
+  cxx_test(gmock_stress_test gmock)
 
   # gmock_all_test is commented to save time building and running tests.
   # Uncomment if necessary.

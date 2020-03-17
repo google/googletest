@@ -38,8 +38,6 @@
 
 #include "src/gtest-internal-inl.h"
 
-#if GTEST_IS_THREADSAFE
-
 namespace testing {
 namespace {
 
@@ -225,14 +223,3 @@ int main(int argc, char **argv) {
   printf("\nPASS\n");
   return 0;
 }
-
-#else
-TEST(StressTest,
-     DISABLED_ThreadSafetyTestsAreSkippedWhenGoogleTestIsNotThreadSafe) {
-}
-
-int main(int argc, char **argv) {
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}
-#endif  // GTEST_IS_THREADSAFE

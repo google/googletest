@@ -74,8 +74,6 @@
 //                              are enabled.
 //   GTEST_HAS_POSIX_RE       - Define it to 1/0 to indicate that POSIX regular
 //                              expressions are/aren't available.
-//   GTEST_HAS_PTHREAD        - Define it to 1/0 to indicate that <pthread.h>
-//                              is/isn't available.
 //   GTEST_HAS_RTTI           - Define it to 1/0 to indicate that RTTI is/isn't
 //                              enabled.
 //   GTEST_HAS_STD_WSTRING    - Define it to 1/0 to indicate that
@@ -166,7 +164,6 @@
 //   GTEST_HAS_DEATH_TEST   - death tests
 //   GTEST_HAS_TYPED_TEST   - typed tests
 //   GTEST_HAS_TYPED_TEST_P - type-parameterized tests
-//   GTEST_IS_THREADSAFE    - Google Test is thread-safe.
 //   GOOGLETEST_CM0007 DO NOT DELETE
 //   GTEST_USES_POSIX_RE    - enhanced POSIX regex is used. Do not confuse with
 //                            GTEST_HAS_POSIX_RE (see above) which users can
@@ -520,26 +517,6 @@
 # include <typeinfo>
 #endif
 
-// Determines whether Google Test can use the pthreads library.
-#ifndef GTEST_HAS_PTHREAD
-// The user didn't tell us explicitly, so we make reasonable assumptions about
-// which platforms have pthreads support.
-//
-// To disable threading support in Google Test, add -DGTEST_HAS_PTHREAD=0
-// to your compiler flags.
-#define GTEST_HAS_PTHREAD                                                      \
-  (GTEST_OS_LINUX || GTEST_OS_MAC || GTEST_OS_HPUX || GTEST_OS_QNX ||          \
-   GTEST_OS_FREEBSD || GTEST_OS_NACL || GTEST_OS_NETBSD || GTEST_OS_FUCHSIA || \
-   GTEST_OS_DRAGONFLY || GTEST_OS_GNU_KFREEBSD || GTEST_OS_OPENBSD ||          \
-   GTEST_OS_HAIKU)
-#endif  // GTEST_HAS_PTHREAD
-
-#if GTEST_HAS_PTHREAD
-// gtest-port.h guarantees to #include <pthread.h> when GTEST_HAS_PTHREAD is
-// true.
-# include <pthread.h>  // NOLINT
-#endif  // GTEST_HAS_PTHREAD
-
 // Determines whether clone(2) is supported.
 // Usually it will only be available on Linux, excluding
 // Linux on the Itanium architecture.
@@ -729,14 +706,6 @@
 # endif
 
 #endif  // GTEST_HAS_SEH
-
-#ifndef GTEST_IS_THREADSAFE
-
-#define GTEST_IS_THREADSAFE                                                 \
-  (GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_PHONE && !GTEST_OS_WINDOWS_RT) || \
-   GTEST_HAS_PTHREAD
-
-#endif  // GTEST_IS_THREADSAFE
 
 // GTEST_API_ qualifies all symbols that must be exported. The definitions below
 // are guarded by #ifndef to give embedders a chance to define GTEST_API_ in

@@ -19,8 +19,6 @@ option(gtest_build_tests "Build all of gtest's own tests." OFF)
 
 option(gtest_build_samples "Build gtest's sample programs." OFF)
 
-option(gtest_disable_pthreads "Disable uses of pthreads in gtest." OFF)
-
 option(
   gtest_hide_internal_symbols
   "Build gtest with internal symbols hidden in shared libraries."
@@ -76,7 +74,6 @@ else()
     gtest_force_shared_crt
     gtest_build_tests
     gtest_build_samples
-    gtest_disable_pthreads
     gtest_hide_internal_symbols)
 
 endif()
