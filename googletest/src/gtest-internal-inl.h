@@ -88,6 +88,7 @@ const char kFailFast[] = "fail_fast";
 const char kFilterFlag[] = "filter";
 const char kListTestsFlag[] = "list_tests";
 const char kOutputFlag[] = "output";
+const char kBriefFlag[] = "brief";
 const char kPrintTimeFlag[] = "print_time";
 const char kPrintUTF8Flag[] = "print_utf8";
 const char kRandomSeedFlag[] = "random_seed";
@@ -170,6 +171,7 @@ class GTestFlagSaver {
     internal_run_death_test_ = GTEST_FLAG(internal_run_death_test);
     list_tests_ = GTEST_FLAG(list_tests);
     output_ = GTEST_FLAG(output);
+    brief_ = GTEST_FLAG(brief);
     print_time_ = GTEST_FLAG(print_time);
     print_utf8_ = GTEST_FLAG(print_utf8);
     random_seed_ = GTEST_FLAG(random_seed);
@@ -193,6 +195,7 @@ class GTestFlagSaver {
     GTEST_FLAG(internal_run_death_test) = internal_run_death_test_;
     GTEST_FLAG(list_tests) = list_tests_;
     GTEST_FLAG(output) = output_;
+    GTEST_FLAG(brief) = brief_;
     GTEST_FLAG(print_time) = print_time_;
     GTEST_FLAG(print_utf8) = print_utf8_;
     GTEST_FLAG(random_seed) = random_seed_;
@@ -216,6 +219,7 @@ class GTestFlagSaver {
   std::string internal_run_death_test_;
   bool list_tests_;
   std::string output_;
+  bool brief_;
   bool print_time_;
   bool print_utf8_;
   int32_t random_seed_;

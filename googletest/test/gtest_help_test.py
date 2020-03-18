@@ -68,6 +68,7 @@ HELP_REGEX = re.compile(
     FLAG_PREFIX + r'shuffle.*' +
     FLAG_PREFIX + r'random_seed=.*' +
     FLAG_PREFIX + r'color=.*' +
+    FLAG_PREFIX + r'brief.*' +
     FLAG_PREFIX + r'print_time.*' +
     FLAG_PREFIX + r'output=.*' +
     FLAG_PREFIX + r'break_on_failure.*' +
