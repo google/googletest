@@ -37,21 +37,22 @@
 // code once "gtest.h" has been #included.
 // Do not move it after other gtest #includes.
 TEST(CommandLineFlagsTest, CanBeAccessedInCodeOnceGTestHIsIncluded) {
-  bool dummy = testing::GTEST_FLAG(also_run_disabled_tests)
-      || testing::GTEST_FLAG(break_on_failure)
-      || testing::GTEST_FLAG(catch_exceptions)
-      || testing::GTEST_FLAG(color) != "unknown"
-      || testing::GTEST_FLAG(filter) != "unknown"
-      || testing::GTEST_FLAG(list_tests)
-      || testing::GTEST_FLAG(output) != "unknown"
-      || testing::GTEST_FLAG(print_time)
-      || testing::GTEST_FLAG(random_seed)
-      || testing::GTEST_FLAG(repeat) > 0
-      || testing::GTEST_FLAG(show_internal_stack_frames)
-      || testing::GTEST_FLAG(shuffle)
-      || testing::GTEST_FLAG(stack_trace_depth) > 0
-      || testing::GTEST_FLAG(stream_result_to) != "unknown"
-      || testing::GTEST_FLAG(throw_on_failure);
+  bool dummy = testing::GTEST_FLAG(also_run_disabled_tests) ||
+               testing::GTEST_FLAG(break_on_failure) ||
+               testing::GTEST_FLAG(catch_exceptions) ||
+               testing::GTEST_FLAG(color) != "unknown" ||
+               testing::GTEST_FLAG(fail_fast) ||
+               testing::GTEST_FLAG(filter) != "unknown" ||
+               testing::GTEST_FLAG(list_tests) ||
+               testing::GTEST_FLAG(output) != "unknown" ||
+               testing::GTEST_FLAG(print_time) ||
+               testing::GTEST_FLAG(random_seed) ||
+               testing::GTEST_FLAG(repeat) > 0 ||
+               testing::GTEST_FLAG(show_internal_stack_frames) ||
+               testing::GTEST_FLAG(shuffle) ||
+               testing::GTEST_FLAG(stack_trace_depth) > 0 ||
+               testing::GTEST_FLAG(stream_result_to) != "unknown" ||
+               testing::GTEST_FLAG(throw_on_failure);
   EXPECT_TRUE(dummy || !dummy);  // Suppresses warning that dummy is unused.
 }
 
@@ -202,6 +203,7 @@ using testing::GTEST_FLAG(break_on_failure);
 using testing::GTEST_FLAG(catch_exceptions);
 using testing::GTEST_FLAG(color);
 using testing::GTEST_FLAG(death_test_use_fork);
+using testing::GTEST_FLAG(fail_fast);
 using testing::GTEST_FLAG(filter);
 using testing::GTEST_FLAG(list_tests);
 using testing::GTEST_FLAG(output);
@@ -1598,6 +1600,7 @@ class GTestFlagSaverTest : public Test {
     GTEST_FLAG(catch_exceptions) = false;
     GTEST_FLAG(death_test_use_fork) = false;
     GTEST_FLAG(color) = "auto";
+    GTEST_FLAG(fail_fast) = false;
     GTEST_FLAG(filter) = "";
     GTEST_FLAG(list_tests) = false;
     GTEST_FLAG(output) = "";
@@ -1625,6 +1628,7 @@ class GTestFlagSaverTest : public Test {
     EXPECT_FALSE(GTEST_FLAG(catch_exceptions));
     EXPECT_STREQ("auto", GTEST_FLAG(color).c_str());
     EXPECT_FALSE(GTEST_FLAG(death_test_use_fork));
+    EXPECT_FALSE(GTEST_FLAG(fail_fast));
     EXPECT_STREQ("", GTEST_FLAG(filter).c_str());
     EXPECT_FALSE(GTEST_FLAG(list_tests));
     EXPECT_STREQ("", GTEST_FLAG(output).c_str());
@@ -1641,6 +1645,7 @@ class GTestFlagSaverTest : public Test {
     GTEST_FLAG(catch_exceptions) = true;
     GTEST_FLAG(color) = "no";
     GTEST_FLAG(death_test_use_fork) = true;
+    GTEST_FLAG(fail_fast) = true;
     GTEST_FLAG(filter) = "abc";
     GTEST_FLAG(list_tests) = true;
     GTEST_FLAG(output) = "xml:foo.xml";
@@ -5495,20 +5500,22 @@ TEST_F(SetUpTestSuiteTest, TestSetupTestSuite2) {
 // The Flags struct stores a copy of all Google Test flags.
 struct Flags {
   // Constructs a Flags struct where each flag has its default value.
-  Flags() : also_run_disabled_tests(false),
-            break_on_failure(false),
-            catch_exceptions(false),
-            death_test_use_fork(false),
-            filter(""),
-            list_tests(false),
-            output(""),
-            print_time(true),
-            random_seed(0),
-            repeat(1),
-            shuffle(false),
-            stack_trace_depth(kMaxStackTraceDepth),
-            stream_result_to(""),
-            throw_on_failure(false) {}
+  Flags()
+      : also_run_disabled_tests(false),
+        break_on_failure(false),
+        catch_exceptions(false),
+        death_test_use_fork(false),
+        fail_fast(false),
+        filter(""),
+        list_tests(false),
+        output(""),
+        print_time(true),
+        random_seed(0),
+        repeat(1),
+        shuffle(false),
+        stack_trace_depth(kMaxStackTraceDepth),
+        stream_result_to(""),
+        throw_on_failure(false) {}
 
   // Factory methods.
 
@@ -5541,6 +5548,14 @@ struct Flags {
   static Flags DeathTestUseFork(bool death_test_use_fork) {
     Flags flags;
     flags.death_test_use_fork = death_test_use_fork;
+    return flags;
+  }
+
+  // Creates a Flags struct where the gtest_fail_fast flag has
+  // the given value.
+  static Flags FailFast(bool fail_fast) {
+    Flags flags;
+    flags.fail_fast = fail_fast;
     return flags;
   }
 
@@ -5629,6 +5644,7 @@ struct Flags {
   bool break_on_failure;
   bool catch_exceptions;
   bool death_test_use_fork;
+  bool fail_fast;
   const char* filter;
   bool list_tests;
   const char* output;
@@ -5650,6 +5666,7 @@ class ParseFlagsTest : public Test {
     GTEST_FLAG(break_on_failure) = false;
     GTEST_FLAG(catch_exceptions) = false;
     GTEST_FLAG(death_test_use_fork) = false;
+    GTEST_FLAG(fail_fast) = false;
     GTEST_FLAG(filter) = "";
     GTEST_FLAG(list_tests) = false;
     GTEST_FLAG(output) = "";
@@ -5680,6 +5697,7 @@ class ParseFlagsTest : public Test {
     EXPECT_EQ(expected.break_on_failure, GTEST_FLAG(break_on_failure));
     EXPECT_EQ(expected.catch_exceptions, GTEST_FLAG(catch_exceptions));
     EXPECT_EQ(expected.death_test_use_fork, GTEST_FLAG(death_test_use_fork));
+    EXPECT_EQ(expected.fail_fast, GTEST_FLAG(fail_fast));
     EXPECT_STREQ(expected.filter, GTEST_FLAG(filter).c_str());
     EXPECT_EQ(expected.list_tests, GTEST_FLAG(list_tests));
     EXPECT_STREQ(expected.output, GTEST_FLAG(output).c_str());
@@ -5764,6 +5782,15 @@ TEST_F(ParseFlagsTest, NoFlag) {
   const char* argv2[] = {"foo.exe", nullptr};
 
   GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags(), false);
+}
+
+// Tests parsing --gtest_fail_fast.
+TEST_F(ParseFlagsTest, FailFast) {
+  const char* argv[] = {"foo.exe", "--gtest_fail_fast", nullptr};
+
+  const char* argv2[] = {"foo.exe", nullptr};
+
+  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::FailFast(true), false);
 }
 
 // Tests parsing a bad --gtest_filter flag.
