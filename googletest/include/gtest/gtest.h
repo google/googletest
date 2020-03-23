@@ -101,6 +101,10 @@ GTEST_DECLARE_bool_(catch_exceptions);
 // to let Google Test decide.
 GTEST_DECLARE_string_(color);
 
+// This flag controls whether the test runner should continue execution past
+// first failure.
+GTEST_DECLARE_bool_(fail_fast);
+
 // This flag sets up the filter to select by name using a glob pattern
 // the tests to run. If the filter is not given all tests are executed.
 GTEST_DECLARE_string_(filter);
@@ -795,6 +799,9 @@ class GTEST_API_ TestInfo {
   // deletes it.
   void Run();
 
+  // Skip and records the test result for this object.
+  void Skip();
+
   static void ClearTestResult(TestInfo* test_info) {
     test_info->result_.Clear();
   }
@@ -942,6 +949,9 @@ class GTEST_API_ TestSuite {
 
   // Runs every test in this TestSuite.
   void Run();
+
+  // Skips the execution of tests under this TestSuite
+  void Skip();
 
   // Runs SetUpTestSuite() for this TestSuite.  This wrapper is needed
   // for catching exceptions thrown from SetUpTestSuite().

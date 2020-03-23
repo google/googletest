@@ -58,6 +58,7 @@ cc_test(
             "googletest-catch-exceptions-test_.cc",
             "googletest-color-test_.cc",
             "googletest-env-var-test_.cc",
+            "googletest-failfast-unittest_.cc",
             "googletest-filter-unittest_.cc",
             "googletest-break-on-failure-unittest_.cc",
             "googletest-listener-test.cc",
@@ -219,6 +220,21 @@ py_test(
     size = "medium",
     srcs = ["googletest-env-var-test.py"],
     data = [":googletest-env-var-test_"],
+    deps = [":gtest_test_utils"],
+)
+
+cc_binary(
+    name = "googletest-failfast-unittest_",
+    testonly = 1,
+    srcs = ["googletest-failfast-unittest_.cc"],
+    deps = ["//:gtest"],
+)
+
+py_test(
+    name = "googletest-failfast-unittest",
+    size = "medium",
+    srcs = ["googletest-failfast-unittest.py"],
+    data = [":googletest-failfast-unittest_"],
     deps = [":gtest_test_utils"],
 )
 

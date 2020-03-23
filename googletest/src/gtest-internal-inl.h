@@ -84,6 +84,7 @@ const char kAlsoRunDisabledTestsFlag[] = "also_run_disabled_tests";
 const char kBreakOnFailureFlag[] = "break_on_failure";
 const char kCatchExceptionsFlag[] = "catch_exceptions";
 const char kColorFlag[] = "color";
+const char kFailFast[] = "fail_fast";
 const char kFilterFlag[] = "filter";
 const char kListTestsFlag[] = "list_tests";
 const char kOutputFlag[] = "output";
@@ -164,6 +165,7 @@ class GTestFlagSaver {
     color_ = GTEST_FLAG(color);
     death_test_style_ = GTEST_FLAG(death_test_style);
     death_test_use_fork_ = GTEST_FLAG(death_test_use_fork);
+    fail_fast_ = GTEST_FLAG(fail_fast);
     filter_ = GTEST_FLAG(filter);
     internal_run_death_test_ = GTEST_FLAG(internal_run_death_test);
     list_tests_ = GTEST_FLAG(list_tests);
@@ -187,6 +189,7 @@ class GTestFlagSaver {
     GTEST_FLAG(death_test_style) = death_test_style_;
     GTEST_FLAG(death_test_use_fork) = death_test_use_fork_;
     GTEST_FLAG(filter) = filter_;
+    GTEST_FLAG(fail_fast) = fail_fast_;
     GTEST_FLAG(internal_run_death_test) = internal_run_death_test_;
     GTEST_FLAG(list_tests) = list_tests_;
     GTEST_FLAG(output) = output_;
@@ -208,6 +211,7 @@ class GTestFlagSaver {
   std::string color_;
   std::string death_test_style_;
   bool death_test_use_fork_;
+  bool fail_fast_;
   std::string filter_;
   std::string internal_run_death_test_;
   bool list_tests_;
