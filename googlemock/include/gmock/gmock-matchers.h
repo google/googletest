@@ -445,7 +445,7 @@ class MatcherCastImpl<T, Matcher<U> > {
    private:
     const Matcher<U> source_matcher_;
 
-    GTEST_DISALLOW_ASSIGN_(Impl);
+    GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(Impl);
   };
 };
 
@@ -862,12 +862,12 @@ class RefMatcher<T&> {
    private:
     const Super& object_;
 
-    GTEST_DISALLOW_ASSIGN_(Impl);
+    GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(Impl);
   };
 
   T& object_;
 
-  GTEST_DISALLOW_ASSIGN_(RefMatcher);
+  GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(RefMatcher);
 };
 
 // Polymorphic helper functions for narrow and wide string matchers.
@@ -971,7 +971,7 @@ class StrEqualityMatcher {
   const bool expect_eq_;
   const bool case_sensitive_;
 
-  GTEST_DISALLOW_ASSIGN_(StrEqualityMatcher);
+  GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(StrEqualityMatcher);
 };
 
 // Implements the polymorphic HasSubstr(substring) matcher, which
@@ -1027,7 +1027,7 @@ class HasSubstrMatcher {
  private:
   const StringType substring_;
 
-  GTEST_DISALLOW_ASSIGN_(HasSubstrMatcher);
+  GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(HasSubstrMatcher);
 };
 
 // Implements the polymorphic StartsWith(substring) matcher, which
@@ -1084,7 +1084,7 @@ class StartsWithMatcher {
  private:
   const StringType prefix_;
 
-  GTEST_DISALLOW_ASSIGN_(StartsWithMatcher);
+  GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(StartsWithMatcher);
 };
 
 // Implements the polymorphic EndsWith(substring) matcher, which
@@ -1140,7 +1140,7 @@ class EndsWithMatcher {
  private:
   const StringType suffix_;
 
-  GTEST_DISALLOW_ASSIGN_(EndsWithMatcher);
+  GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(EndsWithMatcher);
 };
 
 // Implements a matcher that compares the two fields of a 2-tuple
@@ -1235,7 +1235,7 @@ class NotMatcherImpl : public MatcherInterface<const T&> {
  private:
   const Matcher<T> matcher_;
 
-  GTEST_DISALLOW_ASSIGN_(NotMatcherImpl);
+  GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(NotMatcherImpl);
 };
 
 // Implements the Not(m) matcher, which matches a value that doesn't
@@ -1255,7 +1255,7 @@ class NotMatcher {
  private:
   InnerMatcher matcher_;
 
-  GTEST_DISALLOW_ASSIGN_(NotMatcher);
+  GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(NotMatcher);
 };
 
 // Implements the AllOf(m1, m2) matcher for a particular argument type
@@ -1318,7 +1318,7 @@ class AllOfMatcherImpl : public MatcherInterface<const T&> {
  private:
   const std::vector<Matcher<T> > matchers_;
 
-  GTEST_DISALLOW_ASSIGN_(AllOfMatcherImpl);
+  GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(AllOfMatcherImpl);
 };
 
 // VariadicMatcher is used for the variadic implementation of
@@ -1358,7 +1358,7 @@ class VariadicMatcher {
 
   std::tuple<Args...> matchers_;
 
-  GTEST_DISALLOW_ASSIGN_(VariadicMatcher);
+  GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(VariadicMatcher);
 };
 
 template <typename... Args>
@@ -1424,7 +1424,7 @@ class AnyOfMatcherImpl : public MatcherInterface<const T&> {
  private:
   const std::vector<Matcher<T> > matchers_;
 
-  GTEST_DISALLOW_ASSIGN_(AnyOfMatcherImpl);
+  GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(AnyOfMatcherImpl);
 };
 
 // AnyOfMatcher is used for the variadic implementation of AnyOf(m_1, m_2, ...).
@@ -1453,7 +1453,7 @@ class SomeOfArrayMatcher {
  private:
   const ::std::vector<T> matchers_;
 
-  GTEST_DISALLOW_ASSIGN_(SomeOfArrayMatcher);
+  GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(SomeOfArrayMatcher);
 };
 
 template <typename T>
@@ -1498,7 +1498,7 @@ class TrulyMatcher {
  private:
   Predicate predicate_;
 
-  GTEST_DISALLOW_ASSIGN_(TrulyMatcher);
+  GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(TrulyMatcher);
 };
 
 // Used for implementing Matches(matcher), which turns a matcher into
@@ -1536,7 +1536,7 @@ class MatcherAsPredicate {
  private:
   M matcher_;
 
-  GTEST_DISALLOW_ASSIGN_(MatcherAsPredicate);
+  GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(MatcherAsPredicate);
 };
 
 // For implementing ASSERT_THAT() and EXPECT_THAT().  The template
@@ -1588,7 +1588,7 @@ class PredicateFormatterFromMatcher {
  private:
   const M matcher_;
 
-  GTEST_DISALLOW_ASSIGN_(PredicateFormatterFromMatcher);
+  GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(PredicateFormatterFromMatcher);
 };
 
 // A helper function for converting a matcher to a predicate-formatter
@@ -1741,7 +1741,7 @@ class FloatingEqMatcher {
     // max_abs_error will be used for value comparison when >= 0.
     const FloatType max_abs_error_;
 
-    GTEST_DISALLOW_ASSIGN_(Impl);
+    GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(Impl);
   };
 
   // The following 3 type conversion operators allow FloatEq(expected) and
@@ -1771,7 +1771,7 @@ class FloatingEqMatcher {
   // max_abs_error will be used for value comparison when >= 0.
   const FloatType max_abs_error_;
 
-  GTEST_DISALLOW_ASSIGN_(FloatingEqMatcher);
+  GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(FloatingEqMatcher);
 };
 
 // A 2-tuple ("binary") wrapper around FloatingEqMatcher:
@@ -1902,12 +1902,12 @@ class PointeeMatcher {
    private:
     const Matcher<const Pointee&> matcher_;
 
-    GTEST_DISALLOW_ASSIGN_(Impl);
+    GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(Impl);
   };
 
   const InnerMatcher matcher_;
 
-  GTEST_DISALLOW_ASSIGN_(PointeeMatcher);
+  GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(PointeeMatcher);
 };
 
 #if GTEST_HAS_RTTI
@@ -1945,7 +1945,7 @@ class WhenDynamicCastToMatcherBase {
     *os << "when dynamic_cast to " << GetToName() << ", ";
   }
 
-  GTEST_DISALLOW_ASSIGN_(WhenDynamicCastToMatcherBase);
+  GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(WhenDynamicCastToMatcherBase);
 };
 
 // Primary template.
@@ -2044,7 +2044,7 @@ class FieldMatcher {
   // or "whose field `name_of_field` " if the name is known.
   const std::string whose_field_;
 
-  GTEST_DISALLOW_ASSIGN_(FieldMatcher);
+  GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(FieldMatcher);
 };
 
 // Implements the Property() matcher for matching a property
@@ -2114,7 +2114,7 @@ class PropertyMatcher {
   // unknown or "whose property `name_of_property` " if the name is known.
   const std::string whose_property_;
 
-  GTEST_DISALLOW_ASSIGN_(PropertyMatcher);
+  GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(PropertyMatcher);
 };
 
 // Type traits specifying various features of different functors for ResultOf.
@@ -2205,13 +2205,13 @@ class ResultOfMatcher {
     mutable CallableStorageType callable_;
     const Matcher<ResultType> matcher_;
 
-    GTEST_DISALLOW_ASSIGN_(Impl);
+    GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(Impl);
   };  // class Impl
 
   const CallableStorageType callable_;
   const InnerMatcher matcher_;
 
-  GTEST_DISALLOW_ASSIGN_(ResultOfMatcher);
+  GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(ResultOfMatcher);
 };
 
 // Implements a matcher that checks the size of an STL-style container.
@@ -2256,12 +2256,12 @@ class SizeIsMatcher {
 
    private:
     const Matcher<SizeType> size_matcher_;
-    GTEST_DISALLOW_ASSIGN_(Impl);
+    GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(Impl);
   };
 
  private:
   const SizeMatcher size_matcher_;
-  GTEST_DISALLOW_ASSIGN_(SizeIsMatcher);
+  GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(SizeIsMatcher);
 };
 
 // Implements a matcher that checks the begin()..end() distance of an STL-style
@@ -2313,12 +2313,12 @@ class BeginEndDistanceIsMatcher {
 
    private:
     const Matcher<DistanceType> distance_matcher_;
-    GTEST_DISALLOW_ASSIGN_(Impl);
+    GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(Impl);
   };
 
  private:
   const DistanceMatcher distance_matcher_;
-  GTEST_DISALLOW_ASSIGN_(BeginEndDistanceIsMatcher);
+  GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(BeginEndDistanceIsMatcher);
 };
 
 // Implements an equality matcher for any STL-style container whose elements
@@ -2412,7 +2412,7 @@ class ContainerEqMatcher {
  private:
   const StlContainer expected_;
 
-  GTEST_DISALLOW_ASSIGN_(ContainerEqMatcher);
+  GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(ContainerEqMatcher);
 };
 
 // A comparator functor that uses the < operator to compare two values.
@@ -2495,7 +2495,7 @@ class WhenSortedByMatcher {
   const Comparator comparator_;
   const ContainerMatcher matcher_;
 
-  GTEST_DISALLOW_ASSIGN_(WhenSortedByMatcher);
+  GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(WhenSortedByMatcher);
 };
 
 // Implements Pointwise(tuple_matcher, rhs_container).  tuple_matcher
@@ -2612,14 +2612,14 @@ class PointwiseMatcher {
     const Matcher<InnerMatcherArg> mono_tuple_matcher_;
     const RhsStlContainer rhs_;
 
-    GTEST_DISALLOW_ASSIGN_(Impl);
+    GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(Impl);
   };
 
  private:
   const TupleMatcher tuple_matcher_;
   const RhsStlContainer rhs_;
 
-  GTEST_DISALLOW_ASSIGN_(PointwiseMatcher);
+  GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(PointwiseMatcher);
 };
 
 // Holds the logic common to ContainsMatcherImpl and EachMatcherImpl.
@@ -2663,7 +2663,7 @@ class QuantifierMatcherImpl : public MatcherInterface<Container> {
  protected:
   const Matcher<const Element&> inner_matcher_;
 
-  GTEST_DISALLOW_ASSIGN_(QuantifierMatcherImpl);
+  GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(QuantifierMatcherImpl);
 };
 
 // Implements Contains(element_matcher) for the given argument type Container.
@@ -2692,7 +2692,7 @@ class ContainsMatcherImpl : public QuantifierMatcherImpl<Container> {
   }
 
  private:
-  GTEST_DISALLOW_ASSIGN_(ContainsMatcherImpl);
+  GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(ContainsMatcherImpl);
 };
 
 // Implements Each(element_matcher) for the given argument type Container.
@@ -2721,7 +2721,7 @@ class EachMatcherImpl : public QuantifierMatcherImpl<Container> {
   }
 
  private:
-  GTEST_DISALLOW_ASSIGN_(EachMatcherImpl);
+  GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(EachMatcherImpl);
 };
 
 // Implements polymorphic Contains(element_matcher).
@@ -2739,7 +2739,7 @@ class ContainsMatcher {
  private:
   const M inner_matcher_;
 
-  GTEST_DISALLOW_ASSIGN_(ContainsMatcher);
+  GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(ContainsMatcher);
 };
 
 // Implements polymorphic Each(element_matcher).
@@ -2757,7 +2757,7 @@ class EachMatcher {
  private:
   const M inner_matcher_;
 
-  GTEST_DISALLOW_ASSIGN_(EachMatcher);
+  GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(EachMatcher);
 };
 
 struct Rank1 {};
@@ -2829,7 +2829,7 @@ class KeyMatcherImpl : public MatcherInterface<PairType> {
  private:
   const Matcher<const KeyType&> inner_matcher_;
 
-  GTEST_DISALLOW_ASSIGN_(KeyMatcherImpl);
+  GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(KeyMatcherImpl);
 };
 
 // Implements polymorphic Key(matcher_for_key).
@@ -2847,7 +2847,7 @@ class KeyMatcher {
  private:
   const M matcher_for_key_;
 
-  GTEST_DISALLOW_ASSIGN_(KeyMatcher);
+  GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(KeyMatcher);
 };
 
 // Implements Pair(first_matcher, second_matcher) for the given argument pair
@@ -2934,7 +2934,7 @@ class PairMatcherImpl : public MatcherInterface<PairType> {
   const Matcher<const FirstType&> first_matcher_;
   const Matcher<const SecondType&> second_matcher_;
 
-  GTEST_DISALLOW_ASSIGN_(PairMatcherImpl);
+  GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(PairMatcherImpl);
 };
 
 // Implements polymorphic Pair(first_matcher, second_matcher).
@@ -2954,7 +2954,7 @@ class PairMatcher {
   const FirstMatcher first_matcher_;
   const SecondMatcher second_matcher_;
 
-  GTEST_DISALLOW_ASSIGN_(PairMatcher);
+  GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(PairMatcher);
 };
 
 // Implements ElementsAre() and ElementsAreArray().
@@ -3101,7 +3101,7 @@ class ElementsAreMatcherImpl : public MatcherInterface<Container> {
 
   ::std::vector<Matcher<const Element&> > matchers_;
 
-  GTEST_DISALLOW_ASSIGN_(ElementsAreMatcherImpl);
+  GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(ElementsAreMatcherImpl);
 };
 
 // Connectivity matrix of (elements X matchers), in element-major order.
@@ -3205,7 +3205,7 @@ class GTEST_API_ UnorderedElementsAreMatcherImplBase {
   UnorderedMatcherRequire::Flags match_flags_;
   MatcherDescriberVec matcher_describers_;
 
-  GTEST_DISALLOW_ASSIGN_(UnorderedElementsAreMatcherImplBase);
+  GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(UnorderedElementsAreMatcherImplBase);
 };
 
 // Implements UnorderedElementsAre, UnorderedElementsAreArray, IsSubsetOf, and
@@ -3302,7 +3302,7 @@ class UnorderedElementsAreMatcherImpl
 
   ::std::vector<Matcher<const Element&> > matchers_;
 
-  GTEST_DISALLOW_ASSIGN_(UnorderedElementsAreMatcherImpl);
+  GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(UnorderedElementsAreMatcherImpl);
 };
 
 // Functor for use in TransformTuple.
@@ -3340,7 +3340,7 @@ class UnorderedElementsAreMatcher {
 
  private:
   const MatcherTuple matchers_;
-  GTEST_DISALLOW_ASSIGN_(UnorderedElementsAreMatcher);
+  GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(UnorderedElementsAreMatcher);
 };
 
 // Implements ElementsAre.
@@ -3370,7 +3370,7 @@ class ElementsAreMatcher {
 
  private:
   const MatcherTuple matchers_;
-  GTEST_DISALLOW_ASSIGN_(ElementsAreMatcher);
+  GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(ElementsAreMatcher);
 };
 
 // Implements UnorderedElementsAreArray(), IsSubsetOf(), and IsSupersetOf().
@@ -3393,7 +3393,7 @@ class UnorderedElementsAreArrayMatcher {
   UnorderedMatcherRequire::Flags match_flags_;
   ::std::vector<T> matchers_;
 
-  GTEST_DISALLOW_ASSIGN_(UnorderedElementsAreArrayMatcher);
+  GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(UnorderedElementsAreArrayMatcher);
 };
 
 // Implements ElementsAreArray().
@@ -3416,7 +3416,7 @@ class ElementsAreArrayMatcher {
  private:
   const ::std::vector<T> matchers_;
 
-  GTEST_DISALLOW_ASSIGN_(ElementsAreArrayMatcher);
+  GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(ElementsAreArrayMatcher);
 };
 
 // Given a 2-tuple matcher tm of type Tuple2Matcher and a value second
@@ -3479,7 +3479,7 @@ class BoundSecondMatcher {
     const Matcher<const ArgTuple&> mono_tuple2_matcher_;
     const Second second_value_;
 
-    GTEST_DISALLOW_ASSIGN_(Impl);
+    GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(Impl);
   };
 
   const Tuple2Matcher tuple2_matcher_;
@@ -3552,12 +3552,12 @@ class OptionalMatcher {
 
    private:
     const Matcher<ValueType> value_matcher_;
-    GTEST_DISALLOW_ASSIGN_(Impl);
+    GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(Impl);
   };
 
  private:
   const ValueMatcher value_matcher_;
-  GTEST_DISALLOW_ASSIGN_(OptionalMatcher);
+  GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(OptionalMatcher);
 };
 
 namespace variant_matcher {

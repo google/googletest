@@ -880,7 +880,7 @@ class GTEST_API_ ExpectationBase {
   mutable bool action_count_checked_;  // Under mutex_.
   mutable Mutex mutex_;  // Protects action_count_checked_.
 
-  GTEST_DISALLOW_ASSIGN_(ExpectationBase);
+  GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(ExpectationBase);
 };  // class ExpectationBase
 
 // Impements an expectation for the given function type.
@@ -1296,7 +1296,7 @@ class MockSpec {
   // The argument matchers specified in the spec.
   ArgumentMatcherTuple matchers_;
 
-  GTEST_DISALLOW_ASSIGN_(MockSpec);
+  GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(MockSpec);
 };  // class MockSpec
 
 // Wrapper type for generically holding an ordinary value or lvalue reference.

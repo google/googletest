@@ -705,8 +705,8 @@ class Base {
  public:
   virtual ~Base() {}
   Base() {}
- private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(Base);
+  Base(const Base&) = delete;
+  Base& operator=(const Base&) = delete;
 };
 
 class Derived : public Base {
@@ -2941,11 +2941,10 @@ TEST(AllArgsTest, WorksForNonTuple) {
 class AllArgsHelper {
  public:
   AllArgsHelper() {}
+  AllArgsHelper(const AllArgsHelper&) = delete;
+  AllArgsHelper& operator=(const AllArgsHelper&) = delete;
 
   MOCK_METHOD2(Helper, int(char x, int y));
-
- private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(AllArgsHelper);
 };
 
 TEST(AllArgsTest, WorksInWithClause) {
@@ -2965,6 +2964,8 @@ TEST(AllArgsTest, WorksInWithClause) {
 class OptionalMatchersHelper {
  public:
   OptionalMatchersHelper() {}
+  OptionalMatchersHelper(const OptionalMatchersHelper&) = delete;
+  OptionalMatchersHelper& operator=(const OptionalMatchersHelper&) = delete;
 
   MOCK_METHOD0(NoArgs, int());
 
@@ -2974,9 +2975,6 @@ class OptionalMatchersHelper {
 
   MOCK_METHOD1(Overloaded, int(char x));
   MOCK_METHOD2(Overloaded, int(char x, int y));
-
- private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(OptionalMatchersHelper);
 };
 
 TEST(AllArgsTest, WorksWithoutMatchers) {
@@ -3720,13 +3718,14 @@ class Uncopyable {
  public:
   Uncopyable() : value_(-1) {}
   explicit Uncopyable(int a_value) : value_(a_value) {}
+  Uncopyable(const Uncopyable&) = delete;
+  Uncopyable& operator=(const Uncopyable&) = delete;
 
   int value() const { return value_; }
   void set_value(int i) { value_ = i; }
 
  private:
   int value_;
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(Uncopyable);
 };
 
 // Returns true if and only if x.value() is positive.
@@ -3741,22 +3740,17 @@ struct AStruct {
   AStruct() : x(0), y(1.0), z(5), p(nullptr) {}
   AStruct(const AStruct& rhs)
       : x(rhs.x), y(rhs.y), z(rhs.z.value()), p(rhs.p) {}
+  AStruct& operator=(const AStruct&) = delete;
 
   int x;           // A non-const field.
   const double y;  // A const field.
   Uncopyable z;    // An uncopyable field.
   const char* p;   // A pointer field.
-
- private:
-  GTEST_DISALLOW_ASSIGN_(AStruct);
 };
 
 // A derived struct for testing Field().
 struct DerivedStruct : public AStruct {
   char ch;
-
- private:
-  GTEST_DISALLOW_ASSIGN_(DerivedStruct);
 };
 
 // Tests that Field(&Foo::field, ...) works when field is non-const.
@@ -4559,6 +4553,8 @@ TEST(ExplainmatcherResultTest, MonomorphicMatcher) {
 class NotCopyable {
  public:
   explicit NotCopyable(int a_value) : value_(a_value) {}
+  NotCopyable(const NotCopyable&) = delete;
+  NotCopyable& operator=(const NotCopyable&) = delete;
 
   int value() const { return value_; }
 
@@ -4571,8 +4567,6 @@ class NotCopyable {
   }
  private:
   int value_;
-
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(NotCopyable);
 };
 
 TEST(ByRefTest, AllowsNotCopyableConstValueInMatchers) {

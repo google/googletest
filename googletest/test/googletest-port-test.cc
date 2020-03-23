@@ -1168,6 +1168,7 @@ class DestructorTracker {
   DestructorTracker() : index_(GetNewIndex()) {}
   DestructorTracker(const DestructorTracker& /* rhs */)
       : index_(GetNewIndex()) {}
+  DestructorTracker& operator=(const DestructorTracker&) = delete;
   ~DestructorTracker() {
     // We never access DestructorCall::List() concurrently, so we don't need
     // to protect this access with a mutex.
@@ -1180,8 +1181,6 @@ class DestructorTracker {
     return DestructorCall::List().size() - 1;
   }
   const size_t index_;
-
-  GTEST_DISALLOW_ASSIGN_(DestructorTracker);
 };
 
 typedef ThreadLocal<DestructorTracker>* ThreadParam;

@@ -1079,6 +1079,7 @@ class NativeArray {
   NativeArray(const NativeArray& rhs) {
     (this->*rhs.clone_)(rhs.array_, rhs.size_);
   }
+  NativeArray& operator=(const NativeArray&) = delete;
 
   ~NativeArray() {
     if (clone_ != &NativeArray::InitRef)
@@ -1118,8 +1119,6 @@ class NativeArray {
   const Element* array_;
   size_t size_;
   void (NativeArray::*clone_)(const Element*, size_t);
-
-  GTEST_DISALLOW_ASSIGN_(NativeArray);
 };
 
 // Backport of std::index_sequence.
@@ -1407,8 +1406,6 @@ constexpr bool InstantiateTypedTestCase_P_IsDeprecated() { return true; }
     GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)() {}                   \
     ~GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)() override = default; \
     GTEST_DISALLOW_COPY_AND_ASSIGN_(GTEST_TEST_CLASS_NAME_(test_suite_name,   \
-                                                           test_name));       \
-    GTEST_DISALLOW_MOVE_AND_ASSIGN_(GTEST_TEST_CLASS_NAME_(test_suite_name,   \
                                                            test_name));       \
                                                                               \
    private:                                                                   \

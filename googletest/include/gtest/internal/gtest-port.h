@@ -190,10 +190,8 @@
 //   GTEST_AMBIGUOUS_ELSE_BLOCKER_ - for disabling a gcc warning.
 //   GTEST_ATTRIBUTE_UNUSED_  - declares that a class' instances or a
 //                              variable don't have to be used.
-//   GTEST_DISALLOW_ASSIGN_   - disables copy operator=.
+//   GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_ - disables copy operator=.
 //   GTEST_DISALLOW_COPY_AND_ASSIGN_ - disables copy ctor and operator=.
-//   GTEST_DISALLOW_MOVE_ASSIGN_   - disables move operator=.
-//   GTEST_DISALLOW_MOVE_AND_ASSIGN_ - disables move ctor and operator=.
 //   GTEST_MUST_USE_RESULT_   - declares that a function's result must be used.
 //   GTEST_INTENTIONAL_CONST_COND_PUSH_ - start code section where MSVC C4127 is
 //                                        suppressed (constant conditional).
@@ -675,25 +673,17 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 
 // A macro to disallow copy operator=
 // This should be used in the private: declarations for a class.
-#define GTEST_DISALLOW_ASSIGN_(type) \
+#define GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(type) \
+  public: \
+  type(type const &) = default; \
+  private: \
   type& operator=(type const &) = delete
 
 // A macro to disallow copy constructor and operator=
 // This should be used in the private: declarations for a class.
 #define GTEST_DISALLOW_COPY_AND_ASSIGN_(type) \
   type(type const &) = delete; \
-  GTEST_DISALLOW_ASSIGN_(type)
-
-// A macro to disallow move operator=
-// This should be used in the private: declarations for a class.
-#define GTEST_DISALLOW_MOVE_ASSIGN_(type) \
-  type& operator=(type &&) noexcept = delete
-
-// A macro to disallow move constructor and operator=
-// This should be used in the private: declarations for a class.
-#define GTEST_DISALLOW_MOVE_AND_ASSIGN_(type) \
-  type(type &&) noexcept = delete; \
-  GTEST_DISALLOW_MOVE_ASSIGN_(type)
+  type& operator=(type const &) = delete
 
 // Tell the compiler to warn about unused return values for functions declared
 // with this macro.  The macro should be used on function declarations
@@ -881,6 +871,7 @@ class GTEST_API_ RE {
   // A copy constructor is required by the Standard to initialize object
   // references from r-values.
   RE(const RE& other) { Init(other.pattern()); }
+  RE& operator=(const RE&) = delete;
 
   // Constructs an RE from a string.
   RE(const ::std::string& regex) { Init(regex.c_str()); }  // NOLINT
@@ -920,8 +911,6 @@ class GTEST_API_ RE {
   const char* full_pattern_;  // For FullMatch();
 
 # endif
-
-  GTEST_DISALLOW_ASSIGN_(RE);
 };
 
 #endif  // GTEST_USES_PCRE

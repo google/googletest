@@ -571,12 +571,12 @@ class PolymorphicAction {
    private:
     Impl impl_;
 
-    GTEST_DISALLOW_ASSIGN_(MonomorphicImpl);
+    GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(MonomorphicImpl);
   };
 
   Impl impl_;
 
-  GTEST_DISALLOW_ASSIGN_(PolymorphicAction);
+  GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(PolymorphicAction);
 };
 
 // Creates an Action from its implementation and returns it.  The
@@ -718,12 +718,12 @@ class ReturnAction {
     bool performed_;
     const std::shared_ptr<R> wrapper_;
 
-    GTEST_DISALLOW_ASSIGN_(Impl);
+    GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(Impl);
   };
 
   const std::shared_ptr<R> value_;
 
-  GTEST_DISALLOW_ASSIGN_(ReturnAction);
+  GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(ReturnAction);
 };
 
 // Implements the ReturnNull() action.
@@ -785,12 +785,12 @@ class ReturnRefAction {
    private:
     T& ref_;
 
-    GTEST_DISALLOW_ASSIGN_(Impl);
+    GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(Impl);
   };
 
   T& ref_;
 
-  GTEST_DISALLOW_ASSIGN_(ReturnRefAction);
+  GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(ReturnRefAction);
 };
 
 // Implements the polymorphic ReturnRefOfCopy(x) action, which can be
@@ -832,12 +832,12 @@ class ReturnRefOfCopyAction {
    private:
     T value_;
 
-    GTEST_DISALLOW_ASSIGN_(Impl);
+    GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(Impl);
   };
 
   const T value_;
 
-  GTEST_DISALLOW_ASSIGN_(ReturnRefOfCopyAction);
+  GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(ReturnRefOfCopyAction);
 };
 
 // Implements the polymorphic ReturnRoundRobin(v) action, which can be
@@ -895,7 +895,7 @@ class AssignAction {
   T1* const ptr_;
   const T2 value_;
 
-  GTEST_DISALLOW_ASSIGN_(AssignAction);
+  GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(AssignAction);
 };
 
 #if !GTEST_OS_WINDOWS_MOBILE
@@ -918,7 +918,7 @@ class SetErrnoAndReturnAction {
   const int errno_;
   const T result_;
 
-  GTEST_DISALLOW_ASSIGN_(SetErrnoAndReturnAction);
+  GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(SetErrnoAndReturnAction);
 };
 
 #endif  // !GTEST_OS_WINDOWS_MOBILE
@@ -1024,12 +1024,12 @@ class IgnoreResultAction {
 
     const Action<OriginalFunction> action_;
 
-    GTEST_DISALLOW_ASSIGN_(Impl);
+    GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(Impl);
   };
 
   const A action_;
 
-  GTEST_DISALLOW_ASSIGN_(IgnoreResultAction);
+  GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(IgnoreResultAction);
 };
 
 template <typename InnerAction, size_t... I>
@@ -1468,11 +1468,11 @@ auto InvokeArgumentAdl(AdlTag, F f, Args... args) -> decltype(f(args...)) {
       GMOCK_ACTION_FIELD_PARAMS_(params)                                      \
                                                                               \
      private:                                                                 \
-      GTEST_DISALLOW_ASSIGN_(gmock_Impl);                                     \
+      GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(gmock_Impl);                                     \
     };                                                                        \
                                                                               \
    private:                                                                   \
-    GTEST_DISALLOW_ASSIGN_(full_name);                                        \
+    GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(full_name);                                        \
   };                                                                          \
   template <GMOCK_ACTION_TYPENAME_PARAMS_(params)>                            \
   inline full_name<GMOCK_ACTION_TYPE_PARAMS_(params)> name(                   \
@@ -1511,13 +1511,7 @@ auto InvokeArgumentAdl(AdlTag, F f, Args... args) -> decltype(f(args...)) {
       }                                                                       \
       template <GMOCK_ACTION_TEMPLATE_ARGS_NAMES_>                            \
       return_type gmock_PerformImpl(GMOCK_ACTION_ARG_TYPES_AND_NAMES_) const; \
-                                                                              \
-     private:                                                                 \
-      GTEST_DISALLOW_ASSIGN_(gmock_Impl);                                     \
     };                                                                        \
-                                                                              \
-   private:                                                                   \
-    GTEST_DISALLOW_ASSIGN_(name##Action);                                     \
   };                                                                          \
   inline name##Action name() { return name##Action(); }                       \
   template <typename F>                                                       \

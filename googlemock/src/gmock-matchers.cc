@@ -219,7 +219,7 @@ class MaxBipartiteMatchState {
   ::std::vector<size_t> left_;
   ::std::vector<size_t> right_;
 
-  GTEST_DISALLOW_ASSIGN_(MaxBipartiteMatchState);
+  GTEST_DISALLOW_ASSIGN_BUT_DEFAULT_COPY_(MaxBipartiteMatchState);
 };
 
 const size_t MaxBipartiteMatchState::kUnused;
