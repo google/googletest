@@ -1,5 +1,19 @@
 # Googletest Primer
 
+## Contents
+1. [Introduction: Why googletest?](#introduction-why-googletest)
+1. [Beware of the nomenclature](#beware-of-the-nomenclature)
+1. [Basic Concepts](#basic-concepts)
+1. [Assertions](#assertions)
+	1. [Basic Assertions](#basic-assertions)
+	1. [Binary Comparison](#binary-comparison)
+	1. [String Comparison](#string-comparison)
+1. [Simple Tests](#simple-tests)
+1. [Test Fixtures: Using the Same Data Configuration for Multiple Tests {#same-data-multiple-tests}](#test-fixtures-using-the-same-data-configuration-for-multiple-tests-same-data-multiple-tests)
+1. [Invoking the Tests](#invoking-the-tests)
+1. [Writing the main() Function](#writing-the-main-function)
+1. [Known Limitations](#known-limitations)
+
 ## Introduction: Why googletest?
 
 *googletest* helps you write better C++ tests.

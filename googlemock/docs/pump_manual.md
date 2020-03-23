@@ -2,6 +2,16 @@
 
 # The Problem
 
+## Contents
+1. [Our Solution](#our-solution)
+1. [Highlights](#highlights)
+1. [Examples](#examples)
+1. [Constructs](#constructs)
+1. [Grammar](#grammar)
+1. [Code](#code)
+1. [Real Examples](#real-examples)
+1. [Tips](#tips)
+
 Template and macro libraries often need to define many classes, functions, or
 macros that vary only (or almost only) in the number of arguments they take.
 It's a lot of repetitive, mechanical, and error-prone work.

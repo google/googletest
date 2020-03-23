@@ -1,5 +1,10 @@
 ## Using GoogleTest from various build systems
 
+## Contents
+1. [CMake](#cmake)
+1. [Help! pkg-config can't find GoogleTest!](#help-pkg-config-can't-find-googletest)
+1. [Using pkg-config in a cross-compilation setting](#using-pkg-config-in-a-cross-compilation-setting)
+
 GoogleTest comes with pkg-config files that can be used to determine all
 necessary flags for compiling and linking to GoogleTest (and GoogleMock).
 Pkg-config is a standardised plain-text format containing

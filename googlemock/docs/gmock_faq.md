@@ -1,5 +1,25 @@
 ## Legacy gMock FAQ {#GMockFaq}
 
+## Contents
+1. [When I call a method on my mock object, the method for the real object is invoked instead. What's the problem?](#when-i-call-a-method-on-my-mock-object-the-method-for-the-real-object-is-invoked-instead-what's-the-problem)
+1. [Can I mock a variadic function?](#can-i-mock-a-variadic-function)
+1. [MSVC gives me warning C4301 or C4373 when I define a mock method with a const parameter. Why?](#msvc-gives-me-warning-c4301-or-c4373-when-i-define-a-mock-method-with-a-const-parameter-why)
+1. [I can't figure out why gMock thinks my expectations are not satisfied. What should I do?](#i-can't-figure-out-why-gmock-thinks-my-expectations-are-not-satisfied-what-should-i-do)
+1. [My program crashed and `ScopedMockLog` spit out tons of messages. Is it a gMock bug?](#my-program-crashed-and-scopedmocklog-spit-out-tons-of-messages-is-it-a-gmock-bug)
+1. [How can I assert that a function is NEVER called?](#how-can-i-assert-that-a-function-is-never-called)
+1. [I have a failed test where gMock tells me TWICE that a particular expectation is not satisfied. Isn't this redundant?](#i-have-a-failed-test-where-gmock-tells-me-twice-that-a-particular-expectation-is-not-satisfied-isn't-this-redundant)
+1. [I get a heapcheck failure when using a mock object, but using a real object is fine. What can be wrong?](#i-get-a-heapcheck-failure-when-using-a-mock-object-but-using-a-real-object-is-fine-what-can-be-wrong)
+1. [The "newer expectations override older ones" rule makes writing expectations awkward. Why does gMock do that?](#the-newer-expectations-override-older-ones-rule-makes-writing-expectations-awkward-why-does-gmock-do-that)
+1. [gMock prints a warning when a function without EXPECT_CALL is called, even if I have set its behavior using ON_CALL. Would it be reasonable not to show the warning in this case?](#gmock-prints-a-warning-when-a-function-without-expect_call-is-called-even-if-i-have-set-its-behavior-using-on_call-would-it-be-reasonable-not-to-show-the-warning-in-this-case)
+1. [How can I delete the mock function's argument in an action?](#how-can-i-delete-the-mock-function's-argument-in-an-action)
+1. [How can I perform an arbitrary action on a mock function's argument?](#how-can-i-perform-an-arbitrary-action-on-a-mock-function's-argument)
+1. [My code calls a static/global function. Can I mock it?](#my-code-calls-a-staticglobal-function-can-i-mock-it)
+1. [My mock object needs to do complex stuff. It's a lot of pain to specify the actions. gMock sucks!](#my-mock-object-needs-to-do-complex-stuff-it's-a-lot-of-pain-to-specify-the-actions-gmock-sucks)
+1. [I got a warning "Uninteresting function call encountered - default action taken.." Should I panic?](#i-got-a-warning-uninteresting-function-call-encountered---default-action-taken-should-i-panic)
+1. [I want to define a custom action. Should I use Invoke() or implement the ActionInterface interface?](#i-want-to-define-a-custom-action-should-i-use-invoke-or-implement-the-actioninterface-interface)
+1. [I use SetArgPointee() in WillOnce(), but gcc complains about "conflicting return type specified". What does it mean?](#i-use-setargpointee-in-willonce-but-gcc-complains-about-conflicting-return-type-specified-what-does-it-mean)
+1. [I have a huge mock class, and Microsoft Visual C++ runs out of memory when compiling it. What can I do?](#i-have-a-huge-mock-class-and-microsoft-visual-c++-runs-out-of-memory-when-compiling-it-what-can-i-do)
+
 <!-- GOOGLETEST_CM0021 DO NOT DELETE -->
 
 ### When I call a method on my mock object, the method for the real object is invoked instead. What's the problem?

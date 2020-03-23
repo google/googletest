@@ -1,5 +1,18 @@
 ## gMock Cheat Sheet
 
+## Contents
+1. [Defining a Mock Class](#defining-a-mock-class)
+1. [Using Mocks in Tests {#UsingMocks}](#using-mocks-in-tests-usingmocks)
+1. [Setting Default Actions {#OnCall}](#setting-default-actions-oncall)
+1. [Setting Expectations {#ExpectCall}](#setting-expectations-expectcall)
+1. [Matchers {#MatcherList}](#matchers-matcherlist)
+1. [Actions {#ActionList}](#actions-actionlist)
+1. [Cardinalities {#CardinalityList}](#cardinalities-cardinalitylist)
+1. [Expectation Order](#expectation-order)
+1. [Verifying and Resetting a Mock](#verifying-and-resetting-a-mock)
+1. [Mock Classes](#mock-classes)
+1. [Flags](#flags)
+
 <!-- GOOGLETEST_CM0019 DO NOT DELETE -->
 
 <!-- GOOGLETEST_CM0033 DO NOT DELETE -->
