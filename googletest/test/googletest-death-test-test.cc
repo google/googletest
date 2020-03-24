@@ -391,17 +391,19 @@ void SigprofAction(int, siginfo_t*, void*) { /* no op */ }
 
 // Sets SIGPROF action and ITIMER_PROF timer (interval: 1ms).
 void SetSigprofActionAndTimer() {
-  struct itimerval timer;
-  timer.it_interval.tv_sec = 0;
-  timer.it_interval.tv_usec = 1;
-  timer.it_value = timer.it_interval;
-  ASSERT_EQ(0, setitimer(ITIMER_PROF, &timer, nullptr));
   struct sigaction signal_action;
   memset(&signal_action, 0, sizeof(signal_action));
   sigemptyset(&signal_action.sa_mask);
   signal_action.sa_sigaction = SigprofAction;
   signal_action.sa_flags = SA_RESTART | SA_SIGINFO;
   ASSERT_EQ(0, sigaction(SIGPROF, &signal_action, nullptr));
+  // timer comes second, to avoid SIGPROF premature delivery, as suggested at
+  // https://www.gnu.org/software/libc/manual/html_node/Setting-an-Alarm.html
+  struct itimerval timer;
+  timer.it_interval.tv_sec = 0;
+  timer.it_interval.tv_usec = 1;
+  timer.it_value = timer.it_interval;
+  ASSERT_EQ(0, setitimer(ITIMER_PROF, &timer, nullptr));
 }
 
 // Disables ITIMER_PROF timer and ignores SIGPROF signal.
