@@ -1300,33 +1300,33 @@ constexpr bool InstantiateTypedTestCase_P_IsDeprecated() { return true; }
       gtest_msg.value = \
           "Expected: " #statement " throws an exception of type " \
           #expected_exception ".\n  Actual: it throws a different type."; \
-      goto GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__); \
+      fail(gtest_msg.value); \
     } \
     if (!gtest_caught_expected) { \
       gtest_msg.value = \
           "Expected: " #statement " throws an exception of type " \
           #expected_exception ".\n  Actual: it throws nothing."; \
-      goto GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__); \
+      fail(gtest_msg.value); \
     } \
   } else \
-    GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__): \
       fail(gtest_msg.value)
 
 #if GTEST_HAS_EXCEPTIONS
 
-#define GTEST_TEST_NO_THROW_CATCH_STD_EXCEPTION_() \
+#define GTEST_TEST_NO_THROW_CATCH_STD_EXCEPTION_(statement, fail) \
   catch (std::exception const& e) { \
     gtest_msg.value = ( \
       "it throws std::exception-derived exception with description: \"" \
     ); \
     gtest_msg.value += e.what(); \
     gtest_msg.value += "\"."; \
-    goto GTEST_CONCAT_TOKEN_(gtest_label_testnothrow_, __LINE__); \
+    fail(("Expected: " #statement " doesn't throw an exception.\n" \
+            "  Actual: " + gtest_msg.value).c_str()); \
   }
 
 #else  // GTEST_HAS_EXCEPTIONS
 
-#define GTEST_TEST_NO_THROW_CATCH_STD_EXCEPTION_()
+#define GTEST_TEST_NO_THROW_CATCH_STD_EXCEPTION_(statement, fail)
 
 #endif  // GTEST_HAS_EXCEPTIONS
 
@@ -1336,13 +1336,13 @@ constexpr bool InstantiateTypedTestCase_P_IsDeprecated() { return true; }
     try { \
       GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement); \
     } \
-    GTEST_TEST_NO_THROW_CATCH_STD_EXCEPTION_() \
+    GTEST_TEST_NO_THROW_CATCH_STD_EXCEPTION_(statement, fail) \
     catch (...) { \
       gtest_msg.value = "it throws."; \
-      goto GTEST_CONCAT_TOKEN_(gtest_label_testnothrow_, __LINE__); \
+      fail(("Expected: " #statement " doesn't throw an exception.\n" \
+            "  Actual: " + gtest_msg.value).c_str()); \
     } \
   } else \
-    GTEST_CONCAT_TOKEN_(gtest_label_testnothrow_, __LINE__): \
       fail(("Expected: " #statement " doesn't throw an exception.\n" \
             "  Actual: " + gtest_msg.value).c_str())
 
@@ -1357,10 +1357,10 @@ constexpr bool InstantiateTypedTestCase_P_IsDeprecated() { return true; }
       gtest_caught_any = true; \
     } \
     if (!gtest_caught_any) { \
-      goto GTEST_CONCAT_TOKEN_(gtest_label_testanythrow_, __LINE__); \
+        fail("Expected: " #statement " throws an exception.\n" \
+           "  Actual: it doesn't."); \
     } \
   } else \
-    GTEST_CONCAT_TOKEN_(gtest_label_testanythrow_, __LINE__): \
       fail("Expected: " #statement " throws an exception.\n" \
            "  Actual: it doesn't.")
 
@@ -1383,10 +1383,11 @@ constexpr bool InstantiateTypedTestCase_P_IsDeprecated() { return true; }
     ::testing::internal::HasNewFatalFailureHelper gtest_fatal_failure_checker; \
     GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement); \
     if (gtest_fatal_failure_checker.has_new_fatal_failure()) { \
-      goto GTEST_CONCAT_TOKEN_(gtest_label_testnofatal_, __LINE__); \
+        fail("Expected: " #statement " doesn't generate new fatal " \
+                   "failures in the current thread.\n" \
+                   "  Actual: it does."); \
     } \
   } else \
-    GTEST_CONCAT_TOKEN_(gtest_label_testnofatal_, __LINE__): \
       fail("Expected: " #statement " doesn't generate new fatal " \
            "failures in the current thread.\n" \
            "  Actual: it does.")

@@ -219,14 +219,14 @@ inline Matcher<const ::std::string&> MakeDeathTestMatcher(
             #statement,                                                        \
             ::testing::internal::MakeDeathTestMatcher(regex_or_matcher),       \
             __FILE__, __LINE__, &gtest_dt)) {                                  \
-      goto GTEST_CONCAT_TOKEN_(gtest_label_, __LINE__);                        \
+        fail(::testing::internal::DeathTest::LastMessage());                   \
     }                                                                          \
     if (gtest_dt != nullptr) {                                                 \
       std::unique_ptr< ::testing::internal::DeathTest> gtest_dt_ptr(gtest_dt); \
       switch (gtest_dt->AssumeRole()) {                                        \
         case ::testing::internal::DeathTest::OVERSEE_TEST:                     \
           if (!gtest_dt->Passed(predicate(gtest_dt->Wait()))) {                \
-            goto GTEST_CONCAT_TOKEN_(gtest_label_, __LINE__);                  \
+              fail(::testing::internal::DeathTest::LastMessage());             \
           }                                                                    \
           break;                                                               \
         case ::testing::internal::DeathTest::EXECUTE_TEST: {                   \
@@ -241,8 +241,7 @@ inline Matcher<const ::std::string&> MakeDeathTestMatcher(
       }                                                                        \
     }                                                                          \
   } else                                                                       \
-    GTEST_CONCAT_TOKEN_(gtest_label_, __LINE__)                                \
-        : fail(::testing::internal::DeathTest::LastMessage())
+      fail(::testing::internal::DeathTest::LastMessage())
 // The symbol "fail" here expands to something into which a message
 // can be streamed.
 
