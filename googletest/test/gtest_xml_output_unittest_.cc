@@ -74,6 +74,15 @@ TEST_F(SkippedTest, Skipped) {
   GTEST_SKIP();
 }
 
+TEST_F(SkippedTest, SkippedWithMessage) {
+  GTEST_SKIP() << "It is good practice to tell why you skip a test.";
+}
+
+TEST_F(SkippedTest, SkippedAfterFailure) {
+  EXPECT_EQ(1, 2);
+  GTEST_SKIP() << "It is good practice to tell why you skip a test.";
+}
+
 TEST(MixedResultTest, Succeeds) {
   EXPECT_EQ(1, 1);
   ASSERT_EQ(1, 1);

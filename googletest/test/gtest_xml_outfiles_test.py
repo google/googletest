@@ -42,7 +42,7 @@ GTEST_OUTPUT_2_TEST = "gtest_xml_outfile2_test_"
 
 EXPECTED_XML_1 = """<?xml version="1.0" encoding="UTF-8"?>
 <testsuites tests="1" failures="0" disabled="0" errors="0" time="*" timestamp="*" name="AllTests">
-  <testsuite name="PropertyOne" tests="1" failures="0" disabled="0" errors="0" time="*" timestamp="*">
+  <testsuite name="PropertyOne" tests="1" failures="0" skipped="0" disabled="0" errors="0" time="*" timestamp="*">
     <testcase name="TestSomeProperties" status="run" result="completed" time="*" timestamp="*" classname="PropertyOne">
       <properties>
         <property name="SetUpProp" value="1"/>
@@ -56,7 +56,7 @@ EXPECTED_XML_1 = """<?xml version="1.0" encoding="UTF-8"?>
 
 EXPECTED_XML_2 = """<?xml version="1.0" encoding="UTF-8"?>
 <testsuites tests="1" failures="0" disabled="0" errors="0" time="*" timestamp="*" name="AllTests">
-  <testsuite name="PropertyTwo" tests="1" failures="0" disabled="0" errors="0" time="*" timestamp="*">
+  <testsuite name="PropertyTwo" tests="1" failures="0" skipped="0" disabled="0" errors="0" time="*" timestamp="*">
     <testcase name="TestSomeProperties" status="run" result="completed" time="*" timestamp="*" classname="PropertyTwo">
       <properties>
         <property name="SetUpProp" value="2"/>
