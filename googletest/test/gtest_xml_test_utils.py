@@ -105,6 +105,7 @@ class GTestXMLTestCase(gtest_test_utils.TestCase):
       'testsuite': 'name',
       'testcase': 'name',
       'failure': 'message',
+      'skipped': 'message',
       'property': 'name',
   }
 
@@ -179,7 +180,7 @@ class GTestXMLTestCase(gtest_test_utils.TestCase):
       type_param = element.getAttributeNode('type_param')
       if type_param and type_param.value:
         type_param.value = '*'
-    elif element.tagName == 'failure':
+    elif element.tagName == 'failure' or element.tagName == 'skipped':
       source_line_pat = r'^.*[/\\](.*:)\d+\n'
       # Replaces the source line information with a normalized form.
       message = element.getAttributeNode('message')
