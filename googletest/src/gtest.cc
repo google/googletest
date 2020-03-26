@@ -4235,6 +4235,355 @@ void XmlUnitTestResultPrinter::OutputXmlTestProperties(
 
 // End XmlUnitTestResultPrinter
 
+class JUnitXmlUnitTestResultPrinter : public EmptyTestEventListener {
+public:
+    explicit JUnitXmlUnitTestResultPrinter(const char* output_file);
+
+    void OnTestIterationEnd(const UnitTest& unit_test, int iteration) override;
+    void ListTestsMatchingFilter(const std::vector<TestSuite*>& test_suites);
+
+    // Prints and XML summary of all unit tests
+    static void PrintJUnitXmlTestsList(std::ostream* stream,
+                                       const std::vector<TestSuite*>& test_suites);
+
+private:
+    // Is c a whitespace character that is normalized to a space character
+    // when it appears in an XML attribute value?
+    static bool IsNormalizableWhitespace(char c) {
+        return c == 0x9 || c == 0xA || c == 0xD;
+    }
+
+    // May c appear in a well-formed XML document?
+    static bool IsValidXmlCharacter(char c) {
+        return IsNormalizableWhitespace(c) || c >= 0x20;
+    }
+
+    // Returns an XML-escaped copy of the input string str.  If
+    // is_attribute is true, the text is meant to appear as an attribute
+    // value, and normalizable whitespace is preserved by replacing it
+    // with character references.
+    static std::string EscapeXml(const std::string& str, bool is_attribute);
+
+    // Returns the given string with all characters invalid in XML removed.
+    static std::string RemoveInvalidXmlCharacters(const std::string& str);
+
+    // Convenience wrapper around EscapeXml when str is an attribute value.
+    static std::string EscapeXmlAttribute(const std::string& str) {
+        return EscapeXml(str, true);
+    }
+
+    // Convenience wrapper around EscapeXml when str is not an attribute value.
+    static std::string EscapeXmlText(const char* str) {
+        return EscapeXml(str, false);
+    }
+
+    // Verifies that the given attribute belongs to the given element and
+    // streams the attribute as XML.
+    static void OutputXmlAttribute(std::ostream* stream,
+                                   const std::string& element_name,
+                                   const std::string& name,
+                                   const std::string& value);
+
+    // Streams an XML CDATA section, escaping invalid CDATA sequences as needed.
+    static void OutputXmlCDataSection(::std::ostream* stream, const char* data);
+
+
+    // Streams a JUnit formatter XML representation of a TestInfo object
+    static void OutputJUnitXmlTestInfo(::std::ostream* stream,
+                                       const char* test_suite_name,
+                                       const TestInfo& test_info);
+
+
+    static void PrintJUnitXmlTestSuite(::std::ostream* stream,
+                                       const TestSuite& test_suite);
+
+
+    // Prints a JUnit formatted XML of unit_test to output stream out.
+    static void PrintJUnitXmlUnitTest(::std::ostream* stream,
+                                      const UnitTest& unit_test);
+
+    // Produces a string representing the test properties in a result as space
+    // delimited XML attributes based on the property key="value" pairs.
+    // When the std::string is not empty, it includes a space at the beginning,
+    // to delimit this attribute from prior attributes.
+    static std::string TestPropertiesAsXmlAttributes(const TestResult& result);
+
+    // Streams an XML representation of the test properties of a TestResult
+    // object.
+    static void OutputXmlTestProperties(std::ostream* stream,
+                                        const TestResult& result);
+
+    // The output file.
+    const std::string output_file_;
+
+    GTEST_DISALLOW_COPY_AND_ASSIGN_(JUnitXmlUnitTestResultPrinter);
+};
+
+JUnitXmlUnitTestResultPrinter::JUnitXmlUnitTestResultPrinter(const char* output_file)
+: output_file_(output_file) {
+    if (output_file_.empty()) {
+        GTEST_LOG_(FATAL) << "XML output file may not be null";
+    }
+}
+
+// Called after unit test ends
+void JUnitXmlUnitTestResultPrinter::OnTestIterationEnd(const UnitTest& unit_test,
+                                                  int /*iteration*/) {
+    FILE* xmlout = OpenFileForWriting(output_file_);
+    std::stringstream stream;
+    PrintJUnitXmlUnitTest(&stream, unit_test);
+    fprintf(xmlout, "%s", StringStreamToString(&stream).c_str());
+    fclose(xmlout);
+}
+
+
+void JUnitXmlUnitTestResultPrinter::ListTestsMatchingFilter(
+        const std::vector<TestSuite*>& test_suites) {
+    FILE* xmlout = OpenFileForWriting(output_file_);
+    std::stringstream stream;
+    PrintJUnitXmlTestsList(&stream, test_suites);
+    fprintf(xmlout, "%s", StringStreamToString(&stream).c_str());
+    fclose(xmlout);
+}
+
+// Returns an XML-escaped copy of the input string str.  If is_attribute
+// is true, the text is meant to appear as an attribute value, and
+// normalizable whitespace is preserved by replacing it with character
+// references.
+//
+// Invalid XML characters in str, if any, are stripped from the output.
+// It is expected that most, if not all, of the text processed by this
+// module will consist of ordinary English text.
+// If this module is ever modified to produce version 1.1 XML output,
+// most invalid characters can be retained using character references.
+std::string JUnitXmlUnitTestResultPrinter::EscapeXml(
+        const std::string& str, bool is_attribute) {
+    Message m;
+
+    for (size_t i = 0; i < str.size(); ++i) {
+        const char ch = str[i];
+        switch (ch) {
+            case '<':
+                m << "&lt;";
+                break;
+            case '>':
+                m << "&gt;";
+                break;
+            case '&':
+                m << "&amp;";
+                break;
+            case '\'':
+                if (is_attribute)
+                    m << "&apos;";
+                else
+                    m << '\'';
+                break;
+            case '"':
+                if (is_attribute)
+                    m << "&quot;";
+                else
+                    m << '"';
+                break;
+            default:
+                if (IsValidXmlCharacter(ch)) {
+                    if (is_attribute && IsNormalizableWhitespace(ch))
+                        m << "&#x" << String::FormatByte(static_cast<unsigned char>(ch))
+                          << ";";
+                    else
+                        m << ch;
+                }
+                break;
+        }
+    }
+
+    return m.GetString();
+}
+
+// Returns the given string with all characters invalid in XML removed.
+// Currently invalid characters are dropped from the string. An
+// alternative is to replace them with certain characters such as . or ?.
+std::string JUnitXmlUnitTestResultPrinter::RemoveInvalidXmlCharacters(
+        const std::string& str) {
+    std::string output;
+    output.reserve(str.size());
+    for (std::string::const_iterator it = str.begin(); it != str.end(); ++it)
+        if (IsValidXmlCharacter(*it))
+            output.push_back(*it);
+
+    return output;
+}
+
+// The following routines generate an XML representation of a UnitTest
+// object.
+// GOOGLETEST_CM0009 DO NOT DELETE
+//
+// This is how Google Test concepts map to the DTD:
+//
+// <testsuites name="AllTests">        <-- corresponds to a UnitTest object
+//   <testsuite name="testcase-name">  <-- corresponds to a TestSuite object
+//     <testcase name="test-name">     <-- corresponds to a TestInfo object
+//       <failure message="...">...</failure>
+//       <failure message="...">...</failure>
+//       <failure message="...">...</failure>
+//                                     <-- individual assertion failures
+//     </testcase>
+//   </testsuite>
+// </testsuites>
+
+
+// Streams an XML CDATA section, escaping invalid CDATA sequences as needed.
+void JUnitXmlUnitTestResultPrinter::OutputXmlCDataSection(::std::ostream* stream,
+                                                     const char* data) {
+    const char* segment = data;
+    *stream << "<![CDATA[";
+    for (;;) {
+        const char* const next_segment = strstr(segment, "]]>");
+        if (next_segment != nullptr) {
+            stream->write(
+                    segment, static_cast<std::streamsize>(next_segment - segment));
+            *stream << "]]>]]&gt;<![CDATA[";
+            segment = next_segment + strlen("]]>");
+        } else {
+            *stream << segment;
+            break;
+        }
+    }
+    *stream << "]]>";
+}
+
+void JUnitXmlUnitTestResultPrinter::OutputXmlAttribute(
+        std::ostream* stream,
+        const std::string& element_name,
+        const std::string& name,
+        const std::string& value) {
+//    const std::vector<std::string>& allowed_names =
+//            GetReservedOutputAttributesForElement(element_name);
+
+//    GTEST_CHECK_(std::find(allowed_names.begin(), allowed_names.end(), name) !=
+//                 allowed_names.end())
+//            << "Attribute " << name << " is not allowed for element <" << element_name
+//            << ">.";
+
+    *stream << " " << name << "=\"" << EscapeXmlAttribute(value) << "\"";
+}
+
+
+void JUnitXmlUnitTestResultPrinter::PrintJUnitXmlUnitTest(std::ostream* stream,
+                                                     const UnitTest& unit_test) {
+
+    const std::string kTestExecutions = "testExecutions";
+    *stream << "<" << kTestExecutions;
+
+    JUnitXmlUnitTestResultPrinter::OutputXmlAttribute(stream, kTestExecutions, "version", "1");
+    *stream << ">\n";
+
+    for (int i = 0; i < unit_test.total_test_suite_count(); ++i) {
+        if (unit_test.GetTestSuite(i)->reportable_test_count() > 0) {
+            PrintJUnitXmlTestSuite(stream, *unit_test.GetTestSuite(i));
+        }
+    }
+
+    *stream << "</" << kTestExecutions << ">\n";
+}
+
+void JUnitXmlUnitTestResultPrinter::PrintJUnitXmlTestSuite(::std::ostream *stream,
+                                                      const TestSuite& test_suite) {
+    const std::string kTestFile = "file";
+    *stream << "  <" << kTestFile;
+    JUnitXmlUnitTestResultPrinter::OutputXmlAttribute(stream, kTestFile, "path", test_suite.name());
+    *stream << ">\n";
+
+    for (int i = 0; i < test_suite.total_test_count(); ++i) {
+        if (test_suite.GetTestInfo(i)->is_reportable()) {
+            OutputJUnitXmlTestInfo(stream, test_suite.name(), *test_suite.GetTestInfo(i));
+        }
+    }
+
+    *stream << "  </" << kTestFile << ">\n";
+}
+
+void JUnitXmlUnitTestResultPrinter::OutputJUnitXmlTestInfo(::std::ostream* stream,
+                                                      const char* test_suite_name,
+                                                      const TestInfo& test_info) {
+
+    const TestResult& result = *test_info.result();
+    const std::string kTestCase = "testCase";
+
+    if (test_info.is_in_another_shard()) {
+        return;
+    }
+
+    *stream << "    <" << kTestCase;
+    JUnitXmlUnitTestResultPrinter::OutputXmlAttribute(stream, kTestCase, "name", test_info.name());
+    JUnitXmlUnitTestResultPrinter::OutputXmlAttribute(stream, kTestCase, "duration", FormatTimeInMillisAsSeconds(result.elapsed_time()));
+
+    int failures = 0;
+    for (int i = 0; i < result.total_part_count(); ++i) {
+        const TestPartResult& part = result.GetTestPartResult(i);
+        if (part.failed()) {
+            if (++failures == 1) {
+                *stream << ">\n";
+            }
+            const std::string location =
+                    internal::FormatCompilerIndependentFileLocation(part.file_name(),
+                                                                    part.line_number());
+            const std::string summary = location + "\n" + part.summary();
+            *stream << "      <error message=\""
+                    << EscapeXmlAttribute(summary.c_str())
+                    << "\">";
+            const std::string detail = location + "\n" + part.message();
+            JUnitXmlUnitTestResultPrinter::OutputXmlCDataSection(stream, RemoveInvalidXmlCharacters(detail).c_str());
+            *stream << "</error>\n";
+        }
+    }
+
+    if (failures == 0 && result.test_property_count() == 0) {
+        *stream << " />\n";
+    } else {
+        if (failures == 0) {
+            *stream << ">\n";
+        }
+        JUnitXmlUnitTestResultPrinter::OutputXmlTestProperties(stream, result);
+        *stream << "   </testCase>\n";
+    }
+}
+
+void JUnitXmlUnitTestResultPrinter::PrintJUnitXmlTestsList(
+        std::ostream* stream, const std::vector<TestSuite*>& test_suites) {
+
+    const std::string kTestExecutions = "testExecutions";
+    *stream << "<" << kTestExecutions;
+
+    JUnitXmlUnitTestResultPrinter::OutputXmlAttribute(stream, kTestExecutions, "version", "1");
+    *stream << ">\n";
+
+    for (auto test_suite : test_suites) {
+        PrintJUnitXmlTestSuite(stream, *test_suite);
+    }
+
+    *stream << "</" << kTestExecutions << ">\n";
+}
+
+void JUnitXmlUnitTestResultPrinter::OutputXmlTestProperties(
+        std::ostream* stream, const TestResult& result) {
+    const std::string kProperties = "properties";
+    const std::string kProperty = "property";
+
+    if (result.test_property_count() <= 0) {
+        return;
+    }
+
+    *stream << "<" << kProperties << ">\n";
+    for (int i = 0; i < result.test_property_count(); ++i) {
+        const TestProperty& property = result.GetTestProperty(i);
+        *stream << "<" << kProperty;
+        *stream << " name=\"" << EscapeXmlAttribute(property.key()) << "\"";
+        *stream << " value=\"" << EscapeXmlAttribute(property.value()) << "\"";
+        *stream << "/>\n";
+    }
+    *stream << "</" << kProperties << ">\n";
+}
+
 // This class generates an JSON output file.
 class JsonUnitTestResultPrinter : public EmptyTestEventListener {
  public:
@@ -5336,6 +5685,9 @@ void UnitTestImpl::ConfigureXmlOutput() {
   } else if (output_format == "json") {
     listeners()->SetDefaultXmlGenerator(new JsonUnitTestResultPrinter(
         UnitTestOptions::GetAbsolutePathToOutputFile().c_str()));
+  } else if (output_format == "junit_xml"){
+      listeners()->SetDefaultXmlGenerator(new JUnitXmlUnitTestResultPrinter(
+         UnitTestOptions::GetAbsolutePathToOutputFile().c_str()));
   } else if (output_format != "") {
     GTEST_LOG_(WARNING) << "WARNING: unrecognized output format \""
                         << output_format << "\" ignored.";
@@ -5864,7 +6216,7 @@ void UnitTestImpl::ListTestsMatchingFilter() {
   }
   fflush(stdout);
   const std::string& output_format = UnitTestOptions::GetOutputFormat();
-  if (output_format == "xml" || output_format == "json") {
+  if (output_format == "xml" || output_format == "junit_xml" || output_format == "json") {
     FILE* fileout = OpenFileForWriting(
         UnitTestOptions::GetAbsolutePathToOutputFile().c_str());
     std::stringstream stream;
@@ -5872,6 +6224,10 @@ void UnitTestImpl::ListTestsMatchingFilter() {
       XmlUnitTestResultPrinter(
           UnitTestOptions::GetAbsolutePathToOutputFile().c_str())
           .PrintXmlTestsList(&stream, test_suites_);
+    } else if (output_format == "junit_xml"){
+        JUnitXmlUnitTestResultPrinter(
+           UnitTestOptions::GetAbsolutePathToOutputFile().c_str())
+           .PrintJUnitXmlTestsList(&stream, test_suites_);
     } else if (output_format == "json") {
       JsonUnitTestResultPrinter(
           UnitTestOptions::GetAbsolutePathToOutputFile().c_str())
@@ -6169,7 +6525,7 @@ static const char kColorEncodedHelpMessage[] =
 "      Enable/disable colored output. The default is @Gauto@D.\n"
 "  -@G-" GTEST_FLAG_PREFIX_ "print_time=0@D\n"
 "      Don't print the elapsed time of each test.\n"
-"  @G--" GTEST_FLAG_PREFIX_ "output=@Y(@Gjson@Y|@Gxml@Y)[@G:@YDIRECTORY_PATH@G"
+"  @G--" GTEST_FLAG_PREFIX_ "output=@Y(@Gjson@Y|@Gxml@Y|@Gjunit_xml@Y)[@G:@YDIRECTORY_PATH@G"
     GTEST_PATH_SEP_ "@Y|@G:@YFILE_PATH]@D\n"
 "      Generate a JSON or XML report in the given directory or with the given\n"
 "      file name. @YFILE_PATH@D defaults to @Gtest_detail.xml@D.\n"
