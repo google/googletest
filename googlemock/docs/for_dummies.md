@@ -374,7 +374,7 @@ convenient way of saying "any value".
 In the above examples, `100` and `50` are also matchers; implicitly, they are
 the same as `Eq(100)` and `Eq(50)`, which specify that the argument must be
 equal (using `operator==`) to the matcher argument. There are many
-[built-in matchers](#MatcherList) for common types (as well as
+[built-in matchers](cheat_sheet.md#MatcherList) for common types (as well as
 [custom matchers](cook_book.md#NewMatchers)); for example:
 
 ```cpp

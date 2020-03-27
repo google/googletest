@@ -2116,6 +2116,15 @@ For example:
     everything in test suite `FooTest` except `FooTest.Bar` and everything in
     test suite `BarTest` except `BarTest.Foo`.
 
+#### Stop test execution upon first failure
+
+By default, a googletest program runs all tests the user has defined. In some
+cases (e.g. iterative test development & execution) it may be desirable stop
+test execution upon first failure (trading improved latency for completeness).
+If `GTEST_FAIL_FAST` environment variable or `--gtest_fail_fast` flag is set,
+the test runner will stop execution as soon as the first test failure is
+found.
+
 #### Temporarily Disabling Tests
 
 If you have a broken test that you cannot fix right away, you can add the
