@@ -1,0 +1,3 @@
+[submodule "cpp-auto-formatter"]
+	path = cpp-auto-formatter
+	url = https://github.com/AndrewGaspar/cpp-auto-formatter.git
