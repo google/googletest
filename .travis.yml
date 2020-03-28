@@ -25,16 +25,16 @@ matrix:
       script: ./ci/build-linux-bazel.sh
     - os: linux
       compiler: gcc
-      env: BUILD_TYPE=Debug VERBOSE=1 CXX_FLAGS=-std=c++11
+      env: BUILD_TYPE=Debug VERBOSE=1 CXX_FLAGS="-std=c++11 -Wdeprecated"
     - os: linux
       compiler: clang
-      env: BUILD_TYPE=Release VERBOSE=1 CXX_FLAGS=-std=c++11 NO_EXCEPTION=ON NO_RTTI=ON COMPILER_IS_GNUCXX=ON
+      env: BUILD_TYPE=Release VERBOSE=1 CXX_FLAGS="-std=c++11 -Wdeprecated" NO_EXCEPTION=ON NO_RTTI=ON COMPILER_IS_GNUCXX=ON
     - os: osx
       compiler: gcc
-      env: BUILD_TYPE=Release VERBOSE=1 CXX_FLAGS=-std=c++11 HOMEBREW_LOGS=~/homebrew-logs HOMEBREW_TEMP=~/homebrew-temp
+      env: BUILD_TYPE=Release VERBOSE=1 CXX_FLAGS="-std=c++11 -Wdeprecated" HOMEBREW_LOGS=~/homebrew-logs HOMEBREW_TEMP=~/homebrew-temp
     - os: osx
       compiler: clang
-      env: BUILD_TYPE=Release VERBOSE=1 CXX_FLAGS=-std=c++11 HOMEBREW_LOGS=~/homebrew-logs HOMEBREW_TEMP=~/homebrew-temp
+      env: BUILD_TYPE=Release VERBOSE=1 CXX_FLAGS="-std=c++11 -Wdeprecated" HOMEBREW_LOGS=~/homebrew-logs HOMEBREW_TEMP=~/homebrew-temp
 
 # These are the install and build (script) phases for the most common entries in the matrix.  They could be included
 # in each entry in the matrix, but that is just repetitive.
