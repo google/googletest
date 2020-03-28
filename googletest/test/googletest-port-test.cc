@@ -1180,8 +1180,6 @@ class DestructorTracker {
     return DestructorCall::List().size() - 1;
   }
   const size_t index_;
-
-  GTEST_DISALLOW_ASSIGN_(DestructorTracker);
 };
 
 typedef ThreadLocal<DestructorTracker>* ThreadParam;
