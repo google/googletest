@@ -220,9 +220,6 @@ class Mock: public Interface {
   MOCK_METHOD1(VoidFromFloat, void(float n));
   MOCK_METHOD1(VoidFromDouble, void(double n));
   MOCK_METHOD1(VoidFromVector, void(const std::vector<int>& v));
-
- private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(Mock);
 };
 
 class InvokeHelper {

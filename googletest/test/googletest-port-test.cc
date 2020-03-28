@@ -1154,8 +1154,6 @@ class DestructorCall {
   AutoHandle wait_event_;
 #endif
   static std::vector<DestructorCall*>* const list_;
-
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(DestructorCall);
 };
 
 std::vector<DestructorCall*>* const DestructorCall::list_ =

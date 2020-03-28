@@ -92,7 +92,6 @@ class GTEST_API_ DeathTest {
     ~ReturnSentinel() { test_->Abort(TEST_ENCOUNTERED_RETURN_STATEMENT); }
    private:
     DeathTest* const test_;
-    GTEST_DISALLOW_COPY_AND_ASSIGN_(ReturnSentinel);
   } GTEST_ATTRIBUTE_UNUSED_;
 
   // An enumeration of possible roles that may be taken when a death
@@ -136,8 +135,6 @@ class GTEST_API_ DeathTest {
  private:
   // A string containing a description of the outcome of the last death test.
   static std::string last_death_test_message_;
-
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(DeathTest);
 };
 
 GTEST_DISABLE_MSC_WARNINGS_POP_()  //  4251
@@ -287,8 +284,6 @@ class InternalRunDeathTestFlag {
   int line_;
   int index_;
   int write_fd_;
-
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(InternalRunDeathTestFlag);
 };
 
 // Returns a newly created InternalRunDeathTestFlag object with fields

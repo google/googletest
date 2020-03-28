@@ -442,9 +442,6 @@ class OsStackTraceGetterInterface {
   // This string is inserted in place of stack frames that are part of
   // Google Test's implementation.
   static const char* const kElidedFramesMarker;
-
- private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(OsStackTraceGetterInterface);
 };
 
 // A working implementation of the OsStackTraceGetterInterface interface.
@@ -465,8 +462,6 @@ class OsStackTraceGetter : public OsStackTraceGetterInterface {
   // and any calls to the stack trace code from within the user code.
   void* caller_frame_ = nullptr;
 #endif  // GTEST_HAS_ABSL
-
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(OsStackTraceGetter);
 };
 
 // Information about a Google Test trace point.
@@ -488,8 +483,6 @@ class DefaultGlobalTestPartResultReporter
 
  private:
   UnitTestImpl* const unit_test_;
-
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(DefaultGlobalTestPartResultReporter);
 };
 
 // This is the default per thread test part result reporter used in
@@ -504,8 +497,6 @@ class DefaultPerThreadTestPartResultReporter
 
  private:
   UnitTestImpl* const unit_test_;
-
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(DefaultPerThreadTestPartResultReporter);
 };
 
 // The private implementation of the UnitTest class.  We don't protect
@@ -963,8 +954,6 @@ class GTEST_API_ UnitTestImpl {
   // The value of GTEST_FLAG(catch_exceptions) at the moment RunAllTests()
   // starts.
   bool catch_exceptions_;
-
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(UnitTestImpl);
 };  // class UnitTestImpl
 
 // Convenience function for accessing the global UnitTest
@@ -1123,8 +1112,6 @@ class StreamingListener : public EmptyTestEventListener {
     int sockfd_;  // socket file descriptor
     const std::string host_name_;
     const std::string port_num_;
-
-    GTEST_DISALLOW_COPY_AND_ASSIGN_(SocketWriter);
   };  // class SocketWriter
 
   // Escapes '=', '&', '%', and '\n' characters in str as "%xx".
@@ -1208,8 +1195,6 @@ class StreamingListener : public EmptyTestEventListener {
   std::string FormatBool(bool value) { return value ? "1" : "0"; }
 
   const std::unique_ptr<AbstractSocketWriter> socket_writer_;
-
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(StreamingListener);
 };  // class StreamingListener
 
 #endif  // GTEST_CAN_STREAM_RESULTS_

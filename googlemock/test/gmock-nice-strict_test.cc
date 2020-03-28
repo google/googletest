@@ -42,9 +42,6 @@ class Mock {
   Mock() {}
 
   MOCK_METHOD0(DoThis, void());
-
- private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(Mock);
 };
 
 namespace testing {
@@ -85,9 +82,6 @@ class MockFoo : public Foo {
   MOCK_METHOD0(DoThis, void());
   MOCK_METHOD1(DoThat, int(bool flag));
   MOCK_METHOD0(ReturnNonDefaultConstructible, NotDefaultConstructible());
-
- private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(MockFoo);
 };
 
 class MockBar {
@@ -109,8 +103,6 @@ class MockBar {
 
  private:
   std::string str_;
-
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(MockBar);
 };
 
 

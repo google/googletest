@@ -360,9 +360,6 @@ class NativeArrayPassedAsPointerAndSize {
   NativeArrayPassedAsPointerAndSize() {}
 
   MOCK_METHOD2(Helper, void(int* array, int size));
-
- private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(NativeArrayPassedAsPointerAndSize);
 };
 
 TEST(ElementsAreTest, WorksWithNativeArrayPassedAsPointerAndSize) {

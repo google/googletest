@@ -312,8 +312,6 @@ class StringMatchResultListener : public MatchResultListener {
 
  private:
   ::std::stringstream ss_;
-
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(StringMatchResultListener);
 };
 
 // Anything inside the 'internal' namespace IS INTERNAL IMPLEMENTATION
@@ -1238,8 +1236,6 @@ class NotMatcher {
 
  private:
   InnerMatcher matcher_;
-
-  GTEST_DISALLOW_ASSIGN_(NotMatcher);
 };
 
 // Implements the AllOf(m1, m2) matcher for a particular argument type
@@ -1315,6 +1311,11 @@ class VariadicMatcher {
     static_assert(sizeof...(Args) > 0, "Must have at least one matcher.");
   }
 
+  // Like all matchers, this type lacks assignment; but ensure that
+  // the compiler doesn't have to inspect all of Args... to figure that out.
+  VariadicMatcher(const VariadicMatcher&) = default;
+  VariadicMatcher& operator=(const VariadicMatcher&) = delete;
+
   // This template type conversion operator allows an
   // VariadicMatcher<Matcher1, Matcher2...> object to match any type that
   // all of the provided matchers (Matcher1, Matcher2, ...) can match.
@@ -1339,8 +1340,6 @@ class VariadicMatcher {
       std::integral_constant<size_t, sizeof...(Args)>) const {}
 
   std::tuple<Args...> matchers_;
-
-  GTEST_DISALLOW_ASSIGN_(VariadicMatcher);
 };
 
 template <typename... Args>
@@ -1475,8 +1474,6 @@ class TrulyMatcher {
 
  private:
   Predicate predicate_;
-
-  GTEST_DISALLOW_ASSIGN_(TrulyMatcher);
 };
 
 // Used for implementing Matches(matcher), which turns a matcher into
@@ -1513,8 +1510,6 @@ class MatcherAsPredicate {
 
  private:
   M matcher_;
-
-  GTEST_DISALLOW_ASSIGN_(MatcherAsPredicate);
 };
 
 // For implementing ASSERT_THAT() and EXPECT_THAT().  The template
@@ -2439,8 +2434,6 @@ class WhenSortedByMatcher {
    private:
     const Comparator comparator_;
     const Matcher<const ::std::vector<LhsValue>&> matcher_;
-
-    GTEST_DISALLOW_COPY_AND_ASSIGN_(Impl);
   };
 
  private:
@@ -2634,9 +2627,6 @@ class ContainsMatcherImpl : public QuantifierMatcherImpl<Container> {
                        MatchResultListener* listener) const override {
     return this->MatchAndExplainImpl(false, container, listener);
   }
-
- private:
-  GTEST_DISALLOW_ASSIGN_(ContainsMatcherImpl);
 };
 
 // Implements Each(element_matcher) for the given argument type Container.
@@ -2663,9 +2653,6 @@ class EachMatcherImpl : public QuantifierMatcherImpl<Container> {
                        MatchResultListener* listener) const override {
     return this->MatchAndExplainImpl(true, container, listener);
   }
-
- private:
-  GTEST_DISALLOW_ASSIGN_(EachMatcherImpl);
 };
 
 // Implements polymorphic Contains(element_matcher).
@@ -3032,8 +3019,6 @@ class ElementsAreMatcherImpl : public MatcherInterface<Container> {
   size_t count() const { return matchers_.size(); }
 
   ::std::vector<Matcher<const Element&> > matchers_;
-
-  GTEST_DISALLOW_ASSIGN_(ElementsAreMatcherImpl);
 };
 
 // Connectivity matrix of (elements X matchers), in element-major order.
@@ -3136,8 +3121,6 @@ class GTEST_API_ UnorderedElementsAreMatcherImplBase {
  private:
   UnorderedMatcherRequire::Flags match_flags_;
   MatcherDescriberVec matcher_describers_;
-
-  GTEST_DISALLOW_ASSIGN_(UnorderedElementsAreMatcherImplBase);
 };
 
 // Implements UnorderedElementsAre, UnorderedElementsAreArray, IsSubsetOf, and
@@ -3233,8 +3216,6 @@ class UnorderedElementsAreMatcherImpl
   }
 
   ::std::vector<Matcher<const Element&> > matchers_;
-
-  GTEST_DISALLOW_ASSIGN_(UnorderedElementsAreMatcherImpl);
 };
 
 // Functor for use in TransformTuple.
@@ -3322,8 +3303,6 @@ class UnorderedElementsAreArrayMatcher {
  private:
   UnorderedMatcherRequire::Flags match_flags_;
   ::std::vector<T> matchers_;
-
-  GTEST_DISALLOW_ASSIGN_(UnorderedElementsAreArrayMatcher);
 };
 
 // Implements ElementsAreArray().

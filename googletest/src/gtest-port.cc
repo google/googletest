@@ -407,8 +407,6 @@ class MemoryIsNotDeallocated
 
  private:
   int old_crtdbg_flag_;
-
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(MemoryIsNotDeallocated);
 };
 #endif  // _MSC_VER
 
@@ -506,8 +504,6 @@ class ThreadWithParamSupport : public ThreadWithParamBase {
 
   // Prohibit instantiation.
   ThreadWithParamSupport();
-
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(ThreadWithParamSupport);
 };
 
 }  // namespace
@@ -1154,8 +1150,6 @@ class CapturedStream {
   int uncaptured_fd_;
   // Name of the temporary file holding the stderr output.
   ::std::string filename_;
-
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(CapturedStream);
 };
 
 GTEST_DISABLE_MSC_DEPRECATED_POP_()

@@ -705,8 +705,6 @@ class Base {
  public:
   virtual ~Base() {}
   Base() {}
- private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(Base);
 };
 
 class Derived : public Base {
@@ -2943,9 +2941,6 @@ class AllArgsHelper {
   AllArgsHelper() {}
 
   MOCK_METHOD2(Helper, int(char x, int y));
-
- private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(AllArgsHelper);
 };
 
 TEST(AllArgsTest, WorksInWithClause) {
@@ -2974,9 +2969,6 @@ class OptionalMatchersHelper {
 
   MOCK_METHOD1(Overloaded, int(char x));
   MOCK_METHOD2(Overloaded, int(char x, int y));
-
- private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(OptionalMatchersHelper);
 };
 
 TEST(AllArgsTest, WorksWithoutMatchers) {
@@ -3726,7 +3718,6 @@ class Uncopyable {
 
  private:
   int value_;
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(Uncopyable);
 };
 
 // Returns true if and only if x.value() is positive.
@@ -4565,8 +4556,6 @@ class NotCopyable {
   }
  private:
   int value_;
-
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(NotCopyable);
 };
 
 TEST(ByRefTest, AllowsNotCopyableConstValueInMatchers) {

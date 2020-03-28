@@ -61,9 +61,6 @@ class MockFoo {
   MOCK_METHOD3(Bar, char(const std::string& s, int i, double x));
   MOCK_METHOD2(Bar2, bool(int x, int y));
   MOCK_METHOD2(Bar3, void(int x, int y));
-
- private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(MockFoo);
 };
 
 class GMockOutputTest : public testing::Test {

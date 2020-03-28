@@ -403,8 +403,6 @@ class ParameterizedTestFactory : public TestFactoryBase {
 
  private:
   const ParamType parameter_;
-
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(ParameterizedTestFactory);
 };
 
 // INTERNAL IMPLEMENTATION - DO NOT USE IN USER CODE.
@@ -438,9 +436,6 @@ class TestMetaFactory
   TestFactoryBase* CreateTestFactory(ParamType parameter) override {
     return new ParameterizedTestFactory<TestSuite>(parameter);
   }
-
- private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(TestMetaFactory);
 };
 
 // INTERNAL IMPLEMENTATION - DO NOT USE IN USER CODE.
@@ -469,9 +464,6 @@ class ParameterizedTestSuiteInfoBase {
 
  protected:
   ParameterizedTestSuiteInfoBase() {}
-
- private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(ParameterizedTestSuiteInfoBase);
 };
 
 // INTERNAL IMPLEMENTATION - DO NOT USE IN USER CODE.
@@ -661,8 +653,6 @@ class ParameterizedTestSuiteInfo : public ParameterizedTestSuiteInfoBase {
   CodeLocation code_location_;
   TestInfoContainer tests_;
   InstantiationContainer instantiations_;
-
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(ParameterizedTestSuiteInfo);
 };  // class ParameterizedTestSuiteInfo
 
 //  Legacy API is deprecated but still available
@@ -736,8 +726,6 @@ class ParameterizedTestSuiteRegistry {
   using TestSuiteInfoContainer = ::std::vector<ParameterizedTestSuiteInfoBase*>;
 
   TestSuiteInfoContainer test_suite_infos_;
-
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(ParameterizedTestSuiteRegistry);
 };
 
 // Keep track of what type-parameterized test suite are defined and

@@ -104,8 +104,6 @@ class MatchResultListener {
 
  private:
   ::std::ostream* const stream_;
-
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(MatchResultListener);
 };
 
 inline MatchResultListener::~MatchResultListener() {
@@ -202,8 +200,6 @@ class MatcherInterfaceAdapter : public MatcherInterface<const T&> {
 
  private:
   const MatcherInterface<T>* const impl_;
-
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(MatcherInterfaceAdapter);
 };
 
 struct AnyEq {
@@ -235,9 +231,6 @@ struct AnyGe {
 class DummyMatchResultListener : public MatchResultListener {
  public:
   DummyMatchResultListener() : MatchResultListener(nullptr) {}
-
- private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(DummyMatchResultListener);
 };
 
 // A match result listener that forwards the explanation to a given
@@ -247,9 +240,6 @@ class StreamMatchResultListener : public MatchResultListener {
  public:
   explicit StreamMatchResultListener(::std::ostream* os)
       : MatchResultListener(os) {}
-
- private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(StreamMatchResultListener);
 };
 
 // An internal class for implementing Matcher<T>, which will derive

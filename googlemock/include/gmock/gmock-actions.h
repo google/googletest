@@ -338,7 +338,6 @@ class DefaultValue {
 
    private:
     const T value_;
-    GTEST_DISALLOW_COPY_AND_ASSIGN_(FixedValueProducer);
   };
 
   class FactoryValueProducer : public ValueProducer {
@@ -349,7 +348,6 @@ class DefaultValue {
 
    private:
     const FactoryFunction factory_;
-    GTEST_DISALLOW_COPY_AND_ASSIGN_(FactoryValueProducer);
   };
 
   static ValueProducer* producer_;
@@ -421,9 +419,6 @@ class ActionInterface {
   // get-the-next-element-from-the-collection action will need to
   // remember the current element.
   virtual Result Perform(const ArgumentTuple& args) = 0;
-
- private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(ActionInterface);
 };
 
 // An Action<F> is a copyable and IMMUTABLE (except by assignment)
@@ -570,13 +565,9 @@ class PolymorphicAction {
 
    private:
     Impl impl_;
-
-    GTEST_DISALLOW_ASSIGN_(MonomorphicImpl);
   };
 
   Impl impl_;
-
-  GTEST_DISALLOW_ASSIGN_(PolymorphicAction);
 };
 
 // Creates an Action from its implementation and returns it.  The
@@ -692,8 +683,6 @@ class ReturnAction {
     // wrapper type.
     R value_before_cast_;
     Result value_;
-
-    GTEST_DISALLOW_COPY_AND_ASSIGN_(Impl);
   };
 
   // Partially specialize for ByMoveWrapper. This version of ReturnAction will
@@ -823,8 +812,6 @@ class ReturnRefOfCopyAction {
 
    private:
     T value_;
-
-    GTEST_DISALLOW_ASSIGN_(Impl);
   };
 
   const T value_;
@@ -1448,13 +1435,7 @@ auto InvokeArgumentAdl(AdlTag, F f, Args... args) -> decltype(f(args...)) {
       template <GMOCK_ACTION_TEMPLATE_ARGS_NAMES_>                            \
       return_type gmock_PerformImpl(GMOCK_ACTION_ARG_TYPES_AND_NAMES_) const; \
       GMOCK_ACTION_FIELD_PARAMS_(params)                                      \
-                                                                              \
-     private:                                                                 \
-      GTEST_DISALLOW_ASSIGN_(gmock_Impl);                                     \
     };                                                                        \
-                                                                              \
-   private:                                                                   \
-    GTEST_DISALLOW_ASSIGN_(full_name);                                        \
   };                                                                          \
   template <GMOCK_ACTION_TYPENAME_PARAMS_(params)>                            \
   inline full_name<GMOCK_ACTION_TYPE_PARAMS_(params)> name(                   \
@@ -1493,13 +1474,7 @@ auto InvokeArgumentAdl(AdlTag, F f, Args... args) -> decltype(f(args...)) {
       }                                                                       \
       template <GMOCK_ACTION_TEMPLATE_ARGS_NAMES_>                            \
       return_type gmock_PerformImpl(GMOCK_ACTION_ARG_TYPES_AND_NAMES_) const; \
-                                                                              \
-     private:                                                                 \
-      GTEST_DISALLOW_ASSIGN_(gmock_Impl);                                     \
     };                                                                        \
-                                                                              \
-   private:                                                                   \
-    GTEST_DISALLOW_ASSIGN_(name##Action);                                     \
   };                                                                          \
   inline name##Action name() { return name##Action(); }                       \
   template <typename F>                                                       \

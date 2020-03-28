@@ -600,8 +600,6 @@ class TestGenerationEnvironment : public ::testing::Environment {
   int set_up_count_;
   int tear_down_count_;
   int test_body_count_;
-
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(TestGenerationEnvironment);
 };
 
 const int test_generation_params[] = {36, 42, 72};
@@ -664,9 +662,6 @@ class TestGenerationTest : public TestWithParam<int> {
  protected:
   int current_parameter_;
   static vector<int> collected_parameters_;
-
- private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(TestGenerationTest);
 };
 vector<int> TestGenerationTest::collected_parameters_;
 

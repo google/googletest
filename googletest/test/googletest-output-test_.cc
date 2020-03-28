@@ -491,9 +491,6 @@ struct SpawnThreadNotifications {
 
   Notification spawn_thread_started;
   Notification spawn_thread_ok_to_terminate;
-
- private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(SpawnThreadNotifications);
 };
 
 // The function to be executed in the thread spawn by the

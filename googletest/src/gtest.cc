@@ -3682,8 +3682,6 @@ class TestEventRepeater : public TestEventListener {
   bool forwarding_enabled_;
   // The list of listeners that receive events.
   std::vector<TestEventListener*> listeners_;
-
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(TestEventRepeater);
 };
 
 TestEventRepeater::~TestEventRepeater() {
@@ -3848,8 +3846,6 @@ class XmlUnitTestResultPrinter : public EmptyTestEventListener {
 
   // The output file.
   const std::string output_file_;
-
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(XmlUnitTestResultPrinter);
 };
 
 // Creates a new XmlUnitTestResultPrinter.
@@ -4285,8 +4281,6 @@ class JsonUnitTestResultPrinter : public EmptyTestEventListener {
 
   // The output file.
   const std::string output_file_;
-
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(JsonUnitTestResultPrinter);
 };
 
 // Creates a new JsonUnitTestResultPrinter.
@@ -4780,8 +4774,6 @@ class ScopedPrematureExitFile {
 
  private:
   const std::string premature_exit_filepath_;
-
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(ScopedPrematureExitFile);
 };
 
 }  // namespace internal

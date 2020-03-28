@@ -744,9 +744,6 @@ class MockClass {
   MOCK_METHOD1(TakeUnique, int(std::unique_ptr<int>));
   MOCK_METHOD2(TakeUnique,
                int(const std::unique_ptr<int>&, std::unique_ptr<int>));
-
- private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(MockClass);
 };
 
 // Tests that DoDefault() returns the built-in default value for the

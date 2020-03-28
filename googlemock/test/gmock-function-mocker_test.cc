@@ -180,9 +180,6 @@ class MockFoo : public FooInterface {
   MOCK_METHOD((std::map<int, std::string>), CTReturnTypeWithComma, (),
               (Calltype(STDMETHODCALLTYPE)));
 #endif  // GTEST_OS_WINDOWS
-
- private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(MockFoo);
 };
 
 class LegacyMockFoo : public FooInterface {
@@ -241,9 +238,6 @@ class LegacyMockFoo : public FooInterface {
   MOCK_METHOD0_WITH_CALLTYPE(STDMETHODCALLTYPE, CTReturnTypeWithComma,
                              std::map<int, std::string>());
 #endif  // GTEST_OS_WINDOWS
-
- private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(LegacyMockFoo);
 };
 
 #ifdef _MSC_VER
@@ -425,9 +419,6 @@ class MockB {
   MockB() {}
 
   MOCK_METHOD(void, DoB, ());
-
- private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(MockB);
 };
 
 class LegacyMockB {
@@ -435,9 +426,6 @@ class LegacyMockB {
   LegacyMockB() {}
 
   MOCK_METHOD0(DoB, void());
-
- private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(LegacyMockB);
 };
 
 template <typename T>
@@ -490,9 +478,6 @@ class MockStack : public StackInterface<T> {
   // Tests that the function return type can contain unprotected comma.
   MOCK_METHOD((std::map<int, int>), ReturnTypeWithComma, (), ());
   MOCK_METHOD((std::map<int, int>), ReturnTypeWithComma, (int), (const));
-
- private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(MockStack);
 };
 
 template <typename T>
@@ -508,9 +493,6 @@ class LegacyMockStack : public StackInterface<T> {
   // Tests that the function return type can contain unprotected comma.
   MOCK_METHOD0_T(ReturnTypeWithComma, std::map<int, int>());
   MOCK_CONST_METHOD1_T(ReturnTypeWithComma, std::map<int, int>(int));  // NOLINT
-
- private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(LegacyMockStack);
 };
 
 template <typename T>
@@ -582,9 +564,6 @@ class MockStackWithCallType : public StackInterfaceWithCallType<T> {
   MOCK_METHOD(int, GetSize, (), (Calltype(STDMETHODCALLTYPE), override, const));
   MOCK_METHOD(const T&, GetTop, (),
               (Calltype(STDMETHODCALLTYPE), override, const));
-
- private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(MockStackWithCallType);
 };
 
 template <typename T>
@@ -596,9 +575,6 @@ class LegacyMockStackWithCallType : public StackInterfaceWithCallType<T> {
   MOCK_METHOD0_T_WITH_CALLTYPE(STDMETHODCALLTYPE, Pop, void());
   MOCK_CONST_METHOD0_T_WITH_CALLTYPE(STDMETHODCALLTYPE, GetSize, int());
   MOCK_CONST_METHOD0_T_WITH_CALLTYPE(STDMETHODCALLTYPE, GetTop, const T&());
-
- private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(LegacyMockStackWithCallType);
 };
 
 template <typename T>
@@ -648,9 +624,6 @@ class MockOverloadedOnArgNumber {
   MockOverloadedOnArgNumber() {}
 
   MY_MOCK_METHODS1_;
-
- private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(MockOverloadedOnArgNumber);
 };
 
 class LegacyMockOverloadedOnArgNumber {
@@ -658,9 +631,6 @@ class LegacyMockOverloadedOnArgNumber {
   LegacyMockOverloadedOnArgNumber() {}
 
   LEGACY_MY_MOCK_METHODS1_;
-
- private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(LegacyMockOverloadedOnArgNumber);
 };
 
 template <typename T>
@@ -690,9 +660,6 @@ class MockOverloadedOnConstness {
   MockOverloadedOnConstness() {}
 
   MY_MOCK_METHODS2_;
-
- private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(MockOverloadedOnConstness);
 };
 
 TEST(MockMethodOverloadedMockMethodTest, CanOverloadOnConstnessInMacroBody) {

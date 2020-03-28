@@ -190,10 +190,6 @@
 //   GTEST_AMBIGUOUS_ELSE_BLOCKER_ - for disabling a gcc warning.
 //   GTEST_ATTRIBUTE_UNUSED_  - declares that a class' instances or a
 //                              variable don't have to be used.
-//   GTEST_DISALLOW_ASSIGN_   - disables copy operator=.
-//   GTEST_DISALLOW_COPY_AND_ASSIGN_ - disables copy ctor and operator=.
-//   GTEST_DISALLOW_MOVE_ASSIGN_   - disables move operator=.
-//   GTEST_DISALLOW_MOVE_AND_ASSIGN_ - disables move ctor and operator=.
 //   GTEST_MUST_USE_RESULT_   - declares that a function's result must be used.
 //   GTEST_INTENTIONAL_CONST_COND_PUSH_ - start code section where MSVC C4127 is
 //                                        suppressed (constant conditional).
@@ -673,28 +669,6 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 #endif
 
 
-// A macro to disallow copy operator=
-// This should be used in the private: declarations for a class.
-#define GTEST_DISALLOW_ASSIGN_(type) \
-  type& operator=(type const &) = delete
-
-// A macro to disallow copy constructor and operator=
-// This should be used in the private: declarations for a class.
-#define GTEST_DISALLOW_COPY_AND_ASSIGN_(type) \
-  type(type const &) = delete; \
-  GTEST_DISALLOW_ASSIGN_(type)
-
-// A macro to disallow move operator=
-// This should be used in the private: declarations for a class.
-#define GTEST_DISALLOW_MOVE_ASSIGN_(type) \
-  type& operator=(type &&) noexcept = delete
-
-// A macro to disallow move constructor and operator=
-// This should be used in the private: declarations for a class.
-#define GTEST_DISALLOW_MOVE_AND_ASSIGN_(type) \
-  type(type &&) noexcept = delete; \
-  GTEST_DISALLOW_MOVE_ASSIGN_(type)
-
 // Tell the compiler to warn about unused return values for functions declared
 // with this macro.  The macro should be used on function declarations
 // following the argument list:
@@ -920,8 +894,6 @@ class GTEST_API_ RE {
   const char* full_pattern_;  // For FullMatch();
 
 # endif
-
-  GTEST_DISALLOW_ASSIGN_(RE);
 };
 
 #endif  // GTEST_USES_PCRE
@@ -963,8 +935,6 @@ class GTEST_API_ GTestLog {
 
  private:
   const GTestLogSeverity severity_;
-
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(GTestLog);
 };
 
 #if !defined(GTEST_LOG_)
@@ -1207,8 +1177,6 @@ class Notification {
  private:
   pthread_mutex_t mutex_;
   bool notified_;
-
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(Notification);
 };
 
 # elif GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_PHONE && !GTEST_OS_WINDOWS_RT
@@ -1240,8 +1208,6 @@ class GTEST_API_ AutoHandle {
   bool IsCloseable() const;
 
   Handle handle_;
-
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(AutoHandle);
 };
 
 // Allows a controller thread to pause execution of newly created
@@ -1258,8 +1224,6 @@ class GTEST_API_ Notification {
 
  private:
   AutoHandle event_;
-
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(Notification);
 };
 # endif  // GTEST_HAS_NOTIFICATION_
 
@@ -1341,8 +1305,6 @@ class ThreadWithParam : public ThreadWithParamBase {
   bool finished_;  // true if and only if we know that the thread function has
                    // finished.
   pthread_t thread_;  // The native thread object.
-
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(ThreadWithParam);
 };
 # endif  // !GTEST_OS_WINDOWS && GTEST_HAS_PTHREAD ||
          // GTEST_HAS_MUTEX_AND_THREAD_LOCAL_
@@ -1404,8 +1366,6 @@ class GTEST_API_ Mutex {
   MutexType type_;
   long critical_section_init_phase_;  // NOLINT
   GTEST_CRITICAL_SECTION* critical_section_;
-
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(Mutex);
 };
 
 # define GTEST_DECLARE_STATIC_MUTEX_(mutex) \
@@ -1428,8 +1388,6 @@ class GTestMutexLock {
 
  private:
   Mutex* const mutex_;
-
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(GTestMutexLock);
 };
 
 typedef GTestMutexLock MutexLock;
@@ -1454,9 +1412,6 @@ class ThreadLocalBase {
  protected:
   ThreadLocalBase() {}
   virtual ~ThreadLocalBase() {}
-
- private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(ThreadLocalBase);
 };
 
 // Maps a thread to a set of ThreadLocals that have values instantiated on that
@@ -1518,11 +1473,7 @@ class ThreadWithParam : public ThreadWithParamBase {
    private:
     UserThreadFunc* const func_;
     const T param_;
-
-    GTEST_DISALLOW_COPY_AND_ASSIGN_(RunnableImpl);
   };
-
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(ThreadWithParam);
 };
 
 // Implements thread-local storage on Windows systems.
@@ -1578,7 +1529,6 @@ class ThreadLocal : public ThreadLocalBase {
 
    private:
     T value_;
-    GTEST_DISALLOW_COPY_AND_ASSIGN_(ValueHolder);
   };
 
 
@@ -1596,18 +1546,12 @@ class ThreadLocal : public ThreadLocalBase {
     ValueHolderFactory() {}
     virtual ~ValueHolderFactory() {}
     virtual ValueHolder* MakeNewHolder() const = 0;
-
-   private:
-    GTEST_DISALLOW_COPY_AND_ASSIGN_(ValueHolderFactory);
   };
 
   class DefaultValueHolderFactory : public ValueHolderFactory {
    public:
     DefaultValueHolderFactory() {}
     ValueHolder* MakeNewHolder() const override { return new ValueHolder(); }
-
-   private:
-    GTEST_DISALLOW_COPY_AND_ASSIGN_(DefaultValueHolderFactory);
   };
 
   class InstanceValueHolderFactory : public ValueHolderFactory {
@@ -1619,13 +1563,9 @@ class ThreadLocal : public ThreadLocalBase {
 
    private:
     const T value_;  // The value for each thread.
-
-    GTEST_DISALLOW_COPY_AND_ASSIGN_(InstanceValueHolderFactory);
   };
 
   std::unique_ptr<ValueHolderFactory> default_factory_;
-
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(ThreadLocal);
 };
 
 # elif GTEST_HAS_PTHREAD
@@ -1698,9 +1638,6 @@ class Mutex : public MutexBase {
   ~Mutex() {
     GTEST_CHECK_POSIX_SUCCESS_(pthread_mutex_destroy(&mutex_));
   }
-
- private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(Mutex);
 };
 
 // We cannot name this class MutexLock because the ctor declaration would
@@ -1717,8 +1654,6 @@ class GTestMutexLock {
 
  private:
   MutexBase* const mutex_;
-
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(GTestMutexLock);
 };
 
 typedef GTestMutexLock MutexLock;
@@ -1775,7 +1710,6 @@ class GTEST_API_ ThreadLocal {
 
    private:
     T value_;
-    GTEST_DISALLOW_COPY_AND_ASSIGN_(ValueHolder);
   };
 
   static pthread_key_t CreateKey() {
@@ -1805,18 +1739,12 @@ class GTEST_API_ ThreadLocal {
     ValueHolderFactory() {}
     virtual ~ValueHolderFactory() {}
     virtual ValueHolder* MakeNewHolder() const = 0;
-
-   private:
-    GTEST_DISALLOW_COPY_AND_ASSIGN_(ValueHolderFactory);
   };
 
   class DefaultValueHolderFactory : public ValueHolderFactory {
    public:
     DefaultValueHolderFactory() {}
     ValueHolder* MakeNewHolder() const override { return new ValueHolder(); }
-
-   private:
-    GTEST_DISALLOW_COPY_AND_ASSIGN_(DefaultValueHolderFactory);
   };
 
   class InstanceValueHolderFactory : public ValueHolderFactory {
@@ -1828,15 +1756,11 @@ class GTEST_API_ ThreadLocal {
 
    private:
     const T value_;  // The value for each thread.
-
-    GTEST_DISALLOW_COPY_AND_ASSIGN_(InstanceValueHolderFactory);
   };
 
   // A key pthreads uses for looking up per-thread values.
   const pthread_key_t key_;
   std::unique_ptr<ValueHolderFactory> default_factory_;
-
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(ThreadLocal);
 };
 
 # endif  // GTEST_HAS_MUTEX_AND_THREAD_LOCAL_
