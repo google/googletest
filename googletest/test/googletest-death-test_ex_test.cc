@@ -59,7 +59,7 @@ TEST(CxxExceptionDeathTest, ExceptionIsFailure) {
 
 class TestException : public std::exception {
  public:
-  const char* what() const throw() override { return "exceptional message"; }
+  const char* what() const noexcept override { return "exceptional message"; }
 };
 
 TEST(CxxExceptionDeathTest, PrintsMessageForStdExceptions) {
