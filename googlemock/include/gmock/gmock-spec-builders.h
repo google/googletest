@@ -499,7 +499,8 @@ class GTEST_API_ Expectation {
  public:
   // Constructs a null object that doesn't reference any expectation.
   Expectation();
-
+  Expectation(const Expectation&) = default;
+  Expectation& operator=(const Expectation&) = default;
   ~Expectation();
 
   // This single-argument ctor must not be explicit, in order to support the
@@ -512,9 +513,6 @@ class GTEST_API_ Expectation {
   // Expectation must receive a *non-const* reference to the
   // ExpectationBase object.
   Expectation(internal::ExpectationBase& exp);  // NOLINT
-
-  // The compiler-generated copy ctor and operator= work exactly as
-  // intended, so we don't need to define our own.
 
   // Returns true if and only if rhs references the same expectation as this
   // object does.
