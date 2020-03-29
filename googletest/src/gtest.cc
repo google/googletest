@@ -4453,16 +4453,8 @@ void JUnitXmlUnitTestResultPrinter::OutputXmlCDataSection(::std::ostream* stream
 
 void JUnitXmlUnitTestResultPrinter::OutputXmlAttribute(
         std::ostream* stream,
-        const std::string& element_name,
         const std::string& name,
         const std::string& value) {
-//    const std::vector<std::string>& allowed_names =
-//            GetReservedOutputAttributesForElement(element_name);
-
-//    GTEST_CHECK_(std::find(allowed_names.begin(), allowed_names.end(), name) !=
-//                 allowed_names.end())
-//            << "Attribute " << name << " is not allowed for element <" << element_name
-//            << ">.";
 
     *stream << " " << name << "=\"" << EscapeXmlAttribute(value) << "\"";
 }
@@ -4503,7 +4495,6 @@ void JUnitXmlUnitTestResultPrinter::PrintJUnitXmlTestSuite(::std::ostream *strea
 }
 
 void JUnitXmlUnitTestResultPrinter::OutputJUnitXmlTestInfo(::std::ostream* stream,
-                                                      const char* test_suite_name,
                                                       const TestInfo& test_info) {
 
     const TestResult& result = *test_info.result();
