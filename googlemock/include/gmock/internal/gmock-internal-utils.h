@@ -460,6 +460,16 @@ struct Function<R(Args...)> {
 template <typename R, typename... Args>
 constexpr size_t Function<R(Args...)>::ArgumentCount;
 
+// C++11 and 14 compatible invoke_result
+template<typename C, typename... Args>
+struct InvokeResult {
+#ifdef __cpp_lib_is_invocable
+  typedef typename std::invoke_result<C, Args...>::type type;
+#else
+  typedef typename std::result_of<C(Args...)>::type type;
+#endif
+};
+
 #ifdef _MSC_VER
 # pragma warning(pop)
 #endif
