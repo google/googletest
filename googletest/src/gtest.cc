@@ -6330,19 +6330,12 @@ static bool ParseGoogleTestFlag(const char* const arg) {
                          &GTEST_FLAG(death_test_style)) ||
          ParseBoolFlag(arg, kDeathTestUseFork,
                        &GTEST_FLAG(death_test_use_fork)) ||
-<<<<<<< HEAD
          ParseBoolFlag(arg, kFailFast, &GTEST_FLAG(fail_fast)) ||
-=======
->>>>>>> fb19f578 (Add GTEST_BRIEF option)
          ParseStringFlag(arg, kFilterFlag, &GTEST_FLAG(filter)) ||
          ParseStringFlag(arg, kInternalRunDeathTestFlag,
                          &GTEST_FLAG(internal_run_death_test)) ||
          ParseBoolFlag(arg, kListTestsFlag, &GTEST_FLAG(list_tests)) ||
          ParseStringFlag(arg, kOutputFlag, &GTEST_FLAG(output)) ||
-<<<<<<< HEAD
-=======
-         ParseBoolFlag(arg, kBriefFlag, &GTEST_FLAG(brief)) ||
->>>>>>> fb19f578 (Add GTEST_BRIEF option)
          ParseBoolFlag(arg, kPrintTimeFlag, &GTEST_FLAG(print_time)) ||
          ParseBoolFlag(arg, kPrintUTF8Flag, &GTEST_FLAG(print_utf8)) ||
          ParseInt32Flag(arg, kRandomSeedFlag, &GTEST_FLAG(random_seed)) ||
