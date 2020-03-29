@@ -680,10 +680,6 @@ class GTEST_API_ InSequence {
 
 namespace internal {
 
-// Points to the implicit sequence introduced by a living InSequence
-// object (if any) in the current thread or NULL.
-GTEST_API_ extern thread_local Sequence* g_gmock_implicit_sequence;
-
 // Base class for implementing expectations.
 //
 // There are two reasons for having a type-agnostic base class for
@@ -1433,6 +1429,9 @@ class ActionResultHolder<void> : public UntypedActionResultHolderBase {
   GTEST_DISALLOW_COPY_AND_ASSIGN_(ActionResultHolder);
 };
 
+// Adds an expectation into the implicit sequence if there is one.
+GTEST_API_ void AddExpectationToCurrentThread(const Expectation& expectation);
+
 template <typename F>
 class FunctionMocker;
 
@@ -1612,11 +1611,7 @@ class FunctionMocker<R(Args...)> final : public UntypedFunctionMockerBase {
     // it is unprotected here.
     untyped_expectations_.push_back(untyped_expectation);
 
-    // Adds this expectation into the implicit sequence if there is one.
-    if (g_gmock_implicit_sequence != nullptr) {
-      g_gmock_implicit_sequence->AddExpectation(
-          Expectation(untyped_expectation));
-    }
+    AddExpectationToCurrentThread(Expectation(untyped_expectation));
 
     return *expectation;
   }

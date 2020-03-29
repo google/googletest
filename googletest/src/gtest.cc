@@ -169,6 +169,13 @@ static const char kTestShardStatusFile[] = "GTEST_SHARD_STATUS_FILE";
 
 namespace internal {
 
+// Points to (but doesn't own) the per-thread test part result reporter.
+thread_local TestPartResultReporterInterface*
+    per_thread_test_part_result_reporter;
+
+// A per-thread stack of traces created by the SCOPED_TRACE() macro.
+thread_local std::vector<TraceInfo> gtest_trace_stack;
+
 // The text used in failure messages to indicate the start of the
 // stack trace.
 const char kStackTraceMarker[] = "\nStack trace:\n";
@@ -906,17 +913,17 @@ void UnitTestImpl::SetGlobalTestPartResultReporter(
 // Returns the test part result reporter for the current thread.
 TestPartResultReporterInterface*
 UnitTestImpl::GetOrCreateTestPartResultReporterForCurrentThread() {
-  if (per_thread_test_part_result_reporter_ == nullptr)
+  if (per_thread_test_part_result_reporter == nullptr)
     SetTestPartResultReporterForCurrentThread(
         &default_per_thread_test_part_result_reporter_);
 
-  return per_thread_test_part_result_reporter_;
+  return per_thread_test_part_result_reporter;
 }
 
 // Sets the test part result reporter for the current thread.
 void UnitTestImpl::SetTestPartResultReporterForCurrentThread(
     TestPartResultReporterInterface* reporter) {
-  per_thread_test_part_result_reporter_ = reporter;
+  per_thread_test_part_result_reporter = reporter;
 }
 
 // Gets the number of successful test suites.
@@ -998,6 +1005,14 @@ std::string UnitTestImpl::CurrentOsStackTraceExceptTop(int skip_count) {
       // Skips the user-specified number of frames plus this function
       // itself.
       );  // NOLINT
+}
+
+// Getters for the per-thread Google Test trace stack.
+std::vector<TraceInfo>& UnitTestImpl::gtest_trace_stack() {
+  return internal::gtest_trace_stack;
+}
+const std::vector<TraceInfo>& UnitTestImpl::gtest_trace_stack() const {
+  return internal::gtest_trace_stack;
 }
 
 // Returns the current time in milliseconds.
@@ -5379,10 +5394,6 @@ void UnitTest::PopGTestTrace()
 }
 
 namespace internal {
-
-thread_local TestPartResultReporterInterface*
-    UnitTestImpl::per_thread_test_part_result_reporter_;
-thread_local std::vector<TraceInfo> UnitTestImpl::gtest_trace_stack_;
 
 UnitTestImpl::UnitTestImpl(UnitTest* parent)
     : parent_(parent),

@@ -272,7 +272,7 @@ void ExpectationBase::UntypedTimes(const Cardinality& a_cardinality) {
 
 // Points to the implicit sequence introduced by a living InSequence
 // object (if any) in the current thread or NULL.
-GTEST_API_ thread_local Sequence* g_gmock_implicit_sequence;
+thread_local Sequence* g_gmock_implicit_sequence;
 
 // Reports an uninteresting call (whose description is in msg) in the
 // manner specified by 'reaction'.
@@ -567,6 +567,12 @@ CallReaction intToCallReaction(int mock_behavior) {
     return static_cast<internal::CallReaction>(mock_behavior);
   }
   return kWarn;
+}
+
+GTEST_API_ void AddExpectationToCurrentThread(const Expectation& expectation) {
+  if (g_gmock_implicit_sequence != nullptr) {
+    g_gmock_implicit_sequence->AddExpectation(expectation);
+  }
 }
 
 }  // namespace internal
