@@ -2280,8 +2280,7 @@ static const char* const kReservedTestCaseAttributes[] = {
 // Use a slightly different set for allowed output to ensure existing tests can
 // still RecordProperty("result") or "RecordProperty(timestamp")
 static const char* const kReservedOutputTestCaseAttributes[] = {
-    "classname",   "name", "status", "time",   "type_param",
-    "value_param", "file", "line",   "result", "timestamp"};
+    "name", "file", "duration", "error"};
 
 template <size_t kSize>
 std::vector<std::string> ArrayAsVector(const char* const (&array)[kSize]) {
@@ -4290,7 +4289,6 @@ private:
 
     // Streams a JUnit formatter XML representation of a TestInfo object
     static void OutputJUnitXmlTestInfo(::std::ostream* stream,
-                                       const char* test_suite_name,
                                        const TestInfo& test_info);
 
 
@@ -4456,13 +4454,13 @@ void JUnitXmlUnitTestResultPrinter::OutputXmlAttribute(
         const std::string& element_name,
         const std::string& name,
         const std::string& value) {
-//    const std::vector<std::string>& allowed_names =
-//            GetReservedOutputAttributesForElement(element_name);
+    const std::vector<std::string>& allowed_names =
+            GetReservedOutputAttributesForElement(element_name);
 
-//    GTEST_CHECK_(std::find(allowed_names.begin(), allowed_names.end(), name) !=
-//                 allowed_names.end())
-//            << "Attribute " << name << " is not allowed for element <" << element_name
-//            << ">.";
+    GTEST_CHECK_(std::find(allowed_names.begin(), allowed_names.end(), name) !=
+                 allowed_names.end())
+            << "Attribute " << name << " is not allowed for element <" << element_name
+            << ">.";
 
     *stream << " " << name << "=\"" << EscapeXmlAttribute(value) << "\"";
 }
@@ -4495,7 +4493,7 @@ void JUnitXmlUnitTestResultPrinter::PrintJUnitXmlTestSuite(::std::ostream *strea
 
     for (int i = 0; i < test_suite.total_test_count(); ++i) {
         if (test_suite.GetTestInfo(i)->is_reportable()) {
-            OutputJUnitXmlTestInfo(stream, test_suite.name(), *test_suite.GetTestInfo(i));
+            OutputJUnitXmlTestInfo(stream, *test_suite.GetTestInfo(i));
         }
     }
 
@@ -4503,7 +4501,6 @@ void JUnitXmlUnitTestResultPrinter::PrintJUnitXmlTestSuite(::std::ostream *strea
 }
 
 void JUnitXmlUnitTestResultPrinter::OutputJUnitXmlTestInfo(::std::ostream* stream,
-                                                      const char* test_suite_name,
                                                       const TestInfo& test_info) {
 
     const TestResult& result = *test_info.result();
