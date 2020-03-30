@@ -41,7 +41,6 @@
 #if GTEST_OS_WINDOWS
 # include <windows.h>
 # include <io.h>
-# include <sys/stat.h>
 # include <map>  // Used in ThreadLocal.
 # ifdef _MSC_VER
 #  include <crtdbg.h>
