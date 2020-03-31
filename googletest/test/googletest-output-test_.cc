@@ -476,63 +476,6 @@ TEST(GtestFailAtTest, MessageContainsSpecifiedFileAndLineNumber) {
   GTEST_FAIL_AT("foo.cc", 42) << "Expected fatal failure in foo.cc";
 }
 
-#if GTEST_IS_THREADSAFE
-
-// A unary function that may die.
-void DieIf(bool should_die) {
-  GTEST_CHECK_(!should_die) << " - death inside DieIf().";
-}
-
-// Tests running death tests in a multi-threaded context.
-
-// Used for coordination between the main and the spawn thread.
-struct SpawnThreadNotifications {
-  SpawnThreadNotifications() {}
-
-  Notification spawn_thread_started;
-  Notification spawn_thread_ok_to_terminate;
-
- private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(SpawnThreadNotifications);
-};
-
-// The function to be executed in the thread spawn by the
-// MultipleThreads test (below).
-static void ThreadRoutine(SpawnThreadNotifications* notifications) {
-  // Signals the main thread that this thread has started.
-  notifications->spawn_thread_started.Notify();
-
-  // Waits for permission to finish from the main thread.
-  notifications->spawn_thread_ok_to_terminate.WaitForNotification();
-}
-
-// This is a death-test test, but it's not named with a DeathTest
-// suffix.  It starts threads which might interfere with later
-// death tests, so it must run after all other death tests.
-class DeathTestAndMultiThreadsTest : public testing::Test {
- protected:
-  // Starts a thread and waits for it to begin.
-  void SetUp() override {
-    thread_.reset(new ThreadWithParam<SpawnThreadNotifications*>(
-        &ThreadRoutine, &notifications_, nullptr));
-    notifications_.spawn_thread_started.WaitForNotification();
-  }
-  // Tells the thread to finish, and reaps it.
-  // Depending on the version of the thread library in use,
-  // a manager thread might still be left running that will interfere
-  // with later death tests.  This is unfortunate, but this class
-  // cleans up after itself as best it can.
-  void TearDown() override {
-    notifications_.spawn_thread_ok_to_terminate.Notify();
-  }
-
- private:
-  SpawnThreadNotifications notifications_;
-  std::unique_ptr<ThreadWithParam<SpawnThreadNotifications*> > thread_;
-};
-
-#endif  // GTEST_IS_THREADSAFE
-
 // The MixedUpTestSuiteTest test case verifies that Google Test will fail a
 // test if it uses a different fixture class than what other tests in
 // the same test case use.  It deliberately contains two fixture
