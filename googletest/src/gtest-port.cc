@@ -169,7 +169,7 @@ size_t GetThreadCount() {
     1,
 #endif
   };
-  u_int miblen = sizeof(mib) / sizeof(mib[0]);
+  size_t miblen = sizeof(mib) / sizeof(mib[0]);
   struct kinfo_proc info;
   size_t size = sizeof(info);
   if (sysctl(mib, miblen, &info, &size, NULL, 0)) {
