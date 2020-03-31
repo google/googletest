@@ -1,7 +1,7 @@
 insights.md  
 -a detailed look at some aspects of the proper usage of googlemocks/googletest
 
-By Gabriel Staples  
+By [Gabriel Staples](https://github.com/ElectricRCAircraftGuy)  
 30 Mar. 2020  
 
 This answer was originally [posted on Stack Overflow here](https://stackoverflow.com/questions/44034633/google-mock-can-i-call-expect-call-multiple-times-on-same-mock-object/60905880#60905880) to answer this question: "**google mock - can I call EXPECT_CALL multiple times on same mock object?**"
