@@ -2562,6 +2562,18 @@ IMPORTANT: The exact format of the JSON document is subject to change.
 
 ### Controlling How Failures Are Reported
 
+#### Detecting Test Premature Exit
+
+Google Test implements the _premature-exit-file_ protocol for test runners
+to catch any kind of unexpected exits of test programs. Upon start,
+Google Test creates the file which will be automatically deleted after
+all work has been finished. Then, the test runner can check if this file
+exists. In case the file remains undeleted, the inspected test has exited
+prematurely.
+
+This feature is enabled only if the `TEST_PREMATURE_EXIT_FILE` environment
+variable has been set.
+
 #### Turning Assertion Failures into Break-Points
 
 When running test programs under a debugger, it's very convenient if the
