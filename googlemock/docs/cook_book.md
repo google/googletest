@@ -1712,8 +1712,8 @@ brittle tests. For example, we may care about `A` occurring before both `B` and
 the test should reflect our real intent, instead of being overly constraining.
 
 gMock allows you to impose an arbitrary DAG (directed acyclic graph) on the
-calls. One way to express the DAG is to use the [After](#AfterClause) clause of
-`EXPECT_CALL`.
+calls. One way to express the DAG is to use the
+[After](cheat_sheet.md#AfterClause) clause of `EXPECT_CALL`.
 
 Another way is via the `InSequence()` clause (not the same as the `InSequence`
 class), which we borrowed from jMock 2. It's less flexible than `After()`, but
