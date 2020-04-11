@@ -188,6 +188,10 @@ function(cxx_library_with_type name type cxx_flags)
     endif()
     target_link_libraries(${name} PUBLIC ${threads_spec})
   endif()
+
+  if (NOT "${CMAKE_VERSION}" VERSION_LESS "3.8")
+    target_compile_features(${name} PUBLIC cxx_std_11)
+  endif()
 endfunction()
 
 ########################################################################
