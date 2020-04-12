@@ -208,7 +208,7 @@ size_t GetThreadCount() {
 
   // exclude empty members
   int nthreads = 0;
-  for (int i = 0; i < size / mib[4]; i++) {
+  for (size_t i = 0; i < size / mib[4]; i++) {
     if (info[i].p_tid != -1)
       nthreads++;
   }
