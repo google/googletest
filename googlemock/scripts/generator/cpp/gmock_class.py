@@ -26,9 +26,6 @@ Usage:
 Output is sent to stdout.
 """
 
-__author__ = 'nnorwitz@google.com (Neal Norwitz)'
-
-
 import os
 import re
 import sys
@@ -41,6 +38,7 @@ try:
   _dummy = set
 except NameError:
   import sets
+
   set = sets.Set
 
 _VERSION = (1, 0, 1)  # The version of this script.
@@ -48,79 +46,99 @@ _VERSION = (1, 0, 1)  # The version of this script.
 _INDENT = 2
 
 
+def _RenderType(ast_type):
+  """Renders the potentially recursively templated type into a string.
+
+  Args:
+    ast_type: The AST of the type.
+
+  Returns:
+    Rendered string of the type.
+  """
+  # Add modifiers like 'const'.
+  modifiers = ''
+  if ast_type.modifiers:
+    modifiers = ' '.join(ast_type.modifiers) + ' '
+  return_type = modifiers + ast_type.name
+  if ast_type.templated_types:
+    # Collect template args.
+    template_args = []
+    for arg in ast_type.templated_types:
+      rendered_arg = _RenderType(arg)
+      template_args.append(rendered_arg)
+    return_type += '<' + ', '.join(template_args) + '>'
+  if ast_type.pointer:
+    return_type += '*'
+  if ast_type.reference:
+    return_type += '&'
+  return return_type
+
+
+def _GenerateArg(source):
+  """Strips out comments, default arguments, and redundant spaces from a single argument.
+
+  Args:
+    source: A string for a single argument.
+
+  Returns:
+    Rendered string of the argument.
+  """
+  # Remove end of line comments before eliminating newlines.
+  arg = re.sub(r'//.*', '', source)
+
+  # Remove c-style comments.
+  arg = re.sub(r'/\*.*\*/', '', arg)
+
+  # Remove default arguments.
+  arg = re.sub(r'=.*', '', arg)
+
+  # Collapse spaces and newlines into a single space.
+  arg = re.sub(r'\s+', ' ', arg)
+  return arg.strip()
+
+
+def _EscapeForMacro(s):
+  """Escapes a string for use as an argument to a C++ macro."""
+  paren_count = 0
+  for c in s:
+    if c == '(':
+      paren_count += 1
+    elif c == ')':
+      paren_count -= 1
+    elif c == ',' and paren_count == 0:
+      return '(' + s + ')'
+  return s
+
+
 def _GenerateMethods(output_lines, source, class_node):
-  function_type = (ast.FUNCTION_VIRTUAL | ast.FUNCTION_PURE_VIRTUAL |
-                   ast.FUNCTION_OVERRIDE)
+  function_type = (
+      ast.FUNCTION_VIRTUAL | ast.FUNCTION_PURE_VIRTUAL | ast.FUNCTION_OVERRIDE)
   ctor_or_dtor = ast.FUNCTION_CTOR | ast.FUNCTION_DTOR
   indent = ' ' * _INDENT
 
   for node in class_node.body:
     # We only care about virtual functions.
-    if (isinstance(node, ast.Function) and
-        node.modifiers & function_type and
+    if (isinstance(node, ast.Function) and node.modifiers & function_type and
         not node.modifiers & ctor_or_dtor):
       # Pick out all the elements we need from the original function.
-      const = ''
+      modifiers = 'override'
       if node.modifiers & ast.FUNCTION_CONST:
-        const = 'CONST_'
+        modifiers = 'const, ' + modifiers
+
       return_type = 'void'
       if node.return_type:
-        # Add modifiers like 'const'.
-        modifiers = ''
-        if node.return_type.modifiers:
-          modifiers = ' '.join(node.return_type.modifiers) + ' '
-        return_type = modifiers + node.return_type.name
-        template_args = [arg.name for arg in node.return_type.templated_types]
-        if template_args:
-          return_type += '<' + ', '.join(template_args) + '>'
-          if len(template_args) > 1:
-            for line in [
-                '// The following line won\'t really compile, as the return',
-                '// type has multiple template arguments.  To fix it, use a',
-                '// typedef for the return type.']:
-              output_lines.append(indent + line)
-        if node.return_type.pointer:
-          return_type += '*'
-        if node.return_type.reference:
-          return_type += '&'
-        num_parameters = len(node.parameters)
-        if len(node.parameters) == 1:
-          first_param = node.parameters[0]
-          if source[first_param.start:first_param.end].strip() == 'void':
-            # We must treat T(void) as a function with no parameters.
-            num_parameters = 0
-      tmpl = ''
-      if class_node.templated_types:
-        tmpl = '_T'
-      mock_method_macro = 'MOCK_%sMETHOD%d%s' % (const, num_parameters, tmpl)
+        return_type = _EscapeForMacro(_RenderType(node.return_type))
 
-      args = ''
-      if node.parameters:
-        # Due to the parser limitations, it is impossible to keep comments
-        # while stripping the default parameters.  When defaults are
-        # present, we choose to strip them and comments (and produce
-        # compilable code).
-        # TODO(nnorwitz@google.com): Investigate whether it is possible to
-        # preserve parameter name when reconstructing parameter text from
-        # the AST.
-        if len([param for param in node.parameters if param.default]) > 0:
-          args = ', '.join(param.type.name for param in node.parameters)
-        else:
-          # Get the full text of the parameters from the start
-          # of the first parameter to the end of the last parameter.
-          start = node.parameters[0].start
-          end = node.parameters[-1].end
-          # Remove // comments.
-          args_strings = re.sub(r'//.*', '', source[start:end])
-          # Condense multiple spaces and eliminate newlines putting the
-          # parameters together on a single line.  Ensure there is a
-          # space in an argument which is split by a newline without
-          # intervening whitespace, e.g.: int\nBar
-          args = re.sub('  +', ' ', args_strings.replace('\n', ' '))
+      args = []
+      for p in node.parameters:
+        arg = _GenerateArg(source[p.start:p.end])
+        args.append(_EscapeForMacro(arg))
 
       # Create the mock method definition.
-      output_lines.extend(['%s%s(%s,' % (indent, mock_method_macro, node.name),
-                           '%s%s(%s));' % (indent*3, return_type, args)])
+      output_lines.extend([
+          '%sMOCK_METHOD(%s, %s, (%s), (%s));' %
+          (indent, return_type, node.name, ', '.join(args), modifiers)
+      ])
 
 
 def _GenerateMocks(filename, source, ast_list, desired_class_names):
@@ -171,7 +189,7 @@ def _GenerateMocks(filename, source, ast_list, desired_class_names):
 
       # Close the namespace.
       if class_node.namespace:
-        for i in range(len(class_node.namespace)-1, -1, -1):
+        for i in range(len(class_node.namespace) - 1, -1, -1):
           lines.append('}  // namespace %s' % class_node.namespace[i])
         lines.append('')  # Add an extra newline.
 

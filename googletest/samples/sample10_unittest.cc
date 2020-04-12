@@ -25,8 +25,7 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Author: vladl@google.com (Vlad Losev)
+
 
 // This sample shows how to use Google Test listener API to implement
 // a primitive leak checker.
@@ -35,18 +34,15 @@
 #include <stdlib.h>
 
 #include "gtest/gtest.h"
-
 using ::testing::EmptyTestEventListener;
 using ::testing::InitGoogleTest;
 using ::testing::Test;
-using ::testing::TestCase;
 using ::testing::TestEventListeners;
 using ::testing::TestInfo;
 using ::testing::TestPartResult;
 using ::testing::UnitTest;
 
 namespace {
-
 // We will track memory used by this class.
 class Water {
  public:
@@ -78,12 +74,12 @@ int Water::allocated_ = 0;
 class LeakChecker : public EmptyTestEventListener {
  private:
   // Called before a test starts.
-  virtual void OnTestStart(const TestInfo& /* test_info */) {
+  void OnTestStart(const TestInfo& /* test_info */) override {
     initially_allocated_ = Water::allocated();
   }
 
   // Called after a test ends.
-  virtual void OnTestEnd(const TestInfo& /* test_info */) {
+  void OnTestEnd(const TestInfo& /* test_info */) override {
     int difference = Water::allocated() - initially_allocated_;
 
     // You can generate a failure in any event handler except
@@ -104,9 +100,8 @@ TEST(ListenersTest, DoesNotLeak) {
 // specified.
 TEST(ListenersTest, LeaksWater) {
   Water* water = new Water;
-  EXPECT_TRUE(water != NULL);
+  EXPECT_TRUE(water != nullptr);
 }
-
 }  // namespace
 
 int main(int argc, char **argv) {

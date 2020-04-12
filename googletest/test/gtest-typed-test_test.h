@@ -26,8 +26,7 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Author: wan@google.com (Zhanyong Wan)
+
 
 #ifndef GTEST_TEST_GTEST_TYPED_TEST_TEST_H_
 #define GTEST_TEST_GTEST_TYPED_TEST_TEST_H_
@@ -47,7 +46,7 @@ template <typename T>
 class ContainerTest : public Test {
 };
 
-TYPED_TEST_CASE_P(ContainerTest);
+TYPED_TEST_SUITE_P(ContainerTest);
 
 TYPED_TEST_P(ContainerTest, CanBeDefaultConstructed) {
   TypeParam container;
@@ -58,8 +57,8 @@ TYPED_TEST_P(ContainerTest, InitialSizeIsZero) {
   EXPECT_EQ(0U, container.size());
 }
 
-REGISTER_TYPED_TEST_CASE_P(ContainerTest,
-                           CanBeDefaultConstructed, InitialSizeIsZero);
+REGISTER_TYPED_TEST_SUITE_P(ContainerTest,
+                            CanBeDefaultConstructed, InitialSizeIsZero);
 
 #endif  // GTEST_HAS_TYPED_TEST_P
 

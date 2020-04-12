@@ -27,8 +27,6 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Author: keith.ray@gmail.com (Keith Ray)
-//
 // gtest_xml_outfile1_test_ writes some xml via TestProperty used by
 // gtest_xml_outfiles_test.py
 
@@ -36,12 +34,8 @@
 
 class PropertyOne : public testing::Test {
  protected:
-  virtual void SetUp() {
-    RecordProperty("SetUpProp", 1);
-  }
-  virtual void TearDown() {
-    RecordProperty("TearDownProp", 1);
-  }
+  void SetUp() override { RecordProperty("SetUpProp", 1); }
+  void TearDown() override { RecordProperty("TearDownProp", 1); }
 };
 
 TEST_F(PropertyOne, TestSomeProperties) {

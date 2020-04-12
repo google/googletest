@@ -26,8 +26,7 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Author: vladl@google.com (Vlad Losev)
+
 
 // This sample shows how to test code relying on some global flag variables.
 // Combine() helps with generating all possible combinations of such flags,
@@ -37,8 +36,7 @@
 #include "prime_tables.h"
 
 #include "gtest/gtest.h"
-
-#if GTEST_HAS_COMBINE
+namespace {
 
 // Suppose we want to introduce a new, improved implementation of PrimeTable
 // which combines speed of PrecalcPrimeTable and versatility of
@@ -51,24 +49,25 @@ class HybridPrimeTable : public PrimeTable {
  public:
   HybridPrimeTable(bool force_on_the_fly, int max_precalculated)
       : on_the_fly_impl_(new OnTheFlyPrimeTable),
-        precalc_impl_(force_on_the_fly ? NULL :
-                          new PreCalculatedPrimeTable(max_precalculated)),
+        precalc_impl_(force_on_the_fly
+                          ? nullptr
+                          : new PreCalculatedPrimeTable(max_precalculated)),
         max_precalculated_(max_precalculated) {}
-  virtual ~HybridPrimeTable() {
+  ~HybridPrimeTable() override {
     delete on_the_fly_impl_;
     delete precalc_impl_;
   }
 
-  virtual bool IsPrime(int n) const {
-    if (precalc_impl_ != NULL && n < max_precalculated_)
+  bool IsPrime(int n) const override {
+    if (precalc_impl_ != nullptr && n < max_precalculated_)
       return precalc_impl_->IsPrime(n);
     else
       return on_the_fly_impl_->IsPrime(n);
   }
 
-  virtual int GetNextPrime(int p) const {
+  int GetNextPrime(int p) const override {
     int next_prime = -1;
-    if (precalc_impl_ != NULL && p < max_precalculated_)
+    if (precalc_impl_ != nullptr && p < max_precalculated_)
       next_prime = precalc_impl_->GetNextPrime(p);
 
     return next_prime != -1 ? next_prime : on_the_fly_impl_->GetNextPrime(p);
@@ -90,24 +89,17 @@ using ::testing::Combine;
 // PreCalculatedPrimeTable disabled. We do this by defining fixture which will
 // accept different combinations of parameters for instantiating a
 // HybridPrimeTable instance.
-class PrimeTableTest : public TestWithParam< ::testing::tuple<bool, int> > {
+class PrimeTableTest : public TestWithParam< ::std::tuple<bool, int> > {
  protected:
-  virtual void SetUp() {
-    // This can be written as
-    //
-    // bool force_on_the_fly;
-    // int max_precalculated;
-    // tie(force_on_the_fly, max_precalculated) = GetParam();
-    //
-    // once the Google C++ Style Guide allows use of ::std::tr1::tie.
-    //
-    bool force_on_the_fly = ::testing::get<0>(GetParam());
-    int max_precalculated = ::testing::get<1>(GetParam());
+  void SetUp() override {
+    bool force_on_the_fly;
+    int max_precalculated;
+    std::tie(force_on_the_fly, max_precalculated) = GetParam();
     table_ = new HybridPrimeTable(force_on_the_fly, max_precalculated);
   }
-  virtual void TearDown() {
+  void TearDown() override {
     delete table_;
-    table_ = NULL;
+    table_ = nullptr;
   }
   HybridPrimeTable* table_;
 };
@@ -156,18 +148,7 @@ TEST_P(PrimeTableTest, CanGetNextPrime) {
 // will put some of the tested numbers beyond the capability of the
 // PrecalcPrimeTable instance and some inside it (10). Combine will produce all
 // possible combinations.
-INSTANTIATE_TEST_CASE_P(MeaningfulTestParameters,
-                        PrimeTableTest,
-                        Combine(Bool(), Values(1, 10)));
+INSTANTIATE_TEST_SUITE_P(MeaningfulTestParameters, PrimeTableTest,
+                         Combine(Bool(), Values(1, 10)));
 
-#else
-
-// Google Test may not support Combine() with some compilers. If we
-// use conditional compilation to compile out all code referring to
-// the gtest_main library, MSVC linker will not link that library at
-// all and consequently complain about missing entry point defined in
-// that library (fatal error LNK1561: entry point must be
-// defined). This dummy test keeps gtest_main linked in.
-TEST(DummyTest, CombineIsNotSupportedOnThisPlatform) {}
-
-#endif  // GTEST_HAS_COMBINE
+}  // namespace

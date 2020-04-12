@@ -26,22 +26,21 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 //
-// Author: wan@google.com (Zhanyong Wan)
-//
-// Tests for Google C++ Testing Framework (Google Test)
+// Tests for Google C++ Testing and Mocking Framework (Google Test)
 //
 // Sometimes it's desirable to build most of Google Test's own tests
 // by compiling a single file.  This file serves this purpose.
-#include "test/gtest-filepath_test.cc"
-#include "test/gtest-linked_ptr_test.cc"
-#include "test/gtest-message_test.cc"
-#include "test/gtest-options_test.cc"
-#include "test/gtest-port_test.cc"
+#include "test/googletest-filepath-test.cc"
+#include "test/googletest-message-test.cc"
+#include "test/googletest-options-test.cc"
+#include "test/googletest-port-test.cc"
+#include "test/googletest-test-part-test.cc"
+#include "test/gtest-typed-test2_test.cc"
+#include "test/gtest-typed-test_test.cc"
 #include "test/gtest_pred_impl_unittest.cc"
 #include "test/gtest_prod_test.cc"
-#include "test/gtest-test-part_test.cc"
-#include "test/gtest-typed-test_test.cc"
-#include "test/gtest-typed-test2_test.cc"
+#include "test/gtest_skip_test.cc"
 #include "test/gtest_unittest.cc"
 #include "test/production.cc"

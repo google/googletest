@@ -78,7 +78,7 @@ def HeaderPreamble(n):
     }
 
   return (
-"""// Copyright 2006, Google Inc.
+  """// Copyright 2006, Google Inc.
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -111,14 +111,15 @@ def HeaderPreamble(n):
 // '%(command)s'.  DO NOT EDIT BY HAND!
 //
 // Implements a family of generic predicate assertion macros.
+// GOOGLETEST_CM0001 DO NOT DELETE
+
 
 #ifndef GTEST_INCLUDE_GTEST_GTEST_PRED_IMPL_H_
 #define GTEST_INCLUDE_GTEST_GTEST_PRED_IMPL_H_
 
-// Makes sure this header is not included before gtest.h.
-#ifndef GTEST_INCLUDE_GTEST_GTEST_H_
-# error Do not include gtest_pred_impl.h directly.  Include gtest.h instead.
-#endif  // GTEST_INCLUDE_GTEST_GTEST_H_
+#include "gtest/gtest.h"
+
+namespace testing {
 
 // This header implements a family of generic predicate assertion
 // macros:
@@ -247,8 +248,10 @@ AssertionResult AssertPred%(n)sHelper(const char* pred_text""" % DEFS
 
   impl += ' << ") evaluates to false, where"'
 
-  impl += Iter(n, """
-                            << "\\n" << e%s << " evaluates to " << v%s""")
+  impl += Iter(
+      n, """
+      << "\\n" << e%s << " evaluates to " << ::testing::PrintToString(v%s)"""
+  )
 
   impl += """;
 }
@@ -295,16 +298,17 @@ def HeaderPostamble():
 
   return """
 
+}  // namespace testing
+
 #endif  // GTEST_INCLUDE_GTEST_GTEST_PRED_IMPL_H_
 """
 
 
 def GenerateFile(path, content):
-  """Given a file path and a content string, overwrites it with the
-  given content."""
-
+  """Given a file path and a content string
+     overwrites it with the given content.
+  """
   print 'Updating file %s . . .' % path
-
   f = file(path, 'w+')
   print >>f, content,
   f.close()
@@ -314,8 +318,8 @@ def GenerateFile(path, content):
 
 def GenerateHeader(n):
   """Given the maximum arity n, updates the header file that implements
-  the predicate assertions."""
-
+  the predicate assertions.
+  """
   GenerateFile(HEADER,
                HeaderPreamble(n)
                + ''.join([ImplementationForArity(i) for i in OneTo(n)])
@@ -333,7 +337,7 @@ def UnitTestPreamble():
     }
 
   return (
-"""// Copyright 2006, Google Inc.
+  """// Copyright 2006, Google Inc.
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -427,7 +431,7 @@ def TestsForArity(n):
     }
 
   tests = (
-"""// Sample functions/functors for testing %(arity)s predicate assertions.
+  """// Sample functions/functors for testing %(arity)s predicate assertions.
 
 // A %(arity)s predicate function.
 template <%(types)s>
@@ -435,9 +439,8 @@ bool PredFunction%(n)s(%(tvs)s) {
   return %(v_sum)s > 0;
 }
 
-// The following two functions are needed to circumvent a bug in
-// gcc 2.95.3, which sometimes has problem with the above template
-// function.
+// The following two functions are needed because a compiler doesn't have
+// a context yet to know which template function must be instantiated.
 bool PredFunction%(n)sInt(%(int_vs)s) {
   return %(v_sum)s > 0;
 }
@@ -510,7 +513,7 @@ struct PredFormatFunctor%(n)s {
 
 class Predicate%(n)sTest : public testing::Test {
  protected:
-  virtual void SetUp() {
+  void SetUp() override {
     expected_to_finish_ = true;
     finished_ = false;""" % DEFS
 
@@ -520,7 +523,7 @@ class Predicate%(n)sTest : public testing::Test {
 """
 
   tests += """
-  virtual void TearDown() {
+  void TearDown() override {
     // Verifies that each of the predicate's arguments was evaluated
     // exactly once."""
 
@@ -540,10 +543,10 @@ class Predicate%(n)sTest : public testing::Test {
     }
   }
 
-  // true iff the test function is expected to run to finish.
+  // true if and only if the test function is expected to run to finish.
   static bool expected_to_finish_;
 
-  // true iff the test function did run to finish.
+  // true if and only if the test function did run to finish.
   static bool finished_;
 """ % DEFS
 
@@ -572,12 +575,12 @@ typedef Predicate%(n)sTest ASSERT_PRED%(n)sTest;
     """Returns the test for a predicate assertion macro.
 
     Args:
-      use_format:     true iff the assertion is a *_PRED_FORMAT*.
-      use_assert:     true iff the assertion is a ASSERT_*.
-      expect_failure: true iff the assertion is expected to fail.
-      use_functor:    true iff the first argument of the assertion is
+      use_format:     true if and only if the assertion is a *_PRED_FORMAT*.
+      use_assert:     true if and only if the assertion is a ASSERT_*.
+      expect_failure: true if and only if the assertion is expected to fail.
+      use_functor:    true if and only if the first argument of the assertion is
                       a functor (as opposed to a function)
-      use_user_type:  true iff the predicate functor/function takes
+      use_user_type:  true if and only if the predicate functor/function takes
                       argument(s) of a user-defined type.
 
     Example:
@@ -588,7 +591,7 @@ typedef Predicate%(n)sTest ASSERT_PRED%(n)sTest;
 
     if use_assert:
       assrt = 'ASSERT'  # 'assert' is reserved, so we cannot use
-                        # that identifier here.
+      # that identifier here.
     else:
       assrt = 'EXPECT'
 

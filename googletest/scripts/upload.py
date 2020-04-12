@@ -1,18 +1,33 @@
 #!/usr/bin/env python
 #
-# Copyright 2007 Google Inc.
+# Copyright 2007, Google Inc.
+# All rights reserved.
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are
+# met:
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     * Redistributions of source code must retain the above copyright
+# notice, this list of conditions and the following disclaimer.
+#     * Redistributions in binary form must reproduce the above
+# copyright notice, this list of conditions and the following disclaimer
+# in the documentation and/or other materials provided with the
+# distribution.
+#     * Neither the name of Google Inc. nor the names of its
+# contributors may be used to endorse or promote products derived from
+# this software without specific prior written permission.
 #
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+# OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 """Tool for uploading diffs from a version control system to the codereview app.
 
@@ -242,7 +257,7 @@ class AbstractRpcServer(object):
     The authentication process works as follows:
      1) We get a username and password from the user
      2) We use ClientLogin to obtain an AUTH token for the user
-        (see http://code.google.com/apis/accounts/AuthForInstalledApps.html).
+        (see https://developers.google.com/identity/protocols/AuthForInstalledApps).
      3) We pass the auth token to /_ah/login on the server to obtain an
         authentication cookie. If login was successful, it tries to redirect
         us to the URL we provided.
@@ -506,7 +521,7 @@ def EncodeMultipartFormData(fields, files):
     (content_type, body) ready for httplib.HTTP instance.
 
   Source:
-    http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/146306
+    https://web.archive.org/web/20160116052001/code.activestate.com/recipes/146306
   """
   BOUNDARY = '-M-A-G-I-C---B-O-U-N-D-A-R-Y-'
   CRLF = '\r\n'
@@ -732,7 +747,7 @@ class SubversionVCS(VersionControlSystem):
     else:
       self.rev_start = self.rev_end = None
     # Cache output from "svn list -r REVNO dirname".
-    # Keys: dirname, Values: 2-tuple (ouput for start rev and end rev).
+    # Keys: dirname, Values: 2-tuple (output for start rev and end rev).
     self.svnls_cache = {}
     # SVN base URL is required to fetch files deleted in an older revision.
     # Result is cached to not guess it over and over again in GetBaseFile().
@@ -807,7 +822,7 @@ class SubversionVCS(VersionControlSystem):
     # svn cat translates keywords but svn diff doesn't. As a result of this
     # behavior patching.PatchChunks() fails with a chunk mismatch error.
     # This part was originally written by the Review Board development team
-    # who had the same problem (http://reviews.review-board.org/r/276/).
+    # who had the same problem (https://reviews.reviewboard.org/r/276/).
     # Mapping of keywords to known aliases
     svn_keywords = {
       # Standard keywords
@@ -860,7 +875,7 @@ class SubversionVCS(VersionControlSystem):
       status_lines = status.splitlines()
       # If file is in a cl, the output will begin with
       # "\n--- Changelist 'cl_name':\n".  See
-      # http://svn.collab.net/repos/svn/trunk/notes/changelist-design.txt
+      # https://web.archive.org/web/20090918234815/svn.collab.net/repos/svn/trunk/notes/changelist-design.txt
       if (len(status_lines) == 3 and
           not status_lines[0] and
           status_lines[1].startswith("--- Changelist")):

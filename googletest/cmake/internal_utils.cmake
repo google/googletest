@@ -12,6 +12,10 @@
 #   Test and Google Mock's option() definitions, and thus must be
 #   called *after* the options have been defined.
 
+if (POLICY CMP0054)
+  cmake_policy(SET CMP0054 NEW)
+endif (POLICY CMP0054)
+
 # Tweaks CMake's default compiler/linker settings to suit Google Test's needs.
 #
 # This must be a macro(), as inside a function string() can only
@@ -20,8 +24,10 @@ macro(fix_default_compiler_settings_)
   if (MSVC)
     # For MSVC, CMake sets certain flags to defaults we want to override.
     # This replacement code is taken from sample in the CMake Wiki at
-    # http://www.cmake.org/Wiki/CMake_FAQ#Dynamic_Replace.
+    # https://gitlab.kitware.com/cmake/community/wikis/FAQ#dynamic-replace.
     foreach (flag_var
+             CMAKE_C_FLAGS CMAKE_C_FLAGS_DEBUG CMAKE_C_FLAGS_RELEASE
+             CMAKE_C_FLAGS_MINSIZEREL CMAKE_C_FLAGS_RELWITHDEBINFO
              CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
              CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
       if (NOT BUILD_SHARED_LIBS AND NOT gtest_force_shared_crt)
@@ -38,6 +44,11 @@ macro(fix_default_compiler_settings_)
       # We prefer more strict warning checking for building Google Test.
       # Replaces /W3 with /W4 in defaults.
       string(REPLACE "/W3" "/W4" ${flag_var} "${${flag_var}}")
+
+      # Prevent D9025 warning for targets that have exception handling
+      # turned off (/EHs-c- flag). Where required, exceptions are explicitly
+      # re-enabled using the cxx_exception_flags variable.
+      string(REPLACE "/EHsc" "" ${flag_var} "${${flag_var}}")
     endforeach()
   endif()
 endmacro()
@@ -46,9 +57,15 @@ endmacro()
 # Google Mock.  You can tweak these definitions to suit your need.  A
 # variable's value is empty before it's explicitly assigned to.
 macro(config_compiler_and_linker)
-  if (NOT gtest_disable_pthreads)
+  # Note: pthreads on MinGW is not supported, even if available
+  # instead, we use windows threading primitives
+  unset(GTEST_HAS_PTHREAD)
+  if (NOT gtest_disable_pthreads AND NOT MINGW)
     # Defines CMAKE_USE_PTHREADS_INIT and CMAKE_THREAD_LIBS_INIT.
     find_package(Threads)
+    if (CMAKE_USE_PTHREADS_INIT)
+      set(GTEST_HAS_PTHREAD ON)
+    endif()
   endif()
 
   fix_default_compiler_settings_()
@@ -56,42 +73,25 @@ macro(config_compiler_and_linker)
     # Newlines inside flags variables break CMake's NMake generator.
     # TODO(vladl@google.com): Add -RTCs and -RTCu to debug builds.
     set(cxx_base_flags "-GS -W4 -WX -wd4251 -wd4275 -nologo -J -Zi")
-    if (MSVC_VERSION LESS 1400)  # 1400 is Visual Studio 2005
-      # Suppress spurious warnings MSVC 7.1 sometimes issues.
-      # Forcing value to bool.
-      set(cxx_base_flags "${cxx_base_flags} -wd4800")
-      # Copy constructor and assignment operator could not be generated.
-      set(cxx_base_flags "${cxx_base_flags} -wd4511 -wd4512")
-      # Compatibility warnings not applicable to Google Test.
-      # Resolved overload was found by argument-dependent lookup.
-      set(cxx_base_flags "${cxx_base_flags} -wd4675")
-    endif()
-    if (MSVC_VERSION LESS 1500)  # 1500 is Visual Studio 2008
-      # Conditional expression is constant.
-      # When compiling with /W4, we get several instances of C4127
-      # (Conditional expression is constant). In our code, we disable that
-      # warning on a case-by-case basis. However, on Visual Studio 2005,
-      # the warning fires on std::list. Therefore on that compiler and earlier,
-      # we disable the warning project-wide.
-      set(cxx_base_flags "${cxx_base_flags} -wd4127")
-    endif()
-    if (NOT (MSVC_VERSION LESS 1700))  # 1700 is Visual Studio 2012.
-      # Suppress "unreachable code" warning on VS 2012 and later.
-      # http://stackoverflow.com/questions/3232669 explains the issue.
-      set(cxx_base_flags "${cxx_base_flags} -wd4702")
-    endif()
-    if (NOT (MSVC_VERSION GREATER 1900))  # 1900 is Visual Studio 2015
-      # BigObj required for tests.
-      set(cxx_base_flags "${cxx_base_flags} -bigobj")
-    endif()
-
     set(cxx_base_flags "${cxx_base_flags} -D_UNICODE -DUNICODE -DWIN32 -D_WIN32")
     set(cxx_base_flags "${cxx_base_flags} -DSTRICT -DWIN32_LEAN_AND_MEAN")
     set(cxx_exception_flags "-EHsc -D_HAS_EXCEPTIONS=1")
-    set(cxx_no_exception_flags "-D_HAS_EXCEPTIONS=0")
+    set(cxx_no_exception_flags "-EHs-c- -D_HAS_EXCEPTIONS=0")
     set(cxx_no_rtti_flags "-GR-")
+    # Suppress "unreachable code" warning
+    # http://stackoverflow.com/questions/3232669 explains the issue.
+    set(cxx_base_flags "${cxx_base_flags} -wd4702")
+  elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    set(cxx_base_flags "-Wall -Wshadow -Werror -Wconversion")
+    set(cxx_exception_flags "-fexceptions")
+    set(cxx_no_exception_flags "-fno-exceptions")
+    set(cxx_strict_flags "-W -Wpointer-arith -Wreturn-type -Wcast-qual -Wwrite-strings -Wswitch -Wunused-parameter -Wcast-align -Wchar-subscripts -Winline -Wredundant-decls")
+    set(cxx_no_rtti_flags "-fno-rtti")
   elseif (CMAKE_COMPILER_IS_GNUCXX)
-    set(cxx_base_flags "-Wall -Wshadow")
+    set(cxx_base_flags "-Wall -Wshadow -Werror")
+    if(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 7.0.0)
+      set(cxx_base_flags "${cxx_base_flags} -Wno-error=dangling-else")
+    endif()
     set(cxx_exception_flags "-fexceptions")
     set(cxx_no_exception_flags "-fno-exceptions")
     # Until version 4.3.2, GCC doesn't define a macro to indicate
@@ -123,19 +123,20 @@ macro(config_compiler_and_linker)
     set(cxx_no_rtti_flags "")
   endif()
 
-  if (CMAKE_USE_PTHREADS_INIT)  # The pthreads library is available and allowed.
-    set(cxx_base_flags "${cxx_base_flags} -DGTEST_HAS_PTHREAD=1")
+  # The pthreads library is available and allowed?
+  if (DEFINED GTEST_HAS_PTHREAD)
+    set(GTEST_HAS_PTHREAD_MACRO "-DGTEST_HAS_PTHREAD=1")
   else()
-    set(cxx_base_flags "${cxx_base_flags} -DGTEST_HAS_PTHREAD=0")
+    set(GTEST_HAS_PTHREAD_MACRO "-DGTEST_HAS_PTHREAD=0")
   endif()
+  set(cxx_base_flags "${cxx_base_flags} ${GTEST_HAS_PTHREAD_MACRO}")
 
   # For building gtest's own tests and samples.
-  set(cxx_exception "${CMAKE_CXX_FLAGS} ${cxx_base_flags} ${cxx_exception_flags}")
+  set(cxx_exception "${cxx_base_flags} ${cxx_exception_flags}")
   set(cxx_no_exception
     "${CMAKE_CXX_FLAGS} ${cxx_base_flags} ${cxx_no_exception_flags}")
   set(cxx_default "${cxx_exception}")
   set(cxx_no_rtti "${cxx_default} ${cxx_no_rtti_flags}")
-  set(cxx_use_own_tuple "${cxx_default} -DGTEST_USE_OWN_TR1_TUPLE=1")
 
   # For building the gtest libraries.
   set(cxx_strict "${cxx_default} ${cxx_strict_flags}")
@@ -150,13 +151,42 @@ function(cxx_library_with_type name type cxx_flags)
   set_target_properties(${name}
     PROPERTIES
     COMPILE_FLAGS "${cxx_flags}")
+  # Generate debug library name with a postfix.
+  set_target_properties(${name}
+    PROPERTIES
+    DEBUG_POSTFIX "d")
+  # Set the output directory for build artifacts
+  set_target_properties(${name}
+    PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+    PDB_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+  # make PDBs match library name
+  get_target_property(pdb_debug_postfix ${name} DEBUG_POSTFIX)
+  set_target_properties(${name}
+    PROPERTIES
+    PDB_NAME "${name}"
+    PDB_NAME_DEBUG "${name}${pdb_debug_postfix}"
+    COMPILE_PDB_NAME "${name}"
+    COMPILE_PDB_NAME_DEBUG "${name}${pdb_debug_postfix}")
+
   if (BUILD_SHARED_LIBS OR type STREQUAL "SHARED")
     set_target_properties(${name}
       PROPERTIES
       COMPILE_DEFINITIONS "GTEST_CREATE_SHARED_LIBRARY=1")
+    if (NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.11")
+      target_compile_definitions(${name} INTERFACE
+        $<INSTALL_INTERFACE:GTEST_LINKED_AS_SHARED_LIBRARY=1>)
+    endif()
   endif()
-  if (CMAKE_USE_PTHREADS_INIT)
-    target_link_libraries(${name} ${CMAKE_THREAD_LIBS_INIT})
+  if (DEFINED GTEST_HAS_PTHREAD)
+    if ("${CMAKE_VERSION}" VERSION_LESS "3.1.0")
+      set(threads_spec ${CMAKE_THREAD_LIBS_INIT})
+    else()
+      set(threads_spec Threads::Threads)
+    endif()
+    target_link_libraries(${name} PUBLIC ${threads_spec})
   endif()
 endfunction()
 
@@ -178,6 +208,10 @@ endfunction()
 # is built from the given source files with the given compiler flags.
 function(cxx_executable_with_flags name cxx_flags libs)
   add_executable(${name} ${ARGN})
+  if (MSVC)
+    # BigObj required for tests.
+    set(cxx_flags "${cxx_flags} -bigobj")
+  endif()
   if (cxx_flags)
     set_target_properties(${name}
       PROPERTIES
@@ -214,7 +248,13 @@ find_package(PythonInterp)
 # from the given source files with the given compiler flags.
 function(cxx_test_with_flags name cxx_flags libs)
   cxx_executable_with_flags(${name} "${cxx_flags}" "${libs}" ${ARGN})
-  add_test(${name} ${name})
+  if (WIN32 OR MINGW)
+    add_test(NAME ${name}
+      COMMAND "powershell" "-Command" "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/RunTest.ps1" "$<TARGET_FILE:${name}>")
+  else()
+    add_test(NAME ${name}
+      COMMAND "$<TARGET_FILE:${name}>")
+  endif()
 endfunction()
 
 # cxx_test(name libs srcs...)
@@ -232,23 +272,87 @@ endfunction()
 # creates a Python test with the given name whose main module is in
 # test/name.py.  It does nothing if Python is not installed.
 function(py_test name)
-  # We are not supporting Python tests on Linux yet as they consider
-  # all Linux environments to be google3 and try to use google3 features.
   if (PYTHONINTERP_FOUND)
-    # ${CMAKE_BINARY_DIR} is known at configuration time, so we can
-    # directly bind it from cmake. ${CTEST_CONFIGURATION_TYPE} is known
-    # only at ctest runtime (by calling ctest -c <Configuration>), so
-    # we have to escape $ to delay variable substitution here.
-    if (${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} GREATER 3.1)
-      add_test(
-        NAME ${name}
-        COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/${name}.py
-            --build_dir=${CMAKE_CURRENT_BINARY_DIR}/$<CONFIGURATION>)
-    else (${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} GREATER 3.1)
-      add_test(
-        ${name}
-        ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/${name}.py
-          --build_dir=${CMAKE_CURRENT_BINARY_DIR}/\${CTEST_CONFIGURATION_TYPE})
-    endif (${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} GREATER 3.1)
+    if ("${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" VERSION_GREATER 3.1)
+      if (CMAKE_CONFIGURATION_TYPES)
+        # Multi-configuration build generators as for Visual Studio save
+        # output in a subdirectory of CMAKE_CURRENT_BINARY_DIR (Debug,
+        # Release etc.), so we have to provide it here.
+        if (WIN32 OR MINGW)
+          add_test(NAME ${name}
+            COMMAND powershell -Command ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/RunTest.ps1
+              ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/${name}.py
+              --build_dir=${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG> ${ARGN})
+        else()
+          add_test(NAME ${name}
+            COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/${name}.py
+              --build_dir=${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG> ${ARGN})
+        endif()
+      else (CMAKE_CONFIGURATION_TYPES)
+        # Single-configuration build generators like Makefile generators
+        # don't have subdirs below CMAKE_CURRENT_BINARY_DIR.
+        if (WIN32 OR MINGW)
+          add_test(NAME ${name}
+            COMMAND powershell -Command ${CMAKE_CURRENT_BINARY_DIR}/RunTest.ps1
+              ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/${name}.py
+              --build_dir=${CMAKE_CURRENT_BINARY_DIR} ${ARGN})
+        else()
+          add_test(NAME ${name}
+            COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/${name}.py
+              --build_dir=${CMAKE_CURRENT_BINARY_DIR} ${ARGN})
+        endif()
+      endif (CMAKE_CONFIGURATION_TYPES)
+    else()
+      # ${CMAKE_CURRENT_BINARY_DIR} is known at configuration time, so we can
+      # directly bind it from cmake. ${CTEST_CONFIGURATION_TYPE} is known
+      # only at ctest runtime (by calling ctest -c <Configuration>), so
+      # we have to escape $ to delay variable substitution here.
+      if (WIN32 OR MINGW)
+        add_test(NAME ${name}
+          COMMAND powershell -Command ${CMAKE_CURRENT_BINARY_DIR}/RunTest.ps1
+            ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/${name}.py
+            --build_dir=${CMAKE_CURRENT_BINARY_DIR}/\${CTEST_CONFIGURATION_TYPE} ${ARGN})
+      else()
+        add_test(NAME ${name}
+          COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/${name}.py
+            --build_dir=${CMAKE_CURRENT_BINARY_DIR}/\${CTEST_CONFIGURATION_TYPE} ${ARGN})
+      endif()
+    endif()
+  endif(PYTHONINTERP_FOUND)
+endfunction()
+
+# install_project(targets...)
+#
+# Installs the specified targets and configures the associated pkgconfig files.
+function(install_project)
+  if(INSTALL_GTEST)
+    install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/"
+      DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
+    # Install the project targets.
+    install(TARGETS ${ARGN}
+      EXPORT ${targets_export_name}
+      RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+      ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+      LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}")
+    if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+      # Install PDBs
+      foreach(t ${ARGN})
+        get_target_property(t_pdb_name ${t} COMPILE_PDB_NAME)
+        get_target_property(t_pdb_name_debug ${t} COMPILE_PDB_NAME_DEBUG)
+        get_target_property(t_pdb_output_directory ${t} PDB_OUTPUT_DIRECTORY)
+        install(FILES
+          "${t_pdb_output_directory}/\${CMAKE_INSTALL_CONFIG_NAME}/$<$<CONFIG:Debug>:${t_pdb_name_debug}>$<$<NOT:$<CONFIG:Debug>>:${t_pdb_name}>.pdb"
+          DESTINATION ${CMAKE_INSTALL_LIBDIR}
+          OPTIONAL)
+      endforeach()
+    endif()
+    # Configure and install pkgconfig files.
+    foreach(t ${ARGN})
+      set(configured_pc "${generated_dir}/${t}.pc")
+      configure_file("${PROJECT_SOURCE_DIR}/cmake/${t}.pc.in"
+        "${configured_pc}" @ONLY)
+      install(FILES "${configured_pc}"
+        DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
+    endforeach()
   endif()
 endfunction()

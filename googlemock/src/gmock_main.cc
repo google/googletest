@@ -26,18 +26,35 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-// Author: wan@google.com (Zhanyong Wan)
+
 
 #include <iostream>
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
+#if GTEST_OS_ESP8266 || GTEST_OS_ESP32
+#if GTEST_OS_ESP8266
+extern "C" {
+#endif
+void setup() {
+  // Since Google Mock depends on Google Test, InitGoogleMock() is
+  // also responsible for initializing Google Test.  Therefore there's
+  // no need for calling testing::InitGoogleTest() separately.
+  testing::InitGoogleMock();
+}
+void loop() { RUN_ALL_TESTS(); }
+#if GTEST_OS_ESP8266
+}
+#endif
+
+#else
+
 // MS C++ compiler/linker has a bug on Windows (not on Windows CE), which
 // causes a link error when _tmain is defined in a static library and UNICODE
 // is enabled. For this reason instead of _tmain, main function is used on
 // Windows. See the following link to track the current status of this bug:
-// http://connect.microsoft.com/VisualStudio/feedback/ViewFeedback.aspx?FeedbackID=394464  // NOLINT
+// https://web.archive.org/web/20170912203238/connect.microsoft.com/VisualStudio/feedback/details/394464/wmain-link-error-in-the-static-library
+// // NOLINT
 #if GTEST_OS_WINDOWS_MOBILE
 # include <tchar.h>  // NOLINT
 
@@ -52,3 +69,4 @@ GTEST_API_ int main(int argc, char** argv) {
   testing::InitGoogleMock(&argc, argv);
   return RUN_ALL_TESTS();
 }
+#endif

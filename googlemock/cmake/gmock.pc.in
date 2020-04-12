@@ -1,0 +1,10 @@
+libdir=@CMAKE_INSTALL_FULL_LIBDIR@
+includedir=@CMAKE_INSTALL_FULL_INCLUDEDIR@
+
+Name: gmock
+Description: GoogleMock (without main() function)
+Version: @PROJECT_VERSION@
+URL: https://github.com/google/googletest
+Requires: gtest
+Libs: -L${libdir} -lgmock @CMAKE_THREAD_LIBS_INIT@
+Cflags: -I${includedir} @GTEST_HAS_PTHREAD_MACRO@
