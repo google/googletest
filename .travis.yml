@@ -28,9 +28,6 @@ matrix:
       env: BUILD_TYPE=Debug VERBOSE=1 CXX_FLAGS=-std=c++11
     - os: linux
       compiler: clang
-      env: BUILD_TYPE=Release VERBOSE=1 CXX_FLAGS=-std=c++11 -Wgnu-zero-variadic-macro-arguments
-    - os: linux
-      compiler: clang
       env: BUILD_TYPE=Release VERBOSE=1 CXX_FLAGS=-std=c++11 NO_EXCEPTION=ON NO_RTTI=ON COMPILER_IS_GNUCXX=ON
     - os: osx
       compiler: gcc
