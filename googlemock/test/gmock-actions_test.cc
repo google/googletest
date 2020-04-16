@@ -574,8 +574,6 @@ class FromType {
 
  private:
   bool* const converted_;
-
-  GTEST_DISALLOW_ASSIGN_(FromType);
 };
 
 class ToType {

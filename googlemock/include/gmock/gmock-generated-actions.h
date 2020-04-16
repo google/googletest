@@ -435,16 +435,12 @@
       template <GMOCK_ACTION_TEMPLATE_ARGS_NAMES_>\
       return_type gmock_PerformImpl(GMOCK_ACTION_ARG_TYPES_AND_NAMES_) const;\
       GMOCK_INTERNAL_DEFN_##value_params\
-     private:\
-      GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
     template <typename F> operator ::testing::Action<F>() const {\
       return ::testing::Action<F>(\
           new gmock_Impl<F>(GMOCK_INTERNAL_LIST_##value_params));\
     }\
     GMOCK_INTERNAL_DEFN_##value_params\
-   private:\
-    GTEST_DISALLOW_ASSIGN_(GMOCK_ACTION_CLASS_(name, value_params));\
   };\
   template <GMOCK_INTERNAL_DECL_##template_params\
             GMOCK_INTERNAL_DECL_TYPE_##value_params>\
