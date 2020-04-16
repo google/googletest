@@ -90,10 +90,10 @@ TEST(IsXDigitTest, ReturnsFalseForWideNonAscii) {
 
 class Base {
  public:
-  // Copy constructor and assignment operator do exactly what we need, so we
-  // use them.
   Base() : member_(0) {}
   explicit Base(int n) : member_(n) {}
+  Base(const Base&) = default;
+  Base& operator=(const Base&) = default;
   virtual ~Base() {}
   int member() { return member_; }
 
