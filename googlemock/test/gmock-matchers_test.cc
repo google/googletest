@@ -765,10 +765,11 @@ TEST(SafeMatcherCastTest, FromConstReferenceToReference) {
 
 // Tests that MatcherCast<const T&>(m) works when m is a Matcher<T>.
 TEST(SafeMatcherCastTest, FromNonReferenceToConstReference) {
-  Matcher<int> m1 = Eq(0);
-  Matcher<const int&> m2 = SafeMatcherCast<const int&>(m1);
-  EXPECT_TRUE(m2.Matches(0));
-  EXPECT_FALSE(m2.Matches(1));
+  Matcher<std::unique_ptr<int>> m1 = IsNull();
+  Matcher<const std::unique_ptr<int>&> m2 =
+      SafeMatcherCast<const std::unique_ptr<int>&>(m1);
+  EXPECT_TRUE(m2.Matches(std::unique_ptr<int>()));
+  EXPECT_FALSE(m2.Matches(std::unique_ptr<int>(new int)));
 }
 
 // Tests that SafeMatcherCast<T&>(m) works when m is a Matcher<T>.
@@ -4725,20 +4726,18 @@ TEST(SizeIsTest, ExplainsResult) {
   Matcher<vector<int> > m1 = SizeIs(2);
   Matcher<vector<int> > m2 = SizeIs(Lt(2u));
   Matcher<vector<int> > m3 = SizeIs(AnyOf(0, 3));
-  Matcher<vector<int> > m4 = SizeIs(GreaterThan(1));
+  Matcher<vector<int> > m4 = SizeIs(Gt(1u));
   vector<int> container;
   EXPECT_EQ("whose size 0 doesn't match", Explain(m1, container));
   EXPECT_EQ("whose size 0 matches", Explain(m2, container));
   EXPECT_EQ("whose size 0 matches", Explain(m3, container));
-  EXPECT_EQ("whose size 0 doesn't match, which is 1 less than 1",
-            Explain(m4, container));
+  EXPECT_EQ("whose size 0 doesn't match", Explain(m4, container));
   container.push_back(0);
   container.push_back(0);
   EXPECT_EQ("whose size 2 matches", Explain(m1, container));
   EXPECT_EQ("whose size 2 doesn't match", Explain(m2, container));
   EXPECT_EQ("whose size 2 doesn't match", Explain(m3, container));
-  EXPECT_EQ("whose size 2 matches, which is 1 more than 1",
-            Explain(m4, container));
+  EXPECT_EQ("whose size 2 matches", Explain(m4, container));
 }
 
 #if GTEST_HAS_TYPED_TEST
