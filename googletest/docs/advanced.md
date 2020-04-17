@@ -401,7 +401,7 @@ alone with them. For a list of matchers gMock provides, read
 your [own matchers](../../googlemock/docs/cook_book.md#NewMatchers) too.
 
 gMock is bundled with googletest, so you don't need to add any build dependency
-in order to take advantage of this. Just include `"testing/base/public/gmock.h"`
+in order to take advantage of this. Just include `"gmock/gmock.h"`
 and you're ready to go.
 
 ### More String Assertions
