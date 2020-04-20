@@ -190,11 +190,10 @@ GTEST_API_ bool InDeathTestChild();
 class GTEST_API_ ExitedWithCode {
  public:
   explicit ExitedWithCode(int exit_code);
+  ExitedWithCode(const ExitedWithCode&) = default;
+  void operator=(const ExitedWithCode& other) = delete;
   bool operator()(int exit_status) const;
  private:
-  // No implementation - assignment is unsupported.
-  void operator=(const ExitedWithCode& other);
-
   const int exit_code_;
 };
 
