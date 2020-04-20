@@ -4784,7 +4784,7 @@ inline InnerMatcher AllArgs(const InnerMatcher& matcher) { return matcher; }
 // and is printable using 'PrintToString'. It is compatible with
 // std::optional/std::experimental::optional.
 // Note that to compare an optional type variable against nullopt you should
-// use Eq(nullopt) and not Optional(Eq(nullopt)). The latter implies that the
+// use Eq(nullopt) and not Eq(Optional(nullopt)). The latter implies that the
 // optional value contains an optional itself.
 template <typename ValueMatcher>
 inline internal::OptionalMatcher<ValueMatcher> Optional(
