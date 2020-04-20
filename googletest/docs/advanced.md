@@ -1776,7 +1776,7 @@ In frameworks that report a failure by throwing an exception, you could catch
 the exception and assert on it. But googletest doesn't use exceptions, so how do
 we test that a piece of code generates an expected failure?
 
-gunit-spi.h contains some constructs to do this. After #including this header,
+gtest-spi.h contains some constructs to do this. After #including this header,
 you can use
 
 ```c++
