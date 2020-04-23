@@ -863,7 +863,7 @@ restored afterwards, so you need not do that yourself. For example:
 
 ```c++
 int main(int argc, char** argv) {
-  InitGoogle(argv[0], &argc, &argv, true);
+  ::testing::InitGoogleTest(&argc, argv);
   ::testing::FLAGS_gtest_death_test_style = "fast";
   return RUN_ALL_TESTS();
 }
