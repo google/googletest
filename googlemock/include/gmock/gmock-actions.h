@@ -138,6 +138,7 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <tuple>
 #include <type_traits>
 #include <utility>
 
@@ -1307,6 +1308,31 @@ inline internal::IgnoreResultAction<A> IgnoreResult(const A& an_action) {
 template <typename T>
 inline ::std::reference_wrapper<T> ByRef(T& l_value) {  // NOLINT
   return ::std::reference_wrapper<T>(l_value);
+}
+
+namespace internal {
+
+template <typename T, typename... Params>
+struct ReturnNewAction {
+  T* operator()() const {
+    return internal::Apply(
+        [](const Params&... unpacked_params) {
+          return new T(unpacked_params...);
+        },
+        params);
+  }
+  std::tuple<Params...> params;
+};
+
+}  // namespace internal
+
+// The ReturnNew<T>(a1, a2, ..., a_k) action returns a pointer to a new
+// instance of type T, constructed on the heap with constructor arguments
+// a1, a2, ..., and a_k. The caller assumes ownership of the returned value.
+template <typename T, typename... Params>
+internal::ReturnNewAction<T, typename std::decay<Params>::type...> ReturnNew(
+    Params&&... params) {
+  return {std::forward_as_tuple(std::forward<Params>(params)...)};
 }
 
 namespace internal {
