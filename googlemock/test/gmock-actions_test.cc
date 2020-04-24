@@ -54,35 +54,34 @@
 
 namespace {
 
-// This list should be kept sorted.
-using testing::_;
-using testing::Action;
-using testing::ActionInterface;
-using testing::Assign;
-using testing::ByMove;
-using testing::ByRef;
-using testing::DefaultValue;
-using testing::DoAll;
-using testing::DoDefault;
-using testing::IgnoreResult;
-using testing::Invoke;
-using testing::InvokeWithoutArgs;
-using testing::MakePolymorphicAction;
-using testing::Ne;
-using testing::PolymorphicAction;
-using testing::Return;
-using testing::ReturnNull;
-using testing::ReturnRef;
-using testing::ReturnRefOfCopy;
-using testing::ReturnRoundRobin;
-using testing::SetArgPointee;
-using testing::SetArgumentPointee;
-using testing::Unused;
-using testing::WithArgs;
-using testing::internal::BuiltInDefaultValue;
+using ::testing::_;
+using ::testing::Action;
+using ::testing::ActionInterface;
+using ::testing::Assign;
+using ::testing::ByMove;
+using ::testing::ByRef;
+using ::testing::DefaultValue;
+using ::testing::DoAll;
+using ::testing::DoDefault;
+using ::testing::IgnoreResult;
+using ::testing::Invoke;
+using ::testing::InvokeWithoutArgs;
+using ::testing::MakePolymorphicAction;
+using ::testing::PolymorphicAction;
+using ::testing::Return;
+using ::testing::ReturnNew;
+using ::testing::ReturnNull;
+using ::testing::ReturnRef;
+using ::testing::ReturnRefOfCopy;
+using ::testing::ReturnRoundRobin;
+using ::testing::SetArgPointee;
+using ::testing::SetArgumentPointee;
+using ::testing::Unused;
+using ::testing::WithArgs;
+using ::testing::internal::BuiltInDefaultValue;
 
 #if !GTEST_OS_WINDOWS_MOBILE
-using testing::SetErrnoAndReturn;
+using ::testing::SetErrnoAndReturn;
 #endif
 
 // Tests that BuiltInDefaultValue<T*>::Get() returns NULL.
@@ -1292,6 +1291,52 @@ TEST(ByRefTest, PrintsCorrectly) {
   EXPECT_EQ(expected.str(), actual.str());
 }
 
+struct UnaryConstructorClass {
+  explicit UnaryConstructorClass(int v) : value(v) {}
+  int value;
+};
+
+// Tests using ReturnNew() with a unary constructor.
+TEST(ReturnNewTest, Unary) {
+  Action<UnaryConstructorClass*()> a = ReturnNew<UnaryConstructorClass>(4000);
+  UnaryConstructorClass* c = a.Perform(std::make_tuple());
+  EXPECT_EQ(4000, c->value);
+  delete c;
+}
+
+TEST(ReturnNewTest, UnaryWorksWhenMockMethodHasArgs) {
+  Action<UnaryConstructorClass*(bool, int)> a =
+      ReturnNew<UnaryConstructorClass>(4000);
+  UnaryConstructorClass* c = a.Perform(std::make_tuple(false, 5));
+  EXPECT_EQ(4000, c->value);
+  delete c;
+}
+
+TEST(ReturnNewTest, UnaryWorksWhenMockMethodReturnsPointerToConst) {
+  Action<const UnaryConstructorClass*()> a =
+      ReturnNew<UnaryConstructorClass>(4000);
+  const UnaryConstructorClass* c = a.Perform(std::make_tuple());
+  EXPECT_EQ(4000, c->value);
+  delete c;
+}
+
+class TenArgConstructorClass {
+ public:
+  TenArgConstructorClass(int a1, int a2, int a3, int a4, int a5, int a6, int a7,
+                         int a8, int a9, int a10)
+      : value_(a1 + a2 + a3 + a4 + a5 + a6 + a7 + a8 + a9 + a10) {}
+  int value_;
+};
+
+// Tests using ReturnNew() with a 10-argument constructor.
+TEST(ReturnNewTest, ConstructorThatTakes10Arguments) {
+  Action<TenArgConstructorClass*()> a = ReturnNew<TenArgConstructorClass>(
+      1000000000, 200000000, 30000000, 4000000, 500000, 60000, 7000, 800, 90,
+      0);
+  TenArgConstructorClass* c = a.Perform(std::make_tuple());
+  EXPECT_EQ(1234567890, c->value_);
+  delete c;
+}
 
 std::unique_ptr<int> UniquePtrSource() {
   return std::unique_ptr<int>(new int(19));

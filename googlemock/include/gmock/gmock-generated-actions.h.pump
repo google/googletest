@@ -344,24 +344,6 @@ ACTION_TEMPLATE(InvokeArgument,
 
 ]]
 
-// Various overloads for ReturnNew<T>().
-//
-// The ReturnNew<T>(a1, a2, ..., a_k) action returns a pointer to a new
-// instance of type T, constructed on the heap with constructor arguments
-// a1, a2, ..., and a_k. The caller assumes ownership of the returned value.
-$range i 0..n
-$for i [[
-$range j 0..i-1
-$var ps = [[$for j, [[p$j]]]]
-
-ACTION_TEMPLATE(ReturnNew,
-                HAS_1_TEMPLATE_PARAMS(typename, T),
-                AND_$i[[]]_VALUE_PARAMS($ps)) {
-  return new T($ps);
-}
-
-]]
-
 #ifdef _MSC_VER
 # pragma warning(pop)
 #endif
