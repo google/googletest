@@ -1564,7 +1564,13 @@ class AstBuilder(object):
         name = None
         if token.token_type == tokenize.NAME:
             name = token.name
-            token = self._GetNextToken()
+            tmp = self._GetNextToken()
+            # Support c++17 nested namespace
+            while tmp.token_type == tokenize.NAME or tmp.name == '::':
+                token.name += tmp.name
+                name = token.name
+                tmp = self._GetNextToken()
+            token = tmp
         self.namespace_stack.append(name)
         assert token.token_type == tokenize.SYNTAX, token
         # Create an internal token that denotes when the namespace is complete.
