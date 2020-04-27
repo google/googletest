@@ -257,8 +257,8 @@ Stack trace:
 ...
 ```
 
-**Tip 1:** If you run the test from an Emacs buffer, you can hit <Enter> on the
-line number to jump right to the failed expectation.
+**Tip 1:** If you run the test from an Emacs buffer, you can hit `<Enter>` on
+the line number to jump right to the failed expectation.
 
 **Tip 2:** If your mock objects are never deleted, the final verification won't
 happen. Therefore it's a good idea to turn on the heap checker in your tests
