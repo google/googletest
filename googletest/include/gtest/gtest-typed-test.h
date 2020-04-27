@@ -188,10 +188,12 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes);
 #define GTEST_NAME_GENERATOR_(TestSuiteName) \
   gtest_type_params_##TestSuiteName##_NameGenerator
 
-#define TYPED_TEST_SUITE(CaseName, Types, ...)                          \
-  typedef ::testing::internal::GenerateTypeList<Types>::type            \
-      GTEST_TYPE_PARAMS_(CaseName);                                     \
-  typedef ::testing::internal::NameGeneratorSelector<__VA_ARGS__>::type \
+#define TYPED_TEST_SUITE(...) \
+    TYPED_TEST_SUITE_INTERNAL(__VA_ARGS__,, unusedArg)
+#define TYPED_TEST_SUITE_INTERNAL(CaseName, Types, Names, ...)    \
+  typedef ::testing::internal::GenerateTypeList<Types>::type      \
+      GTEST_TYPE_PARAMS_(CaseName);                               \
+  typedef ::testing::internal::NameGeneratorSelector<Names>::type \
       GTEST_NAME_GENERATOR_(CaseName)
 
 #define TYPED_TEST(CaseName, TestName)                                        \
@@ -307,9 +309,11 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes);
   REGISTER_TYPED_TEST_SUITE_P
 #endif  // GTEST_REMOVE_LEGACY_TEST_CASEAPI_
 
-#define INSTANTIATE_TYPED_TEST_SUITE_P(Prefix, SuiteName, Types, ...)       \
+#define INSTANTIATE_TYPED_TEST_SUITE_P(...)       \
+    INSTANTIATE_TYPED_TEST_SUITE_P_INTERNAL(__VA_ARGS__,, unusedArg)
+#define INSTANTIATE_TYPED_TEST_SUITE_P_INTERNAL(Prefix, SuiteName, Types, Names, ...) \
   static_assert(sizeof(GTEST_STRINGIFY_(Prefix)) > 1,                       \
-                "test-suit-prefix must not be empty");                      \
+                "test-suite-prefix must not be empty");                     \
   static bool gtest_##Prefix##_##SuiteName GTEST_ATTRIBUTE_UNUSED_ =        \
       ::testing::internal::TypeParameterizedTestSuite<                      \
           SuiteName, GTEST_SUITE_NAMESPACE_(SuiteName)::gtest_AllTests_,    \
@@ -321,7 +325,7 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes);
                    GTEST_REGISTERED_TEST_NAMES_(SuiteName),                 \
                    ::testing::internal::GenerateNames<                      \
                        ::testing::internal::NameGeneratorSelector<          \
-                           __VA_ARGS__>::type,                              \
+                           Names>::type,                                    \
                        ::testing::internal::GenerateTypeList<Types>::type>())
 
 // Legacy API is deprecated but still available
