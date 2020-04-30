@@ -1776,7 +1776,7 @@ In frameworks that report a failure by throwing an exception, you could catch
 the exception and assert on it. But googletest doesn't use exceptions, so how do
 we test that a piece of code generates an expected failure?
 
-gunit-spi.h contains some constructs to do this. After #including this header,
+`"gtest/gtest-spi.h"` contains some constructs to do this. After #including this header,
 you can use
 
 ```c++
@@ -1924,8 +1924,8 @@ To obtain a `TestInfo` object for the currently running test, call
 ```
 
 `current_test_info()` returns a null pointer if no test is running. In
-particular, you cannot find the test suite name in `TestSuiteSetUp()`,
-`TestSuiteTearDown()` (where you know the test suite name implicitly), or
+particular, you cannot find the test suite name in `SetUpTestSuite()`,
+`TearDownTestSuite()` (where you know the test suite name implicitly), or
 functions called from them.
 
 ## Extending googletest by Handling Test Events
