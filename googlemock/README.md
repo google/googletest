@@ -9,7 +9,7 @@ It is inspired by:
 
 *   [jMock](http://www.jmock.org/),
 *   [EasyMock](http://www.easymock.org/), and
-*   [Hamcrest](http://code.google.com/p/hamcrest/),
+*   [Hamcrest](http://code.google.com/p/hamcrest/)
 
 and designed with C++'s specifics in mind.
 
