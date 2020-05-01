@@ -3746,17 +3746,11 @@ struct AStruct {
   const double y;  // A const field.
   Uncopyable z;    // An uncopyable field.
   const char* p;   // A pointer field.
-
- private:
-  GTEST_DISALLOW_ASSIGN_(AStruct);
 };
 
 // A derived struct for testing Field().
 struct DerivedStruct : public AStruct {
   char ch;
-
- private:
-  GTEST_DISALLOW_ASSIGN_(DerivedStruct);
 };
 
 // Tests that Field(&Foo::field, ...) works when field is non-const.

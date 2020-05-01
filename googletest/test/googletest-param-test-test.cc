@@ -490,11 +490,12 @@ TEST(CombineTest, CombineWithMaxNumberOfParameters) {
 class NonDefaultConstructAssignString {
  public:
   NonDefaultConstructAssignString(const std::string& s) : str_(s) {}
+  NonDefaultConstructAssignString() = delete;
   NonDefaultConstructAssignString(const NonDefaultConstructAssignString&) =
       default;
-
-  NonDefaultConstructAssignString() = delete;
-  void operator=(const NonDefaultConstructAssignString&) = delete;
+  NonDefaultConstructAssignString& operator=(
+      const NonDefaultConstructAssignString&) = delete;
+  ~NonDefaultConstructAssignString() = default;
 
   const std::string& str() const { return str_; }
 
