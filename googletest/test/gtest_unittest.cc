@@ -7115,10 +7115,6 @@ TEST(IsAProtocolMessageTest, ValueIsTrueWhenTypeIsAProtocolMessage) {
   EXPECT_TRUE(IsAProtocolMessage<::proto2::MessageLite>::value);
 }
 
-TEST(IsAProtocolMessageTest, ValueIsTrueWhenTypeIsAnOpenSourceProtocolMessage) {
-  EXPECT_TRUE(IsAProtocolMessage<::google::protobuf::MessageLite>::value);
-}
-
 // Tests that IsAProtocolMessage<T>::value is false when T is neither
 // ::proto2::Message nor a sub-class of it.
 TEST(IsAProtocolMessageTest, ValueIsFalseWhenTypeIsNotAProtocolMessage) {

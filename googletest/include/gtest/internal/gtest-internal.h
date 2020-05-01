@@ -94,12 +94,6 @@ namespace proto2 {
 class MessageLite;
 }
 
-namespace google {
-namespace protobuf {
-class MessageLite;
-}
-}
-
 namespace testing {
 
 // Forward declarations.
@@ -887,15 +881,10 @@ class GTEST_API_ Random {
   typename std::remove_const<typename std::remove_reference<T>::type>::type
 
 // IsAProtocolMessage<T>::value is a compile-time bool constant that's
-// true if and only if T is type proto2::MessageLite or
-// google::protobuf::MessageLite or a subclass of one of them.
+// true if and only if T is type proto2::MessageLite or a subclass of it.
 template <typename T>
 struct IsAProtocolMessage
-    : public std::integral_constant<
-          bool,
-          std::is_convertible<const T*, const ::proto2::MessageLite*>::value ||
-              std::is_convertible<
-                  const T*, const ::google::protobuf::MessageLite*>::value> {};
+    : public std::is_convertible<const T*, const ::proto2::MessageLite*> {};
 
 // When the compiler sees expression IsContainerTest<C>(0), if C is an
 // STL-style container class, the first overload of IsContainerTest
