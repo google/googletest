@@ -81,6 +81,7 @@
 
 #elif GTEST_OS_WINDOWS  // We are on Windows proper.
 
+# include <Windows.h>  // NOLINT
 # include <windows.h>  // NOLINT
 # undef min
 
