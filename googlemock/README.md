@@ -7,26 +7,26 @@ derive better designs of your system and write better tests.
 
 It is inspired by:
 
-*   [jMock](http://www.jmock.org/),
-*   [EasyMock](http://www.easymock.org/), and
-*   [Hamcrest](http://code.google.com/p/hamcrest/),
+*   [jMock](http://www.jmock.org/)
+*   [EasyMock](http://www.easymock.org/)
+*   [Hamcrest](http://code.google.com/p/hamcrest/)
 
-and designed with C++'s specifics in mind.
+It is designed with C++'s specifics in mind.
 
 gMock:
 
--   provides a declarative syntax for defining mocks,
--   can define partial (hybrid) mocks, which are a cross of real and mock
-    objects,
--   handles functions of arbitrary types and overloaded functions,
--   comes with a rich set of matchers for validating function arguments,
--   uses an intuitive syntax for controlling the behavior of a mock,
--   does automatic verification of expectations (no record-and-replay needed),
--   allows arbitrary (partial) ordering constraints on function calls to be
-    expressed,
--   lets a user extend it by defining new matchers and actions.
--   does not use exceptions, and
--   is easy to learn and use.
+-   Provides a declarative syntax for defining mocks.
+-   Can define partial (hybrid) mocks, which are a cross of real and mock
+    objects.
+-   Handles functions of arbitrary types and overloaded functions.
+-   Comes with a rich set of matchers for validating function arguments.
+-   Uses an intuitive syntax for controlling the behavior of a mock.
+-   Does automatic verification of expectations (no record-and-replay needed).
+-   Allows arbitrary (partial) ordering constraints on function calls to be
+    expressed.
+-   Lets a user extend it by defining new matchers and actions.
+-   Does not use exceptions.
+-   Is easy to learn and use.
 
 Details and examples can be found here:
 
