@@ -2261,6 +2261,12 @@ disable colors, or let googletest decide. When the value is `auto`, googletest
 will use colors if and only if the output goes to a terminal and (on non-Windows
 platforms) the `TERM` environment variable is set to `xterm` or `xterm-color`.
 
+#### Suppressing test passes
+
+By default, googletest prints 1 line of output for each test, indicating if it
+passed or failed. To show only test failures, run the test program with
+`--gtest_brief=1`, or set the GTEST_BRIEF environment variable to `1`.
+
 #### Suppressing the Elapsed Time
 
 By default, googletest prints the time it takes to run each test. To disable
