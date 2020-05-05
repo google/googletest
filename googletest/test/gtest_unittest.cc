@@ -45,7 +45,7 @@ TEST(CommandLineFlagsTest, CanBeAccessedInCodeOnceGTestHIsIncluded) {
                testing::GTEST_FLAG(filter) != "unknown" ||
                testing::GTEST_FLAG(list_tests) ||
                testing::GTEST_FLAG(output) != "unknown" ||
-               testing::GTEST_FLAG(print_time) ||
+               testing::GTEST_FLAG(brief) || testing::GTEST_FLAG(print_time) ||
                testing::GTEST_FLAG(random_seed) ||
                testing::GTEST_FLAG(repeat) > 0 ||
                testing::GTEST_FLAG(show_internal_stack_frames) ||
@@ -207,6 +207,7 @@ using testing::GTEST_FLAG(fail_fast);
 using testing::GTEST_FLAG(filter);
 using testing::GTEST_FLAG(list_tests);
 using testing::GTEST_FLAG(output);
+using testing::GTEST_FLAG(brief);
 using testing::GTEST_FLAG(print_time);
 using testing::GTEST_FLAG(random_seed);
 using testing::GTEST_FLAG(repeat);
@@ -1604,6 +1605,7 @@ class GTestFlagSaverTest : public Test {
     GTEST_FLAG(filter) = "";
     GTEST_FLAG(list_tests) = false;
     GTEST_FLAG(output) = "";
+    GTEST_FLAG(brief) = false;
     GTEST_FLAG(print_time) = true;
     GTEST_FLAG(random_seed) = 0;
     GTEST_FLAG(repeat) = 1;
@@ -1632,6 +1634,7 @@ class GTestFlagSaverTest : public Test {
     EXPECT_STREQ("", GTEST_FLAG(filter).c_str());
     EXPECT_FALSE(GTEST_FLAG(list_tests));
     EXPECT_STREQ("", GTEST_FLAG(output).c_str());
+    EXPECT_FALSE(GTEST_FLAG(brief));
     EXPECT_TRUE(GTEST_FLAG(print_time));
     EXPECT_EQ(0, GTEST_FLAG(random_seed));
     EXPECT_EQ(1, GTEST_FLAG(repeat));
@@ -1649,6 +1652,7 @@ class GTestFlagSaverTest : public Test {
     GTEST_FLAG(filter) = "abc";
     GTEST_FLAG(list_tests) = true;
     GTEST_FLAG(output) = "xml:foo.xml";
+    GTEST_FLAG(brief) = true;
     GTEST_FLAG(print_time) = false;
     GTEST_FLAG(random_seed) = 1;
     GTEST_FLAG(repeat) = 100;
@@ -5509,6 +5513,7 @@ struct Flags {
         filter(""),
         list_tests(false),
         output(""),
+        brief(false),
         print_time(true),
         random_seed(0),
         repeat(1),
@@ -5583,6 +5588,14 @@ struct Flags {
     return flags;
   }
 
+  // Creates a Flags struct where the gtest_brief flag has the given
+  // value.
+  static Flags Brief(bool brief) {
+    Flags flags;
+    flags.brief = brief;
+    return flags;
+  }
+
   // Creates a Flags struct where the gtest_print_time flag has the given
   // value.
   static Flags PrintTime(bool print_time) {
@@ -5648,6 +5661,7 @@ struct Flags {
   const char* filter;
   bool list_tests;
   const char* output;
+  bool brief;
   bool print_time;
   int32_t random_seed;
   int32_t repeat;
@@ -5670,6 +5684,7 @@ class ParseFlagsTest : public Test {
     GTEST_FLAG(filter) = "";
     GTEST_FLAG(list_tests) = false;
     GTEST_FLAG(output) = "";
+    GTEST_FLAG(brief) = false;
     GTEST_FLAG(print_time) = true;
     GTEST_FLAG(random_seed) = 0;
     GTEST_FLAG(repeat) = 1;
@@ -5701,6 +5716,7 @@ class ParseFlagsTest : public Test {
     EXPECT_STREQ(expected.filter, GTEST_FLAG(filter).c_str());
     EXPECT_EQ(expected.list_tests, GTEST_FLAG(list_tests));
     EXPECT_STREQ(expected.output, GTEST_FLAG(output).c_str());
+    EXPECT_EQ(expected.brief, GTEST_FLAG(brief));
     EXPECT_EQ(expected.print_time, GTEST_FLAG(print_time));
     EXPECT_EQ(expected.random_seed, GTEST_FLAG(random_seed));
     EXPECT_EQ(expected.repeat, GTEST_FLAG(repeat));
@@ -5990,6 +6006,33 @@ TEST_F(ParseFlagsTest, OutputXmlDirectory) {
 
   GTEST_TEST_PARSING_FLAGS_(argv, argv2,
                             Flags::Output("xml:directory/path/"), false);
+}
+
+// Tests having a --gtest_brief flag
+TEST_F(ParseFlagsTest, BriefFlag) {
+  const char* argv[] = {"foo.exe", "--gtest_brief", nullptr};
+
+  const char* argv2[] = {"foo.exe", nullptr};
+
+  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::Brief(true), false);
+}
+
+// Tests having a --gtest_brief flag with a "true" value
+TEST_F(ParseFlagsTest, BriefFlagTrue) {
+  const char* argv[] = {"foo.exe", "--gtest_brief=1", nullptr};
+
+  const char* argv2[] = {"foo.exe", nullptr};
+
+  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::Brief(true), false);
+}
+
+// Tests having a --gtest_brief flag with a "false" value
+TEST_F(ParseFlagsTest, BriefFlagFalse) {
+  const char* argv[] = {"foo.exe", "--gtest_brief=0", nullptr};
+
+  const char* argv2[] = {"foo.exe", nullptr};
+
+  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::Brief(false), false);
 }
 
 // Tests having a --gtest_print_time flag
