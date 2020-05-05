@@ -908,7 +908,6 @@ struct IsAProtocolMessage
           std::is_convertible<const T*, const ::proto2::MessageLite*>::value ||
               std::is_convertible<
                   const T*, const ::google::protobuf::MessageLite*>::value> {};
-
 // When the compiler sees expression IsContainerTest<C>(0), if C is an
 // STL-style container class, the first overload of IsContainerTest
 // will be viable (since both C::iterator* and C::const_iterator* are
