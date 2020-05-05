@@ -880,11 +880,34 @@ class GTEST_API_ Random {
 #define GTEST_REMOVE_REFERENCE_AND_CONST_(T) \
   typename std::remove_const<typename std::remove_reference<T>::type>::type
 
-// IsAProtocolMessage<T>::value is a compile-time bool constant that's
-// true if and only if T is type proto2::MessageLite or a subclass of it.
+// IsAProtocolMessage<T>::value is a compile-time bool constant that's true if
+// and only if T has methods DebugString() and ShortDebugString() that return
+// std::string.
 template <typename T>
-struct IsAProtocolMessage
-    : public std::is_convertible<const T*, const ::proto2::MessageLite*> {};
+class IsAProtocolMessage {
+ private:
+  template <typename C>
+  static constexpr auto CheckDebugString(C*) ->
+      typename std::is_same<std::string,
+                            decltype(std::declval<const C>().DebugString())>::type;
+  template <typename>
+  static constexpr std::false_type CheckDebugString(...);
+
+  template <typename C>
+  static constexpr auto CheckShortDebugString(C*) -> typename std::is_same<
+      std::string, decltype(std::declval<const C>().ShortDebugString())>::type;
+  template <typename>
+  static constexpr std::false_type CheckShortDebugString(...);
+
+  using HasDebugStringType = decltype(CheckDebugString<T>(nullptr));
+  using HasShortDebugStringType = decltype(CheckShortDebugString<T>(nullptr));
+
+ public:
+  static constexpr bool value =
+      HasDebugStringType::value && HasShortDebugStringType::value;
+};
+
+template <typename T> constexpr bool IsAProtocolMessage<T>::value;
 
 // When the compiler sees expression IsContainerTest<C>(0), if C is an
 // STL-style container class, the first overload of IsContainerTest

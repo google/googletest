@@ -7102,21 +7102,55 @@ GTEST_TEST(AlternativeNameTest, Works) {  // GTEST_TEST is the same as TEST.
 class ConversionHelperBase {};
 class ConversionHelperDerived : public ConversionHelperBase {};
 
+struct HasDebugStringMethods {
+  std::string DebugString() const { return ""; }
+  std::string ShortDebugString() const { return ""; }
+};
+
+struct InheritsDebugStringMethods : public HasDebugStringMethods {};
+
+struct WrongTypeDebugStringMethod {
+  std::string DebugString() const { return ""; }
+  int ShortDebugString() const { return 1; }
+};
+
+struct NotConstDebugStringMethod {
+  std::string DebugString() { return ""; }
+  std::string ShortDebugString() const { return ""; }
+};
+
+struct MissingDebugStringMethod {
+  std::string DebugString() { return ""; }
+};
+
+struct IncompleteType;
+
 // Tests that IsAProtocolMessage<T>::value is a compile-time constant.
 TEST(IsAProtocolMessageTest, ValueIsCompileTimeConstant) {
-  GTEST_COMPILE_ASSERT_(IsAProtocolMessage<::proto2::MessageLite>::value,
+  GTEST_COMPILE_ASSERT_(IsAProtocolMessage<HasDebugStringMethods>::value,
                         const_true);
+  GTEST_COMPILE_ASSERT_(IsAProtocolMessage<InheritsDebugStringMethods>::value,
+                        const_true);
+  GTEST_COMPILE_ASSERT_(
+      IsAProtocolMessage<const InheritsDebugStringMethods>::value, const_true);
+  GTEST_COMPILE_ASSERT_(!IsAProtocolMessage<WrongTypeDebugStringMethod>::value,
+                        const_false);
+  GTEST_COMPILE_ASSERT_(!IsAProtocolMessage<NotConstDebugStringMethod>::value,
+                        const_false);
+  GTEST_COMPILE_ASSERT_(!IsAProtocolMessage<MissingDebugStringMethod>::value,
+                        const_false);
+  GTEST_COMPILE_ASSERT_(!IsAProtocolMessage<IncompleteType>::value,
+                        const_false);
   GTEST_COMPILE_ASSERT_(!IsAProtocolMessage<int>::value, const_false);
 }
 
-// Tests that IsAProtocolMessage<T>::value is true when T is
-// proto2::Message or a sub-class of it.
+// Tests that IsAProtocolMessage<T>::value is true when T has needed methods.
 TEST(IsAProtocolMessageTest, ValueIsTrueWhenTypeIsAProtocolMessage) {
-  EXPECT_TRUE(IsAProtocolMessage<::proto2::MessageLite>::value);
+  EXPECT_TRUE(IsAProtocolMessage<InheritsDebugStringMethods>::value);
 }
 
-// Tests that IsAProtocolMessage<T>::value is false when T is neither
-// ::proto2::Message nor a sub-class of it.
+// Tests that IsAProtocolMessage<T>::value is false when T doesn't have needed
+// methods.
 TEST(IsAProtocolMessageTest, ValueIsFalseWhenTypeIsNotAProtocolMessage) {
   EXPECT_FALSE(IsAProtocolMessage<int>::value);
   EXPECT_FALSE(IsAProtocolMessage<const ConversionHelperBase>::value);
