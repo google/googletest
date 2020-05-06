@@ -128,6 +128,10 @@ package:
 
 *   a C++11-standard-compliant compiler
 
+*   a POSIX compliant system. C++11 is based on ANSI C, which does not include
+    some POSIX functions such as `strdup`, etc. If in doubt, passing compiler
+    flags that enable POSIX functions should help.
+
 ## Contributing change
 
 Please read the [`CONTRIBUTING.md`](CONTRIBUTING.md) for details on how to
