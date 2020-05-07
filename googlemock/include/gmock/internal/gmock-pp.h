@@ -39,7 +39,6 @@
 // Returns the first argument.
 #define GMOCK_PP_HEAD(...) \
   GMOCK_PP_INTERNAL_HEAD((__VA_ARGS__))
-
 // Returns the tail. A variadic list of all arguments minus the first. Requires
 // at least one argument.
 #define GMOCK_PP_TAIL(...) \
