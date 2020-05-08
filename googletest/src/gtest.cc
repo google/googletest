@@ -86,7 +86,6 @@
 
 #ifdef _MSC_VER
 # include <crtdbg.h>  // NOLINT
-# include <debugapi.h>  // NOLINT
 #endif
 
 # include <io.h>  // NOLINT
