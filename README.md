@@ -102,7 +102,7 @@ runs tests from your binary in parallel to provide significant speed-up.
 is a VS Code extension allowing to view Google Tests in a tree view, and
 run/debug your tests.
 
-[Catch2 and Google Test Explorer](https://github.com/matepek/vscode-catch2-test-adapter)
+[C++ TestMate](https://github.com/matepek/vscode-catch2-test-adapter)
 is a VS Code extension allowing to view Google Tests in a tree view, and
 run/debug your tests.
 
