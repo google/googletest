@@ -81,13 +81,11 @@
 
 #elif GTEST_OS_WINDOWS  // We are on Windows proper.
 
-# include <Windows.h>  // NOLINT
 # include <windows.h>  // NOLINT
 # undef min
 
 #ifdef _MSC_VER
 # include <crtdbg.h>  // NOLINT
-# include <debugapi.h>  // NOLINT
 #endif
 
 # include <io.h>  // NOLINT
