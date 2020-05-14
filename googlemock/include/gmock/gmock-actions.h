@@ -1335,15 +1335,17 @@ class ActionHelper {
  public:
   template <typename... Ts>
   static Result Perform(Impl* impl, const std::tuple<Ts...>& args) {
-    return Apply(impl, args, MakeIndexSequence<sizeof...(Ts)>{},
-                 MakeIndexSequence<10 - sizeof...(Ts)>{});
+    static constexpr size_t kMaxArgs = sizeof...(Ts) <= 10 ? sizeof...(Ts) : 10;
+    return Apply(impl, args, MakeIndexSequence<kMaxArgs>{},
+                 MakeIndexSequence<10 - kMaxArgs>{});
   }
 
  private:
   template <typename... Ts, std::size_t... tuple_ids, std::size_t... rest_ids>
   static Result Apply(Impl* impl, const std::tuple<Ts...>& args,
                       IndexSequence<tuple_ids...>, IndexSequence<rest_ids...>) {
-    return impl->template gmock_PerformImpl<Ts...>(
+    return impl->template gmock_PerformImpl<
+        typename std::tuple_element<tuple_ids, std::tuple<Ts...>>::type...>(
         args, std::get<tuple_ids>(args)...,
         ((void)rest_ids, ExcessiveArg())...);
   }
