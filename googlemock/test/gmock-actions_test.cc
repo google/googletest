@@ -32,11 +32,13 @@
 //
 // This file tests the built-in actions.
 
-// Silence C4800 (C4800: 'int *const ': forcing value
-// to bool 'true' or 'false') for MSVC 15
+// Silence C4100 (unreferenced formal parameter) for MSVC
 #ifdef _MSC_VER
-#if _MSC_VER == 1900
 #  pragma warning(push)
+#  pragma warning(disable:4100)
+#if _MSC_VER == 1900
+// and silence C4800 (C4800: 'int *const ': forcing value
+// to bool 'true' or 'false') for MSVC 15
 #  pragma warning(disable:4800)
 #endif
 #endif
