@@ -269,6 +269,7 @@
 #endif
 
 #include <iostream>  // NOLINT
+#include <locale>
 #include <memory>
 #include <string>  // NOLINT
 #include <tuple>
@@ -2045,7 +2046,14 @@ GTEST_DISABLE_MSC_DEPRECATED_PUSH_()
 inline int ChDir(const char* dir) { return chdir(dir); }
 #endif
 inline FILE* FOpen(const char* path, const char* mode) {
+#if GTEST_OS_WINDOWS
+  std::wstring_convert<std::codecvt<wchar_t, char, std::mbstate_t>> converter;
+  std::wstring wide_path = converter.from_bytes(path);
+  std::wstring wide_mode = converter.from_bytes(mode);
+  return _wfopen(wide_path.c_str(), wide_mode.c_str());
+#else
   return fopen(path, mode);
+#endif  // GTEST_OS_WINDOWS
 }
 #if !GTEST_OS_WINDOWS_MOBILE
 inline FILE *FReopen(const char* path, const char* mode, FILE* stream) {
