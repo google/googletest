@@ -128,9 +128,12 @@ package:
 
 *   a C++11-standard-compliant compiler
 
-*   a POSIX compliant system. C++11 is based on ANSI C, which does not include
-    some POSIX functions such as `strdup`, etc. If in doubt, passing compiler
-    flags that enable POSIX functions should help.
+*   Windows, or a POSIX compliant system.
+
+    Compilers on Cygwin do not enable POSIX compliance by default, leading to
+    errors about missing functions such as `strdup()`, even though the
+    standard libraries provide them. Pass e.g. the `-D_GNU_SOURCE` define to
+    enable these functions.
 
 ## Contributing change
 
