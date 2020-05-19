@@ -2686,7 +2686,7 @@ TEST(EventQueueTest, EnqueueEventTest) {
   EventQueue event_queue(&mock_event_dispatcher);
 
   const int32 kEventId = 321;
-  Notification done;
+  absl::Notification done;
   EXPECT_CALL(mock_event_dispatcher, DispatchEvent(kEventId))
       .WillOnce(Notify(&done));
 
