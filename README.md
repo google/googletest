@@ -102,9 +102,9 @@ runs tests from your binary in parallel to provide significant speed-up.
 is a VS Code extension allowing to view Google Tests in a tree view, and
 run/debug your tests.
 
-[Catch2 and Google Test Explorer](https://github.com/matepek/vscode-catch2-test-adapter)
-is a VS Code extension allowing to view Google Tests in a tree view, and
-run/debug your tests.
+[C++ TestMate](https://github.com/matepek/vscode-catch2-test-adapter) is a VS
+Code extension allowing to view Google Tests in a tree view, and run/debug your
+tests.
 
 [Cornichon](https://pypi.org/project/cornichon/) is a small Gherkin DSL parser
 that generates stub code for Google Test.
