@@ -442,13 +442,7 @@
     }\
     GMOCK_INTERNAL_DEFN_##value_params\
   };\
-  template <GMOCK_INTERNAL_DECL_##template_params                   \
-            GMOCK_INTERNAL_DECL_TYPE_##value_params>\
-  GMOCK_ACTION_CLASS_(name, value_params)<\
-      GMOCK_INTERNAL_LIST_##template_params\
-      GMOCK_INTERNAL_LIST_TYPE_##value_params> name(\
-          GMOCK_INTERNAL_DECL_##value_params) GTEST_MUST_USE_RESULT_;\
-  template <GMOCK_INTERNAL_DECL_##template_params                   \
+  template <GMOCK_INTERNAL_DECL_##template_params\
             GMOCK_INTERNAL_DECL_TYPE_##value_params>\
   inline GMOCK_ACTION_CLASS_(name, value_params)<\
       GMOCK_INTERNAL_LIST_##template_params\
