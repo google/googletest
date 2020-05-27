@@ -418,10 +418,10 @@ class GTEST_API_ Test {
   // The d'tor is virtual as we intend to inherit from Test.
   virtual ~Test();
 
-  // Sets up the stuff shared by all tests in this test case.
+  // Sets up the stuff shared by all tests in this test suite.
   //
   // Google Test will call Foo::SetUpTestSuite() before running the first
-  // test in test case Foo.  Hence a sub-class can define its own
+  // test in test suite Foo.  Hence a sub-class can define its own
   // SetUpTestSuite() method to shadow the one defined in the super
   // class.
   static void SetUpTestSuite() {}
@@ -429,7 +429,7 @@ class GTEST_API_ Test {
   // Tears down the stuff shared by all tests in this test suite.
   //
   // Google Test will call Foo::TearDownTestSuite() after running the last
-  // test in test case Foo.  Hence a sub-class can define its own
+  // test in test suite Foo.  Hence a sub-class can define its own
   // TearDownTestSuite() method to shadow the one defined in the super
   // class.
   static void TearDownTestSuite() {}
