@@ -14,19 +14,21 @@ matrix:
       install: ./ci/install-platformio.sh
       script: ./ci/build-platformio.sh
     - os: linux
-      dist: xenial
+      dist: bionic
       compiler: gcc
       install: ./ci/install-linux.sh && ./ci/log-config.sh
       script: ./ci/build-linux-bazel.sh
     - os: linux
-      dist: xenial
+      dist: bionic
       compiler: clang
       install: ./ci/install-linux.sh && ./ci/log-config.sh
       script: ./ci/build-linux-bazel.sh
     - os: linux
+      dist: bionic
       compiler: gcc
       env: BUILD_TYPE=Debug VERBOSE=1 CXX_FLAGS="-std=c++11 -Wdeprecated"
     - os: linux
+      dist: bionic
       compiler: clang
       env: BUILD_TYPE=Release VERBOSE=1 CXX_FLAGS="-std=c++11 -Wdeprecated" NO_EXCEPTION=ON NO_RTTI=ON COMPILER_IS_GNUCXX=ON
     - os: osx
@@ -48,16 +50,9 @@ script: ./ci/travis.sh
 # This section installs the necessary dependencies.
 addons:
   apt:
-    # List of whitelisted in travis packages for ubuntu-precise can be found here:
-    #   https://github.com/travis-ci/apt-package-whitelist/blob/master/ubuntu-precise
-    # List of whitelisted in travis apt-sources:
-    #   https://github.com/travis-ci/apt-source-whitelist/blob/master/ubuntu.json
-    sources:
-    - ubuntu-toolchain-r-test
-    - llvm-toolchain-precise-3.9
     packages:
-    - g++-4.9
-    - clang-3.9
+    - g++
+    - clang
     update: true
   homebrew:
     packages:
