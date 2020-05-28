@@ -2194,7 +2194,9 @@ std::string AppendUserMessage(const std::string& gtest_msg,
   if (user_msg_string.empty()) {
     return gtest_msg;
   }
-
+  if (gtest_msg.empty()) {
+    return user_msg_string;
+  }
   return gtest_msg + "\n" + user_msg_string;
 }
 
@@ -2273,7 +2275,8 @@ static const char* const kReservedTestSuitesAttributes[] = {
 // The list of reserved attributes used in the <testsuite> element of XML
 // output.
 static const char* const kReservedTestSuiteAttributes[] = {
-    "disabled", "errors", "failures", "name", "tests", "time", "timestamp"};
+    "disabled", "errors", "failures",  "name",
+    "tests",    "time",   "timestamp", "skipped"};
 
 // The list of reserved attributes used in the <testcase> element of XML output.
 static const char* const kReservedTestCaseAttributes[] = {
@@ -3115,7 +3118,7 @@ static std::string FormatTestSuiteCount(int test_suite_count) {
 static const char * TestPartResultTypeToString(TestPartResult::Type type) {
   switch (type) {
     case TestPartResult::kSkip:
-      return "Skipped";
+      return "Skipped\n";
     case TestPartResult::kSuccess:
       return "Success";
 
@@ -4187,10 +4190,11 @@ void XmlUnitTestResultPrinter::OutputXmlTestInfo(::std::ostream* stream,
   OutputXmlAttribute(stream, kTestsuite, "classname", test_suite_name);
 
   int failures = 0;
+  int skips = 0;
   for (int i = 0; i < result.total_part_count(); ++i) {
     const TestPartResult& part = result.GetTestPartResult(i);
     if (part.failed()) {
-      if (++failures == 1) {
+      if (++failures == 1 && skips == 0) {
         *stream << ">\n";
       }
       const std::string location =
@@ -4203,13 +4207,26 @@ void XmlUnitTestResultPrinter::OutputXmlTestInfo(::std::ostream* stream,
       const std::string detail = location + "\n" + part.message();
       OutputXmlCDataSection(stream, RemoveInvalidXmlCharacters(detail).c_str());
       *stream << "</failure>\n";
+    } else if (part.skipped()) {
+      if (++skips == 1 && failures == 0) {
+        *stream << ">\n";
+      }
+      const std::string location =
+          internal::FormatCompilerIndependentFileLocation(part.file_name(),
+                                                          part.line_number());
+      const std::string summary = location + "\n" + part.summary();
+      *stream << "      <skipped message=\""
+              << EscapeXmlAttribute(summary.c_str()) << "\">";
+      const std::string detail = location + "\n" + part.message();
+      OutputXmlCDataSection(stream, RemoveInvalidXmlCharacters(detail).c_str());
+      *stream << "</skipped>\n";
     }
   }
 
-  if (failures == 0 && result.test_property_count() == 0) {
+  if (failures == 0 && skips == 0 && result.test_property_count() == 0) {
     *stream << " />\n";
   } else {
-    if (failures == 0) {
+    if (failures == 0 && skips == 0) {
       *stream << ">\n";
     }
     OutputXmlTestProperties(stream, result);
@@ -4231,7 +4248,11 @@ void XmlUnitTestResultPrinter::PrintXmlTestSuite(std::ostream* stream,
     OutputXmlAttribute(
         stream, kTestsuite, "disabled",
         StreamableToString(test_suite.reportable_disabled_test_count()));
+    OutputXmlAttribute(stream, kTestsuite, "skipped",
+                       StreamableToString(test_suite.skipped_test_count()));
+
     OutputXmlAttribute(stream, kTestsuite, "errors", "0");
+
     OutputXmlAttribute(stream, kTestsuite, "time",
                        FormatTimeInMillisAsSeconds(test_suite.elapsed_time()));
     OutputXmlAttribute(
