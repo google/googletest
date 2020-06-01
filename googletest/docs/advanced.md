@@ -1006,7 +1006,7 @@ TEST(FooTest, Bar) {
                  // in Subroutine() to abort the entire test.
 
   // The actual behavior: the function goes on after Subroutine() returns.
-  int* p = NULL;
+  int* p = nullptr;
   *p = 3;  // Segfault!
 }
 ```
@@ -1193,7 +1193,7 @@ class FooTest : public ::testing::Test {
   // Can be omitted if not needed.
   static void TearDownTestSuite() {
     delete shared_resource_;
-    shared_resource_ = NULL;
+    shared_resource_ = nullptr;
   }
 
   // You can define per-test set-up logic as usual.
@@ -1206,7 +1206,7 @@ class FooTest : public ::testing::Test {
   static T* shared_resource_;
 };
 
-T* FooTest::shared_resource_ = NULL;
+T* FooTest::shared_resource_ = nullptr;
 
 TEST_F(FooTest, Test1) {
   ... you can refer to shared_resource_ here ...
