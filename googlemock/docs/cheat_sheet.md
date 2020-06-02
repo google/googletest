@@ -239,6 +239,11 @@ A **matcher** matches a *single* argument. You can use it inside `ON_CALL()` or
 | `ASSERT_THAT(actual_value, matcher)` | The same as `EXPECT_THAT(actual_value, matcher)`, except that it generates a **fatal** failure. |
 <!-- mdformat on -->
 
+**Note:** Although equality matching via `EXPECT_THAT(actual_value,
+expected_value)` is supported, prefer to make the comparison explicit via
+`EXPECT_THAT(actual_value, Eq(expected_value))` or `EXPECT_EQ(actual_value,
+expected_value)`.
+
 Built-in matchers (where `argument` is the function argument, e.g.
 `actual_value` in the example above, or when used in the context of
 `EXPECT_CALL(mock_object, method(matchers))`, the arguments of `method`) are
