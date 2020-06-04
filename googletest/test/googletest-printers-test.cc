@@ -310,6 +310,20 @@ TEST(PrintCharTest, UnsignedChar) {
             Print(static_cast<unsigned char>('b')));
 }
 
+TEST(PrintCharTest, Char16) {
+  EXPECT_EQ("U+0041", Print(u'A'));
+}
+
+TEST(PrintCharTest, Char32) {
+  EXPECT_EQ("U+0041", Print(U'A'));
+}
+
+#ifdef __cpp_char8_t
+TEST(PrintCharTest, Char8) {
+  EXPECT_EQ("U+0041", Print(u8'A'));
+}
+#endif
+
 // Tests printing other simple, built-in types.
 
 // bool.
@@ -359,6 +373,20 @@ TEST(PrintBuiltInTypeTest, Integer) {
             Print(std::numeric_limits<uint64_t>::max()));  // uint64
   EXPECT_EQ("-9223372036854775808",
             Print(std::numeric_limits<int64_t>::min()));  // int64
+#ifdef __cpp_char8_t
+  EXPECT_EQ("U+0000",
+            Print(std::numeric_limits<char8_t>::min()));  // char8_t
+  EXPECT_EQ("U+00FF",
+            Print(std::numeric_limits<char8_t>::max()));  // char8_t
+#endif
+  EXPECT_EQ("U+0000",
+            Print(std::numeric_limits<char16_t>::min()));  // char16_t
+  EXPECT_EQ("U+FFFF",
+            Print(std::numeric_limits<char16_t>::max()));  // char16_t
+  EXPECT_EQ("U+0000",
+            Print(std::numeric_limits<char32_t>::min()));  // char32_t
+  EXPECT_EQ("U+FFFFFFFF",
+            Print(std::numeric_limits<char32_t>::max()));  // char32_t
 }
 
 // Size types.
@@ -643,6 +671,35 @@ TEST(PrintArrayTest, WConstCharArrayWithTerminatingNul) {
   EXPECT_EQ("L\"\\0Hi\"", PrintArrayHelper(a));
 }
 
+#ifdef __cpp_char8_t
+// char8_t array.
+TEST(PrintArrayTest, Char8Array) {
+  const char8_t a[] = u8"Hello, world!";
+  EXPECT_EQ(
+      "{ U+0048, U+0065, U+006C, U+006C, U+006F, U+002C, U+0020, U+0077, "
+      "U+006F, U+0072, U+006C, U+0064, U+0021, U+0000 }",
+      PrintArrayHelper(a));
+}
+#endif
+
+// char16_t array.
+TEST(PrintArrayTest, Char16Array) {
+  const char16_t a[] = u"Hello, 世界";
+  EXPECT_EQ(
+      "{ U+0048, U+0065, U+006C, U+006C, U+006F, U+002C, U+0020, U+4E16, "
+      "U+754C, U+0000 }",
+      PrintArrayHelper(a));
+}
+
+// char32_t array.
+TEST(PrintArrayTest, Char32Array) {
+  const char32_t a[] = U"Hello, 世界";
+  EXPECT_EQ(
+      "{ U+0048, U+0065, U+006C, U+006C, U+006F, U+002C, U+0020, U+4E16, "
+      "U+754C, U+0000 }",
+      PrintArrayHelper(a));
+}
+
 // Array of objects.
 TEST(PrintArrayTest, ObjectArray) {
   std::string a[3] = {"Hi", "Hello", "Ni hao"};
@@ -701,6 +758,35 @@ TEST(PrintWideStringTest, StringAmbiguousHex) {
   EXPECT_EQ("L\"!\\x5-!\"", Print(::std::wstring(L"!\x5-!")));
 }
 #endif  // GTEST_HAS_STD_WSTRING
+
+#ifdef __cpp_char8_t
+TEST(PrintStringTest, U8String) {
+  std::u8string str = u8"Hello, world!";
+  EXPECT_EQ(str, str);  // Verify EXPECT_EQ compiles with this type.
+  EXPECT_EQ(
+      "{ U+0048, U+0065, U+006C, U+006C, U+006F, U+002C, U+0020, U+0077, "
+      "U+006F, U+0072, U+006C, U+0064, U+0021 }",
+      Print(str));
+}
+#endif
+
+TEST(PrintStringTest, U16String) {
+  std::u16string str = u"Hello, 世界";
+  EXPECT_EQ(str, str);  // Verify EXPECT_EQ compiles with this type.
+  EXPECT_EQ(
+      "{ U+0048, U+0065, U+006C, U+006C, U+006F, U+002C, U+0020, U+4E16, "
+      "U+754C }",
+      Print(str));
+}
+
+TEST(PrintStringTest, U32String) {
+  std::u32string str = U"Hello, 世界";
+  EXPECT_EQ(str, str);  // Verify EXPECT_EQ compiles with this type.
+  EXPECT_EQ(
+      "{ U+0048, U+0065, U+006C, U+006C, U+006F, U+002C, U+0020, U+4E16, "
+      "U+754C }",
+      Print(str));
+}
 
 // Tests printing types that support generic streaming (i.e. streaming
 // to std::basic_ostream<Char, CharTraits> for any valid Char and

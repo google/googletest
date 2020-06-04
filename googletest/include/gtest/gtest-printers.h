@@ -360,6 +360,14 @@ GTEST_IMPL_FORMAT_C_STRING_AS_POINTER_(char);
 GTEST_IMPL_FORMAT_C_STRING_AS_POINTER_(const char);
 GTEST_IMPL_FORMAT_C_STRING_AS_POINTER_(wchar_t);
 GTEST_IMPL_FORMAT_C_STRING_AS_POINTER_(const wchar_t);
+#ifdef __cpp_char8_t
+GTEST_IMPL_FORMAT_C_STRING_AS_POINTER_(char8_t);
+GTEST_IMPL_FORMAT_C_STRING_AS_POINTER_(const char8_t);
+#endif
+GTEST_IMPL_FORMAT_C_STRING_AS_POINTER_(char16_t);
+GTEST_IMPL_FORMAT_C_STRING_AS_POINTER_(const char16_t);
+GTEST_IMPL_FORMAT_C_STRING_AS_POINTER_(char32_t);
+GTEST_IMPL_FORMAT_C_STRING_AS_POINTER_(const char32_t);
 
 #undef GTEST_IMPL_FORMAT_C_STRING_AS_POINTER_
 
@@ -377,6 +385,14 @@ GTEST_IMPL_FORMAT_C_STRING_AS_POINTER_(const wchar_t);
 
 GTEST_IMPL_FORMAT_C_STRING_AS_STRING_(char, ::std::string);
 GTEST_IMPL_FORMAT_C_STRING_AS_STRING_(const char, ::std::string);
+#ifdef __cpp_char8_t
+GTEST_IMPL_FORMAT_C_STRING_AS_STRING_(char8_t, ::std::u8string);
+GTEST_IMPL_FORMAT_C_STRING_AS_STRING_(const char8_t, ::std::u8string);
+#endif
+GTEST_IMPL_FORMAT_C_STRING_AS_STRING_(char16_t, ::std::u16string);
+GTEST_IMPL_FORMAT_C_STRING_AS_STRING_(const char16_t, ::std::u16string);
+GTEST_IMPL_FORMAT_C_STRING_AS_STRING_(char32_t, ::std::u32string);
+GTEST_IMPL_FORMAT_C_STRING_AS_STRING_(const char32_t, ::std::u32string);
 
 #if GTEST_HAS_STD_WSTRING
 GTEST_IMPL_FORMAT_C_STRING_AS_STRING_(wchar_t, ::std::wstring);
@@ -452,6 +468,16 @@ inline void PrintTo(bool x, ::std::ostream* os) {
 // as a signed type and is printed as an unsigned integer when wchar_t
 // is implemented as an unsigned type.
 GTEST_API_ void PrintTo(wchar_t wc, ::std::ostream* os);
+
+GTEST_API_ void PrintTo(char32_t c, ::std::ostream* os);
+inline void PrintTo(char16_t c, ::std::ostream* os) {
+  PrintTo(ImplicitCast_<char32_t>(c), os);
+}
+#ifdef __cpp_char8_t
+inline void PrintTo(char8_t c, ::std::ostream* os) {
+  PrintTo(ImplicitCast_<char32_t>(c), os);
+}
+#endif
 
 // Overloads for C strings.
 GTEST_API_ void PrintTo(const char* s, ::std::ostream* os);
