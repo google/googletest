@@ -251,6 +251,11 @@ void PrintTo(wchar_t wc, ostream* os) {
   PrintCharAndCodeTo<wchar_t>(wc, os);
 }
 
+void PrintTo(char32_t c, ::std::ostream* os) {
+  *os << std::hex << "U+" << std::uppercase << std::setfill('0') << std::setw(4)
+      << c;
+}
+
 // Prints the given array of characters to the ostream.  CharType must be either
 // char or wchar_t.
 // The array starts at begin, the length is len, it may include '\0' characters
