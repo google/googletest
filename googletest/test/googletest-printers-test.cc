@@ -1531,32 +1531,65 @@ TEST(UniversalTersePrintTupleFieldsToStringsTestWithStd, PrintsTersely) {
   EXPECT_EQ("\"a\"", result[1]);
 }
 
-#if GTEST_HAS_ABSL
+#if GTEST_INTERNAL_HAS_ANY
+class PrintAnyTest : public ::testing::Test {
+ protected:
+  template <typename T>
+  static std::string ExpectedTypeName() {
+#if GTEST_HAS_RTTI
+    return internal::GetTypeName<T>();
+#else
+    return "<unknown_type>";
+#endif  // GTEST_HAS_RTTI
+  }
+};
 
+TEST_F(PrintAnyTest, Empty) {
+  internal::Any any;
+  EXPECT_EQ("no value", PrintToString(any));
+}
+
+TEST_F(PrintAnyTest, NonEmpty) {
+  internal::Any any;
+  constexpr int val1 = 10;
+  const std::string val2 = "content";
+
+  any = val1;
+  EXPECT_EQ("value of type " + ExpectedTypeName<int>(), PrintToString(any));
+
+  any = val2;
+  EXPECT_EQ("value of type " + ExpectedTypeName<std::string>(),
+            PrintToString(any));
+}
+#endif  // GTEST_INTERNAL_HAS_ANY
+
+#if GTEST_INTERNAL_HAS_OPTIONAL
 TEST(PrintOptionalTest, Basic) {
-  absl::optional<int> value;
+  internal::Optional<int> value;
   EXPECT_EQ("(nullopt)", PrintToString(value));
   value = {7};
   EXPECT_EQ("(7)", PrintToString(value));
-  EXPECT_EQ("(1.1)", PrintToString(absl::optional<double>{1.1}));
-  EXPECT_EQ("(\"A\")", PrintToString(absl::optional<std::string>{"A"}));
+  EXPECT_EQ("(1.1)", PrintToString(internal::Optional<double>{1.1}));
+  EXPECT_EQ("(\"A\")", PrintToString(internal::Optional<std::string>{"A"}));
 }
+#endif  // GTEST_INTERNAL_HAS_OPTIONAL
 
+#if GTEST_INTERNAL_HAS_VARIANT
 struct NonPrintable {
   unsigned char contents = 17;
 };
 
 TEST(PrintOneofTest, Basic) {
-  using Type = absl::variant<int, StreamableInGlobal, NonPrintable>;
-  EXPECT_EQ("('int' with value 7)", PrintToString(Type(7)));
-  EXPECT_EQ("('StreamableInGlobal' with value StreamableInGlobal)",
+  using Type = internal::Variant<int, StreamableInGlobal, NonPrintable>;
+  EXPECT_EQ("('int(index = 0)' with value 7)", PrintToString(Type(7)));
+  EXPECT_EQ("('StreamableInGlobal(index = 1)' with value StreamableInGlobal)",
             PrintToString(Type(StreamableInGlobal{})));
   EXPECT_EQ(
-      "('testing::gtest_printers_test::NonPrintable' with value 1-byte object "
-      "<11>)",
+      "('testing::gtest_printers_test::NonPrintable(index = 2)' with value "
+      "1-byte object <11>)",
       PrintToString(Type(NonPrintable{})));
 }
-#endif  // GTEST_HAS_ABSL
+#endif  // GTEST_INTERNAL_HAS_VARIANT
 namespace {
 class string_ref;
 
