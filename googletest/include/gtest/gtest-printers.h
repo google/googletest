@@ -113,8 +113,6 @@
 
 #if GTEST_HAS_ABSL
 #include "absl/strings/string_view.h"
-#include "absl/types/optional.h"
-#include "absl/types/variant.h"
 #endif  // GTEST_HAS_ABSL
 
 namespace testing {
@@ -596,14 +594,42 @@ class UniversalPrinter {
   GTEST_DISABLE_MSC_WARNINGS_POP_()
 };
 
-#if GTEST_HAS_ABSL
+#if GTEST_INTERNAL_HAS_ANY
 
-// Printer for absl::optional
+// Printer for std::any / absl::any
+
+template <>
+class UniversalPrinter<Any> {
+ public:
+  static void Print(const Any& value, ::std::ostream* os) {
+    if (value.has_value()) {
+      *os << "value of type " << GetTypeName(value);
+    } else {
+      *os << "no value";
+    }
+  }
+
+ private:
+  static std::string GetTypeName(const Any& value) {
+#if GTEST_HAS_RTTI
+    return internal::GetTypeName(value.type());
+#else
+    static_cast<void>(value);  // possibly unused
+    return "<unknown_type>";
+#endif  // GTEST_HAS_RTTI
+  }
+};
+
+#endif  // GTEST_INTERNAL_HAS_ANY
+
+#if GTEST_INTERNAL_HAS_OPTIONAL
+
+// Printer for std::optional / absl::optional
 
 template <typename T>
-class UniversalPrinter<::absl::optional<T>> {
+class UniversalPrinter<Optional<T>> {
  public:
-  static void Print(const ::absl::optional<T>& value, ::std::ostream* os) {
+  static void Print(const Optional<T>& value, ::std::ostream* os) {
     *os << '(';
     if (!value) {
       *os << "nullopt";
@@ -614,14 +640,22 @@ class UniversalPrinter<::absl::optional<T>> {
   }
 };
 
-// Printer for absl::variant
+#endif  // GTEST_INTERNAL_HAS_OPTIONAL
+
+#if GTEST_INTERNAL_HAS_VARIANT
+
+// Printer for std::variant / absl::variant
 
 template <typename... T>
-class UniversalPrinter<::absl::variant<T...>> {
+class UniversalPrinter<Variant<T...>> {
  public:
-  static void Print(const ::absl::variant<T...>& value, ::std::ostream* os) {
+  static void Print(const Variant<T...>& value, ::std::ostream* os) {
     *os << '(';
-    absl::visit(Visitor{os}, value);
+#if GTEST_HAS_ABSL
+    absl::visit(Visitor{os, value.index()}, value);
+#else
+    std::visit(Visitor{os, value.index()}, value);
+#endif  // GTEST_HAS_ABSL
     *os << ')';
   }
 
@@ -629,14 +663,16 @@ class UniversalPrinter<::absl::variant<T...>> {
   struct Visitor {
     template <typename U>
     void operator()(const U& u) const {
-      *os << "'" << GetTypeName<U>() << "' with value ";
+      *os << "'" << GetTypeName<U>() << "(index = " << index
+          << ")' with value ";
       UniversalPrint(u, os);
     }
     ::std::ostream* os;
+    std::size_t index;
   };
 };
 
-#endif  // GTEST_HAS_ABSL
+#endif  // GTEST_INTERNAL_HAS_VARIANT
 
 // UniversalPrintArray(begin, len, os) prints an array of 'len'
 // elements, starting at address 'begin'.
