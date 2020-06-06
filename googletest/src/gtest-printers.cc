@@ -104,7 +104,7 @@ void PrintBytesInObjectToImpl(const unsigned char* obj_bytes, size_t count,
 
 }  // namespace
 
-namespace internal2 {
+namespace internal {
 
 // Delegates to PrintBytesInObjectToImpl() to print the bytes in the
 // given object.  The delegation simplifies the implementation, which
@@ -115,10 +115,6 @@ void PrintBytesInObjectTo(const unsigned char* obj_bytes, size_t count,
                           ostream* os) {
   PrintBytesInObjectToImpl(obj_bytes, count, os);
 }
-
-}  // namespace internal2
-
-namespace internal {
 
 // Depending on the value of a char (or wchar_t), we print it in one
 // of three formats:
@@ -253,6 +249,11 @@ void PrintTo(signed char c, ::std::ostream* os) {
 // code otherwise and also as its code.  L'\0' is printed as "L'\\0'".
 void PrintTo(wchar_t wc, ostream* os) {
   PrintCharAndCodeTo<wchar_t>(wc, os);
+}
+
+void PrintTo(char32_t c, ::std::ostream* os) {
+  *os << std::hex << "U+" << std::uppercase << std::setfill('0') << std::setw(4)
+      << c;
 }
 
 // Prints the given array of characters to the ostream.  CharType must be either

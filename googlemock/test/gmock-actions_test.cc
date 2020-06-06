@@ -32,11 +32,13 @@
 //
 // This file tests the built-in actions.
 
-// Silence C4800 (C4800: 'int *const ': forcing value
-// to bool 'true' or 'false') for MSVC 15
+// Silence C4100 (unreferenced formal parameter) for MSVC
 #ifdef _MSC_VER
-#if _MSC_VER == 1900
 #  pragma warning(push)
+#  pragma warning(disable:4100)
+#if _MSC_VER == 1900
+// and silence C4800 (C4800: 'int *const ': forcing value
+// to bool 'true' or 'false') for MSVC 15
 #  pragma warning(disable:4800)
 #endif
 #endif
@@ -54,35 +56,34 @@
 
 namespace {
 
-// This list should be kept sorted.
-using testing::_;
-using testing::Action;
-using testing::ActionInterface;
-using testing::Assign;
-using testing::ByMove;
-using testing::ByRef;
-using testing::DefaultValue;
-using testing::DoAll;
-using testing::DoDefault;
-using testing::IgnoreResult;
-using testing::Invoke;
-using testing::InvokeWithoutArgs;
-using testing::MakePolymorphicAction;
-using testing::Ne;
-using testing::PolymorphicAction;
-using testing::Return;
-using testing::ReturnNull;
-using testing::ReturnRef;
-using testing::ReturnRefOfCopy;
-using testing::ReturnRoundRobin;
-using testing::SetArgPointee;
-using testing::SetArgumentPointee;
-using testing::Unused;
-using testing::WithArgs;
-using testing::internal::BuiltInDefaultValue;
+using ::testing::_;
+using ::testing::Action;
+using ::testing::ActionInterface;
+using ::testing::Assign;
+using ::testing::ByMove;
+using ::testing::ByRef;
+using ::testing::DefaultValue;
+using ::testing::DoAll;
+using ::testing::DoDefault;
+using ::testing::IgnoreResult;
+using ::testing::Invoke;
+using ::testing::InvokeWithoutArgs;
+using ::testing::MakePolymorphicAction;
+using ::testing::PolymorphicAction;
+using ::testing::Return;
+using ::testing::ReturnNew;
+using ::testing::ReturnNull;
+using ::testing::ReturnRef;
+using ::testing::ReturnRefOfCopy;
+using ::testing::ReturnRoundRobin;
+using ::testing::SetArgPointee;
+using ::testing::SetArgumentPointee;
+using ::testing::Unused;
+using ::testing::WithArgs;
+using ::testing::internal::BuiltInDefaultValue;
 
 #if !GTEST_OS_WINDOWS_MOBILE
-using testing::SetErrnoAndReturn;
+using ::testing::SetErrnoAndReturn;
 #endif
 
 // Tests that BuiltInDefaultValue<T*>::Get() returns NULL.
@@ -575,8 +576,6 @@ class FromType {
 
  private:
   bool* const converted_;
-
-  GTEST_DISALLOW_ASSIGN_(FromType);
 };
 
 class ToType {
@@ -1292,6 +1291,52 @@ TEST(ByRefTest, PrintsCorrectly) {
   EXPECT_EQ(expected.str(), actual.str());
 }
 
+struct UnaryConstructorClass {
+  explicit UnaryConstructorClass(int v) : value(v) {}
+  int value;
+};
+
+// Tests using ReturnNew() with a unary constructor.
+TEST(ReturnNewTest, Unary) {
+  Action<UnaryConstructorClass*()> a = ReturnNew<UnaryConstructorClass>(4000);
+  UnaryConstructorClass* c = a.Perform(std::make_tuple());
+  EXPECT_EQ(4000, c->value);
+  delete c;
+}
+
+TEST(ReturnNewTest, UnaryWorksWhenMockMethodHasArgs) {
+  Action<UnaryConstructorClass*(bool, int)> a =
+      ReturnNew<UnaryConstructorClass>(4000);
+  UnaryConstructorClass* c = a.Perform(std::make_tuple(false, 5));
+  EXPECT_EQ(4000, c->value);
+  delete c;
+}
+
+TEST(ReturnNewTest, UnaryWorksWhenMockMethodReturnsPointerToConst) {
+  Action<const UnaryConstructorClass*()> a =
+      ReturnNew<UnaryConstructorClass>(4000);
+  const UnaryConstructorClass* c = a.Perform(std::make_tuple());
+  EXPECT_EQ(4000, c->value);
+  delete c;
+}
+
+class TenArgConstructorClass {
+ public:
+  TenArgConstructorClass(int a1, int a2, int a3, int a4, int a5, int a6, int a7,
+                         int a8, int a9, int a10)
+      : value_(a1 + a2 + a3 + a4 + a5 + a6 + a7 + a8 + a9 + a10) {}
+  int value_;
+};
+
+// Tests using ReturnNew() with a 10-argument constructor.
+TEST(ReturnNewTest, ConstructorThatTakes10Arguments) {
+  Action<TenArgConstructorClass*()> a = ReturnNew<TenArgConstructorClass>(
+      1000000000, 200000000, 30000000, 4000000, 500000, 60000, 7000, 800, 90,
+      0);
+  TenArgConstructorClass* c = a.Perform(std::make_tuple());
+  EXPECT_EQ(1234567890, c->value_);
+  delete c;
+}
 
 std::unique_ptr<int> UniquePtrSource() {
   return std::unique_ptr<int>(new int(19));
@@ -1470,8 +1515,19 @@ TEST(FunctorActionTest, TypeConversion) {
   EXPECT_EQ(1, s2.Perform(std::make_tuple("hello")));
 
   // Also between the lambda and the action itself.
-  const Action<bool(std::string)> x = [](Unused) { return 42; };
-  EXPECT_TRUE(x.Perform(std::make_tuple("hello")));
+  const Action<bool(std::string)> x1 = [](Unused) { return 42; };
+  const Action<bool(std::string)> x2 = [] { return 42; };
+  EXPECT_TRUE(x1.Perform(std::make_tuple("hello")));
+  EXPECT_TRUE(x2.Perform(std::make_tuple("hello")));
+
+  // Ensure decay occurs where required.
+  std::function<int()> f = [] { return 7; };
+  Action<int(int)> d = f;
+  f = nullptr;
+  EXPECT_EQ(7, d.Perform(std::make_tuple(1)));
+
+  // Ensure creation of an empty action succeeds.
+  Action<void(int)>(nullptr);
 }
 
 TEST(FunctorActionTest, UnusedArguments) {
@@ -1496,6 +1552,26 @@ TEST(MoveOnlyArgumentsTest, ReturningActions) {
   EXPECT_EQ(x, 3);
 }
 
+ACTION(ReturnArity) {
+  return std::tuple_size<args_type>::value;
+}
+
+TEST(ActionMacro, LargeArity) {
+  EXPECT_EQ(
+      1, testing::Action<int(int)>(ReturnArity()).Perform(std::make_tuple(0)));
+  EXPECT_EQ(
+      10,
+      testing::Action<int(int, int, int, int, int, int, int, int, int, int)>(
+          ReturnArity())
+          .Perform(std::make_tuple(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)));
+  EXPECT_EQ(
+      20,
+      testing::Action<int(int, int, int, int, int, int, int, int, int, int, int,
+                          int, int, int, int, int, int, int, int, int)>(
+          ReturnArity())
+          .Perform(std::make_tuple(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13,
+                                   14, 15, 16, 17, 18, 19)));
+}
 
 }  // Unnamed namespace
 

@@ -72,6 +72,11 @@ void PrintFlag(const char* flag) {
     return;
   }
 
+  if (strcmp(flag, "fail_fast") == 0) {
+    cout << GTEST_FLAG(fail_fast);
+    return;
+  }
+
   if (strcmp(flag, "filter") == 0) {
     cout << GTEST_FLAG(filter);
     return;
@@ -79,6 +84,11 @@ void PrintFlag(const char* flag) {
 
   if (strcmp(flag, "output") == 0) {
     cout << GTEST_FLAG(output);
+    return;
+  }
+
+  if (strcmp(flag, "brief") == 0) {
+    cout << GTEST_FLAG(brief);
     return;
   }
 

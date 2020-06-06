@@ -55,8 +55,8 @@ class UnitTestHelper {
   // name.  The caller is responsible for deleting the array.
   static TestSuite const** GetSortedTestSuites() {
     UnitTest& unit_test = *UnitTest::GetInstance();
-    auto const** const test_suites =
-        new const TestSuite*[unit_test.total_test_suite_count()];
+    auto const** const test_suites = new const TestSuite*[static_cast<size_t>(
+      unit_test.total_test_suite_count())];
 
     for (int i = 0; i < unit_test.total_test_suite_count(); ++i)
       test_suites[i] = unit_test.GetTestSuite(i);
@@ -83,8 +83,8 @@ class UnitTestHelper {
   // sorted by the test name.  The caller is responsible for deleting the
   // array.
   static TestInfo const** GetSortedTests(const TestSuite* test_suite) {
-    TestInfo const** const tests =
-        new const TestInfo*[test_suite->total_test_count()];
+    TestInfo const** const tests = new const TestInfo*[static_cast<size_t>(
+      test_suite->total_test_count())];
 
     for (int i = 0; i < test_suite->total_test_count(); ++i)
       tests[i] = test_suite->GetTestInfo(i);

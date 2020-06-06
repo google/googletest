@@ -490,16 +490,17 @@ TEST(CombineTest, CombineWithMaxNumberOfParameters) {
 class NonDefaultConstructAssignString {
  public:
   NonDefaultConstructAssignString(const std::string& s) : str_(s) {}
+  NonDefaultConstructAssignString() = delete;
+  NonDefaultConstructAssignString(const NonDefaultConstructAssignString&) =
+      default;
+  NonDefaultConstructAssignString& operator=(
+      const NonDefaultConstructAssignString&) = delete;
+  ~NonDefaultConstructAssignString() = default;
 
   const std::string& str() const { return str_; }
 
  private:
   std::string str_;
-
-  // Not default constructible
-  NonDefaultConstructAssignString();
-  // Not assignable
-  void operator=(const NonDefaultConstructAssignString&);
 };
 
 TEST(CombineTest, NonDefaultConstructAssign) {

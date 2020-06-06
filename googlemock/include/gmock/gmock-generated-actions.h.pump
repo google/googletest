@@ -253,16 +253,12 @@ $range k 0..n-1
       template <GMOCK_ACTION_TEMPLATE_ARGS_NAMES_>\
       return_type gmock_PerformImpl(GMOCK_ACTION_ARG_TYPES_AND_NAMES_) const;\
       GMOCK_INTERNAL_DEFN_##value_params\
-     private:\
-      GTEST_DISALLOW_ASSIGN_(gmock_Impl);\
     };\
     template <typename F> operator ::testing::Action<F>() const {\
       return ::testing::Action<F>(\
           new gmock_Impl<F>(GMOCK_INTERNAL_LIST_##value_params));\
     }\
     GMOCK_INTERNAL_DEFN_##value_params\
-   private:\
-    GTEST_DISALLOW_ASSIGN_(GMOCK_ACTION_CLASS_(name, value_params));\
   };\
   template <GMOCK_INTERNAL_DECL_##template_params\
             GMOCK_INTERNAL_DECL_TYPE_##value_params>\
@@ -340,24 +336,6 @@ ACTION_TEMPLATE(InvokeArgument,
   using internal::invoke_argument::InvokeArgumentAdl;
   return InvokeArgumentAdl(internal::invoke_argument::AdlTag(),
                            ::std::get<k>(args)$for j[[, p$j]]);
-}
-
-]]
-
-// Various overloads for ReturnNew<T>().
-//
-// The ReturnNew<T>(a1, a2, ..., a_k) action returns a pointer to a new
-// instance of type T, constructed on the heap with constructor arguments
-// a1, a2, ..., and a_k. The caller assumes ownership of the returned value.
-$range i 0..n
-$for i [[
-$range j 0..i-1
-$var ps = [[$for j, [[p$j]]]]
-
-ACTION_TEMPLATE(ReturnNew,
-                HAS_1_TEMPLATE_PARAMS(typename, T),
-                AND_$i[[]]_VALUE_PARAMS($ps)) {
-  return new T($ps);
 }
 
 ]]

@@ -28,16 +28,16 @@
 // Requires: the number of arguments after expansion is at most 15.
 #define GMOCK_PP_NARG(...) \
   GMOCK_PP_INTERNAL_16TH(  \
-      (__VA_ARGS__, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1))
+      (__VA_ARGS__, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0))
 
 // Returns 1 if the expansion of arguments has an unprotected comma. Otherwise
 // returns 0. Requires no more than 15 unprotected commas.
 #define GMOCK_PP_HAS_COMMA(...) \
   GMOCK_PP_INTERNAL_16TH(       \
-      (__VA_ARGS__, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0))
+      (__VA_ARGS__, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0))
 
 // Returns the first argument.
-#define GMOCK_PP_HEAD(...) GMOCK_PP_INTERNAL_HEAD((__VA_ARGS__))
+#define GMOCK_PP_HEAD(...) GMOCK_PP_INTERNAL_HEAD((__VA_ARGS__, unusedArg))
 
 // Returns the tail. A variadic list of all arguments minus the first. Requires
 // at least one argument.

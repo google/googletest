@@ -58,9 +58,9 @@ else:
 
 EXPECTED_NON_EMPTY = {
     u'tests':
-        24,
+        26,
     u'failures':
-        4,
+        5,
     u'disabled':
         2,
     u'errors':
@@ -158,9 +158,9 @@ EXPECTED_NON_EMPTY = {
         u'name':
             u'SkippedTest',
         u'tests':
-            1,
+            3,
         u'failures':
-            0,
+            1,
         u'disabled':
             0,
         u'errors':
@@ -176,6 +176,32 @@ EXPECTED_NON_EMPTY = {
             u'time': u'*',
             u'timestamp': u'*',
             u'classname': u'SkippedTest'
+        }, {
+            u'name': u'SkippedWithMessage',
+            u'status': u'RUN',
+            u'result': u'SKIPPED',
+            u'time': u'*',
+            u'timestamp': u'*',
+            u'classname': u'SkippedTest'
+        }, {
+            u'name':
+                u'SkippedAfterFailure',
+            u'status':
+                u'RUN',
+            u'result':
+                u'COMPLETED',
+            u'time':
+                u'*',
+            u'timestamp':
+                u'*',
+            u'classname':
+                u'SkippedTest',
+            u'failures': [{
+                u'failure': u'gtest_xml_output_unittest_.cc:*\n'
+                            u'Expected equality of these values:\n'
+                            u'  1\n  2' + STACK_TRACE_TEMPLATE,
+                u'type': u''
+            }]
         }]
     }, {
         u'name':
