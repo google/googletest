@@ -432,8 +432,8 @@ namespace {
 // inserted to report ether an error or a log message.
 //
 // This configuration bit will likely be removed at some point.
-constexpr bool kErrorOnUninstantiatedParameterizedTest = false;
-constexpr bool kErrorOnUninstantiatedTypeParameterizedTest = false;
+constexpr bool kErrorOnUninstantiatedParameterizedTest = true;
+constexpr bool kErrorOnUninstantiatedTypeParameterizedTest = true;
 
 // A test that fails at a given file/line location with a given message.
 class FailureTest : public Test {
