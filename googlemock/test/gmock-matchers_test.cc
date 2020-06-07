@@ -138,8 +138,10 @@ Matcher<int> GreaterThan(int n) {
   return MakeMatcher(new GreaterThanMatcher(n));
 }
 
-std::string OfType(const std::string& type_name) {
+template<typename T>
+std::string OfType() {
 #if GTEST_HAS_RTTI
+  std::string type_name = internal::GetTypeName<T>();
   return IsReadableTypeName(type_name) ? " (of type " + type_name + ")" : "";
 #else
   return "";
@@ -3020,13 +3022,13 @@ TEST(MatcherAssertionTest, WorksWhenMatcherIsNotSatisfied) {
   EXPECT_FATAL_FAILURE(ASSERT_THAT(n, Gt(10)),
                        "Value of: n\n"
                        "Expected: is > 10\n"
-                       "  Actual: 5" + OfType(internal::GetTypeName<unsigned short>()));
+                       "  Actual: 5" + OfType<unsigned short>());
   n = 0;
   EXPECT_NONFATAL_FAILURE(
       EXPECT_THAT(n, AllOf(Le(7), Ge(5))),
       "Value of: n\n"
       "Expected: (is <= 7) and (is >= 5)\n"
-      "  Actual: 0" + OfType(internal::GetTypeName<unsigned short>()));
+      "  Actual: 0" + OfType<unsigned short>());
 }
 
 // Tests that ASSERT_THAT() and EXPECT_THAT() work when the argument
@@ -3042,7 +3044,7 @@ TEST(MatcherAssertionTest, WorksForByRefArguments) {
                        "Expected: does not reference the variable @");
   // Tests the "Actual" part.
   EXPECT_FATAL_FAILURE(ASSERT_THAT(n, Not(Ref(n))),
-                       "Actual: 0" + OfType(internal::GetTypeName<int>()) + ", which is located @");
+                       "Actual: 0" + OfType<int>() + ", which is located @");
 }
 
 // Tests that ASSERT_THAT() and EXPECT_THAT() work when the matcher is
@@ -3062,7 +3064,7 @@ TEST(MatcherAssertionTest, WorksForMonomorphicMatcher) {
   EXPECT_NONFATAL_FAILURE(EXPECT_THAT(5, is_greater_than_5),
                           "Value of: 5\n"
                           "Expected: is > 5\n"
-                          "  Actual: 5" + OfType(internal::GetTypeName<int>()));
+                          "  Actual: 5" + OfType<int>());
 }
 
 // Tests floating-point matchers.
@@ -3705,14 +3707,14 @@ TEST(PointeeTest, CanExplainMatchResult) {
 
   const Matcher<long*> m2 = Pointee(GreaterThan(1));  // NOLINT
   long n = 3;  // NOLINT
-  EXPECT_EQ("which points to 3" + OfType(internal::GetTypeName<long>()) + ", which is 2 more than 1",
+  EXPECT_EQ("which points to 3" + OfType<long>() + ", which is 2 more than 1",
             Explain(m2, &n));
 }
 
 TEST(PointeeTest, AlwaysExplainsPointee) {
   const Matcher<int*> m = Pointee(0);
   int n = 42;
-  EXPECT_EQ("which points to 42" + OfType(internal::GetTypeName<int>()), Explain(m, &n));
+  EXPECT_EQ("which points to 42" + OfType<int>(), Explain(m, &n));
 }
 
 // An uncopyable class.
@@ -3865,11 +3867,11 @@ TEST(FieldTest, CanExplainMatchResult) {
 
   AStruct a;
   a.x = 1;
-  EXPECT_EQ("whose given field is 1" + OfType(internal::GetTypeName<int>()), Explain(m, a));
+  EXPECT_EQ("whose given field is 1" + OfType<int>(), Explain(m, a));
 
   m = Field(&AStruct::x, GreaterThan(0));
   EXPECT_EQ(
-      "whose given field is 1" + OfType(internal::GetTypeName<int>()) + ", which is 1 more than 0",
+      "whose given field is 1" + OfType<int>() + ", which is 1 more than 0",
       Explain(m, a));
 }
 
@@ -3878,10 +3880,10 @@ TEST(FieldTest, CanExplainMatchResultWithFieldName) {
 
   AStruct a;
   a.x = 1;
-  EXPECT_EQ("whose field `field_name` is 1" + OfType(internal::GetTypeName<int>()), Explain(m, a));
+  EXPECT_EQ("whose field `field_name` is 1" + OfType<int>(), Explain(m, a));
 
   m = Field("field_name", &AStruct::x, GreaterThan(0));
-  EXPECT_EQ("whose field `field_name` is 1" + OfType(internal::GetTypeName<int>()) +
+  EXPECT_EQ("whose field `field_name` is 1" + OfType<int>() +
                 ", which is 1 more than 0",
             Explain(m, a));
 }
@@ -3958,11 +3960,11 @@ TEST(FieldForPointerTest, CanExplainMatchResult) {
   AStruct a;
   a.x = 1;
   EXPECT_EQ("", Explain(m, static_cast<const AStruct*>(nullptr)));
-  EXPECT_EQ("which points to an object whose given field is 1" + OfType(internal::GetTypeName<int>()),
+  EXPECT_EQ("which points to an object whose given field is 1" + OfType<int>(),
             Explain(m, &a));
 
   m = Field(&AStruct::x, GreaterThan(0));
-  EXPECT_EQ("which points to an object whose given field is 1" + OfType(internal::GetTypeName<int>()) +
+  EXPECT_EQ("which points to an object whose given field is 1" + OfType<int>() +
             ", which is 1 more than 0", Explain(m, &a));
 }
 
@@ -3973,12 +3975,12 @@ TEST(FieldForPointerTest, CanExplainMatchResultWithFieldName) {
   a.x = 1;
   EXPECT_EQ("", Explain(m, static_cast<const AStruct*>(nullptr)));
   EXPECT_EQ(
-      "which points to an object whose field `field_name` is 1" + OfType(internal::GetTypeName<int>()),
+      "which points to an object whose field `field_name` is 1" + OfType<int>(),
       Explain(m, &a));
 
   m = Field("field_name", &AStruct::x, GreaterThan(0));
   EXPECT_EQ("which points to an object whose field `field_name` is 1" +
-                OfType(internal::GetTypeName<int>()) + ", which is 1 more than 0",
+                OfType<int>() + ", which is 1 more than 0",
             Explain(m, &a));
 }
 
@@ -4151,11 +4153,11 @@ TEST(PropertyTest, CanExplainMatchResult) {
 
   AClass a;
   a.set_n(1);
-  EXPECT_EQ("whose given property is 1" + OfType(internal::GetTypeName<int>()), Explain(m, a));
+  EXPECT_EQ("whose given property is 1" + OfType<int>(), Explain(m, a));
 
   m = Property(&AClass::n, GreaterThan(0));
   EXPECT_EQ(
-      "whose given property is 1" + OfType(internal::GetTypeName<int>()) + ", which is 1 more than 0",
+      "whose given property is 1" + OfType<int>() + ", which is 1 more than 0",
       Explain(m, a));
 }
 
@@ -4164,10 +4166,10 @@ TEST(PropertyTest, CanExplainMatchResultWithPropertyName) {
 
   AClass a;
   a.set_n(1);
-  EXPECT_EQ("whose property `fancy_name` is 1" + OfType(internal::GetTypeName<int>()), Explain(m, a));
+  EXPECT_EQ("whose property `fancy_name` is 1" + OfType<int>(), Explain(m, a));
 
   m = Property("fancy_name", &AClass::n, GreaterThan(0));
-  EXPECT_EQ("whose property `fancy_name` is 1" + OfType(internal::GetTypeName<int>()) +
+  EXPECT_EQ("whose property `fancy_name` is 1" + OfType<int>() +
                 ", which is 1 more than 0",
             Explain(m, a));
 }
@@ -4255,12 +4257,12 @@ TEST(PropertyForPointerTest, CanExplainMatchResult) {
   a.set_n(1);
   EXPECT_EQ("", Explain(m, static_cast<const AClass*>(nullptr)));
   EXPECT_EQ(
-      "which points to an object whose given property is 1" + OfType(internal::GetTypeName<int>()),
+      "which points to an object whose given property is 1" + OfType<int>(),
       Explain(m, &a));
 
   m = Property(&AClass::n, GreaterThan(0));
   EXPECT_EQ("which points to an object whose given property is 1" +
-            OfType(internal::GetTypeName<int>()) + ", which is 1 more than 0",
+            OfType<int>() + ", which is 1 more than 0",
             Explain(m, &a));
 }
 
@@ -4271,12 +4273,12 @@ TEST(PropertyForPointerTest, CanExplainMatchResultWithPropertyName) {
   a.set_n(1);
   EXPECT_EQ("", Explain(m, static_cast<const AClass*>(nullptr)));
   EXPECT_EQ("which points to an object whose property `fancy_name` is 1" +
-                OfType(internal::GetTypeName<int>()),
+                OfType<int>(),
             Explain(m, &a));
 
   m = Property("fancy_name", &AClass::n, GreaterThan(0));
   EXPECT_EQ("which points to an object whose property `fancy_name` is 1" +
-                OfType(internal::GetTypeName<int>()) + ", which is 1 more than 0",
+                OfType<int>() + ", which is 1 more than 0",
             Explain(m, &a));
 }
 
@@ -4310,11 +4312,11 @@ int IntFunction(int input) { return input == 42 ? 80 : 90; }
 
 TEST(ResultOfTest, CanExplainMatchResult) {
   Matcher<int> matcher = ResultOf(&IntFunction, Ge(85));
-  EXPECT_EQ("which is mapped by the given callable to 90" + OfType(internal::GetTypeName<int>()),
+  EXPECT_EQ("which is mapped by the given callable to 90" + OfType<int>(),
             Explain(matcher, 36));
 
   matcher = ResultOf(&IntFunction, GreaterThan(85));
-  EXPECT_EQ("which is mapped by the given callable to 90" + OfType(internal::GetTypeName<int>()) +
+  EXPECT_EQ("which is mapped by the given callable to 90" + OfType<int>() +
             ", which is 5 more than 85", Explain(matcher, 36));
 }
 
@@ -6907,7 +6909,7 @@ TEST_F(PredicateFormatterFromMatcherTest, NoShortCircuitOnFailure) {
   std::string expect =
       "Value of: dummy-name\nExpected: [DescribeTo]\n"
       "  Actual: 1" +
-      OfType(internal::GetTypeName<Behavior>()) + ", [MatchAndExplain]";
+      OfType<Behavior>() + ", [MatchAndExplain]";
   EXPECT_EQ(expect, result.message());
 }
 
@@ -6919,7 +6921,7 @@ TEST_F(PredicateFormatterFromMatcherTest, DetectsFlakyShortCircuit) {
       "  The matcher failed on the initial attempt; but passed when rerun to "
       "generate the explanation.\n"
       "  Actual: 2" +
-      OfType(internal::GetTypeName<Behavior>()) + ", [MatchAndExplain]";
+      OfType<Behavior>() + ", [MatchAndExplain]";
   EXPECT_EQ(expect, result.message());
 }
 
