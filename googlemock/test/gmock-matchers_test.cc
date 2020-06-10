@@ -1226,6 +1226,25 @@ TEST(RefTest, ExplainsResult) {
 
 // Tests string comparison matchers.
 
+template <typename T = std::string>
+std::string FromStringLike(internal::StringLike<T> str) {
+  return std::string(str);
+}
+
+TEST(StringLike, TestConversions) {
+  EXPECT_EQ("foo", FromStringLike("foo"));
+  EXPECT_EQ("foo", FromStringLike(std::string("foo")));
+#if GTEST_INTERNAL_HAS_STRING_VIEW
+  EXPECT_EQ("foo", FromStringLike(internal::StringView("foo")));
+#endif  // GTEST_INTERNAL_HAS_STRING_VIEW
+
+  // Non deducible types.
+  EXPECT_EQ("", FromStringLike({}));
+  EXPECT_EQ("foo", FromStringLike({'f', 'o', 'o'}));
+  const char buf[] = "foo";
+  EXPECT_EQ("foo", FromStringLike({buf, buf + 3}));
+}
+
 TEST(StrEqTest, MatchesEqualString) {
   Matcher<const char*> m = StrEq(std::string("Hello"));
   EXPECT_TRUE(m.Matches("Hello"));
@@ -1237,7 +1256,8 @@ TEST(StrEqTest, MatchesEqualString) {
   EXPECT_FALSE(m2.Matches("Hi"));
 
 #if GTEST_INTERNAL_HAS_STRING_VIEW
-  Matcher<const internal::StringView&> m3 = StrEq("Hello");
+  Matcher<const internal::StringView&> m3 =
+      StrEq(internal::StringView("Hello"));
   EXPECT_TRUE(m3.Matches(internal::StringView("Hello")));
   EXPECT_FALSE(m3.Matches(internal::StringView("hello")));
   EXPECT_FALSE(m3.Matches(internal::StringView()));
@@ -1274,7 +1294,7 @@ TEST(StrNeTest, MatchesUnequalString) {
   EXPECT_FALSE(m2.Matches("Hello"));
 
 #if GTEST_INTERNAL_HAS_STRING_VIEW
-  Matcher<const internal::StringView> m3 = StrNe("Hello");
+  Matcher<const internal::StringView> m3 = StrNe(internal::StringView("Hello"));
   EXPECT_TRUE(m3.Matches(internal::StringView("")));
   EXPECT_TRUE(m3.Matches(internal::StringView()));
   EXPECT_FALSE(m3.Matches(internal::StringView("Hello")));
@@ -1298,7 +1318,8 @@ TEST(StrCaseEqTest, MatchesEqualStringIgnoringCase) {
   EXPECT_FALSE(m2.Matches("Hi"));
 
 #if GTEST_INTERNAL_HAS_STRING_VIEW
-  Matcher<const internal::StringView&> m3 = StrCaseEq(std::string("Hello"));
+  Matcher<const internal::StringView&> m3 =
+      StrCaseEq(internal::StringView("Hello"));
   EXPECT_TRUE(m3.Matches(internal::StringView("Hello")));
   EXPECT_TRUE(m3.Matches(internal::StringView("hello")));
   EXPECT_FALSE(m3.Matches(internal::StringView("Hi")));
@@ -1348,7 +1369,8 @@ TEST(StrCaseNeTest, MatchesUnequalStringIgnoringCase) {
   EXPECT_FALSE(m2.Matches("Hello"));
 
 #if GTEST_INTERNAL_HAS_STRING_VIEW
-  Matcher<const internal::StringView> m3 = StrCaseNe("Hello");
+  Matcher<const internal::StringView> m3 =
+      StrCaseNe(internal::StringView("Hello"));
   EXPECT_TRUE(m3.Matches(internal::StringView("Hi")));
   EXPECT_TRUE(m3.Matches(internal::StringView()));
   EXPECT_FALSE(m3.Matches(internal::StringView("Hello")));
@@ -1397,7 +1419,8 @@ TEST(HasSubstrTest, WorksForCStrings) {
 #if GTEST_INTERNAL_HAS_STRING_VIEW
 // Tests that HasSubstr() works for matching StringView-typed values.
 TEST(HasSubstrTest, WorksForStringViewClasses) {
-  const Matcher<internal::StringView> m1 = HasSubstr("foo");
+  const Matcher<internal::StringView> m1 =
+      HasSubstr(internal::StringView("foo"));
   EXPECT_TRUE(m1.Matches(internal::StringView("I love food.")));
   EXPECT_FALSE(m1.Matches(internal::StringView("tofo")));
   EXPECT_FALSE(m1.Matches(internal::StringView()));
@@ -1650,7 +1673,8 @@ TEST(StartsWithTest, MatchesStringWithGivenPrefix) {
   EXPECT_FALSE(m2.Matches(" Hi"));
 
 #if GTEST_INTERNAL_HAS_STRING_VIEW
-  const Matcher<internal::StringView> m_empty = StartsWith("");
+  const Matcher<internal::StringView> m_empty =
+      StartsWith(internal::StringView(""));
   EXPECT_TRUE(m_empty.Matches(internal::StringView()));
   EXPECT_TRUE(m_empty.Matches(internal::StringView("")));
   EXPECT_TRUE(m_empty.Matches(internal::StringView("not empty")));
@@ -1678,7 +1702,8 @@ TEST(EndsWithTest, MatchesStringWithGivenSuffix) {
   EXPECT_FALSE(m2.Matches("Hi "));
 
 #if GTEST_INTERNAL_HAS_STRING_VIEW
-  const Matcher<const internal::StringView&> m4 = EndsWith("");
+  const Matcher<const internal::StringView&> m4 =
+      EndsWith(internal::StringView(""));
   EXPECT_TRUE(m4.Matches("Hi"));
   EXPECT_TRUE(m4.Matches(""));
   EXPECT_TRUE(m4.Matches(internal::StringView()));
@@ -1710,7 +1735,8 @@ TEST(MatchesRegexTest, MatchesStringMatchingGivenRegex) {
   EXPECT_TRUE(m3.Matches(internal::StringView("abcz")));
   EXPECT_FALSE(m3.Matches(internal::StringView("1az")));
   EXPECT_FALSE(m3.Matches(internal::StringView()));
-  const Matcher<const internal::StringView&> m4 = MatchesRegex("");
+  const Matcher<const internal::StringView&> m4 =
+      MatchesRegex(internal::StringView(""));
   EXPECT_TRUE(m4.Matches(internal::StringView("")));
   EXPECT_TRUE(m4.Matches(internal::StringView()));
 #endif  // GTEST_INTERNAL_HAS_STRING_VIEW
@@ -1749,7 +1775,8 @@ TEST(ContainsRegexTest, MatchesStringContainingGivenRegex) {
   EXPECT_TRUE(m3.Matches(internal::StringView("az1")));
   EXPECT_FALSE(m3.Matches(internal::StringView("1a")));
   EXPECT_FALSE(m3.Matches(internal::StringView()));
-  const Matcher<const internal::StringView&> m4 = ContainsRegex("");
+  const Matcher<const internal::StringView&> m4 =
+      ContainsRegex(internal::StringView(""));
   EXPECT_TRUE(m4.Matches(internal::StringView("")));
   EXPECT_TRUE(m4.Matches(internal::StringView()));
 #endif  // GTEST_INTERNAL_HAS_STRING_VIEW
