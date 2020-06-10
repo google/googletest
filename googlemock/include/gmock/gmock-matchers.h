@@ -903,9 +903,10 @@ bool CaseInsensitiveStringEquals(const StringType& s1,
 template <typename StringType>
 class StrEqualityMatcher {
  public:
-  StrEqualityMatcher(const StringType& str, bool expect_eq,
-                     bool case_sensitive)
-      : string_(str), expect_eq_(expect_eq), case_sensitive_(case_sensitive) {}
+  StrEqualityMatcher(StringType str, bool expect_eq, bool case_sensitive)
+      : string_(std::move(str)),
+        expect_eq_(expect_eq),
+        case_sensitive_(case_sensitive) {}
 
 #if GTEST_INTERNAL_HAS_STRING_VIEW
   bool MatchAndExplain(const internal::StringView& s,
@@ -3990,52 +3991,60 @@ internal::ResultOfMatcher<Callable, InnerMatcher> ResultOf(
 // String matchers.
 
 // Matches a string equal to str.
-inline PolymorphicMatcher<internal::StrEqualityMatcher<std::string> > StrEq(
-    const std::string& str) {
+template <typename T = std::string>
+PolymorphicMatcher<internal::StrEqualityMatcher<std::string> > StrEq(
+    const internal::StringLike<T>& str) {
   return MakePolymorphicMatcher(
-      internal::StrEqualityMatcher<std::string>(str, true, true));
+      internal::StrEqualityMatcher<std::string>(std::string(str), true, true));
 }
 
 // Matches a string not equal to str.
-inline PolymorphicMatcher<internal::StrEqualityMatcher<std::string> > StrNe(
-    const std::string& str) {
+template <typename T = std::string>
+PolymorphicMatcher<internal::StrEqualityMatcher<std::string> > StrNe(
+    const internal::StringLike<T>& str) {
   return MakePolymorphicMatcher(
-      internal::StrEqualityMatcher<std::string>(str, false, true));
+      internal::StrEqualityMatcher<std::string>(std::string(str), false, true));
 }
 
 // Matches a string equal to str, ignoring case.
-inline PolymorphicMatcher<internal::StrEqualityMatcher<std::string> > StrCaseEq(
-    const std::string& str) {
+template <typename T = std::string>
+PolymorphicMatcher<internal::StrEqualityMatcher<std::string> > StrCaseEq(
+    const internal::StringLike<T>& str) {
   return MakePolymorphicMatcher(
-      internal::StrEqualityMatcher<std::string>(str, true, false));
+      internal::StrEqualityMatcher<std::string>(std::string(str), true, false));
 }
 
 // Matches a string not equal to str, ignoring case.
-inline PolymorphicMatcher<internal::StrEqualityMatcher<std::string> > StrCaseNe(
-    const std::string& str) {
-  return MakePolymorphicMatcher(
-      internal::StrEqualityMatcher<std::string>(str, false, false));
+template <typename T = std::string>
+PolymorphicMatcher<internal::StrEqualityMatcher<std::string> > StrCaseNe(
+    const internal::StringLike<T>& str) {
+  return MakePolymorphicMatcher(internal::StrEqualityMatcher<std::string>(
+      std::string(str), false, false));
 }
 
 // Creates a matcher that matches any string, std::string, or C string
 // that contains the given substring.
-inline PolymorphicMatcher<internal::HasSubstrMatcher<std::string> > HasSubstr(
-    const std::string& substring) {
+template <typename T = std::string>
+PolymorphicMatcher<internal::HasSubstrMatcher<std::string> > HasSubstr(
+    const internal::StringLike<T>& substring) {
   return MakePolymorphicMatcher(
-      internal::HasSubstrMatcher<std::string>(substring));
+      internal::HasSubstrMatcher<std::string>(std::string(substring)));
 }
 
 // Matches a string that starts with 'prefix' (case-sensitive).
-inline PolymorphicMatcher<internal::StartsWithMatcher<std::string> > StartsWith(
-    const std::string& prefix) {
+template <typename T = std::string>
+PolymorphicMatcher<internal::StartsWithMatcher<std::string> > StartsWith(
+    const internal::StringLike<T>& prefix) {
   return MakePolymorphicMatcher(
-      internal::StartsWithMatcher<std::string>(prefix));
+      internal::StartsWithMatcher<std::string>(std::string(prefix)));
 }
 
 // Matches a string that ends with 'suffix' (case-sensitive).
-inline PolymorphicMatcher<internal::EndsWithMatcher<std::string> > EndsWith(
-    const std::string& suffix) {
-  return MakePolymorphicMatcher(internal::EndsWithMatcher<std::string>(suffix));
+template <typename T = std::string>
+PolymorphicMatcher<internal::EndsWithMatcher<std::string> > EndsWith(
+    const internal::StringLike<T>& suffix) {
+  return MakePolymorphicMatcher(
+      internal::EndsWithMatcher<std::string>(std::string(suffix)));
 }
 
 #if GTEST_HAS_STD_WSTRING
