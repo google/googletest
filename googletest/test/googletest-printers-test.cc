@@ -513,6 +513,56 @@ TEST(PrintCharPointerTest, ConstUnsignedChar) {
   EXPECT_EQ("NULL", Print(p));
 }
 
+#ifdef __cpp_char8_t
+// char8_t*
+TEST(PrintCharPointerTest, Char8) {
+  char8_t* p = reinterpret_cast<char8_t*>(0x1234);
+  EXPECT_EQ(PrintPointer(p), Print(p));
+  p = nullptr;
+  EXPECT_EQ("NULL", Print(p));
+}
+
+// const char8_t*
+TEST(PrintCharPointerTest, ConstChar8) {
+  const char8_t* p = reinterpret_cast<const char8_t*>(0x1234);
+  EXPECT_EQ(PrintPointer(p), Print(p));
+  p = nullptr;
+  EXPECT_EQ("NULL", Print(p));
+}
+#endif
+
+// char16_t*
+TEST(PrintCharPointerTest, Char16) {
+  char16_t* p = reinterpret_cast<char16_t*>(0x1234);
+  EXPECT_EQ(PrintPointer(p), Print(p));
+  p = nullptr;
+  EXPECT_EQ("NULL", Print(p));
+}
+
+// const char16_t*
+TEST(PrintCharPointerTest, ConstChar16) {
+  const char16_t* p = reinterpret_cast<const char16_t*>(0x1234);
+  EXPECT_EQ(PrintPointer(p), Print(p));
+  p = nullptr;
+  EXPECT_EQ("NULL", Print(p));
+}
+
+// char32_t*
+TEST(PrintCharPointerTest, Char32) {
+  char32_t* p = reinterpret_cast<char32_t*>(0x1234);
+  EXPECT_EQ(PrintPointer(p), Print(p));
+  p = nullptr;
+  EXPECT_EQ("NULL", Print(p));
+}
+
+// const char32_t*
+TEST(PrintCharPointerTest, ConstChar32) {
+  const char32_t* p = reinterpret_cast<const char32_t*>(0x1234);
+  EXPECT_EQ(PrintPointer(p), Print(p));
+  p = nullptr;
+  EXPECT_EQ("NULL", Print(p));
+}
+
 // Tests printing pointers to simple, built-in types.
 
 // bool*.
