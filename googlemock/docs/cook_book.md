@@ -1675,11 +1675,11 @@ times from calling it with the wrong arguments.
 
 ### Expecting Ordered Calls {#OrderedCalls}
 
-Although an `EXPECT_CALL()` statement defined earlier takes precedence when
-gMock tries to match a function call with an expectation, by default calls don't
-have to happen in the order `EXPECT_CALL()` statements are written. For example,
-if the arguments match the matchers in the third `EXPECT_CALL()`, but not those
-in the first two, then the third expectation will be used.
+Although an `EXPECT_CALL()` statement defined later takes precedence when gMock
+tries to match a function call with an expectation, by default calls don't have
+to happen in the order `EXPECT_CALL()` statements are written. For example, if
+the arguments match the matchers in the second `EXPECT_CALL()`, but not those in
+the first and third, then the second expectation will be used.
 
 If you would rather have all calls occur in the order of the expectations, put
 the `EXPECT_CALL()` statements in a block where you define a variable of type
