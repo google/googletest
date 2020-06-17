@@ -497,7 +497,7 @@ void InsertSyntheticTestCase(const std::string& name, CodeLocation location,
       "removed but the rest got left behind.";
 
   std::string message =
-      "Paramaterized test suite " + name +
+      "Parameterized test suite " + name +
       (has_test_p ? kMissingInstantiation : kMissingTestCase) +
       "\n\n"
       "To suppress this error for this test suite, insert the following line "
@@ -505,7 +505,7 @@ void InsertSyntheticTestCase(const std::string& name, CodeLocation location,
       "\n\n"
       "GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(" + name + ");";
 
-  std::string full_name = "UninstantiatedParamaterizedTestSuite<" + name + ">";
+  std::string full_name = "UninstantiatedParameterizedTestSuite<" + name + ">";
   RegisterTest(  //
       "GoogleTestVerification", full_name.c_str(),
       nullptr,  // No type parameter.
@@ -552,7 +552,7 @@ void TypeParameterizedTestSuiteRegistry::CheckForInstantiations() {
     if (ignored.find(testcase.first) != ignored.end()) continue;
 
     std::string message =
-        "Type paramaterized test suite " + testcase.first +
+        "Type parameterized test suite " + testcase.first +
         " is defined via REGISTER_TYPED_TEST_SUITE_P, but never instantiated "
         "via INSTANTIATE_TYPED_TEST_SUITE_P. None of the test cases will run."
         "\n\n"
@@ -568,7 +568,7 @@ void TypeParameterizedTestSuiteRegistry::CheckForInstantiations() {
         testcase.first + ");";
 
     std::string full_name =
-        "UninstantiatedTypeParamaterizedTestSuite<" + testcase.first + ">";
+        "UninstantiatedTypeParameterizedTestSuite<" + testcase.first + ">";
     RegisterTest(  //
         "GoogleTestVerification", full_name.c_str(),
         nullptr,  // No type parameter.
