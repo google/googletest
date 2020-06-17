@@ -983,9 +983,9 @@ Stack trace: (omitted)
 
 [0;31m[  FAILED  ] [mPrintingStrings/ParamTest.Failure/a, where GetParam() = "a"
 [0;32m[----------] [m3 tests from GoogleTestVerification
-[0;32m[ RUN      ] [mGoogleTestVerification.UninstantiatedParamaterizedTestSuite<NoTests>
+[0;32m[ RUN      ] [mGoogleTestVerification.UninstantiatedParameterizedTestSuite<NoTests>
 googletest-output-test_.cc:#: Failure
-Paramaterized test suite NoTests is instantiated via INSTANTIATE_TEST_SUITE_P, but no tests are defined via TEST_P . No test cases will run.
+Parameterized test suite NoTests is instantiated via INSTANTIATE_TEST_SUITE_P, but no tests are defined via TEST_P . No test cases will run.
 
 Ideally, INSTANTIATE_TEST_SUITE_P should only ever be invoked from code that always depend on code that provides TEST_P. Failing to do so is often an indication of dead code, e.g. the last TEST_P was removed but the rest got left behind.
 
@@ -994,10 +994,10 @@ To suppress this error for this test suite, insert the following line (in a non-
 GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(NoTests);
 Stack trace: (omitted)
 
-[0;31m[  FAILED  ] [mGoogleTestVerification.UninstantiatedParamaterizedTestSuite<NoTests>
-[0;32m[ RUN      ] [mGoogleTestVerification.UninstantiatedParamaterizedTestSuite<DetectNotInstantiatedTest>
+[0;31m[  FAILED  ] [mGoogleTestVerification.UninstantiatedParameterizedTestSuite<NoTests>
+[0;32m[ RUN      ] [mGoogleTestVerification.UninstantiatedParameterizedTestSuite<DetectNotInstantiatedTest>
 googletest-output-test_.cc:#: Failure
-Paramaterized test suite DetectNotInstantiatedTest is defined via TEST_P, but never instantiated. None of the test cases will run. Either no INSTANTIATE_TEST_SUITE_P is provided or the only ones provided expand to nothing.
+Parameterized test suite DetectNotInstantiatedTest is defined via TEST_P, but never instantiated. None of the test cases will run. Either no INSTANTIATE_TEST_SUITE_P is provided or the only ones provided expand to nothing.
 
 Ideally, TEST_P definitions should only ever be included as part of binaries that intend to use them. (As opposed to, for example, being placed in a library that may be linked in to get other utilities.)
 
@@ -1006,10 +1006,10 @@ To suppress this error for this test suite, insert the following line (in a non-
 GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(DetectNotInstantiatedTest);
 Stack trace: (omitted)
 
-[0;31m[  FAILED  ] [mGoogleTestVerification.UninstantiatedParamaterizedTestSuite<DetectNotInstantiatedTest>
-[0;32m[ RUN      ] [mGoogleTestVerification.UninstantiatedTypeParamaterizedTestSuite<DetectNotInstantiatedTypesTest>
+[0;31m[  FAILED  ] [mGoogleTestVerification.UninstantiatedParameterizedTestSuite<DetectNotInstantiatedTest>
+[0;32m[ RUN      ] [mGoogleTestVerification.UninstantiatedTypeParameterizedTestSuite<DetectNotInstantiatedTypesTest>
 googletest-output-test_.cc:#: Failure
-Type paramaterized test suite DetectNotInstantiatedTypesTest is defined via REGISTER_TYPED_TEST_SUITE_P, but never instantiated via INSTANTIATE_TYPED_TEST_SUITE_P. None of the test cases will run.
+Type parameterized test suite DetectNotInstantiatedTypesTest is defined via REGISTER_TYPED_TEST_SUITE_P, but never instantiated via INSTANTIATE_TYPED_TEST_SUITE_P. None of the test cases will run.
 
 Ideally, TYPED_TEST_P definitions should only ever be included as part of binaries that intend to use them. (As opposed to, for example, being placed in a library that may be linked in to get other utilities.)
 
@@ -1018,7 +1018,7 @@ To suppress this error for this test suite, insert the following line (in a non-
 GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(DetectNotInstantiatedTypesTest);
 Stack trace: (omitted)
 
-[0;31m[  FAILED  ] [mGoogleTestVerification.UninstantiatedTypeParamaterizedTestSuite<DetectNotInstantiatedTypesTest>
+[0;31m[  FAILED  ] [mGoogleTestVerification.UninstantiatedTypeParameterizedTestSuite<DetectNotInstantiatedTypesTest>
 [0;32m[----------] [mGlobal test environment tear-down
 BarEnvironment::TearDown() called.
 googletest-output-test_.cc:#: Failure
@@ -1089,9 +1089,9 @@ Stack trace: (omitted)
 [0;31m[  FAILED  ] [mBadDynamicFixture2.Derived
 [0;31m[  FAILED  ] [mPrintingFailingParams/FailingParamTest.Fails/0, where GetParam() = 2
 [0;31m[  FAILED  ] [mPrintingStrings/ParamTest.Failure/a, where GetParam() = "a"
-[0;31m[  FAILED  ] [mGoogleTestVerification.UninstantiatedParamaterizedTestSuite<NoTests>
-[0;31m[  FAILED  ] [mGoogleTestVerification.UninstantiatedParamaterizedTestSuite<DetectNotInstantiatedTest>
-[0;31m[  FAILED  ] [mGoogleTestVerification.UninstantiatedTypeParamaterizedTestSuite<DetectNotInstantiatedTypesTest>
+[0;31m[  FAILED  ] [mGoogleTestVerification.UninstantiatedParameterizedTestSuite<NoTests>
+[0;31m[  FAILED  ] [mGoogleTestVerification.UninstantiatedParameterizedTestSuite<DetectNotInstantiatedTest>
+[0;31m[  FAILED  ] [mGoogleTestVerification.UninstantiatedTypeParameterizedTestSuite<DetectNotInstantiatedTypesTest>
 
 57 FAILED TESTS
 [0;33m  YOU HAVE 1 DISABLED TEST
