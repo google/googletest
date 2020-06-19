@@ -1291,9 +1291,41 @@ constexpr bool InstantiateTypedTestCase_P_IsDeprecated() { return true; }
   } else                     /* NOLINT */                         \
     static_assert(true, "")  // User must have a semicolon after expansion.
 
+#if GTEST_HAS_EXCEPTIONS
+
+#if GTEST_HAS_RTTI
+
+#define GTEST_EXCEPTION_TYPE_(e) \
+  ::testing::internal::GetTypeName(typeid(e))
+
+#else  // GTEST_HAS_RTTI
+
+#define GTEST_EXCEPTION_TYPE_(e) \
+  std::string{"an std::exception-derived error"}
+
+#endif  // GTEST_HAS_RTTI
+
+#define GTEST_TEST_THROW_CATCH_STD_EXCEPTION_(statement, expected_exception) \
+  catch (std::exception const& e) { \
+    gtest_msg.value = \
+        "Expected: " #statement " throws an exception of type " \
+        #expected_exception ".\n  Actual: it throws "; \
+    gtest_msg.value += GTEST_EXCEPTION_TYPE_(e); \
+    gtest_msg.value += " with description \""; \
+    gtest_msg.value += e.what(); \
+    gtest_msg.value += "\"."; \
+    goto GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__); \
+  }
+
+#else  // GTEST_HAS_EXCEPTIONS
+
+#define GTEST_TEST_THROW_CATCH_STD_EXCEPTION_(statement, expected_exception)
+
+#endif  // GTEST_HAS_EXCEPTIONS
+
 #define GTEST_TEST_THROW_(statement, expected_exception, fail) \
   GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
-  if (::testing::internal::ConstCharPtr gtest_msg = "") { \
+  if (::testing::internal::TrueWithString gtest_msg{}) { \
     bool gtest_caught_expected = false; \
     try { \
       GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement); \
@@ -1301,6 +1333,7 @@ constexpr bool InstantiateTypedTestCase_P_IsDeprecated() { return true; }
     catch (expected_exception const&) { \
       gtest_caught_expected = true; \
     } \
+    GTEST_TEST_THROW_CATCH_STD_EXCEPTION_(statement, expected_exception) \
     catch (...) { \
       gtest_msg.value = \
           "Expected: " #statement " throws an exception of type " \
@@ -1315,15 +1348,15 @@ constexpr bool InstantiateTypedTestCase_P_IsDeprecated() { return true; }
     } \
   } else \
     GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__): \
-      fail(gtest_msg.value)
+      fail(gtest_msg.value.c_str())
 
 #if GTEST_HAS_EXCEPTIONS
 
 #define GTEST_TEST_NO_THROW_CATCH_STD_EXCEPTION_() \
   catch (std::exception const& e) { \
-    gtest_msg.value = ( \
-      "it throws std::exception-derived exception with description: \"" \
-    ); \
+    gtest_msg.value = "it throws "; \
+    gtest_msg.value += GTEST_EXCEPTION_TYPE_(e); \
+    gtest_msg.value += " with description \""; \
     gtest_msg.value += e.what(); \
     gtest_msg.value += "\"."; \
     goto GTEST_CONCAT_TOKEN_(gtest_label_testnothrow_, __LINE__); \
