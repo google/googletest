@@ -4725,6 +4725,140 @@ PolymorphicMatcher<internal::variant_matcher::VariantMatcher<T> > VariantWith(
       internal::variant_matcher::VariantMatcher<T>(matcher));
 }
 
+
+#if GTEST_HAS_EXCEPTIONS
+
+// Anything inside the 'internal' namespace IS INTERNAL IMPLEMENTATION
+// and MUST NOT BE USED IN USER CODE!!!
+namespace internal {
+
+template <typename Err>
+class ExceptionMatcherImpl {
+ public:
+  ExceptionMatcherImpl(Matcher<const Err&> matcher)
+      : matcher_(std::move(matcher)) {}
+
+ public:
+  void DescribeTo(::std::ostream* os) const {
+    *os << "throws an exception of type " << GetTypeName<Err>();
+    if (matcher_.GetDescriber() != nullptr) {
+      *os << " which ";
+      matcher_.DescribeTo(os);
+    }
+  }
+
+  void DescribeNegationTo(::std::ostream* os) const {
+    *os << "not (";
+    DescribeTo(os);
+    *os << ")";
+  }
+
+  template <typename T>
+  bool MatchAndExplain(T&& x, MatchResultListener* listener) const {
+    try {
+      (void)(std::forward<T>(x)());
+    } catch (const Err& err) {
+      *listener << "throws an exception of type " << GetTypeName<Err>();
+      if (matcher_.GetDescriber() != nullptr) {
+        *listener << " ";
+        return matcher_.MatchAndExplain(err, listener);
+      } else {
+        return true;
+      }
+    } catch (const std::exception& err) {
+#if GTEST_HAS_RTTI
+      *listener << "throws an exception of type "
+          << GetTypeName(typeid(err)) << " ";
+#else
+      *listener << "throws an std::exception-derived error ";
+#endif
+      *listener << "with description \"" << err.what() << "\"";
+      return false;
+    } catch (...) {
+      *listener << "throws an exception of some other type";
+      return false;
+    }
+    *listener << "does not throw any exception";
+    return false;
+  }
+
+ private:
+  const Matcher<const Err&> matcher_;
+};
+
+}  // namespace internal
+
+// Throws()
+// Throws(exceptionMatcher)
+// ThrowsMessage(messageMatcher)
+// ThrowsMessageHasSubstr(message)
+//
+// This matcher accepts a callable and verifies that when invoked, it throws
+// an exception with the given type and properties.
+//
+// Examples:
+//
+//   EXPECT_THAT(
+//       []() { throw std::runtime_error("message"); },
+//       Throws<std::runtime_error>());
+//
+//   EXPECT_THAT(
+//       []() { throw std::runtime_error("message"); },
+//       ThrowsMessage<std::runtime_error>(HasSubstr("message")));
+//
+//   EXPECT_THAT(
+//       []() { throw std::runtime_error("message"); },
+//       ThrowsMessageHasSubstr<std::runtime_error>("message"));
+//
+//   EXPECT_THAT(
+//       []() { throw std::runtime_error("message"); },
+//       Throws
+
+template <typename Err>
+PolymorphicMatcher<internal::ExceptionMatcherImpl<Err>>
+Throws() {
+  return MakePolymorphicMatcher(
+      internal::ExceptionMatcherImpl<Err>{
+          Matcher<const Err&>{}});
+}
+template <typename Err, typename ExceptionMatcher>
+PolymorphicMatcher<internal::ExceptionMatcherImpl<Err>>
+Throws(const ExceptionMatcher& exceptionMatcher) {
+  // Using matcher cast allows users to pass a matcher of a more broad type.
+  // For example user may want to pass Matcher<std::exception>
+  // to Throws<std::runtime_error>, or Matcher<int64> to Throws<int32>.
+  return MakePolymorphicMatcher(
+      internal::ExceptionMatcherImpl<Err>{
+          SafeMatcherCast<const Err&>(exceptionMatcher)});
+}
+template <typename Err, typename MessageMatcher>
+PolymorphicMatcher<internal::ExceptionMatcherImpl<Err>>
+ThrowsMessage(const MessageMatcher& messageMatcher) {
+  static_assert(
+      std::is_base_of<std::exception, Err>::value,
+      "expected an std::exception-derived class");
+  // We cast matcher to std::string so that we have string semantics instead of
+  // pointer semantics. With this cast, we can accept matchers that match types
+  // that're constructible from strings. Also, we can accept raw string
+  // literals, e.g. ThrowsMessage("message").
+  return MakePolymorphicMatcher(
+      internal::ExceptionMatcherImpl<Err>{
+          Property("description", &std::exception::what,
+                   MatcherCast<std::string>(messageMatcher))});
+}
+template <typename Err, typename Message = std::string>
+PolymorphicMatcher<internal::ExceptionMatcherImpl<Err>>
+ThrowsMessageHasSubstr(const internal::StringLike<Message>& message) {
+  static_assert(
+      std::is_base_of<std::exception, Err>::value,
+      "expected an std::exception-derived class");
+  return MakePolymorphicMatcher(
+      internal::ExceptionMatcherImpl<Err>{
+          Property("description", &std::exception::what, HasSubstr(message))});
+}
+
+#endif  // GTEST_HAS_EXCEPTIONS
+
 // These macros allow using matchers to check values in Google Test
 // tests.  ASSERT_THAT(value, matcher) and EXPECT_THAT(value, matcher)
 // succeed if and only if the value matches the matcher.  If the assertion
