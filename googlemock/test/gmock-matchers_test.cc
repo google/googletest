@@ -8282,10 +8282,8 @@ TEST(ThrowsPredicateCompilesTest, StringLikeMessage) {
     std::string inner;
 
     // Note: explicit conversion.
-    explicit operator std::string() const {
-      return inner;
-    }
-};
+    explicit operator std::string() const { return inner; }
+  };
 
   Matcher<void (*)()> matcher = ThrowsMessageHasSubstr<std::runtime_error>(
       SomeCustomString{"error message"});

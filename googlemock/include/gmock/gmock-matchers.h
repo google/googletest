@@ -4843,7 +4843,7 @@ ThrowsMessage(const MessageMatcher& messageMatcher) {
   // literals, e.g. ThrowsMessage("message").
   return MakePolymorphicMatcher(
       internal::ExceptionMatcherImpl<Err>{
-          Property("description", &std::exception::what,
+          Property("what", &std::exception::what,
                    MatcherCast<std::string>(messageMatcher))});
 }
 template <typename Err, typename Message = std::string>
@@ -4854,7 +4854,7 @@ ThrowsMessageHasSubstr(const internal::StringLike<Message>& message) {
       "expected an std::exception-derived class");
   return MakePolymorphicMatcher(
       internal::ExceptionMatcherImpl<Err>{
-          Property("description", &std::exception::what, HasSubstr(message))});
+          Property("what", &std::exception::what, HasSubstr(message))});
 }
 
 #endif  // GTEST_HAS_EXCEPTIONS
