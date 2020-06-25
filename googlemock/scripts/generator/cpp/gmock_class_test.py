@@ -361,26 +361,26 @@ class GenerateMocksTest(TestCase):
     source = """
 namespace Foo {
 namespace Bar { class Forward; }
-namespace Baz {
+namespace Baz::Qux {
 
 class Test {
  public:
   virtual void Foo();
 };
 
-}  // namespace Baz
+}  // namespace Baz::Qux
 }  // namespace Foo
 """
     expected = """\
 namespace Foo {
-namespace Baz {
+namespace Baz::Qux {
 
 class MockTest : public Test {
 public:
 MOCK_METHOD(void, Foo, (), (override));
 };
 
-}  // namespace Baz
+}  // namespace Baz::Qux
 }  // namespace Foo
 """
     self.assertEqualIgnoreLeadingWhitespace(expected,
