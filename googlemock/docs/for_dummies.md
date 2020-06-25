@@ -47,7 +47,6 @@ Using Google Mock is easy! Inside your C++ source file, just `#include` `"gtest/
 
 # A Case for Mock Turtles #
 Let's look at an example. Suppose you are developing a graphics program that relies on a LOGO-like API for drawing. How would you test that it does the right thing? Well, you can run it and compare the screen with a golden screen snapshot, but let's admit it: tests like this are expensive to run and fragile (What if you just upgraded to a shiny new graphics card that has better anti-aliasing? Suddenly you have to update all your golden images.). It would be too painful if all your tests are like this. Fortunately, you learned about Dependency Injection and know the right thing to do: instead of having your application talk to the drawing API directly, wrap the API in an interface (say, `Turtle`) and code to that interface:
-
 ```cpp
 class Turtle {
   ...
@@ -80,13 +79,13 @@ because your new machine does anti-aliasing differently), easier to read and
 maintain (the intent of a test is expressed in the code, not in some binary
 images), and run *much, much faster*.
 
-### Writing the Mock Class
+## Writing the Mock Class
 
 If you are lucky, the mocks you need to use have already been implemented by
 some nice people. If, however, you find yourself in the position to write a mock
 class, relax - gMock turns this task into a fun game! (Well, almost.)
 
-#### How to Define It
+### How to Define It
 
 Using the `Turtle` interface as example, here are the simple steps you need to
 follow:
@@ -129,7 +128,7 @@ class MockTurtle : public Turtle {
 You don't need to define these mock methods somewhere else - the `MOCK_METHOD`
 macro will generate the definitions for you. It's that simple!
 
-#### Where to Put It
+### Where to Put It
 
 When you define a mock class, you need to decide where to put its definition.
 Some people put it in a `_test.cc`. This is fine when the interface being mocked
@@ -153,7 +152,7 @@ specific domain much better than `Foo` does.
 
 <!-- GOOGLETEST_CM0029 DO NOT DELETE -->
 
-### Using Mocks in Tests
+## Using Mocks in Tests
 
 Once you have a mock class, using it is easy. The typical work flow is:
 
@@ -224,7 +223,7 @@ Admittedly, this test is contrived and doesn't do much. You can easily achieve
 the same effect without using gMock. However, as we shall reveal soon, gMock
 allows you to do *so much more* with the mocks.
 
-### Setting Expectations
+## Setting Expectations
 
 The key to using a mock object successfully is to set the *right expectations*
 on it. If you set the expectations too strict, your test will fail as the result
@@ -233,7 +232,7 @@ to do it just right such that your test can catch exactly the kind of bugs you
 intend it to catch. gMock provides the necessary means for you to do it "just
 right."
 
-#### General Syntax
+### General Syntax
 
 In gMock we use the `EXPECT_CALL()` macro to set an expectation on a mock
 method. The general syntax is:
@@ -288,7 +287,7 @@ it makes expectations easily identifiable (either by `gsearch` or by a human
 reader), and second it allows gMock to include the source file location of a
 failed expectation in messages, making debugging easier.
 
-#### Matchers: What Arguments Do We Expect?
+### Matchers: What Arguments Do We Expect?
 
 When a mock function takes arguments, we may specify what arguments we are
 expecting, for example:
@@ -344,7 +343,7 @@ to help gMock resolve which overload is expected by specifying the number of
 arguments and possibly also the
 [types of the arguments](cook_book.md#SelectOverload).
 
-#### Cardinalities: How Many Times Will It Be Called?
+### Cardinalities: How Many Times Will It Be Called?
 
 The first clause we can specify following an `EXPECT_CALL()` is `Times()`. We
 call its argument a **cardinality** as it tells *how many times* the call should
@@ -374,7 +373,7 @@ the cardinality for you.** The rules are easy to remember:
 **Quick quiz:** what do you think will happen if a function is expected to be
 called twice but actually called four times?
 
-#### Actions: What Should It Do?
+### Actions: What Should It Do?
 
 Remember that a mock object doesn't really have a working implementation? We as
 users have to tell it what to do when a method is invoked. This is easy in
@@ -467,7 +466,7 @@ will be taken afterwards. So the right answer is that `turtle.GetY()` will
 return 100 the first time, but **return 0 from the second time on**, as
 returning 0 is the default action for `int` functions.
 
-#### Using Multiple Expectations {#MultiExpectations}
+### Using Multiple Expectations {#MultiExpectations}
 
 So far we've only shown examples where you have a single expectation. More
 realistically, you'll specify expectations on multiple mock methods which may be
@@ -508,7 +507,7 @@ useful for methods that have some expectations, but for which other calls are
 ok. See
 [Understanding Uninteresting vs Unexpected Calls](cook_book.md#uninteresting-vs-unexpected).
 
-#### Ordered vs Unordered Calls {#OrderedCalls}
+### Ordered vs Unordered Calls {#OrderedCalls}
 
 By default, an expectation can match a call even though an earlier expectation
 hasn't been satisfied. In other words, the calls don't have to occur in the
@@ -545,7 +544,7 @@ order as written. If a call is made out-of-order, it will be an error.
 them? Can you specify an arbitrary partial order? The answer is ... yes! The
 details can be found [here](cook_book.md#OrderedCalls).)
 
-#### All Expectations Are Sticky (Unless Said Otherwise) {#StickyExpectations}
+### All Expectations Are Sticky (Unless Said Otherwise) {#StickyExpectations}
 
 Now let's do a quick quiz to see how well you can use this mock stuff already.
 How would you test that the turtle is asked to go to the origin *exactly twice*
@@ -633,7 +632,7 @@ it's in a sequence - as soon as another expectation that comes after it in the
 sequence has been used, it automatically retires (and will never be used to
 match any call).
 
-#### Uninteresting Calls
+### Uninteresting Calls
 
 A mock object may have many methods, and not all of them are that interesting.
 For example, in some tests we may not care about how many times `GetX()` and
