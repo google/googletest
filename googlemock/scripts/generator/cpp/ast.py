@@ -1599,12 +1599,11 @@ class AstBuilder(object):
                       bases, templated_types, body, self.namespace_stack)
 
   def handle_namespace(self):
-    token = self._GetNextToken()
     # Support anonymous namespaces.
     name = None
-    if token.token_type == tokenize.NAME:
-      name = token.name
-      token = self._GetNextToken()
+    name_tokens, token = self.GetName()
+    if name_tokens:
+      name = ''.join([t.name for t in name_tokens])
     self.namespace_stack.append(name)
     assert token.token_type == tokenize.SYNTAX, token
     # Create an internal token that denotes when the namespace is complete.
