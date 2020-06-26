@@ -56,20 +56,20 @@ EXPECTED_XML = """<\?xml version="1.0" encoding="UTF-8"\?>
     <testcase name="Test4" file=".*gtest_list_output_unittest_.cc" line="49" />
   </testsuite>
   <testsuite name="TypedTest/0" tests="2">
-    <testcase name="Test7" type_param="int" file=".*gtest_list_output_unittest_.cc" line="60" />
-    <testcase name="Test8" type_param="int" file=".*gtest_list_output_unittest_.cc" line="61" />
+    <testcase name="Test7" type_param="int" file=".*gtest_list_output_unittest_.cc" line="61" />
+    <testcase name="Test8" type_param="int" file=".*gtest_list_output_unittest_.cc" line="62" />
   </testsuite>
   <testsuite name="TypedTest/1" tests="2">
-    <testcase name="Test7" type_param="bool" file=".*gtest_list_output_unittest_.cc" line="60" />
-    <testcase name="Test8" type_param="bool" file=".*gtest_list_output_unittest_.cc" line="61" />
+    <testcase name="Test7" type_param="bool" file=".*gtest_list_output_unittest_.cc" line="61" />
+    <testcase name="Test8" type_param="bool" file=".*gtest_list_output_unittest_.cc" line="62" />
   </testsuite>
   <testsuite name="Single/TypeParameterizedTestSuite/0" tests="2">
-    <testcase name="Test9" type_param="int" file=".*gtest_list_output_unittest_.cc" line="68" />
-    <testcase name="Test10" type_param="int" file=".*gtest_list_output_unittest_.cc" line="69" />
+    <testcase name="Test9" type_param="int" file=".*gtest_list_output_unittest_.cc" line="69" />
+    <testcase name="Test10" type_param="int" file=".*gtest_list_output_unittest_.cc" line="70" />
   </testsuite>
   <testsuite name="Single/TypeParameterizedTestSuite/1" tests="2">
-    <testcase name="Test9" type_param="bool" file=".*gtest_list_output_unittest_.cc" line="68" />
-    <testcase name="Test10" type_param="bool" file=".*gtest_list_output_unittest_.cc" line="69" />
+    <testcase name="Test9" type_param="bool" file=".*gtest_list_output_unittest_.cc" line="69" />
+    <testcase name="Test10" type_param="bool" file=".*gtest_list_output_unittest_.cc" line="70" />
   </testsuite>
   <testsuite name="ValueParam/ValueParamTest" tests="4">
     <testcase name="Test5/0" value_param="33" file=".*gtest_list_output_unittest_.cc" line="52" />
@@ -124,13 +124,13 @@ EXPECTED_JSON = """{
           "name": "Test7",
           "type_param": "int",
           "file": ".*gtest_list_output_unittest_.cc",
-          "line": 60
+          "line": 61
         },
         {
           "name": "Test8",
           "type_param": "int",
           "file": ".*gtest_list_output_unittest_.cc",
-          "line": 61
+          "line": 62
         }
       \]
     },
@@ -142,13 +142,13 @@ EXPECTED_JSON = """{
           "name": "Test7",
           "type_param": "bool",
           "file": ".*gtest_list_output_unittest_.cc",
-          "line": 60
+          "line": 61
         },
         {
           "name": "Test8",
           "type_param": "bool",
           "file": ".*gtest_list_output_unittest_.cc",
-          "line": 61
+          "line": 62
         }
       \]
     },
@@ -160,13 +160,13 @@ EXPECTED_JSON = """{
           "name": "Test9",
           "type_param": "int",
           "file": ".*gtest_list_output_unittest_.cc",
-          "line": 68
+          "line": 69
         },
         {
           "name": "Test10",
           "type_param": "int",
           "file": ".*gtest_list_output_unittest_.cc",
-          "line": 69
+          "line": 70
         }
       \]
     },
@@ -178,13 +178,13 @@ EXPECTED_JSON = """{
           "name": "Test9",
           "type_param": "bool",
           "file": ".*gtest_list_output_unittest_.cc",
-          "line": 68
+          "line": 69
         },
         {
           "name": "Test10",
           "type_param": "bool",
           "file": ".*gtest_list_output_unittest_.cc",
-          "line": 69
+          "line": 70
         }
       \]
     },
@@ -260,6 +260,7 @@ class GTestListTestsOutputUnitTest(gtest_test_utils.TestCase):
 
     self.assertTrue(p.exited)
     self.assertEqual(0, p.exit_code)
+    self.assertTrue(os.path.isfile(file_path))
     with open(file_path) as f:
       result = f.read()
     return result
