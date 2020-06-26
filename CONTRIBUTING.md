@@ -28,7 +28,7 @@ PR is acceptable as an alternative.
 ## Contributing A Patch
 
 1.  Submit an issue describing your proposed change to the
-    [issue tracker](https://github.com/google/googletest).
+    [issue tracker](https://github.com/google/googletest/issues).
 2.  Please don't mix more than one logical change per submittal, because it
     makes the history hard to follow. If you want to make a change that doesn't
     have a corresponding issue in the issue tracker, please create one.
