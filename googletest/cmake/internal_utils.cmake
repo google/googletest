@@ -249,8 +249,10 @@ find_package(PythonInterp)
 function(cxx_test_with_flags name cxx_flags libs)
   cxx_executable_with_flags(${name} "${cxx_flags}" "${libs}" ${ARGN})
   if (WIN32 OR MINGW)
+    file(TO_CMAKE_PATH "$ENV{PATH}" PATH)
+    file(TO_NATIVE_PATH "${CMAKE_BINARY_DIR}/bin;${CMAKE_BINARY_DIR}/bin/$<CONFIG>;${PATH}" PATH)
     add_test(NAME ${name}
-      COMMAND "powershell" "-Command" "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/RunTest.ps1" "$<TARGET_FILE:${name}>")
+      COMMAND ${CMAKE_COMMAND} -E env "PATH=${PATH}" "$<TARGET_FILE:${name}>")
   else()
     add_test(NAME ${name}
       COMMAND "$<TARGET_FILE:${name}>")
@@ -274,33 +276,23 @@ endfunction()
 function(py_test name)
   if (PYTHONINTERP_FOUND)
     if ("${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" VERSION_GREATER 3.1)
+      file(TO_CMAKE_PATH "$ENV{PATH}" PATH)
+      file(TO_NATIVE_PATH "${CMAKE_BINARY_DIR}/bin;${CMAKE_BINARY_DIR}/bin/$<CONFIG>;${PATH}" PATH)
       if (CMAKE_CONFIGURATION_TYPES)
         # Multi-configuration build generators as for Visual Studio save
         # output in a subdirectory of CMAKE_CURRENT_BINARY_DIR (Debug,
         # Release etc.), so we have to provide it here.
-        if (WIN32 OR MINGW)
-          add_test(NAME ${name}
-            COMMAND powershell -Command ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/RunTest.ps1
-              ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/${name}.py
-              --build_dir=${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG> ${ARGN})
-        else()
-          add_test(NAME ${name}
-            COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/${name}.py
-              --build_dir=${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG> ${ARGN})
-        endif()
+        add_test(NAME ${name}
+          COMMAND ${CMAKE_COMMAND} -E env "PATH=${PATH}"
+            ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/${name}.py
+            --build_dir=${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG> ${ARGN})
       else (CMAKE_CONFIGURATION_TYPES)
         # Single-configuration build generators like Makefile generators
         # don't have subdirs below CMAKE_CURRENT_BINARY_DIR.
-        if (WIN32 OR MINGW)
-          add_test(NAME ${name}
-            COMMAND powershell -Command ${CMAKE_CURRENT_BINARY_DIR}/RunTest.ps1
-              ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/${name}.py
-              --build_dir=${CMAKE_CURRENT_BINARY_DIR} ${ARGN})
-        else()
-          add_test(NAME ${name}
-            COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/${name}.py
-              --build_dir=${CMAKE_CURRENT_BINARY_DIR} ${ARGN})
-        endif()
+        add_test(NAME ${name}
+          COMMAND ${CMAKE_COMMAND} -E env "PATH=${PATH}"
+            ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/${name}.py
+            --build_dir=${CMAKE_CURRENT_BINARY_DIR} ${ARGN})
       endif (CMAKE_CONFIGURATION_TYPES)
     else()
       # ${CMAKE_CURRENT_BINARY_DIR} is known at configuration time, so we can
