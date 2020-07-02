@@ -277,7 +277,12 @@ function(py_test name)
   if (PYTHONINTERP_FOUND)
     if ("${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" VERSION_GREATER 3.1)
       file(TO_CMAKE_PATH "$ENV{PATH}" PATH)
-      file(TO_NATIVE_PATH "${CMAKE_BINARY_DIR}/bin;${CMAKE_BINARY_DIR}/bin/$<CONFIG>;${PATH}" PATH)
+      list(INSERT PATH 0 "${CMAKE_BINARY_DIR}/bin" "${CMAKE_BINARY_DIR}/bin/$<CONFIG>")
+      if(CMAKE_HOST_WIN32)
+        file(TO_NATIVE_PATH "${PATH}" PATH)
+      else(CMAKE_HOST_WIN32)
+        string(REPLACE ";" ":" PATH "${PATH}")
+      endif()
       if (CMAKE_CONFIGURATION_TYPES)
         # Multi-configuration build generators as for Visual Studio save
         # output in a subdirectory of CMAKE_CURRENT_BINARY_DIR (Debug,
