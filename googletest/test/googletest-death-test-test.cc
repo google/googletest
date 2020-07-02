@@ -1376,7 +1376,11 @@ void DieWithMessage(const char* message) {
 TEST(MatcherDeathTest, DoesNotBreakBareRegexMatching) {
   // googletest tests this, of course; here we ensure that including googlemock
   // has not broken it.
+#if GTEST_USES_POSIX_RE
   EXPECT_DEATH(DieWithMessage("O, I die, Horatio."), "I d[aeiou]e");
+#else
+  EXPECT_DEATH(DieWithMessage("O, I die, Horatio."), "I di?e");
+#endif
 }
 
 TEST(MatcherDeathTest, MonomorphicMatcherMatches) {
