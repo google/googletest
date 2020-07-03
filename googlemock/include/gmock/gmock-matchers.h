@@ -4812,7 +4812,8 @@ class ExceptionMatcherImpl {
 //
 //   EXPECT_THAT(
 //       []() { throw std::runtime_error("message"); },
-//       Throws
+//       Throws<std::runtime_error>(
+//           Property(&std::runtime_error::what, HasSubstr("message"))));
 
 template <typename Err>
 PolymorphicMatcher<internal::ExceptionMatcherImpl<Err>>

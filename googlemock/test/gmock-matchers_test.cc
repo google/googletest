@@ -8119,6 +8119,26 @@ TEST(MatcherPMacroTest, WorksOnMoveOnlyType) {
 
 #if GTEST_HAS_EXCEPTIONS
 
+// Test that examples from documentation compile
+TEST(ThrowsTest, Examples) {
+  EXPECT_THAT(
+      []() { throw std::runtime_error("message"); },
+      Throws<std::runtime_error>());
+
+  EXPECT_THAT(
+      []() { throw std::runtime_error("message"); },
+      ThrowsMessage<std::runtime_error>(HasSubstr("message")));
+
+  EXPECT_THAT(
+      []() { throw std::runtime_error("message"); },
+      ThrowsMessageHasSubstr<std::runtime_error>("message"));
+
+  EXPECT_THAT(
+      []() { throw std::runtime_error("message"); },
+      Throws<std::runtime_error>(
+          Property(&std::runtime_error::what, HasSubstr("message"))));
+}
+
 TEST(ThrowsTest, Describe) {
   Matcher<void (*)()> matcher = Throws<std::runtime_error>();
   std::stringstream ss;
