@@ -8151,28 +8151,28 @@ TEST(ThrowsTest, CallableExecutedExactlyOnce) {
   EXPECT_THAT(
       [&a]() { a++; throw 10; },
       Throws<int>());
-  EXPECT_EQ(a, 1);
+  EXPECT_EQ(a, 1u);
 
   EXPECT_THAT(
       [&a]() { a++; throw std::runtime_error("message"); },
       Throws<std::runtime_error>());
-  EXPECT_EQ(a, 2);
+  EXPECT_EQ(a, 2u);
 
   EXPECT_THAT(
       [&a]() { a++; throw std::runtime_error("message"); },
       ThrowsMessage<std::runtime_error>(HasSubstr("message")));
-  EXPECT_EQ(a, 3);
+  EXPECT_EQ(a, 3u);
 
   EXPECT_THAT(
       [&a]() { a++; throw std::runtime_error("message"); },
       ThrowsMessageHasSubstr<std::runtime_error>("message"));
-  EXPECT_EQ(a, 4);
+  EXPECT_EQ(a, 4u);
 
   EXPECT_THAT(
       [&a]() { a++; throw std::runtime_error("message"); },
       Throws<std::runtime_error>(
           Property(&std::runtime_error::what, HasSubstr("message"))));
-  EXPECT_EQ(a, 5);
+  EXPECT_EQ(a, 5u);
 }
 
 TEST(ThrowsTest, Describe) {
