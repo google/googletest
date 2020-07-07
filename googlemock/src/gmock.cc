@@ -124,7 +124,7 @@ static bool ParseGoogleMockStringFlag(const char* str, const char* flag,
 }
 
 static bool ParseGoogleMockIntFlag(const char* str, const char* flag,
-                                   int* value) {
+                                   int32_t* value) {
   // Gets the value of the flag as a string.
   const char* const value_str = ParseGoogleMockFlagValue(str, flag, true);
 
