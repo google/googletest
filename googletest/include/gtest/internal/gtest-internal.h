@@ -1296,7 +1296,11 @@ constexpr bool InstantiateTypedTestCase_P_IsDeprecated() { return true; }
 namespace testing {
 namespace internal {
 
-class NeverThrown: public std::exception {
+class NeverThrown {
+ public:
+  const char* what() const noexcept {
+    return "this exception should never be thrown";
+  }
 };
 
 }  // namespace internal
