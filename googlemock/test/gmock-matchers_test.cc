@@ -8139,6 +8139,12 @@ TEST(ThrowsTest, Examples) {
           Property(&std::runtime_error::what, HasSubstr("message"))));
 }
 
+TEST(ThrowsTest, DoesNotGenerateDuplicateCatchClauseWarning) {
+  EXPECT_THAT(
+      []() { throw std::exception(); },
+      Throws<std::exception>());
+}
+
 TEST(ThrowsTest, Describe) {
   Matcher<void (*)()> matcher = Throws<std::runtime_error>();
   std::stringstream ss;

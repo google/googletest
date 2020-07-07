@@ -4738,7 +4738,6 @@ class ExceptionMatcherImpl {
   ExceptionMatcherImpl(Matcher<const Err&> matcher)
       : matcher_(std::move(matcher)) {}
 
- public:
   void DescribeTo(::std::ostream* os) const {
     *os << "throws an exception of type " << GetTypeName<Err>();
     if (matcher_.GetDescriber() != nullptr) {
@@ -4775,7 +4774,7 @@ class ExceptionMatcherImpl {
       *listener << "with description \"" << err.what() << "\"";
       return false;
     } catch (...) {
-      *listener << "throws an exception of some other type";
+      *listener << "throws an exception of an unknown type";
       return false;
     }
     *listener << "does not throw any exception";
