@@ -624,7 +624,7 @@ class MockObjectRegistry {
     if (leaked_count > 0) {
       std::cout << "\nERROR: " << leaked_count << " leaked mock "
                 << (leaked_count == 1 ? "object" : "objects")
-                << " found at program exit. Expectations on a mock object is "
+                << " found at program exit. Expectations on a mock object are "
                    "verified when the object is destructed. Leaking a mock "
                    "means that its expectations aren't verified, which is "
                    "usually a test bug. If you really intend to leak a mock, "
