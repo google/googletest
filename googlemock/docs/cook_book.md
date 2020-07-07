@@ -1180,15 +1180,14 @@ executed. Just tell gMock that it should save a reference to `bar`, instead of a
 copy of it. Here's how:
 
 ```cpp
-using ::testing::ByRef;
 using ::testing::Eq;
 using ::testing::Lt;
 ...
   // Expects that Foo()'s argument == bar.
-  EXPECT_CALL(mock_obj, Foo(Eq(ByRef(bar))));
+  EXPECT_CALL(mock_obj, Foo(Eq(std::ref(bar))));
 
   // Expects that Foo()'s argument < bar.
-  EXPECT_CALL(mock_obj, Foo(Lt(ByRef(bar))));
+  EXPECT_CALL(mock_obj, Foo(Lt(std::ref(bar))));
 ```
 
 Remember: if you do this, don't change `bar` after the `EXPECT_CALL()`, or the
@@ -1851,10 +1850,9 @@ Methods"). However, gMock doesn't let you use `ReturnRef()` in a mock function
 whose return type is not a reference, as doing that usually indicates a user
 error. So, what shall you do?
 
-Though you may be tempted, DO NOT use `ByRef()`:
+Though you may be tempted, DO NOT use `std::ref()`:
 
 ```cpp
-using testing::ByRef;
 using testing::Return;
 
 class MockFoo : public Foo {
@@ -1865,7 +1863,7 @@ class MockFoo : public Foo {
   int x = 0;
   MockFoo foo;
   EXPECT_CALL(foo, GetValue())
-      .WillRepeatedly(Return(ByRef(x)));  // Wrong!
+      .WillRepeatedly(Return(std::ref(x)));  // Wrong!
   x = 42;
   EXPECT_EQ(42, foo.GetValue());
 ```
@@ -1881,9 +1879,9 @@ Expected: 42
 The reason is that `Return(*value*)` converts `value` to the actual return type
 of the mock function at the time when the action is *created*, not when it is
 *executed*. (This behavior was chosen for the action to be safe when `value` is
-a proxy object that references some temporary objects.) As a result, `ByRef(x)`
-is converted to an `int` value (instead of a `const int&`) when the expectation
-is set, and `Return(ByRef(x))` will always return 0.
+a proxy object that references some temporary objects.) As a result,
+`std::ref(x)` is converted to an `int` value (instead of a `const int&`) when
+the expectation is set, and `Return(std::ref(x))` will always return 0.
 
 `ReturnPointee(pointer)` was provided to solve this problem specifically. It
 returns the value pointed to by `pointer` at the time the action is *executed*:
@@ -2376,7 +2374,7 @@ using ::testing::InvokeArgument;
 ```
 
 What if the callable takes an argument by reference? No problem - just wrap it
-inside `ByRef()`:
+inside `std::ref()`:
 
 ```cpp
   ...
@@ -2385,20 +2383,19 @@ inside `ByRef()`:
               (override));
   ...
   using ::testing::_;
-  using ::testing::ByRef;
   using ::testing::InvokeArgument;
   ...
   MockFoo foo;
   Helper helper;
   ...
   EXPECT_CALL(foo, Bar(_))
-      .WillOnce(InvokeArgument<0>(5, ByRef(helper)));
-      // ByRef(helper) guarantees that a reference to helper, not a copy of it,
-      // will be passed to the callback.
+      .WillOnce(InvokeArgument<0>(5, std::ref(helper)));
+      // std::ref(helper) guarantees that a reference to helper, not a copy of
+      // it, will be passed to the callback.
 ```
 
 What if the callable takes an argument by reference and we do **not** wrap the
-argument in `ByRef()`? Then `InvokeArgument()` will *make a copy* of the
+argument in `std::ref()`? Then `InvokeArgument()` will *make a copy* of the
 argument, and pass a *reference to the copy*, instead of a reference to the
 original value, to the callable. This is especially handy when the argument is a
 temporary value:
