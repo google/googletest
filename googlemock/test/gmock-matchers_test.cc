@@ -8205,7 +8205,7 @@ TEST(ThrowsTest, FailWrongTypeNonStd) {
           []() { throw 10; }, &listener));
   EXPECT_THAT(
       listener.str(),
-      testing::HasSubstr("throws an exception of some other type"));
+      testing::HasSubstr("throws an exception of an unknown type"));
 }
 
 TEST(ThrowsTest, FailNoThrow) {
@@ -8257,7 +8257,7 @@ TEST_P(ThrowsPredicateTest, FailWrongTypeNonStd) {
           []() { throw 10; }, &listener));
   EXPECT_THAT(
       listener.str(),
-      testing::HasSubstr("throws an exception of some other type"));
+      testing::HasSubstr("throws an exception of an unknown type"));
 }
 
 TEST_P(ThrowsPredicateTest, FailWrongMessage) {
