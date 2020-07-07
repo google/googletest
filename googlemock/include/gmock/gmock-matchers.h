@@ -4736,6 +4736,13 @@ namespace internal {
 
 template <typename Err>
 class ExceptionMatcherImpl {
+  class NeverThrown {
+   public:
+    const char* what() const noexcept {
+      return "this exception should never be thrown";
+    }
+  };
+
  public:
   ExceptionMatcherImpl(Matcher<const Err&> matcher)
       : matcher_(std::move(matcher)) {}
@@ -4766,7 +4773,14 @@ class ExceptionMatcherImpl {
       } else {
         return true;
       }
-    } catch (const std::exception& err) {
+    } catch (
+        typename std::conditional<
+            std::is_same<
+                typename std::remove_cv<
+                    typename std::remove_reference<Err>::type>::type,
+                std::exception>::value,
+            const NeverThrown&,
+            const std::exception&>::type const& err) {
 #if GTEST_HAS_RTTI
       *listener << "throws an exception of type "
           << GetTypeName(typeid(err)) << " ";
