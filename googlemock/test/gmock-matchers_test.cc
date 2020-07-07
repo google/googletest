@@ -8145,6 +8145,36 @@ TEST(ThrowsTest, DoesNotGenerateDuplicateCatchClauseWarning) {
       Throws<std::exception>());
 }
 
+TEST(ThrowsTest, CallableExecutedExactlyOnce) {
+  size_t a = 0;
+
+  EXPECT_THAT(
+      [&a]() { a++; throw 10; },
+      Throws<int>());
+  EXPECT_EQ(a, 1);
+
+  EXPECT_THAT(
+      [&a]() { a++; throw std::runtime_error("message"); },
+      Throws<std::runtime_error>());
+  EXPECT_EQ(a, 2);
+
+  EXPECT_THAT(
+      [&a]() { a++; throw std::runtime_error("message"); },
+      ThrowsMessage<std::runtime_error>(HasSubstr("message")));
+  EXPECT_EQ(a, 3);
+
+  EXPECT_THAT(
+      [&a]() { a++; throw std::runtime_error("message"); },
+      ThrowsMessageHasSubstr<std::runtime_error>("message"));
+  EXPECT_EQ(a, 4);
+
+  EXPECT_THAT(
+      [&a]() { a++; throw std::runtime_error("message"); },
+      Throws<std::runtime_error>(
+          Property(&std::runtime_error::what, HasSubstr("message"))));
+  EXPECT_EQ(a, 5);
+}
+
 TEST(ThrowsTest, Describe) {
   Matcher<void (*)()> matcher = Throws<std::runtime_error>();
   std::stringstream ss;
