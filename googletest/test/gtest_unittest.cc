@@ -4163,6 +4163,10 @@ TEST(ExpectThrowTest, DoesNotGenerateUnreachableCodeWarning) {
   EXPECT_NONFATAL_FAILURE(EXPECT_ANY_THROW(n++), "");
 }
 
+TEST(ExpectThrowTest, DoesNotGenerateDuplicateCatchClauseWarning) {
+  EXPECT_THROW(throw std::exception(), std::exception);
+}
+
 TEST(AssertionSyntaxTest, ExceptionAssertionsBehavesLikeSingleStatement) {
   if (AlwaysFalse())
     EXPECT_THROW(ThrowNothing(), bool);

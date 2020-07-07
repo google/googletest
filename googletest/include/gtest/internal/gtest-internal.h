@@ -1293,6 +1293,15 @@ constexpr bool InstantiateTypedTestCase_P_IsDeprecated() { return true; }
 
 #if GTEST_HAS_EXCEPTIONS
 
+namespace testing {
+namespace internal {
+
+class NeverThrown: public std::exception {
+};
+
+}  // namespace internal
+}  // namespace testing
+
 #if GTEST_HAS_RTTI
 
 #define GTEST_EXCEPTION_TYPE_(e) \
@@ -1306,7 +1315,16 @@ constexpr bool InstantiateTypedTestCase_P_IsDeprecated() { return true; }
 #endif  // GTEST_HAS_RTTI
 
 #define GTEST_TEST_THROW_CATCH_STD_EXCEPTION_(statement, expected_exception) \
-  catch (std::exception const& e) { \
+  catch ( \
+      typename std::conditional< \
+          std::is_same< \
+              typename std::remove_cv< \
+                  typename std::remove_reference< \
+                      expected_exception>::type>::type, \
+              std::exception>::value, \
+          const ::testing::internal::NeverThrown&, \
+          const std::exception& \
+      >::type e) { \
     gtest_msg.value = \
         "Expected: " #statement " throws an exception of type " \
         #expected_exception ".\n  Actual: it throws "; \
