@@ -24,9 +24,6 @@ Win32-Release/
 x64-Debug/
 x64-Release/
 
-# Eclipse
-.project
-
 # Ignore autoconf / automake files
 Makefile.in
 aclocal.m4
