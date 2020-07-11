@@ -295,7 +295,7 @@ program from the beginning in the child process. Therefore make sure your
 program can run side-by-side with itself and is deterministic.
 
 In the end, this boils down to good concurrent programming. You have to make
-sure that there is no race conditions or dead locks in your program. No silver
+sure that there are no race conditions or deadlocks in your program. No silver
 bullet - sorry!
 
 ## Should I use the constructor/destructor of the test fixture or SetUp()/TearDown()? {#CtorVsSetUp}
@@ -401,7 +401,7 @@ you can use it in a predicate assertion like this:
 ASSERT_PRED1(IsNegative<int>, -5);
 ```
 
-Things are more interesting if your template has more than one parameters. The
+Things are more interesting if your template has more than one parameter. The
 following won't compile:
 
 ```c++
@@ -555,7 +555,7 @@ TEST(MyDeathTest, ComplexExpression) {
                "(Func1|Method) failed");
 }
 
-// Death assertions can be used any where in a function.  In
+// Death assertions can be used anywhere in a function.  In
 // particular, they can be inside a loop.
 TEST(MyDeathTest, InsideLoop) {
   // Verifies that Foo(0), Foo(1), ..., and Foo(4) all die.
@@ -597,7 +597,7 @@ However, there are cases where you have to define your own:
 ## Why does ASSERT_DEATH complain about previous threads that were already joined?
 
 With the Linux pthread library, there is no turning back once you cross the line
-from single thread to multiple threads. The first time you create a thread, a
+from a single thread to multiple threads. The first time you create a thread, a
 manager thread is created in addition, so you get 3, not 2, threads. Later when
 the thread you create joins the main thread, the thread count decrements by 1,
 but the manager thread will never be killed, so you still have 2 threads, which
@@ -612,7 +612,7 @@ runs on, you shouldn't depend on this.
 googletest does not interleave tests from different test suites. That is, it
 runs all tests in one test suite first, and then runs all tests in the next test
 suite, and so on. googletest does this because it needs to set up a test suite
-before the first test in it is run, and tear it down afterwords. Splitting up
+before the first test in it is run, and tear it down afterwards. Splitting up
 the test case would require multiple set-up and tear-down processes, which is
 inefficient and makes the semantics unclean.
 
