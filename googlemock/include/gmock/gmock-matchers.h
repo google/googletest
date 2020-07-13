@@ -4741,6 +4741,35 @@ class ExceptionMatcherImpl {
     }
   };
 
+  // If the matchee raises an exception of a wrong type, we'd like to
+  // catch it and print its message and type. To do that, we add an additional
+  // catch clause:
+  //
+  //     try { ... }
+  //     catch (const Err&) { /* an expected exception */ }
+  //     catch (const std::exception&) { /* exception of a wrong type */ }
+  //
+  // However, if the `Err` itself is `std::exception`, we'd end up with two
+  // identical `catch` clauses:
+  //
+  //     try { ... }
+  //     catch (const std::exception&) { /* an expected exception */ }
+  //     catch (const std::exception&) { /* exception of a wrong type */ }
+  //
+  // This can cause a warning or an error in some compilers. To resolve
+  // the issue, we use a fake error type whenever `Err` is `std::exception`:
+  //
+  //     try { ... }
+  //     catch (const std::exception&) { /* an expected exception */ }
+  //     catch (const NeverThrown&) { /* exception of a wrong type */ }
+  using DefaultExceptionType = typename std::conditional<
+      std::is_same<
+          typename std::remove_cv<
+              typename std::remove_reference<Err>::type>::type,
+          std::exception>::value,
+      const NeverThrown&,
+      const std::exception&>::type;
+
  public:
   ExceptionMatcherImpl(Matcher<const Err&> matcher)
       : matcher_(std::move(matcher)) {}
@@ -4771,14 +4800,7 @@ class ExceptionMatcherImpl {
       } else {
         return true;
       }
-    } catch (
-        typename std::conditional<
-            std::is_same<
-                typename std::remove_cv<
-                    typename std::remove_reference<Err>::type>::type,
-                std::exception>::value,
-            const NeverThrown&,
-            const std::exception&>::type const& err) {
+    } catch (DefaultExceptionType err) {
 #if GTEST_HAS_RTTI
       *listener << "throws an exception of type "
           << GetTypeName(typeid(err)) << " ";
