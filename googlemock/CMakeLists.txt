@@ -168,7 +168,6 @@ $env:Path = \"$project_bin;$env:Path\"
   cxx_test(gmock_ex_test gmock_main)
   cxx_test(gmock-function-mocker_test gmock_main)
   cxx_test(gmock-generated-actions_test gmock_main)
-  cxx_test(gmock-generated-matchers_test gmock_main)
   cxx_test(gmock-internal-utils_test gmock_main)
   cxx_test(gmock-matchers_test gmock_main)
   cxx_test(gmock-more-actions_test gmock_main)
