@@ -3345,6 +3345,16 @@ TEST_F(SingleEvaluationTest, OtherCases) {
 
 #if GTEST_HAS_EXCEPTIONS
 
+#if GTEST_HAS_RTTI
+
+#define ERROR_DESC "std::runtime_error"
+
+#else  // GTEST_HAS_RTTI
+
+#define ERROR_DESC "an std::exception-derived error"
+
+#endif  // GTEST_HAS_RTTI
+
 void ThrowAnInteger() {
   throw 1;
 }
@@ -3368,31 +3378,38 @@ TEST_F(SingleEvaluationTest, ExceptionTests) {
   }, bool), "throws a different type");
   EXPECT_EQ(2, a_);
 
+  // failed EXPECT_THROW, throws runtime error
+  EXPECT_NONFATAL_FAILURE(EXPECT_THROW({  // NOLINT
+    a_++;
+    ThrowRuntimeError("A description");
+  }, bool), "throws " ERROR_DESC " with description \"A description\"");
+  EXPECT_EQ(3, a_);
+
   // failed EXPECT_THROW, throws nothing
   EXPECT_NONFATAL_FAILURE(EXPECT_THROW(a_++, bool), "throws nothing");
-  EXPECT_EQ(3, a_);
+  EXPECT_EQ(4, a_);
 
   // successful EXPECT_NO_THROW
   EXPECT_NO_THROW(a_++);
-  EXPECT_EQ(4, a_);
+  EXPECT_EQ(5, a_);
 
   // failed EXPECT_NO_THROW
   EXPECT_NONFATAL_FAILURE(EXPECT_NO_THROW({  // NOLINT
     a_++;
     ThrowAnInteger();
   }), "it throws");
-  EXPECT_EQ(5, a_);
+  EXPECT_EQ(6, a_);
 
   // successful EXPECT_ANY_THROW
   EXPECT_ANY_THROW({  // NOLINT
     a_++;
     ThrowAnInteger();
   });
-  EXPECT_EQ(6, a_);
+  EXPECT_EQ(7, a_);
 
   // failed EXPECT_ANY_THROW
   EXPECT_NONFATAL_FAILURE(EXPECT_ANY_THROW(a_++), "it doesn't");
-  EXPECT_EQ(7, a_);
+  EXPECT_EQ(8, a_);
 }
 
 #endif  // GTEST_HAS_EXCEPTIONS
@@ -3812,6 +3829,12 @@ TEST(AssertionTest, ASSERT_THROW) {
       ASSERT_THROW(ThrowAnInteger(), bool),
       "Expected: ThrowAnInteger() throws an exception of type bool.\n"
       "  Actual: it throws a different type.");
+  EXPECT_FATAL_FAILURE(
+      ASSERT_THROW(ThrowRuntimeError("A description"), std::logic_error),
+      "Expected: ThrowRuntimeError(\"A description\") "
+      "throws an exception of type std::logic_error.\n  "
+      "Actual: it throws " ERROR_DESC " "
+      "with description \"A description\".");
 # endif
 
   EXPECT_FATAL_FAILURE(
@@ -3829,8 +3852,8 @@ TEST(AssertionTest, ASSERT_NO_THROW) {
   EXPECT_FATAL_FAILURE(ASSERT_NO_THROW(ThrowRuntimeError("A description")),
                        "Expected: ThrowRuntimeError(\"A description\") "
                        "doesn't throw an exception.\n  "
-                       "Actual: it throws std::exception-derived exception "
-                       "with description: \"A description\".");
+                       "Actual: it throws " ERROR_DESC " "
+                       "with description \"A description\".");
 }
 
 // Tests ASSERT_ANY_THROW.
@@ -4138,6 +4161,10 @@ TEST(ExpectThrowTest, DoesNotGenerateUnreachableCodeWarning) {
   EXPECT_NONFATAL_FAILURE(EXPECT_NO_THROW(throw 1), "");
   EXPECT_ANY_THROW(throw 1);
   EXPECT_NONFATAL_FAILURE(EXPECT_ANY_THROW(n++), "");
+}
+
+TEST(ExpectThrowTest, DoesNotGenerateDuplicateCatchClauseWarning) {
+  EXPECT_THROW(throw std::exception(), std::exception);
 }
 
 TEST(AssertionSyntaxTest, ExceptionAssertionsBehavesLikeSingleStatement) {
@@ -4550,6 +4577,12 @@ TEST(ExpectTest, EXPECT_THROW) {
   EXPECT_NONFATAL_FAILURE(EXPECT_THROW(ThrowAnInteger(), bool),
                           "Expected: ThrowAnInteger() throws an exception of "
                           "type bool.\n  Actual: it throws a different type.");
+  EXPECT_NONFATAL_FAILURE(EXPECT_THROW(ThrowRuntimeError("A description"),
+                                       std::logic_error),
+                          "Expected: ThrowRuntimeError(\"A description\") "
+                          "throws an exception of type std::logic_error.\n  "
+                          "Actual: it throws " ERROR_DESC " "
+                          "with description \"A description\".");
   EXPECT_NONFATAL_FAILURE(
       EXPECT_THROW(ThrowNothing(), bool),
       "Expected: ThrowNothing() throws an exception of type bool.\n"
@@ -4565,8 +4598,8 @@ TEST(ExpectTest, EXPECT_NO_THROW) {
   EXPECT_NONFATAL_FAILURE(EXPECT_NO_THROW(ThrowRuntimeError("A description")),
                           "Expected: ThrowRuntimeError(\"A description\") "
                           "doesn't throw an exception.\n  "
-                          "Actual: it throws std::exception-derived exception "
-                          "with description: \"A description\".");
+                          "Actual: it throws " ERROR_DESC " "
+                          "with description \"A description\".");
 }
 
 // Tests EXPECT_ANY_THROW.
