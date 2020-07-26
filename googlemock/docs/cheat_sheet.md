@@ -423,7 +423,7 @@ messages, you can use:
 
 <!-- GOOGLETEST_CM0026 DO NOT DELETE -->
 
-<!-- GOOGLETEST_CM0027 DO NOT DELETE -->
+<!--#include file="includes/g3_util_status_matcher.md"-->
 
 ### Multi-argument Matchers {#MultiArgMatchers}
 

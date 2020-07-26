@@ -1388,22 +1388,14 @@ class ActionImpl<Derived<Ts...>> {
   std::tuple<Ts...> params_;
 };
 
-namespace invoke_argument {
-
-// Appears in InvokeArgumentAdl's argument list to help avoid
-// accidental calls to user functions of the same name.
-struct AdlTag {};
-
-// InvokeArgumentAdl - a helper for InvokeArgument.
+// internal::InvokeArgument - a helper for InvokeArgument action.
 // The basic overloads are provided here for generic functors.
 // Overloads for other custom-callables are provided in the
 // internal/custom/gmock-generated-actions.h header.
 template <typename F, typename... Args>
-auto InvokeArgumentAdl(AdlTag, F f, Args... args) -> decltype(f(args...)) {
+auto InvokeArgument(F f, Args... args) -> decltype(f(args...)) {
   return f(args...);
 }
-
-}  // namespace invoke_argument
 
 #define GMOCK_INTERNAL_ARG_UNUSED(i, data, el) \
   , const arg##i##_type& arg##i GTEST_ATTRIBUTE_UNUSED_
