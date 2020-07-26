@@ -49,6 +49,9 @@ $$}} This meta comment fixes auto-indentation in editors.
 #include "gmock/gmock-actions.h"
 #include "gmock/internal/gmock-port.h"
 
+// Include any custom callback actions added by the local installation.
+#include "gmock/internal/custom/gmock-generated-actions.h"
+
 $range i 0..n
 $range k 0..n-1
 
@@ -333,9 +336,7 @@ $range j 0..i-1
 ACTION_TEMPLATE(InvokeArgument,
                 HAS_1_TEMPLATE_PARAMS(int, k),
                 AND_$i[[]]_VALUE_PARAMS($for j, [[p$j]])) {
-  using internal::invoke_argument::InvokeArgumentAdl;
-  return InvokeArgumentAdl(internal::invoke_argument::AdlTag(),
-                           ::std::get<k>(args)$for j[[, p$j]]);
+  return internal::InvokeArgument(::std::get<k>(args)$for j[[, p$j]]);
 }
 
 ]]
@@ -345,10 +346,5 @@ ACTION_TEMPLATE(InvokeArgument,
 #endif
 
 }  // namespace testing
-
-// Include any custom callback actions added by the local installation.
-// We must include this header at the end to make sure it can use the
-// declarations from this file.
-#include "gmock/internal/custom/gmock-generated-actions.h"
 
 #endif  // GMOCK_INCLUDE_GMOCK_GMOCK_GENERATED_ACTIONS_H_
