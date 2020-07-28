@@ -1375,15 +1375,11 @@ INSTANTIATE_TEST_SUITE_P(InstantiationName,
 NOTE: The code above must be placed at global or namespace scope, not at
 function scope.
 
-NOTE: Don't forget this step! If you do your test will silently pass, but none
-of its suites will ever run!
-
-There is work in progress to make omitting `INSTANTIATE_TEST_SUITE_P` show up
-under the `GoogleTestVerification` test suite and to then make that an error.
-If you have a test suite where that omission is not an error, for example it is
-in a library that may be linked in for other reason or where the list of test
-cases is dynamic and may be empty, then this check can be suppressed by tagging
-the test suite:
+Per default, every `TEST_P` without a corresponding `INSTANTIATE_TEST_SUITE_P`
+causes a failing test in test suite `GoogleTestVerification`. If you have a test
+suite where that omission is not an error, for example it is in a library that
+may be linked in for other reason or where the list of test cases is dynamic and
+may be empty, then this check can be suppressed by tagging the test suite:
 
 ```c++
 GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(FooTest);
