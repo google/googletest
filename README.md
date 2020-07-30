@@ -76,8 +76,6 @@ following notable projects:
 *   [Protocol Buffers](https://github.com/google/protobuf), Google's data
     interchange format.
 *   The [OpenCV](http://opencv.org/) computer vision library.
-*   [tiny-dnn](https://github.com/tiny-dnn/tiny-dnn): header only,
-    dependency-free deep learning framework in C++11.
 
 ## Related Open Source Projects
 
