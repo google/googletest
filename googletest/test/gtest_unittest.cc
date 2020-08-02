@@ -221,7 +221,7 @@ using testing::Message;
 using testing::ScopedFakeTestPartResultReporter;
 using testing::StaticAssertTypeEq;
 using testing::Test;
-using testing::TestCase;
+using testing::TestSuite;
 using testing::TestEventListeners;
 using testing::TestInfo;
 using testing::TestPartResult;
@@ -5331,7 +5331,7 @@ class TestInfoTest : public Test {
 TEST_F(TestInfoTest, Names) {
   const TestInfo* const test_info = GetTestInfo("Names");
 
-  ASSERT_STREQ("TestInfoTest", test_info->test_case_name());
+  ASSERT_STREQ("TestInfoTest", test_info->test_suite_name());
   ASSERT_STREQ("Names", test_info->name());
 }
 
@@ -5401,7 +5401,7 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, CodeLocationForTYPEDTESTP, int);
 
 // Tests setting up and tearing down a test case.
 // Legacy API is deprecated but still available
-#ifndef REMOVE_LEGACY_TEST_CASEAPI
+#ifndef GTEST_REMOVE_LEGACY_TEST_CASEAPI_
 class SetUpTestCaseTest : public Test {
  protected:
   // This will be called once before the first test in this test case
@@ -6387,8 +6387,8 @@ TEST_F(CurrentTestInfoTest, WorksForFirstTestInATestSuite) {
     UnitTest::GetInstance()->current_test_info();
   ASSERT_TRUE(nullptr != test_info)
       << "There is a test running so we should have a valid TestInfo.";
-  EXPECT_STREQ("CurrentTestInfoTest", test_info->test_case_name())
-      << "Expected the name of the currently running test case.";
+  EXPECT_STREQ("CurrentTestInfoTest", test_info->test_suite_name())
+      << "Expected the name of the currently running test suite.";
   EXPECT_STREQ("WorksForFirstTestInATestSuite", test_info->name())
       << "Expected the name of the currently running test.";
 }
@@ -6402,8 +6402,8 @@ TEST_F(CurrentTestInfoTest, WorksForSecondTestInATestSuite) {
     UnitTest::GetInstance()->current_test_info();
   ASSERT_TRUE(nullptr != test_info)
       << "There is a test running so we should have a valid TestInfo.";
-  EXPECT_STREQ("CurrentTestInfoTest", test_info->test_case_name())
-      << "Expected the name of the currently running test case.";
+  EXPECT_STREQ("CurrentTestInfoTest", test_info->test_suite_name())
+      << "Expected the name of the currently running test suite.";
   EXPECT_STREQ("WorksForSecondTestInATestSuite", test_info->name())
       << "Expected the name of the currently running test.";
 }

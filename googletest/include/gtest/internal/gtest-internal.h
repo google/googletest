@@ -526,6 +526,7 @@ struct SuiteApiResolver : T {
 
   static SetUpTearDownSuiteFuncType GetSetUpCaseOrSuite(const char* filename,
                                                         int line_num) {
+#ifndef GTEST_REMOVE_LEGACY_TEST_CASEAPI_
     SetUpTearDownSuiteFuncType test_case_fp =
         GetNotDefaultOrNull(&T::SetUpTestCase, &Test::SetUpTestCase);
     SetUpTearDownSuiteFuncType test_suite_fp =
@@ -537,10 +538,16 @@ struct SuiteApiResolver : T {
         << filename << ":" << line_num;
 
     return test_case_fp != nullptr ? test_case_fp : test_suite_fp;
+#else
+    (void)(filename);
+    (void)(line_num);
+    return &T::SetUpTestSuite;
+#endif
   }
 
   static SetUpTearDownSuiteFuncType GetTearDownCaseOrSuite(const char* filename,
                                                            int line_num) {
+#ifndef GTEST_REMOVE_LEGACY_TEST_CASEAPI_
     SetUpTearDownSuiteFuncType test_case_fp =
         GetNotDefaultOrNull(&T::TearDownTestCase, &Test::TearDownTestCase);
     SetUpTearDownSuiteFuncType test_suite_fp =
@@ -552,6 +559,11 @@ struct SuiteApiResolver : T {
         << filename << ":" << line_num;
 
     return test_case_fp != nullptr ? test_case_fp : test_suite_fp;
+#else
+    (void)(filename);
+    (void)(line_num);
+    return &T::TearDownTestSuite;
+#endif
   }
 };
 
