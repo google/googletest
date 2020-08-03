@@ -422,6 +422,15 @@ TEST(DoAllTest, TenActions) {
   EXPECT_EQ('g', g);
 }
 
+TEST(DoAllTest, MoveOnlyArgs) {
+  bool ran_first = false;
+  Action<int(std::unique_ptr<int>)> a =
+      DoAll(InvokeWithoutArgs([&] { ran_first = true; }),
+            [](std::unique_ptr<int> p) { return *p; });
+  EXPECT_EQ(7, a.Perform(std::make_tuple(std::unique_ptr<int>(new int(7)))));
+  EXPECT_TRUE(ran_first);
+}
+
 // The ACTION*() macros trigger warning C4100 (unreferenced formal
 // parameter) in MSVC with -W4.  Unfortunately they cannot be fixed in
 // the macro definition, as the warnings are generated when the macro
