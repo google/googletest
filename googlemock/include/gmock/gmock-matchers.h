@@ -4774,15 +4774,15 @@ class ExceptionMatcherImpl {
   ExceptionMatcherImpl(Matcher<const Err&> matcher)
       : matcher_(std::move(matcher)) {}
 
-  void DescribeTo(::std::ostream* os) const {
-    *os << "throws an exception of type " << GetTypeName<Err>();
+  void DescribeTo(std::ostream* os) const {
+    *os << "throws an exception which is a " << GetTypeName<Err>();
     if (matcher_.GetDescriber() != nullptr) {
       *os << " which ";
       matcher_.DescribeTo(os);
     }
   }
 
-  void DescribeNegationTo(::std::ostream* os) const {
+  void DescribeNegationTo(std::ostream* os) const {
     *os << "not (";
     DescribeTo(os);
     *os << ")";
@@ -4793,7 +4793,7 @@ class ExceptionMatcherImpl {
     try {
       (void)(std::forward<T>(x)());
     } catch (const Err& err) {
-      *listener << "throws an exception of type " << GetTypeName<Err>();
+      *listener << "throws an exception which is a " << GetTypeName<Err>();
       if (matcher_.GetDescriber() != nullptr) {
         *listener << " ";
         return matcher_.MatchAndExplain(err, listener);
@@ -4826,7 +4826,6 @@ class ExceptionMatcherImpl {
 // Throws()
 // Throws(exceptionMatcher)
 // ThrowsMessage(messageMatcher)
-// ThrowsMessageHasSubstr(message)
 //
 // This matcher accepts a callable and verifies that when invoked, it throws
 // an exception with the given type and properties.
@@ -4840,10 +4839,6 @@ class ExceptionMatcherImpl {
 //   EXPECT_THAT(
 //       []() { throw std::runtime_error("message"); },
 //       ThrowsMessage<std::runtime_error>(HasSubstr("message")));
-//
-//   EXPECT_THAT(
-//       []() { throw std::runtime_error("message"); },
-//       ThrowsMessageHasSubstr<std::runtime_error>("message"));
 //
 //   EXPECT_THAT(
 //       []() { throw std::runtime_error("message"); },
@@ -4881,16 +4876,6 @@ ThrowsMessage(const MessageMatcher& messageMatcher) {
       internal::ExceptionMatcherImpl<Err>{
           Property("what", &std::exception::what,
                    MatcherCast<std::string>(messageMatcher))});
-}
-template <typename Err, typename Message = std::string>
-PolymorphicMatcher<internal::ExceptionMatcherImpl<Err>>
-ThrowsMessageHasSubstr(const internal::StringLike<Message>& message) {
-  static_assert(
-      std::is_base_of<std::exception, Err>::value,
-      "expected an std::exception-derived class");
-  return MakePolymorphicMatcher(
-      internal::ExceptionMatcherImpl<Err>{
-          Property("what", &std::exception::what, HasSubstr(message))});
 }
 
 #endif  // GTEST_HAS_EXCEPTIONS

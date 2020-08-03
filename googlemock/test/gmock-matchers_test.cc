@@ -8131,10 +8131,6 @@ TEST(ThrowsTest, Examples) {
 
   EXPECT_THAT(
       []() { throw std::runtime_error("message"); },
-      ThrowsMessageHasSubstr<std::runtime_error>("message"));
-
-  EXPECT_THAT(
-      []() { throw std::runtime_error("message"); },
       Throws<std::runtime_error>(
           Property(&std::runtime_error::what, HasSubstr("message"))));
 }
@@ -8165,14 +8161,9 @@ TEST(ThrowsTest, CallableExecutedExactlyOnce) {
 
   EXPECT_THAT(
       [&a]() { a++; throw std::runtime_error("message"); },
-      ThrowsMessageHasSubstr<std::runtime_error>("message"));
-  EXPECT_EQ(a, 4u);
-
-  EXPECT_THAT(
-      [&a]() { a++; throw std::runtime_error("message"); },
       Throws<std::runtime_error>(
           Property(&std::runtime_error::what, HasSubstr("message"))));
-  EXPECT_EQ(a, 5u);
+  EXPECT_EQ(a, 4u);
 }
 
 TEST(ThrowsTest, Describe) {
@@ -8180,7 +8171,7 @@ TEST(ThrowsTest, Describe) {
   std::stringstream ss;
   matcher.DescribeTo(&ss);
   auto explanation = ss.str();
-  EXPECT_THAT(explanation, testing::HasSubstr("std::runtime_error"));
+  EXPECT_THAT(explanation, HasSubstr("std::runtime_error"));
 }
 
 TEST(ThrowsTest, Success) {
@@ -8189,7 +8180,7 @@ TEST(ThrowsTest, Success) {
   EXPECT_TRUE(
       matcher.MatchAndExplain(
           []() { throw std::runtime_error("error message"); }, &listener));
-  EXPECT_THAT(listener.str(), testing::HasSubstr("std::runtime_error"));
+  EXPECT_THAT(listener.str(), HasSubstr("std::runtime_error"));
 }
 
 TEST(ThrowsTest, FailWrongType) {
@@ -8198,8 +8189,8 @@ TEST(ThrowsTest, FailWrongType) {
   EXPECT_FALSE(
       matcher.MatchAndExplain(
           []() { throw std::logic_error("error message"); }, &listener));
-  EXPECT_THAT(listener.str(), testing::HasSubstr("std::logic_error"));
-  EXPECT_THAT(listener.str(), testing::HasSubstr("\"error message\""));
+  EXPECT_THAT(listener.str(), HasSubstr("std::logic_error"));
+  EXPECT_THAT(listener.str(), HasSubstr("\"error message\""));
 }
 
 TEST(ThrowsTest, FailWrongTypeNonStd) {
@@ -8210,7 +8201,7 @@ TEST(ThrowsTest, FailWrongTypeNonStd) {
           []() { throw 10; }, &listener));
   EXPECT_THAT(
       listener.str(),
-      testing::HasSubstr("throws an exception of an unknown type"));
+      HasSubstr("throws an exception of an unknown type"));
 }
 
 TEST(ThrowsTest, FailNoThrow) {
@@ -8221,7 +8212,7 @@ TEST(ThrowsTest, FailNoThrow) {
           []() { (void)0; }, &listener));
   EXPECT_THAT(
       listener.str(),
-      testing::HasSubstr("does not throw any exception"));
+      HasSubstr("does not throw any exception"));
 }
 
 class ThrowsPredicateTest: public TestWithParam<Matcher<void (*)()>> {};
@@ -8231,8 +8222,8 @@ TEST_P(ThrowsPredicateTest, Describe) {
   std::stringstream ss;
   matcher.DescribeTo(&ss);
   auto explanation = ss.str();
-  EXPECT_THAT(explanation, testing::HasSubstr("std::runtime_error"));
-  EXPECT_THAT(explanation, testing::HasSubstr("error message"));
+  EXPECT_THAT(explanation, HasSubstr("std::runtime_error"));
+  EXPECT_THAT(explanation, HasSubstr("error message"));
 }
 
 TEST_P(ThrowsPredicateTest, Success) {
@@ -8241,7 +8232,7 @@ TEST_P(ThrowsPredicateTest, Success) {
   EXPECT_TRUE(
       matcher.MatchAndExplain(
           []() { throw std::runtime_error("error message"); }, &listener));
-  EXPECT_THAT(listener.str(), testing::HasSubstr("std::runtime_error"));
+  EXPECT_THAT(listener.str(), HasSubstr("std::runtime_error"));
 }
 
 TEST_P(ThrowsPredicateTest, FailWrongType) {
@@ -8250,8 +8241,8 @@ TEST_P(ThrowsPredicateTest, FailWrongType) {
   EXPECT_FALSE(
       matcher.MatchAndExplain(
           []() { throw std::logic_error("error message"); }, &listener));
-  EXPECT_THAT(listener.str(), testing::HasSubstr("std::logic_error"));
-  EXPECT_THAT(listener.str(), testing::HasSubstr("\"error message\""));
+  EXPECT_THAT(listener.str(), HasSubstr("std::logic_error"));
+  EXPECT_THAT(listener.str(), HasSubstr("\"error message\""));
 }
 
 TEST_P(ThrowsPredicateTest, FailWrongTypeNonStd) {
@@ -8262,7 +8253,7 @@ TEST_P(ThrowsPredicateTest, FailWrongTypeNonStd) {
           []() { throw 10; }, &listener));
   EXPECT_THAT(
       listener.str(),
-      testing::HasSubstr("throws an exception of an unknown type"));
+      HasSubstr("throws an exception of an unknown type"));
 }
 
 TEST_P(ThrowsPredicateTest, FailWrongMessage) {
@@ -8271,8 +8262,8 @@ TEST_P(ThrowsPredicateTest, FailWrongMessage) {
   EXPECT_FALSE(
       matcher.MatchAndExplain(
           []() { throw std::runtime_error("wrong message"); }, &listener));
-  EXPECT_THAT(listener.str(), testing::HasSubstr("std::runtime_error"));
-  EXPECT_THAT(listener.str(), testing::HasSubstr("wrong message"));
+  EXPECT_THAT(listener.str(), HasSubstr("std::runtime_error"));
+  EXPECT_THAT(listener.str(), HasSubstr("wrong message"));
 }
 
 TEST_P(ThrowsPredicateTest, FailNoThrow) {
@@ -8283,18 +8274,16 @@ TEST_P(ThrowsPredicateTest, FailNoThrow) {
           []() { (void)0; }, &listener));
   EXPECT_THAT(
       listener.str(),
-      testing::HasSubstr("does not throw any exception"));
+      HasSubstr("does not throw any exception"));
 }
 
 INSTANTIATE_TEST_SUITE_P(AllMessagePredicates, ThrowsPredicateTest,
-    ::testing::Values(
+    Values(
         static_cast<Matcher<void (*)()>>(
             Throws<std::runtime_error>(
                 Property(&std::exception::what, HasSubstr("error message")))),
         static_cast<Matcher<void (*)()>>(
-            ThrowsMessage<std::runtime_error>(HasSubstr("error message"))),
-        static_cast<Matcher<void (*)()>>(
-            ThrowsMessageHasSubstr<std::runtime_error>("error message"))));
+            ThrowsMessage<std::runtime_error>(HasSubstr("error message")))));
 
 // Tests that Throws<E1>(Matcher<E2>{}) compiles even when E2 != const E1&.
 TEST(ThrowsPredicateCompilesTest, ExceptionMatcherAcceptsBroadType) {
@@ -8329,26 +8318,6 @@ TEST(ThrowsPredicateCompilesTest, MessageMatcherAcceptsNonMatcher) {
   EXPECT_FALSE(
       matcher.Matches(
           []() { throw std::runtime_error("wrong error message"); }));
-}
-
-// Tests that ThrowsMessageHasSubstr accepts types that're
-// explicitly-convertible to std::string.
-TEST(ThrowsPredicateCompilesTest, StringLikeMessage) {
-  struct SomeCustomString {
-    std::string inner;
-
-    // Note: explicit conversion.
-    explicit operator std::string() const { return inner; }
-  };
-
-  Matcher<void (*)()> matcher = ThrowsMessageHasSubstr<std::runtime_error>(
-      SomeCustomString{"error message"});
-  EXPECT_TRUE(
-      matcher.Matches(
-          []() { throw std::runtime_error("error message"); }));
-  EXPECT_FALSE(
-      matcher.Matches(
-          []() { throw std::runtime_error("wrong message"); }));
 }
 
 #endif  // GTEST_HAS_EXCEPTIONS
