@@ -1032,13 +1032,8 @@ struct WithArgsAction {
 template <typename... Actions>
 struct DoAllAction {
  private:
-  template <typename T>
-  using NonFinalType =
-      typename std::conditional<std::is_scalar<T>::value, T, const T&>::type;
-
   template <typename... Args, size_t... I>
-  std::vector<Action<void(NonFinalType<Args>...)>> Convert(
-      IndexSequence<I...>) const {
+  std::vector<Action<void(Args...)>> Convert(IndexSequence<I...>) const {
     return {std::get<I>(actions)...};
   }
 
@@ -1048,13 +1043,14 @@ struct DoAllAction {
   template <typename R, typename... Args>
   operator Action<R(Args...)>() const {  // NOLINT
     struct Op {
-      std::vector<Action<void(NonFinalType<Args>...)>> converted;
+      std::vector<Action<void(Args...)>> converted;
       Action<R(Args...)> last;
       R operator()(Args... args) const {
+        auto tuple_args = std::forward_as_tuple(std::forward<Args>(args)...);
         for (auto& a : converted) {
-          a.Perform(std::forward_as_tuple(std::forward<Args>(args)...));
+          a.Perform(tuple_args);
         }
-        return last.Perform(std::forward_as_tuple(std::forward<Args>(args)...));
+        return last.Perform(tuple_args);
       }
     };
     return Op{Convert<Args...>(MakeIndexSequence<sizeof...(Actions) - 1>()),
@@ -1097,8 +1093,7 @@ struct DoAllAction {
 typedef internal::IgnoredValue Unused;
 
 // Creates an action that does actions a1, a2, ..., sequentially in
-// each invocation. All but the last action will have a readonly view of the
-// arguments.
+// each invocation.
 template <typename... Action>
 internal::DoAllAction<typename std::decay<Action>::type...> DoAll(
     Action&&... action) {
