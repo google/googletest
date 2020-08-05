@@ -38,7 +38,9 @@
 #include <memory>
 #include <sstream>
 #include <string>
+
 #include "gmock/gmock.h"
+#include "gtest/gtest-spi.h"
 #include "gtest/gtest.h"
 
 namespace testing {
@@ -602,6 +604,33 @@ TEST(ThrowActionTest, ThrowsGivenExceptionInNonVoidFunction) {
 TEST(ThrowActionTest, ThrowsGivenExceptionInNullaryFunction) {
   const Action<double()> a = Throw(MyException());
   EXPECT_THROW(a.Perform(std::make_tuple()), MyException);
+}
+
+class Object {
+ public:
+  virtual ~Object() {}
+  virtual void Func() {}
+};
+
+class MockObject : public Object {
+ public:
+  ~MockObject() override {}
+  MOCK_METHOD(void, Func, (), (override));
+};
+
+TEST(ThrowActionTest, Times0) {
+  EXPECT_NONFATAL_FAILURE(
+      [] {
+        try {
+          MockObject m;
+          ON_CALL(m, Func()).WillByDefault([] { throw "something"; });
+          EXPECT_CALL(m, Func()).Times(0);
+          m.Func();
+        } catch (...) {
+          // Exception is caught but Times(0) still triggers a failure.
+        }
+      }(),
+      "");
 }
 
 #endif  // GTEST_HAS_EXCEPTIONS
