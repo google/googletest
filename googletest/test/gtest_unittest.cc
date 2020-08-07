@@ -218,17 +218,18 @@ using testing::GTEST_FLAG(stream_result_to);
 using testing::GTEST_FLAG(throw_on_failure);
 using testing::IsNotSubstring;
 using testing::IsSubstring;
+using testing::kMaxStackTraceDepth;
 using testing::Message;
 using testing::ScopedFakeTestPartResultReporter;
 using testing::StaticAssertTypeEq;
 using testing::Test;
-using testing::TestCase;
 using testing::TestEventListeners;
 using testing::TestInfo;
 using testing::TestPartResult;
 using testing::TestPartResultArray;
 using testing::TestProperty;
 using testing::TestResult;
+using testing::TestSuite;
 using testing::TimeInMillis;
 using testing::UnitTest;
 using testing::internal::AlwaysFalse;
@@ -244,7 +245,6 @@ using testing::internal::FloatingPoint;
 using testing::internal::ForEach;
 using testing::internal::FormatEpochTimeInMillisAsIso8601;
 using testing::internal::FormatTimeInMillisAsSeconds;
-using testing::internal::GTestFlagSaver;
 using testing::internal::GetCurrentOsStackTraceExceptTop;
 using testing::internal::GetElementOr;
 using testing::internal::GetNextRandomSeed;
@@ -253,11 +253,14 @@ using testing::internal::GetTestTypeId;
 using testing::internal::GetTimeInMillis;
 using testing::internal::GetTypeId;
 using testing::internal::GetUnitTestImpl;
+using testing::internal::GTestFlagSaver;
 using testing::internal::Int32FromEnvOrDie;
 using testing::internal::IsAProtocolMessage;
 using testing::internal::IsContainer;
 using testing::internal::IsContainerTest;
 using testing::internal::IsNotContainer;
+using testing::internal::kMaxRandomSeed;
+using testing::internal::kTestTypeIdInGoogleTest;
 using testing::internal::NativeArray;
 using testing::internal::OsStackTraceGetter;
 using testing::internal::OsStackTraceGetterInterface;
@@ -279,9 +282,6 @@ using testing::internal::WideStringToUtf8;
 using testing::internal::edit_distance::CalculateOptimalEdits;
 using testing::internal::edit_distance::CreateUnifiedDiff;
 using testing::internal::edit_distance::EditType;
-using testing::internal::kMaxRandomSeed;
-using testing::internal::kTestTypeIdInGoogleTest;
-using testing::kMaxStackTraceDepth;
 
 #if GTEST_HAS_STREAM_REDIRECTION
 using testing::internal::CaptureStdout;
@@ -5339,7 +5339,7 @@ class TestInfoTest : public Test {
 TEST_F(TestInfoTest, Names) {
   const TestInfo* const test_info = GetTestInfo("Names");
 
-  ASSERT_STREQ("TestInfoTest", test_info->test_case_name());
+  ASSERT_STREQ("TestInfoTest", test_info->test_suite_name());
   ASSERT_STREQ("Names", test_info->name());
 }
 
@@ -5409,7 +5409,7 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, CodeLocationForTYPEDTESTP, int);
 
 // Tests setting up and tearing down a test case.
 // Legacy API is deprecated but still available
-#ifndef REMOVE_LEGACY_TEST_CASEAPI
+#ifndef GTEST_REMOVE_LEGACY_TEST_CASEAPI_
 class SetUpTestCaseTest : public Test {
  protected:
   // This will be called once before the first test in this test case
@@ -5468,7 +5468,7 @@ TEST_F(SetUpTestCaseTest, Test1) { EXPECT_STRNE(nullptr, shared_resource_); }
 TEST_F(SetUpTestCaseTest, Test2) {
   EXPECT_STREQ("123", shared_resource_);
 }
-#endif  //  REMOVE_LEGACY_TEST_CASEAPI
+#endif  //  GTEST_REMOVE_LEGACY_TEST_CASEAPI_
 
 // Tests SetupTestSuite/TearDown TestSuite
 class SetUpTestSuiteTest : public Test {
@@ -6374,8 +6374,8 @@ TEST_F(CurrentTestInfoTest, WorksForFirstTestInATestSuite) {
     UnitTest::GetInstance()->current_test_info();
   ASSERT_TRUE(nullptr != test_info)
       << "There is a test running so we should have a valid TestInfo.";
-  EXPECT_STREQ("CurrentTestInfoTest", test_info->test_case_name())
-      << "Expected the name of the currently running test case.";
+  EXPECT_STREQ("CurrentTestInfoTest", test_info->test_suite_name())
+      << "Expected the name of the currently running test suite.";
   EXPECT_STREQ("WorksForFirstTestInATestSuite", test_info->name())
       << "Expected the name of the currently running test.";
 }
@@ -6389,8 +6389,8 @@ TEST_F(CurrentTestInfoTest, WorksForSecondTestInATestSuite) {
     UnitTest::GetInstance()->current_test_info();
   ASSERT_TRUE(nullptr != test_info)
       << "There is a test running so we should have a valid TestInfo.";
-  EXPECT_STREQ("CurrentTestInfoTest", test_info->test_case_name())
-      << "Expected the name of the currently running test case.";
+  EXPECT_STREQ("CurrentTestInfoTest", test_info->test_suite_name())
+      << "Expected the name of the currently running test suite.";
   EXPECT_STREQ("WorksForSecondTestInATestSuite", test_info->name())
       << "Expected the name of the currently running test.";
 }

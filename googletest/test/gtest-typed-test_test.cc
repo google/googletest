@@ -193,13 +193,13 @@ TYPED_TEST(TypedTestWithNames, TestSuiteName) {
   if (std::is_same<TypeParam, char>::value) {
     EXPECT_STREQ(::testing::UnitTest::GetInstance()
                      ->current_test_info()
-                     ->test_case_name(),
+                     ->test_suite_name(),
                  "TypedTestWithNames/char0");
   }
   if (std::is_same<TypeParam, int>::value) {
     EXPECT_STREQ(::testing::UnitTest::GetInstance()
                      ->current_test_info()
-                     ->test_case_name(),
+                     ->test_suite_name(),
                  "TypedTestWithNames/int1");
   }
 }
@@ -315,13 +315,13 @@ TYPED_TEST_P(TypeParametrizedTestWithNames, TestSuiteName) {
   if (std::is_same<TypeParam, char>::value) {
     EXPECT_STREQ(::testing::UnitTest::GetInstance()
                      ->current_test_info()
-                     ->test_case_name(),
+                     ->test_suite_name(),
                  "CustomName/TypeParametrizedTestWithNames/parChar0");
   }
   if (std::is_same<TypeParam, int>::value) {
     EXPECT_STREQ(::testing::UnitTest::GetInstance()
                      ->current_test_info()
-                     ->test_case_name(),
+                     ->test_suite_name(),
                  "CustomName/TypeParametrizedTestWithNames/parInt1");
   }
 }
