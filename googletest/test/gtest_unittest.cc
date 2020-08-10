@@ -113,6 +113,7 @@ TEST_F(StreamingListenerTest, OnTestIterationEnd) {
   EXPECT_EQ("event=TestIterationEnd&passed=1&elapsed_time=0ms\n", *output());
 }
 
+#ifndef GTEST_REMOVE_LEGACY_TEST_CASEAPI_
 TEST_F(StreamingListenerTest, OnTestCaseStart) {
   *output() = "";
   streamer_.OnTestCaseStart(TestCase("FooTest", "Bar", nullptr, nullptr));
@@ -124,6 +125,19 @@ TEST_F(StreamingListenerTest, OnTestCaseEnd) {
   streamer_.OnTestCaseEnd(TestCase("FooTest", "Bar", nullptr, nullptr));
   EXPECT_EQ("event=TestCaseEnd&passed=1&elapsed_time=0ms\n", *output());
 }
+#else
+TEST_F(StreamingListenerTest, OnTestSuiteStart) {
+  *output() = "";
+  streamer_.OnTestSuiteStart(TestSuite("FooTest", "Bar", nullptr, nullptr));
+  EXPECT_EQ("event=TestSuiteStart&name=FooTest\n", *output());
+}
+
+TEST_F(StreamingListenerTest, OnTestSuiteEnd) {
+  *output() = "";
+  streamer_.OnTestSuiteEnd(TestSuite("FooTest", "Bar", nullptr, nullptr));
+  EXPECT_EQ("event=TestSuiteEnd&passed=1&elapsed_time=0ms\n", *output());
+}
+#endif
 
 TEST_F(StreamingListenerTest, OnTestStart) {
   *output() = "";

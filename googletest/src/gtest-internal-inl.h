@@ -1168,6 +1168,7 @@ class StreamingListener : public EmptyTestEventListener {
            StreamableToString(unit_test.elapsed_time()) + "ms");
   }
 
+#ifndef GTEST_REMOVE_LEGACY_TEST_CASEAPI_
   // Note that "event=TestCaseStart" is a wire format and has to remain
   // "case" for compatibilty
   void OnTestCaseStart(const TestCase& test_case) override {
@@ -1181,6 +1182,16 @@ class StreamingListener : public EmptyTestEventListener {
            "&elapsed_time=" + StreamableToString(test_case.elapsed_time()) +
            "ms");
   }
+#else
+  void OnTestSuiteStart(const TestSuite& test_suite) override {
+    SendLn(std::string("event=TestSuiteStart&name=") + test_suite.name());
+  }
+  void OnTestSuiteEnd(const TestSuite& test_suite) override {
+    SendLn("event=TestSuiteEnd&passed=" + FormatBool(test_suite.Passed()) +
+           "&elapsed_time=" + StreamableToString(test_suite.elapsed_time()) +
+           "ms");
+  }
+#endif
 
   void OnTestStart(const TestInfo& test_info) override {
     SendLn(std::string("event=TestStart&name=") + test_info.name());
