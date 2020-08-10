@@ -1,5 +1,7 @@
 # Googletest Primer
 
+<!-- GOOGLETEST_CM0035 DO NOT DELETE -->
+
 ## Introduction: Why googletest?
 
 *googletest* helps you write better C++ tests.

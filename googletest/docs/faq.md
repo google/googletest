@@ -2,6 +2,8 @@
 
 <!-- GOOGLETEST_CM0014 DO NOT DELETE -->
 
+<!-- GOOGLETEST_CM0035 DO NOT DELETE -->
+
 ## Why should test suite names and test names not contain underscore?
 
 Underscore (`_`) is special, as C++ reserves the following to be used by the
