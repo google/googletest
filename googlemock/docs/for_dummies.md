@@ -1,4 +1,3 @@
-
 (**Note:** If you get compiler errors that you don't understand, be sure to consult [Google Mock Doctor](frequently_asked_questions.md#how-am-i-supposed-to-make-sense-of-these-horrible-template-errors).)
 
 # What Is Google C++ Mocking Framework? #
