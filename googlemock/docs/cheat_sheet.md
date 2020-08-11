@@ -2,6 +2,8 @@
 
 <!-- GOOGLETEST_CM0019 DO NOT DELETE -->
 
+<!-- GOOGLETEST_CM0035 DO NOT DELETE -->
+
 <!-- GOOGLETEST_CM0033 DO NOT DELETE -->
 
 ## Defining a Mock Class

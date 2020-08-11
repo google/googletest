@@ -2,6 +2,8 @@
 
 <!-- GOOGLETEST_CM0021 DO NOT DELETE -->
 
+<!-- GOOGLETEST_CM0035 DO NOT DELETE -->
+
 ### When I call a method on my mock object, the method for the real object is invoked instead. What's the problem?
 
 In order for a method to be mocked, it must be *virtual*, unless you use the
