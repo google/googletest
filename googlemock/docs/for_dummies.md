@@ -2,6 +2,8 @@
 
 <!-- GOOGLETEST_CM0013 DO NOT DELETE -->
 
+<!-- GOOGLETEST_CM0035 DO NOT DELETE -->
+
 ## What Is gMock?
 
 When you write a prototype or test, often it's not feasible or wise to rely on

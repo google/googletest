@@ -10,6 +10,8 @@ recommended to write `using ::testing::Foo;` once in your file before using the
 name `Foo` defined by gMock. We omit such `using` statements in this section for
 brevity, but you should do it in your own code.
 
+<!-- GOOGLETEST_CM0035 DO NOT DELETE -->
+
 ## Creating Mock Classes
 
 Mock classes are defined as normal classes, using the `MOCK_METHOD` macro to
