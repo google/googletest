@@ -25,8 +25,6 @@ This repository is a merger of the formerly separate GoogleTest and GoogleMock
 projects. These were so closely related that it makes sense to maintain and
 release them together.
 
-Please subscribe to the mailing list at googletestframework@googlegroups.com for
-questions, discussions, and development.
 
 ### Getting started:
 
@@ -111,9 +109,9 @@ that generates stub code for Google Test.
 
 Google Test is designed to have fairly minimal requirements to build and use
 with your projects, but there are some. If you notice any problems on your
-platform, please notify
-[googletestframework@googlegroups.com](https://groups.google.com/forum/#!forum/googletestframework).
-Patches for fixing them are welcome!
+platform, feel free to file an issue on the
+[GoogleTest GitHub Issue Tracker](https://github.com/google/googletest/issues).
+PRs for fixing them are welcome!
 
 ### Build Requirements
 
