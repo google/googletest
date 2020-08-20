@@ -1050,10 +1050,11 @@ struct DoAllAction {
       std::vector<Action<void(NonFinalType<Args>...)>> converted;
       Action<R(Args...)> last;
       R operator()(Args... args) const {
+        auto tuple_args = std::forward_as_tuple(std::forward<Args>(args)...);
         for (auto& a : converted) {
-          a.Perform(std::forward_as_tuple(std::forward<Args>(args)...));
+          a.Perform(tuple_args);
         }
-        return last.Perform(std::forward_as_tuple(std::forward<Args>(args)...));
+        return last.Perform(std::move(tuple_args));
       }
     };
     return Op{Convert<Action<void(NonFinalType<Args>...)>>(
