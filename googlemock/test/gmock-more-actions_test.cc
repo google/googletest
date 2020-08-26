@@ -27,18 +27,16 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
 // Google Mock - a framework for writing C++ mock classes.
 //
-// This file tests the built-in actions in gmock-more-actions.h.
-
-#include "gmock/gmock-more-actions.h"
+// This file tests the built-in actions in gmock-actions.h.
 
 #include <functional>
 #include <memory>
 #include <sstream>
 #include <string>
 
+#include "gmock/gmock-actions.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest-spi.h"
 #include "gtest/gtest.h"
