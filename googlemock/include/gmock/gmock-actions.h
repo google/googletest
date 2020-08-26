@@ -1063,6 +1063,105 @@ struct DoAllAction {
   }
 };
 
+template <typename T, typename... Params>
+struct ReturnNewAction {
+  T* operator()() const {
+    return internal::Apply(
+        [](const Params&... unpacked_params) {
+          return new T(unpacked_params...);
+        },
+        params);
+  }
+  std::tuple<Params...> params;
+};
+
+template <size_t k>
+struct ReturnArgAction {
+  template <typename... Args>
+  auto operator()(const Args&... args) const ->
+      typename std::tuple_element<k, std::tuple<Args...>>::type {
+    return std::get<k>(std::tie(args...));
+  }
+};
+
+template <size_t k, typename Ptr>
+struct SaveArgAction {
+  Ptr pointer;
+
+  template <typename... Args>
+  void operator()(const Args&... args) const {
+    *pointer = std::get<k>(std::tie(args...));
+  }
+};
+
+template <size_t k, typename Ptr>
+struct SaveArgPointeeAction {
+  Ptr pointer;
+
+  template <typename... Args>
+  void operator()(const Args&... args) const {
+    *pointer = *std::get<k>(std::tie(args...));
+  }
+};
+
+template <size_t k, typename T>
+struct SetArgRefereeAction {
+  T value;
+
+  template <typename... Args>
+  void operator()(Args&&... args) const {
+    using argk_type =
+        typename ::std::tuple_element<k, std::tuple<Args...>>::type;
+    static_assert(std::is_lvalue_reference<argk_type>::value,
+                  "Argument must be a reference type.");
+    std::get<k>(std::tie(args...)) = value;
+  }
+};
+
+template <size_t k, typename I1, typename I2>
+struct SetArrayArgumentAction {
+  I1 first;
+  I2 last;
+
+  template <typename... Args>
+  void operator()(const Args&... args) const {
+    auto value = std::get<k>(std::tie(args...));
+    for (auto it = first; it != last; ++it, (void)++value) {
+      *value = *it;
+    }
+  }
+};
+
+template <size_t k>
+struct DeleteArgAction {
+  template <typename... Args>
+  void operator()(const Args&... args) const {
+    delete std::get<k>(std::tie(args...));
+  }
+};
+
+template <typename Ptr>
+struct ReturnPointeeAction {
+  Ptr pointer;
+  template <typename... Args>
+  auto operator()(const Args&...) const -> decltype(*pointer) {
+    return *pointer;
+  }
+};
+
+#if GTEST_HAS_EXCEPTIONS
+template <typename T>
+struct ThrowAction {
+  T exception;
+  // We use a conversion operator to adapt to any return type.
+  template <typename R, typename... Args>
+  operator Action<R(Args...)>() const {  // NOLINT
+    T copy = exception;
+    return [copy](Args...) -> R { throw copy; };
+  }
+};
+#endif  // GTEST_HAS_EXCEPTIONS
+
 }  // namespace internal
 
 // An Unused object can be implicitly constructed from ANY value.
@@ -1292,22 +1391,6 @@ inline ::std::reference_wrapper<T> ByRef(T& l_value) {  // NOLINT
   return ::std::reference_wrapper<T>(l_value);
 }
 
-namespace internal {
-
-template <typename T, typename... Params>
-struct ReturnNewAction {
-  T* operator()() const {
-    return internal::Apply(
-        [](const Params&... unpacked_params) {
-          return new T(unpacked_params...);
-        },
-        params);
-  }
-  std::tuple<Params...> params;
-};
-
-}  // namespace internal
-
 // The ReturnNew<T>(a1, a2, ..., a_k) action returns a pointer to a new
 // instance of type T, constructed on the heap with constructor arguments
 // a1, a2, ..., and a_k. The caller assumes ownership of the returned value.
@@ -1316,6 +1399,67 @@ internal::ReturnNewAction<T, typename std::decay<Params>::type...> ReturnNew(
     Params&&... params) {
   return {std::forward_as_tuple(std::forward<Params>(params)...)};
 }
+
+// Action ReturnArg<k>() returns the k-th argument of the mock function.
+template <size_t k>
+internal::ReturnArgAction<k> ReturnArg() {
+  return {};
+}
+
+// Action SaveArg<k>(pointer) saves the k-th (0-based) argument of the
+// mock function to *pointer.
+template <size_t k, typename Ptr>
+internal::SaveArgAction<k, Ptr> SaveArg(Ptr pointer) {
+  return {pointer};
+}
+
+// Action SaveArgPointee<k>(pointer) saves the value pointed to
+// by the k-th (0-based) argument of the mock function to *pointer.
+template <size_t k, typename Ptr>
+internal::SaveArgPointeeAction<k, Ptr> SaveArgPointee(Ptr pointer) {
+  return {pointer};
+}
+
+// Action SetArgReferee<k>(value) assigns 'value' to the variable
+// referenced by the k-th (0-based) argument of the mock function.
+template <size_t k, typename T>
+internal::SetArgRefereeAction<k, typename std::decay<T>::type> SetArgReferee(
+    T&& value) {
+  return {std::forward<T>(value)};
+}
+
+// Action SetArrayArgument<k>(first, last) copies the elements in
+// source range [first, last) to the array pointed to by the k-th
+// (0-based) argument, which can be either a pointer or an
+// iterator. The action does not take ownership of the elements in the
+// source range.
+template <size_t k, typename I1, typename I2>
+internal::SetArrayArgumentAction<k, I1, I2> SetArrayArgument(I1 first,
+                                                             I2 last) {
+  return {first, last};
+}
+
+// Action DeleteArg<k>() deletes the k-th (0-based) argument of the mock
+// function.
+template <size_t k>
+internal::DeleteArgAction<k> DeleteArg() {
+  return {};
+}
+
+// This action returns the value pointed to by 'pointer'.
+template <typename Ptr>
+internal::ReturnPointeeAction<Ptr> ReturnPointee(Ptr pointer) {
+  return {pointer};
+}
+
+// Action Throw(exception) can be used in a mock function of any type
+// to throw the given exception.  Any copyable value can be thrown.
+#if GTEST_HAS_EXCEPTIONS
+template <typename T>
+internal::ThrowAction<typename std::decay<T>::type> Throw(T&& exception) {
+  return {std::forward<T>(exception)};
+}
+#endif  // GTEST_HAS_EXCEPTIONS
 
 namespace internal {
 
