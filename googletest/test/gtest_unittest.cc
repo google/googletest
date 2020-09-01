@@ -485,28 +485,28 @@ class FormatEpochTimeInMillisAsIso8601Test : public Test {
 const TimeInMillis FormatEpochTimeInMillisAsIso8601Test::kMillisPerSec;
 
 TEST_F(FormatEpochTimeInMillisAsIso8601Test, PrintsTwoDigitSegments) {
-  EXPECT_EQ("2011-10-31T18:52:42",
+  EXPECT_EQ("2011-10-31T18:52:42.000",
             FormatEpochTimeInMillisAsIso8601(1320087162 * kMillisPerSec));
 }
 
-TEST_F(FormatEpochTimeInMillisAsIso8601Test, MillisecondsDoNotAffectResult) {
+TEST_F(FormatEpochTimeInMillisAsIso8601Test, IncludesMillisecondsAfterDot) {
   EXPECT_EQ(
-      "2011-10-31T18:52:42",
+      "2011-10-31T18:52:42.234",
       FormatEpochTimeInMillisAsIso8601(1320087162 * kMillisPerSec + 234));
 }
 
 TEST_F(FormatEpochTimeInMillisAsIso8601Test, PrintsLeadingZeroes) {
-  EXPECT_EQ("2011-09-03T05:07:02",
+  EXPECT_EQ("2011-09-03T05:07:02.000",
             FormatEpochTimeInMillisAsIso8601(1315026422 * kMillisPerSec));
 }
 
 TEST_F(FormatEpochTimeInMillisAsIso8601Test, Prints24HourTime) {
-  EXPECT_EQ("2011-09-28T17:08:22",
+  EXPECT_EQ("2011-09-28T17:08:22.000",
             FormatEpochTimeInMillisAsIso8601(1317229702 * kMillisPerSec));
 }
 
 TEST_F(FormatEpochTimeInMillisAsIso8601Test, PrintsEpochStart) {
-  EXPECT_EQ("1970-01-01T00:00:00", FormatEpochTimeInMillisAsIso8601(0));
+  EXPECT_EQ("1970-01-01T00:00:00.000", FormatEpochTimeInMillisAsIso8601(0));
 }
 
 # ifdef __BORLANDC__
