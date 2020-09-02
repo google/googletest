@@ -44,6 +44,7 @@
 #include <wctype.h>
 
 #include <algorithm>
+#include <chrono>  // NOLINT
 #include <cstdint>
 #include <iomanip>
 #include <limits>
@@ -54,8 +55,6 @@
 #include <vector>
 
 #if GTEST_OS_LINUX
-
-# define GTEST_HAS_GETTIMEOFDAY_ 1
 
 # include <fcntl.h>  // NOLINT
 # include <limits.h>  // NOLINT
@@ -68,7 +67,6 @@
 # include <string>
 
 #elif GTEST_OS_ZOS
-# define GTEST_HAS_GETTIMEOFDAY_ 1
 # include <sys/time.h>  // NOLINT
 
 // On z/OS we additionally need strings.h for strcasecmp.
@@ -94,15 +92,10 @@
 # include <sys/stat.h>  // NOLINT
 
 # if GTEST_OS_WINDOWS_MINGW
-// MinGW has gettimeofday() but not _ftime64().
-#  define GTEST_HAS_GETTIMEOFDAY_ 1
 #  include <sys/time.h>  // NOLINT
 # endif  // GTEST_OS_WINDOWS_MINGW
 
 #else
-
-// Assume other platforms have gettimeofday().
-# define GTEST_HAS_GETTIMEOFDAY_ 1
 
 // cpplint thinks that the header is already included, so we want to
 // silence it.
@@ -1005,42 +998,10 @@ std::string UnitTestImpl::CurrentOsStackTraceExceptTop(int skip_count) {
 
 // Returns the current time in milliseconds.
 TimeInMillis GetTimeInMillis() {
-#if GTEST_OS_WINDOWS_MOBILE || defined(__BORLANDC__)
-  // Difference between 1970-01-01 and 1601-01-01 in milliseconds.
-  // http://analogous.blogspot.com/2005/04/epoch.html
-  const TimeInMillis kJavaEpochToWinFileTimeDelta =
-    static_cast<TimeInMillis>(116444736UL) * 100000UL;
-  const DWORD kTenthMicrosInMilliSecond = 10000;
-
-  SYSTEMTIME now_systime;
-  FILETIME now_filetime;
-  ULARGE_INTEGER now_int64;
-  GetSystemTime(&now_systime);
-  if (SystemTimeToFileTime(&now_systime, &now_filetime)) {
-    now_int64.LowPart = now_filetime.dwLowDateTime;
-    now_int64.HighPart = now_filetime.dwHighDateTime;
-    now_int64.QuadPart = (now_int64.QuadPart / kTenthMicrosInMilliSecond) -
-      kJavaEpochToWinFileTimeDelta;
-    return now_int64.QuadPart;
-  }
-  return 0;
-#elif GTEST_OS_WINDOWS && !GTEST_HAS_GETTIMEOFDAY_
-  __timeb64 now;
-
-  // MSVC 8 deprecates _ftime64(), so we want to suppress warning 4996
-  // (deprecated function) there.
-  GTEST_DISABLE_MSC_DEPRECATED_PUSH_()
-  _ftime64(&now);
-  GTEST_DISABLE_MSC_DEPRECATED_POP_()
-
-  return static_cast<TimeInMillis>(now.time) * 1000 + now.millitm;
-#elif GTEST_HAS_GETTIMEOFDAY_
-  struct timeval now;
-  gettimeofday(&now, nullptr);
-  return static_cast<TimeInMillis>(now.tv_sec) * 1000 + now.tv_usec / 1000;
-#else
-# error "Don't know how to get the current time on your system."
-#endif
+  return std::chrono::duration_cast<std::chrono::milliseconds>(
+             std::chrono::system_clock::now() -
+             std::chrono::system_clock::from_time_t(0))
+      .count();
 }
 
 // Utilities
