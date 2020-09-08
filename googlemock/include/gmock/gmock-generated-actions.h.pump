@@ -55,7 +55,6 @@ $$}} This meta comment fixes auto-indentation in editors.
 $range i 0..n
 $range k 0..n-1
 
-
 // Sometimes you want to give an action explicit template parameters
 // that cannot be inferred from its value parameters.  ACTION() and
 // ACTION_P*() don't support that.  ACTION_TEMPLATE() remedies that
@@ -178,6 +177,16 @@ $range j 0..i-1
 
 ]]
 
+// Defines the copy constructor
+
+$for i [[
+#define GMOCK_INTERNAL_DEFN_COPY_AND_$i[[]]_VALUE_PARAMS$if i == 0[[() \
+    {}  // Work around https://gcc.gnu.org/bugzilla/show_bug.cgi?id=82134
+]] $else [[(...) = default;]]
+
+
+]]
+
 // Declares the fields for storing the value parameters.
 
 $for i [[
@@ -241,6 +250,11 @@ $range k 0..n-1
    public:\
     explicit GMOCK_ACTION_CLASS_(name, value_params)\
         GMOCK_INTERNAL_INIT_##value_params {}\
+    GMOCK_ACTION_CLASS_(name, value_params)(\
+        const GMOCK_ACTION_CLASS_(name, value_params)<\
+            GMOCK_INTERNAL_LIST_##template_params\
+            GMOCK_INTERNAL_LIST_TYPE_##value_params>&)\
+        GMOCK_INTERNAL_DEFN_COPY_##value_params\
     template <typename F>\
     class gmock_Impl : public ::testing::ActionInterface<F> {\
      public:\
@@ -263,6 +277,12 @@ $range k 0..n-1
     }\
     GMOCK_INTERNAL_DEFN_##value_params\
   };\
+  template <GMOCK_INTERNAL_DECL_##template_params\
+            GMOCK_INTERNAL_DECL_TYPE_##value_params>\
+  GMOCK_ACTION_CLASS_(name, value_params)<\
+      GMOCK_INTERNAL_LIST_##template_params\
+      GMOCK_INTERNAL_LIST_TYPE_##value_params> name(\
+          GMOCK_INTERNAL_DECL_##value_params) GTEST_MUST_USE_RESULT_;\
   template <GMOCK_INTERNAL_DECL_##template_params\
             GMOCK_INTERNAL_DECL_TYPE_##value_params>\
   inline GMOCK_ACTION_CLASS_(name, value_params)<\

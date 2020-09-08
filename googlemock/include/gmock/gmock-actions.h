@@ -1637,6 +1637,9 @@ auto InvokeArgument(F f, Args... args) -> decltype(f(args...)) {
                                                                               \
    public:                                                                    \
     using base_type::base_type;                                               \
+    name##Action() = default;                                                 \
+    /* Work around https://gcc.gnu.org/bugzilla/show_bug.cgi?id=82134 */      \
+    name##Action(const name##Action&) { }                                     \
     template <typename F>                                                     \
     class gmock_Impl : public ::testing::ActionInterface<F> {                 \
      public:                                                                  \
@@ -1654,6 +1657,7 @@ auto InvokeArgument(F f, Args... args) -> decltype(f(args...)) {
       return_type gmock_PerformImpl(GMOCK_ACTION_ARG_TYPES_AND_NAMES_) const; \
     };                                                                        \
   };                                                                          \
+  inline name##Action name() GTEST_MUST_USE_RESULT_;                          \
   inline name##Action name() { return name##Action(); }                       \
   template <typename F>                                                       \
   template <GMOCK_ACTION_TEMPLATE_ARGS_NAMES_>                                \
