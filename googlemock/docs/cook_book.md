@@ -3,7 +3,7 @@
 <!-- GOOGLETEST_CM0012 DO NOT DELETE -->
 
 You can find recipes for using gMock here. If you haven't yet, please read
-[this](for_dummies.md) first to make sure you understand the basics.
+[the dummy guide](for_dummies.md) first to make sure you understand the basics.
 
 **Note:** gMock lives in the `testing` name space. For readability, it is
 recommended to write `using ::testing::Foo;` once in your file before using the
@@ -283,9 +283,11 @@ recipe for [mocking non-virtual methods](#MockingNonVirtualMethods).
 
 ### Old-Style `MOCK_METHODn` Macros
 
-Before the generic `MOCK_METHOD` macro was introduced, mocks where created using
-a family of macros collectively called `MOCK_METHODn`. These macros are still
-supported, though migration to the new `MOCK_METHOD` is recommended.
+Before the generic `MOCK_METHOD` macro
+[was introduced in 2018](https://github.com/google/googletest/commit/c5f08bf91944ce1b19bcf414fa1760e69d20afc2),
+mocks where created using a family of macros collectively called `MOCK_METHODn`.
+These macros are still supported, though migration to the new `MOCK_METHOD` is
+recommended.
 
 The macros in the `MOCK_METHODn` family differ from `MOCK_METHOD`:
 
