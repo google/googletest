@@ -51,7 +51,7 @@ The easiest way to use Google Test is importing installed libraries and headers.
 
 * Import Google Test by using `find_package` (or `pkg_check_modules`).
   For example, if `find_package(GTest CONFIG REQUIRED)` is succeed,
-  you can use the libraries as  `GTest::gtest`, `GTest::gmock`.
+  you can use the libraries as `GTest::gtest`, `GTest::gmock`.
 
 And a more robust and flexible approach is to build gtest as part of that project
 directly. This is done by making the Google Test source code available to the
