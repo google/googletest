@@ -24,17 +24,20 @@ another project.
 When building Google Test as a standalone project, the typical workflow starts
 with:
 
-    mkdir mybuild       # Create a directory to hold the build output.
-    cd mybuild
-    cmake ${GTEST_DIR}  # Generate native build scripts.
-
-If you want to build Google Test's samples, you should replace the last command
-with
-
-    cmake -Dgtest_build_samples=ON ${GTEST_DIR}
+    git clone https://github.com/google/googletest.git -b release-1.10.0
+    cd googletest
+    mkdir build          # Create a directory to hold the build output.
+    cd build
+    cmake ..             # Generate native build scripts for Google Test
 
 If you are on a \*nix system, you should now see a Makefile in the current
-directory. Just type 'make' to build gtest.
+directory. Just type `make` to build gtest.
+
+    make
+
+And if you are a system administrator, you can simply install Google Test.
+
+    sudo make install    # Install in /usr/local/ by default
 
 If you use Windows and have Visual Studio installed, a `gtest.sln` file and
 several `.vcproj` files will be created. You can then build them using Visual
@@ -44,26 +47,31 @@ On Mac OS X with Xcode installed, a `.xcodeproj` file will be generated.
 
 #### Incorporating Into An Existing CMake Project
 
-If you want to use gtest in a project which already uses CMake, then a more
-robust and flexible approach is to build gtest as part of that project directly.
-This is done by making the GoogleTest source code available to the main build
-and adding it using CMake's `add_subdirectory()` command. This has the
-significant advantage that the same compiler and linker settings are used
-between gtest and the rest of your project, so issues associated with using
-incompatible libraries (eg debug/release), etc. are avoided. This is
-particularly useful on Windows. Making GoogleTest's source code available to the
+The easiest way to use Google Test is importing installed libraries and headers.
+
+* Import Google Test by using `find_package` (or `pkg_check_modules`).
+  For example, if `find_package(GTest CONFIG REQUIRED)` is succeed,
+  you can use the libraries as  `GTest::gtest`, `GTest::gmock`.
+
+And a more robust and flexible approach is to build gtest as part of that project
+directly. This is done by making the Google Test source code available to the
+main build and adding it using CMake's `add_subdirectory()` command.
+This has the significant advantage that the same compiler and linker settings
+are used between gtest and the rest of your project, so issues associated with
+using incompatible libraries (eg debug/release), etc. are avoided. This is
+particularly useful on Windows. Making Google Test's source code available to the
 main build can be done a few different ways:
 
-*   Download the GoogleTest source code manually and place it at a known
+*   Download the Google Test source code manually and place it at a known
     location. This is the least flexible approach and can make it more difficult
     to use with continuous integration systems, etc.
-*   Embed the GoogleTest source code as a direct copy in the main project's
+*   Embed the Google Test source code as a direct copy in the main project's
     source tree. This is often the simplest approach, but is also the hardest to
     keep up to date. Some organizations may not permit this method.
-*   Add GoogleTest as a git submodule or equivalent. This may not always be
+*   Add Google Test as a git submodule or equivalent. This may not always be
     possible or appropriate. Git submodules, for example, have their own set of
     advantages and drawbacks.
-*   Use CMake to download GoogleTest as part of the build's configure step. This
+*   Use CMake to download Google Test as part of the build's configure step. This
     is just a little more complex, but doesn't have the limitations of the other
     methods.
 

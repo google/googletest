@@ -21,7 +21,7 @@ is now available.
 
 ## Welcome to **Google Test**, Google's C++ test framework!
 
-This repository is a merger of the formerly separate GoogleTest and GoogleMock
+This repository is a merger of the formerly separate Google Test and Google Mock
 projects. These were so closely related that it makes sense to maintain and
 release them together.
 
@@ -98,7 +98,7 @@ is a VS Code extension allowing to view Google Tests in a tree view, and
 run/debug your tests.
 
 [C++ TestMate](https://github.com/matepek/vscode-catch2-test-adapter) is a VS
-Code extension allowing to view Google Tests in a tree view, and run/debug your
+Code extension allowing to view Google Test in a tree view, and run/debug your
 tests.
 
 [Cornichon](https://pypi.org/project/cornichon/) is a small Gherkin DSL parser
