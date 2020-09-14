@@ -21,7 +21,7 @@ is now available.
 
 ## Welcome to **Google Test**, Google's C++ test framework!
 
-This repository is a merger of the formerly separate GoogleTest and GoogleMock
+This repository is a merger of the formerly separate Google Test and Google Mock
 projects. These were so closely related that it makes sense to maintain and
 release them together.
 
