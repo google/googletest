@@ -1,4 +1,4 @@
-# Google Test
+# GoogleTest
 
 #### OSS Builds Status:
 
@@ -19,19 +19,19 @@ is now available.
 *   We are also planning to take a dependency on
     [Abseil](https://github.com/abseil/abseil-cpp).
 
-## Welcome to **Google Test**, Google's C++ test framework!
+## Welcome to **GoogleTest**, Google's C++ test framework!
 
-This repository is a merger of the formerly separate Google Test and Google Mock
+This repository is a merger of the formerly separate GoogleTest and GoogleMock
 projects. These were so closely related that it makes sense to maintain and
 release them together.
 
 ### Getting started:
 
-The information for **Google Test** is available in the
-[Google Test Primer](googletest/docs/primer.md) documentation.
+The information for **GoogleTest** is available in the
+[GoogleTest Primer](googletest/docs/primer.md) documentation.
 
-**Google Mock** is an extension to Google Test for writing and using C++ mock
-classes. See the separate [Google Mock documentation](googlemock/README.md).
+**GoogleMock** is an extension to GoogleTest for writing and using C++ mock
+classes. See the separate [GoogleMock documentation](googlemock/README.md).
 
 More detailed documentation for googletest is in its interior
 [googletest/README.md](googletest/README.md) file.
@@ -51,7 +51,7 @@ More detailed documentation for googletest is in its interior
 
 ## Platforms
 
-Google test has been used on a variety of platforms:
+GoogleTest has been used on a variety of platforms:
 
 *   Linux
 *   Mac OS X
@@ -62,9 +62,9 @@ Google test has been used on a variety of platforms:
 *   Symbian
 *   PlatformIO
 
-## Who Is Using Google Test?
+## Who Is Using GoogleTest?
 
-In addition to many internal projects at Google, Google Test is also used by the
+In addition to many internal projects at Google, GoogleTest is also used by the
 following notable projects:
 
 *   The [Chromium projects](http://www.chromium.org/) (behind the Chrome browser
@@ -86,7 +86,7 @@ displays a list of test failures. Clicking on one shows failure text. Google
 Test UI is written in C#.
 
 [GTest TAP Listener](https://github.com/kinow/gtest-tap-listener) is an event
-listener for Google Test that implements the
+listener for GoogleTest that implements the
 [TAP protocol](https://en.wikipedia.org/wiki/Test_Anything_Protocol) for test
 result output. If your test runner understands TAP, you may find it useful.
 
@@ -94,7 +94,7 @@ result output. If your test runner understands TAP, you may find it useful.
 runs tests from your binary in parallel to provide significant speed-up.
 
 [GoogleTest Adapter](https://marketplace.visualstudio.com/items?itemName=DavidSchuldenfrei.gtest-adapter)
-is a VS Code extension allowing to view Google Tests in a tree view, and
+is a VS Code extension allowing to view GoogleTest in a tree view, and
 run/debug your tests.
 
 [Catch2 and Google Test Explorer](https://github.com/matepek/vscode-catch2-test-adapter)
@@ -102,11 +102,11 @@ is a VS Code extension allowing to view Google Tests in a tree view, and
 run/debug your tests.
 
 [Cornichon](https://pypi.org/project/cornichon/) is a small Gherkin DSL parser
-that generates stub code for Google Test.
+that generates stub code for GoogleTest.
 
 ## Requirements
 
-Google Test is designed to have fairly minimal requirements to build and use
+GoogleTest is designed to have fairly minimal requirements to build and use
 with your projects, but there are some. If you notice any problems on your
 platform, please file an issue on the
 [GoogleTest GitHub Issue Tracker](https://github.com/google/googletest/issues).
@@ -115,11 +115,11 @@ Patches for fixing them are welcome!
 
 ### Build Requirements
 
-These are the base requirements to build and use Google Test from a source
+These are the base requirements to build and use GoogleTest from a source
 package:
 
 *   [Bazel](https://bazel.build/) or [CMake](https://cmake.org/). NOTE: Bazel is
-    the build system that googletest is using internally and tests against.
+    the build system that GoogleTest is using internally and tests against.
     CMake is community-supported.
 
 *   A C++11-standard-compliant compiler
