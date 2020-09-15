@@ -30,7 +30,8 @@ with
     cd build
     cmake ..             # Generate native build scripts for Google Test.
 
-If you want to build without Google Mock, you should replace the last command
+The above command also includes Google Mock by default. And so, if you want
+to build only Google Test, you should replace the last command
 with
 
     cmake .. -DBUILD_GMOCK=OFF
