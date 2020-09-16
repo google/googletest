@@ -61,10 +61,6 @@
 # include <sys/types.h>  // For ssize_t. NOLINT
 #endif
 
-namespace proto2 {
-class Message;
-}  // namespace proto2
-
 namespace testing {
 namespace internal {
 
