@@ -1243,6 +1243,17 @@ class FlatTuple
   }
 };
 
+// utility functions to unwrap std::reference_wrapper
+template <typename T>
+const T& Unwrap(const T& v) {
+    return v;
+}
+
+template <typename T>
+const T& Unwrap(std::reference_wrapper<T> v) {
+    return v;
+}
+
 // Utility functions to be called with static_assert to induce deprecation
 // warnings.
 GTEST_INTERNAL_DEPRECATED(

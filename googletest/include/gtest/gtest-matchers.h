@@ -535,11 +535,6 @@ class ComparisonBase {
   }
 
  private:
-  template <typename T>
-  static const T& Unwrap(const T& v) { return v; }
-  template <typename T>
-  static const T& Unwrap(std::reference_wrapper<T> v) { return v; }
-
   template <typename Lhs, typename = Rhs>
   class Impl : public MatcherInterface<Lhs> {
    public:
