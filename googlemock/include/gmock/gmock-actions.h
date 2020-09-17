@@ -449,6 +449,9 @@ class Action {
     }
   };
 
+  template <typename G>
+  using IsCompatibleFunctor = std::is_constructible<std::function<F>, G>;
+
  public:
   typedef typename internal::Function<F>::Result Result;
   typedef typename internal::Function<F>::ArgumentTuple ArgumentTuple;
@@ -460,15 +463,13 @@ class Action {
   // Construct an Action from a specified callable.
   // This cannot take std::function directly, because then Action would not be
   // directly constructible from lambda (it would require two conversions).
-  template <typename G,
-            typename IsCompatibleFunctor =
-                ::std::is_constructible<::std::function<F>, G>,
-            typename IsNoArgsFunctor =
-                ::std::is_constructible<::std::function<Result()>, G>,
-            typename = typename ::std::enable_if<internal::disjunction<
-                IsCompatibleFunctor, IsNoArgsFunctor>::value>::type>
+  template <
+      typename G,
+      typename = typename std::enable_if<internal::disjunction<
+          IsCompatibleFunctor<G>, std::is_constructible<std::function<Result()>,
+                                                        G>>::value>::type>
   Action(G&& fun) {  // NOLINT
-    Init(::std::forward<G>(fun), IsCompatibleFunctor());
+    Init(::std::forward<G>(fun), IsCompatibleFunctor<G>());
   }
 
   // Constructs an Action from its implementation.
