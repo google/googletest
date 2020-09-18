@@ -781,28 +781,12 @@ perhaps your test doesn't need to mock `Concrete()` at all (but it would be
 oh-so painful to have to define a new mock class whenever you don't need to mock
 one of its methods).
 
-The trick is to leave a back door in your mock class for accessing the real
-methods in the base class:
-
-```cpp
-class MockFoo : public Foo {
- public:
-  // Mocking a pure method.
-  MOCK_METHOD(void, Pure, (int n), (override));
-  // Mocking a concrete method.  Foo::Concrete() is shadowed.
-  MOCK_METHOD(int, Concrete, (const char* str), (override));
-
-  // Use this to call Concrete() defined in Foo.
-  int FooConcrete(const char* str) { return Foo::Concrete(str); }
-};
-```
-
-Now, you can call `Foo::Concrete()` inside an action by:
+You can call `Foo::Concrete()` inside an action by:
 
 ```cpp
 ...
   EXPECT_CALL(foo, Concrete).WillOnce([&foo](const char* str) {
-    return foo.FooConcrete(str);
+    return foo.Foo::Concrete(str);
   });
 ```
 
@@ -811,7 +795,7 @@ or tell the mock object that you don't want to mock `Concrete()`:
 ```cpp
 ...
   ON_CALL(foo, Concrete).WillByDefault([&foo](const char* str) {
-    return foo.FooConcrete(str);
+    return foo.Foo::Concrete(str);
   });
 ```
 
