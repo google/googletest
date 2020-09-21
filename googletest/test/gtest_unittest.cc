@@ -3084,6 +3084,13 @@ TEST_F(DoubleTest, EXPECT_NEAR) {
   EXPECT_NONFATAL_FAILURE(EXPECT_NEAR(1.0, 1.5, 0.25),  // NOLINT
                           "The difference between 1.0 and 1.5 is 0.5, "
                           "which exceeds 0.25");
+  // At this magnitude adjacent doubles are 512.0 apart, so this triggers a
+  // slightly different failure reporting path.
+  EXPECT_NONFATAL_FAILURE(
+      EXPECT_NEAR(4.2934311416234112e+18, 4.2934311416234107e+18, 1.0),
+      "The abs_error parameter 1.0 evaluates to 1 which is smaller than the "
+      "minimum distance between doubles for numbers of this magnitude which is "
+      "512");
 }
 
 // Tests ASSERT_NEAR.
