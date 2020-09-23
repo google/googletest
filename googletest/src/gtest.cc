@@ -35,7 +35,6 @@
 #include "gtest/gtest-spi.h"
 
 #include <ctype.h>
-#include <math.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -45,6 +44,7 @@
 
 #include <algorithm>
 #include <chrono>  // NOLINT
+#include <cmath>
 #include <cstdint>
 #include <iomanip>
 #include <limits>
@@ -1527,7 +1527,8 @@ AssertionResult DoubleNearPredFormat(const char* expr1,
   // requiring exotic floating-point knowledge.
   // Don't do an epsilon check if abs_error is zero because that implies
   // that an equality check was actually intended.
-  if (!isnan(val1) && !isnan(val2) && abs_error > 0 && abs_error < epsilon) {
+  if (!(std::isnan)(val1) && !(std::isnan)(val2) && abs_error > 0 &&
+      abs_error < epsilon) {
     return AssertionFailure()
            << "The difference between " << expr1 << " and " << expr2 << " is "
            << diff << ", where\n"
