@@ -371,9 +371,11 @@ Verifies that `val1` is less than, or almost equal to, `val2`. You can replace
 
 ### Asserting Using gMock Matchers
 
-[gMock](../../googlemock) comes with a library of matchers for validating
-arguments passed to mock objects. A gMock *matcher* is basically a predicate
-that knows how to describe itself. It can be used in these assertion macros:
+[gMock](../../googlemock) comes with
+[a library of matchers](../../googlemock/docs/cheat_sheet.md#MatcherList) for
+validating arguments passed to mock objects. A gMock *matcher* is basically a
+predicate that knows how to describe itself. It can be used in these assertion
+macros:
 
 <!-- mdformat off(github rendering does not support multiline tables) -->
 
