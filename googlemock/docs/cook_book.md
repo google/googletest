@@ -2115,7 +2115,7 @@ class MockFoo : public Foo {
   DefaultValue<Bar>::Clear();
 ```
 
-Please note that changing the default value for a type can make you tests hard
+Please note that changing the default value for a type can make your tests hard
 to understand. We recommend you to use this feature judiciously. For example,
 you may want to make sure the `Set()` and `Clear()` calls are right next to the
 code that uses your mock.
