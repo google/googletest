@@ -434,7 +434,8 @@ class GTEST_API_ Test {
   // class.
   static void TearDownTestSuite() {}
 
-  // Legacy API is deprecated but still available
+  // Legacy API is deprecated but still available. Use SetUpTestSuite and
+  // TearDownTestSuite instead.
 #ifndef GTEST_REMOVE_LEGACY_TEST_CASEAPI_
   static void TearDownTestCase() {}
   static void SetUpTestCase() {}
