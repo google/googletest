@@ -69,10 +69,6 @@ class GTEST_API_ FilePath {
     Normalize();
   }
 
-  void Set(const FilePath& rhs) {
-    pathname_ = rhs.pathname_;
-  }
-
   const std::string& string() const { return pathname_; }
   const char* c_str() const { return pathname_.c_str(); }
 

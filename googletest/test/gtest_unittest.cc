@@ -6277,9 +6277,9 @@ class FlagfileTest : public ParseFlagsTest {
   void SetUp() override {
     ParseFlagsTest::SetUp();
 
-    testdata_path_.Set(internal::FilePath(
+    testdata_path_ = internal::FilePath(
         testing::TempDir() + internal::GetCurrentExecutableName().string() +
-        "_flagfile_test"));
+        "_flagfile_test");
     testing::internal::posix::RmDir(testdata_path_.c_str());
     EXPECT_TRUE(testdata_path_.CreateFolder());
   }

@@ -594,9 +594,9 @@ FilePath GetCurrentExecutableName() {
   FilePath result;
 
 #if GTEST_OS_WINDOWS || GTEST_OS_OS2
-  result.Set(FilePath(GetArgvs()[0]).RemoveExtension("exe"));
+  result = FilePath(GetArgvs()[0]).RemoveExtension("exe");
 #else
-  result.Set(FilePath(GetArgvs()[0]));
+  result = FilePath(GetArgvs()[0]);
 #endif  // GTEST_OS_WINDOWS
 
   return result.RemoveDirectoryName();

@@ -282,7 +282,7 @@ FilePath FilePath::GenerateUniqueFileName(const FilePath& directory,
   FilePath full_pathname;
   int number = 0;
   do {
-    full_pathname.Set(MakeFileName(directory, base_name, number++, extension));
+    full_pathname = MakeFileName(directory, base_name, number++, extension);
   } while (full_pathname.FileOrDirectoryExists());
   return full_pathname;
 }

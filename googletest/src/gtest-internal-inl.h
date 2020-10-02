@@ -690,7 +690,7 @@ class GTEST_API_ UnitTestImpl {
     // AddTestInfo(), which is called to register a TEST or TEST_F
     // before main() is reached.
     if (original_working_dir_.IsEmpty()) {
-      original_working_dir_.Set(FilePath::GetCurrentDir());
+      original_working_dir_ = FilePath::GetCurrentDir();
       GTEST_CHECK_(!original_working_dir_.IsEmpty())
           << "Failed to get the current working directory.";
     }

@@ -455,15 +455,15 @@ TEST(NormalizeTest, MixAlternateSeparatorAtStringEnd) {
 class DirectoryCreationTest : public Test {
  protected:
   void SetUp() override {
-    testdata_path_.Set(FilePath(
+    testdata_path_ = FilePath(
         TempDir() + GetCurrentExecutableName().string() +
-        "_directory_creation" GTEST_PATH_SEP_ "test" GTEST_PATH_SEP_));
-    testdata_file_.Set(testdata_path_.RemoveTrailingPathSeparator());
+        "_directory_creation" GTEST_PATH_SEP_ "test" GTEST_PATH_SEP_);
+    testdata_file_ = testdata_path_.RemoveTrailingPathSeparator();
 
-    unique_file0_.Set(FilePath::MakeFileName(testdata_path_, FilePath("unique"),
-        0, "txt"));
-    unique_file1_.Set(FilePath::MakeFileName(testdata_path_, FilePath("unique"),
-        1, "txt"));
+    unique_file0_ = FilePath::MakeFileName(testdata_path_, FilePath("unique"),
+        0, "txt");
+    unique_file1_ = FilePath::MakeFileName(testdata_path_, FilePath("unique"),
+        1, "txt");
 
     remove(testdata_file_.c_str());
     remove(unique_file0_.c_str());
@@ -554,14 +554,6 @@ TEST(FilePathTest, CharAndMoveConstructor) {
 TEST(FilePathTest, StringConstructor) {
   const FilePath fp(std::string("cider"));
   EXPECT_EQ("cider", fp.string());
-}
-
-TEST(FilePathTest, Set) {
-  const FilePath apple("apple");
-  FilePath mac("mac");
-  mac.Set(apple);  // Implement Set() since overloading operator= is forbidden.
-  EXPECT_EQ("apple", mac.string());
-  EXPECT_EQ("apple", apple.string());
 }
 
 TEST(FilePathTest, ToString) {
