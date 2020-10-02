@@ -61,16 +61,12 @@ namespace internal {
 
 class GTEST_API_ FilePath {
  public:
-  FilePath() : pathname_("") { }
-  FilePath(const FilePath& rhs) : pathname_(rhs.pathname_) { }
+  FilePath() = default;
+  FilePath(FilePath&& rhs) = default;
+  FilePath& operator=(FilePath&& rhs) = default;
 
   explicit FilePath(const std::string& pathname) : pathname_(pathname) {
     Normalize();
-  }
-
-  FilePath& operator=(const FilePath& rhs) {
-    Set(rhs);
-    return *this;
   }
 
   void Set(const FilePath& rhs) {
@@ -173,6 +169,9 @@ class GTEST_API_ FilePath {
   bool IsAbsolutePath() const;
 
  private:
+  FilePath(const FilePath& rhs) = default;
+  FilePath& operator=(const FilePath& rhs) = default;
+
   // Replaces multiple consecutive separators with a single separator.
   // For example, "bar///foo" becomes "bar/foo". Does not eliminate other
   // redundancies that might be in a pathname involving "." or "..".

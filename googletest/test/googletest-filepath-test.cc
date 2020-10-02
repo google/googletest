@@ -452,29 +452,6 @@ TEST(NormalizeTest, MixAlternateSeparatorAtStringEnd) {
 
 #endif
 
-TEST(AssignmentOperatorTest, DefaultAssignedToNonDefault) {
-  FilePath default_path;
-  FilePath non_default_path("path");
-  non_default_path = default_path;
-  EXPECT_EQ("", non_default_path.string());
-  EXPECT_EQ("", default_path.string());  // RHS var is unchanged.
-}
-
-TEST(AssignmentOperatorTest, NonDefaultAssignedToDefault) {
-  FilePath non_default_path("path");
-  FilePath default_path;
-  default_path = non_default_path;
-  EXPECT_EQ("path", default_path.string());
-  EXPECT_EQ("path", non_default_path.string());  // RHS var is unchanged.
-}
-
-TEST(AssignmentOperatorTest, ConstAssignedToNonConst) {
-  const FilePath const_default_path("const_path");
-  FilePath non_default_path("path");
-  non_default_path = const_default_path;
-  EXPECT_EQ("const_path", non_default_path.string());
-}
-
 class DirectoryCreationTest : public Test {
  protected:
   void SetUp() override {
@@ -566,12 +543,12 @@ TEST(FilePathTest, DefaultConstructor) {
   EXPECT_EQ("", fp.string());
 }
 
-TEST(FilePathTest, CharAndCopyConstructors) {
-  const FilePath fp("spicy");
+TEST(FilePathTest, CharAndMoveConstructor) {
+  FilePath fp("spicy");
   EXPECT_EQ("spicy", fp.string());
 
-  const FilePath fp_copy(fp);
-  EXPECT_EQ("spicy", fp_copy.string());
+  FilePath fp_move(std::move(fp));
+  EXPECT_EQ("spicy", fp_move.string());
 }
 
 TEST(FilePathTest, StringConstructor) {
