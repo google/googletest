@@ -348,8 +348,7 @@ FilePath FilePath::RemoveTrailingPathSeparator() const {
 // For example, "bar///foo" becomes "bar/foo". Does not eliminate other
 // redundancies that might be in a pathname involving "." or "..".
 void FilePath::Normalize() {
-  std::string normalized_pathname;
-  normalized_pathname.reserve(pathname_.length());
+  auto out = pathname_.begin();
 
   for (const auto character : pathname_)
     if (!IsPathSeparator(character))
@@ -360,7 +359,7 @@ void FilePath::Normalize() {
     else
       continue;
 
-  pathname_ = normalized_pathname;
+  pathname_.erase(out, pathname_.end());
 }
 
 }  // namespace internal
