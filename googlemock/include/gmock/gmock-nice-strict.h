@@ -89,9 +89,9 @@ class NiceMock : public MockClass {
         internal::ImplicitCast_<MockClass*>(this));
   }
 
-  template <typename A1, typename A2, typename... An>
-  NiceMock(A1&& arg1, A2&& arg2, An&&... args)
-      : MockClass(std::forward<A1>(arg1), std::forward<A2>(arg2),
+  template <typename TArg1, typename TArg2, typename... An>
+  NiceMock(TArg1&& arg1, TArg2&& arg2, An&&... args)
+      : MockClass(std::forward<TArg1>(arg1), std::forward<TArg2>(arg2),
                   std::forward<An>(args)...) {
     ::testing::Mock::AllowUninterestingCalls(
         internal::ImplicitCast_<MockClass*>(this));
@@ -127,9 +127,9 @@ class NaggyMock : public MockClass {
         internal::ImplicitCast_<MockClass*>(this));
   }
 
-  template <typename A1, typename A2, typename... An>
-  NaggyMock(A1&& arg1, A2&& arg2, An&&... args)
-      : MockClass(std::forward<A1>(arg1), std::forward<A2>(arg2),
+  template <typename TArg1, typename TArg2, typename... An>
+  NaggyMock(TArg1&& arg1, TArg2&& arg2, An&&... args)
+      : MockClass(std::forward<TArg1>(arg1), std::forward<TArg2>(arg2),
                   std::forward<An>(args)...) {
     ::testing::Mock::WarnUninterestingCalls(
         internal::ImplicitCast_<MockClass*>(this));
@@ -165,9 +165,9 @@ class StrictMock : public MockClass {
         internal::ImplicitCast_<MockClass*>(this));
   }
 
-  template <typename A1, typename A2, typename... An>
-  StrictMock(A1&& arg1, A2&& arg2, An&&... args)
-      : MockClass(std::forward<A1>(arg1), std::forward<A2>(arg2),
+  template <typename TArg1, typename TArg2, typename... An>
+  StrictMock(TArg1&& arg1, TArg2&& arg2, An&&... args)
+      : MockClass(std::forward<TArg1>(arg1), std::forward<TArg2>(arg2),
                   std::forward<An>(args)...) {
     ::testing::Mock::FailUninterestingCalls(
         internal::ImplicitCast_<MockClass*>(this));
