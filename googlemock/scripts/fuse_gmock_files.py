@@ -28,8 +28,8 @@
 # THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+"""fuse_gmock_files.py v0.1.0.
 
-"""fuse_gmock_files.py v0.1.0
 Fuses Google Mock and Google Test source code into two .h files and a .cc file.
 
 SYNOPSIS
@@ -55,16 +55,20 @@ EXAMPLES
 This tool is experimental.  In particular, it assumes that there is no
 conditional inclusion of Google Mock or Google Test headers.  Please
 report any problems to googlemock@googlegroups.com.  You can read
-https://github.com/google/googletest/blob/master/googlemock/docs/cook_book.md for more
+https://github.com/google/googletest/blob/master/googlemock/docs/cook_book.md
+for more
 information.
 """
 
-__author__ = 'wan@google.com (Zhanyong Wan)'
+from __future__ import print_function
 
 import os
 import re
-import sets
 import sys
+
+import fuse_gtest_files
+
+__author__ = 'wan@google.com (Zhanyong Wan)'
 
 # We assume that this file is in the scripts/ directory in the Google
 # Mock root directory.
@@ -72,10 +76,10 @@ DEFAULT_GMOCK_ROOT_DIR = os.path.join(os.path.dirname(__file__), '..')
 
 # We need to call into googletest/scripts/fuse_gtest_files.py.
 sys.path.append(os.path.join(DEFAULT_GMOCK_ROOT_DIR, '../googletest/scripts'))
-import fuse_gtest_files
 gtest = fuse_gtest_files
 
-# Regex for matching '#include "gmock/..."'.
+# Regex for matching
+# '#include "gmock/..."'.
 INCLUDE_GMOCK_FILE_REGEX = re.compile(r'^\s*#\s*include\s*"(gmock/.+)"')
 
 # Where to find the source seed files.
@@ -98,6 +102,9 @@ def ValidateGMockRootDir(gmock_root):
   """Makes sure gmock_root points to a valid gmock root directory.
 
   The function aborts the program on failure.
+
+  Args:
+    gmock_root: A string with the mock root directory.
   """
 
   gtest.ValidateGTestRootDir(GetGTestRootDir(gmock_root))
@@ -109,6 +116,9 @@ def ValidateOutputDir(output_dir):
   """Makes sure output_dir points to a valid output directory.
 
   The function aborts the program on failure.
+
+  Args:
+    output_dir: A string representing the output directory.
   """
 
   gtest.VerifyOutputFile(output_dir, gtest.GTEST_H_OUTPUT)
@@ -119,8 +129,8 @@ def ValidateOutputDir(output_dir):
 def FuseGMockH(gmock_root, output_dir):
   """Scans folder gmock_root to generate gmock/gmock.h in output_dir."""
 
-  output_file = file(os.path.join(output_dir, GMOCK_H_OUTPUT), 'w')
-  processed_files = sets.Set()  # Holds all gmock headers we've processed.
+  output_file = open(os.path.join(output_dir, GMOCK_H_OUTPUT), 'w')
+  processed_files = frozenset()  # Holds all gmock headers we've processed.
 
   def ProcessFile(gmock_header_path):
     """Processes the given gmock header file."""
@@ -132,25 +142,29 @@ def FuseGMockH(gmock_root, output_dir):
     processed_files.add(gmock_header_path)
 
     # Reads each line in the given gmock header.
-    for line in file(os.path.join(gmock_root, gmock_header_path), 'r'):
-      m = INCLUDE_GMOCK_FILE_REGEX.match(line)
-      if m:
-        # It's '#include "gmock/..."' - let's process it recursively.
-        ProcessFile('include/' + m.group(1))
-      else:
-        m = gtest.INCLUDE_GTEST_FILE_REGEX.match(line)
-        if m:
-          # It's '#include "gtest/foo.h"'.  We translate it to
-          # "gtest/gtest.h", regardless of what foo is, since all
-          # gtest headers are fused into gtest/gtest.h.
 
-          # There is no need to #include gtest.h twice.
-          if not gtest.GTEST_H_SEED in processed_files:
-            processed_files.add(gtest.GTEST_H_SEED)
-            output_file.write('#include "%s"\n' % (gtest.GTEST_H_OUTPUT,))
+    with open(os.path.join(gmock_root, gmock_header_path), 'r') as fh:
+      for line in fh:
+        m = INCLUDE_GMOCK_FILE_REGEX.match(line)
+        if m:
+          # '#include "gmock/..."'
+          # - let's process it recursively.
+          ProcessFile('include/' + m.group(1))
         else:
-          # Otherwise we copy the line unchanged to the output file.
-          output_file.write(line)
+          m = gtest.INCLUDE_GTEST_FILE_REGEX.match(line)
+          if m:
+            # '#include "third_party/googletest/googletest/
+            # include/gtest/foo.h"'.
+            # We translate it to "gtest/gtest.h", regardless of what foo is,
+            # since all gtest headers are fused into gtest/gtest.h.
+
+            # There is no need to #include gtest.h twice.
+            if gtest.GTEST_H_SEED not in processed_files:
+              processed_files.add(gtest.GTEST_H_SEED)
+              output_file.write('#include "%s"\n' % (gtest.GTEST_H_OUTPUT,))
+          else:
+            # Otherwise we copy the line unchanged to the output file.
+            output_file.write(line)
 
   ProcessFile(GMOCK_H_SEED)
   output_file.close()
@@ -159,7 +173,7 @@ def FuseGMockH(gmock_root, output_dir):
 def FuseGMockAllCcToFile(gmock_root, output_file):
   """Scans folder gmock_root to fuse gmock-all.cc into output_file."""
 
-  processed_files = sets.Set()
+  processed_files = frozenset()
 
   def ProcessFile(gmock_source_file):
     """Processes the given gmock source file."""
@@ -171,32 +185,37 @@ def FuseGMockAllCcToFile(gmock_root, output_file):
     processed_files.add(gmock_source_file)
 
     # Reads each line in the given gmock source file.
-    for line in file(os.path.join(gmock_root, gmock_source_file), 'r'):
-      m = INCLUDE_GMOCK_FILE_REGEX.match(line)
-      if m:
-        # It's '#include "gmock/foo.h"'.  We treat it as '#include
-        # "gmock/gmock.h"', as all other gmock headers are being fused
-        # into gmock.h and cannot be #included directly.
 
-        # There is no need to #include "gmock/gmock.h" more than once.
-        if not GMOCK_H_SEED in processed_files:
-          processed_files.add(GMOCK_H_SEED)
-          output_file.write('#include "%s"\n' % (GMOCK_H_OUTPUT,))
-      else:
-        m = gtest.INCLUDE_GTEST_FILE_REGEX.match(line)
+    with open(os.path.join(gmock_root, gmock_source_file), 'r') as fh:
+      for line in fh:
+        m = INCLUDE_GMOCK_FILE_REGEX.match(line)
         if m:
-          # It's '#include "gtest/..."'.
-          # There is no need to #include gtest.h as it has been
-          # #included by gtest-all.cc.
-          pass
+          # '#include "gmock/foo.h"'.
+          # We treat it as '#include  "gmock/gmock.h"', as all other gmock
+          # headers are being fused into gmock.h and cannot be
+          # included directly.  No need to #include
+          # "third_party/googletest/googlemock/include/gmock/gmock.h"
+          # more than once.
+
+          if GMOCK_H_SEED not in processed_files:
+            processed_files.add(GMOCK_H_SEED)
+            output_file.write('#include "%s"\n' % (GMOCK_H_OUTPUT,))
         else:
-          m = gtest.INCLUDE_SRC_FILE_REGEX.match(line)
+          m = gtest.INCLUDE_GTEST_FILE_REGEX.match(line)
           if m:
-            # It's '#include "src/foo"' - let's process it recursively.
-            ProcessFile(m.group(1))
+            # '#include "gtest/..."'.
+            # There is no need to #include gtest.h as it has been
+            # #included by gtest-all.cc.
+
+            pass
           else:
-            # Otherwise we copy the line unchanged to the output file.
-            output_file.write(line)
+            m = gtest.INCLUDE_SRC_FILE_REGEX.match(line)
+            if m:
+              # It's '#include "src/foo"' - let's process it recursively.
+              ProcessFile(m.group(1))
+            else:
+              # Otherwise we copy the line unchanged to the output file.
+              output_file.write(line)
 
   ProcessFile(GMOCK_ALL_CC_SEED)
 
@@ -204,12 +223,12 @@ def FuseGMockAllCcToFile(gmock_root, output_file):
 def FuseGMockGTestAllCc(gmock_root, output_dir):
   """Scans folder gmock_root to generate gmock-gtest-all.cc in output_dir."""
 
-  output_file = file(os.path.join(output_dir, GMOCK_GTEST_ALL_CC_OUTPUT), 'w')
-  # First, fuse gtest-all.cc into gmock-gtest-all.cc.
-  gtest.FuseGTestAllCcToFile(GetGTestRootDir(gmock_root), output_file)
-  # Next, append fused gmock-all.cc to gmock-gtest-all.cc.
-  FuseGMockAllCcToFile(gmock_root, output_file)
-  output_file.close()
+  with open(os.path.join(output_dir, GMOCK_GTEST_ALL_CC_OUTPUT),
+            'w') as output_file:
+    # First, fuse gtest-all.cc into gmock-gtest-all.cc.
+    gtest.FuseGTestAllCcToFile(GetGTestRootDir(gmock_root), output_file)
+    # Next, append fused gmock-all.cc to gmock-gtest-all.cc.
+    FuseGMockAllCcToFile(gmock_root, output_file)
 
 
 def FuseGMock(gmock_root, output_dir):
@@ -232,7 +251,7 @@ def main():
     # fuse_gmock_files.py GMOCK_ROOT_DIR OUTPUT_DIR
     FuseGMock(sys.argv[1], sys.argv[2])
   else:
-    print __doc__
+    print(__doc__)
     sys.exit(1)
 
 
