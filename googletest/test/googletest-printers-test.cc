@@ -90,6 +90,18 @@ class BiggestIntConvertible {
   operator ::testing::internal::BiggestInt() const { return 42; }
 };
 
+// A parent class with two child classes. The parent and one of the kids have
+// stream operators.
+class ParentClass {};
+class ChildClassWithStreamOperator : public ParentClass {};
+class ChildClassWithoutStreamOperator : public ParentClass {};
+static void operator<<(std::ostream& os, const ParentClass&) {
+  os << "ParentClass";
+}
+static void operator<<(std::ostream& os, const ChildClassWithStreamOperator&) {
+  os << "ChildClassWithStreamOperator";
+}
+
 // A user-defined unprintable class template in the global namespace.
 template <typename T>
 class UnprintableTemplateInGlobal {
@@ -175,6 +187,17 @@ template <typename T>
 inline ::std::ostream& operator<<(::std::ostream& os,
                                   const StreamableTemplateInFoo<T>& x) {
   return os << "StreamableTemplateInFoo: " << x.value();
+}
+
+// A user-defined streamable type in a user namespace whose operator<< is
+// templated on the type of the output stream.
+struct TemplatedStreamableInFoo {};
+
+template <typename OutputStream>
+OutputStream& operator<<(OutputStream& os,
+                         const TemplatedStreamableInFoo& /*ts*/) {
+  os << "TemplatedStreamableInFoo";
+  return os;
 }
 
 // A user-defined streamable but recursivly-defined container type in
@@ -1199,6 +1222,20 @@ TEST(PrintStreamableTypeTest, InGlobalNamespace) {
 TEST(PrintStreamableTypeTest, TemplateTypeInUserNamespace) {
   EXPECT_EQ("StreamableTemplateInFoo: 0",
             Print(::foo::StreamableTemplateInFoo<int>()));
+}
+
+TEST(PrintStreamableTypeTest, TypeInUserNamespaceWithTemplatedStreamOperator) {
+  EXPECT_EQ("TemplatedStreamableInFoo",
+            Print(::foo::TemplatedStreamableInFoo()));
+}
+
+TEST(PrintStreamableTypeTest, SubclassUsesSuperclassStreamOperator) {
+  ParentClass parent;
+  ChildClassWithStreamOperator child_stream;
+  ChildClassWithoutStreamOperator child_no_stream;
+  EXPECT_EQ("ParentClass", Print(parent));
+  EXPECT_EQ("ChildClassWithStreamOperator", Print(child_stream));
+  EXPECT_EQ("ParentClass", Print(child_no_stream));
 }
 
 // Tests printing a user-defined recursive container type that has a <<

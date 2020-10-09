@@ -192,42 +192,33 @@ struct PointerPrinter {
   }
 };
 
-namespace internal_stream {
+namespace internal_stream_operator_without_lexical_name_lookup {
 
-struct Sentinel;
-template <typename Char, typename CharTraits, typename T>
-Sentinel* operator<<(::std::basic_ostream<Char, CharTraits>& os, const T& x);
-
-// Check if the user has a user-defined operator<< for their type.
-//
-// We put this in its own namespace to inject a custom operator<< that allows us
-// to probe the type's operator.
-//
-// Note that this operator<< takes a generic std::basic_ostream<Char,
-// CharTraits> type instead of the more restricted std::ostream.  If
-// we define it to take an std::ostream instead, we'll get an
-// "ambiguous overloads" compiler error when trying to print a type
-// Foo that supports streaming to std::basic_ostream<Char,
-// CharTraits>, as the compiler cannot tell whether
-// operator<<(std::ostream&, const T&) or
-// operator<<(std::basic_stream<Char, CharTraits>, const Foo&) is more
-// specific.
-template <typename T>
-constexpr bool UseStreamOperator() {
-  return !std::is_same<decltype(std::declval<std::ostream&>()
-                                << std::declval<const T&>()),
-                       Sentinel*>::value;
-}
-
-}  // namespace internal_stream
+// The presence of an operator<< here will terminate lexical scope lookup
+// straight away (even though it cannot be a match because of its argument
+// types). Thus, the two operator<< calls in StreamPrinter will find only ADL
+// candidates.
+struct LookupBlocker {};
+void operator<<(LookupBlocker, LookupBlocker);
 
 struct StreamPrinter {
-  template <typename T, typename = typename std::enable_if<
-                            internal_stream::UseStreamOperator<T>()>::type>
+  template <typename T,
+            // Don't accept member pointers here. We'd print them via implicit
+            // conversion to bool, which isn't useful.
+            typename = typename std::enable_if<
+                !std::is_member_pointer<T>::value>::type,
+            // Only accept types for which we can find a streaming operator via
+            // ADL (possibly involving implicit conversions).
+            typename = decltype(std::declval<std::ostream&>()
+                                << std::declval<const T&>())>
   static void PrintValue(const T& value, ::std::ostream* os) {
+    // Call streaming operator found by ADL, possibly with implicit conversions
+    // of the arguments.
     *os << value;
   }
 };
+
+}  // namespace internal_stream_operator_without_lexical_name_lookup
 
 struct ProtobufPrinter {
   // We print a protobuf using its ShortDebugString() when the string
@@ -308,7 +299,8 @@ template <typename T>
 void PrintWithFallback(const T& value, ::std::ostream* os) {
   using Printer = typename FindFirstPrinter<
       T, void, ContainerPrinter, FunctionPointerPrinter, PointerPrinter,
-      StreamPrinter, ProtobufPrinter, ConvertibleToIntegerPrinter,
+      internal_stream_operator_without_lexical_name_lookup::StreamPrinter,
+      ProtobufPrinter, ConvertibleToIntegerPrinter,
       ConvertibleToStringViewPrinter, FallbackPrinter>::type;
   Printer::PrintValue(value, os);
 }
