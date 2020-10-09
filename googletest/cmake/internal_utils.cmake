@@ -244,7 +244,12 @@ function(cxx_executable name dir libs)
 endfunction()
 
 # Sets PYTHONINTERP_FOUND and PYTHON_EXECUTABLE.
-find_package(PythonInterp)
+find_package (Python2 COMPONENTS Interpreter)
+if (Python2_FOUND)
+    set(PYTHON_EXECUTABLE "${_Python2_EXECUTABLE}")
+    set(PYTHONINTERP_FOUND ON)
+endif()
+
 
 # cxx_test_with_flags(name cxx_flags libs srcs...)
 #
@@ -297,7 +302,7 @@ function(py_test name)
         # don't have subdirs below CMAKE_CURRENT_BINARY_DIR.
         if (WIN32 OR MINGW)
           add_test(NAME ${name}
-            COMMAND powershell -Command ${CMAKE_CURRENT_BINARY_DIR}/RunTest.ps1
+            COMMAND powershell -Command ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/RunTest.ps1
               ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/${name}.py
               --build_dir=${CMAKE_CURRENT_BINARY_DIR} ${ARGN})
         else()
