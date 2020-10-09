@@ -64,6 +64,7 @@ TEST(CommandLineFlagsTest, CanBeAccessedInCodeOnceGTestHIsIncluded) {
 #include <cstdint>
 #include <map>
 #include <ostream>
+#include <string>
 #include <type_traits>
 #include <unordered_set>
 #include <vector>
@@ -7531,6 +7532,142 @@ TEST(FlatTuple, Basic) {
 
   tuple.Get<1>() = 5.1;
   EXPECT_EQ(5.1, tuple.Get<1>());
+}
+
+namespace {
+std::string AddIntToString(int i, const std::string& s) {
+  return s + std::to_string(i);
+}
+}  // namespace
+
+TEST(FlatTuple, Apply) {
+  using testing::internal::FlatTuple;
+
+  FlatTuple<int, std::string> tuple{5, "Hello"};
+
+  // Lambda.
+  EXPECT_TRUE(tuple.Apply([](int i, const std::string& s) -> bool {
+    return i == static_cast<int>(s.size());
+  }));
+
+  // Function.
+  EXPECT_EQ(tuple.Apply(AddIntToString), "Hello5");
+
+  // Mutating operations.
+  tuple.Apply([](int& i, std::string& s) {
+    ++i;
+    s += s;
+  });
+  EXPECT_EQ(tuple.Get<0>(), 6);
+  EXPECT_EQ(tuple.Get<1>(), "HelloHello");
+}
+
+struct ConstructionCounting {
+  ConstructionCounting() { ++default_ctor_calls; }
+  ~ConstructionCounting() { ++dtor_calls; }
+  ConstructionCounting(const ConstructionCounting&) { ++copy_ctor_calls; }
+  ConstructionCounting(ConstructionCounting&&) noexcept { ++move_ctor_calls; }
+  ConstructionCounting& operator=(const ConstructionCounting&) {
+    ++copy_assignment_calls;
+    return *this;
+  }
+  ConstructionCounting& operator=(ConstructionCounting&&) noexcept {
+    ++move_assignment_calls;
+    return *this;
+  }
+
+  static void Reset() {
+    default_ctor_calls = 0;
+    dtor_calls = 0;
+    copy_ctor_calls = 0;
+    move_ctor_calls = 0;
+    copy_assignment_calls = 0;
+    move_assignment_calls = 0;
+  }
+
+  static int default_ctor_calls;
+  static int dtor_calls;
+  static int copy_ctor_calls;
+  static int move_ctor_calls;
+  static int copy_assignment_calls;
+  static int move_assignment_calls;
+};
+
+int ConstructionCounting::default_ctor_calls = 0;
+int ConstructionCounting::dtor_calls = 0;
+int ConstructionCounting::copy_ctor_calls = 0;
+int ConstructionCounting::move_ctor_calls = 0;
+int ConstructionCounting::copy_assignment_calls = 0;
+int ConstructionCounting::move_assignment_calls = 0;
+
+TEST(FlatTuple, ConstructorCalls) {
+  using testing::internal::FlatTuple;
+
+  // Default construction.
+  ConstructionCounting::Reset();
+  { FlatTuple<ConstructionCounting> tuple; }
+  EXPECT_EQ(ConstructionCounting::default_ctor_calls, 1);
+  EXPECT_EQ(ConstructionCounting::dtor_calls, 1);
+  EXPECT_EQ(ConstructionCounting::copy_ctor_calls, 0);
+  EXPECT_EQ(ConstructionCounting::move_ctor_calls, 0);
+  EXPECT_EQ(ConstructionCounting::copy_assignment_calls, 0);
+  EXPECT_EQ(ConstructionCounting::move_assignment_calls, 0);
+
+  // Copy construction.
+  ConstructionCounting::Reset();
+  {
+    ConstructionCounting elem;
+    FlatTuple<ConstructionCounting> tuple{elem};
+  }
+  EXPECT_EQ(ConstructionCounting::default_ctor_calls, 1);
+  EXPECT_EQ(ConstructionCounting::dtor_calls, 2);
+  EXPECT_EQ(ConstructionCounting::copy_ctor_calls, 1);
+  EXPECT_EQ(ConstructionCounting::move_ctor_calls, 0);
+  EXPECT_EQ(ConstructionCounting::copy_assignment_calls, 0);
+  EXPECT_EQ(ConstructionCounting::move_assignment_calls, 0);
+
+  // Move construction.
+  ConstructionCounting::Reset();
+  { FlatTuple<ConstructionCounting> tuple{ConstructionCounting{}}; }
+  EXPECT_EQ(ConstructionCounting::default_ctor_calls, 1);
+  EXPECT_EQ(ConstructionCounting::dtor_calls, 2);
+  EXPECT_EQ(ConstructionCounting::copy_ctor_calls, 0);
+  EXPECT_EQ(ConstructionCounting::move_ctor_calls, 1);
+  EXPECT_EQ(ConstructionCounting::copy_assignment_calls, 0);
+  EXPECT_EQ(ConstructionCounting::move_assignment_calls, 0);
+
+  // Copy assignment.
+  // TODO(ofats): it should be testing assignment operator of FlatTuple, not its
+  // elements
+  ConstructionCounting::Reset();
+  {
+    FlatTuple<ConstructionCounting> tuple;
+    ConstructionCounting elem;
+    tuple.Get<0>() = elem;
+  }
+  EXPECT_EQ(ConstructionCounting::default_ctor_calls, 2);
+  EXPECT_EQ(ConstructionCounting::dtor_calls, 2);
+  EXPECT_EQ(ConstructionCounting::copy_ctor_calls, 0);
+  EXPECT_EQ(ConstructionCounting::move_ctor_calls, 0);
+  EXPECT_EQ(ConstructionCounting::copy_assignment_calls, 1);
+  EXPECT_EQ(ConstructionCounting::move_assignment_calls, 0);
+
+  // Move assignment.
+  // TODO(ofats): it should be testing assignment operator of FlatTuple, not its
+  // elements
+  ConstructionCounting::Reset();
+  {
+    FlatTuple<ConstructionCounting> tuple;
+    tuple.Get<0>() = ConstructionCounting{};
+  }
+  EXPECT_EQ(ConstructionCounting::default_ctor_calls, 2);
+  EXPECT_EQ(ConstructionCounting::dtor_calls, 2);
+  EXPECT_EQ(ConstructionCounting::copy_ctor_calls, 0);
+  EXPECT_EQ(ConstructionCounting::move_ctor_calls, 0);
+  EXPECT_EQ(ConstructionCounting::copy_assignment_calls, 0);
+  EXPECT_EQ(ConstructionCounting::move_assignment_calls, 1);
+
+  ConstructionCounting::Reset();
 }
 
 TEST(FlatTuple, ManyTypes) {
