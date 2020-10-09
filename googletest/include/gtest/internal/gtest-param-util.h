@@ -818,10 +818,15 @@ internal::ParamGenerator<typename Container::value_type> ValuesIn(
 namespace internal {
 // Used in the Values() function to provide polymorphic capabilities.
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4100)
+#endif
+
 template <typename... Ts>
 class ValueArray {
  public:
-  ValueArray(Ts... v) : v_{std::move(v)...} {}
+  explicit ValueArray(Ts... v) : v_(std::move(v)...) {}
 
   template <typename T>
   operator ParamGenerator<T>() const {  // NOLINT
@@ -836,6 +841,10 @@ class ValueArray {
 
   FlatTuple<Ts...> v_;
 };
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 template <typename... T>
 class CartesianProductGenerator
