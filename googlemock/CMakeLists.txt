@@ -100,8 +100,10 @@ if (MSVC)
 else()
   cxx_library(gmock "${cxx_strict}" src/gmock-all.cc)
   target_link_libraries(gmock PUBLIC gtest)
+  set_target_properties(gmock PROPERTIES VERSION ${GOOGLETEST_VERSION})
   cxx_library(gmock_main "${cxx_strict}" src/gmock_main.cc)
   target_link_libraries(gmock_main PUBLIC gmock)
+  set_target_properties(gmock_main PROPERTIES VERSION ${GOOGLETEST_VERSION})
 endif()
 # If the CMake version supports it, attach header directory information
 # to the targets for when we are part of a parent build (ie being pulled
@@ -166,7 +168,6 @@ $env:Path = \"$project_bin;$env:Path\"
   cxx_test(gmock_ex_test gmock_main)
   cxx_test(gmock-function-mocker_test gmock_main)
   cxx_test(gmock-generated-actions_test gmock_main)
-  cxx_test(gmock-generated-matchers_test gmock_main)
   cxx_test(gmock-internal-utils_test gmock_main)
   cxx_test(gmock-matchers_test gmock_main)
   cxx_test(gmock-more-actions_test gmock_main)

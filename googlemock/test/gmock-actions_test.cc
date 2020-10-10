@@ -32,11 +32,13 @@
 //
 // This file tests the built-in actions.
 
-// Silence C4800 (C4800: 'int *const ': forcing value
-// to bool 'true' or 'false') for MSVC 15
+// Silence C4100 (unreferenced formal parameter) for MSVC
 #ifdef _MSC_VER
-#if _MSC_VER == 1900
 #  pragma warning(push)
+#  pragma warning(disable:4100)
+#if _MSC_VER == 1900
+// and silence C4800 (C4800: 'int *const ': forcing value
+// to bool 'true' or 'false') for MSVC 15
 #  pragma warning(disable:4800)
 #endif
 #endif
@@ -1550,6 +1552,26 @@ TEST(MoveOnlyArgumentsTest, ReturningActions) {
   EXPECT_EQ(x, 3);
 }
 
+ACTION(ReturnArity) {
+  return std::tuple_size<args_type>::value;
+}
+
+TEST(ActionMacro, LargeArity) {
+  EXPECT_EQ(
+      1, testing::Action<int(int)>(ReturnArity()).Perform(std::make_tuple(0)));
+  EXPECT_EQ(
+      10,
+      testing::Action<int(int, int, int, int, int, int, int, int, int, int)>(
+          ReturnArity())
+          .Perform(std::make_tuple(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)));
+  EXPECT_EQ(
+      20,
+      testing::Action<int(int, int, int, int, int, int, int, int, int, int, int,
+                          int, int, int, int, int, int, int, int, int)>(
+          ReturnArity())
+          .Perform(std::make_tuple(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13,
+                                   14, 15, 16, 17, 18, 19)));
+}
 
 }  // Unnamed namespace
 

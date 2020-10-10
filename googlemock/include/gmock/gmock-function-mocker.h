@@ -124,7 +124,7 @@ using internal::FunctionMocker;
       ::testing::tuple_size<typename ::testing::internal::Function<    \
               __VA_ARGS__>::ArgumentTuple>::value == _N,               \
       "This method does not take " GMOCK_PP_STRINGIZE(                 \
-          _N) " arguments. Parenthesize all types with unproctected commas.")
+          _N) " arguments. Parenthesize all types with unprotected commas.")
 
 #define GMOCK_INTERNAL_ASSERT_VALID_SPEC(_Spec) \
   GMOCK_PP_FOR_EACH(GMOCK_INTERNAL_ASSERT_VALID_SPEC_ELEMENT, ~, _Spec)
@@ -234,7 +234,7 @@ using internal::FunctionMocker;
   GMOCK_INTERNAL_GET_VALUE_CALLTYPE_I(          \
       GMOCK_PP_CAT(GMOCK_INTERNAL_IS_CALLTYPE_HELPER_, _arg))
 #define GMOCK_INTERNAL_GET_VALUE_CALLTYPE_I(_arg) \
-  GMOCK_PP_CAT(GMOCK_PP_IDENTITY, _arg)
+  GMOCK_PP_IDENTITY _arg
 
 #define GMOCK_INTERNAL_IS_CALLTYPE_HELPER_Calltype
 

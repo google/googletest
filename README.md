@@ -25,9 +25,6 @@ This repository is a merger of the formerly separate GoogleTest and GoogleMock
 projects. These were so closely related that it makes sense to maintain and
 release them together.
 
-Please subscribe to the mailing list at googletestframework@googlegroups.com for
-questions, discussions, and development.
-
 ### Getting started:
 
 The information for **Google Test** is available in the
@@ -76,8 +73,6 @@ following notable projects:
 *   [Protocol Buffers](https://github.com/google/protobuf), Google's data
     interchange format.
 *   The [OpenCV](http://opencv.org/) computer vision library.
-*   [tiny-dnn](https://github.com/tiny-dnn/tiny-dnn): header only,
-    dependency-free deep learning framework in C++11.
 
 ## Related Open Source Projects
 
@@ -85,7 +80,7 @@ following notable projects:
 automated test-runner and Graphical User Interface with powerful features for
 Windows and Linux platforms.
 
-[Google Test UI](https://github.com/ospector/gtest-gbar) is test runner that
+[Google Test UI](https://github.com/ospector/gtest-gbar) is a test runner that
 runs your test binary, allows you to track its progress via a progress bar, and
 displays a list of test failures. Clicking on one shows failure text. Google
 Test UI is written in C#.
@@ -102,9 +97,9 @@ runs tests from your binary in parallel to provide significant speed-up.
 is a VS Code extension allowing to view Google Tests in a tree view, and
 run/debug your tests.
 
-[Catch2 and Google Test Explorer](https://github.com/matepek/vscode-catch2-test-adapter)
-is a VS Code extension allowing to view Google Tests in a tree view, and
-run/debug your tests.
+[C++ TestMate](https://github.com/matepek/vscode-catch2-test-adapter) is a VS
+Code extension allowing to view Google Tests in a tree view, and run/debug your
+tests.
 
 [Cornichon](https://pypi.org/project/cornichon/) is a small Gherkin DSL parser
 that generates stub code for Google Test.
@@ -113,8 +108,9 @@ that generates stub code for Google Test.
 
 Google Test is designed to have fairly minimal requirements to build and use
 with your projects, but there are some. If you notice any problems on your
-platform, please notify
-[googletestframework@googlegroups.com](https://groups.google.com/forum/#!forum/googletestframework).
+platform, please file an issue on the
+[GoogleTest GitHub Issue Tracker](https://github.com/google/googletest/issues).
+
 Patches for fixing them are welcome!
 
 ### Build Requirements
@@ -126,7 +122,7 @@ package:
     the build system that googletest is using internally and tests against.
     CMake is community-supported.
 
-*   a C++11-standard-compliant compiler
+*   A C++11-standard-compliant compiler
 
 ## Contributing change
 

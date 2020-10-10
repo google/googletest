@@ -36,6 +36,8 @@ package(default_visibility = ["//visibility:public"])
 
 licenses(["notice"])
 
+exports_files(["LICENSE"])
+
 config_setting(
     name = "windows",
     constraint_values = ["@bazel_tools//platforms:windows"],
@@ -103,6 +105,7 @@ cc_library(
             "@com_google_absl//absl/debugging:stacktrace",
             "@com_google_absl//absl/debugging:symbolize",
             "@com_google_absl//absl/strings",
+            "@com_google_absl//absl/types:any",
             "@com_google_absl//absl/types:optional",
             "@com_google_absl//absl/types:variant",
         ],

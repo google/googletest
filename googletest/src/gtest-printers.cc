@@ -44,6 +44,7 @@
 #include "gtest/gtest-printers.h"
 #include <stdio.h>
 #include <cctype>
+#include <cstdint>
 #include <cwchar>
 #include <ostream>  // NOLINT
 #include <string>
@@ -249,6 +250,11 @@ void PrintTo(signed char c, ::std::ostream* os) {
 // code otherwise and also as its code.  L'\0' is printed as "L'\\0'".
 void PrintTo(wchar_t wc, ostream* os) {
   PrintCharAndCodeTo<wchar_t>(wc, os);
+}
+
+void PrintTo(char32_t c, ::std::ostream* os) {
+  *os << std::hex << "U+" << std::uppercase << std::setfill('0') << std::setw(4)
+      << static_cast<uint32_t>(c);
 }
 
 // Prints the given array of characters to the ostream.  CharType must be either

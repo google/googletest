@@ -46,16 +46,42 @@ GTEST_LIST_TESTS_FLAG = '--gtest_list_tests'
 GTEST_OUTPUT_FLAG = '--gtest_output'
 
 EXPECTED_XML = """<\?xml version="1.0" encoding="UTF-8"\?>
-<testsuites tests="2" name="AllTests">
+<testsuites tests="16" name="AllTests">
   <testsuite name="FooTest" tests="2">
     <testcase name="Test1" file=".*gtest_list_output_unittest_.cc" line="43" />
     <testcase name="Test2" file=".*gtest_list_output_unittest_.cc" line="45" />
+  </testsuite>
+  <testsuite name="FooTestFixture" tests="2">
+    <testcase name="Test3" file=".*gtest_list_output_unittest_.cc" line="48" />
+    <testcase name="Test4" file=".*gtest_list_output_unittest_.cc" line="49" />
+  </testsuite>
+  <testsuite name="TypedTest/0" tests="2">
+    <testcase name="Test7" type_param="int" file=".*gtest_list_output_unittest_.cc" line="61" />
+    <testcase name="Test8" type_param="int" file=".*gtest_list_output_unittest_.cc" line="62" />
+  </testsuite>
+  <testsuite name="TypedTest/1" tests="2">
+    <testcase name="Test7" type_param="bool" file=".*gtest_list_output_unittest_.cc" line="61" />
+    <testcase name="Test8" type_param="bool" file=".*gtest_list_output_unittest_.cc" line="62" />
+  </testsuite>
+  <testsuite name="Single/TypeParameterizedTestSuite/0" tests="2">
+    <testcase name="Test9" type_param="int" file=".*gtest_list_output_unittest_.cc" line="69" />
+    <testcase name="Test10" type_param="int" file=".*gtest_list_output_unittest_.cc" line="70" />
+  </testsuite>
+  <testsuite name="Single/TypeParameterizedTestSuite/1" tests="2">
+    <testcase name="Test9" type_param="bool" file=".*gtest_list_output_unittest_.cc" line="69" />
+    <testcase name="Test10" type_param="bool" file=".*gtest_list_output_unittest_.cc" line="70" />
+  </testsuite>
+  <testsuite name="ValueParam/ValueParamTest" tests="4">
+    <testcase name="Test5/0" value_param="33" file=".*gtest_list_output_unittest_.cc" line="52" />
+    <testcase name="Test5/1" value_param="42" file=".*gtest_list_output_unittest_.cc" line="52" />
+    <testcase name="Test6/0" value_param="33" file=".*gtest_list_output_unittest_.cc" line="53" />
+    <testcase name="Test6/1" value_param="42" file=".*gtest_list_output_unittest_.cc" line="53" />
   </testsuite>
 </testsuites>
 """
 
 EXPECTED_JSON = """{
-  "tests": 2,
+  "tests": 16,
   "name": "AllTests",
   "testsuites": \[
     {
@@ -71,6 +97,124 @@ EXPECTED_JSON = """{
           "name": "Test2",
           "file": ".*gtest_list_output_unittest_.cc",
           "line": 45
+        }
+      \]
+    },
+    {
+      "name": "FooTestFixture",
+      "tests": 2,
+      "testsuite": \[
+        {
+          "name": "Test3",
+          "file": ".*gtest_list_output_unittest_.cc",
+          "line": 48
+        },
+        {
+          "name": "Test4",
+          "file": ".*gtest_list_output_unittest_.cc",
+          "line": 49
+        }
+      \]
+    },
+    {
+      "name": "TypedTest\\\\/0",
+      "tests": 2,
+      "testsuite": \[
+        {
+          "name": "Test7",
+          "type_param": "int",
+          "file": ".*gtest_list_output_unittest_.cc",
+          "line": 61
+        },
+        {
+          "name": "Test8",
+          "type_param": "int",
+          "file": ".*gtest_list_output_unittest_.cc",
+          "line": 62
+        }
+      \]
+    },
+    {
+      "name": "TypedTest\\\\/1",
+      "tests": 2,
+      "testsuite": \[
+        {
+          "name": "Test7",
+          "type_param": "bool",
+          "file": ".*gtest_list_output_unittest_.cc",
+          "line": 61
+        },
+        {
+          "name": "Test8",
+          "type_param": "bool",
+          "file": ".*gtest_list_output_unittest_.cc",
+          "line": 62
+        }
+      \]
+    },
+    {
+      "name": "Single\\\\/TypeParameterizedTestSuite\\\\/0",
+      "tests": 2,
+      "testsuite": \[
+        {
+          "name": "Test9",
+          "type_param": "int",
+          "file": ".*gtest_list_output_unittest_.cc",
+          "line": 69
+        },
+        {
+          "name": "Test10",
+          "type_param": "int",
+          "file": ".*gtest_list_output_unittest_.cc",
+          "line": 70
+        }
+      \]
+    },
+    {
+      "name": "Single\\\\/TypeParameterizedTestSuite\\\\/1",
+      "tests": 2,
+      "testsuite": \[
+        {
+          "name": "Test9",
+          "type_param": "bool",
+          "file": ".*gtest_list_output_unittest_.cc",
+          "line": 69
+        },
+        {
+          "name": "Test10",
+          "type_param": "bool",
+          "file": ".*gtest_list_output_unittest_.cc",
+          "line": 70
+        }
+      \]
+    },
+    {
+      "name": "ValueParam\\\\/ValueParamTest",
+      "tests": 4,
+      "testsuite": \[
+        {
+          "name": "Test5\\\\/0",
+          "value_param": "33",
+          "file": ".*gtest_list_output_unittest_.cc",
+          "line": 52
+        },
+        {
+          "name": "Test5\\\\/1",
+          "value_param": "42",
+          "file": ".*gtest_list_output_unittest_.cc",
+          "line": 52
+        },
+        {
+          "name": "Test6\\\\/0",
+          "value_param": "33",
+          "file": ".*gtest_list_output_unittest_.cc",
+          "line": 53
+        },
+        {
+          "name": "Test6\\\\/1",
+          "value_param": "42",
+          "file": ".*gtest_list_output_unittest_.cc",
+          "line": 53
         }
       \]
     }
@@ -114,8 +258,9 @@ class GTestListTestsOutputUnitTest(gtest_test_utils.TestCase):
     p = gtest_test_utils.Subprocess(
         command, env=environ_copy, working_dir=gtest_test_utils.GetTempDir())
 
-    self.assert_(p.exited)
-    self.assertEquals(0, p.exit_code)
+    self.assertTrue(p.exited)
+    self.assertEqual(0, p.exit_code)
+    self.assertTrue(os.path.isfile(file_path))
     with open(file_path) as f:
       result = f.read()
     return result
@@ -128,7 +273,7 @@ class GTestListTestsOutputUnitTest(gtest_test_utils.TestCase):
     for actual_line in actual_lines:
       expected_line = expected_lines[line_count]
       expected_line_re = re.compile(expected_line.strip())
-      self.assert_(
+      self.assertTrue(
           expected_line_re.match(actual_line.strip()),
           ('actual output of "%s",\n'
            'which does not match expected regex of "%s"\n'

@@ -3,12 +3,14 @@
 <!-- GOOGLETEST_CM0012 DO NOT DELETE -->
 
 You can find recipes for using gMock here. If you haven't yet, please read
-[this](for_dummies.md) first to make sure you understand the basics.
+[the dummy guide](for_dummies.md) first to make sure you understand the basics.
 
 **Note:** gMock lives in the `testing` name space. For readability, it is
 recommended to write `using ::testing::Foo;` once in your file before using the
 name `Foo` defined by gMock. We omit such `using` statements in this section for
 brevity, but you should do it in your own code.
+
+<!-- GOOGLETEST_CM0035 DO NOT DELETE -->
 
 ## Creating Mock Classes
 
@@ -281,9 +283,11 @@ recipe for [mocking non-virtual methods](#MockingNonVirtualMethods).
 
 ### Old-Style `MOCK_METHODn` Macros
 
-Before the generic `MOCK_METHOD` macro was introduced, mocks where created using
-a family of macros collectively called `MOCK_METHODn`. These macros are still
-supported, though migration to the new `MOCK_METHOD` is recommended.
+Before the generic `MOCK_METHOD` macro
+[was introduced in 2018](https://github.com/google/googletest/commit/c5f08bf91944ce1b19bcf414fa1760e69d20afc2),
+mocks where created using a family of macros collectively called `MOCK_METHODn`.
+These macros are still supported, though migration to the new `MOCK_METHOD` is
+recommended.
 
 The macros in the `MOCK_METHODn` family differ from `MOCK_METHOD`:
 
@@ -410,8 +414,8 @@ NOTE: `NiceMock` and `StrictMock` only affects *uninteresting* calls (calls of
 methods with expectations, but they don't match). See
 [Understanding Uninteresting vs Unexpected Calls](#uninteresting-vs-unexpected).
 
-There are some caveats though (I dislike them just as much as the next guy, but
-sadly they are side effects of C++'s limitations):
+There are some caveats though (sadly they are side effects of C++'s
+limitations):
 
 1.  `NiceMock<MockFoo>` and `StrictMock<MockFoo>` only work for mock methods
     defined using the `MOCK_METHOD` macro **directly** in the `MockFoo` class.
@@ -777,28 +781,12 @@ perhaps your test doesn't need to mock `Concrete()` at all (but it would be
 oh-so painful to have to define a new mock class whenever you don't need to mock
 one of its methods).
 
-The trick is to leave a back door in your mock class for accessing the real
-methods in the base class:
-
-```cpp
-class MockFoo : public Foo {
- public:
-  // Mocking a pure method.
-  MOCK_METHOD(void, Pure, (int n), (override));
-  // Mocking a concrete method.  Foo::Concrete() is shadowed.
-  MOCK_METHOD(int, Concrete, (const char* str), (override));
-
-  // Use this to call Concrete() defined in Foo.
-  int FooConcrete(const char* str) { return Foo::Concrete(str); }
-};
-```
-
-Now, you can call `Foo::Concrete()` inside an action by:
+You can call `Foo::Concrete()` inside an action by:
 
 ```cpp
 ...
   EXPECT_CALL(foo, Concrete).WillOnce([&foo](const char* str) {
-    return foo.FooConcrete(str);
+    return foo.Foo::Concrete(str);
   });
 ```
 
@@ -807,7 +795,7 @@ or tell the mock object that you don't want to mock `Concrete()`:
 ```cpp
 ...
   ON_CALL(foo, Concrete).WillByDefault([&foo](const char* str) {
-    return foo.FooConcrete(str);
+    return foo.Foo::Concrete(str);
   });
 ```
 
@@ -1144,10 +1132,11 @@ Hamcrest project, which adds `assertThat()` to JUnit.
 
 ### Using Predicates as Matchers
 
-gMock provides a [built-in set](#MatcherList) of matchers. In case you find them
-lacking, you can use an arbitrary unary predicate function or functor as a
-matcher - as long as the predicate accepts a value of the type you want. You do
-this by wrapping the predicate inside the `Truly()` function, for example:
+gMock provides a [built-in set](cheat_sheet.md#MatcherList) of matchers. In case
+you find them lacking, you can use an arbitrary unary predicate function or
+functor as a matcher - as long as the predicate accepts a value of the type you
+want. You do this by wrapping the predicate inside the `Truly()` function, for
+example:
 
 ```cpp
 using ::testing::Truly;
@@ -1180,15 +1169,14 @@ executed. Just tell gMock that it should save a reference to `bar`, instead of a
 copy of it. Here's how:
 
 ```cpp
-using ::testing::ByRef;
 using ::testing::Eq;
 using ::testing::Lt;
 ...
   // Expects that Foo()'s argument == bar.
-  EXPECT_CALL(mock_obj, Foo(Eq(ByRef(bar))));
+  EXPECT_CALL(mock_obj, Foo(Eq(std::ref(bar))));
 
   // Expects that Foo()'s argument < bar.
-  EXPECT_CALL(mock_obj, Foo(Lt(ByRef(bar))));
+  EXPECT_CALL(mock_obj, Foo(Lt(std::ref(bar))));
 ```
 
 Remember: if you do this, don't change `bar` after the `EXPECT_CALL()`, or the
@@ -1675,11 +1663,11 @@ times from calling it with the wrong arguments.
 
 ### Expecting Ordered Calls {#OrderedCalls}
 
-Although an `EXPECT_CALL()` statement defined earlier takes precedence when
-gMock tries to match a function call with an expectation, by default calls don't
-have to happen in the order `EXPECT_CALL()` statements are written. For example,
-if the arguments match the matchers in the third `EXPECT_CALL()`, but not those
-in the first two, then the third expectation will be used.
+Although an `EXPECT_CALL()` statement defined later takes precedence when gMock
+tries to match a function call with an expectation, by default calls don't have
+to happen in the order `EXPECT_CALL()` statements are written. For example, if
+the arguments match the matchers in the second `EXPECT_CALL()`, but not those in
+the first and third, then the second expectation will be used.
 
 If you would rather have all calls occur in the order of the expectations, put
 the `EXPECT_CALL()` statements in a block where you define a variable of type
@@ -1851,10 +1839,9 @@ Methods"). However, gMock doesn't let you use `ReturnRef()` in a mock function
 whose return type is not a reference, as doing that usually indicates a user
 error. So, what shall you do?
 
-Though you may be tempted, DO NOT use `ByRef()`:
+Though you may be tempted, DO NOT use `std::ref()`:
 
 ```cpp
-using testing::ByRef;
 using testing::Return;
 
 class MockFoo : public Foo {
@@ -1865,7 +1852,7 @@ class MockFoo : public Foo {
   int x = 0;
   MockFoo foo;
   EXPECT_CALL(foo, GetValue())
-      .WillRepeatedly(Return(ByRef(x)));  // Wrong!
+      .WillRepeatedly(Return(std::ref(x)));  // Wrong!
   x = 42;
   EXPECT_EQ(42, foo.GetValue());
 ```
@@ -1881,9 +1868,9 @@ Expected: 42
 The reason is that `Return(*value*)` converts `value` to the actual return type
 of the mock function at the time when the action is *created*, not when it is
 *executed*. (This behavior was chosen for the action to be safe when `value` is
-a proxy object that references some temporary objects.) As a result, `ByRef(x)`
-is converted to an `int` value (instead of a `const int&`) when the expectation
-is set, and `Return(ByRef(x))` will always return 0.
+a proxy object that references some temporary objects.) As a result,
+`std::ref(x)` is converted to an `int` value (instead of a `const int&`) when
+the expectation is set, and `Return(std::ref(x))` will always return 0.
 
 `ReturnPointee(pointer)` was provided to solve this problem specifically. It
 returns the value pointed to by `pointer` at the time the action is *executed*:
@@ -2128,7 +2115,7 @@ class MockFoo : public Foo {
   DefaultValue<Bar>::Clear();
 ```
 
-Please note that changing the default value for a type can make you tests hard
+Please note that changing the default value for a type can make your tests hard
 to understand. We recommend you to use this feature judiciously. For example,
 you may want to make sure the `Set()` and `Clear()` calls are right next to the
 code that uses your mock.
@@ -2376,7 +2363,7 @@ using ::testing::InvokeArgument;
 ```
 
 What if the callable takes an argument by reference? No problem - just wrap it
-inside `ByRef()`:
+inside `std::ref()`:
 
 ```cpp
   ...
@@ -2385,20 +2372,19 @@ inside `ByRef()`:
               (override));
   ...
   using ::testing::_;
-  using ::testing::ByRef;
   using ::testing::InvokeArgument;
   ...
   MockFoo foo;
   Helper helper;
   ...
   EXPECT_CALL(foo, Bar(_))
-      .WillOnce(InvokeArgument<0>(5, ByRef(helper)));
-      // ByRef(helper) guarantees that a reference to helper, not a copy of it,
-      // will be passed to the callback.
+      .WillOnce(InvokeArgument<0>(5, std::ref(helper)));
+      // std::ref(helper) guarantees that a reference to helper, not a copy of
+      // it, will be passed to the callback.
 ```
 
 What if the callable takes an argument by reference and we do **not** wrap the
-argument in `ByRef()`? Then `InvokeArgument()` will *make a copy* of the
+argument in `std::ref()`? Then `InvokeArgument()` will *make a copy* of the
 argument, and pass a *reference to the copy*, instead of a reference to the
 original value, to the callable. This is especially handy when the argument is a
 temporary value:
@@ -2686,7 +2672,7 @@ TEST(EventQueueTest, EnqueueEventTest) {
   EventQueue event_queue(&mock_event_dispatcher);
 
   const int32 kEventId = 321;
-  Notification done;
+  absl::Notification done;
   EXPECT_CALL(mock_event_dispatcher, DispatchEvent(kEventId))
       .WillOnce(Notify(&done));
 
