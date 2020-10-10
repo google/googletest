@@ -880,16 +880,15 @@ class GTEST_API_ Random {
 #define GTEST_REMOVE_REFERENCE_AND_CONST_(T) \
   typename std::remove_const<typename std::remove_reference<T>::type>::type
 
-// IsAProtocolMessage<T>::value is a compile-time bool constant that's true if
-// and only if T has methods DebugString() and ShortDebugString() that return
-// std::string.
+// HasDebugStringAndShortDebugString<T>::value is a compile-time bool
+// constant that's true if and only if T has methods DebugString() and
+// ShortDebugString() that return std::string.
 template <typename T>
-class IsAProtocolMessage {
+class HasDebugStringAndShortDebugString {
  private:
   template <typename C>
-  static constexpr auto CheckDebugString(C*) ->
-      typename std::is_same<std::string,
-                            decltype(std::declval<const C>().DebugString())>::type;
+  static constexpr auto CheckDebugString(C*) -> typename std::is_same<
+      std::string, decltype(std::declval<const C>().DebugString())>::type;
   template <typename>
   static constexpr std::false_type CheckDebugString(...);
 
@@ -907,7 +906,8 @@ class IsAProtocolMessage {
       HasDebugStringType::value && HasShortDebugStringType::value;
 };
 
-template <typename T> constexpr bool IsAProtocolMessage<T>::value;
+template <typename T>
+constexpr bool HasDebugStringAndShortDebugString<T>::value;
 
 // When the compiler sees expression IsContainerTest<C>(0), if C is an
 // STL-style container class, the first overload of IsContainerTest
