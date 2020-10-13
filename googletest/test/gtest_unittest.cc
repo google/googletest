@@ -254,8 +254,8 @@ using testing::internal::GetTimeInMillis;
 using testing::internal::GetTypeId;
 using testing::internal::GetUnitTestImpl;
 using testing::internal::GTestFlagSaver;
+using testing::internal::HasDebugStringAndShortDebugString;
 using testing::internal::Int32FromEnvOrDie;
-using testing::internal::IsAProtocolMessage;
 using testing::internal::IsContainer;
 using testing::internal::IsContainerTest;
 using testing::internal::IsNotContainer;
@@ -7185,24 +7185,71 @@ GTEST_TEST(AlternativeNameTest, Works) {  // GTEST_TEST is the same as TEST.
 class ConversionHelperBase {};
 class ConversionHelperDerived : public ConversionHelperBase {};
 
-// Tests that IsAProtocolMessage<T>::value is a compile-time constant.
-TEST(IsAProtocolMessageTest, ValueIsCompileTimeConstant) {
-  GTEST_COMPILE_ASSERT_(IsAProtocolMessage<::proto2::MessageLite>::value,
+struct HasDebugStringMethods {
+  std::string DebugString() const { return ""; }
+  std::string ShortDebugString() const { return ""; }
+};
+
+struct InheritsDebugStringMethods : public HasDebugStringMethods {};
+
+struct WrongTypeDebugStringMethod {
+  std::string DebugString() const { return ""; }
+  int ShortDebugString() const { return 1; }
+};
+
+struct NotConstDebugStringMethod {
+  std::string DebugString() { return ""; }
+  std::string ShortDebugString() const { return ""; }
+};
+
+struct MissingDebugStringMethod {
+  std::string DebugString() { return ""; }
+};
+
+struct IncompleteType;
+
+// Tests that HasDebugStringAndShortDebugString<T>::value is a compile-time
+// constant.
+TEST(HasDebugStringAndShortDebugStringTest, ValueIsCompileTimeConstant) {
+  GTEST_COMPILE_ASSERT_(
+      HasDebugStringAndShortDebugString<HasDebugStringMethods>::value,
+      const_true);
+  GTEST_COMPILE_ASSERT_(
+      HasDebugStringAndShortDebugString<InheritsDebugStringMethods>::value,
+      const_true);
+  GTEST_COMPILE_ASSERT_(HasDebugStringAndShortDebugString<
+                            const InheritsDebugStringMethods>::value,
                         const_true);
-  GTEST_COMPILE_ASSERT_(!IsAProtocolMessage<int>::value, const_false);
+  GTEST_COMPILE_ASSERT_(
+      !HasDebugStringAndShortDebugString<WrongTypeDebugStringMethod>::value,
+      const_false);
+  GTEST_COMPILE_ASSERT_(
+      !HasDebugStringAndShortDebugString<NotConstDebugStringMethod>::value,
+      const_false);
+  GTEST_COMPILE_ASSERT_(
+      !HasDebugStringAndShortDebugString<MissingDebugStringMethod>::value,
+      const_false);
+  GTEST_COMPILE_ASSERT_(
+      !HasDebugStringAndShortDebugString<IncompleteType>::value, const_false);
+  GTEST_COMPILE_ASSERT_(!HasDebugStringAndShortDebugString<int>::value,
+                        const_false);
 }
 
-// Tests that IsAProtocolMessage<T>::value is true when T is
-// proto2::Message or a sub-class of it.
-TEST(IsAProtocolMessageTest, ValueIsTrueWhenTypeIsAProtocolMessage) {
-  EXPECT_TRUE(IsAProtocolMessage<::proto2::MessageLite>::value);
+// Tests that HasDebugStringAndShortDebugString<T>::value is true when T has
+// needed methods.
+TEST(HasDebugStringAndShortDebugStringTest,
+     ValueIsTrueWhenTypeHasDebugStringAndShortDebugString) {
+  EXPECT_TRUE(
+      HasDebugStringAndShortDebugString<InheritsDebugStringMethods>::value);
 }
 
-// Tests that IsAProtocolMessage<T>::value is false when T is neither
-// ::proto2::Message nor a sub-class of it.
-TEST(IsAProtocolMessageTest, ValueIsFalseWhenTypeIsNotAProtocolMessage) {
-  EXPECT_FALSE(IsAProtocolMessage<int>::value);
-  EXPECT_FALSE(IsAProtocolMessage<const ConversionHelperBase>::value);
+// Tests that HasDebugStringAndShortDebugString<T>::value is false when T
+// doesn't have needed methods.
+TEST(HasDebugStringAndShortDebugStringTest,
+     ValueIsFalseWhenTypeIsNotAProtocolMessage) {
+  EXPECT_FALSE(HasDebugStringAndShortDebugString<int>::value);
+  EXPECT_FALSE(
+      HasDebugStringAndShortDebugString<const ConversionHelperBase>::value);
 }
 
 // Tests GTEST_REMOVE_REFERENCE_AND_CONST_.
