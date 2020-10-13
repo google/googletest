@@ -1325,8 +1325,8 @@ constexpr bool InstantiateTypedTestCase_P_IsDeprecated() { return true; }
 namespace std {
 
 template <typename... Ts>
-struct tuple_size<testing::internal::FlatTuple<Ts...>>
-    : std::integral_constant<size_t, sizeof...(Ts)> {};
+class tuple_size<testing::internal::FlatTuple<Ts...>>
+    : public std::integral_constant<size_t, sizeof...(Ts)> {};
 
 }  // namespace std
 
