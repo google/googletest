@@ -859,6 +859,22 @@ using ::testing::Not;
                           NULL));
 ```
 
+Matchers are function objects, and parametrized matchers can be composed just
+like any other function. However because their types can be long and rarely
+provide meaningful information, it can be easier to express them with C++14
+generic lambdas to avoid specifying types. For example,
+
+```cpp
+using ::testing::Contains;
+using ::testing::Property;
+
+inline constexpr auto HasFoo = [](const auto& f) {
+  return Property(&MyClass::foo, Contains(f));
+};
+...
+  EXPECT_THAT(x, HasFoo("blah"));
+```
+
 ### Casting Matchers {#SafeMatcherCast}
 
 gMock matchers are statically typed, meaning that the compiler can catch your
