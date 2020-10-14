@@ -4127,11 +4127,13 @@ TEST(HRESULTAssertionTest, Streaming) {
 
 #endif  // GTEST_OS_WINDOWS
 
-#ifdef __BORLANDC__
-// Silences warnings: "Condition is always true", "Unreachable code"
-# pragma option push -w-ccc -w-rch
+// The following code intentionally tests a suboptimal syntax.
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdangling-else"
+#pragma GCC diagnostic ignored "-Wempty-body"
+#pragma GCC diagnostic ignored "-Wpragmas"
 #endif
-
 // Tests that the assertion macros behave like single statements.
 TEST(AssertionSyntaxTest, BasicAssertionsBehavesLikeSingleStatement) {
   if (AlwaysFalse())
@@ -4151,6 +4153,9 @@ TEST(AssertionSyntaxTest, BasicAssertionsBehavesLikeSingleStatement) {
   else
     EXPECT_GT(3, 2) << "";
 }
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
 
 #if GTEST_HAS_EXCEPTIONS
 // Tests that the compiler will not complain about unreachable code in the
@@ -4192,8 +4197,19 @@ TEST(AssertionSyntaxTest, ExceptionAssertionsBehavesLikeSingleStatement) {
   else
     ;  // NOLINT
 }
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
+
 #endif  // GTEST_HAS_EXCEPTIONS
 
+// The following code intentionally tests a suboptimal syntax.
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdangling-else"
+#pragma GCC diagnostic ignored "-Wempty-body"
+#pragma GCC diagnostic ignored "-Wpragmas"
+#endif
 TEST(AssertionSyntaxTest, NoFatalFailureAssertionsBehavesLikeSingleStatement) {
   if (AlwaysFalse())
     EXPECT_NO_FATAL_FAILURE(FAIL()) << "This should never be executed. "
@@ -4216,6 +4232,9 @@ TEST(AssertionSyntaxTest, NoFatalFailureAssertionsBehavesLikeSingleStatement) {
   else
     ASSERT_NO_FATAL_FAILURE(SUCCEED());
 }
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
 
 // Tests that the assertion macros work well with switch statements.
 TEST(AssertionSyntaxTest, WorksWithSwitch) {
