@@ -235,8 +235,9 @@ struct ProtobufPrinter {
   // DebugString() for better readability.
   static const size_t kProtobufOneLinerMaxLength = 50;
 
-  template <typename T, typename = typename std::enable_if<
-                            internal::IsAProtocolMessage<T>::value>::type>
+  template <typename T,
+            typename = typename std::enable_if<
+                internal::HasDebugStringAndShortDebugString<T>::value>::type>
   static void PrintValue(const T& value, ::std::ostream* os) {
     std::string pretty_str = value.ShortDebugString();
     if (pretty_str.length() > kProtobufOneLinerMaxLength) {
