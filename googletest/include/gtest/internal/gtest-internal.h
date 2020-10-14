@@ -1323,11 +1323,19 @@ constexpr bool InstantiateTypedTestCase_P_IsDeprecated() { return true; }
 }  // namespace testing
 
 namespace std {
-
+// Some standard library implementations use `struct tuple_size` and some use
+// `class tuple_size`. Clang warns about the mismatch.
+// https://reviews.llvm.org/D55466
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmismatched-tags"
+#endif
 template <typename... Ts>
-class tuple_size<testing::internal::FlatTuple<Ts...>>
-    : public std::integral_constant<size_t, sizeof...(Ts)> {};
-
+struct tuple_size<testing::internal::FlatTuple<Ts...>>
+    : std::integral_constant<size_t, sizeof...(Ts)> {};
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 }  // namespace std
 
 #define GTEST_MESSAGE_AT_(file, line, message, result_type) \
