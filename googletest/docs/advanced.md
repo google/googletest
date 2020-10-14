@@ -1538,7 +1538,7 @@ template <typename T>
 class FooTest : public ::testing::Test {
  public:
   ...
-  typedef std::list<T> List;
+  using List = std::list<T>;
   static T shared_;
   T value_;
 };
@@ -1642,7 +1642,7 @@ put the above code in a header file, you can `#include` it in multiple C++
 source files and instantiate it multiple times.
 
 ```c++
-typedef ::testing::Types<char, int, unsigned int> MyTypes;
+using MyTypes = ::testing::Types<char, int, unsigned int>;
 INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes);
 ```
 
