@@ -49,7 +49,7 @@ Let's look at an example. Suppose you are developing a graphics program that rel
 ```cpp
 class Turtle {
   ...
-  virtual ~Turtle() {};
+  virtual ~Turtle() {}
   virtual void PenUp() = 0;
   virtual void PenDown() = 0;
   virtual void Forward(int distance) = 0;
