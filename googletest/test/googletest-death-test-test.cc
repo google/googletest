@@ -298,6 +298,13 @@ TEST(ExitStatusPredicateTest, KilledBySignal) {
 
 # endif  // GTEST_OS_WINDOWS || GTEST_OS_FUCHSIA
 
+// The following code intentionally tests a suboptimal syntax.
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdangling-else"
+#pragma GCC diagnostic ignored "-Wempty-body"
+#pragma GCC diagnostic ignored "-Wpragmas"
+#endif
 // Tests that the death test macros expand to code which may or may not
 // be followed by operator<<, and that in either case the complete text
 // comprises only a single C++ statement.
@@ -321,6 +328,9 @@ TEST_F(TestForDeathTest, SingleStatement) {
   else
     EXPECT_DEATH(_exit(1), "") << 1 << 2 << 3;
 }
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
 
 # if GTEST_USES_PCRE
 
@@ -1468,6 +1478,13 @@ TEST(ConditionalDeathMacrosTest, AssertDeatDoesNotReturnhIfUnsupported) {
 
 namespace {
 
+// The following code intentionally tests a suboptimal syntax.
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdangling-else"
+#pragma GCC diagnostic ignored "-Wempty-body"
+#pragma GCC diagnostic ignored "-Wpragmas"
+#endif
 // Tests that the death test macros expand to code which may or may not
 // be followed by operator<<, and that in either case the complete text
 // comprises only a single C++ statement.
@@ -1493,6 +1510,9 @@ TEST(ConditionalDeathMacrosSyntaxDeathTest, SingleStatement) {
   else
     EXPECT_DEATH_IF_SUPPORTED(_exit(1), "") << 1 << 2 << 3;
 }
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
 
 // Tests that conditional death test macros expand to code which interacts
 // well with switch statements.
