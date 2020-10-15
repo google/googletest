@@ -287,7 +287,7 @@ class FloatingPoint {
   //
   // See the following article for more details on ULP:
   // http://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/
-  static const size_t kMaxUlps = 4;
+  static const uint32_t kMaxUlps = 4;
 
   // Constructs a FloatingPoint from a raw floating-point number.
   //
