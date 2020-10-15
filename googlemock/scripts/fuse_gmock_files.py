@@ -66,8 +66,6 @@ import os
 import re
 import sys
 
-import fuse_gtest_files
-
 __author__ = 'wan@google.com (Zhanyong Wan)'
 
 # We assume that this file is in the scripts/ directory in the Google
@@ -76,7 +74,7 @@ DEFAULT_GMOCK_ROOT_DIR = os.path.join(os.path.dirname(__file__), '..')
 
 # We need to call into googletest/scripts/fuse_gtest_files.py.
 sys.path.append(os.path.join(DEFAULT_GMOCK_ROOT_DIR, '../googletest/scripts'))
-gtest = fuse_gtest_files
+import fuse_gtest_files as gtest  # pylint:disable=g-import-not-at-top
 
 # Regex for matching
 # '#include "gmock/..."'.
@@ -130,7 +128,7 @@ def FuseGMockH(gmock_root, output_dir):
   """Scans folder gmock_root to generate gmock/gmock.h in output_dir."""
 
   output_file = open(os.path.join(output_dir, GMOCK_H_OUTPUT), 'w')
-  processed_files = frozenset()  # Holds all gmock headers we've processed.
+  processed_files = set()  # Holds all gmock headers we've processed.
 
   def ProcessFile(gmock_header_path):
     """Processes the given gmock header file."""
@@ -173,7 +171,7 @@ def FuseGMockH(gmock_root, output_dir):
 def FuseGMockAllCcToFile(gmock_root, output_file):
   """Scans folder gmock_root to fuse gmock-all.cc into output_file."""
 
-  processed_files = frozenset()
+  processed_files = set()
 
   def ProcessFile(gmock_source_file):
     """Processes the given gmock source file."""
