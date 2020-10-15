@@ -2980,7 +2980,7 @@ auto UnpackStruct(const T& t)
 // The array ensures left-to-right order of evaluation.
 // Usage: VariadicExpand({expr...});
 template <typename T, size_t N>
-void VariadicExpand(const T (&a)[N]) {}
+void VariadicExpand(const T (&/*a*/)[N]) {}
 
 template <typename Struct, typename StructSize>
 class FieldsAreMatcherImpl;
@@ -3038,9 +3038,10 @@ class FieldsAreMatcherImpl<Struct, IndexSequence<I...>>
                                  std::get<I>(tuple), &inner_listener[I])
              ? failed_pos = I
              : 0 ...});
-    if (failed_pos != ~size_t{}) {
+    if (failed_pos >= 0) {
       *listener << "whose field #" << failed_pos << " does not match";
-      PrintIfNotEmpty(inner_listener[failed_pos].str(), listener->stream());
+      unsigned int u_failed_pos = static_cast<unsigned int>(failed_pos);
+      PrintIfNotEmpty(inner_listener[u_failed_pos].str(), listener->stream());
       return false;
     }
 
