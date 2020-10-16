@@ -528,8 +528,8 @@ a `SetUp`/`TearDown` function; see
 [constructor/destructor vs. `SetUp`/`TearDown`](faq.md#CtorVsSetUp)
 
 WARNING: A fatal assertion in a helper function (private void-returning method)
-called from a constructor or destructor does not does not terminate the current
-test, as your intuition might suggest: it merely returns from the constructor or
+called from a constructor or destructor does not terminate the current test, as
+your intuition might suggest: it merely returns from the constructor or
 destructor early, possibly leaving your object in a partially-constructed or
 partially-destructed state! You almost certainly want to `abort` or use
 `SetUp`/`TearDown` instead.
