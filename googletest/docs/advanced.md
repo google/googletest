@@ -1353,7 +1353,7 @@ TEST_P(FooTest, HasBlahBlah) {
 }
 ```
 
-Finally, you can use `INSTANTIATE_TEST_SUITE_P` to instantiate the test suite
+Finally, you can use `INSTANTIATE_TEST_CASE_P` to instantiate the test suite
 with any set of parameters you want. googletest defines a number of functions
 for generating test parameters. They return what we call (surprise!) *parameter
 generators*. Here is a summary of them, which are all in the `testing`
@@ -1377,7 +1377,7 @@ The following statement will instantiate tests from the `FooTest` test suite
 each with parameter values `"meeny"`, `"miny"`, and `"moe"`.
 
 ```c++
-INSTANTIATE_TEST_SUITE_P(InstantiationName,
+INSTANTIATE_TEST_CASE_P(InstantiationName,
                          FooTest,
                          testing::Values("meeny", "miny", "moe"));
 ```
@@ -1385,7 +1385,7 @@ INSTANTIATE_TEST_SUITE_P(InstantiationName,
 NOTE: The code above must be placed at global or namespace scope, not at
 function scope.
 
-Per default, every `TEST_P` without a corresponding `INSTANTIATE_TEST_SUITE_P`
+Per default, every `TEST_P` without a corresponding `INSTANTIATE_TEST_CASE_P`
 causes a failing test in test suite `GoogleTestVerification`. If you have a test
 suite where that omission is not an error, for example it is in a library that
 may be linked in for other reason or where the list of test cases is dynamic and
@@ -1396,7 +1396,7 @@ GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(FooTest);
 ```
 
 To distinguish different instances of the pattern (yes, you can instantiate it
-more than once), the first argument to `INSTANTIATE_TEST_SUITE_P` is a prefix
+more than once), the first argument to `INSTANTIATE_TEST_CASE_P` is a prefix
 that will be added to the actual test suite name. Remember to pick unique
 prefixes for different instantiations. The tests from the instantiation above
 will have these names:
@@ -1415,7 +1415,7 @@ parameter values `"cat"` and `"dog"`:
 
 ```c++
 const char* pets[] = {"cat", "dog"};
-INSTANTIATE_TEST_SUITE_P(AnotherInstantiationName, FooTest,
+INSTANTIATE_TEST_CASE_P(AnotherInstantiationName, FooTest,
                          testing::ValuesIn(pets));
 ```
 
