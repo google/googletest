@@ -39,6 +39,7 @@ import gtest_xml_test_utils
 GTEST_OUTPUT_SUBDIR = "xml_outfiles"
 GTEST_OUTPUT_1_TEST = "gtest_xml_outfile1_test_"
 GTEST_OUTPUT_2_TEST = "gtest_xml_outfile2_test_"
+GTEST_OUTPUT_3_TEST = "gtest_xml_outfile3_test_"
 
 EXPECTED_XML_1 = """<?xml version="1.0" encoding="UTF-8"?>
 <testsuites tests="1" failures="0" disabled="0" errors="0" time="*" timestamp="*" name="AllTests">
@@ -68,6 +69,20 @@ EXPECTED_XML_2 = """<?xml version="1.0" encoding="UTF-8"?>
 </testsuites>
 """
 
+EXPECTED_XML_3 = """<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="8" failures="0" disabled="0" errors="0" time="*" timestamp="*" name="AllTests">
+  <testsuite name="InvalidXMLTestInstance/InvalidXMLTest" tests="8" failures="0" skipped="0" disabled="0" errors="0" time="*" timestamp="*">
+    <testcase name="testInvalids/0" value_param="&quot;\\xEF\\xBF\\xBE&quot;&#x0A;    As Text: &quot;&quot;" status="run" result="completed" time="*" timestamp="*" classname="InvalidXMLTestInstance/InvalidXMLTest" />
+    <testcase name="testInvalids/1" value_param="&quot;\\xEF\\xBF\\xBE&quot;&#x0A;    As Text: &quot;&quot;" status="run" result="completed" time="*" timestamp="*" classname="InvalidXMLTestInstance/InvalidXMLTest" />
+    <testcase name="testInvalids/2" value_param="&quot;\\xED\\xA0\\x80&quot;" status="run" result="completed" time="*" timestamp="*" classname="InvalidXMLTestInstance/InvalidXMLTest" />
+    <testcase name="testInvalids/3" value_param="&quot;\\xED\\xAD\\xBF&quot;" status="run" result="completed" time="*" timestamp="*" classname="InvalidXMLTestInstance/InvalidXMLTest" />
+    <testcase name="testInvalids/4" value_param="&quot;\\xED\\xB0\\x80&quot;" status="run" result="completed" time="*" timestamp="*" classname="InvalidXMLTestInstance/InvalidXMLTest" />
+    <testcase name="testInvalids/5" value_param="&quot;\\xED\\xBF\\xBF&quot;" status="run" result="completed" time="*" timestamp="*" classname="InvalidXMLTestInstance/InvalidXMLTest" />
+    <testcase name="testInvalids/6" value_param="&quot;\\xED\\xA9\\x92&quot;" status="run" result="completed" time="*" timestamp="*" classname="InvalidXMLTestInstance/InvalidXMLTest" />
+    <testcase name="testInvalids/7" value_param="&quot;\\xED\\xB8\\x92&quot;" status="run" result="completed" time="*" timestamp="*" classname="InvalidXMLTestInstance/InvalidXMLTest" />
+  </testsuite>
+</testsuites>
+"""
 
 class GTestXMLOutFilesTest(gtest_xml_test_utils.GTestXMLTestCase):
   """Unit test for Google Test's XML output functionality."""
@@ -93,6 +108,10 @@ class GTestXMLOutFilesTest(gtest_xml_test_utils.GTestXMLTestCase):
     except os.error:
       pass
     try:
+      os.remove(os.path.join(self.output_dir_, GTEST_OUTPUT_3_TEST + ".xml"))
+    except os.error:
+      pass
+    try:
       os.rmdir(self.output_dir_)
     except os.error:
       pass
@@ -102,6 +121,9 @@ class GTestXMLOutFilesTest(gtest_xml_test_utils.GTestXMLTestCase):
 
   def testOutfile2(self):
     self._TestOutFile(GTEST_OUTPUT_2_TEST, EXPECTED_XML_2)
+
+  def testOutfile3(self):
+    self._TestOutFile(GTEST_OUTPUT_3_TEST, EXPECTED_XML_3)
 
   def _TestOutFile(self, test_name, expected_xml):
     gtest_prog_path = gtest_test_utils.GetTestExecutablePath(test_name)

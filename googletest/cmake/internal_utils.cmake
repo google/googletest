@@ -81,12 +81,15 @@ macro(config_compiler_and_linker)
     # Suppress "unreachable code" warning
     # http://stackoverflow.com/questions/3232669 explains the issue.
     set(cxx_base_flags "${cxx_base_flags} -wd4702")
+    # Option -J is already given
+    set(cxx_unsigned_char "${cxx_base_flags}")
   elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     set(cxx_base_flags "-Wall -Wshadow -Werror -Wconversion")
     set(cxx_exception_flags "-fexceptions")
     set(cxx_no_exception_flags "-fno-exceptions")
     set(cxx_strict_flags "-W -Wpointer-arith -Wreturn-type -Wcast-qual -Wwrite-strings -Wswitch -Wunused-parameter -Wcast-align -Wchar-subscripts -Winline -Wredundant-decls")
     set(cxx_no_rtti_flags "-fno-rtti")
+    set(cxx_unsigned_char "${cxx_base_flags} -funsigned-char")
   elseif (CMAKE_COMPILER_IS_GNUCXX)
     set(cxx_base_flags "-Wall -Wshadow -Werror")
     if(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 7.0.0)
@@ -100,12 +103,14 @@ macro(config_compiler_and_linker)
     set(cxx_no_rtti_flags "-fno-rtti -DGTEST_HAS_RTTI=0")
     set(cxx_strict_flags
       "-Wextra -Wno-unused-parameter -Wno-missing-field-initializers")
+    set(cxx_unsigned_char "${cxx_base_flags} -funsigned-char")
   elseif (CMAKE_CXX_COMPILER_ID STREQUAL "SunPro")
     set(cxx_exception_flags "-features=except")
     # Sun Pro doesn't provide macros to indicate whether exceptions and
     # RTTI are enabled, so we define GTEST_HAS_* explicitly.
     set(cxx_no_exception_flags "-features=no%except -DGTEST_HAS_EXCEPTIONS=0")
     set(cxx_no_rtti_flags "-features=no%rtti -DGTEST_HAS_RTTI=0")
+    set(cxx_unsigned_char "${cxx_base_flags} -xchar=u")
   elseif (CMAKE_CXX_COMPILER_ID STREQUAL "VisualAge" OR
       CMAKE_CXX_COMPILER_ID STREQUAL "XL")
     # CMake 2.8 changes Visual Age's compiler ID to "XL".
@@ -115,12 +120,14 @@ macro(config_compiler_and_linker)
     # whether RTTI is enabled.  Therefore we define GTEST_HAS_RTTI
     # explicitly.
     set(cxx_no_rtti_flags "-qnortti -DGTEST_HAS_RTTI=0")
+    set(cxx_unsigned_char "${cxx_base_flags}" -qchars=unsigned)
   elseif (CMAKE_CXX_COMPILER_ID STREQUAL "HP")
     set(cxx_base_flags "-AA -mt")
     set(cxx_exception_flags "-DGTEST_HAS_EXCEPTIONS=1")
     set(cxx_no_exception_flags "+noeh -DGTEST_HAS_EXCEPTIONS=0")
     # RTTI can not be disabled in HP aCC compiler.
     set(cxx_no_rtti_flags "")
+    set(cxx_unsigned_char "${cxx_base_flags} -uc")
   endif()
 
   # The pthreads library is available and allowed?

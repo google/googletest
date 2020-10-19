@@ -325,6 +325,15 @@ $env:Path = \"$project_bin;$env:Path\"
 
   cxx_executable(gtest_xml_outfile1_test_ test gtest_main)
   cxx_executable(gtest_xml_outfile2_test_ test gtest_main)
+  cxx_library(gtest_unsigned_char "${cxx_unsigned_char}" src/gtest-all.cc)
+  cxx_library(gtest_main_unsigned_char "${cxx_unsigned_char}" src/gtest_main.cc)
+  target_link_libraries(gtest_main_unsigned_char PUBLIC gtest_unsigned_char)
+  cxx_executable_with_flags(
+    gtest_xml_outfile3_test_
+    "${cxx_unsigned_char}"
+    gtest_main_unsigned_char
+    test/gtest_xml_outfile3_test_.cc
+  )
   py_test(gtest_xml_outfiles_test)
   py_test(googletest-json-outfiles-test)
 
