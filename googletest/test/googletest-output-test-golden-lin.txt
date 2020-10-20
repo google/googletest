@@ -1013,7 +1013,7 @@ Type parameterized test suite DetectNotInstantiatedTypesTest is defined via REGI
 
 Ideally, TYPED_TEST_P definitions should only ever be included as part of binaries that intend to use them. (As opposed to, for example, being placed in a library that may be linked in to get other utilities.)
 
-To suppress this error for this test suite, insert the following line (in a non-header) in the namespace it is definedin in:
+To suppress this error for this test suite, insert the following line (in a non-header) in the namespace it is defined in:
 
 GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(DetectNotInstantiatedTypesTest);
 Stack trace: (omitted)
