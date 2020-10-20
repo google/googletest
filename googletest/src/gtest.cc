@@ -555,7 +555,7 @@ void TypeParameterizedTestSuiteRegistry::CheckForInstantiations() {
         "utilities.)"
         "\n\n"
         "To suppress this error for this test suite, insert the following line "
-        "(in a non-header) in the namespace it is definedin in:"
+        "(in a non-header) in the namespace it is defined in:"
         "\n\n"
         "GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(" +
         testcase.first + ");";
