@@ -65,6 +65,8 @@ if(CMAKE_PROJECT_NAME STREQUAL "gtest" OR CMAKE_PROJECT_NAME STREQUAL "googletes
   # make it prominent in the GUI.
   option(BUILD_SHARED_LIBS "Build shared libraries (DLLs)." OFF)
 
+  option(GTEST_HAS_ABSL "Build against Google abseil" OFF)
+
 else()
 
   mark_as_advanced(
@@ -90,6 +92,10 @@ config_compiler_and_linker()  # Defined in internal_utils.cmake.
 # Needed to set the namespace for both the export targets and the
 # alias libraries
 set(cmake_package_name GTest CACHE INTERNAL "")
+
+if(GTEST_HAS_ABSL)
+  find_package(absl REQUIRED)
+endif()
 
 # Create the CMake package file descriptors.
 if (INSTALL_GTEST)
@@ -141,6 +147,10 @@ if (DEFINED CMAKE_VERSION AND NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.11")
 endif()
 if(CMAKE_SYSTEM_NAME MATCHES "QNX")
   target_link_libraries(gtest PUBLIC regex)
+endif()
+if(GTEST_HAS_ABSL)
+  target_compile_definitions(gtest PUBLIC GTEST_HAS_ABSL=1)
+  target_link_libraries(gtest PUBLIC absl::strings absl::stacktrace absl::symbolize absl::failure_signal_handler absl::base)
 endif()
 target_link_libraries(gtest_main PUBLIC gtest)
 
