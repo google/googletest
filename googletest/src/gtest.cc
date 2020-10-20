@@ -134,6 +134,20 @@
 #include "absl/strings/str_cat.h"
 #endif  // GTEST_HAS_ABSL
 
+#if GTEST_HAS_UNWIND
+#include <elfutils/libdwfl.h>
+
+// The macro UNW_LOCAL_ONLY generates more performant code. It can be used if
+// there is no need to unwind a separate process, only the current process:
+#define UNW_LOCAL_ONLY
+#include <libunwind.h>
+
+#include <cxxabi.h>
+#include <dlfcn.h>
+
+#define LIBUNWIND_MAX_PROCNAME_LENGTH 1024
+#endif  // GTEST_HAS_UNWIND
+
 namespace testing {
 
 using internal::CountIf;
@@ -4802,30 +4816,191 @@ void StreamingListener::SocketWriter::MakeConnection() {
 
 // class OsStackTraceGetter
 
+#if GTEST_HAS_UNWIND
+size_t OsStackTraceGetter::UnwindGetStackTrace(std::vector<OsStackTraceGetter::StackFrame>& stack_trace, int max_depth, int skip_count, void* caller_frame) {
+  // Begin stack unwinding with libunwind:
+  int vUnwindStatus = 0;
+  unw_context_t vUnwindContext;
+  vUnwindStatus = unw_getcontext(&vUnwindContext);
+  if (vUnwindStatus) {
+    std::cerr << "libunwind_print_backtrace(): Error in unw_getcontext: " << vUnwindStatus << "\n";
+    return 0;
+  }
+
+  unw_cursor_t vUnwindCursor;
+  vUnwindStatus = unw_init_local(&vUnwindCursor, &vUnwindContext);
+  if (vUnwindStatus) {
+    std::cerr << "libunwind_print_backtrace(): Error in unw_init_local: " << vUnwindStatus << "\n";
+    return 0;
+  }
+
+  // Skip requested frames. Note that this implementation needs to
+  // skip one more frame because its inside one deeper nested method:
+  for (int i = 0; i <= skip_count; ++i) {
+    vUnwindStatus = unw_step(&vUnwindCursor);
+    if (vUnwindStatus <= 0) {
+      return 0;
+    }
+  }
+
+  size_t stack_trace_size = 0;
+  for (int i = 0; i < max_depth; ++i) {
+    vUnwindStatus = unw_step(&vUnwindCursor);
+    if (vUnwindStatus <= 0) {
+      return stack_trace_size;
+    }
+
+
+    unw_word_t ip = 0;
+    if (unw_get_reg(&vUnwindCursor, UNW_REG_IP, &ip) != 0) {
+      return stack_trace_size;
+    }
+
+    // Filter based on the highest uninteresting frame:
+    if (reinterpret_cast<void*>(ip) == caller_frame &&
+      !GTEST_FLAG(show_internal_stack_frames)) {
+      // Add a marker to the trace and stop adding frames.
+      stack_trace[stack_trace_size].proc_name_ = kElidedFramesMarker;
+      return stack_trace_size + 1;
+    }
+
+
+    const char* symbol = "(unknown)";
+
+    unw_word_t off;
+    char vProcedureName[LIBUNWIND_MAX_PROCNAME_LENGTH+1];
+    if (unw_get_proc_name(&vUnwindCursor, vProcedureName, LIBUNWIND_MAX_PROCNAME_LENGTH, &off) == 0) {
+      symbol = vProcedureName;
+
+      // Demangle the name of the procedure using the GNU C++ ABI:
+      int vDemangleStatus = 0;
+      char* vDemangledProcedureName = abi::__cxa_demangle(vProcedureName, NULL, NULL, &vDemangleStatus);
+
+      // If the demangle should fail we just print the non-demangled name
+      if (vDemangledProcedureName != NULL) {
+        strncpy(vProcedureName, vDemangledProcedureName, LIBUNWIND_MAX_PROCNAME_LENGTH);
+        free(vDemangledProcedureName);
+      }
+    }
+
+    //// Filter based on symbol names:
+    //if (stack_trace[i].proc_name_.find("testing::") < 5) {
+    //  continue;
+    //}
+
+
+    stack_trace[stack_trace_size].frame_ = reinterpret_cast<void*>(ip);
+    stack_trace[stack_trace_size].proc_name_ = symbol;
+    ++stack_trace_size;
+  }
+
+  return stack_trace_size;
+}
+#endif
+
 const char* const OsStackTraceGetterInterface::kElidedFramesMarker =
     "... " GTEST_NAME_ " internal frames ...";
 
 std::string OsStackTraceGetter::CurrentStackTrace(int max_depth, int skip_count)
     GTEST_LOCK_EXCLUDED_(mutex_) {
-#if GTEST_HAS_ABSL
   std::string result;
 
+#if GTEST_HAS_ABSL || GTEST_HAS_UNWIND
   if (max_depth <= 0) {
     return result;
   }
 
   max_depth = std::min(max_depth, kMaxStackTraceDepth);
 
-  std::vector<void*> raw_stack(max_depth);
-  // Skips the frames requested by the caller, plus this function.
-  const int raw_stack_size =
-      absl::GetStackTrace(&raw_stack[0], max_depth, skip_count + 1);
+  std::vector<StackFrame> stack_trace(static_cast<size_t>(max_depth));
 
   void* caller_frame = nullptr;
   {
     MutexLock lock(&mutex_);
     caller_frame = caller_frame_;
   }
+
+#if GTEST_HAS_UNWIND
+  size_t stack_trace_size = UnwindGetStackTrace(stack_trace, max_depth, skip_count, caller_frame);
+
+#if GTEST_HAS_DWARF
+  // This is from DWARF for accessing the debugger information:
+  char* debuginfo_path = NULL;
+  Dwfl_Callbacks callbacks = { };
+  Dwfl_Line* vDWARFObjLine;
+
+  // initialize the DWARF handling:
+  callbacks.find_elf = dwfl_linux_proc_find_elf;
+  callbacks.find_debuginfo = dwfl_standard_find_debuginfo;
+  callbacks.debuginfo_path = &debuginfo_path;
+  Dwfl* dwfl = dwfl_begin(&callbacks);
+  if (dwfl == NULL) {
+    std::cerr << "libunwind_print_backtrace(): Error initializing DWARF.\n";
+  }
+  if ((dwfl != NULL) && (dwfl_linux_proc_report(dwfl, getpid()) != 0)) {
+    std::cerr << "libunwind_print_backtrace(): Error initializing DWARF.\n";
+    dwfl = NULL;
+  }
+  if ((dwfl != NULL) && (dwfl_report_end(dwfl, NULL, NULL) != 0)) {
+    std::cerr << "libunwind_print_backtrace(): Error initializing DWARF.\n";
+    dwfl = NULL;
+  }
+  if (dwfl != NULL) {
+    for (size_t i = 0; i < stack_trace_size; ++i) {
+      // Resolve the source file name using DWARF:
+      if (stack_trace[i].frame_ != nullptr) {
+        Dwarf_Addr addr = reinterpret_cast<uintptr_t>(stack_trace[i].frame_) - 4;
+        vDWARFObjLine = dwfl_getsrc(dwfl, addr);
+        if (vDWARFObjLine != NULL) {
+          stack_trace[i].file_name_ = dwfl_lineinfo(vDWARFObjLine, &addr, &stack_trace[i].line_number_, NULL, NULL, NULL);
+        }
+      }
+    }
+  }
+#endif
+
+  for (size_t i = 0; i < stack_trace_size; ++i) {
+#define PRINT_STACK_IN_VSCODE_COMPATIBLE_MODE true
+#if PRINT_STACK_IN_VSCODE_COMPATIBLE_MODE
+#if GTEST_HAS_DWARF
+    // Print the source file name:
+    if (!stack_trace[i].file_name_.empty()) {
+      result += stack_trace[i].file_name_;
+    } else {
+      result += "???";
+    }
+    result += ":" + std::to_string(stack_trace[i].line_number_);
+#endif
+
+    // Print the procedure name:
+    result += ": " + stack_trace[i].proc_name_;
+#else
+    char line[1024];
+
+    // Print the stack frame number:
+    snprintf(line, sizeof(line), "#%d", i);
+    result += line;
+
+    // Print the procedure name:
+    result += " in ";
+    result += stack_trace[i].proc_name_;
+
+    // Print the source file name:
+    snprintf(line, sizeof(line), "%s:%d", vSourceFileName, vSourceFileLineNumber);
+    result += " at ";
+    result += line;
+#endif
+
+    // Print a newline to terminate the output:
+    result += "\n";
+  }
+
+#elif GTEST_HAS_ABSL
+
+  std::vector<void*> raw_stack(max_depth);
+  // Skips the frames requested by the caller, plus this function.
+  const int raw_stack_size =
+      absl::GetStackTrace(&raw_stack[0], max_depth, skip_count + 1);
 
   for (int i = 0; i < raw_stack_size; ++i) {
     if (raw_stack[i] == caller_frame &&
@@ -4846,25 +5021,33 @@ std::string OsStackTraceGetter::CurrentStackTrace(int max_depth, int skip_count)
     result += line;
   }
 
-  return result;
-
-#else  // !GTEST_HAS_ABSL
+#endif  // GTEST_HAS_ABSL || GTEST_HAS_UNWIND
+#else  // !(GTEST_HAS_ABSL || GTEST_HAS_UNWIND)
   static_cast<void>(max_depth);
   static_cast<void>(skip_count);
-  return "";
-#endif  // GTEST_HAS_ABSL
+#endif  // GTEST_HAS_ABSL || GTEST_HAS_UNWIND
+
+  return result;
 }
 
 void OsStackTraceGetter::UponLeavingGTest() GTEST_LOCK_EXCLUDED_(mutex_) {
-#if GTEST_HAS_ABSL
+#if GTEST_HAS_ABSL || GTEST_HAS_UNWIND
   void* caller_frame = nullptr;
+
+#if GTEST_HAS_UNWIND
+  std::vector<OsStackTraceGetter::StackFrame> stack_trace(1);
+  if (UnwindGetStackTrace(stack_trace, 1, 3) > 0) {
+    caller_frame = stack_trace[0].frame_;
+  }
+#elif GTEST_HAS_ABSL
   if (absl::GetStackTrace(&caller_frame, 1, 3) <= 0) {
     caller_frame = nullptr;
   }
+#endif  // GTEST_HAS_ABSL || GTEST_HAS_UNWIND
 
   MutexLock lock(&mutex_);
   caller_frame_ = caller_frame;
-#endif  // GTEST_HAS_ABSL
+#endif  // GTEST_HAS_ABSL || GTEST_HAS_UNWIND
 }
 
 // A helper class that creates the premature-exit file in its

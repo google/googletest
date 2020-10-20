@@ -33,6 +33,9 @@ if (COMMAND pre_project_set_up_hermetic_build)
   pre_project_set_up_hermetic_build()
 endif()
 
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+
+
 ########################################################################
 #
 # Project-wide settings
@@ -70,6 +73,10 @@ if(CMAKE_PROJECT_NAME STREQUAL "gtest" OR CMAKE_PROJECT_NAME STREQUAL "googletes
   # make it prominent in the GUI.
   option(BUILD_SHARED_LIBS "Build shared libraries (DLLs)." OFF)
 
+  option(GTEST_HAS_ABSL "Build against Google abseil" OFF)
+  option(GTEST_HAS_UNWIND "Build against libunwind for stack traces (Linux only)" OFF)
+  option(GTEST_HAS_DWARF "Build against DWARF libDW for file names in stack traces (Linux only)" OFF)
+
 else()
 
   mark_as_advanced(
@@ -91,6 +98,16 @@ endif()
 include(cmake/internal_utils.cmake)
 
 config_compiler_and_linker()  # Defined in internal_utils.cmake.
+
+if(GTEST_HAS_ABSL)
+  find_package(absl REQUIRED)
+endif()
+if(GTEST_HAS_UNWIND)
+  find_package(Libunwind REQUIRED)
+endif()
+if(GTEST_HAS_DWARF)
+  find_package(DWARF REQUIRED)
+endif()
 
 # Create the CMake package file descriptors.
 if (INSTALL_GTEST)
@@ -139,6 +156,21 @@ if (DEFINED CMAKE_VERSION AND NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.11")
   target_include_directories(gtest_main SYSTEM INTERFACE
     "$<BUILD_INTERFACE:${gtest_build_include_dirs}>"
     "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
+endif()
+
+if(GTEST_HAS_ABSL)
+  target_compile_definitions(gtest PUBLIC GTEST_HAS_ABSL=1)
+  target_link_libraries(gtest PUBLIC absl::strings absl::stacktrace absl::symbolize absl::failure_signal_handler absl::base)
+endif()
+if(GTEST_HAS_UNWIND)
+  target_compile_definitions(gtest PUBLIC GTEST_HAS_UNWIND=1)
+  target_include_directories(gtest PRIVATE ${LIBUNWIND_INCLUDE_DIR})
+  target_link_libraries(gtest PUBLIC ${LIBUNWIND_LIBRARIES})
+endif()
+if(GTEST_HAS_DWARF)
+  target_compile_definitions(gtest PUBLIC GTEST_HAS_DWARF=1)
+  target_include_directories(gtest PRIVATE ${DWARF_INCLUDE_DIR} ${LIBDW_INCLUDE_DIR} ${ELF_INCLUDE_DIR})
+  target_link_libraries(gtest PUBLIC ${CMAKE_DL_LIBS} ${DWARF_LIBRARIES})
 endif()
 target_link_libraries(gtest_main PUBLIC gtest)
 
