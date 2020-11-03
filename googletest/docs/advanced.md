@@ -189,11 +189,11 @@ write a predicate function that returns `AssertionResult` instead of `bool`. For
 example, if you define `IsEven()` as:
 
 ```c++
-::testing::AssertionResult IsEven(int n) {
+testing::AssertionResult IsEven(int n) {
   if ((n % 2) == 0)
-     return ::testing::AssertionSuccess();
+    return testing::AssertionSuccess();
   else
-     return ::testing::AssertionFailure() << n << " is odd";
+    return testing::AssertionFailure() << n << " is odd";
 }
 ```
 
@@ -227,11 +227,11 @@ are fine with making the predicate slower in the success case, you can supply a
 success message:
 
 ```c++
-::testing::AssertionResult IsEven(int n) {
+testing::AssertionResult IsEven(int n) {
   if ((n % 2) == 0)
-     return ::testing::AssertionSuccess() << n << " is even";
+    return testing::AssertionSuccess() << n << " is even";
   else
-     return ::testing::AssertionFailure() << n << " is odd";
+    return testing::AssertionFailure() << n << " is odd";
 }
 ```
 
@@ -262,14 +262,14 @@ a predicate, `(ASSERT|EXPECT)_PRED_FORMAT*` take a *predicate-formatter*
 (`pred_formatn`), which is a function or functor with the signature:
 
 ```c++
-::testing::AssertionResult PredicateFormattern(const char* expr1,
-                                               const char* expr2,
-                                               ...
-                                               const char* exprn,
-                                               T1 val1,
-                                               T2 val2,
-                                               ...
-                                               Tn valn);
+testing::AssertionResult PredicateFormattern(const char* expr1,
+                                             const char* expr2,
+                                             ...
+                                             const char* exprn,
+                                             T1 val1,
+                                             T2 val2,
+                                             ...
+                                             Tn valn);
 ```
 
 where `val1`, `val2`, ..., and `valn` are the values of the predicate arguments,
@@ -287,13 +287,13 @@ used with `EXPECT_PRED2()`:
 int SmallestPrimeCommonDivisor(int m, int n) { ... }
 
 // A predicate-formatter for asserting that two integers are mutually prime.
-::testing::AssertionResult AssertMutuallyPrime(const char* m_expr,
-                                               const char* n_expr,
-                                               int m,
-                                               int n) {
-  if (MutuallyPrime(m, n)) return ::testing::AssertionSuccess();
+testing::AssertionResult AssertMutuallyPrime(const char* m_expr,
+                                             const char* n_expr,
+                                             int m,
+                                             int n) {
+  if (MutuallyPrime(m, n)) return testing::AssertionSuccess();
 
-  return ::testing::AssertionFailure() << m_expr << " and " << n_expr
+  return testing::AssertionFailure() << m_expr << " and " << n_expr
       << " (" << m << " and " << n << ") are not mutually prime, "
       << "as they have a common divisor " << SmallestPrimeCommonDivisor(m, n);
 }
@@ -362,8 +362,8 @@ that can be used in predicate assertion macros (e.g. `EXPECT_PRED_FORMAT2`,
 etc).
 
 ```c++
-EXPECT_PRED_FORMAT2(::testing::FloatLE, val1, val2);
-EXPECT_PRED_FORMAT2(::testing::DoubleLE, val1, val2);
+EXPECT_PRED_FORMAT2(testing::FloatLE, val1, val2);
+EXPECT_PRED_FORMAT2(testing::DoubleLE, val1, val2);
 ```
 
 Verifies that `val1` is less than, or almost equal to, `val2`. You can replace
@@ -433,7 +433,7 @@ its DOM tree matches an
 ```c++
 // Currently still in //template/prototemplate/testing:xpath_matcher
 #include "template/prototemplate/testing/xpath_matcher.h"
-using prototemplate::testing::MatchesXPath;
+using ::prototemplate::testing::MatchesXPath;
 EXPECT_THAT(html_string, MatchesXPath("//a[text()='click here']"));
 ```
 
@@ -480,7 +480,7 @@ instantiated. For example, given:
 ```c++
 template <typename T> class Foo {
  public:
-  void Bar() { ::testing::StaticAssertTypeEq<int, T>(); }
+  void Bar() { testing::StaticAssertTypeEq<int, T>(); }
 };
 ```
 
@@ -609,7 +609,7 @@ call `::testing::PrintToString(x)`, which returns an `std::string`:
 vector<pair<Bar, int> > bar_ints = GetBarIntVector();
 
 EXPECT_TRUE(IsCorrectBarIntVector(bar_ints))
-    << "bar_ints = " << ::testing::PrintToString(bar_ints);
+    << "bar_ints = " << testing::PrintToString(bar_ints);
 ```
 
 ## Death Tests
@@ -678,7 +678,7 @@ This expression is `true` if the program exited normally with the given exit
 code.
 
 ```c++
-::testing::KilledBySignal(signal_number)  // Not available on Windows.
+testing::KilledBySignal(signal_number)  // Not available on Windows.
 ```
 
 This expression is `true` if the program was killed by the given signal.
@@ -711,11 +711,11 @@ TEST(MyDeathTest, Foo) {
 }
 
 TEST(MyDeathTest, NormalExit) {
-  EXPECT_EXIT(NormalExit(), ::testing::ExitedWithCode(0), "Success");
+  EXPECT_EXIT(NormalExit(), testing::ExitedWithCode(0), "Success");
 }
 
 TEST(MyDeathTest, KillMyself) {
-  EXPECT_EXIT(KillMyself(), ::testing::KilledBySignal(SIGKILL),
+  EXPECT_EXIT(KillMyself(), testing::KilledBySignal(SIGKILL),
               "Sending myself unblockable signal");
 }
 ```
@@ -742,7 +742,7 @@ If a test fixture class is shared by normal tests and death tests, you can use
 duplicating its code:
 
 ```c++
-class FooTest : public ::testing::Test { ... };
+class FooTest : public testing::Test { ... };
 
 using FooDeathTest = FooTest;
 
@@ -802,7 +802,7 @@ limited syntax only.
 
 Under the hood, `ASSERT_EXIT()` spawns a new process and executes the death test
 statement in that process. The details of how precisely that happens depend on
-the platform and the variable ::testing::GTEST_FLAG(death_test_style) (which is
+the platform and the variable `::testing::GTEST_FLAG(death_test_style)` (which is
 initialized from the command-line flag `--gtest_death_test_style`).
 
 *   On POSIX systems, `fork()` (or `clone()` on Linux) is used to spawn the
@@ -867,13 +867,13 @@ restored afterwards, so you need not do that yourself. For example:
 
 ```c++
 int main(int argc, char** argv) {
-  ::testing::InitGoogleTest(&argc, argv);
-  ::testing::FLAGS_gtest_death_test_style = "fast";
+  testing::InitGoogleTest(&argc, argv);
+  testing::FLAGS_gtest_death_test_style = "fast";
   return RUN_ALL_TESTS();
 }
 
 TEST(MyDeathTest, TestOne) {
-  ::testing::FLAGS_gtest_death_test_style = "threadsafe";
+  testing::FLAGS_gtest_death_test_style = "threadsafe";
   // This test is run in the "threadsafe" style:
   ASSERT_DEATH(ThisShouldDie(), "");
 }
@@ -1110,7 +1110,7 @@ If `HasFatalFailure()` is used outside of `TEST()` , `TEST_F()` , or a test
 fixture, you must add the `::testing::Test::` prefix, as in:
 
 ```c++
-if (::testing::Test::HasFatalFailure()) return;
+if (testing::Test::HasFatalFailure()) return;
 ```
 
 Similarly, `HasNonfatalFailure()` returns `true` if the current test has at
@@ -1189,7 +1189,7 @@ state to its original value before passing control to the next test.
 Here's an example of per-test-suite set-up and tear-down:
 
 ```c++
-class FooTest : public ::testing::Test {
+class FooTest : public testing::Test {
  protected:
   // Per-test-suite set-up.
   // Called before the first test in this test suite.
@@ -1240,7 +1240,7 @@ First, you subclass the `::testing::Environment` class to define a test
 environment, which knows how to set-up and tear-down:
 
 ```c++
-class Environment : public ::testing::Environment {
+class Environment : public testing::Environment {
  public:
   ~Environment() override {}
 
@@ -1278,8 +1278,8 @@ probably in `main()`. If you use `gtest_main`, you need to call this before
 variable like this:
 
 ```c++
-::testing::Environment* const foo_env =
-    ::testing::AddGlobalTestEnvironment(new FooEnvironment);
+testing::Environment* const foo_env =
+    testing::AddGlobalTestEnvironment(new FooEnvironment);
 ```
 
 However, we strongly recommend you to write your own `main()` and call
@@ -1535,7 +1535,7 @@ Remember to derive it from `::testing::Test`:
 
 ```c++
 template <typename T>
-class FooTest : public ::testing::Test {
+class FooTest : public testing::Test {
  public:
   ...
   using List = std::list<T>;
@@ -1603,7 +1603,7 @@ First, define a fixture class template, as we did with typed tests:
 
 ```c++
 template <typename T>
-class FooTest : public ::testing::Test {
+class FooTest : public testing::Test {
   ...
 };
 ```
@@ -1761,7 +1761,7 @@ To test them, we use the following special techniques:
     ```c++
     namespace my_namespace {
 
-    class FooTest : public ::testing::Test {
+    class FooTest : public testing::Test {
      protected:
       ...
     };
@@ -1856,7 +1856,7 @@ undefined.
 Use case example:
 
 ```c++
-class MyFixture : public ::testing::Test {
+class MyFixture : public testing::Test {
  public:
   // All of these optional, just like in regular macro usage.
   static void SetUpTestSuite() { ... }
@@ -1876,7 +1876,7 @@ class MyTest : public MyFixture {
 
 void RegisterMyTests(const std::vector<int>& values) {
   for (int v : values) {
-    ::testing::RegisterTest(
+    testing::RegisterTest(
         "MyFixture", ("Test" + std::to_string(v)).c_str(), nullptr,
         std::to_string(v).c_str(),
         __FILE__, __LINE__,
@@ -1921,8 +1921,8 @@ To obtain a `TestInfo` object for the currently running test, call
 ```c++
   // Gets information about the currently running test.
   // Do NOT delete the returned object - it's managed by the UnitTest class.
-  const ::testing::TestInfo* const test_info =
-    ::testing::UnitTest::GetInstance()->current_test_info();
+  const testing::TestInfo* const test_info =
+      testing::UnitTest::GetInstance()->current_test_info();
 
   printf("We are in test %s of test suite %s.\n",
          test_info->name(),
@@ -1968,15 +1968,15 @@ interesting information about the event and the test program's state.
 Here's an example:
 
 ```c++
-  class MinimalistPrinter : public ::testing::EmptyTestEventListener {
+  class MinimalistPrinter : public testing::EmptyTestEventListener {
     // Called before a test starts.
-    virtual void OnTestStart(const ::testing::TestInfo& test_info) {
+    virtual void OnTestStart(const testing::TestInfo& test_info) {
       printf("*** Test %s.%s starting.\n",
              test_info.test_suite_name(), test_info.name());
     }
 
     // Called after a failed assertion or a SUCCESS().
-    virtual void OnTestPartResult(const ::testing::TestPartResult& test_part_result) {
+    virtual void OnTestPartResult(const testing::TestPartResult& test_part_result) {
       printf("%s in %s:%d\n%s\n",
              test_part_result.failed() ? "*** Failure" : "Success",
              test_part_result.file_name(),
@@ -1985,7 +1985,7 @@ Here's an example:
     }
 
     // Called after a test ends.
-    virtual void OnTestEnd(const ::testing::TestInfo& test_info) {
+    virtual void OnTestEnd(const testing::TestInfo& test_info) {
       printf("*** Test %s.%s ending.\n",
              test_info.test_suite_name(), test_info.name());
     }
@@ -2001,10 +2001,10 @@ the "s" at the end of the name) in your `main()` function, before calling
 
 ```c++
 int main(int argc, char** argv) {
-  ::testing::InitGoogleTest(&argc, argv);
+  testing::InitGoogleTest(&argc, argv);
   // Gets hold of the event listener list.
-  ::testing::TestEventListeners& listeners =
-        ::testing::UnitTest::GetInstance()->listeners();
+  testing::TestEventListeners& listeners =
+      testing::UnitTest::GetInstance()->listeners();
   // Adds a listener to the end.  googletest takes the ownership.
   listeners.Append(new MinimalistPrinter);
   return RUN_ALL_TESTS();
@@ -2149,7 +2149,7 @@ will still be compiled:
 // Tests that Foo does Abc.
 TEST(FooTest, DISABLED_DoesAbc) { ... }
 
-class DISABLED_BarTest : public ::testing::Test { ... };
+class DISABLED_BarTest : public testing::Test { ... };
 
 // Tests that Bar does Xyz.
 TEST_F(DISABLED_BarTest, DoesXyz) { ... }
@@ -2609,3 +2609,32 @@ to be handled by the debugger, such that you can examine the call stack when an
 exception is thrown. To achieve that, set the `GTEST_CATCH_EXCEPTIONS`
 environment variable to `0`, or use the `--gtest_catch_exceptions=0` flag when
 running the tests.
+
+### Sanitizer Integration
+
+The
+[Undefined Behavior Sanitizer](https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html),
+[Address Sanitizer](https://github.com/google/sanitizers/wiki/AddressSanitizer),
+and
+[Thread Sanitizer](https://github.com/google/sanitizers/wiki/ThreadSanitizerCppManual)
+all provide weak functions that you can override to trigger explicit failures
+when they detect sanitizer errors, such as creating a reference from `nullptr`.
+To override these functions, place definitions for them in a source file that
+you compile as part of your main binary:
+
+```
+extern "C" {
+void __ubsan_on_report() {
+  FAIL() << "Encountered an undefined behavior sanitizer error";
+}
+void __asan_on_error() {
+  FAIL() << "Encountered an address sanitizer error";
+}
+void __tsan_on_report() {
+  FAIL() << "Encountered a thread sanitizer error";
+}
+}  // extern "C"
+```
+
+After compiling your project with one of the sanitizers enabled, if a particular
+test triggers a sanitizer error, googletest will report that it failed.
