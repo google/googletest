@@ -35,10 +35,10 @@ Details and examples can be found here:
 *   [gMock Cookbook](docs/cook_book.md)
 *   [gMock Cheat Sheet](docs/cheat_sheet.md)
 
-Please note that code under scripts/generator/ is from the [cppclean
-project](http://code.google.com/p/cppclean/) and under the Apache
-License, which is different from Google Mock's license.
+Please note that code under scripts/generator/ is from the
+[cppclean project](http://code.google.com/p/cppclean/) and under the Apache
+License, which is different from GoogleMock's license.
 
-Google Mock is a part of
-[Google Test C++ testing framework](http://github.com/google/googletest/) and a
+GoogleMock is a part of
+[GoogleTest C++ testing framework](http://github.com/google/googletest/) and a
 subject to the same requirements.
