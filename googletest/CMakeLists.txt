@@ -59,6 +59,10 @@ if (POLICY CMP0063) # Visibility
   cmake_policy(SET CMP0063 NEW)
 endif (POLICY CMP0063)
 
+if (POLICY CMP0069) # Interprocedural optimization
+  cmake_policy(SET CMP0069 NEW)
+endif (POLICY CMP0069)
+
 if (COMMAND set_up_hermetic_build)
   set_up_hermetic_build()
 endif()
