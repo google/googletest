@@ -305,9 +305,7 @@ $range k 0..n-1
               gmock_PerformImpl(\
           GMOCK_ACTION_ARG_TYPES_AND_NAMES_UNUSED_) const
 
-
 namespace testing {
-
 
 // The ACTION*() macros trigger warning C4100 (unreferenced formal
 // parameter) in MSVC with -W4.  Unfortunately they cannot be fixed in
@@ -319,8 +317,36 @@ namespace testing {
 # pragma warning(disable:4100)
 #endif
 
-// Various overloads for InvokeArgument<N>().
-//
+namespace internal {
+
+// internal::InvokeArgument - a helper for InvokeArgument action.
+// The basic overloads are provided here for generic functors.
+// Overloads for other custom-callables are provided in the
+// internal/custom/gmock-generated-actions.h header.
+template <typename F, typename... Args>
+auto InvokeArgument(F f, Args... args) -> decltype(f(args...)) {
+  return f(args...);
+}
+
+template <std::size_t index, typename... Params>
+struct InvokeArgumentAction {
+  template <typename... Args>
+  auto operator()(Args&&... args) const -> decltype(internal::InvokeArgument(
+      std::get<index>(std::forward_as_tuple(std::forward<Args>(args)...)),
+      std::declval<const Params&>()...)) {
+    internal::FlatTuple<Args&&...> args_tuple(std::forward<Args>(args)...);
+    return params.Apply([&](const Params&... unpacked_params) {
+      auto&& callable = args_tuple.template Get<index>();
+      return internal::InvokeArgument(
+          std::forward<decltype(callable)>(callable), unpacked_params...);
+    });
+  }
+
+  internal::FlatTuple<Params...> params;
+};
+
+}  // namespace internal
+
 // The InvokeArgument<N>(a1, a2, ..., a_k) action invokes the N-th
 // (0-based) argument, which must be a k-ary callable, of the mock
 // function, with arguments a1, a2, ..., a_k.
@@ -328,15 +354,15 @@ namespace testing {
 // Notes:
 //
 //   1. The arguments are passed by value by default.  If you need to
-//   pass an argument by reference, wrap it inside ByRef().  For
+//   pass an argument by reference, wrap it inside std::ref().  For
 //   example,
 //
-//     InvokeArgument<1>(5, string("Hello"), ByRef(foo))
+//     InvokeArgument<1>(5, string("Hello"), std::ref(foo))
 //
 //   passes 5 and string("Hello") by value, and passes foo by
 //   reference.
 //
-//   2. If the callable takes an argument by reference but ByRef() is
+//   2. If the callable takes an argument by reference but std::ref() is
 //   not used, it will receive the reference to a copy of the value,
 //   instead of the original value.  For example, when the 0-th
 //   argument of the mock function takes a const string&, the action
@@ -348,18 +374,12 @@ namespace testing {
 //   to the callable.  This makes it easy for a user to define an
 //   InvokeArgument action from temporary values and have it performed
 //   later.
-
-$range i 0..n
-$for i [[
-$range j 0..i-1
-
-ACTION_TEMPLATE(InvokeArgument,
-                HAS_1_TEMPLATE_PARAMS(int, k),
-                AND_$i[[]]_VALUE_PARAMS($for j, [[p$j]])) {
-  return internal::InvokeArgument(::std::get<k>(args)$for j[[, p$j]]);
+template <std::size_t index, typename... Params>
+internal::InvokeArgumentAction<index, typename std::decay<Params>::type...>
+InvokeArgument(Params&&... params) {
+  return {internal::FlatTuple<typename std::decay<Params>::type...>(
+      std::forward<Params>(params)...)};
 }
-
-]]
 
 #ifdef _MSC_VER
 # pragma warning(pop)
