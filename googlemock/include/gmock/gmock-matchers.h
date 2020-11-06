@@ -1717,6 +1717,9 @@ class FloatingEqMatcher {
   // The following 3 type conversion operators allow FloatEq(expected) and
   // NanSensitiveFloatEq(expected) to be used as a Matcher<float>, a
   // Matcher<const float&>, or a Matcher<float&>, but nothing else.
+  // (While Google's C++ coding style doesn't allow arguments passed
+  // by non-const reference, we may see them in code not conforming to
+  // the style.  Therefore Google Mock needs to support them.)
   operator Matcher<FloatType>() const {
     return MakeMatcher(
         new Impl<FloatType>(expected_, nan_eq_nan_, max_abs_error_));

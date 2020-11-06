@@ -111,6 +111,10 @@
 #include "gtest/internal/gtest-internal.h"
 #include "gtest/internal/gtest-port.h"
 
+#if GTEST_HAS_ABSL
+#include "absl/strings/string_view.h"
+#endif  // GTEST_HAS_ABSL
+
 namespace testing {
 
 // Definitions in the internal* namespaces are subject to change without notice.
