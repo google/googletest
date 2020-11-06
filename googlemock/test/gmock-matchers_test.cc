@@ -2984,6 +2984,13 @@ TEST(TrulyTest, WorksForByRefArguments) {
   EXPECT_FALSE(m.Matches(n));
 }
 
+// Tests that Truly(predicate) provides a helpful reason when it fails.
+TEST(TrulyTest, ExplainsFailures) {
+  StringMatchResultListener listener;
+  EXPECT_FALSE(ExplainMatchResult(Truly(IsPositive), -1, &listener));
+  EXPECT_EQ(listener.str(), "didn't satisfy the given predicate");
+}
+
 // Tests that Matches(m) is a predicate satisfied by whatever that
 // matches matcher m.
 TEST(MatchesTest, IsSatisfiedByWhatMatchesTheMatcher) {
