@@ -108,6 +108,16 @@ class FooInterface {
   using fn_ptr = int (*)(bool);
   virtual fn_ptr ReturnsFunctionPointer2(int) = 0;
 
+  virtual int RefQualifiedConstRef() const& = 0;
+  virtual int RefQualifiedConstRefRef() const&& = 0;
+  virtual int RefQualifiedRef() & = 0;
+  virtual int RefQualifiedRefRef() && = 0;
+
+  virtual int RefQualifiedOverloaded() const& = 0;
+  virtual int RefQualifiedOverloaded() const&& = 0;
+  virtual int RefQualifiedOverloaded() & = 0;
+  virtual int RefQualifiedOverloaded() && = 0;
+
 #if GTEST_OS_WINDOWS
   STDMETHOD_(int, CTNullary)() = 0;
   STDMETHOD_(bool, CTUnary)(int x) = 0;
@@ -181,6 +191,17 @@ class MockFoo : public FooInterface {
               (Calltype(STDMETHODCALLTYPE)));
 #endif  // GTEST_OS_WINDOWS
 
+  // Test reference qualified functions.
+  MOCK_METHOD(int, RefQualifiedConstRef, (), (const, ref(&), override));
+  MOCK_METHOD(int, RefQualifiedConstRefRef, (), (const, ref(&&), override));
+  MOCK_METHOD(int, RefQualifiedRef, (), (ref(&), override));
+  MOCK_METHOD(int, RefQualifiedRefRef, (), (ref(&&), override));
+
+  MOCK_METHOD(int, RefQualifiedOverloaded, (), (const, ref(&), override));
+  MOCK_METHOD(int, RefQualifiedOverloaded, (), (const, ref(&&), override));
+  MOCK_METHOD(int, RefQualifiedOverloaded, (), (ref(&), override));
+  MOCK_METHOD(int, RefQualifiedOverloaded, (), (ref(&&), override));
+
  private:
   GTEST_DISALLOW_COPY_AND_ASSIGN_(MockFoo);
 };
@@ -241,6 +262,17 @@ class LegacyMockFoo : public FooInterface {
   MOCK_METHOD0_WITH_CALLTYPE(STDMETHODCALLTYPE, CTReturnTypeWithComma,
                              std::map<int, std::string>());
 #endif  // GTEST_OS_WINDOWS
+
+  // We can't mock these with the old macros, but we need to define them to make
+  // it concrete.
+  int RefQualifiedConstRef() const& override { return 0; }
+  int RefQualifiedConstRefRef() const&& override { return 0; }
+  int RefQualifiedRef() & override { return 0; }
+  int RefQualifiedRefRef() && override { return 0; }
+  int RefQualifiedOverloaded() const& override { return 0; }
+  int RefQualifiedOverloaded() const&& override { return 0; }
+  int RefQualifiedOverloaded() & override { return 0; }
+  int RefQualifiedOverloaded() && override { return 0; }
 
  private:
   GTEST_DISALLOW_COPY_AND_ASSIGN_(LegacyMockFoo);
@@ -419,6 +451,40 @@ TYPED_TEST(FunctionMockerTest, MocksReturnTypeWithCommaAndCallType) {
 }
 
 #endif  // GTEST_OS_WINDOWS
+
+TEST(FunctionMockerTest, RefQualified) {
+  MockFoo mock_foo;
+
+  EXPECT_CALL(mock_foo, RefQualifiedConstRef).WillOnce(Return(1));
+  EXPECT_CALL(std::move(mock_foo),  // NOLINT
+              RefQualifiedConstRefRef)
+      .WillOnce(Return(2));
+  EXPECT_CALL(mock_foo, RefQualifiedRef).WillOnce(Return(3));
+  EXPECT_CALL(std::move(mock_foo),  // NOLINT
+              RefQualifiedRefRef)
+      .WillOnce(Return(4));
+
+  EXPECT_CALL(static_cast<const MockFoo&>(mock_foo), RefQualifiedOverloaded())
+      .WillOnce(Return(5));
+  EXPECT_CALL(static_cast<const MockFoo&&>(mock_foo), RefQualifiedOverloaded())
+      .WillOnce(Return(6));
+  EXPECT_CALL(static_cast<MockFoo&>(mock_foo), RefQualifiedOverloaded())
+      .WillOnce(Return(7));
+  EXPECT_CALL(static_cast<MockFoo&&>(mock_foo), RefQualifiedOverloaded())
+      .WillOnce(Return(8));
+
+  EXPECT_EQ(mock_foo.RefQualifiedConstRef(), 1);
+  EXPECT_EQ(std::move(mock_foo).RefQualifiedConstRefRef(), 2);  // NOLINT
+  EXPECT_EQ(mock_foo.RefQualifiedRef(), 3);
+  EXPECT_EQ(std::move(mock_foo).RefQualifiedRefRef(), 4);  // NOLINT
+
+  EXPECT_EQ(std::cref(mock_foo).get().RefQualifiedOverloaded(), 5);
+  EXPECT_EQ(std::move(std::cref(mock_foo).get())  // NOLINT
+                .RefQualifiedOverloaded(),
+            6);
+  EXPECT_EQ(mock_foo.RefQualifiedOverloaded(), 7);
+  EXPECT_EQ(std::move(mock_foo).RefQualifiedOverloaded(), 8);  // NOLINT
+}
 
 class MockB {
  public:

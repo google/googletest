@@ -37,6 +37,9 @@ generated method:
     `noexcept` method.
 *   **`Calltype(...)`** - Sets the call type for the method (e.g. to
     `STDMETHODCALLTYPE`), useful in Windows.
+*   **`ref(...)`** - Marks the method with the reference qualification
+    specified. Required if overriding a method that has reference
+    qualifications. Eg `ref(&)` or `ref(&&)`.
 
 ### Dealing with unprotected commas
 
