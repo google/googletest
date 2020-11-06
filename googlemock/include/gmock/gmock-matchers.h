@@ -1453,7 +1453,7 @@ class TrulyMatcher {
   // interested in the address of the argument.
   template <typename T>
   bool MatchAndExplain(T& x,  // NOLINT
-                       MatchResultListener* /* listener */) const {
+                       MatchResultListener* listener) const {
     // Without the if-statement, MSVC sometimes warns about converting
     // a value to bool (warning 4800).
     //
@@ -1462,6 +1462,7 @@ class TrulyMatcher {
     // having no operator!().
     if (predicate_(x))
       return true;
+    *listener << "didn't satisfy the given predicate";
     return false;
   }
 
