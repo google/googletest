@@ -296,7 +296,7 @@
 
 // Defines the copy constructor
 #define GMOCK_INTERNAL_DEFN_COPY_AND_0_VALUE_PARAMS() \
-    {}  // Work around https://gcc.gnu.org/bugzilla/show_bug.cgi?id=82134
+    noexcept {}  // Avoid https://gcc.gnu.org/bugzilla/show_bug.cgi?id=82134
 #define GMOCK_INTERNAL_DEFN_COPY_AND_1_VALUE_PARAMS(...) = default;
 #define GMOCK_INTERNAL_DEFN_COPY_AND_2_VALUE_PARAMS(...) = default;
 #define GMOCK_INTERNAL_DEFN_COPY_AND_3_VALUE_PARAMS(...) = default;
@@ -429,66 +429,66 @@
 #define GMOCK_ACTION_CLASS_(name, value_params)\
     GTEST_CONCAT_TOKEN_(name##Action, GMOCK_INTERNAL_COUNT_##value_params)
 
-#define ACTION_TEMPLATE(name, template_params, value_params)\
-  template <GMOCK_INTERNAL_DECL_##template_params\
-            GMOCK_INTERNAL_DECL_TYPE_##value_params>\
-  class GMOCK_ACTION_CLASS_(name, value_params) {\
-   public:\
-    explicit GMOCK_ACTION_CLASS_(name, value_params)\
-        GMOCK_INTERNAL_INIT_##value_params {}\
-    GMOCK_ACTION_CLASS_(name, value_params)(\
-        const GMOCK_ACTION_CLASS_(name, value_params)<\
-            GMOCK_INTERNAL_LIST_##template_params\
-            GMOCK_INTERNAL_LIST_TYPE_##value_params>&)\
-        GMOCK_INTERNAL_DEFN_COPY_##value_params\
-    template <typename F>\
-    class gmock_Impl : public ::testing::ActionInterface<F> {\
-     public:\
-      typedef F function_type;\
-      typedef typename ::testing::internal::Function<F>::Result return_type;\
-      typedef typename ::testing::internal::Function<F>::ArgumentTuple\
-          args_type;\
-      explicit gmock_Impl GMOCK_INTERNAL_INIT_##value_params {}\
-      return_type Perform(const args_type& args) override {\
-        return ::testing::internal::ActionHelper<return_type, gmock_Impl>::\
-            Perform(this, args);\
-      }\
-      template <GMOCK_ACTION_TEMPLATE_ARGS_NAMES_>\
-      return_type gmock_PerformImpl(GMOCK_ACTION_ARG_TYPES_AND_NAMES_) const;\
-      GMOCK_INTERNAL_DEFN_##value_params\
-    };\
-    template <typename F> operator ::testing::Action<F>() const {\
-      return ::testing::Action<F>(\
-          new gmock_Impl<F>(GMOCK_INTERNAL_LIST_##value_params));\
-    }\
-    GMOCK_INTERNAL_DEFN_##value_params\
-  };\
-  template <GMOCK_INTERNAL_DECL_##template_params\
-            GMOCK_INTERNAL_DECL_TYPE_##value_params>\
-  GMOCK_ACTION_CLASS_(name, value_params)<\
-      GMOCK_INTERNAL_LIST_##template_params\
-      GMOCK_INTERNAL_LIST_TYPE_##value_params> name(\
-          GMOCK_INTERNAL_DECL_##value_params) GTEST_MUST_USE_RESULT_;\
-  template <GMOCK_INTERNAL_DECL_##template_params\
-            GMOCK_INTERNAL_DECL_TYPE_##value_params>\
-  inline GMOCK_ACTION_CLASS_(name, value_params)<\
-      GMOCK_INTERNAL_LIST_##template_params\
-      GMOCK_INTERNAL_LIST_TYPE_##value_params> name(\
-          GMOCK_INTERNAL_DECL_##value_params) {\
-    return GMOCK_ACTION_CLASS_(name, value_params)<\
-        GMOCK_INTERNAL_LIST_##template_params\
-        GMOCK_INTERNAL_LIST_TYPE_##value_params>(\
-            GMOCK_INTERNAL_LIST_##value_params);\
-  }\
-  template <GMOCK_INTERNAL_DECL_##template_params\
-            GMOCK_INTERNAL_DECL_TYPE_##value_params>\
-  template <typename F>\
-  template <GMOCK_ACTION_TEMPLATE_ARGS_NAMES_>\
-  typename ::testing::internal::Function<F>::Result\
-      GMOCK_ACTION_CLASS_(name, value_params)<\
-          GMOCK_INTERNAL_LIST_##template_params\
-          GMOCK_INTERNAL_LIST_TYPE_##value_params>::gmock_Impl<F>::\
-              gmock_PerformImpl(\
+#define ACTION_TEMPLATE(name, template_params, value_params)                   \
+  template <GMOCK_INTERNAL_DECL_##template_params                              \
+            GMOCK_INTERNAL_DECL_TYPE_##value_params>                           \
+  class GMOCK_ACTION_CLASS_(name, value_params) {                              \
+   public:                                                                     \
+    explicit GMOCK_ACTION_CLASS_(name, value_params)(                          \
+        GMOCK_INTERNAL_DECL_##value_params)                                    \
+        GMOCK_PP_IF(GMOCK_PP_IS_EMPTY(GMOCK_INTERNAL_COUNT_##value_params),    \
+                    = default; ,                                               \
+                    : impl_(std::make_shared<gmock_Impl>(                      \
+                                GMOCK_INTERNAL_LIST_##value_params)) { })      \
+    GMOCK_ACTION_CLASS_(name, value_params)(                                   \
+        const GMOCK_ACTION_CLASS_(name, value_params)&)                        \
+        GMOCK_INTERNAL_DEFN_COPY_##value_params                                \
+    GMOCK_ACTION_CLASS_(name, value_params)(                                   \
+        GMOCK_ACTION_CLASS_(name, value_params)&&)                             \
+        GMOCK_INTERNAL_DEFN_COPY_##value_params                                \
+    template <typename F>                                                      \
+    operator ::testing::Action<F>() const {                                    \
+      return GMOCK_PP_IF(                                                      \
+          GMOCK_PP_IS_EMPTY(GMOCK_INTERNAL_COUNT_##value_params),              \
+                      (::testing::internal::MakeAction<F, gmock_Impl>()),      \
+                      (::testing::internal::MakeAction<F>(impl_)));            \
+    }                                                                          \
+   private:                                                                    \
+    class gmock_Impl {                                                         \
+     public:                                                                   \
+      explicit gmock_Impl GMOCK_INTERNAL_INIT_##value_params {}                \
+      template <typename function_type, typename return_type,                  \
+                typename args_type, GMOCK_ACTION_TEMPLATE_ARGS_NAMES_>         \
+      return_type gmock_PerformImpl(GMOCK_ACTION_ARG_TYPES_AND_NAMES_) const;  \
+      GMOCK_INTERNAL_DEFN_##value_params                                       \
+    };                                                                         \
+    GMOCK_PP_IF(GMOCK_PP_IS_EMPTY(GMOCK_INTERNAL_COUNT_##value_params),        \
+                , std::shared_ptr<const gmock_Impl> impl_;)                    \
+  };                                                                           \
+  template <GMOCK_INTERNAL_DECL_##template_params                              \
+            GMOCK_INTERNAL_DECL_TYPE_##value_params>                           \
+  GMOCK_ACTION_CLASS_(name, value_params)<                                     \
+      GMOCK_INTERNAL_LIST_##template_params                                    \
+      GMOCK_INTERNAL_LIST_TYPE_##value_params> name(                           \
+          GMOCK_INTERNAL_DECL_##value_params) GTEST_MUST_USE_RESULT_;          \
+  template <GMOCK_INTERNAL_DECL_##template_params                              \
+            GMOCK_INTERNAL_DECL_TYPE_##value_params>                           \
+  inline GMOCK_ACTION_CLASS_(name, value_params)<                              \
+      GMOCK_INTERNAL_LIST_##template_params                                    \
+      GMOCK_INTERNAL_LIST_TYPE_##value_params> name(                           \
+          GMOCK_INTERNAL_DECL_##value_params) {                                \
+    return GMOCK_ACTION_CLASS_(name, value_params)<                            \
+        GMOCK_INTERNAL_LIST_##template_params                                  \
+        GMOCK_INTERNAL_LIST_TYPE_##value_params>(                              \
+            GMOCK_INTERNAL_LIST_##value_params);                               \
+  }                                                                            \
+  template <GMOCK_INTERNAL_DECL_##template_params                              \
+            GMOCK_INTERNAL_DECL_TYPE_##value_params>                           \
+  template <typename function_type, typename return_type, typename args_type,  \
+            GMOCK_ACTION_TEMPLATE_ARGS_NAMES_>                                 \
+  return_type GMOCK_ACTION_CLASS_(name, value_params)<                         \
+      GMOCK_INTERNAL_LIST_##template_params                                    \
+      GMOCK_INTERNAL_LIST_TYPE_##value_params>::gmock_Impl::gmock_PerformImpl( \
           GMOCK_ACTION_ARG_TYPES_AND_NAMES_UNUSED_) const
 
 namespace testing {
