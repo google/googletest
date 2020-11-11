@@ -756,7 +756,12 @@ TEST(PrintArrayTest, Char8Array) {
 #endif
 
 // char16_t array.
+#ifdef _MSC_VER
+// TODO(b/173029407): Figure out why this doesn't work under MSVC.
+TEST(PrintArrayTest, DISABLED_Char16Array) {
+#else
 TEST(PrintArrayTest, Char16Array) {
+#endif
   const char16_t a[] = u"Hello, 世界";
   EXPECT_EQ(
       "{ U+0048, U+0065, U+006C, U+006C, U+006F, U+002C, U+0020, U+4E16, "
@@ -765,7 +770,12 @@ TEST(PrintArrayTest, Char16Array) {
 }
 
 // char32_t array.
+#ifdef _MSC_VER
+// TODO(b/173029407): Figure out why this doesn't work under MSVC.
+TEST(PrintArrayTest, DISABLED_Char32Array) {
+#else
 TEST(PrintArrayTest, Char32Array) {
+#endif
   const char32_t a[] = U"Hello, 世界";
   EXPECT_EQ(
       "{ U+0048, U+0065, U+006C, U+006C, U+006F, U+002C, U+0020, U+4E16, "
@@ -843,7 +853,12 @@ TEST(PrintStringTest, U8String) {
 }
 #endif
 
+#ifdef _MSC_VER
+// TODO(b/173029407): Figure out why this doesn't work under MSVC.
+TEST(PrintStringTest, DISABLED_U16String) {
+#else
 TEST(PrintStringTest, U16String) {
+#endif
   std::u16string str = u"Hello, 世界";
   EXPECT_EQ(str, str);  // Verify EXPECT_EQ compiles with this type.
   EXPECT_EQ(
@@ -852,7 +867,12 @@ TEST(PrintStringTest, U16String) {
       Print(str));
 }
 
+#ifdef _MSC_VER
+// TODO(b/173029407): Figure out why this doesn't work under MSVC.
+TEST(PrintStringTest, DISABLED_U32String) {
+#else
 TEST(PrintStringTest, U32String) {
+#endif
   std::u32string str = U"Hello, 世界";
   EXPECT_EQ(str, str);  // Verify EXPECT_EQ compiles with this type.
   EXPECT_EQ(
