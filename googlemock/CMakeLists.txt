@@ -138,20 +138,6 @@ if (gmock_build_tests)
   # 'make test' or ctest.
   enable_testing()
 
-  if (WIN32)
-    file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/RunTest.ps1"
-         CONTENT
-"$project_bin = \"${CMAKE_BINARY_DIR}/bin/$<CONFIG>\"
-$env:Path = \"$project_bin;$env:Path\"
-& $args")
-  elseif (MINGW OR CYGWIN)
-    file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/RunTest.ps1"
-         CONTENT
-"$project_bin = (cygpath --windows ${CMAKE_BINARY_DIR}/bin)
-$env:Path = \"$project_bin;$env:Path\"
-& $args")
-  endif()
-
   if (MINGW OR CYGWIN)
     if (CMAKE_VERSION VERSION_LESS "2.8.12")
       add_compile_options("-Wa,-mbig-obj")
