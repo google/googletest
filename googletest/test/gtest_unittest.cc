@@ -3351,7 +3351,11 @@ TEST_F(SingleEvaluationTest, OtherCases) {
 
 #if GTEST_HAS_RTTI
 
+#ifdef _MSC_VER
+#define ERROR_DESC "class std::runtime_error"
+#else
 #define ERROR_DESC "std::runtime_error"
+#endif
 
 #else  // GTEST_HAS_RTTI
 
