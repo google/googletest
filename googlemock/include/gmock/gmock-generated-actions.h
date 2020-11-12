@@ -520,7 +520,8 @@ struct InvokeArgumentAction {
   auto operator()(Args&&... args) const -> decltype(internal::InvokeArgument(
       std::get<index>(std::forward_as_tuple(std::forward<Args>(args)...)),
       std::declval<const Params&>()...)) {
-    internal::FlatTuple<Args&&...> args_tuple(std::forward<Args>(args)...);
+    internal::FlatTuple<Args&&...> args_tuple(FlatTupleConstructTag{},
+                                              std::forward<Args>(args)...);
     return params.Apply([&](const Params&... unpacked_params) {
       auto&& callable = args_tuple.template Get<index>();
       return internal::InvokeArgument(
@@ -564,7 +565,7 @@ template <std::size_t index, typename... Params>
 internal::InvokeArgumentAction<index, typename std::decay<Params>::type...>
 InvokeArgument(Params&&... params) {
   return {internal::FlatTuple<typename std::decay<Params>::type...>(
-      std::forward<Params>(params)...)};
+      internal::FlatTupleConstructTag{}, std::forward<Params>(params)...)};
 }
 
 #ifdef _MSC_VER
