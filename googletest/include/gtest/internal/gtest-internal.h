@@ -1285,14 +1285,9 @@ class FlatTuple
 
  public:
   FlatTuple() = default;
-  template <typename... Args,
-            typename = typename std::enable_if<
-                !std::is_same<void(FlatTuple), void(typename std::decay<
-                                                    Args>::type...)>::value &&
-                (sizeof...(T) >= 1)>::type>
-  explicit FlatTuple(Args&&... args)
-      : FlatTuple::FlatTupleBase(FlatTupleConstructTag{},
-                                 std::forward<Args>(args)...) {}
+  template <typename... Args>
+  explicit FlatTuple(FlatTupleConstructTag tag, Args&&... args)
+      : FlatTuple::FlatTupleBase(tag, std::forward<Args>(args)...) {}
 
   using FlatTuple::FlatTupleBase::Apply;
   using FlatTuple::FlatTupleBase::Get;

@@ -791,7 +791,7 @@ namespace internal {
 template <typename... Ts>
 class ValueArray {
  public:
-  explicit ValueArray(Ts... v) : v_(std::move(v)...) {}
+  explicit ValueArray(Ts... v) : v_(FlatTupleConstructTag{}, std::move(v)...) {}
 
   template <typename T>
   operator ParamGenerator<T>() const {  // NOLINT
