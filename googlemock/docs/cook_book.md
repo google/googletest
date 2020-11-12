@@ -3078,7 +3078,7 @@ class MockFoo : public Foo {
   ...
   // Add the following two lines to the mock class.
   MOCK_METHOD(void, Die, ());
-  virtual ~MockFoo() { Die(); }
+  ~MockFoo() override { Die(); }
 };
 ```
 
