@@ -6557,18 +6557,27 @@ std::string TempDir() {
   return "\\temp\\";
 #elif GTEST_OS_WINDOWS
   const char* temp_dir = internal::posix::GetEnv("TEMP");
-  if (temp_dir == nullptr || temp_dir[0] == '\0')
+  if (temp_dir == nullptr || temp_dir[0] == '\0') {
     return "\\temp\\";
-  else if (temp_dir[strlen(temp_dir) - 1] == '\\')
+  } else if (temp_dir[strlen(temp_dir) - 1] == '\\') {
     return temp_dir;
-  else
+  } else {
     return std::string(temp_dir) + "\\";
+  }
 #elif GTEST_OS_LINUX_ANDROID
   const char* temp_dir = internal::posix::GetEnv("TEST_TMPDIR");
-  if (temp_dir == nullptr || temp_dir[0] == '\0')
+  if (temp_dir == nullptr || temp_dir[0] == '\0') {
     return "/data/local/tmp/";
-  else
+  } else {
     return temp_dir;
+  }
+#elif GTEST_OS_LINUX
+  const char* temp_dir = internal::posix::GetEnv("TEST_TMPDIR");
+  if (temp_dir == nullptr || temp_dir[0] == '\0') {
+    return "/tmp/";
+  } else {
+    return temp_dir;
+  }
 #else
   return "/tmp/";
 #endif  // GTEST_OS_WINDOWS_MOBILE
