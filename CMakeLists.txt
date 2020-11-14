@@ -6,6 +6,9 @@ cmake_minimum_required(VERSION 2.8.8)
 if (POLICY CMP0048)
   cmake_policy(SET CMP0048 NEW)
 endif (POLICY CMP0048)
+if (POLICY CMP0077) # prevent option overrides BUILD_GMOCK when used using FetchContent
+  cmake_policy(SET CMP0077 NEW)
+endif (POLICY CMP0077)
 
 project(googletest-distribution)
 set(GOOGLETEST_VERSION 1.10.0)
