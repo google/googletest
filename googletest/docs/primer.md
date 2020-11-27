@@ -256,6 +256,7 @@ To create a test:
 3.  The test's result is determined by the assertions; if any assertion in the
     test fails (either fatally or non-fatally), or if the test crashes, the
     entire test fails. Otherwise, it succeeds.
+4.  To skip a test based on a runtime condition use the `GTEST_SKIP()` macro.
 
 ```c++
 TEST(TestSuiteName, TestName) {
