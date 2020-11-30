@@ -36,4 +36,4 @@ if [ "${TRAVIS_OS_NAME}" != "osx" ]; then
     exit 0
 fi
 
-# Intentionally empty.
+# This file is currently intentionally empty.

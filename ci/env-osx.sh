@@ -33,7 +33,9 @@
 # This file should be sourced, and not executed as a standalone script.
 #
 
-if [ "${TRAVIS_OS_NAME}" = "osx" ]; then
+if [ "${TRAVIS_OS_NAME}" != "osx" ]; then
    echo "Not a macOS build; skipping"
    exit 0
 fi
+
+# This file is currently intentionally empty.
