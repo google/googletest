@@ -33,15 +33,9 @@
 # This file should be sourced, and not executed as a standalone script.
 #
 
-# TODO() - we can check if this is being sourced using $BASH_VERSION and $BASH_SOURCE[0] != ${0}.
-#
-
-if [ "${TRAVIS_OS_NAME}" = "osx" ]; then
-    if [ "$CXX" = "clang++" ]; then
-        # $PATH needs to be adjusted because the llvm tap doesn't install the
-        # package to /usr/local/bin, etc, like the gcc tap does.
-        # See: https://github.com/Homebrew/legacy-homebrew/issues/29733
-        clang_version=3.9
-        export PATH="/usr/local/opt/llvm@${clang_version}/bin:$PATH";
-    fi
+if [ "${TRAVIS_OS_NAME}" != "osx" ]; then
+   echo "Not a macOS build; skipping"
+   exit 0
 fi
+
+# This file is currently intentionally empty.

@@ -36,5 +36,4 @@ if [ "${TRAVIS_OS_NAME}" != "osx" ]; then
     exit 0
 fi
 
-brew update
-brew install ccache gcc@4.9
+# This file is currently intentionally empty.

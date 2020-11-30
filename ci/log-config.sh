@@ -31,10 +31,6 @@
 
 set -e
 
-# ccache on OS X needs installation first
-# reset ccache statistics
-ccache --zero-stats
-
 echo PATH=${PATH}
 
 echo "Compiler configuration:"
