@@ -32,9 +32,11 @@ matrix:
       compiler: clang
       env: BUILD_TYPE=Release VERBOSE=1 CXX_FLAGS="-std=c++11 -Wdeprecated" NO_EXCEPTION=ON NO_RTTI=ON COMPILER_IS_GNUCXX=ON
     - os: osx
+      osx_image: xcode12.2
       compiler: gcc
-      env: BUILD_TYPE=Release VERBOSE=1 CXX_FLAGS="-std=c++11 -Wdeprecated" HOMEBREW_LOGS=~/homebrew-logs HOMEBREW_TEMP=~/homebrew-temp
+      env: BUILD_TYPE=Release VERBOSE=1 CC=gcc-10 CXX=g++-10 CXX_FLAGS="-std=c++11 -Wdeprecated" HOMEBREW_LOGS=~/homebrew-logs HOMEBREW_TEMP=~/homebrew-temp
     - os: osx
+      osx_image: xcode12.2
       compiler: clang
       env: BUILD_TYPE=Release VERBOSE=1 CXX_FLAGS="-std=c++11 -Wdeprecated" HOMEBREW_LOGS=~/homebrew-logs HOMEBREW_TEMP=~/homebrew-temp
 
@@ -56,9 +58,7 @@ addons:
     update: true
   homebrew:
     packages:
-    - ccache
-    - gcc@4.9
-    - llvm@4
+    - gcc@10
     update: true
 
 notifications:
