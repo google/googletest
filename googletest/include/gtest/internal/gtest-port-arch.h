@@ -68,6 +68,7 @@
 # define GTEST_OS_OS2 1
 #elif defined __APPLE__
 # define GTEST_OS_MAC 1
+# include <TargetConditionals.h>
 # if TARGET_OS_IPHONE
 #  define GTEST_OS_IOS 1
 # endif
