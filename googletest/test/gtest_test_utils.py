@@ -289,10 +289,10 @@ class Subprocess:
       else:  # os.WIFEXITED(ret_code) should return True here.
         self._return_code = os.WEXITSTATUS(ret_code)
 
-    if self._return_code < 0:
+    if bool(self._return_code & 0x80000000):
       self.terminated_by_signal = True
       self.exited = False
-      self.signal = -self._return_code
+      self.signal = self._return_code & 0x7fffffff
     else:
       self.terminated_by_signal = False
       self.exited = True
