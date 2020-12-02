@@ -1,7 +1,5 @@
 # Googletest Primer
 
-<!-- GOOGLETEST_CM0036 DO NOT DELETE -->
-
 <!-- GOOGLETEST_CM0035 DO NOT DELETE -->
 
 ## Introduction: Why googletest?
