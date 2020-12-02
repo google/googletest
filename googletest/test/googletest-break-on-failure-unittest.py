@@ -39,6 +39,7 @@ Google Test) with different environments and command line flags.
 """
 
 import os
+import sys
 import gtest_test_utils
 
 # Constants.
@@ -77,6 +78,7 @@ def Run(command):
   """Runs a command; returns 1 if it was killed by a signal, or 0 otherwise."""
 
   p = gtest_test_utils.Subprocess(command, env=environ)
+  print("XX=%x" % (p._return_code,))
   if p.terminated_by_signal:
     return 1
   else:
@@ -179,6 +181,9 @@ class GTestBreakOnFailureUnitTest(gtest_test_utils.TestCase):
     self.RunAndVerify(env_var_value='1',
                       flag_value='1',
                       expect_seg_fault=1)
+
+  def testBreadcrumb(self):
+    self.assertEqual("%s %s" % (os.name, sys.version), "---wat")
 
   def testBreakOnFailureOverridesThrowOnFailure(self):
     """Tests that gtest_break_on_failure overrides gtest_throw_on_failure."""
