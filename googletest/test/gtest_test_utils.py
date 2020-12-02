@@ -291,7 +291,6 @@ class Subprocess:
     if bool(self._return_code & 0x80000000):
       self.terminated_by_signal = True
       self.exited = False
-      self.signal = (~self._return_code & 0x7fffffff) + 1
     else:
       self.terminated_by_signal = False
       self.exited = True
