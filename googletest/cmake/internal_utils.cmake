@@ -244,13 +244,7 @@ function(cxx_executable name dir libs)
 endfunction()
 
 # Sets PYTHONINTERP_FOUND and PYTHON_EXECUTABLE.
-if ("${CMAKE_VERSION}" VERSION_LESS "3.12.0")
-  find_package(PythonInterp)
-else()
-  find_package(Python COMPONENTS Interpreter)
-  set(PYTHONINTERP_FOUND ${Python_Interpreter_FOUND})
-  set(PYTHON_EXECUTABLE ${Python_EXECUTABLE})
-endif()
+find_package(PythonInterp)
 
 # cxx_test_with_flags(name cxx_flags libs srcs...)
 #

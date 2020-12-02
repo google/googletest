@@ -39,6 +39,7 @@ Google Test) with different environments and command line flags.
 """
 
 import os
+import sys
 import gtest_test_utils
 
 # Constants.
@@ -179,6 +180,9 @@ class GTestBreakOnFailureUnitTest(gtest_test_utils.TestCase):
     self.RunAndVerify(env_var_value='1',
                       flag_value='1',
                       expect_seg_fault=1)
+
+  def testBreadcrumb(self):
+    self.assertEqual("%s %s" % (os.name, sys.version), "---wat")
 
   def testBreakOnFailureOverridesThrowOnFailure(self):
     """Tests that gtest_break_on_failure overrides gtest_throw_on_failure."""
