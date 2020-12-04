@@ -124,6 +124,13 @@ package:
 
 *   A C++11-standard-compliant compiler
 
+*   Windows, or a POSIX compliant system.
+
+    Compilers on Cygwin do not enable POSIX compliance by default, leading to
+    errors about missing functions such as `strdup()`, even though the
+    standard libraries provide them. Pass e.g. the `-D_GNU_SOURCE` define to
+    enable these functions.
+
 ## Contributing change
 
 Please read the [`CONTRIBUTING.md`](CONTRIBUTING.md) for details on how to
