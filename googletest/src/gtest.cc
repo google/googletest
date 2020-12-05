@@ -6275,7 +6275,7 @@ static const char kColorEncodedHelpMessage[] =
     "      List the names of all tests instead of running them. The name of\n"
     "      TEST(Foo, Bar) is \"Foo.Bar\".\n"
     "  @G--" GTEST_FLAG_PREFIX_
-    "filter=@YPOSTIVE_PATTERNS"
+    "filter=@YPOSITIVE_PATTERNS"
     "[@G-@YNEGATIVE_PATTERNS]@D\n"
     "      Run only the tests whose name matches one of the positive patterns "
     "but\n"
