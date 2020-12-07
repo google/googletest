@@ -421,6 +421,7 @@ messages, you can use:
 | Matcher                   | Description                                     |
 | :------------------------ | :---------------------------------------------- |
 | `Pointee(m)`              | `argument` (either a smart pointer or a raw pointer) points to a value that matches matcher `m`. |
+| `Pointer(m)`              | `argument` (either a smart pointer or a raw pointer) contains a pointer that matches `m`. `m` will match against the raw pointer regardless of the type of `argument`. |
 | `WhenDynamicCastTo<T>(m)` | when `argument` is passed through `dynamic_cast<T>()`, it matches matcher `m`. |
 <!-- mdformat on -->
 

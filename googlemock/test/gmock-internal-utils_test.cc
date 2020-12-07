@@ -124,20 +124,6 @@ TEST(ConvertIdentifierNameToWordsTest, WorksWhenNameIsMixture) {
             ConvertIdentifierNameToWords("_Chapter11Section_1_"));
 }
 
-TEST(PointeeOfTest, WorksForSmartPointers) {
-  EXPECT_TRUE(
-      (std::is_same<int, PointeeOf<std::unique_ptr<int>>::type>::value));
-  EXPECT_TRUE(
-      (std::is_same<std::string,
-                    PointeeOf<std::shared_ptr<std::string>>::type>::value));
-}
-
-TEST(PointeeOfTest, WorksForRawPointers) {
-  EXPECT_TRUE((std::is_same<int, PointeeOf<int*>::type>::value));
-  EXPECT_TRUE((std::is_same<const char, PointeeOf<const char*>::type>::value));
-  EXPECT_TRUE((std::is_void<PointeeOf<void*>::type>::value));
-}
-
 TEST(GetRawPointerTest, WorksForSmartPointers) {
   const char* const raw_p1 = new const char('a');  // NOLINT
   const std::unique_ptr<const char> p1(raw_p1);
