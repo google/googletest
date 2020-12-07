@@ -71,20 +71,6 @@ GTEST_API_ std::string JoinAsTuple(const Strings& fields);
 // "foo_bar_123" are converted to "foo bar 123".
 GTEST_API_ std::string ConvertIdentifierNameToWords(const char* id_name);
 
-// PointeeOf<Pointer>::type is the type of a value pointed to by a
-// Pointer, which can be either a smart pointer or a raw pointer.  The
-// following default implementation is for the case where Pointer is a
-// smart pointer.
-template <typename Pointer>
-struct PointeeOf {
-  // Smart pointer classes define type element_type as the type of
-  // their pointees.
-  typedef typename Pointer::element_type type;
-};
-// This specialization is for the raw pointer case.
-template <typename T>
-struct PointeeOf<T*> { typedef T type; };  // NOLINT
-
 // GetRawPointer(p) returns the raw pointer underlying p when p is a
 // smart pointer, or returns p itself when p is already a raw pointer.
 // The following default implementation is for the smart pointer case.
@@ -378,7 +364,8 @@ template <typename ElementPointer, typename Size>
 class StlContainerView< ::std::tuple<ElementPointer, Size> > {
  public:
   typedef typename std::remove_const<
-      typename internal::PointeeOf<ElementPointer>::type>::type RawElement;
+      typename std::pointer_traits<ElementPointer>::element_type>::type
+      RawElement;
   typedef internal::NativeArray<RawElement> type;
   typedef const type const_reference;
 

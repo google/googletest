@@ -1841,8 +1841,9 @@ class PointeeMatcher {
   template <typename Pointer>
   class Impl : public MatcherInterface<Pointer> {
    public:
-    typedef typename PointeeOf<GTEST_REMOVE_REFERENCE_AND_CONST_(Pointer)>::type
-        Pointee;
+    using Pointee =
+        typename std::pointer_traits<GTEST_REMOVE_REFERENCE_AND_CONST_(
+            Pointer)>::element_type;
 
     explicit Impl(const InnerMatcher& matcher)
         : matcher_(MatcherCast<const Pointee&>(matcher)) {}
@@ -1867,6 +1868,64 @@ class PointeeMatcher {
 
    private:
     const Matcher<const Pointee&> matcher_;
+  };
+
+  const InnerMatcher matcher_;
+};
+
+// Implements the Pointer(m) matcher
+// Implements the Pointer(m) matcher for matching a pointer that matches matcher
+// m.  The pointer can be either raw or smart, and will match `m` against the
+// raw pointer.
+template <typename InnerMatcher>
+class PointerMatcher {
+ public:
+  explicit PointerMatcher(const InnerMatcher& matcher) : matcher_(matcher) {}
+
+  // This type conversion operator template allows Pointer(m) to be
+  // used as a matcher for any pointer type whose pointer type is
+  // compatible with the inner matcher, where type PointerType can be
+  // either a raw pointer or a smart pointer.
+  //
+  // The reason we do this instead of relying on
+  // MakePolymorphicMatcher() is that the latter is not flexible
+  // enough for implementing the DescribeTo() method of Pointer().
+  template <typename PointerType>
+  operator Matcher<PointerType>() const {  // NOLINT
+    return Matcher<PointerType>(new Impl<const PointerType&>(matcher_));
+  }
+
+ private:
+  // The monomorphic implementation that works for a particular pointer type.
+  template <typename PointerType>
+  class Impl : public MatcherInterface<PointerType> {
+   public:
+    using Pointer =
+        const typename std::pointer_traits<GTEST_REMOVE_REFERENCE_AND_CONST_(
+            PointerType)>::element_type*;
+
+    explicit Impl(const InnerMatcher& matcher)
+        : matcher_(MatcherCast<Pointer>(matcher)) {}
+
+    void DescribeTo(::std::ostream* os) const override {
+      *os << "is a pointer that ";
+      matcher_.DescribeTo(os);
+    }
+
+    void DescribeNegationTo(::std::ostream* os) const override {
+      *os << "is not a pointer that ";
+      matcher_.DescribeTo(os);
+    }
+
+    bool MatchAndExplain(PointerType pointer,
+                         MatchResultListener* listener) const override {
+      *listener << "which is a pointer that ";
+      Pointer p = GetRawPointer(pointer);
+      return MatchPrintAndExplain(p, matcher_, listener);
+    }
+
+   private:
+    Matcher<Pointer> matcher_;
   };
 
   const InnerMatcher matcher_;
@@ -4719,6 +4778,14 @@ internal::FieldsAreMatcher<typename std::decay<M>::type...> FieldsAre(
     M&&... matchers) {
   return internal::FieldsAreMatcher<typename std::decay<M>::type...>(
       std::forward<M>(matchers)...);
+}
+
+// Creates a matcher that matches a pointer (raw or smart) that matches
+// inner_matcher.
+template <typename InnerMatcher>
+inline internal::PointerMatcher<InnerMatcher> Pointer(
+    const InnerMatcher& inner_matcher) {
+  return internal::PointerMatcher<InnerMatcher>(inner_matcher);
 }
 }  // namespace no_adl
 
