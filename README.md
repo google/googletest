@@ -1,11 +1,11 @@
 # GoogleTest
 
-#### OSS Builds Status:
+#### OSS Builds Status
 
 [![Build Status](https://api.travis-ci.org/google/googletest.svg?branch=master)](https://travis-ci.org/google/googletest)
 [![Build status](https://ci.appveyor.com/api/projects/status/4o38plt0xbo1ubc8/branch/master?svg=true)](https://ci.appveyor.com/project/GoogleTestAppVeyor/googletest/branch/master)
 
-### Announcements:
+### Announcements
 
 #### Release 1.10.x
 
@@ -25,7 +25,7 @@ This repository is a merger of the formerly separate GoogleTest and GoogleMock
 projects. These were so closely related that it makes sense to maintain and
 release them together.
 
-### Getting started:
+### Getting Started
 
 The information for **GoogleTest** is available in the
 [GoogleTest Primer](googletest/docs/primer.md) documentation.
@@ -49,18 +49,41 @@ More detailed documentation for googletest is in its interior
 *   Various options for running the tests.
 *   XML test report generation.
 
-## Platforms
+## Supported Platforms
 
-GoogleTest has been used on a variety of platforms:
+GoogleTest requires a codebase and compiler compliant with the C++11 standard or
+newer.
+
+The GoogleTest code is officially supported on the following platforms.
+Operating systems or tools not listed below are community-supported. For
+community-supported platforms, patches that do not complicate the code may be
+considered.
+
+If you notice any problems on your platform, please file an issue on the
+[GoogleTest GitHub Issue Tracker](https://github.com/google/googletest/issues).
+Pull requests containing fixes are welcome!
+
+### Operating Systems
 
 *   Linux
-*   Mac OS X
+*   macOS
 *   Windows
-*   Cygwin
-*   MinGW
-*   Windows Mobile
-*   Symbian
-*   PlatformIO
+
+### Compilers
+
+*   gcc 5.0+
+*   clang 5.0+
+*   MSVC 2015+
+
+**macOS users:** Xcode 9.3+ provides clang 5.0+.
+
+### Build Systems
+
+*   [Bazel](https://bazel.build/)
+*   [CMake](https://cmake.org/)
+
+**Note:** Bazel is the build system used by the team internally and in tests.
+CMake is supported on a best-effort basis and by the community.
 
 ## Who Is Using GoogleTest?
 
@@ -104,29 +127,9 @@ tests.
 [Cornichon](https://pypi.org/project/cornichon/) is a small Gherkin DSL parser
 that generates stub code for GoogleTest.
 
-## Requirements
+## Contributing Changes
 
-GoogleTest is designed to have fairly minimal requirements to build and use with
-your projects, but there are some. If you notice any problems on your platform,
-please file an issue on the
-[GoogleTest GitHub Issue Tracker](https://github.com/google/googletest/issues).
-
-Patches for fixing them are welcome!
-
-### Build Requirements
-
-These are the base requirements to build and use GoogleTest from a source
-package:
-
-*   [Bazel](https://bazel.build/) or [CMake](https://cmake.org/). NOTE: Bazel is
-    the build system that GoogleTest is using internally and tests against.
-    CMake is community-supported.
-
-*   A C++11-standard-compliant compiler
-
-## Contributing change
-
-Please read the [`CONTRIBUTING.md`](CONTRIBUTING.md) for details on how to
+Please read [`CONTRIBUTING.md`](CONTRIBUTING.md) for details on how to
 contribute to this project.
 
 Happy testing!
