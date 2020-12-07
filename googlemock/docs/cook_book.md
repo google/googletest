@@ -520,7 +520,7 @@ argument matchers:
 
 ```cpp
 ON_CALL(factory, DoMakeTurtle)
-    .WillByDefault(MakeMockTurtle());
+    .WillByDefault(Return(MakeMockTurtle()));
 ```
 
 ### Alternative to Mocking Concrete Classes
