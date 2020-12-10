@@ -35,6 +35,8 @@ load("@rules_python//python:defs.bzl", "py_library", "py_test")
 
 licenses(["notice"])
 
+package(default_visibility = ["//:__subpackages__"])
+
 #on windows exclude gtest-tuple.h
 cc_test(
     name = "gtest_all_test",
