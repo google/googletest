@@ -52,6 +52,9 @@ py_library(
     name = "gmock_test_utils",
     testonly = 1,
     srcs = ["gmock_test_utils.py"],
+    deps = [
+        "//googletest/test:gtest_test_utils",
+    ]
 )
 
 cc_binary(
