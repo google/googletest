@@ -63,14 +63,44 @@
 #ifndef GMOCK_INCLUDE_GMOCK_GMOCK_NICE_STRICT_H_
 #define GMOCK_INCLUDE_GMOCK_GMOCK_NICE_STRICT_H_
 
+#include <type_traits>
+
 #include "gmock/gmock-spec-builders.h"
 #include "gmock/internal/gmock-port.h"
 
 namespace testing {
+template <class MockClass>
+class NiceMock;
+template <class MockClass>
+class NaggyMock;
+template <class MockClass>
+class StrictMock;
+
+namespace internal {
+template <typename T>
+std::true_type StrictnessModifierProbe(const NiceMock<T>&);
+template <typename T>
+std::true_type StrictnessModifierProbe(const NaggyMock<T>&);
+template <typename T>
+std::true_type StrictnessModifierProbe(const StrictMock<T>&);
+std::false_type StrictnessModifierProbe(...);
+
+template <typename T>
+constexpr bool HasStrictnessModifier() {
+  return decltype(StrictnessModifierProbe(std::declval<const T&>()))::value;
+}
+
+}  // namespace internal
 
 template <class MockClass>
 class NiceMock : public MockClass {
  public:
+  static_assert(
+      !internal::HasStrictnessModifier<MockClass>(),
+      "Can't apply NiceMock to a class hierarchy that already has a "
+      "strictness modifier. See "
+      "https://github.com/google/googletest/blob/master/googlemock/docs/"
+      "cook_book.md#the-nice-the-strict-and-the-naggy-nicestrictnaggy");
   NiceMock() : MockClass() {
     ::testing::Mock::AllowUninterestingCalls(
         internal::ImplicitCast_<MockClass*>(this));
@@ -108,6 +138,13 @@ class NiceMock : public MockClass {
 
 template <class MockClass>
 class NaggyMock : public MockClass {
+  static_assert(
+      !internal::HasStrictnessModifier<MockClass>(),
+      "Can't apply NaggyMock to a class hierarchy that already has a "
+      "strictness modifier. See "
+      "https://github.com/google/googletest/blob/master/googlemock/docs/"
+      "cook_book.md#the-nice-the-strict-and-the-naggy-nicestrictnaggy");
+
  public:
   NaggyMock() : MockClass() {
     ::testing::Mock::WarnUninterestingCalls(
@@ -147,6 +184,12 @@ class NaggyMock : public MockClass {
 template <class MockClass>
 class StrictMock : public MockClass {
  public:
+  static_assert(
+      !internal::HasStrictnessModifier<MockClass>(),
+      "Can't apply StrictMock to a class hierarchy that already has a "
+      "strictness modifier. See "
+      "https://github.com/google/googletest/blob/master/googlemock/docs/"
+      "cook_book.md#the-nice-the-strict-and-the-naggy-nicestrictnaggy");
   StrictMock() : MockClass() {
     ::testing::Mock::FailUninterestingCalls(
         internal::ImplicitCast_<MockClass*>(this));
@@ -181,34 +224,6 @@ class StrictMock : public MockClass {
  private:
   GTEST_DISALLOW_COPY_AND_ASSIGN_(StrictMock);
 };
-
-// The following specializations catch some (relatively more common)
-// user errors of nesting nice and strict mocks.  They do NOT catch
-// all possible errors.
-
-// These specializations are declared but not defined, as NiceMock,
-// NaggyMock, and StrictMock cannot be nested.
-
-template <typename MockClass>
-class NiceMock<NiceMock<MockClass> >;
-template <typename MockClass>
-class NiceMock<NaggyMock<MockClass> >;
-template <typename MockClass>
-class NiceMock<StrictMock<MockClass> >;
-
-template <typename MockClass>
-class NaggyMock<NiceMock<MockClass> >;
-template <typename MockClass>
-class NaggyMock<NaggyMock<MockClass> >;
-template <typename MockClass>
-class NaggyMock<StrictMock<MockClass> >;
-
-template <typename MockClass>
-class StrictMock<NiceMock<MockClass> >;
-template <typename MockClass>
-class StrictMock<NaggyMock<MockClass> >;
-template <typename MockClass>
-class StrictMock<StrictMock<MockClass> >;
 
 }  // namespace testing
 
