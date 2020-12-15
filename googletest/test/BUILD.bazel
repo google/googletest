@@ -156,6 +156,7 @@ py_library(
     name = "gtest_test_utils",
     testonly = 1,
     srcs = ["gtest_test_utils.py"],
+    imports = ["."],
 )
 
 cc_binary(
@@ -551,6 +552,10 @@ py_test(
     srcs = ["googletest-param-test-invalid-name1-test.py"],
     data = [":googletest-param-test-invalid-name1-test_"],
     deps = [":gtest_test_utils"],
+    tags = [
+        "no_test_msvc2015",
+        "no_test_msvc2017",
+    ],
 )
 
 py_test(
@@ -559,4 +564,8 @@ py_test(
     srcs = ["googletest-param-test-invalid-name2-test.py"],
     data = [":googletest-param-test-invalid-name2-test_"],
     deps = [":gtest_test_utils"],
+    tags = [
+        "no_test_msvc2015",
+        "no_test_msvc2017",
+    ],
 )
