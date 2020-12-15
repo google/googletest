@@ -428,8 +428,8 @@ class Test {
 };
 """
     expected = """\
-template <typename T0, typename T1>
-class MockTest : public Test<T0, T1> {
+template <typename S, typename T>
+class MockTest : public Test<S, T> {
 public:
 MOCK_METHOD(void, Foo, (), (override));
 };

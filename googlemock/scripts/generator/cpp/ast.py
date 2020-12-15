@@ -38,6 +38,7 @@ except ImportError:
 
 import sys
 import traceback
+import collections
 
 from cpp import keywords
 from cpp import tokenize
@@ -1433,7 +1434,7 @@ class AstBuilder(object):
     pass  # Not needed yet.
 
   def _GetTemplatedTypes(self):
-    result = {}
+    result = collections.OrderedDict()
     tokens = list(self._GetMatchingChar('<', '>'))
     len_tokens = len(tokens) - 1    # Ignore trailing '>'.
     i = 0
