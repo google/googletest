@@ -527,6 +527,32 @@ destructor early, possibly leaving your object in a partially-constructed or
 partially-destructed state! You almost certainly want to `abort` or use
 `SetUp`/`TearDown` instead.
 
+## Skipping test execution
+
+Related to pseudo assertions `SUCCEED()` and `FAIL()` you can prevent further test
+execution with the `GTEST_SKIP()` macro.
+
+`GTEST_SKIP` can be used in test cases or in `SetUp()` methods of classes inherited
+from either `::testing::Environment` or `::testing::Test`. The latter is a convenient
+way to check for preconditions of the system under test during runtime and skip
+the test in a meaningful way.
+
+Based on googletest's own test code:
+```c++
+class Fixture : public Test {
+ protected:
+  void SetUp() override {
+    GTEST_SKIP() << "skipping all tests for this fixture";
+  }
+};
+
+TEST_F(Fixture, SkipsOneTest) {
+  EXPECT_EQ(5, 7); // won't fail, it won't get executed
+}
+```
+
+The informational text is optional.
+
 ## Teaching googletest How to Print Your Values
 
 When a test assertion such as `EXPECT_EQ` fails, googletest prints the argument
