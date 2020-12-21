@@ -429,16 +429,6 @@ limitations):
 2.  `NiceMock<MockFoo>` and `StrictMock<MockFoo>` may not work correctly if the
     destructor of `MockFoo` is not virtual. We would like to fix this, but it
     requires cleaning up existing tests.
-3.  During the constructor or destructor of `MockFoo`, the mock object is *not*
-    nice or strict. This may cause surprises if the constructor or destructor
-    calls a mock method on `this` object. (This behavior, however, is consistent
-    with C++'s general rule: if a constructor or destructor calls a virtual
-    method of `this` object, that method is treated as non-virtual. In other
-    words, to the base class's constructor or destructor, `this` object behaves
-    like an instance of the base class, not the derived class. This rule is
-    required for safety. Otherwise a base constructor may use members of a
-    derived class before they are initialized, or a base destructor may use
-    members of a derived class after they have been destroyed.)
 
 Finally, you should be **very cautious** about when to use naggy or strict
 mocks, as they tend to make tests more brittle and harder to maintain. When you
