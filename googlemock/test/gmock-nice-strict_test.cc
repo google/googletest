@@ -67,6 +67,12 @@ class NotDefaultConstructible {
   explicit NotDefaultConstructible(int) {}
 };
 
+class CallsMockMethodInDestructor {
+ public:
+  ~CallsMockMethodInDestructor() { OnDestroy(); }
+  MOCK_METHOD(void, OnDestroy, ());
+};
+
 // Defines some mock classes needed by the tests.
 
 class Foo {
@@ -302,6 +308,13 @@ TEST(NiceMockTest, AcceptsClassNamedMock) {
   nice.DoThis();
 }
 
+TEST(NiceMockTest, IsNiceInDestructor) {
+  {
+    NiceMock<CallsMockMethodInDestructor> nice_on_destroy;
+    // Don't add an expectation for the call before the mock goes out of scope.
+  }
+}
+
 TEST(NiceMockTest, IsNaggy_IsNice_IsStrict) {
   NiceMock<MockFoo> nice_foo;
   EXPECT_FALSE(Mock::IsNaggy(&nice_foo));
@@ -405,6 +418,22 @@ TEST(NaggyMockTest, AcceptsClassNamedMock) {
   naggy.DoThis();
 }
 
+TEST(NaggyMockTest, IsNaggyInDestructor) {
+  const std::string saved_flag = GMOCK_FLAG(verbose);
+  GMOCK_FLAG(verbose) = "warning";
+  CaptureStdout();
+
+  {
+    NaggyMock<CallsMockMethodInDestructor> naggy_on_destroy;
+    // Don't add an expectation for the call before the mock goes out of scope.
+  }
+
+  EXPECT_THAT(GetCapturedStdout(),
+              HasSubstr("Uninteresting mock function call"));
+
+  GMOCK_FLAG(verbose) = saved_flag;
+}
+
 TEST(NaggyMockTest, IsNaggy_IsNice_IsStrict) {
   NaggyMock<MockFoo> naggy_foo;
   EXPECT_TRUE(Mock::IsNaggy(&naggy_foo));
@@ -487,6 +516,16 @@ TEST(StrictMockTest, AcceptsClassNamedMock) {
   StrictMock< ::Mock> strict;
   EXPECT_CALL(strict, DoThis());
   strict.DoThis();
+}
+
+TEST(StrictMockTest, IsStrictInDestructor) {
+  EXPECT_NONFATAL_FAILURE(
+      {
+        StrictMock<CallsMockMethodInDestructor> strict_on_destroy;
+        // Don't add an expectation for the call before the mock goes out of
+        // scope.
+      },
+      "Uninteresting mock function call");
 }
 
 TEST(StrictMockTest, IsNaggy_IsNice_IsStrict) {
