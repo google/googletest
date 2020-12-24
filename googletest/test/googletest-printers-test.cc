@@ -1589,6 +1589,40 @@ TEST(PrintToStringTest, WorksForCharArrayWithEmbeddedNul) {
                           "\n    As Text: \"From ä — ẑ\"");
 }
 
+#if GTEST_HAS_RTTI
+TEST(PrintToStringTest, IncludesNameWithTypeInfoAndTypeIndex) {
+  // The following lambda tests that both the printed string for the specified
+  // `typeid`, and the one for its `std::type_index` contain the string returned
+  // by its `name()` member function.
+  const auto TestTypeId = [](const ::std::type_info& id) {
+    const auto name = id.name();
+    const auto contains_name = [name](const ::std::string& str) {
+      return str.find(name) != ::std::string::npos;
+    };
+    EXPECT_TRUE(contains_name(PrintToString(id)));
+    EXPECT_TRUE(contains_name(PrintToString(::std::type_index{id})));
+  };
+
+  TestTypeId(typeid(void));
+  TestTypeId(typeid(int));
+  TestTypeId(typeid(const volatile int*));
+
+  struct Base {
+    virtual ~Base() = default;
+  };
+  struct Derived : Base {};
+
+  TestTypeId(typeid(Base));
+  TestTypeId(typeid(Derived));
+
+  Derived derived;
+  Base& base = derived;
+
+  TestTypeId(typeid(base));
+  TestTypeId(typeid(derived));
+}
+#endif  // GTEST_HAS_RTTI
+
 TEST(IsValidUTF8Test, IllFormedUTF8) {
   // The following test strings are ill-formed UTF-8 and are printed
   // as hex only (or ASCII, in case of ASCII bytes) because IsValidUTF8() is
