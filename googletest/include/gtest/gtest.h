@@ -1603,10 +1603,12 @@ template <typename T1, typename T2>
 AssertionResult CmpHelperOpFailure(const char* expr1, const char* expr2,
                                    const T1& val1, const T2& val2,
                                    const char* op) {
+  const auto str1 = FormatForComparisonFailureMessage(val1, val2);
+  const auto str2 = FormatForComparisonFailureMessage(val2, val1);
   return AssertionFailure()
          << "Expected: (" << expr1 << ") " << op << " (" << expr2
-         << "), actual: " << FormatForComparisonFailureMessage(val1, val2)
-         << " vs " << FormatForComparisonFailureMessage(val2, val1);
+         << "), actual: " << str1 << ' '
+         << ((str1 == str2) ? "(same for both operands)" : ("vs " + str2));
 }
 
 // A macro for implementing the helper functions needed to implement

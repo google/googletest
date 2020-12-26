@@ -62,6 +62,7 @@ TEST(CommandLineFlagsTest, CanBeAccessedInCodeOnceGTestHIsIncluded) {
 #include <time.h>
 
 #include <cstdint>
+#include <limits>
 #include <map>
 #include <ostream>
 #include <string>
@@ -71,6 +72,8 @@ TEST(CommandLineFlagsTest, CanBeAccessedInCodeOnceGTestHIsIncluded) {
 
 #include "gtest/gtest-spi.h"
 #include "src/gtest-internal-inl.h"
+
+const std::string suffix_for_same_operand_strings = " (same for both operands)";
 
 namespace testing {
 namespace internal {
@@ -3793,7 +3796,8 @@ TEST(AssertionTest, ASSERT_NE) {
   ASSERT_NE(6, 7);
   EXPECT_FATAL_FAILURE(ASSERT_NE('a', 'a'),
                        "Expected: ('a') != ('a'), "
-                       "actual: 'a' (97, 0x61) vs 'a' (97, 0x61)");
+                       "actual: 'a' (97, 0x61)" +
+                           suffix_for_same_operand_strings);
 }
 
 // Tests ASSERT_LE.
@@ -3807,8 +3811,8 @@ TEST(AssertionTest, ASSERT_LE) {
 // Tests ASSERT_LT.
 TEST(AssertionTest, ASSERT_LT) {
   ASSERT_LT(2, 3);
-  EXPECT_FATAL_FAILURE(ASSERT_LT(2, 2),
-                       "Expected: (2) < (2), actual: 2 vs 2");
+  EXPECT_FATAL_FAILURE(ASSERT_LT(2, 2), "Expected: (2) < (2), actual: 2" +
+                                            suffix_for_same_operand_strings);
 }
 
 // Tests ASSERT_GE.
@@ -3822,8 +3826,8 @@ TEST(AssertionTest, ASSERT_GE) {
 // Tests ASSERT_GT.
 TEST(AssertionTest, ASSERT_GT) {
   ASSERT_GT(2, 1);
-  EXPECT_FATAL_FAILURE(ASSERT_GT(2, 2),
-                       "Expected: (2) > (2), actual: 2 vs 2");
+  EXPECT_FATAL_FAILURE(ASSERT_GT(2, 2), "Expected: (2) > (2), actual: 2" +
+                                            suffix_for_same_operand_strings);
 }
 
 #if GTEST_HAS_EXCEPTIONS
@@ -4551,9 +4555,23 @@ TEST(ExpectTest, EXPECT_EQ_0) {
 TEST(ExpectTest, EXPECT_NE) {
   EXPECT_NE(6, 7);
 
+  constexpr auto lowest_int64 = ::std::numeric_limits<::std::int64_t>::lowest();
+  constexpr auto min_int64 = (::std::numeric_limits<::std::int64_t>::min)();
+  EXPECT_NONFATAL_FAILURE(EXPECT_NE(lowest_int64, min_int64),
+                          "Expected: (lowest_int64) != (min_int64), "
+                          "actual: -9223372036854775808" +
+                              suffix_for_same_operand_strings);
+  EXPECT_NONFATAL_FAILURE(EXPECT_NE(0.0, 0.0),
+                          "Expected: (0.0) != (0.0), "
+                          "actual: 0" +
+                              suffix_for_same_operand_strings);
+  EXPECT_NONFATAL_FAILURE(EXPECT_NE(0.0, -0.0),
+                          "Expected: (0.0) != (-0.0), "
+                          "actual: 0 vs -0");
   EXPECT_NONFATAL_FAILURE(EXPECT_NE('a', 'a'),
                           "Expected: ('a') != ('a'), "
-                          "actual: 'a' (97, 0x61) vs 'a' (97, 0x61)");
+                          "actual: 'a' (97, 0x61)" +
+                              suffix_for_same_operand_strings);
   EXPECT_NONFATAL_FAILURE(EXPECT_NE(2, 2),
                           "2");
   char* const p0 = nullptr;
@@ -4582,8 +4600,8 @@ TEST(ExpectTest, EXPECT_LE) {
 // Tests EXPECT_LT.
 TEST(ExpectTest, EXPECT_LT) {
   EXPECT_LT(2, 3);
-  EXPECT_NONFATAL_FAILURE(EXPECT_LT(2, 2),
-                          "Expected: (2) < (2), actual: 2 vs 2");
+  EXPECT_NONFATAL_FAILURE(EXPECT_LT(2, 2), "Expected: (2) < (2), actual: 2" +
+                                               suffix_for_same_operand_strings);
   EXPECT_NONFATAL_FAILURE(EXPECT_LT(2, 1),
                           "(2) < (1)");
 }
@@ -4601,8 +4619,8 @@ TEST(ExpectTest, EXPECT_GE) {
 // Tests EXPECT_GT.
 TEST(ExpectTest, EXPECT_GT) {
   EXPECT_GT(2, 1);
-  EXPECT_NONFATAL_FAILURE(EXPECT_GT(2, 2),
-                          "Expected: (2) > (2), actual: 2 vs 2");
+  EXPECT_NONFATAL_FAILURE(EXPECT_GT(2, 2), "Expected: (2) > (2), actual: 2" +
+                                               suffix_for_same_operand_strings);
   EXPECT_NONFATAL_FAILURE(EXPECT_GT(2, 3),
                           "(2) > (3)");
 }
