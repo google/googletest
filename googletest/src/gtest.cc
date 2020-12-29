@@ -6412,6 +6412,11 @@ static void LoadFlagsFromFile(const std::string& path) {
 // instantiated to either char or wchar_t.
 template <typename CharType>
 void ParseGoogleTestFlagsOnlyImpl(int* argc, CharType** argv) {
+
+#if GTEST_USE_OWN_FLAGFILE_FLAG_
+  bool flagfile_used = false;
+#endif  // GTEST_USE_OWN_FLAGFILE_FLAG_
+
   for (int i = 1; i < *argc; i++) {
     const std::string arg_string = StreamableToString(argv[i]);
     const char* const arg = arg_string.c_str();
@@ -6427,6 +6432,7 @@ void ParseGoogleTestFlagsOnlyImpl(int* argc, CharType** argv) {
     } else if (ParseStringFlag(arg, kFlagfileFlag, &GTEST_FLAG(flagfile))) {
       LoadFlagsFromFile(GTEST_FLAG(flagfile));
       remove_flag = true;
+      flagfile_used = true;
 #endif  // GTEST_USE_OWN_FLAGFILE_FLAG_
     } else if (arg_string == "--help" || arg_string == "-h" ||
                arg_string == "-?" || arg_string == "/?" ||
@@ -6453,6 +6459,13 @@ void ParseGoogleTestFlagsOnlyImpl(int* argc, CharType** argv) {
       i--;
     }
   }
+
+#if GTEST_USE_OWN_FLAGFILE_FLAG_
+  // If --gtest_flagfile not given, obey GTEST_FLAGFILE if set
+  if (!g_help_flag && !flagfile_used && GTEST_FLAG(flagfile) != "") {
+      LoadFlagsFromFile(GTEST_FLAG(flagfile));
+  }
+#endif  // GTEST_USE_OWN_FLAGFILE_FLAG_
 
   if (g_help_flag) {
     // We print the help here instead of in RUN_ALL_TESTS(), as the

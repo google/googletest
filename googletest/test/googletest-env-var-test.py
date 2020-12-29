@@ -77,6 +77,18 @@ def TestFlag(flag, test_val, default_val):
   SetEnvVar(env_var, None)
   AssertEq(default_val, GetFlag(flag))
 
+def TestFlagfileEnv(flag, test_val, default_val):
+  """Verifies that the given flag is affected by the GTEST_FLAGFILE env var."""
+
+  file_path = os.path.join(gtest_test_utils.GetTempDir(),
+                             'flagfile.tmp')
+  with open(file_path, 'w') as f:
+    f.write('--gtest_%s=%s\n' % (flag, test_val))
+  env_var = 'GTEST_FLAGFILE'
+  SetEnvVar(env_var, file_path)
+  AssertEq(test_val, GetFlag(flag))
+  SetEnvVar(env_var, None)
+  AssertEq(default_val, GetFlag(flag))
 
 class GTestEnvVarTest(gtest_test_utils.TestCase):
 
@@ -101,6 +113,19 @@ class GTestEnvVarTest(gtest_test_utils.TestCase):
       TestFlag('death_test_use_fork', '1', '0')
       TestFlag('stack_trace_depth', '0', '100')
 
+  def testFlagfileEnvAffectsFlag(self):
+    """Tests that flagfile environment variable should affect the corresponding flag."""
+
+    TestFlagfileEnv('break_on_failure', '1', '0')
+    TestFlagfileEnv('color', 'yes', 'auto')
+    TestFlagfileEnv('filter', 'FooTest.Bar', '*')
+    SetEnvVar('XML_OUTPUT_FILE', None)  # For 'output' test
+    TestFlagfileEnv('output', 'xml:tmp/foo.xml', '')
+    TestFlagfileEnv('print_time', '0', '1')
+    TestFlagfileEnv('repeat', '999', '1')
+    TestFlagfileEnv('throw_on_failure', '1', '0')
+    TestFlagfileEnv('death_test_style', 'threadsafe', 'fast')
+    TestFlagfileEnv('catch_exceptions', '0', '1')
 
   def testXmlOutputFile(self):
     """Tests that $XML_OUTPUT_FILE affects the output flag."""
