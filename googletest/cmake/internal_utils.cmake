@@ -57,17 +57,6 @@ endmacro()
 # Google Mock.  You can tweak these definitions to suit your need.  A
 # variable's value is empty before it's explicitly assigned to.
 macro(config_compiler_and_linker)
-  # Note: pthreads on MinGW is not supported, even if available
-  # instead, we use windows threading primitives
-  unset(GTEST_HAS_PTHREAD)
-  if (NOT gtest_disable_pthreads AND NOT MINGW)
-    # Defines CMAKE_USE_PTHREADS_INIT and CMAKE_THREAD_LIBS_INIT.
-    find_package(Threads)
-    if (CMAKE_USE_PTHREADS_INIT)
-      set(GTEST_HAS_PTHREAD ON)
-    endif()
-  endif()
-
   fix_default_compiler_settings_()
   if (MSVC)
     # Newlines inside flags variables break CMake's NMake generator.
@@ -123,14 +112,6 @@ macro(config_compiler_and_linker)
     set(cxx_no_rtti_flags "")
   endif()
 
-  # The pthreads library is available and allowed?
-  if (DEFINED GTEST_HAS_PTHREAD)
-    set(GTEST_HAS_PTHREAD_MACRO "-DGTEST_HAS_PTHREAD=1")
-  else()
-    set(GTEST_HAS_PTHREAD_MACRO "-DGTEST_HAS_PTHREAD=0")
-  endif()
-  set(cxx_base_flags "${cxx_base_flags} ${GTEST_HAS_PTHREAD_MACRO}")
-
   # For building gtest's own tests and samples.
   set(cxx_exception "${cxx_base_flags} ${cxx_exception_flags}")
   set(cxx_no_exception
@@ -180,14 +161,14 @@ function(cxx_library_with_type name type cxx_flags)
         $<INSTALL_INTERFACE:GTEST_LINKED_AS_SHARED_LIBRARY=1>)
     endif()
   endif()
-  if (DEFINED GTEST_HAS_PTHREAD)
-    if ("${CMAKE_VERSION}" VERSION_LESS "3.1.0")
-      set(threads_spec ${CMAKE_THREAD_LIBS_INIT})
-    else()
-      set(threads_spec Threads::Threads)
-    endif()
-    target_link_libraries(${name} PUBLIC ${threads_spec})
+
+  find_package(Threads)
+  if ("${CMAKE_VERSION}" VERSION_LESS "3.1.0")
+    set(threads_spec ${CMAKE_THREAD_LIBS_INIT})
+  else()
+    set(threads_spec Threads::Threads)
   endif()
+  target_link_libraries(${name} PUBLIC ${threads_spec})
 
   if (NOT "${CMAKE_VERSION}" VERSION_LESS "3.8")
     target_compile_features(${name} PUBLIC cxx_std_11)

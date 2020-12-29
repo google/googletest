@@ -34,11 +34,10 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
+#include <thread>
+
 namespace testing {
 namespace {
-
-// From gtest-port.h.
-using ::testing::internal::ThreadWithParam;
 
 // The maximum number of test threads (not including helper threads)
 // to create.
@@ -53,15 +52,7 @@ class MockFoo {
   MOCK_METHOD2(Baz, char(const char* s1, const std::string& s2));  // NOLINT
 };
 
-// Helper for waiting for the given thread to finish and then deleting it.
-template <typename T>
-void JoinAndDelete(ThreadWithParam<T>* t) {
-  t->Join();
-  delete t;
-}
-
 struct Dummy {};
-
 
 // Tests that different mock objects can be used in their respective
 // threads.  This should generate no Google Test failure.
@@ -130,13 +121,12 @@ void TestConcurrentCallsOnSameObject(Dummy /* dummy */) {
   // excessive calls, and 2*kRepeat failures about unexpected calls.
   int count1 = 0;
   const Helper1Param param = { &foo, &count1 };
-  ThreadWithParam<Helper1Param>* const t =
-      new ThreadWithParam<Helper1Param>(Helper1, param, nullptr);
+  std::thread t(Helper1, param);
 
   int count2 = 0;
   const Helper1Param param2 = { &foo, &count2 };
   Helper1(param2);
-  JoinAndDelete(t);
+  t.join();
 
   EXPECT_EQ(kRepeat, count1 + count2);
 
@@ -184,10 +174,9 @@ void TestPartiallyOrderedExpectationsWithThreads(Dummy /* dummy */) {
   foo.Bar(0);
   foo.Bar(1);
 
-  ThreadWithParam<MockFoo*>* const t =
-      new ThreadWithParam<MockFoo*>(Helper2, &foo, nullptr);
+  std::thread t(Helper2, &foo);
   Helper2(&foo);
-  JoinAndDelete(t);
+  t.join();
 
   foo.Bar(2);
   foo.Bar(4);
@@ -204,17 +193,16 @@ TEST(StressTest, CanUseGMockWithThreads) {
   const int kRoutines = sizeof(test_routines)/sizeof(test_routines[0]);
   const int kCopiesOfEachRoutine = kMaxTestThreads / kRoutines;
   const int kTestThreads = kCopiesOfEachRoutine * kRoutines;
-  ThreadWithParam<Dummy>* threads[kTestThreads] = {};
+  std::thread threads[kTestThreads];
   for (int i = 0; i < kTestThreads; i++) {
     // Creates a thread to run the test function.
-    threads[i] = new ThreadWithParam<Dummy>(test_routines[i % kRoutines],
-                                            Dummy(), nullptr);
+    threads[i] = std::thread(test_routines[i % kRoutines], Dummy());
     GTEST_LOG_(INFO) << "Thread #" << i << " running . . .";
   }
 
   // At this point, we have many threads running.
   for (int i = 0; i < kTestThreads; i++) {
-    JoinAndDelete(threads[i]);
+    threads[i].join();
   }
 
   // Ensures that the correct number of failures have been reported.

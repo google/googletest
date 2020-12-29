@@ -191,25 +191,8 @@ We list the most frequently used macros below. For a complete list, see file
 
 ### Multi-threaded Tests
 
-GoogleTest is thread-safe where the pthread library is available. After
-`#include "gtest/gtest.h"`, you can check the
-`GTEST_IS_THREADSAFE` macro to see whether this is the case (yes if the macro is
-`#defined` to 1, no if it's undefined.).
-
-If GoogleTest doesn't correctly detect whether pthread is available in your
-environment, you can force it with
-
-    -DGTEST_HAS_PTHREAD=1
-
-or
-
-    -DGTEST_HAS_PTHREAD=0
-
-When GoogleTest uses pthread, you may need to add flags to your compiler and/or
-linker to select the pthread library, or you'll get link errors. If you use the
-CMake script, this is taken care of for you. If you use your own build script,
-you'll need to read your compiler and linker's manual to figure out what flags
-to add.
+GoogleTest is thread-safe on all platforms. CMake will automatically detect
+thread libraries available on your platform and use it for linking.
 
 ### As a Shared Library (DLL)
 

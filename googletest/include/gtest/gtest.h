@@ -673,7 +673,7 @@ class GTEST_API_ TestResult {
 
   // Protects mutable state of the property vector and of owned
   // properties, whose values may be updated.
-  internal::Mutex test_properites_mutex_;
+  std::mutex test_properites_mutex_;
 
   // The vector of TestPartResults
   std::vector<TestPartResult> test_part_results_;
@@ -1460,7 +1460,7 @@ class GTEST_API_ UnitTest {
 
   // Protects mutable state in *impl_.  This is mutable as some const
   // methods need to lock it too.
-  mutable internal::Mutex mutex_;
+  mutable std::mutex mutex_;
 
   // Opaque implementation object.  This field is never changed once
   // the object is constructed.  We don't mark it as const here, as

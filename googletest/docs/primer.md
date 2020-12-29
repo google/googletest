@@ -571,13 +571,3 @@ implementation of main(). If it fits your needs, then just link your test with
 the `gtest_main` library and you are good to go.
 
 NOTE: `ParseGUnitFlags()` is deprecated in favor of `InitGoogleTest()`.
-
-## Known Limitations
-
-*   Google Test is designed to be thread-safe. The implementation is thread-safe
-    on systems where the `pthreads` library is available. It is currently
-    _unsafe_ to use Google Test assertions from two threads concurrently on
-    other systems (e.g. Windows). In most tests this is not an issue as usually
-    the assertions are done in the main thread. If you want to help, you can
-    volunteer to implement the necessary synchronization primitives in
-    `gtest-port.h` for your platform.

@@ -127,7 +127,7 @@ class NaggyMockImpl;
 // expectations when InSequence() is used, and thus affect which
 // expectation gets picked.  Therefore, we sequence all mock function
 // calls to ensure the integrity of the mock objects' states.
-GTEST_API_ GTEST_DECLARE_STATIC_MUTEX_(g_gmock_mutex);
+extern GTEST_API_ std::mutex g_gmock_mutex;
 
 // Untyped base class for ActionResultHolder<R>.
 class UntypedActionResultHolderBase;
@@ -686,10 +686,6 @@ class GTEST_API_ InSequence {
 
 namespace internal {
 
-// Points to the implicit sequence introduced by a living InSequence
-// object (if any) in the current thread or NULL.
-GTEST_API_ extern ThreadLocal<Sequence*> g_gmock_implicit_sequence;
-
 // Base class for implementing expectations.
 //
 // There are two reasons for having a type-agnostic base class for
@@ -790,35 +786,30 @@ class GTEST_API_ ExpectationBase {
   // Returns true if and only if this expectation is retired.
   bool is_retired() const
       GTEST_EXCLUSIVE_LOCK_REQUIRED_(g_gmock_mutex) {
-    g_gmock_mutex.AssertHeld();
     return retired_;
   }
 
   // Retires this expectation.
   void Retire()
       GTEST_EXCLUSIVE_LOCK_REQUIRED_(g_gmock_mutex) {
-    g_gmock_mutex.AssertHeld();
     retired_ = true;
   }
 
   // Returns true if and only if this expectation is satisfied.
   bool IsSatisfied() const
       GTEST_EXCLUSIVE_LOCK_REQUIRED_(g_gmock_mutex) {
-    g_gmock_mutex.AssertHeld();
     return cardinality().IsSatisfiedByCallCount(call_count_);
   }
 
   // Returns true if and only if this expectation is saturated.
   bool IsSaturated() const
       GTEST_EXCLUSIVE_LOCK_REQUIRED_(g_gmock_mutex) {
-    g_gmock_mutex.AssertHeld();
     return cardinality().IsSaturatedByCallCount(call_count_);
   }
 
   // Returns true if and only if this expectation is over-saturated.
   bool IsOverSaturated() const
       GTEST_EXCLUSIVE_LOCK_REQUIRED_(g_gmock_mutex) {
-    g_gmock_mutex.AssertHeld();
     return cardinality().IsOverSaturatedByCallCount(call_count_);
   }
 
@@ -834,14 +825,12 @@ class GTEST_API_ ExpectationBase {
   // Returns the number this expectation has been invoked.
   int call_count() const
       GTEST_EXCLUSIVE_LOCK_REQUIRED_(g_gmock_mutex) {
-    g_gmock_mutex.AssertHeld();
     return call_count_;
   }
 
   // Increments the number this expectation has been invoked.
   void IncrementCallCount()
       GTEST_EXCLUSIVE_LOCK_REQUIRED_(g_gmock_mutex) {
-    g_gmock_mutex.AssertHeld();
     call_count_++;
   }
 
@@ -887,7 +876,7 @@ class GTEST_API_ ExpectationBase {
   bool retires_on_saturation_;
   Clause last_clause_;
   mutable bool action_count_checked_;  // Under mutex_.
-  mutable Mutex mutex_;  // Protects action_count_checked_.
+  mutable std::mutex mutex_;           // Protects action_count_checked_.
 };  // class ExpectationBase
 
 // Impements an expectation for the given function type.
@@ -1099,7 +1088,6 @@ class TypedExpectation : public ExpectationBase {
   // Returns true if and only if this expectation matches the given arguments.
   bool Matches(const ArgumentTuple& args) const
       GTEST_EXCLUSIVE_LOCK_REQUIRED_(g_gmock_mutex) {
-    g_gmock_mutex.AssertHeld();
     return TupleMatches(matchers_, args) && extra_matcher_.Matches(args);
   }
 
@@ -1107,8 +1095,6 @@ class TypedExpectation : public ExpectationBase {
   // arguments.
   bool ShouldHandleArguments(const ArgumentTuple& args) const
       GTEST_EXCLUSIVE_LOCK_REQUIRED_(g_gmock_mutex) {
-    g_gmock_mutex.AssertHeld();
-
     // In case the action count wasn't checked when the expectation
     // was defined (e.g. if this expectation has no WillRepeatedly()
     // or RetiresOnSaturation() clause), we check it when the
@@ -1123,8 +1109,6 @@ class TypedExpectation : public ExpectationBase {
       const ArgumentTuple& args,
       ::std::ostream* os) const
           GTEST_EXCLUSIVE_LOCK_REQUIRED_(g_gmock_mutex) {
-    g_gmock_mutex.AssertHeld();
-
     if (is_retired()) {
       *os << "         Expected: the expectation is active\n"
           << "           Actual: it is retired\n";
@@ -1167,7 +1151,6 @@ class TypedExpectation : public ExpectationBase {
   const Action<F>& GetCurrentAction(const FunctionMocker<F>* mocker,
                                     const ArgumentTuple& args) const
       GTEST_EXCLUSIVE_LOCK_REQUIRED_(g_gmock_mutex) {
-    g_gmock_mutex.AssertHeld();
     const int count = call_count();
     Assert(count >= 1, __FILE__, __LINE__,
            "call_count() is <= 0 when GetCurrentAction() is "
@@ -1206,7 +1189,6 @@ class TypedExpectation : public ExpectationBase {
                                          ::std::ostream* what,
                                          ::std::ostream* why)
       GTEST_EXCLUSIVE_LOCK_REQUIRED_(g_gmock_mutex) {
-    g_gmock_mutex.AssertHeld();
     if (IsSaturated()) {
       // We have an excessive call.
       IncrementCallCount();
@@ -1453,6 +1435,9 @@ class ActionResultHolder<void> : public UntypedActionResultHolderBase {
   GTEST_DISALLOW_COPY_AND_ASSIGN_(ActionResultHolder);
 };
 
+// Adds an expectation into the implicit sequence if there is one.
+GTEST_API_ void AddExpectationToCurrentThread(const Expectation& expectation);
+
 template <typename F>
 class FunctionMocker;
 
@@ -1486,7 +1471,7 @@ class FunctionMocker<R(Args...)> final : public UntypedFunctionMockerBase {
   // function have been satisfied.  If not, it will report Google Test
   // non-fatal failures for the violations.
   ~FunctionMocker() override GTEST_LOCK_EXCLUDED_(g_gmock_mutex) {
-    MutexLock l(&g_gmock_mutex);
+    std::lock_guard<std::mutex> lock(g_gmock_mutex);
     VerifyAndClearExpectationsLocked();
     Mock::UnregisterLocked(this);
     ClearDefaultActionsLocked();
@@ -1566,8 +1551,6 @@ class FunctionMocker<R(Args...)> final : public UntypedFunctionMockerBase {
   // clears the ON_CALL()s set on this mock function.
   void ClearDefaultActionsLocked() override
       GTEST_EXCLUSIVE_LOCK_REQUIRED_(g_gmock_mutex) {
-    g_gmock_mutex.AssertHeld();
-
     // Deleting our default actions may trigger other mock objects to be
     // deleted, for example if an action contains a reference counted smart
     // pointer to that mock object, and that is the last reference. So if we
@@ -1578,7 +1561,7 @@ class FunctionMocker<R(Args...)> final : public UntypedFunctionMockerBase {
     UntypedOnCallSpecs specs_to_delete;
     untyped_on_call_specs_.swap(specs_to_delete);
 
-    g_gmock_mutex.Unlock();
+    g_gmock_mutex.unlock();
     for (UntypedOnCallSpecs::const_iterator it =
              specs_to_delete.begin();
          it != specs_to_delete.end(); ++it) {
@@ -1587,7 +1570,7 @@ class FunctionMocker<R(Args...)> final : public UntypedFunctionMockerBase {
 
     // Lock the mutex again, since the caller expects it to be locked when we
     // return.
-    g_gmock_mutex.Lock();
+    g_gmock_mutex.lock();
   }
 
   // Returns the result of invoking this mock function with the given
@@ -1634,11 +1617,7 @@ class FunctionMocker<R(Args...)> final : public UntypedFunctionMockerBase {
     // it is unprotected here.
     untyped_expectations_.push_back(untyped_expectation);
 
-    // Adds this expectation into the implicit sequence if there is one.
-    Sequence* const implicit_sequence = g_gmock_implicit_sequence.get();
-    if (implicit_sequence != nullptr) {
-      implicit_sequence->AddExpectation(Expectation(untyped_expectation));
-    }
+    AddExpectationToCurrentThread(Expectation(untyped_expectation));
 
     return *expectation;
   }
@@ -1700,7 +1679,7 @@ class FunctionMocker<R(Args...)> final : public UntypedFunctionMockerBase {
       GTEST_LOCK_EXCLUDED_(g_gmock_mutex) {
     const ArgumentTuple& args =
         *static_cast<const ArgumentTuple*>(untyped_args);
-    MutexLock l(&g_gmock_mutex);
+    std::lock_guard<std::mutex> lock(g_gmock_mutex);
     TypedExpectation<F>* exp = this->FindMatchingExpectationLocked(args);
     if (exp == nullptr) {  // A match wasn't found.
       this->FormatUnexpectedCallMessageLocked(args, what, why);
@@ -1731,7 +1710,6 @@ class FunctionMocker<R(Args...)> final : public UntypedFunctionMockerBase {
   TypedExpectation<F>* FindMatchingExpectationLocked(
       const ArgumentTuple& args) const
           GTEST_EXCLUSIVE_LOCK_REQUIRED_(g_gmock_mutex) {
-    g_gmock_mutex.AssertHeld();
     // See the definition of untyped_expectations_ for why access to
     // it is unprotected here.
     for (typename UntypedExpectations::const_reverse_iterator it =
@@ -1752,7 +1730,6 @@ class FunctionMocker<R(Args...)> final : public UntypedFunctionMockerBase {
       ::std::ostream* os,
       ::std::ostream* why) const
           GTEST_EXCLUSIVE_LOCK_REQUIRED_(g_gmock_mutex) {
-    g_gmock_mutex.AssertHeld();
     *os << "\nUnexpected mock function call - ";
     DescribeDefaultActionTo(args, os);
     PrintTriedExpectationsLocked(args, why);
@@ -1764,7 +1741,6 @@ class FunctionMocker<R(Args...)> final : public UntypedFunctionMockerBase {
       const ArgumentTuple& args,
       ::std::ostream* why) const
           GTEST_EXCLUSIVE_LOCK_REQUIRED_(g_gmock_mutex) {
-    g_gmock_mutex.AssertHeld();
     const size_t count = untyped_expectations_.size();
     *why << "Google Mock tried the following " << count << " "
          << (count == 1 ? "expectation, but it didn't match" :

@@ -169,6 +169,13 @@ static const char kTestShardStatusFile[] = "GTEST_SHARD_STATUS_FILE";
 
 namespace internal {
 
+// Points to (but doesn't own) the per-thread test part result reporter.
+thread_local TestPartResultReporterInterface*
+    per_thread_test_part_result_reporter;
+
+// A per-thread stack of traces created by the SCOPED_TRACE() macro.
+thread_local std::vector<TraceInfo> gtest_trace_stack;
+
 // The text used in failure messages to indicate the start of the
 // stack trace.
 const char kStackTraceMarker[] = "\nStack trace:\n";
@@ -775,7 +782,7 @@ void ScopedFakeTestPartResultReporter::Init() {
     old_reporter_ = impl->GetGlobalTestPartResultReporter();
     impl->SetGlobalTestPartResultReporter(this);
   } else {
-    old_reporter_ = impl->GetTestPartResultReporterForCurrentThread();
+    old_reporter_ = impl->GetOrCreateTestPartResultReporterForCurrentThread();
     impl->SetTestPartResultReporterForCurrentThread(this);
   }
 }
@@ -892,27 +899,31 @@ void DefaultPerThreadTestPartResultReporter::ReportTestPartResult(
 // Returns the global test part result reporter.
 TestPartResultReporterInterface*
 UnitTestImpl::GetGlobalTestPartResultReporter() {
-  internal::MutexLock lock(&global_test_part_result_reporter_mutex_);
+  std::lock_guard<std::mutex> lock(global_test_part_result_reporter_mutex_);
   return global_test_part_result_repoter_;
 }
 
 // Sets the global test part result reporter.
 void UnitTestImpl::SetGlobalTestPartResultReporter(
     TestPartResultReporterInterface* reporter) {
-  internal::MutexLock lock(&global_test_part_result_reporter_mutex_);
+  std::lock_guard<std::mutex> lock(global_test_part_result_reporter_mutex_);
   global_test_part_result_repoter_ = reporter;
 }
 
 // Returns the test part result reporter for the current thread.
 TestPartResultReporterInterface*
-UnitTestImpl::GetTestPartResultReporterForCurrentThread() {
-  return per_thread_test_part_result_reporter_.get();
+UnitTestImpl::GetOrCreateTestPartResultReporterForCurrentThread() {
+  if (per_thread_test_part_result_reporter == nullptr)
+    SetTestPartResultReporterForCurrentThread(
+        &default_per_thread_test_part_result_reporter_);
+
+  return per_thread_test_part_result_reporter;
 }
 
 // Sets the test part result reporter for the current thread.
 void UnitTestImpl::SetTestPartResultReporterForCurrentThread(
     TestPartResultReporterInterface* reporter) {
-  per_thread_test_part_result_reporter_.set(reporter);
+  per_thread_test_part_result_reporter = reporter;
 }
 
 // Gets the number of successful test suites.
@@ -994,6 +1005,14 @@ std::string UnitTestImpl::CurrentOsStackTraceExceptTop(int skip_count) {
       // Skips the user-specified number of frames plus this function
       // itself.
       );  // NOLINT
+}
+
+// Getters for the per-thread Google Test trace stack.
+std::vector<TraceInfo>& UnitTestImpl::gtest_trace_stack() {
+  return internal::gtest_trace_stack;
+}
+const std::vector<TraceInfo>& UnitTestImpl::gtest_trace_stack() const {
+  return internal::gtest_trace_stack;
 }
 
 // Returns the current time in milliseconds.
@@ -2239,7 +2258,7 @@ void TestResult::RecordProperty(const std::string& xml_element,
   if (!ValidateTestProperty(xml_element, test_property)) {
     return;
   }
-  internal::MutexLock lock(&test_properites_mutex_);
+  std::lock_guard<std::mutex> lock(test_properites_mutex_);
   const std::vector<TestProperty>::iterator property_with_matching_key =
       std::find_if(test_properties_.begin(), test_properties_.end(),
                    internal::TestPropertyKeyIs(test_property.key()));
@@ -2664,6 +2683,22 @@ Result HandleExceptionsInMethodIfSupported(
   }
 }
 
+void Notification::Notify() {
+  std::lock_guard<std::mutex> lock(mutex_);
+  notified_ = true;
+}
+
+void Notification::WaitForNotification() {
+  while(true) {
+    mutex_.lock();
+    const bool notified = notified_;
+    mutex_.unlock();
+    if (notified)
+      break;
+    SleepMilliseconds(10);
+  }
+}
+
 }  // namespace internal
 
 // Runs the test and updates the test result.
@@ -2890,8 +2925,8 @@ void TestInfo::Skip() {
 
   const TestPartResult test_part_result =
       TestPartResult(TestPartResult::kSkip, this->file(), this->line(), "");
-  impl->GetTestPartResultReporterForCurrentThread()->ReportTestPartResult(
-      test_part_result);
+  impl->GetOrCreateTestPartResultReporterForCurrentThread()
+      ->ReportTestPartResult(test_part_result);
 
   // Notifies the unit test event listener that a test has just finished.
   repeater->OnTestEnd(*this);
@@ -4824,7 +4859,7 @@ std::string OsStackTraceGetter::CurrentStackTrace(int max_depth, int skip_count)
 
   void* caller_frame = nullptr;
   {
-    MutexLock lock(&mutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
     caller_frame = caller_frame_;
   }
 
@@ -4863,7 +4898,7 @@ void OsStackTraceGetter::UponLeavingGTest() GTEST_LOCK_EXCLUDED_(mutex_) {
     caller_frame = nullptr;
   }
 
-  MutexLock lock(&mutex_);
+  std::lock_guard<std::mutex> lock(mutex_);
   caller_frame_ = caller_frame;
 #endif  // GTEST_HAS_ABSL
 }
@@ -5155,7 +5190,7 @@ void UnitTest::AddTestPartResult(
   Message msg;
   msg << message;
 
-  internal::MutexLock lock(&mutex_);
+  std::lock_guard<std::mutex> lock(mutex_);
   if (impl_->gtest_trace_stack().size() > 0) {
     msg << "\n" << GTEST_NAME_ << " trace:";
 
@@ -5172,8 +5207,8 @@ void UnitTest::AddTestPartResult(
 
   const TestPartResult result = TestPartResult(
       result_type, file_name, line_number, msg.GetString().c_str());
-  impl_->GetTestPartResultReporterForCurrentThread()->
-      ReportTestPartResult(result);
+  impl_->GetOrCreateTestPartResultReporterForCurrentThread()
+      ->ReportTestPartResult(result);
 
   if (result_type != TestPartResult::kSuccess &&
       result_type != TestPartResult::kSkip) {
@@ -5319,7 +5354,7 @@ const char* UnitTest::original_working_dir() const {
 // or NULL if no test is running.
 const TestSuite* UnitTest::current_test_suite() const
     GTEST_LOCK_EXCLUDED_(mutex_) {
-  internal::MutexLock lock(&mutex_);
+  std::lock_guard<std::mutex> lock(mutex_);
   return impl_->current_test_suite();
 }
 
@@ -5327,7 +5362,7 @@ const TestSuite* UnitTest::current_test_suite() const
 #ifndef GTEST_REMOVE_LEGACY_TEST_CASEAPI_
 const TestCase* UnitTest::current_test_case() const
     GTEST_LOCK_EXCLUDED_(mutex_) {
-  internal::MutexLock lock(&mutex_);
+  std::lock_guard<std::mutex> lock(mutex_);
   return impl_->current_test_suite();
 }
 #endif
@@ -5336,7 +5371,7 @@ const TestCase* UnitTest::current_test_case() const
 // or NULL if no test is running.
 const TestInfo* UnitTest::current_test_info() const
     GTEST_LOCK_EXCLUDED_(mutex_) {
-  internal::MutexLock lock(&mutex_);
+  std::lock_guard<std::mutex> lock(mutex_);
   return impl_->current_test_info();
 }
 
@@ -5364,14 +5399,14 @@ UnitTest::~UnitTest() {
 // Google Test trace stack.
 void UnitTest::PushGTestTrace(const internal::TraceInfo& trace)
     GTEST_LOCK_EXCLUDED_(mutex_) {
-  internal::MutexLock lock(&mutex_);
+  std::lock_guard<std::mutex> lock(mutex_);
   impl_->gtest_trace_stack().push_back(trace);
 }
 
 // Pops a trace from the per-thread Google Test trace stack.
 void UnitTest::PopGTestTrace()
     GTEST_LOCK_EXCLUDED_(mutex_) {
-  internal::MutexLock lock(&mutex_);
+  std::lock_guard<std::mutex> lock(mutex_);
   impl_->gtest_trace_stack().pop_back();
 }
 
@@ -5384,8 +5419,6 @@ UnitTestImpl::UnitTestImpl(UnitTest* parent)
       default_per_thread_test_part_result_reporter_(this),
       GTEST_DISABLE_MSC_WARNINGS_POP_() global_test_part_result_repoter_(
           &default_global_test_part_result_reporter_),
-      per_thread_test_part_result_reporter_(
-          &default_per_thread_test_part_result_reporter_),
       parameterized_test_registry_(),
       parameterized_tests_registered_(false),
       last_death_test_suite_(-1),

@@ -23,7 +23,7 @@ GTEST_MAIN_CC = ../../src/gtest_main.cc
 # Flags passed to the preprocessor.
 # We have no idea here whether pthreads is available in the system, so
 # disable its use.
-CPPFLAGS += -I$(FUSED_GTEST_DIR) -DGTEST_HAS_PTHREAD=0
+CPPFLAGS += -I$(FUSED_GTEST_DIR)
 
 # Flags passed to the C++ compiler.
 CXXFLAGS += -g

@@ -487,26 +487,6 @@ TEST_F(TestForDeathTest, MixedStyles) {
   EXPECT_DEATH(_exit(1), "");
 }
 
-# if GTEST_HAS_CLONE && GTEST_HAS_PTHREAD
-
-bool pthread_flag;
-
-void SetPthreadFlag() {
-  pthread_flag = true;
-}
-
-TEST_F(TestForDeathTest, DoesNotExecuteAtforkHooks) {
-  if (!testing::GTEST_FLAG(death_test_use_fork)) {
-    testing::GTEST_FLAG(death_test_style) = "threadsafe";
-    pthread_flag = false;
-    ASSERT_EQ(0, pthread_atfork(&SetPthreadFlag, nullptr, nullptr));
-    ASSERT_DEATH(_exit(1), "");
-    ASSERT_FALSE(pthread_flag);
-  }
-}
-
-# endif  // GTEST_HAS_CLONE && GTEST_HAS_PTHREAD
-
 // Tests that a method of another class can be used in a death test.
 TEST_F(TestForDeathTest, MethodOfAnotherClass) {
   const MayDie x(true);

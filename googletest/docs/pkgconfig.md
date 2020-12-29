@@ -110,7 +110,7 @@ Description: GoogleTest (without main() function)
 Version: 1.10.0
 URL: https://github.com/google/googletest
 Libs: -L${libdir} -lgtest -lpthread
-Cflags: -I${includedir} -DGTEST_HAS_PTHREAD=1 -lpthread
+Cflags: -I${includedir} -lpthread
 ```
 
 Notice that the sysroot is not included in `libdir` and `includedir`! If you try
