@@ -2370,7 +2370,6 @@ class ContainerEqMatcher {
     typedef internal::StlContainerView<
         typename std::remove_const<LhsContainer>::type>
         LhsView;
-    typedef typename LhsView::type LhsStlContainer;
     StlContainerReference lhs_stl_container = LhsView::ConstReference(lhs);
     if (lhs_stl_container == expected_)
       return true;
@@ -2379,8 +2378,7 @@ class ContainerEqMatcher {
     if (os != nullptr) {
       // Something is different. Check for extra values first.
       bool printed_header = false;
-      for (typename LhsStlContainer::const_iterator it =
-               lhs_stl_container.begin();
+      for (auto it = lhs_stl_container.begin();
            it != lhs_stl_container.end(); ++it) {
         if (internal::ArrayAwareFind(expected_.begin(), expected_.end(), *it) ==
             expected_.end()) {
@@ -2396,7 +2394,7 @@ class ContainerEqMatcher {
 
       // Now check for missing values.
       bool printed_header2 = false;
-      for (typename StlContainer::const_iterator it = expected_.begin();
+      for (auto it = expected_.begin();
            it != expected_.end(); ++it) {
         if (internal::ArrayAwareFind(
                 lhs_stl_container.begin(), lhs_stl_container.end(), *it) ==
@@ -2580,8 +2578,8 @@ class PointwiseMatcher {
         return false;
       }
 
-      typename LhsStlContainer::const_iterator left = lhs_stl_container.begin();
-      typename RhsStlContainer::const_iterator right = rhs_.begin();
+      auto left = lhs_stl_container.begin();
+      auto right = rhs_.begin();
       for (size_t i = 0; i != actual_size; ++i, ++left, ++right) {
         if (listener->IsInterested()) {
           StringMatchResultListener inner_listener;
@@ -2644,7 +2642,7 @@ class QuantifierMatcherImpl : public MatcherInterface<Container> {
                            MatchResultListener* listener) const {
     StlContainerReference stl_container = View::ConstReference(container);
     size_t i = 0;
-    for (typename StlContainer::const_iterator it = stl_container.begin();
+    for (auto it = stl_container.begin();
          it != stl_container.end(); ++it, ++i) {
       StringMatchResultListener inner_listener;
       const bool matches = inner_matcher_.MatchAndExplain(*it, &inner_listener);
@@ -3241,7 +3239,7 @@ class ElementsAreMatcherImpl : public MatcherInterface<Container> {
     // explanations[i] is the explanation of the element at index i.
     ::std::vector<std::string> explanations(count());
     StlContainerReference stl_container = View::ConstReference(container);
-    typename StlContainer::const_iterator it = stl_container.begin();
+    auto it = stl_container.begin();
     size_t exam_pos = 0;
     bool mismatch_found = false;  // Have we found a mismatched element yet?
 
@@ -3434,7 +3432,6 @@ class UnorderedElementsAreMatcherImpl
   typedef internal::StlContainerView<RawContainer> View;
   typedef typename View::type StlContainer;
   typedef typename View::const_reference StlContainerReference;
-  typedef typename StlContainer::const_iterator StlContainerConstIterator;
   typedef typename StlContainer::value_type Element;
 
   template <typename InputIter>
@@ -4597,7 +4594,7 @@ UnorderedPointwise(const Tuple2Matcher& tuple2_matcher,
 
   // Create a matcher for each element in rhs_container.
   ::std::vector<internal::BoundSecondMatcher<Tuple2Matcher, Second> > matchers;
-  for (typename RhsStlContainer::const_iterator it = rhs_stl_container.begin();
+  for (auto it = rhs_stl_container.begin();
        it != rhs_stl_container.end(); ++it) {
     matchers.push_back(
         internal::MatcherBindSecond(tuple2_matcher, *it));
