@@ -71,7 +71,7 @@
 #include "gtest/gtest.h"
 
 namespace testing {
-namespace gmock_matchers_test {
+namespace gmock_matchers_1_test {
 namespace {
 
 using std::greater;
@@ -8554,7 +8554,7 @@ TEST(ThrowsPredicateCompilesTest, MessageMatcherAcceptsNonMatcher) {
 #endif  // GTEST_HAS_EXCEPTIONS
 
 }  // namespace
-}  // namespace gmock_matchers_test
+}  // namespace gmock_matchers_1_test
 }  // namespace testing
 
 #ifdef _MSC_VER
