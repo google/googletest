@@ -116,6 +116,7 @@
 //   GTEST_OS_DRAGONFLY - DragonFlyBSD
 //   GTEST_OS_FREEBSD  - FreeBSD
 //   GTEST_OS_FUCHSIA  - Fuchsia
+//   GTEST_OS_GNU_HURD - GNU/Hurd
 //   GTEST_OS_GNU_KFREEBSD - GNU/kFreeBSD
 //   GTEST_OS_HAIKU    - Haiku
 //   GTEST_OS_HPUX     - HP-UX
@@ -621,7 +622,8 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 
 // Determines whether test results can be streamed to a socket.
 #if GTEST_OS_LINUX || GTEST_OS_GNU_KFREEBSD || GTEST_OS_DRAGONFLY || \
-    GTEST_OS_FREEBSD || GTEST_OS_NETBSD || GTEST_OS_OPENBSD
+    GTEST_OS_FREEBSD || GTEST_OS_NETBSD || GTEST_OS_OPENBSD ||       \
+    GTEST_OS_GNU_HURD
 # define GTEST_CAN_STREAM_RESULTS_ 1
 #endif
 
