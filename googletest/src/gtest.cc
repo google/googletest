@@ -1603,57 +1603,6 @@ AssertionResult DoubleLE(const char* expr1, const char* expr2,
 
 namespace internal {
 
-// The helper function for {ASSERT|EXPECT}_EQ with int or enum
-// arguments.
-AssertionResult CmpHelperEQ(const char* lhs_expression,
-                            const char* rhs_expression,
-                            BiggestInt lhs,
-                            BiggestInt rhs) {
-  if (lhs == rhs) {
-    return AssertionSuccess();
-  }
-
-  return EqFailure(lhs_expression,
-                   rhs_expression,
-                   FormatForComparisonFailureMessage(lhs, rhs),
-                   FormatForComparisonFailureMessage(rhs, lhs),
-                   false);
-}
-
-// A macro for implementing the helper functions needed to implement
-// ASSERT_?? and EXPECT_?? with integer or enum arguments.  It is here
-// just to avoid copy-and-paste of similar code.
-#define GTEST_IMPL_CMP_HELPER_(op_name, op)\
-AssertionResult CmpHelper##op_name(const char* expr1, const char* expr2, \
-                                   BiggestInt val1, BiggestInt val2) {\
-  if (val1 op val2) {\
-    return AssertionSuccess();\
-  } else {\
-    return AssertionFailure() \
-        << "Expected: (" << expr1 << ") " #op " (" << expr2\
-        << "), actual: " << FormatForComparisonFailureMessage(val1, val2)\
-        << " vs " << FormatForComparisonFailureMessage(val2, val1);\
-  }\
-}
-
-// Implements the helper function for {ASSERT|EXPECT}_NE with int or
-// enum arguments.
-GTEST_IMPL_CMP_HELPER_(NE, !=)
-// Implements the helper function for {ASSERT|EXPECT}_LE with int or
-// enum arguments.
-GTEST_IMPL_CMP_HELPER_(LE, <=)
-// Implements the helper function for {ASSERT|EXPECT}_LT with int or
-// enum arguments.
-GTEST_IMPL_CMP_HELPER_(LT, < )
-// Implements the helper function for {ASSERT|EXPECT}_GE with int or
-// enum arguments.
-GTEST_IMPL_CMP_HELPER_(GE, >=)
-// Implements the helper function for {ASSERT|EXPECT}_GT with int or
-// enum arguments.
-GTEST_IMPL_CMP_HELPER_(GT, > )
-
-#undef GTEST_IMPL_CMP_HELPER_
-
 // The helper function for {ASSERT|EXPECT}_STREQ.
 AssertionResult CmpHelperSTREQ(const char* lhs_expression,
                                const char* rhs_expression,

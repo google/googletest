@@ -1549,14 +1549,6 @@ AssertionResult CmpHelperEQ(const char* lhs_expression,
   return CmpHelperEQFailure(lhs_expression, rhs_expression, lhs, rhs);
 }
 
-// With this overloaded version, we allow anonymous enums to be used
-// in {ASSERT|EXPECT}_EQ when compiled with gcc 4, as anonymous enums
-// can be implicitly cast to BiggestInt.
-GTEST_API_ AssertionResult CmpHelperEQ(const char* lhs_expression,
-                                       const char* rhs_expression,
-                                       BiggestInt lhs,
-                                       BiggestInt rhs);
-
 class EqHelper {
  public:
   // This templatized version is for the general case.
@@ -1613,11 +1605,6 @@ AssertionResult CmpHelperOpFailure(const char* expr1, const char* expr2,
 // ASSERT_?? and EXPECT_??.  It is here just to avoid copy-and-paste
 // of similar code.
 //
-// For each templatized helper function, we also define an overloaded
-// version for BiggestInt in order to reduce code bloat and allow
-// anonymous enums to be used with {ASSERT|EXPECT}_?? when compiled
-// with gcc 4.
-//
 // INTERNAL IMPLEMENTATION - DO NOT USE IN A USER PROGRAM.
 
 #define GTEST_IMPL_CMP_HELPER_(op_name, op)\
@@ -1629,9 +1616,7 @@ AssertionResult CmpHelper##op_name(const char* expr1, const char* expr2, \
   } else {\
     return CmpHelperOpFailure(expr1, expr2, val1, val2, #op);\
   }\
-}\
-GTEST_API_ AssertionResult CmpHelper##op_name(\
-    const char* expr1, const char* expr2, BiggestInt val1, BiggestInt val2)
+}
 
 // INTERNAL IMPLEMENTATION - DO NOT USE IN A USER PROGRAM.
 
