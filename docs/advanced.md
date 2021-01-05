@@ -371,8 +371,8 @@ Verifies that `val1` is less than, or almost equal to, `val2`. You can replace
 
 ### Asserting Using gMock Matchers
 
-[gMock](../../googlemock) comes with
-[a library of matchers](../../googlemock/docs/cheat_sheet.md#MatcherList) for
+[gMock](gmock_index.md) comes with
+[a library of matchers](gmock_cheat_sheet.md#MatcherList) for
 validating arguments passed to mock objects. A gMock *matcher* is basically a
 predicate that knows how to describe itself. It can be used in these assertion
 macros:
@@ -396,13 +396,13 @@ using ::testing::StartsWith;
 ```
 
 Read this
-[recipe](../../googlemock/docs/cook_book.md#using-matchers-in-googletest-assertions)
+[recipe](gmock_cook_book.md#using-matchers-in-googletest-assertions)
 in the gMock Cookbook for more details.
 
 gMock has a rich set of matchers. You can do many things googletest cannot do
 alone with them. For a list of matchers gMock provides, read
-[this](../../googlemock/docs/cook_book.md##using-matchers). It's easy to write
-your [own matchers](../../googlemock/docs/cook_book.md#NewMatchers) too.
+[this](gmock_cook_book.md##using-matchers). It's easy to write
+your [own matchers](gmock_cook_book.md#NewMatchers) too.
 
 gMock is bundled with googletest, so you don't need to add any build dependency
 in order to take advantage of this. Just include `"gmock/gmock.h"`
@@ -414,7 +414,7 @@ and you're ready to go.
 you haven't.)
 
 You can use the gMock
-[string matchers](../../googlemock/docs/cheat_sheet.md#string-matchers) with
+[string matchers](gmock_cheat_sheet.md#string-matchers) with
 `EXPECT_THAT()` or `ASSERT_THAT()` to do more string comparison tricks
 (sub-string, prefix, suffix, regular expression, and etc). For example,
 
@@ -915,7 +915,7 @@ handlers registered with `pthread_atfork(3)`.
 
 Note: If you want to put a series of test assertions in a subroutine to check
 for a complex condition, consider using
-[a custom GMock matcher](../../googlemock/docs/cook_book.md#NewMatchers)
+[a custom GMock matcher](gmock_cook_book.md#NewMatchers)
 instead. This lets you provide a more readable error message in case of failure
 and avoid all of the issues described below.
 
