@@ -3,7 +3,8 @@
 <!-- GOOGLETEST_CM0012 DO NOT DELETE -->
 
 You can find recipes for using gMock here. If you haven't yet, please read
-[the dummy guide](for_dummies.md) first to make sure you understand the basics.
+[the dummy guide](gmock_for_dummies.md) first to make sure you understand the
+basics.
 
 **Note:** gMock lives in the `testing` name space. For readability, it is
 recommended to write `using ::testing::Foo;` once in your file before using the
@@ -1141,11 +1142,11 @@ Hamcrest project, which adds `assertThat()` to JUnit.
 
 ### Using Predicates as Matchers
 
-gMock provides a [built-in set](cheat_sheet.md#MatcherList) of matchers. In case
-you find them lacking, you can use an arbitrary unary predicate function or
-functor as a matcher - as long as the predicate accepts a value of the type you
-want. You do this by wrapping the predicate inside the `Truly()` function, for
-example:
+gMock provides a [built-in set](gmock_cheat_sheet.md#MatcherList) of matchers.
+In case you find them lacking, you can use an arbitrary unary predicate function
+or functor as a matcher - as long as the predicate accepts a value of the type
+you want. You do this by wrapping the predicate inside the `Truly()` function,
+for example:
 
 ```cpp
 using ::testing::Truly;
@@ -1710,7 +1711,7 @@ the test should reflect our real intent, instead of being overly constraining.
 
 gMock allows you to impose an arbitrary DAG (directed acyclic graph) on the
 calls. One way to express the DAG is to use the
-[After](cheat_sheet.md#AfterClause) clause of `EXPECT_CALL`.
+[After](gmock_cheat_sheet.md#AfterClause) clause of `EXPECT_CALL`.
 
 Another way is via the `InSequence()` clause (not the same as the `InSequence`
 class), which we borrowed from jMock 2. It's less flexible than `After()`, but
@@ -3714,8 +3715,8 @@ A cardinality is used in `Times()` to tell gMock how many times you expect a
 call to occur. It doesn't have to be exact. For example, you can say
 `AtLeast(5)` or `Between(2, 4)`.
 
-If the [built-in set](cheat_sheet.md#CardinalityList) of cardinalities doesn't
-suit you, you are free to define your own by implementing the following
+If the [built-in set](gmock_cheat_sheet.md#CardinalityList) of cardinalities
+doesn't suit you, you are free to define your own by implementing the following
 interface (in namespace `testing`):
 
 ```cpp
