@@ -166,10 +166,11 @@ exp ::= simple_expression_in_Python_syntax
 
 ## Code
 
-You can find the source code of Pump in [scripts/pump.py](../scripts/pump.py).
-It is still very unpolished and lacks automated tests, although it has been
-successfully used many times. If you find a chance to use it in your project,
-please let us know what you think! We also welcome help on improving Pump.
+You can find the source code of Pump in
+[googlemock/scripts/pump.py](../googlemock/scripts/pump.py). It is still very
+unpolished and lacks automated tests, although it has been successfully used
+many times. If you find a chance to use it in your project, please let us know
+what you think! We also welcome help on improving Pump.
 
 ## Real Examples
 
