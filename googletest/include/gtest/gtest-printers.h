@@ -261,13 +261,20 @@ struct ConvertibleToStringViewPrinter {
 GTEST_API_ void PrintBytesInObjectTo(const unsigned char* obj_bytes,
                                      size_t count,
                                      ::std::ostream* os);
-struct FallbackPrinter {
-  template <typename T>
+struct RawBytesPrinter {
+  // SFINAE on `sizeof` to make sure we have a complete type.
+  template <typename T, size_t = sizeof(T)>
   static void PrintValue(const T& value, ::std::ostream* os) {
     PrintBytesInObjectTo(
-        static_cast<const unsigned char*>(
-            reinterpret_cast<const void*>(std::addressof(value))),
+        reinterpret_cast<const unsigned char*>(std::addressof(value)),
         sizeof(value), os);
+  }
+};
+
+struct FallbackPrinter {
+  template <typename T>
+  static void PrintValue(const T&, ::std::ostream* os) {
+    *os << "(incomplete type)";
   }
 };
 
@@ -297,7 +304,7 @@ void PrintWithFallback(const T& value, ::std::ostream* os) {
       T, void, ContainerPrinter, FunctionPointerPrinter, PointerPrinter,
       internal_stream_operator_without_lexical_name_lookup::StreamPrinter,
       ProtobufPrinter, ConvertibleToIntegerPrinter,
-      ConvertibleToStringViewPrinter, FallbackPrinter>::type;
+      ConvertibleToStringViewPrinter, RawBytesPrinter, FallbackPrinter>::type;
   Printer::PrintValue(value, os);
 }
 
