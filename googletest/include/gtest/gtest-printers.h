@@ -266,7 +266,9 @@ struct RawBytesPrinter {
   template <typename T, size_t = sizeof(T)>
   static void PrintValue(const T& value, ::std::ostream* os) {
     PrintBytesInObjectTo(
-        reinterpret_cast<const unsigned char*>(std::addressof(value)),
+        static_cast<const unsigned char*>(
+            // Load bearing cast to void* to support iOS
+            reinterpret_cast<const void*>(std::addressof(value))),
         sizeof(value), os);
   }
 };
