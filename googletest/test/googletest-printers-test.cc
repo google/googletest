@@ -1695,6 +1695,13 @@ TEST(UniversalPrintTest, WorksForCharArray) {
   EXPECT_EQ("\"\\\"Line\\0 1\\\"\\nLine 2\"", ss2.str());
 }
 
+TEST(UniversalPrintTest, IncompleteType) {
+  struct Incomplete;
+  char some_object = 0;
+  EXPECT_EQ("(incomplete type)",
+            PrintToString(reinterpret_cast<Incomplete&>(some_object)));
+}
+
 TEST(UniversalTersePrintTupleFieldsToStringsTestWithStd, PrintsEmptyTuple) {
   Strings result = UniversalTersePrintTupleFieldsToStrings(::std::make_tuple());
   EXPECT_EQ(0u, result.size());
