@@ -459,11 +459,11 @@ internal::CartesianProductHolder<Generator...> Combine(const Generator&... g) {
 #define GTEST_GET_SECOND_(first, second, ...) second
 
 #define INSTANTIATE_TEST_SUITE_P(prefix, test_suite_name, ...)                \
-  static ::testing::internal::ParamGenerator<test_suite_name::ParamType>      \
+  ::testing::internal::ParamGenerator<test_suite_name::ParamType>             \
       gtest_##prefix##test_suite_name##_EvalGenerator_() {                    \
     return GTEST_EXPAND_(GTEST_GET_FIRST_(__VA_ARGS__, DUMMY_PARAM_));        \
   }                                                                           \
-  static ::std::string gtest_##prefix##test_suite_name##_EvalGenerateName_(   \
+  ::std::string gtest_##prefix##test_suite_name##_EvalGenerateName_(          \
       const ::testing::TestParamInfo<test_suite_name::ParamType>& info) {     \
     if (::testing::internal::AlwaysFalse()) {                                 \
       ::testing::internal::TestNotEmpty(GTEST_EXPAND_(GTEST_GET_SECOND_(      \
@@ -479,7 +479,7 @@ internal::CartesianProductHolder<Generator...> Combine(const Generator&... g) {
         ::testing::internal::DefaultParamName<test_suite_name::ParamType>,    \
         DUMMY_PARAM_))))(info);                                               \
   }                                                                           \
-  static int gtest_##prefix##test_suite_name##_dummy_                         \
+  int gtest_##prefix##test_suite_name##_dummy_                                \
       GTEST_ATTRIBUTE_UNUSED_ =                                               \
           ::testing::UnitTest::GetInstance()                                  \
               ->parameterized_test_registry()                                 \
