@@ -3269,7 +3269,8 @@ bool ShouldUseColor(bool stdout_is_tty) {
 // This routine must actually emit the characters rather than return a string
 // that would be colored when printed, as can be done on Linux.
 
-static void ColoredPrintf(GTestColor color, const char* fmt, ...) {
+GTEST_ATTRIBUTE_PRINTF_(2, 3)
+static void ColoredPrintf(GTestColor color, const char *fmt, ...) {
   va_list args;
   va_start(args, fmt);
 
