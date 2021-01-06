@@ -205,7 +205,7 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes);
     typedef gtest_TypeParam_ TypeParam;                                       \
     void TestBody() override;                                                 \
   };                                                                          \
-  static bool gtest_##CaseName##_##TestName##_registered_                     \
+  bool gtest_##CaseName##_##TestName##_registered_                            \
       GTEST_ATTRIBUTE_UNUSED_ = ::testing::internal::TypeParameterizedTest<   \
           CaseName,                                                           \
           ::testing::internal::TemplateSel<GTEST_TEST_CLASS_NAME_(CaseName,   \
@@ -310,7 +310,8 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes);
 #define INSTANTIATE_TYPED_TEST_SUITE_P(Prefix, SuiteName, Types, ...)       \
   static_assert(sizeof(GTEST_STRINGIFY_(Prefix)) > 1,                       \
                 "test-suit-prefix must not be empty");                      \
-  static bool gtest_##Prefix##_##SuiteName GTEST_ATTRIBUTE_UNUSED_ =        \
+  bool gtest_##Prefix##_##SuiteName##_instantiated_                         \
+      GTEST_ATTRIBUTE_UNUSED_ =                                             \
       ::testing::internal::TypeParameterizedTestSuite<                      \
           SuiteName, GTEST_SUITE_NAMESPACE_(SuiteName)::gtest_AllTests_,    \
           ::testing::internal::GenerateTypeList<Types>::type>::             \

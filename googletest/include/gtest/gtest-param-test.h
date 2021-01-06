@@ -479,7 +479,7 @@ internal::CartesianProductHolder<Generator...> Combine(const Generator&... g) {
         ::testing::internal::DefaultParamName<test_suite_name::ParamType>,    \
         DUMMY_PARAM_))))(info);                                               \
   }                                                                           \
-  static int gtest_##prefix##test_suite_name##_dummy_                         \
+  int gtest_##prefix##test_suite_name##_instantiated_                         \
       GTEST_ATTRIBUTE_UNUSED_ =                                               \
           ::testing::UnitTest::GetInstance()                                  \
               ->parameterized_test_registry()                                 \
