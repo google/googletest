@@ -408,7 +408,7 @@ TEST(StringMatcherTest,
 // MatcherInterface* without requiring the user to explicitly
 // write the type.
 TEST(MakeMatcherTest, ConstructsMatcherFromMatcherInterface) {
-  const MatcherInterface<int>* dummy_impl = nullptr;
+  const MatcherInterface<int>* dummy_impl = new EvenMatcherImpl;
   Matcher<int> m = MakeMatcher(dummy_impl);
 }
 

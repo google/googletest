@@ -1315,32 +1315,30 @@ how you can define a matcher to do it:
 
 ```cpp
 using ::testing::Matcher;
-using ::testing::MatcherInterface;
-using ::testing::MatchResultListener;
 
-class BarPlusBazEqMatcher : public MatcherInterface<const Foo&> {
+class BarPlusBazEqMatcher {
  public:
   explicit BarPlusBazEqMatcher(int expected_sum)
       : expected_sum_(expected_sum) {}
 
   bool MatchAndExplain(const Foo& foo,
-                       MatchResultListener* /* listener */) const override {
+                       std::ostream* /* listener */) const {
     return (foo.bar() + foo.baz()) == expected_sum_;
   }
 
-  void DescribeTo(std::ostream* os) const override {
-    *os << "bar() + baz() equals " << expected_sum_;
+  void DescribeTo(std::ostream& os) const {
+    os << "bar() + baz() equals " << expected_sum_;
   }
 
-  void DescribeNegationTo(std::ostream* os) const override {
-    *os << "bar() + baz() does not equal " << expected_sum_;
+  void DescribeNegationTo(std::ostream& os) const {
+    os << "bar() + baz() does not equal " << expected_sum_;
   }
  private:
   const int expected_sum_;
 };
 
 Matcher<const Foo&> BarPlusBazEq(int expected_sum) {
-  return MakeMatcher(new BarPlusBazEqMatcher(expected_sum));
+  return BarPlusBazEqMatcher(expected_sum);
 }
 
 ...
@@ -3535,20 +3533,146 @@ MATCHER_P2(Blah, a, b, description_string_2) { ... }
 ```
 
 While it's tempting to always use the `MATCHER*` macros when defining a new
-matcher, you should also consider implementing `MatcherInterface` or using
-`MakePolymorphicMatcher()` instead (see the recipes that follow), especially if
-you need to use the matcher a lot. While these approaches require more work,
-they give you more control on the types of the value being matched and the
-matcher parameters, which in general leads to better compiler error messages
-that pay off in the long run. They also allow overloading matchers based on
-parameter types (as opposed to just based on the number of parameters).
+matcher, you should also consider implementing the matcher interface directly
+instead (see the recipes that follow), especially if you need to use the matcher
+a lot. While these approaches require more work, they give you more control on
+the types of the value being matched and the matcher parameters, which in
+general leads to better compiler error messages that pay off in the long run.
+They also allow overloading matchers based on parameter types (as opposed to
+just based on the number of parameters).
 
 ### Writing New Monomorphic Matchers
 
-A matcher of argument type `T` implements `::testing::MatcherInterface<T>` and
-does two things: it tests whether a value of type `T` matches the matcher, and
-can describe what kind of values it matches. The latter ability is used for
+A matcher of argument type `T` implements the matcher interface for `T` and does
+two things: it tests whether a value of type `T` matches the matcher, and can
+describe what kind of values it matches. The latter ability is used for
 generating readable error messages when expectations are violated.
+
+A matcher of `T` must declare a typedef like:
+
+```cpp
+using is_gtest_matcher = void;
+```
+
+and supports the following operations:
+
+```cpp
+// Match a value and optionally explain into an ostream.
+bool matched = matcher.MatchAndExplain(value, maybe_os);
+// where `value` is of type `T` and
+// `maybe_os` is of type `std::ostream*`, where it can be null if the caller
+// is not interested in there textual explanation.
+
+matcher.DescribeTo(os);
+matcher.DescribeNegationTo(os);
+// where `os` is of type `std::ostream*`.
+```
+
+If you need a custom matcher but `Truly()` is not a good option (for example,
+you may not be happy with the way `Truly(predicate)` describes itself, or you
+may want your matcher to be polymorphic as `Eq(value)` is), you can define a
+matcher to do whatever you want in two steps: first implement the matcher
+interface, and then define a factory function to create a matcher instance. The
+second step is not strictly needed but it makes the syntax of using the matcher
+nicer.
+
+For example, you can define a matcher to test whether an `int` is divisible by 7
+and then use it like this:
+
+```cpp
+using ::testing::Matcher;
+
+class DivisibleBy7Matcher {
+ public:
+  bool MatchAndExplain(int n, std::ostream*) const {
+    return (n % 7) == 0;
+  }
+
+  void DescribeTo(std::ostream* os) const {
+    *os << "is divisible by 7";
+  }
+
+  void DescribeNegationTo(std::ostream* os) const {
+    *os << "is not divisible by 7";
+  }
+};
+
+Matcher<int> DivisibleBy7() {
+  return DivisibleBy7Matcher();
+}
+
+...
+  EXPECT_CALL(foo, Bar(DivisibleBy7()));
+```
+
+You may improve the matcher message by streaming additional information to the
+`os` argument in `MatchAndExplain()`:
+
+```cpp
+class DivisibleBy7Matcher {
+ public:
+  bool MatchAndExplain(int n, std::ostream* os) const {
+    const int remainder = n % 7;
+    if (remainder != 0 && os != nullptr) {
+      *os << "the remainder is " << remainder;
+    }
+    return remainder == 0;
+  }
+  ...
+};
+```
+
+Then, `EXPECT_THAT(x, DivisibleBy7());` may generate a message like this:
+
+```shell
+Value of: x
+Expected: is divisible by 7
+  Actual: 23 (the remainder is 2)
+```
+
+### Writing New Polymorphic Matchers
+
+Expanding what we learned above to *polymorphic* matchers is now just as simple
+as adding templates in the right place.
+
+```cpp
+
+class NotNullMatcher {
+ public:
+  // To implement a polymorphic matcher, we just need to make MatchAndExplain a
+  // template on its first argument.
+
+  // In this example, we want to use NotNull() with any pointer, so
+  // MatchAndExplain() accepts a pointer of any type as its first argument.
+  // In general, you can define MatchAndExplain() as an ordinary method or
+  // a method template, or even overload it.
+  template <typename T>
+  bool MatchAndExplain(T* p, std::ostream*) const {
+    return p != nullptr;
+  }
+
+  // Describes the property of a value matching this matcher.
+  void DescribeTo(std::ostream& os) const { *os << "is not NULL"; }
+
+  // Describes the property of a value NOT matching this matcher.
+  void DescribeNegationTo(std::ostream* os) const { *os << "is NULL"; }
+};
+
+NotNullMatcher NotNull() {
+  return NotNullMatcher();
+}
+
+...
+
+  EXPECT_CALL(foo, Bar(NotNull()));  // The argument must be a non-NULL pointer.
+```
+
+### Legacy Matcher Implementation
+
+Defining matchers used to be somewhat more complicated, in which it required
+several supporting classes and virtual functions. To implement a matcher for
+type `T` using the legacy API you have to derive from `MatcherInterface<T>` and
+call `MakeMatcher` to construct the object.
 
 The interface looks like this:
 
@@ -3581,83 +3705,6 @@ class MatcherInterface {
   virtual void DescribeNegationTo(std::ostream* os) const;
 };
 ```
-
-If you need a custom matcher but `Truly()` is not a good option (for example,
-you may not be happy with the way `Truly(predicate)` describes itself, or you
-may want your matcher to be polymorphic as `Eq(value)` is), you can define a
-matcher to do whatever you want in two steps: first implement the matcher
-interface, and then define a factory function to create a matcher instance. The
-second step is not strictly needed but it makes the syntax of using the matcher
-nicer.
-
-For example, you can define a matcher to test whether an `int` is divisible by 7
-and then use it like this:
-
-```cpp
-using ::testing::MakeMatcher;
-using ::testing::Matcher;
-using ::testing::MatcherInterface;
-using ::testing::MatchResultListener;
-
-class DivisibleBy7Matcher : public MatcherInterface<int> {
- public:
-  bool MatchAndExplain(int n,
-                       MatchResultListener* /* listener */) const override {
-    return (n % 7) == 0;
-  }
-
-  void DescribeTo(std::ostream* os) const override {
-    *os << "is divisible by 7";
-  }
-
-  void DescribeNegationTo(std::ostream* os) const override {
-    *os << "is not divisible by 7";
-  }
-};
-
-Matcher<int> DivisibleBy7() {
-  return MakeMatcher(new DivisibleBy7Matcher);
-}
-
-...
-  EXPECT_CALL(foo, Bar(DivisibleBy7()));
-```
-
-You may improve the matcher message by streaming additional information to the
-`listener` argument in `MatchAndExplain()`:
-
-```cpp
-class DivisibleBy7Matcher : public MatcherInterface<int> {
- public:
-  bool MatchAndExplain(int n,
-                       MatchResultListener* listener) const override {
-    const int remainder = n % 7;
-    if (remainder != 0) {
-      *listener << "the remainder is " << remainder;
-    }
-    return remainder == 0;
-  }
-  ...
-};
-```
-
-Then, `EXPECT_THAT(x, DivisibleBy7());` may generate a message like this:
-
-```shell
-Value of: x
-Expected: is divisible by 7
-  Actual: 23 (the remainder is 2)
-```
-
-### Writing New Polymorphic Matchers
-
-You've learned how to write your own matchers in the previous recipe. Just one
-problem: a matcher created using `MakeMatcher()` only works for one particular
-type of arguments. If you want a *polymorphic* matcher that works with arguments
-of several types (for instance, `Eq(x)` can be used to match a *`value`* as long
-as `value == x` compiles -- *`value`* and `x` don't have to share the same
-type), you can learn the trick from `testing/base/public/gmock-matchers.h` but
-it's a bit involved.
 
 Fortunately, most of the time you can define a polymorphic matcher easily with
 the help of `MakePolymorphicMatcher()`. Here's how you can define `NotNull()` as
