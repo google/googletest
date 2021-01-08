@@ -421,7 +421,11 @@ class MatcherBase : private MatcherDescriberInterface {
   template <typename M, bool = IsInlined<M>()>
   struct ValuePolicy {
     static const M& Get(const MatcherBase& m) {
-      return reinterpret_cast<const M&>(m.buffer_);
+      // When inlined along with Init, need to be explicit to avoid violating
+      // strict aliasing rules.
+      const M *ptr = static_cast<const M*>(
+          static_cast<const void*>(&m.buffer_));
+      return *ptr;
     }
     static void Init(MatcherBase& m, M impl) {
       ::new (static_cast<void*>(&m.buffer_)) M(impl);
