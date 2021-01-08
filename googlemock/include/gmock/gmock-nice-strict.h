@@ -97,7 +97,7 @@ constexpr bool HasStrictnessModifier() {
 // deregistration. This guarantees that MockClass's constructor and destructor
 // run with the same level of strictness as its instance methods.
 
-#if GTEST_OS_WINDOWS && (defined(_MSC_VER) || defined(__clang__))
+#if GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_MINGW && (defined(_MSC_VER) || defined(__clang__))
 // We need to mark these classes with this declspec to ensure that
 // the empty base class optimization is performed.
 #define GTEST_INTERNAL_EMPTY_BASE_CLASS __declspec(empty_bases)
