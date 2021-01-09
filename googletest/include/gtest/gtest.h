@@ -1924,6 +1924,9 @@ class TestWithParam : public Test, public WithParamInterface<T> {
 
 // Define this macro to 1 to omit the definition of FAIL(), which is a
 // generic name and clashes with some other libraries.
+#ifndef GTEST_DONT_DEFINE_FAIL
+# define GTEST_DONT_DEFINE_FAIL 0
+#endif
 #if !GTEST_DONT_DEFINE_FAIL
 # define FAIL() GTEST_FAIL()
 #endif
@@ -1933,6 +1936,9 @@ class TestWithParam : public Test, public WithParamInterface<T> {
 
 // Define this macro to 1 to omit the definition of SUCCEED(), which
 // is a generic name and clashes with some other libraries.
+#ifndef GTEST_DONT_DEFINE_SUCCEED
+# define GTEST_DONT_DEFINE_SUCCEED 0
+#endif
 #if !GTEST_DONT_DEFINE_SUCCEED
 # define SUCCEED() GTEST_SUCCEED()
 #endif
@@ -2069,26 +2075,44 @@ class TestWithParam : public Test, public WithParamInterface<T> {
 // Define macro GTEST_DONT_DEFINE_ASSERT_XY to 1 to omit the definition of
 // ASSERT_XY(), which clashes with some users' own code.
 
+#ifndef GTEST_DONT_DEFINE_ASSERT_EQ
+# define GTEST_DONT_DEFINE_ASSERT_EQ 0
+#endif
 #if !GTEST_DONT_DEFINE_ASSERT_EQ
 # define ASSERT_EQ(val1, val2) GTEST_ASSERT_EQ(val1, val2)
 #endif
 
+#ifndef GTEST_DONT_DEFINE_ASSERT_NE
+# define GTEST_DONT_DEFINE_ASSERT_NE 0
+#endif
 #if !GTEST_DONT_DEFINE_ASSERT_NE
 # define ASSERT_NE(val1, val2) GTEST_ASSERT_NE(val1, val2)
 #endif
 
+#ifndef GTEST_DONT_DEFINE_ASSERT_LE
+# define GTEST_DONT_DEFINE_ASSERT_LE 0
+#endif
 #if !GTEST_DONT_DEFINE_ASSERT_LE
 # define ASSERT_LE(val1, val2) GTEST_ASSERT_LE(val1, val2)
 #endif
 
+#ifndef GTEST_DONT_DEFINE_ASSERT_LT
+# define GTEST_DONT_DEFINE_ASSERT_LT 0
+#endif
 #if !GTEST_DONT_DEFINE_ASSERT_LT
 # define ASSERT_LT(val1, val2) GTEST_ASSERT_LT(val1, val2)
 #endif
 
+#ifndef GTEST_DONT_DEFINE_ASSERT_GE
+# define GTEST_DONT_DEFINE_ASSERT_GE 0
+#endif
 #if !GTEST_DONT_DEFINE_ASSERT_GE
 # define ASSERT_GE(val1, val2) GTEST_ASSERT_GE(val1, val2)
 #endif
 
+#ifndef GTEST_DONT_DEFINE_ASSERT_GT
+# define GTEST_DONT_DEFINE_ASSERT_GT 0
+#endif
 #if !GTEST_DONT_DEFINE_ASSERT_GT
 # define ASSERT_GT(val1, val2) GTEST_ASSERT_GT(val1, val2)
 #endif
@@ -2349,6 +2373,9 @@ constexpr bool StaticAssertTypeEq() noexcept {
 
 // Define this macro to 1 to omit the definition of TEST(), which
 // is a generic name and clashes with some other libraries.
+#ifndef GTEST_DONT_DEFINE_TEST
+# define GTEST_DONT_DEFINE_TEST 0
+#endif
 #if !GTEST_DONT_DEFINE_TEST
 #define TEST(test_suite_name, test_name) GTEST_TEST(test_suite_name, test_name)
 #endif

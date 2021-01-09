@@ -5912,6 +5912,9 @@ bool UnitTestImpl::RunAllTests() {
         "() before calling RUN_ALL_TESTS(). This is INVALID. Soon " GTEST_NAME_
         " will start to enforce the valid usage. "
         "Please fix it ASAP, or IT WILL START TO FAIL.\n");  // NOLINT
+#ifndef GTEST_FOR_GOOGLE_
+# define GTEST_FOR_GOOGLE_ 0
+#endif
 #if GTEST_FOR_GOOGLE_
     ColoredPrintf(GTestColor::kRed,
                   "For more details, see http://wiki/Main/ValidGUnitMain.\n");
