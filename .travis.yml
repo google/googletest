@@ -10,10 +10,6 @@ language: cpp
 matrix:
   include:
     - os: linux
-      before_install: chmod -R +x ./ci/*platformio.sh
-      install: ./ci/install-platformio.sh
-      script: ./ci/build-platformio.sh
-    - os: linux
       dist: bionic
       compiler: gcc
       install: ./ci/install-linux.sh && ./ci/log-config.sh
