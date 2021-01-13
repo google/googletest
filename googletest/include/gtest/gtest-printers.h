@@ -101,6 +101,7 @@
 #define GTEST_INCLUDE_GTEST_GTEST_PRINTERS_H_
 
 #include <functional>
+#include <memory>
 #include <ostream>  // NOLINT
 #include <sstream>
 #include <string>
@@ -108,6 +109,7 @@
 #include <type_traits>
 #include <utility>
 #include <vector>
+
 #include "gtest/internal/gtest-internal.h"
 #include "gtest/internal/gtest-port.h"
 
@@ -571,6 +573,43 @@ inline void PrintTo(std::nullptr_t, ::std::ostream* os) { *os << "(nullptr)"; }
 template <typename T>
 void PrintTo(std::reference_wrapper<T> ref, ::std::ostream* os) {
   UniversalPrinter<T&>::Print(ref.get(), os);
+}
+
+inline const void* VoidifyPointer(const void* p) { return p; }
+inline const void* VoidifyPointer(volatile const void* p) {
+  return const_cast<const void*>(p);
+}
+
+template <typename T, typename Ptr>
+void PrintSmartPointer(const Ptr& ptr, std::ostream* os, char) {
+  if (ptr == nullptr) {
+    *os << "(nullptr)";
+  } else {
+    // We can't print the value. Just print the pointer..
+    *os << "(" << (VoidifyPointer)(ptr.get()) << ")";
+  }
+}
+template <typename T, typename Ptr,
+          typename = typename std::enable_if<!std::is_void<T>::value &&
+                                             !std::is_array<T>::value>::type>
+void PrintSmartPointer(const Ptr& ptr, std::ostream* os, int) {
+  if (ptr == nullptr) {
+    *os << "(nullptr)";
+  } else {
+    *os << "(ptr = " << (VoidifyPointer)(ptr.get()) << ", value = ";
+    UniversalPrinter<T>::Print(*ptr, os);
+    *os << ")";
+  }
+}
+
+template <typename T, typename D>
+void PrintTo(const std::unique_ptr<T, D>& ptr, std::ostream* os) {
+  (PrintSmartPointer<T>)(ptr, os, 0);
+}
+
+template <typename T>
+void PrintTo(const std::shared_ptr<T>& ptr, std::ostream* os) {
+  (PrintSmartPointer<T>)(ptr, os, 0);
 }
 
 // Helper function for printing a tuple.  T must be instantiated with
