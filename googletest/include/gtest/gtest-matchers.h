@@ -418,7 +418,7 @@ class MatcherBase : private MatcherDescriberInterface {
            std::is_trivially_destructible<M>::value;
   }
 
-  template <typename M, bool = IsInlined<M>()>
+  template <typename M, bool = MatcherBase::IsInlined<M>()>
   struct ValuePolicy {
     static const M& Get(const MatcherBase& m) {
       // When inlined along with Init, need to be explicit to avoid violating
