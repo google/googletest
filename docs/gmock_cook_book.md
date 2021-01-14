@@ -3584,6 +3584,8 @@ using ::testing::Matcher;
 
 class DivisibleBy7Matcher {
  public:
+  using is_gtest_matcher = void;
+
   bool MatchAndExplain(int n, std::ostream*) const {
     return (n % 7) == 0;
   }
