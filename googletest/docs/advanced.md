@@ -1432,8 +1432,8 @@ given test suite, whether their definitions come before or *after* the
 
 You can see [sample7_unittest.cc] and [sample8_unittest.cc] for more examples.
 
-[sample7_unittest.cc]: ../samples/sample7_unittest.cc "Parameterized Test example"
-[sample8_unittest.cc]: ../samples/sample8_unittest.cc "Parameterized Test example with multiple parameters"
+[sample7_unittest.cc]: ../googletest/samples/sample7_unittest.cc "Parameterized Test example"
+[sample8_unittest.cc]: ../googletest/samples/sample8_unittest.cc "Parameterized Test example with multiple parameters"
 
 ### Creating Value-Parameterized Abstract Tests
 
@@ -1583,7 +1583,7 @@ TYPED_TEST(FooTest, HasPropertyA) { ... }
 
 You can see [sample6_unittest.cc] for a complete example.
 
-[sample6_unittest.cc]: ../samples/sample6_unittest.cc "Typed Test example"
+[sample6_unittest.cc]: ../googletest/samples/sample6_unittest.cc "Typed Test example"
 
 ## Type-Parameterized Tests
 
@@ -2026,7 +2026,7 @@ You can do so by adding one line:
 Now, sit back and enjoy a completely different output from your tests. For more
 details, see [sample9_unittest.cc].
 
-[sample9_unittest.cc]: ../samples/sample9_unittest.cc "Event listener example"
+[sample9_unittest.cc]: ../googletest/samples/sample9_unittest.cc "Event listener example"
 
 You may append more than one listener to the list. When an `On*Start()` or
 `OnTestPartResult()` event is fired, the listeners will receive it in the order
@@ -2053,7 +2053,7 @@ by the former.
 
 See [sample10_unittest.cc] for an example of a failure-raising listener.
 
-[sample10_unittest.cc]: ../samples/sample10_unittest.cc "Failure-raising listener example"
+[sample10_unittest.cc]: ../googletest/samples/sample10_unittest.cc "Failure-raising listener example"
 
 ## Running Test Programs: Advanced Options
 
