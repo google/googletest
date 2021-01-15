@@ -153,7 +153,7 @@ c is 10
 >
 > 1.  If you see a compiler error "no matching function to call" when using
 >     `ASSERT_PRED*` or `EXPECT_PRED*`, please see
->     [this](faq.md#the-compiler-complains-no-matching-function-to-call-when-i-use-assert-pred-how-do-i-fix-it)
+>     [this](faq.md#the-compiler-complains-no-matching-function-to-call-when-i-use-assert_pred-how-do-i-fix-it)
 >     for how to resolve it.
 
 #### Using a Function That Returns an AssertionResult
