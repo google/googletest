@@ -289,8 +289,7 @@ will be changed.
 `IsTrue` and `IsFalse` are useful when you need to use a matcher, or for types
 that can be explicitly converted to Boolean, but are not implicitly converted to
 Boolean. In other cases, you can use the basic
-[`EXPECT_TRUE` and `EXPECT_FALSE`](../../googletest/docs/primer#basic-assertions)
-assertions.
+[`EXPECT_TRUE` and `EXPECT_FALSE`](primer.md#basic-assertions) assertions.
 
 ### Floating-Point Matchers {#FpMatchers}
 
@@ -340,9 +339,8 @@ The `argument` can be either a C string or a C++ string object:
 
 `ContainsRegex()` and `MatchesRegex()` take ownership of the `RE` object. They
 use the regular expression syntax defined
-[here](../../googletest/docs/advanced.md#regular-expression-syntax). All of
-these matchers, except `ContainsRegex()` and `MatchesRegex()` work for wide
-strings as well.
+[here](advanced.md#regular-expression-syntax). All of these matchers, except
+`ContainsRegex()` and `MatchesRegex()` work for wide strings as well.
 
 ### Container Matchers
 

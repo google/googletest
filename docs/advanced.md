@@ -371,7 +371,7 @@ Verifies that `val1` is less than, or almost equal to, `val2`. You can replace
 
 ### Asserting Using gMock Matchers
 
-[gMock](gmock_index.md) comes with
+[gMock](gmock_for_dummies.md) comes with
 [a library of matchers](gmock_cheat_sheet.md#MatcherList) for
 validating arguments passed to mock objects. A gMock *matcher* is basically a
 predicate that knows how to describe itself. It can be used in these assertion

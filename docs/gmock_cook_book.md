@@ -4253,7 +4253,7 @@ value printer.
 This printer knows how to print built-in C++ types, native arrays, STL
 containers, and any type that supports the `<<` operator. For other types, it
 prints the raw bytes in the value and hopes that you the user can figure it out.
-[googletest's advanced guide](../../googletest/docs/advanced.md#teaching-googletest-how-to-print-your-values)
+[The GoogleTest advanced guide](advanced.md#teaching-googletest-how-to-print-your-values)
 explains how to extend the printer to do a better job at printing your
 particular type than to dump the bytes.
 
