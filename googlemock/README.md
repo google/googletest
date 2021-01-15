@@ -31,7 +31,6 @@ gMock:
 
 Details and examples can be found here:
 
-
 *   [gMock for Dummies](docs/for_dummies.md)
 *   [Legacy gMock FAQ](docs/gmock_faq.md)
 *   [gMock Cookbook](docs/cook_book.md)
