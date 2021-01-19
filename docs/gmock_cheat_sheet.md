@@ -1,10 +1,10 @@
 # gMock Cheat Sheet
 
-<!-- GOOGLETEST_CM0019 DO NOT DELETE -->
+go/gmockcheat
 
-<!-- GOOGLETEST_CM0035 DO NOT DELETE -->
+[TOC]
 
-<!-- GOOGLETEST_CM0033 DO NOT DELETE -->
+<!--#include file="includes/g3_BUILD_rule.md"-->
 
 ## Defining a Mock Class
 
@@ -229,7 +229,7 @@ and the default action will be taken each time.
 
 ## Matchers {#MatcherList}
 
-<!-- GOOGLETEST_CM0020 DO NOT DELETE -->
+go/matchers
 
 A **matcher** matches a *single* argument. You can use it inside `ON_CALL()` or
 `EXPECT_CALL()`, or use it to validate a value directly using two macros:
@@ -424,9 +424,9 @@ messages, you can use:
 | `WhenDynamicCastTo<T>(m)` | when `argument` is passed through `dynamic_cast<T>()`, it matches matcher `m`. |
 <!-- mdformat on -->
 
-<!-- GOOGLETEST_CM0026 DO NOT DELETE -->
+<!--#include file="includes/g3_proto_matchers.md"-->
 
-<!-- GOOGLETEST_CM0027 DO NOT DELETE -->
+<!--#include file="includes/g3_absl_status_matcher.md"-->
 
 ### Multi-argument Matchers {#MultiArgMatchers}
 
@@ -467,7 +467,7 @@ You can make a matcher from one or more other matchers:
 | `Not(m)` | `argument` doesn't match matcher `m`. |
 <!-- mdformat on -->
 
-<!-- GOOGLETEST_CM0028 DO NOT DELETE -->
+<!--#include file="includes/g3_useful_matchers_outsidegmock.md"-->
 
 ### Adapters for Matchers
 
@@ -612,7 +612,7 @@ value, and `foo` by reference.
 **Note:** due to technical reasons, `DoDefault()` cannot be used inside a
 composite action - trying to do so will result in a run-time error.
 
-<!-- GOOGLETEST_CM0032 DO NOT DELETE -->
+<!--#include file="includes/g3_stubby_actions.md"-->
 
 ### Composite Actions
 

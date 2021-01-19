@@ -1,6 +1,6 @@
 ## Using GoogleTest from various build systems
 
-<!-- GOOGLETEST_CM0035 DO NOT DELETE -->
+[TOC]
 
 GoogleTest comes with pkg-config files that can be used to determine all
 necessary flags for compiling and linking to GoogleTest (and GoogleMock).
