@@ -371,8 +371,6 @@ inline internal::ParamGenerator<bool> Bool() {
 //     std::tuple<T1, T2, ..., TN> where T1, T2, ..., TN are the types
 //     of elements from sequences produces by gen1, gen2, ..., genN.
 //
-// Combine can have up to 10 arguments.
-//
 // Example:
 //
 // This will instantiate tests in test suite AnimalTest each one with
