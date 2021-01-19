@@ -1,8 +1,8 @@
 ## Legacy gMock FAQ {#GMockFaq}
 
-<!-- GOOGLETEST_CM0021 DO NOT DELETE -->
+go/gmockfaq
 
-<!-- GOOGLETEST_CM0035 DO NOT DELETE -->
+[TOC]
 
 ### When I call a method on my mock object, the method for the real object is invoked instead. What's the problem?
 
@@ -83,7 +83,7 @@ void Bar(int* p);         // Neither p nor *p is const.
 void Bar(const int* p);  // p is not const, but *p is.
 ```
 
-<!-- GOOGLETEST_CM0030 DO NOT DELETE -->
+<!--#include file="includes/g3_mock_multithreaded.md"-->
 
 ### I can't figure out why gMock thinks my expectations are not satisfied. What should I do?
 
@@ -128,7 +128,7 @@ using ::testing::_;
       .Times(0);
 ```
 
-<!-- GOOGLETEST_CM0031 DO NOT DELETE -->
+<!--#include file="includes/g3_mock_a_stubby_server.md"-->
 
 ### I have a failed test where gMock tells me TWICE that a particular expectation is not satisfied. Isn't this redundant?
 

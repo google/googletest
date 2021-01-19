@@ -1,8 +1,8 @@
 # Googletest Primer
 
-<!-- GOOGLETEST_CM0036 DO NOT DELETE -->
+go/gunitprimer
 
-<!-- GOOGLETEST_CM0035 DO NOT DELETE -->
+[TOC]
 
 ## Introduction: Why googletest?
 

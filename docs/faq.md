@@ -1,8 +1,8 @@
 # Googletest FAQ
 
-<!-- GOOGLETEST_CM0014 DO NOT DELETE -->
+go/gunitfaq
 
-<!-- GOOGLETEST_CM0035 DO NOT DELETE -->
+[TOC]
 
 ## Why should test suite names and test names not contain underscore?
 
@@ -350,7 +350,7 @@ You may still want to use `SetUp()/TearDown()` in the following cases:
 *   In the body of a constructor (or destructor), it's not possible to use the
     `ASSERT_xx` macros. Therefore, if the set-up operation could cause a fatal
     test failure that should prevent the test from running, it's necessary to
-    use `abort` <!-- GOOGLETEST_CM0015 DO NOT DELETE --> and abort the whole test executable,
+    use `abort` (in google3, use `CHECK`) and abort the whole test executable,
     or to use `SetUp()` instead of a constructor.
 *   If the tear-down operation could throw an exception, you must use
     `TearDown()` as opposed to the destructor, as throwing in a destructor leads

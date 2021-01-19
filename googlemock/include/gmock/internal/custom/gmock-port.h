@@ -36,4 +36,29 @@
 #ifndef GMOCK_INCLUDE_GMOCK_INTERNAL_CUSTOM_GMOCK_PORT_H_
 #define GMOCK_INCLUDE_GMOCK_INTERNAL_CUSTOM_GMOCK_PORT_H_
 
+#include "gtest/internal/gtest-port.h"
+
+#if GTEST_GOOGLE3_MODE_
+
+// Defines this iff Google Mock can use google3 callbacks.  This is
+// internal as a user shouldn't rely on Google Mock to tell him
+// whether he can use google3 callbacks.
+# include "base/callback.h"
+# define GMOCK_HAS_GOOGLE3_CALLBACK_ 1
+
+// Macros for declaring flags.
+# define GMOCK_DECLARE_bool_(name)   DECLARE_bool(gmock_##name)
+# define GMOCK_DECLARE_int32_(name)  DECLARE_int32(gmock_##name)
+# define GMOCK_DECLARE_string_(name) DECLARE_string(gmock_##name)
+
+// Macros for defining flags.
+# define GMOCK_DEFINE_bool_(name, default_val, doc) \
+    DEFINE_bool(gmock_##name, default_val, doc)
+# define GMOCK_DEFINE_int32_(name, default_val, doc) \
+    DEFINE_int32(gmock_##name, default_val, doc)
+# define GMOCK_DEFINE_string_(name, default_val, doc) \
+    DEFINE_string(gmock_##name, default_val, doc)
+
+#endif  // GTEST_GOOGLE3_MODE_
+
 #endif  // GMOCK_INCLUDE_GMOCK_INTERNAL_CUSTOM_GMOCK_PORT_H_

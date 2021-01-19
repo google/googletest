@@ -149,7 +149,7 @@ choosing the adaptor interface can make your code easier to write and more
 readable (a net win in the long run), as you can choose `FooAdaptor` to fit your
 specific domain much better than `Foo` does.
 
-<!-- GOOGLETEST_CM0029 DO NOT DELETE -->
+<!--#include file="includes/g3_wrap_external_api_snippet.md"-->
 
 ## Using Mocks in Tests
 
