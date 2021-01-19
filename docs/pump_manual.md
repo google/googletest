@@ -1,6 +1,6 @@
 <b>P</b>ump is <b>U</b>seful for <b>M</b>eta <b>P</b>rogramming.
 
-<!-- GOOGLETEST_CM0035 DO NOT DELETE -->
+[TOC]
 
 # The Problem
 

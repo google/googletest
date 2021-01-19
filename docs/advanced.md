@@ -1,8 +1,8 @@
 # Advanced googletest Topics
 
-<!-- GOOGLETEST_CM0016 DO NOT DELETE -->
+go/gunitadvanced
 
-<!-- GOOGLETEST_CM0035 DO NOT DELETE -->
+[TOC]
 
 ## Introduction
 

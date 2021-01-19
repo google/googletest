@@ -1,8 +1,8 @@
 # gMock for Dummies {#GMockForDummies}
 
-<!-- GOOGLETEST_CM0013 DO NOT DELETE -->
+go/gmockfordummies
 
-<!-- GOOGLETEST_CM0035 DO NOT DELETE -->
+[TOC]
 
 ## What Is gMock?
 
@@ -208,7 +208,7 @@ choosing the adaptor interface can make your code easier to write and more
 readable (a net win in the long run), as you can choose `FooAdaptor` to fit your
 specific domain much better than `Foo` does.
 
-<!-- GOOGLETEST_CM0029 DO NOT DELETE -->
+<!--#include file="includes/g3_wrap_external_api_snippet.md"-->
 
 ## Using Mocks in Tests
 
