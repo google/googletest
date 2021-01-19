@@ -33,39 +33,4 @@
 
 #ifndef GMOCK_INCLUDE_GMOCK_INTERNAL_CUSTOM_GMOCK_MATCHERS_H_
 #define GMOCK_INCLUDE_GMOCK_INTERNAL_CUSTOM_GMOCK_MATCHERS_H_
-
-#include <memory>
-
-#include "gmock/internal/gmock-port.h"
-#if GTEST_GOOGLE3_MODE_
-#include "base/callback.h"
-
-// Realistically this file should be included from gmock-matchers.h
-#include "gmock/gmock-matchers.h"
-
-namespace testing {
-namespace internal {
-
-// Specialization for permanent callbacks.
-template <typename ArgType, typename ResType>
-struct CallableTraits<ResultCallback1<ResType, ArgType>*> {
-  typedef ResType ResultType;
-  using StorageType = std::shared_ptr<ResultCallback1<ResType, ArgType>>;
-  typedef ResultCallback1<ResType, ArgType> Callback;
-
-  static void CheckIsValid(const StorageType& callback) {
-    GTEST_CHECK_(callback != nullptr)
-        << "NULL callback is passed into ResultOf().";
-    callback->CheckIsRepeatable();
-  }
-  template <typename T>
-  static ResType Invoke(const StorageType& callback, T arg) {
-    return callback->Run(arg);
-  }
-};
-
-}  // namespace internal
-}  // namespace testing
-#endif  // GTEST_GOOGLE3_MODE_
-
 #endif  // GMOCK_INCLUDE_GMOCK_INTERNAL_CUSTOM_GMOCK_MATCHERS_H_
