@@ -128,15 +128,3 @@ To run the tests, do
     make test
 
 All tests should pass.
-
-### Regenerating Source Files
-
-Some of Google Test's source files are generated from templates (not in the C++
-sense) using a script. For example, the file
-*googlemock/include/gmock/gmock-generated-actions.h.pump* is used to generate
-*gmock-generated-actions.h* in the same directory.
-
-You don't need to worry about regenerating the source files unless you need to
-modify them. You would then modify the corresponding `.pump` files and run the
-'[pump.py](googlemock/scripts/pump.py)' generator script. See the
-[Pump Manual](googlemock/docs/pump_manual.md).
