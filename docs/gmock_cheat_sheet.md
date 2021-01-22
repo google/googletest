@@ -179,8 +179,8 @@ Example usage:
 To customize the default action for a particular method of a specific mock
 object, use `ON_CALL()`. `ON_CALL()` has a similar syntax to `EXPECT_CALL()`,
 but it is used for setting default behaviors (when you do not require that the
-mock method is called). See [here](gmock_cook_book.md#UseOnCall) for a more detailed
-discussion.
+mock method is called). See [here](gmock_cook_book.md#UseOnCall) for a more
+detailed discussion.
 
 ```cpp
 ON_CALL(mock-object, method(matchers))
@@ -400,10 +400,12 @@ messages, you can use:
 | Matcher                         | Description                                |
 | :------------------------------ | :----------------------------------------- |
 | `Field(&class::field, m)`       | `argument.field` (or `argument->field` when `argument` is a plain pointer) matches matcher `m`, where `argument` is an object of type _class_. |
+| `Field(field_name, &class::field, m)` | The same as the two-parameter version, but provides a better error message. |
 | `Key(e)`                        | `argument.first` matches `e`, which can be either a value or a matcher. E.g. `Contains(Key(Le(5)))` can verify that a `map` contains a key `<= 5`. |
 | `Pair(m1, m2)`                  | `argument` is an `std::pair` whose `first` field matches `m1` and `second` field matches `m2`. |
 | `FieldsAre(m...)`                   | `argument` is a compatible object where each field matches piecewise with `m...`. A compatible object is any that supports the `std::tuple_size<Obj>`+`get<I>(obj)` protocol. In C++17 and up this also supports types compatible with structured bindings, like aggregates. |
 | `Property(&class::property, m)` | `argument.property()` (or `argument->property()` when `argument` is a plain pointer) matches matcher `m`, where `argument` is an object of type _class_. |
+| `Property(property_name, &class::property, m)` | The same as the two-parameter version, but provides a better error message.
 <!-- mdformat on -->
 
 ### Matching the Result of a Function, Functor, or Callback
@@ -773,7 +775,8 @@ class MockFunction<R(A1, ..., An)> {
 };
 ```
 
-See this [recipe](gmock_cook_book.md#using-check-points) for one application of it.
+See this [recipe](gmock_cook_book.md#using-check-points) for one application of
+it.
 
 ## Flags
 
