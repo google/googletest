@@ -28,7 +28,7 @@ release them together.
 ### Getting Started
 
 The information for **GoogleTest** is available in the
-[GoogleTest Primer](googletest/docs/primer.md) documentation.
+[GoogleTest Primer](docs/primer.md) documentation.
 
 **GoogleMock** is an extension to GoogleTest for writing and using C++ mock
 classes. See the separate [GoogleMock documentation](googlemock/README.md).
