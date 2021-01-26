@@ -1,7 +1,5 @@
 ## Using GoogleTest from various build systems
 
-[TOC]
-
 GoogleTest comes with pkg-config files that can be used to determine all
 necessary flags for compiling and linking to GoogleTest (and GoogleMock).
 Pkg-config is a standardised plain-text format containing

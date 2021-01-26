@@ -1,9 +1,5 @@
 # Advanced googletest Topics
 
-go/gunitadvanced
-
-[TOC]
-
 ## Introduction
 
 Now that you have read the [googletest Primer](primer.md) and learned how to
