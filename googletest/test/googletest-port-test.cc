@@ -373,8 +373,6 @@ TEST(RegexEngineSelectionTest, SelectsCorrectRegexEngine) {
 
 #if GTEST_USES_POSIX_RE
 
-# if GTEST_HAS_TYPED_TEST
-
 template <typename Str>
 class RETest : public ::testing::Test {};
 
@@ -429,8 +427,6 @@ TYPED_TEST(RETest, PartialMatchWorks) {
   EXPECT_TRUE(RE::PartialMatch(TypeParam("azy"), re));
   EXPECT_FALSE(RE::PartialMatch(TypeParam("zza"), re));
 }
-
-# endif  // GTEST_HAS_TYPED_TEST
 
 #elif GTEST_USES_SIMPLE_RE
 

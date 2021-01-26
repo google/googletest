@@ -53,16 +53,13 @@ TEST_P(ValueParamTest, Test5) {}
 TEST_P(ValueParamTest, Test6) {}
 INSTANTIATE_TEST_SUITE_P(ValueParam, ValueParamTest, ::testing::Values(33, 42));
 
-#if GTEST_HAS_TYPED_TEST
 template <typename T>
 class TypedTest : public ::testing::Test {};
 typedef testing::Types<int, bool> TypedTestTypes;
 TYPED_TEST_SUITE(TypedTest, TypedTestTypes);
 TYPED_TEST(TypedTest, Test7) {}
 TYPED_TEST(TypedTest, Test8) {}
-#endif
 
-#if GTEST_HAS_TYPED_TEST_P
 template <typename T>
 class TypeParameterizedTestSuite : public ::testing::Test {};
 TYPED_TEST_SUITE_P(TypeParameterizedTestSuite);
@@ -72,7 +69,6 @@ REGISTER_TYPED_TEST_SUITE_P(TypeParameterizedTestSuite, Test9, Test10);
 typedef testing::Types<int, bool> TypeParameterizedTestSuiteTypes;  // NOLINT
 INSTANTIATE_TYPED_TEST_SUITE_P(Single, TypeParameterizedTestSuite,
                                TypeParameterizedTestSuiteTypes);
-#endif
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);

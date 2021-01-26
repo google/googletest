@@ -744,9 +744,6 @@ TEST_P(DetectNotInstantiatedTest, Used) { }
 // This would make the test failure from the above go away.
 // INSTANTIATE_TEST_SUITE_P(Fix, DetectNotInstantiatedTest, testing::Values(1));
 
-// This #ifdef block tests the output of typed tests.
-#if GTEST_HAS_TYPED_TEST
-
 template <typename T>
 class TypedTest : public testing::Test {
 };
@@ -782,11 +779,6 @@ TYPED_TEST_SUITE(TypedTestWithNames, TypesForTestWithNames, TypedTestNames);
 TYPED_TEST(TypedTestWithNames, Success) {}
 
 TYPED_TEST(TypedTestWithNames, Failure) { FAIL(); }
-
-#endif  // GTEST_HAS_TYPED_TEST
-
-// This #ifdef block tests the output of type-parameterized tests.
-#if GTEST_HAS_TYPED_TEST_P
 
 template <typename T>
 class TypedTestP : public testing::Test {
@@ -838,8 +830,6 @@ REGISTER_TYPED_TEST_SUITE_P(DetectNotInstantiatedTypesTest, Used);
 // typedef ::testing::Types<char, int, unsigned int> MyTypes;
 // INSTANTIATE_TYPED_TEST_SUITE_P(All, DetectNotInstantiatedTypesTest, MyTypes);
 
-#endif  // GTEST_HAS_TYPED_TEST_P
-
 #if GTEST_HAS_DEATH_TEST
 
 // We rely on the golden file to verify that tests whose test case
@@ -847,8 +837,6 @@ REGISTER_TYPED_TEST_SUITE_P(DetectNotInstantiatedTypesTest, Used);
 
 TEST(ADeathTest, ShouldRunFirst) {
 }
-
-# if GTEST_HAS_TYPED_TEST
 
 // We rely on the golden file to verify that typed tests whose test
 // case name ends with DeathTest are run first.
@@ -862,10 +850,6 @@ TYPED_TEST_SUITE(ATypedDeathTest, NumericTypes);
 
 TYPED_TEST(ATypedDeathTest, ShouldRunFirst) {
 }
-
-# endif  // GTEST_HAS_TYPED_TEST
-
-# if GTEST_HAS_TYPED_TEST_P
 
 
 // We rely on the golden file to verify that type-parameterized tests
@@ -883,8 +867,6 @@ TYPED_TEST_P(ATypeParamDeathTest, ShouldRunFirst) {
 REGISTER_TYPED_TEST_SUITE_P(ATypeParamDeathTest, ShouldRunFirst);
 
 INSTANTIATE_TYPED_TEST_SUITE_P(My, ATypeParamDeathTest, NumericTypes);
-
-# endif  // GTEST_HAS_TYPED_TEST_P
 
 #endif  // GTEST_HAS_DEATH_TEST
 
