@@ -175,8 +175,6 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes);
 
 // Implements typed tests.
 
-#if GTEST_HAS_TYPED_TEST
-
 // INTERNAL IMPLEMENTATION - DO NOT USE IN USER CODE.
 //
 // Expands to the name of the typedef for the type parameters of the
@@ -230,11 +228,7 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes);
   TYPED_TEST_SUITE
 #endif  // GTEST_REMOVE_LEGACY_TEST_CASEAPI_
 
-#endif  // GTEST_HAS_TYPED_TEST
-
 // Implements type-parameterized tests.
-
-#if GTEST_HAS_TYPED_TEST_P
 
 // INTERNAL IMPLEMENTATION - DO NOT USE IN USER CODE.
 //
@@ -331,7 +325,5 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes);
       ::testing::internal::InstantiateTypedTestCase_P_IsDeprecated(), ""); \
   INSTANTIATE_TYPED_TEST_SUITE_P
 #endif  // GTEST_REMOVE_LEGACY_TEST_CASEAPI_
-
-#endif  // GTEST_HAS_TYPED_TEST_P
 
 #endif  // GTEST_INCLUDE_GTEST_GTEST_TYPED_TEST_H_

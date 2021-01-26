@@ -98,8 +98,6 @@ std::string GetTypeName() {
 #endif  // GTEST_HAS_RTTI
 }
 
-#if GTEST_HAS_TYPED_TEST || GTEST_HAS_TYPED_TEST_P
-
 // A unique type indicating an empty node
 struct None {};
 
@@ -174,8 +172,6 @@ struct GenerateTypeList {
  public:
   using type = typename proxy::type;
 };
-
-#endif  // GTEST_HAS_TYPED_TEST || GTEST_HAS_TYPED_TEST_P
 
 }  // namespace internal
 

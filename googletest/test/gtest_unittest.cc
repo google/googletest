@@ -3183,8 +3183,6 @@ TEST_F(DisabledTestsTest, DISABLED_TestShouldNotRun_2) {
 
 // Tests that disabled typed tests aren't run.
 
-#if GTEST_HAS_TYPED_TEST
-
 template <typename T>
 class TypedTest : public Test {
 };
@@ -3206,11 +3204,7 @@ TYPED_TEST(DISABLED_TypedTest, ShouldNotRun) {
   FAIL() << "Unexpected failure: Disabled typed test should not run.";
 }
 
-#endif  // GTEST_HAS_TYPED_TEST
-
 // Tests that disabled type-parameterized tests aren't run.
-
-#if GTEST_HAS_TYPED_TEST_P
 
 template <typename T>
 class TypedTestP : public Test {
@@ -3241,8 +3235,6 @@ TYPED_TEST_P(DISABLED_TypedTestP, ShouldNotRun) {
 REGISTER_TYPED_TEST_SUITE_P(DISABLED_TypedTestP, ShouldNotRun);
 
 INSTANTIATE_TYPED_TEST_SUITE_P(My, DISABLED_TypedTestP, NumericTypes);
-
-#endif  // GTEST_HAS_TYPED_TEST_P
 
 // Tests that assertion macros evaluate their arguments exactly once.
 

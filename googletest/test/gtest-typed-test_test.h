@@ -33,8 +33,6 @@
 
 #include "gtest/gtest.h"
 
-#if GTEST_HAS_TYPED_TEST_P
-
 using testing::Test;
 
 // For testing that the same type-parameterized test case can be
@@ -59,7 +57,5 @@ TYPED_TEST_P(ContainerTest, InitialSizeIsZero) {
 
 REGISTER_TYPED_TEST_SUITE_P(ContainerTest,
                             CanBeDefaultConstructed, InitialSizeIsZero);
-
-#endif  // GTEST_HAS_TYPED_TEST_P
 
 #endif  // GTEST_TEST_GTEST_TYPED_TEST_TEST_H_
