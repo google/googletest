@@ -1,9 +1,5 @@
 # gMock for Dummies {#GMockForDummies}
 
-go/gmockfordummies
-
-[TOC]
-
 ## What Is gMock?
 
 When you write a prototype or test, often it's not feasible or wise to rely on
@@ -207,8 +203,6 @@ changes in `Foo` much more easily. While this is more work initially, carefully
 choosing the adaptor interface can make your code easier to write and more
 readable (a net win in the long run), as you can choose `FooAdaptor` to fit your
 specific domain much better than `Foo` does.
-
-<!--#include file="includes/g3_wrap_external_api_snippet.md"-->
 
 ## Using Mocks in Tests
 

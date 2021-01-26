@@ -1,11 +1,5 @@
 # gMock Cheat Sheet
 
-go/gmockcheat
-
-[TOC]
-
-<!--#include file="includes/g3_BUILD_rule.md"-->
-
 ## Defining a Mock Class
 
 ### Mocking a Normal Class {#MockClass}
@@ -229,8 +223,6 @@ and the default action will be taken each time.
 
 ## Matchers {#MatcherList}
 
-go/matchers
-
 A **matcher** matches a *single* argument. You can use it inside `ON_CALL()` or
 `EXPECT_CALL()`, or use it to validate a value directly using two macros:
 
@@ -427,10 +419,6 @@ messages, you can use:
 | `WhenDynamicCastTo<T>(m)` | when `argument` is passed through `dynamic_cast<T>()`, it matches matcher `m`. |
 <!-- mdformat on -->
 
-<!--#include file="includes/g3_proto_matchers.md"-->
-
-<!--#include file="includes/g3_absl_status_matcher.md"-->
-
 ### Multi-argument Matchers {#MultiArgMatchers}
 
 Technically, all matchers match a *single* value. A "multi-argument" matcher is
@@ -469,8 +457,6 @@ You can make a matcher from one or more other matchers:
 | `AnyOfArray({m0, m1, ..., mn})`, `AnyOfArray(a_container)`, `AnyOfArray(begin, end)`, `AnyOfArray(array)`, or `AnyOfArray(array, count)` | The same as `AnyOf()` except that the matchers come from an initializer list, STL-style container, iterator range, or C-style array. |
 | `Not(m)` | `argument` doesn't match matcher `m`. |
 <!-- mdformat on -->
-
-<!--#include file="includes/g3_useful_matchers_outsidegmock.md"-->
 
 ### Adapters for Matchers
 
@@ -614,8 +600,6 @@ value, and `foo` by reference.
 
 **Note:** due to technical reasons, `DoDefault()` cannot be used inside a
 composite action - trying to do so will result in a run-time error.
-
-<!--#include file="includes/g3_stubby_actions.md"-->
 
 ### Composite Actions
 
