@@ -1,9 +1,5 @@
 # Googletest Primer
 
-go/gunitprimer
-
-[TOC]
-
 ## Introduction: Why googletest?
 
 *googletest* helps you write better C++ tests.

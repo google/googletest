@@ -149,8 +149,6 @@ choosing the adaptor interface can make your code easier to write and more
 readable (a net win in the long run), as you can choose `FooAdaptor` to fit your
 specific domain much better than `Foo` does.
 
-<!--#include file="includes/g3_wrap_external_api_snippet.md"-->
-
 ## Using Mocks in Tests
 
 Once you have a mock class, using it is easy. The typical work flow is:
