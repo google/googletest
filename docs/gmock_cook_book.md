@@ -3627,6 +3627,8 @@ as adding templates in the right place.
 
 class NotNullMatcher {
  public:
+  using is_gtest_matcher = void;
+
   // To implement a polymorphic matcher, we just need to make MatchAndExplain a
   // template on its first argument.
 
