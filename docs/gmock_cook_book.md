@@ -3618,6 +3618,9 @@ Expected: is divisible by 7
   Actual: 23 (the remainder is 2)
 ```
 
+Tip: for convenience, `MatchAndExplain()` can take a `MatchResultListener*`
+instead of `std::ostream*`.
+
 ### Writing New Polymorphic Matchers
 
 Expanding what we learned above to *polymorphic* matchers is now just as simple

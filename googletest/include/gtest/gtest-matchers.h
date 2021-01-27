@@ -67,6 +67,7 @@ namespace testing {
 //   1. a class FooMatcherMatcher that implements the matcher interface:
 //     using is_gtest_matcher = void;
 //     bool MatchAndExplain(const T&, std::ostream*);
+//       (MatchResultListener* can also be used instead of std::ostream*)
 //     void DescribeTo(std::ostream*);
 //     void DescribeNegationTo(std::ostream*);
 //
