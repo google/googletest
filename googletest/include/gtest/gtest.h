@@ -1616,7 +1616,8 @@ AssertionResult CmpHelper##op_name(const char* expr1, const char* expr2, \
   } else {\
     return CmpHelperOpFailure(expr1, expr2, val1, val2, #op);\
   }\
-}
+}\
+static_assert(true, "Consume semicolon.")
 
 // INTERNAL IMPLEMENTATION - DO NOT USE IN A USER PROGRAM.
 
