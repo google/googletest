@@ -394,13 +394,6 @@ class GTEST_API_ UnitTestOptions {
 
   // Functions for processing the gtest_filter flag.
 
-  // Returns true if and only if the wildcard pattern matches the string.
-  // The first ':' or '\0' character in pattern marks the end of it.
-  //
-  // This recursive algorithm isn't very efficient, but is clear and
-  // works well enough for matching test names, which are short.
-  static bool PatternMatchesString(const char *pattern, const char *str);
-
   // Returns true if and only if the user-specified filter matches the test
   // suite name and the test name.
   static bool FilterMatchesTest(const std::string& test_suite_name,
