@@ -2224,38 +2224,25 @@ random seed and re-shuffle the tests in each iteration.
 googletest can use colors in its terminal output to make it easier to spot the
 important information:
 
-<code>
-...<br/>
-  <font color="green">[----------]</font><font color="black"> 1 test from
-  FooTest</font><br/>
-  <font color="green">[ RUN &nbsp; &nbsp; &nbsp;]</font><font color="black">
-  FooTest.DoesAbc</font><br/>
-  <font color="green">[ &nbsp; &nbsp; &nbsp; OK ]</font><font color="black">
-  FooTest.DoesAbc </font><br/>
-  <font color="green">[----------]</font><font color="black">
-  2 tests from BarTest</font><br/>
-  <font color="green">[ RUN &nbsp; &nbsp; &nbsp;]</font><font color="black">
-  BarTest.HasXyzProperty </font><br/>
-  <font color="green">[ &nbsp; &nbsp; &nbsp; OK ]</font><font color="black">
-  BarTest.HasXyzProperty</font><br/>
-  <font color="green">[ RUN &nbsp; &nbsp; &nbsp;]</font><font color="black">
-  BarTest.ReturnsTrueOnSuccess ... some error messages ...</font><br/>
-  <font color="red">[ &nbsp; FAILED ]</font><font color="black">
-  BarTest.ReturnsTrueOnSuccess ...</font><br/>
-  <font color="green">[==========]</font><font color="black">
-  30 tests from 14 test suites ran.</font><br/>
-  <font color="green">[ &nbsp; PASSED ]</font><font color="black">
-  28 tests.</font><br/>
-  <font color="red">[ &nbsp; FAILED ]</font><font color="black">
-  2 tests, listed below:</font><br/>
-  <font color="red">[ &nbsp; FAILED ]</font><font color="black">
-  BarTest.ReturnsTrueOnSuccess</font><br/>
-  <font color="red">[ &nbsp; FAILED ]</font><font color="black">
-  AnotherTest.DoesXyz<br/>
-<br/>
-  2 FAILED TESTS
-  </font>
-</code>
+<pre>...
+<font color="green">[----------]</font> 1 test from FooTest
+<font color="green">[ RUN      ]</font> FooTest.DoesAbc
+<font color="green">[       OK ]</font> FooTest.DoesAbc
+<font color="green">[----------]</font> 2 tests from BarTest
+<font color="green">[ RUN      ]</font> BarTest.HasXyzProperty
+<font color="green">[       OK ]</font> BarTest.HasXyzProperty
+<font color="green">[ RUN      ]</font> BarTest.ReturnsTrueOnSuccess
+... some error messages ...
+<font color="red">[   FAILED ]</font> BarTest.ReturnsTrueOnSuccess
+...
+<font color="green">[==========]</font> 30 tests from 14 test suites ran.
+<font color="green">[   PASSED ]</font> 28 tests.
+<font color="red">[   FAILED ]</font> 2 tests, listed below:
+<font color="red">[   FAILED ]</font> BarTest.ReturnsTrueOnSuccess
+<font color="red">[   FAILED ]</font> AnotherTest.DoesXyz
+
+ 2 FAILED TESTS
+</pre>
 
 You can set the `GTEST_COLOR` environment variable or the `--gtest_color`
 command line flag to `yes`, `no`, or `auto` (the default) to enable colors,
