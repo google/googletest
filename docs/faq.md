@@ -178,18 +178,6 @@ template argument, and thus doesn't compile in opt mode when `a` contains a call
 to `htonl()`. It is difficult to make `EXPECT_EQ` bypass the `htonl()` bug, as
 the solution must work with different compilers on various platforms.
 
-`htonl()` has some other problems as described in `//util/endian/endian.h`,
-which defines `ghtonl()` to replace it. `ghtonl()` does the same thing `htonl()`
-does, only without its problems. We suggest you to use `ghtonl()` instead of
-`htonl()`, both in your tests and production code.
-
-`//util/endian/endian.h` also defines `ghtons()`, which solves similar problems
-in `htons()`.
-
-Don't forget to add `//util/endian` to the list of dependencies in the `BUILD`
-file wherever `ghtonl()` and `ghtons()` are used. The library consists of a
-single header file and will not bloat your binary.
-
 ## The compiler complains about "undefined references" to some static const member variables, but I did define them in the class body. What's wrong?
 
 If your class has a static data member:
