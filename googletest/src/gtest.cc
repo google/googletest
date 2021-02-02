@@ -646,47 +646,82 @@ std::string UnitTestOptions::GetAbsolutePathToOutputFile() {
   return result.string();
 }
 
-// Returns true if and only if the wildcard pattern matches the string.
-// The first ':' or '\0' character in pattern marks the end of it.
+// Returns true if and only if the wildcard pattern matches the string. Each
+// pattern consists of regular characters, single-character wildcards (?), and
+// multi-character wildcards (*).
 //
-// This recursive algorithm isn't very efficient, but is clear and
-// works well enough for matching test names, which are short.
-bool UnitTestOptions::PatternMatchesString(const char *pattern,
-                                           const char *str) {
-  switch (*pattern) {
-    case '\0':
-    case ':':  // Either ':' or '\0' marks the end of the pattern.
-      return *str == '\0';
-    case '?':  // Matches any single character.
-      return *str != '\0' && PatternMatchesString(pattern + 1, str + 1);
-    case '*':  // Matches any string (possibly empty) of characters.
-      return (*str != '\0' && PatternMatchesString(pattern, str + 1)) ||
-          PatternMatchesString(pattern + 1, str);
-    default:  // Non-special character.  Matches itself.
-      return *pattern == *str &&
-          PatternMatchesString(pattern + 1, str + 1);
+// This function implements a linear-time string globbing algorithm based on
+// https://research.swtch.com/glob.
+static bool PatternMatchesString(const std::string& name_str,
+                                 const char* pattern, const char* pattern_end) {
+  const char* name = name_str.c_str();
+  const char* const name_begin = name;
+  const char* const name_end = name + name_str.size();
+
+  const char* pattern_next = pattern;
+  const char* name_next = name;
+
+  while (pattern < pattern_end || name < name_end) {
+    if (pattern < pattern_end) {
+      switch (*pattern) {
+        default:  // Match an ordinary character.
+          if (name < name_end && *name == *pattern) {
+            ++pattern;
+            ++name;
+            continue;
+          }
+          break;
+        case '?':  // Match any single character.
+          if (name < name_end) {
+            ++pattern;
+            ++name;
+            continue;
+          }
+          break;
+        case '*':
+          // Match zero or more characters. Start by skipping over the wildcard
+          // and matching zero characters from name. If that fails, restart and
+          // match one more character than the last attempt.
+          pattern_next = pattern;
+          name_next = name + 1;
+          ++pattern;
+          continue;
+      }
+    }
+    // Failed to match a character. Restart if possible.
+    if (name_begin < name_next && name_next <= name_end) {
+      pattern = pattern_next;
+      name = name_next;
+      continue;
+    }
+    return false;
   }
+  return true;
 }
 
-bool UnitTestOptions::MatchesFilter(
-    const std::string& name, const char* filter) {
-  const char *cur_pattern = filter;
-  for (;;) {
-    if (PatternMatchesString(cur_pattern, name.c_str())) {
+bool UnitTestOptions::MatchesFilter(const std::string& name_str,
+                                    const char* filter) {
+  // The filter is a list of patterns separated by colons (:).
+  const char* pattern = filter;
+  while (true) {
+    // Find the bounds of this pattern.
+    const char* const next_sep = strchr(pattern, ':');
+    const char* const pattern_end =
+        next_sep != nullptr ? next_sep : pattern + strlen(pattern);
+
+    // Check if this pattern matches name_str.
+    if (PatternMatchesString(name_str, pattern, pattern_end)) {
       return true;
     }
 
-    // Finds the next pattern in the filter.
-    cur_pattern = strchr(cur_pattern, ':');
-
-    // Returns if no more pattern can be found.
-    if (cur_pattern == nullptr) {
+    // Give up on this pattern. However, if we found a pattern separator (:),
+    // advance to the next pattern (skipping over the separator) and restart.
+    if (next_sep == nullptr) {
       return false;
     }
-
-    // Skips the pattern separater (the ':' character).
-    cur_pattern++;
+    pattern = next_sep + 1;
   }
+  return true;
 }
 
 // Returns true if and only if the user-specified filter matches the test
