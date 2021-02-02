@@ -151,8 +151,7 @@ def FuseGMockH(gmock_root, output_dir):
         else:
           m = gtest.INCLUDE_GTEST_FILE_REGEX.match(line)
           if m:
-            # '#include "third_party/googletest/googletest/
-            # include/gtest/foo.h"'.
+            # '#include "gtest/foo.h"'
             # We translate it to "gtest/gtest.h", regardless of what foo is,
             # since all gtest headers are fused into gtest/gtest.h.
 
@@ -188,11 +187,11 @@ def FuseGMockAllCcToFile(gmock_root, output_file):
       for line in fh:
         m = INCLUDE_GMOCK_FILE_REGEX.match(line)
         if m:
-          # '#include "gmock/foo.h"'.
+          # '#include "gmock/foo.h"'
           # We treat it as '#include  "gmock/gmock.h"', as all other gmock
           # headers are being fused into gmock.h and cannot be
-          # included directly.  No need to #include
-          # "third_party/googletest/googlemock/include/gmock/gmock.h"
+          # included directly.  No need to
+          # #include "gmock/gmock.h"
           # more than once.
 
           if GMOCK_H_SEED not in processed_files:
@@ -201,7 +200,7 @@ def FuseGMockAllCcToFile(gmock_root, output_file):
         else:
           m = gtest.INCLUDE_GTEST_FILE_REGEX.match(line)
           if m:
-            # '#include "gtest/..."'.
+            # '#include "gtest/..."'
             # There is no need to #include gtest.h as it has been
             # #included by gtest-all.cc.
 
