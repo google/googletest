@@ -400,6 +400,12 @@ messages, you can use:
 | `Property(property_name, &class::property, m)` | The same as the two-parameter version, but provides a better error message.
 <!-- mdformat on -->
 
+**Notes:**
+
+*   Don't use `Property()` against member functions that you do not own, because
+    taking addresses of functions is fragile and generally not part of the
+    contract of the function.
+
 ### Matching the Result of a Function, Functor, or Callback
 
 <!-- mdformat off(no multiline tables) -->
