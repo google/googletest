@@ -1216,9 +1216,11 @@ For example:
 <!-- mdformat on -->
 
 Note that in `Property(&Foo::baz, ...)`, method `baz()` must take no argument
-and be declared as `const`.
+and be declared as `const`. Don't use `Property()` against member functions that
+you do not own, because taking addresses of functions is fragile and generally
+not part of the contract of the function.
 
-BTW, `Field()` and `Property()` can also match plain pointers to objects. For
+`Field()` and `Property()` can also match plain pointers to objects. For
 instance,
 
 ```cpp
