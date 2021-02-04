@@ -300,44 +300,86 @@ The macros in the `MOCK_METHODn` family differ from `MOCK_METHOD`:
 
 Old macros and their new equivalents:
 
-<a name="table99"></a>
-<table border="1" cellspacing="0" cellpadding="1">
-<tr> <th colspan=2> Simple </th></tr>
-<tr> <td> Old </td> <td> `MOCK_METHOD1(Foo, bool(int))` </td> </tr>
-<tr> <td> New </td> <td> `MOCK_METHOD(bool, Foo, (int))` </td> </tr>
+<table>
+  <tr><th colspan=2>Simple</th></tr>
+  <tr>
+    <td>Old</td>
+    <td><code>MOCK_METHOD1(Foo, bool(int))</code></td>
+  </tr>
+  <tr>
+    <td>New</td>
+    <td><code>MOCK_METHOD(bool, Foo, (int))</code></td>
+  </tr>
 
-<tr> <th colspan=2> Const Method </th></tr> <tr> <td> Old </td> <td>
-`MOCK_CONST_METHOD1(Foo, bool(int))` </td> </tr> <tr> <td> New </td> <td>
-`MOCK_METHOD(bool, Foo, (int), (const))` </td> </tr>
+  <tr><th colspan=2>Const Method</th></tr>
+  <tr>
+    <td>Old</td>
+    <td><code>MOCK_CONST_METHOD1(Foo, bool(int))</code></td>
+  </tr>
+  <tr>
+    <td>New</td>
+    <td><code>MOCK_METHOD(bool, Foo, (int), (const))</code></td>
+  </tr>
 
-<tr> <th colspan=2> Method in a Class Template </th></tr> <tr> <td> Old </td>
-<td> `MOCK_METHOD1_T(Foo, bool(int))` </td> </tr> <tr> <td> New </td> <td>
-`MOCK_METHOD(bool, Foo, (int))` </td> </tr>
+  <tr><th colspan=2>Method in a Class Template</th></tr>
+  <tr>
+    <td>Old</td>
+    <td><code>MOCK_METHOD1_T(Foo, bool(int))</code></td>
+  </tr>
+  <tr>
+    <td>New</td>
+    <td><code>MOCK_METHOD(bool, Foo, (int))</code></td>
+  </tr>
 
-<tr> <th colspan=2> Const Method in a Class Template </th></tr> <tr> <td> Old
-</td> <td> `MOCK_CONST_METHOD1_T(Foo, bool(int))` </td> </tr> <tr> <td> New
-</td> <td> `MOCK_METHOD(bool, Foo, (int), (const))` </td> </tr>
+  <tr><th colspan=2>Const Method in a Class Template</th></tr>
+  <tr>
+    <td>Old</td>
+    <td><code>MOCK_CONST_METHOD1_T(Foo, bool(int))</code></td>
+  </tr>
+  <tr>
+    <td>New</td>
+    <td><code>MOCK_METHOD(bool, Foo, (int), (const))</code></td>
+  </tr>
 
-<tr> <th colspan=2> Method with Call Type </th></tr> <tr> <td> Old </td> <td>
-`MOCK_METHOD1_WITH_CALLTYPE(STDMETHODCALLTYPE, Foo, bool(int))` </td> </tr> <tr>
-<td> New </td> <td> `MOCK_METHOD(bool, Foo, (int),
-(Calltype(STDMETHODCALLTYPE)))` </td> </tr>
+  <tr><th colspan=2>Method with Call Type</th></tr>
+  <tr>
+    <td>Old</td>
+    <td><code>MOCK_METHOD1_WITH_CALLTYPE(STDMETHODCALLTYPE, Foo, bool(int))</code></td>
+  </tr>
+  <tr>
+    <td>New</td>
+    <td><code>MOCK_METHOD(bool, Foo, (int), (Calltype(STDMETHODCALLTYPE)))</code></td>
+  </tr>
 
-<tr> <th colspan=2> Const Method with Call Type </th></tr> <tr> <td> Old</td>
-<td> `MOCK_CONST_METHOD1_WITH_CALLTYPE(STDMETHODCALLTYPE, Foo, bool(int))` </td>
-</tr> <tr> <td> New </td> <td> `MOCK_METHOD(bool, Foo, (int), (const,
-Calltype(STDMETHODCALLTYPE)))` </td> </tr>
+  <tr><th colspan=2>Const Method with Call Type</th></tr>
+  <tr>
+    <td>Old</td>
+    <td><code>MOCK_CONST_METHOD1_WITH_CALLTYPE(STDMETHODCALLTYPE, Foo, bool(int))</code></td>
+  </tr>
+  <tr>
+    <td>New</td>
+    <td><code>MOCK_METHOD(bool, Foo, (int), (const, Calltype(STDMETHODCALLTYPE)))</code></td>
+  </tr>
 
-<tr> <th colspan=2> Method with Call Type in a Class Template </th></tr> <tr>
-<td> Old </td> <td> `MOCK_METHOD1_T_WITH_CALLTYPE(STDMETHODCALLTYPE, Foo,
-bool(int))` </td> </tr> <tr> <td> New </td> <td> `MOCK_METHOD(bool, Foo, (int),
-(Calltype(STDMETHODCALLTYPE)))` </td> </tr>
+  <tr><th colspan=2>Method with Call Type in a Class Template</th></tr>
+  <tr>
+    <td>Old</td>
+    <td><code>MOCK_METHOD1_T_WITH_CALLTYPE(STDMETHODCALLTYPE, Foo, bool(int))</code></td>
+  </tr>
+  <tr>
+    <td>New</td>
+    <td><code>MOCK_METHOD(bool, Foo, (int), (Calltype(STDMETHODCALLTYPE)))</code></td>
+  </tr>
 
-<tr> <th colspan=2> Const Method with Call Type in a Class Template </th></tr>
-<tr> <td> Old </td> <td> `MOCK_CONST_METHOD1_T_WITH_CALLTYPE(STDMETHODCALLTYPE,
-Foo, bool(int))` </td> </tr> <tr> <td> New </td> <td> `MOCK_METHOD(bool, Foo,
-(int), (const, Calltype(STDMETHODCALLTYPE)))` </td> </tr>
-
+  <tr><th colspan=2>Const Method with Call Type in a Class Template</th></tr>
+  <tr>
+    <td>Old</td>
+    <td><code>MOCK_CONST_METHOD1_T_WITH_CALLTYPE(STDMETHODCALLTYPE, Foo, bool(int))</code></td>
+  </tr>
+  <tr>
+    <td>New</td>
+    <td><code>MOCK_METHOD(bool, Foo, (int), (const, Calltype(STDMETHODCALLTYPE)))</code></td>
+  </tr>
 </table>
 
 ### The Nice, the Strict, and the Naggy {#NiceStrictNaggy}
@@ -4081,22 +4123,19 @@ If you are writing a function that returns an `ACTION` object, you'll need to
 know its type. The type depends on the macro used to define the action and the
 parameter types. The rule is relatively simple:
 
+<!-- mdformat off(GitHub does not support multiline tables) -->
+
 | Given Definition              | Expression          | Has Type              |
 | ----------------------------- | ------------------- | --------------------- |
 | `ACTION(Foo)`                 | `Foo()`             | `FooAction`           |
-| `ACTION_TEMPLATE(Foo,`        | `Foo<t1, ...,       | `FooAction<t1, ...,   |
-: `HAS_m_TEMPLATE_PARAMS(...),` : t_m>()`             : t_m>`                 :
-: `AND_0_VALUE_PARAMS())`       :                     :                       :
+| `ACTION_TEMPLATE(Foo, HAS_m_TEMPLATE_PARAMS(...), AND_0_VALUE_PARAMS())` | `Foo<t1, ..., t_m>()` | `FooAction<t1, ..., t_m>` |
 | `ACTION_P(Bar, param)`        | `Bar(int_value)`    | `BarActionP<int>`     |
-| `ACTION_TEMPLATE(Bar,`        | `Bar<t1, ..., t_m>` | `FooActionP<t1, ...,  |
-: `HAS_m_TEMPLATE_PARAMS(...),` : `(int_value)`       : t_m, int>`            :
-: `AND_1_VALUE_PARAMS(p1))`     :                     :                       :
-| `ACTION_P2(Baz, p1, p2)`      | `Baz(bool_value,`   | `BazActionP2<bool,    |
-:                               : `int_value)`        : int>`                 :
-| `ACTION_TEMPLATE(Baz,`        | `Baz<t1, ..., t_m>` | `FooActionP2<t1, ..., |
-: `HAS_m_TEMPLATE_PARAMS(...),` : `(bool_value,`      : t_m,` `bool, int>`    :
-: `AND_2_VALUE_PARAMS(p1, p2))` : `int_value)`        :                       :
+| `ACTION_TEMPLATE(Bar, HAS_m_TEMPLATE_PARAMS(...), AND_1_VALUE_PARAMS(p1))` | `Bar<t1, ..., t_m>(int_value)` | `BarActionP<t1, ..., t_m, int>` |
+| `ACTION_P2(Baz, p1, p2)`      | `Baz(bool_value, int_value)` | `BazActionP2<bool, int>` |
+| `ACTION_TEMPLATE(Baz, HAS_m_TEMPLATE_PARAMS(...), AND_2_VALUE_PARAMS(p1, p2))` | `Baz<t1, ..., t_m>(bool_value, int_value)` | `BazActionP2<t1, ..., t_m, bool, int>` |
 | ...                           | ...                 | ...                   |
+
+<!-- mdformat on -->
 
 Note that we have to pick different suffixes (`Action`, `ActionP`, `ActionP2`,
 and etc) for actions with different numbers of value parameters, or the action
