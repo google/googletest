@@ -132,7 +132,8 @@ def _GenerateMethods(output_lines, source, class_node):
       args = []
       for p in node.parameters:
         arg = _GenerateArg(source[p.start:p.end])
-        args.append(_EscapeForMacro(arg))
+        if arg != 'void':
+          args.append(_EscapeForMacro(arg))
 
       # Create the mock method definition.
       output_lines.extend([

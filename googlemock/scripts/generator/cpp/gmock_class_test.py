@@ -156,7 +156,7 @@ class Foo {
 };
 """
     self.assertEqualIgnoreLeadingWhitespace(
-        'MOCK_METHOD(int, Bar, (void), (override));',
+        'MOCK_METHOD(int, Bar, (), (override));',
         self.GenerateMethodSource(source))
 
   def testStrangeNewlineInParameter(self):
