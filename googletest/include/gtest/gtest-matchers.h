@@ -32,8 +32,8 @@
 // This file implements just enough of the matcher interface to allow
 // EXPECT_DEATH and friends to accept a matcher argument.
 
-#ifndef GTEST_INCLUDE_GTEST_GTEST_MATCHERS_H_
-#define GTEST_INCLUDE_GTEST_GTEST_MATCHERS_H_
+#ifndef THIRD_PARTY_GOOGLETEST_GOOGLETEST_INCLUDE_GTEST_GTEST_MATCHERS_H_
+#define THIRD_PARTY_GOOGLETEST_GOOGLETEST_INCLUDE_GTEST_GTEST_MATCHERS_H_
 
 #include <atomic>
 #include <memory>
@@ -927,4 +927,4 @@ inline internal::NeMatcher<Rhs> Ne(Rhs x) {
 
 GTEST_DISABLE_MSC_WARNINGS_POP_()  //  4251 5046
 
-#endif  // GTEST_INCLUDE_GTEST_GTEST_MATCHERS_H_
+#endif  // THIRD_PARTY_GOOGLETEST_GOOGLETEST_INCLUDE_GTEST_GTEST_MATCHERS_H_
