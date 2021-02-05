@@ -34,8 +34,8 @@
 
 // GOOGLETEST_CM0002 DO NOT DELETE
 
-#ifndef GMOCK_INCLUDE_GMOCK_GMOCK_H_
-#define GMOCK_INCLUDE_GMOCK_GMOCK_H_
+#ifndef GOOGLETEST_GOOGLEMOCK_INCLUDE_GMOCK_GMOCK_H_
+#define GOOGLETEST_GOOGLEMOCK_INCLUDE_GMOCK_GMOCK_H_
 
 // This file implements the following syntax:
 //
@@ -95,4 +95,4 @@ GTEST_API_ void InitGoogleMock();
 
 }  // namespace testing
 
-#endif  // GMOCK_INCLUDE_GMOCK_GMOCK_H_
+#endif  // GOOGLETEST_GOOGLEMOCK_INCLUDE_GMOCK_GMOCK_H_

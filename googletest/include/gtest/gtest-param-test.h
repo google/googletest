@@ -31,9 +31,8 @@
 // in Google C++ Testing and Mocking Framework (Google Test)
 //
 // GOOGLETEST_CM0001 DO NOT DELETE
-#ifndef GTEST_INCLUDE_GTEST_GTEST_PARAM_TEST_H_
-#define GTEST_INCLUDE_GTEST_GTEST_PARAM_TEST_H_
-
+#ifndef GOOGLETEST_INCLUDE_GTEST_GTEST_PARAM_TEST_H_
+#define GOOGLETEST_INCLUDE_GTEST_GTEST_PARAM_TEST_H_
 
 // Value-parameterized tests allow you to test your code with different
 // parameters without writing multiple copies of the same test.
@@ -505,4 +504,4 @@ internal::CartesianProductHolder<Generator...> Combine(const Generator&... g) {
 
 }  // namespace testing
 
-#endif  // GTEST_INCLUDE_GTEST_GTEST_PARAM_TEST_H_
+#endif  // GOOGLETEST_INCLUDE_GTEST_GTEST_PARAM_TEST_H_
