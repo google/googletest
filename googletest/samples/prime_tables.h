@@ -33,8 +33,8 @@
 // prime and determines a next prime number. This interface is used
 // in Google Test samples demonstrating use of parameterized tests.
 
-#ifndef THIRD_PARTY_GOOGLETEST_GOOGLETEST_SAMPLES_PRIME_TABLES_H_
-#define THIRD_PARTY_GOOGLETEST_GOOGLETEST_SAMPLES_PRIME_TABLES_H_
+#ifndef GTEST_SAMPLES_PRIME_TABLES_H_
+#define GTEST_SAMPLES_PRIME_TABLES_H_
 
 #include <algorithm>
 
@@ -123,4 +123,4 @@ class PreCalculatedPrimeTable : public PrimeTable {
   void operator=(const PreCalculatedPrimeTable& rhs);
 };
 
-#endif  // THIRD_PARTY_GOOGLETEST_GOOGLETEST_SAMPLES_PRIME_TABLES_H_
+#endif  // GTEST_SAMPLES_PRIME_TABLES_H_
