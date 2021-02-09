@@ -677,6 +677,10 @@ class UniversalPrinter {
   GTEST_DISABLE_MSC_WARNINGS_POP_()
 };
 
+// Remove any const-qualifiers before passing a type to UniversalPrinter.
+template <typename T>
+class UniversalPrinter<const T> : public UniversalPrinter<T> {};
+
 #if GTEST_INTERNAL_HAS_ANY
 
 // Printer for std::any / absl::any
