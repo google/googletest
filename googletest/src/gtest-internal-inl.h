@@ -31,8 +31,8 @@
 // This file contains purely Google Test's internal implementation.  Please
 // DO NOT #INCLUDE IT IN A USER PROGRAM.
 
-#ifndef GOOGLETEST_SRC_GTEST_INTERNAL_INL_H_
-#define GOOGLETEST_SRC_GTEST_INTERNAL_INL_H_
+#ifndef GTEST_SRC_GTEST_INTERNAL_INL_H_
+#define GTEST_SRC_GTEST_INTERNAL_INL_H_
 
 #ifndef _WIN32_WCE
 # include <errno.h>
@@ -1218,4 +1218,4 @@ class StreamingListener : public EmptyTestEventListener {
 
 GTEST_DISABLE_MSC_WARNINGS_POP_()  //  4251
 
-#endif  // GOOGLETEST_SRC_GTEST_INTERNAL_INL_H_
+#endif  // GTEST_SRC_GTEST_INTERNAL_INL_H_
