@@ -229,6 +229,33 @@ class PathLike {
 }  // namespace foo
 
 namespace testing {
+namespace {
+template <typename T>
+class Wrapper {
+ public:
+  explicit Wrapper(T&& value) : value_(std::forward<T>(value)) {}
+
+  const T& value() const { return value_; }
+
+ private:
+  T value_;
+};
+
+}  // namespace
+
+namespace internal {
+template <typename T>
+class UniversalPrinter<Wrapper<T>> {
+ public:
+  static void Print(const Wrapper<T>& w, ::std::ostream* os) {
+    *os << "Wrapper(";
+    UniversalPrint(w.value(), os);
+    *os << ')';
+  }
+};
+}  // namespace internal
+
+
 namespace gtest_printers_test {
 
 using ::std::deque;
@@ -1665,6 +1692,13 @@ TEST(UniversalPrintTest, WorksForReference) {
   ::std::stringstream ss;
   UniversalPrint(n, &ss);
   EXPECT_EQ("123", ss.str());
+}
+
+TEST(UniversalPrintTest, WorksForPairWithConst) {
+  std::pair<const Wrapper<std::string>, int> p(Wrapper<std::string>("abc"), 1);
+  ::std::stringstream ss;
+  UniversalPrint(p, &ss);
+  EXPECT_EQ("(Wrapper(\"abc\"), 1)", ss.str());
 }
 
 TEST(UniversalPrintTest, WorksForCString) {
