@@ -30,8 +30,8 @@
 //
 // This is part of the unit test for gtest_prod.h.
 
-#ifndef THIRD_PARTY_GOOGLETEST_GOOGLETEST_TEST_PRODUCTION_H_
-#define THIRD_PARTY_GOOGLETEST_GOOGLETEST_TEST_PRODUCTION_H_
+#ifndef GTEST_TEST_PRODUCTION_H_
+#define GTEST_TEST_PRODUCTION_H_
 
 #include "gtest/gtest_prod.h"
 
@@ -51,4 +51,4 @@ class PrivateCode {
   int x_;
 };
 
-#endif  // THIRD_PARTY_GOOGLETEST_GOOGLETEST_TEST_PRODUCTION_H_
+#endif  // GTEST_TEST_PRODUCTION_H_
