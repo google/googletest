@@ -40,8 +40,8 @@
 
 // GOOGLETEST_CM0001 DO NOT DELETE
 
-#ifndef GOOGLETEST_INCLUDE_GTEST_INTERNAL_GTEST_PORT_H_
-#define GOOGLETEST_INCLUDE_GTEST_INTERNAL_GTEST_PORT_H_
+#ifndef GTEST_INCLUDE_GTEST_INTERNAL_GTEST_PORT_H_
+#define GTEST_INCLUDE_GTEST_INTERNAL_GTEST_PORT_H_
 
 // Environment-describing macros
 // -----------------------------
@@ -2368,4 +2368,4 @@ using Variant = ::std::variant<T...>;
 #endif  // __has_include
 #endif  // GTEST_HAS_ABSL
 
-#endif  // GOOGLETEST_INCLUDE_GTEST_INTERNAL_GTEST_PORT_H_
+#endif  // GTEST_INCLUDE_GTEST_INTERNAL_GTEST_PORT_H_
