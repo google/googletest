@@ -8,9 +8,9 @@ object (so it can be used as one), but lets you specify at run time how it will
 be used and what it should do (which methods will be called? in which order? how
 many times? with what arguments? what will they return? etc).
 
-**Note:** It is easy to confuse the term *fake objects* with mock objects. Fakes
-and mocks actually mean very different things in the Test-Driven Development
-(TDD) community:
+It is easy to confuse the term *fake objects* with mock objects. Fakes and mocks
+actually mean very different things in the Test-Driven Development (TDD)
+community:
 
 *   **Fake** objects have working implementations, but usually take some
     shortcut (perhaps to make the operations less expensive), which makes them
@@ -51,9 +51,9 @@ them fast and reliable, using mocks manually in C++ is *hard*:
     one.
 
 In contrast, Java and Python programmers have some fine mock frameworks (jMock,
-EasyMock, [Mox](http://wtf/mox), etc), which automate the creation of mocks. As
-a result, mocking is a proven effective technique and widely adopted practice in
-those communities. Having the right tool absolutely makes the difference.
+EasyMock, etc), which automate the creation of mocks. As a result, mocking is a
+proven effective technique and widely adopted practice in those communities.
+Having the right tool absolutely makes the difference.
 
 gMock was built to help C++ programmers. It was inspired by jMock and EasyMock,
 but designed with C++'s specifics in mind. It is your friend if any of the
@@ -335,7 +335,7 @@ will return 100 the first time, 150 the second time, and then 200 every time.
 Some people like to call this style of syntax a Domain-Specific Language (DSL).
 
 **Note:** Why do we use a macro to do this? Well it serves two purposes: first
-it makes expectations easily identifiable (either by `gsearch` or by a human
+it makes expectations easily identifiable (either by `grep` or by a human
 reader), and second it allows gMock to include the source file location of a
 failed expectation in messages, making debugging easier.
 
