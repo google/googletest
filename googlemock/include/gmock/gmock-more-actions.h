@@ -292,7 +292,7 @@
 
 // Defines the copy constructor
 #define GMOCK_INTERNAL_DEFN_COPY_AND_0_VALUE_PARAMS() \
-    noexcept {}  // Avoid https://gcc.gnu.org/bugzilla/show_bug.cgi?id=82134
+    {}  // Avoid https://gcc.gnu.org/bugzilla/show_bug.cgi?id=82134
 #define GMOCK_INTERNAL_DEFN_COPY_AND_1_VALUE_PARAMS(...) = default;
 #define GMOCK_INTERNAL_DEFN_COPY_AND_2_VALUE_PARAMS(...) = default;
 #define GMOCK_INTERNAL_DEFN_COPY_AND_3_VALUE_PARAMS(...) = default;
@@ -437,10 +437,10 @@
                     : impl_(std::make_shared<gmock_Impl>(                      \
                                 GMOCK_INTERNAL_LIST_##value_params)) { })      \
     GMOCK_ACTION_CLASS_(name, value_params)(                                   \
-        const GMOCK_ACTION_CLASS_(name, value_params)&)                        \
+        const GMOCK_ACTION_CLASS_(name, value_params)&) noexcept               \
         GMOCK_INTERNAL_DEFN_COPY_##value_params                                \
     GMOCK_ACTION_CLASS_(name, value_params)(                                   \
-        GMOCK_ACTION_CLASS_(name, value_params)&&)                             \
+        GMOCK_ACTION_CLASS_(name, value_params)&&) noexcept                    \
         GMOCK_INTERNAL_DEFN_COPY_##value_params                                \
     template <typename F>                                                      \
     operator ::testing::Action<F>() const {                                    \
