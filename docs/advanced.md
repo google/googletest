@@ -1798,8 +1798,6 @@ For technical reasons, there are some caveats:
 3.  `statement` in `EXPECT_FATAL_FAILURE{_ON_ALL_THREADS}()` cannot return a
     value.
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 ## Registering tests programmatically
 
 The `TEST` macros handle the vast majority of all use cases, but there are few
@@ -2139,9 +2137,9 @@ NOTE: This feature should only be used for temporary pain-relief. You still have
 to fix the disabled tests at a later date. As a reminder, googletest will print
 a banner warning you if a test program contains any disabled tests.
 
-TIP: You can easily count the number of disabled tests you have using `gsearch`
-and/or `grep`. This number can be used as a metric for improving your test
-quality.
+TIP: You can easily count the number of disabled tests you have using
+`grep`. This number can be used as a metric for
+improving your test quality.
 
 #### Temporarily Enabling Disabled Tests
 

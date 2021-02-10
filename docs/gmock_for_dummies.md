@@ -280,7 +280,7 @@ will return 100 the first time, 150 the second time, and then 200 every time.
 Some people like to call this style of syntax a Domain-Specific Language (DSL).
 
 **Note:** Why do we use a macro to do this? Well it serves two purposes: first
-it makes expectations easily identifiable (either by `gsearch` or by a human
+it makes expectations easily identifiable (either by `grep` or by a human
 reader), and second it allows gMock to include the source file location of a
 failed expectation in messages, making debugging easier.
 
