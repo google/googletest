@@ -33,8 +33,8 @@
 // Implements a family of generic predicate assertion macros.
 // GOOGLETEST_CM0001 DO NOT DELETE
 
-#ifndef GTEST_INCLUDE_GTEST_GTEST_PRED_IMPL_H_
-#define GTEST_INCLUDE_GTEST_GTEST_PRED_IMPL_H_
+#ifndef GOOGLETEST_INCLUDE_GTEST_GTEST_PRED_IMPL_H_
+#define GOOGLETEST_INCLUDE_GTEST_GTEST_PRED_IMPL_H_
 
 #include "gtest/gtest.h"
 
@@ -356,4 +356,4 @@ AssertionResult AssertPred5Helper(const char* pred_text,
 
 }  // namespace testing
 
-#endif  // GTEST_INCLUDE_GTEST_GTEST_PRED_IMPL_H_
+#endif  // GOOGLETEST_INCLUDE_GTEST_GTEST_PRED_IMPL_H_

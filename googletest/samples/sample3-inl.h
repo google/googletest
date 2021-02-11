@@ -29,8 +29,8 @@
 
 // A sample program demonstrating using Google C++ testing framework.
 
-#ifndef GTEST_SAMPLES_SAMPLE3_INL_H_
-#define GTEST_SAMPLES_SAMPLE3_INL_H_
+#ifndef GOOGLETEST_SAMPLES_SAMPLE3_INL_H_
+#define GOOGLETEST_SAMPLES_SAMPLE3_INL_H_
 
 #include <stddef.h>
 
@@ -169,4 +169,4 @@ class Queue {
   const Queue& operator = (const Queue&);
 };
 
-#endif  // GTEST_SAMPLES_SAMPLE3_INL_H_
+#endif  // GOOGLETEST_SAMPLES_SAMPLE3_INL_H_
