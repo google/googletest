@@ -97,8 +97,8 @@
 
 // GOOGLETEST_CM0001 DO NOT DELETE
 
-#ifndef GTEST_INCLUDE_GTEST_GTEST_PRINTERS_H_
-#define GTEST_INCLUDE_GTEST_GTEST_PRINTERS_H_
+#ifndef GOOGLETEST_INCLUDE_GTEST_GTEST_PRINTERS_H_
+#define GOOGLETEST_INCLUDE_GTEST_GTEST_PRINTERS_H_
 
 #include <functional>
 #include <memory>
@@ -952,4 +952,4 @@ template <typename T>
 // declarations from this file.
 #include "gtest/internal/custom/gtest-printers.h"
 
-#endif  // GTEST_INCLUDE_GTEST_GTEST_PRINTERS_H_
+#endif  // GOOGLETEST_INCLUDE_GTEST_GTEST_PRINTERS_H_
