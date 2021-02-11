@@ -66,13 +66,11 @@ deprecated and refactored away.
 
 So please be aware of the different definitions of the terms:
 
-<!-- mdformat off(github rendering does not support multiline tables) -->
 
 Meaning                                                                              | googletest Term         | [ISTQB](http://www.istqb.org/) Term
 :----------------------------------------------------------------------------------- | :---------------------- | :----------------------------------
 Exercise a particular program path with specific input values and verify the results | [TEST()](#simple-tests) | [Test Case][istqb test case]
 
-<!-- mdformat on -->
 
 [istqb test case]: http://glossary.istqb.org/en/search/test%20case
 [istqb test suite]: http://glossary.istqb.org/en/search/test%20suite
@@ -218,7 +216,6 @@ as `ASSERT_EQ(expected, actual)`, so lots of existing code uses this order. Now
 The assertions in this group compare two **C strings**. If you want to compare
 two `string` objects, use `EXPECT_EQ`, `EXPECT_NE`, and etc instead.
 
-<!-- mdformat off(github rendering does not support multiline tables) -->
 
 | Fatal assertion                | Nonfatal assertion             | Verifies                                                 |
 | --------------------------     | ------------------------------ | -------------------------------------------------------- |
@@ -227,7 +224,6 @@ two `string` objects, use `EXPECT_EQ`, `EXPECT_NE`, and etc instead.
 | `ASSERT_STRCASEEQ(str1,str2);` | `EXPECT_STRCASEEQ(str1,str2);` | the two C strings have the same content, ignoring case   |
 | `ASSERT_STRCASENE(str1,str2);` | `EXPECT_STRCASENE(str1,str2);` | the two C strings have different contents, ignoring case |
 
-<!-- mdformat on -->
 
 Note that "CASE" in an assertion name means that case is ignored. A `NULL`
 pointer and an empty string are considered *different*.

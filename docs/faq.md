@@ -265,7 +265,7 @@ If necessary, you can continue to derive test fixtures from a derived fixture.
 googletest has no limit on how deep the hierarchy can be.
 
 For a complete example using derived test fixtures, see
-[sample5_unittest.cc](../googletest/samples/sample5_unittest.cc).
+[sample5_unittest.cc](https://github.com/google/googletest/blob/master/googletest/samples/sample5_unittest.cc).
 
 ## My compiler complains "void value not ignored as it ought to be." What does this mean?
 
@@ -670,7 +670,7 @@ there is an `std::ostream& operator<<(std::ostream&, const FooType&)` function
 defined such that we can print a value of `FooType`.
 
 In addition, if `FooType` is declared in a name space, the `<<` operator also
-needs to be defined in the *same* name space. See https://abseil.io/tips/49 for details.
+needs to be defined in the *same* name space. See abseil.io/tips/49 for details.
 
 ## How do I suppress the memory leak messages on Windows?
 
