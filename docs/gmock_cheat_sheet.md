@@ -226,12 +226,10 @@ and the default action will be taken each time.
 A **matcher** matches a *single* argument. You can use it inside `ON_CALL()` or
 `EXPECT_CALL()`, or use it to validate a value directly using two macros:
 
-<!-- mdformat off(github rendering does not support multiline tables) -->
 | Macro                                | Description                           |
 | :----------------------------------- | :------------------------------------ |
 | `EXPECT_THAT(actual_value, matcher)` | Asserts that `actual_value` matches `matcher`. |
 | `ASSERT_THAT(actual_value, matcher)` | The same as `EXPECT_THAT(actual_value, matcher)`, except that it generates a **fatal** failure. |
-<!-- mdformat on -->
 
 **Note:** Although equality matching via `EXPECT_THAT(actual_value,
 expected_value)` is supported, prefer to make the comparison explicit via
@@ -252,7 +250,6 @@ Matcher                     | Description
 
 ### Generic Comparison
 
-<!-- mdformat off(no multiline tables) -->
 | Matcher                | Description                                         |
 | :--------------------- | :-------------------------------------------------- |
 | `Eq(value)` or `value` | `argument == value`                                 |
@@ -269,7 +266,6 @@ Matcher                     | Description
 | `VariantWith<T>(m)`    | `argument` is `variant<>` that holds the alternative of type T with a value matching `m`. |
 | `Ref(variable)`        | `argument` is a reference to `variable`.            |
 | `TypedEq<type>(value)` | `argument` has type `type` and is equal to `value`. You may need to use this instead of `Eq(value)` when the mock function is overloaded. |
-<!-- mdformat on -->
 
 Except `Ref()`, these matchers make a *copy* of `value` in case it's modified or
 destructed later. If the compiler complains that `value` doesn't have a public
@@ -285,7 +281,6 @@ Boolean. In other cases, you can use the basic
 
 ### Floating-Point Matchers {#FpMatchers}
 
-<!-- mdformat off(no multiline tables) -->
 | Matcher                          | Description                        |
 | :------------------------------- | :--------------------------------- |
 | `DoubleEq(a_double)`             | `argument` is a `double` value approximately equal to `a_double`, treating two NaNs as unequal. |
@@ -293,7 +288,6 @@ Boolean. In other cases, you can use the basic
 | `NanSensitiveDoubleEq(a_double)` | `argument` is a `double` value approximately equal to `a_double`, treating two NaNs as equal. |
 | `NanSensitiveFloatEq(a_float)`   | `argument` is a `float` value approximately equal to `a_float`, treating two NaNs as equal. |
 | `IsNan()`   | `argument` is any floating-point type with a NaN value. |
-<!-- mdformat on -->
 
 The above matchers use ULP-based comparison (the same as used in googletest).
 They automatically pick a reasonable error bound based on the absolute value of
@@ -302,20 +296,17 @@ which requires comparing two NaNs for equality to return false. The
 `NanSensitive*` version instead treats two NaNs as equal, which is often what a
 user wants.
 
-<!-- mdformat off(no multiline tables) -->
 | Matcher                                           | Description              |
 | :------------------------------------------------ | :----------------------- |
 | `DoubleNear(a_double, max_abs_error)`             | `argument` is a `double` value close to `a_double` (absolute error <= `max_abs_error`), treating two NaNs as unequal. |
 | `FloatNear(a_float, max_abs_error)`               | `argument` is a `float` value close to `a_float` (absolute error <= `max_abs_error`), treating two NaNs as unequal. |
 | `NanSensitiveDoubleNear(a_double, max_abs_error)` | `argument` is a `double` value close to `a_double` (absolute error <= `max_abs_error`), treating two NaNs as equal. |
 | `NanSensitiveFloatNear(a_float, max_abs_error)`   | `argument` is a `float` value close to `a_float` (absolute error <= `max_abs_error`), treating two NaNs as equal. |
-<!-- mdformat on -->
 
 ### String Matchers
 
 The `argument` can be either a C string or a C++ string object:
 
-<!-- mdformat off(no multiline tables) -->
 | Matcher                 | Description                                        |
 | :---------------------- | :------------------------------------------------- |
 | `ContainsRegex(string)` | `argument` matches the given regular expression.   |
@@ -328,7 +319,6 @@ The `argument` can be either a C string or a C++ string object:
 | `StrCaseNe(string)`     | `argument` is not equal to `string`, ignoring case. |
 | `StrEq(string)`         | `argument` is equal to `string`.                   |
 | `StrNe(string)`         | `argument` is not equal to `string`.               |
-<!-- mdformat on -->
 
 `ContainsRegex()` and `MatchesRegex()` take ownership of the `RE` object. They
 use the regular expression syntax defined
@@ -342,7 +332,6 @@ or simply `expected_container` to match a container exactly. If you want to
 write the elements in-line, match them more flexibly, or get more informative
 messages, you can use:
 
-<!-- mdformat off(no multiline tables) -->
 | Matcher                                   | Description                      |
 | :---------------------------------------- | :------------------------------- |
 | `BeginEndDistanceIs(m)` | `argument` is a container whose `begin()` and `end()` iterators are separated by a number of increments matching `m`. E.g. `BeginEndDistanceIs(2)` or `BeginEndDistanceIs(Lt(2))`. For containers that define a `size()` method, `SizeIs(m)` may be more efficient. |
@@ -361,7 +350,6 @@ messages, you can use:
 | `UnorderedPointwise(m, container)`, `UnorderedPointwise(m, {e0, e1, ..., en})` | Like `Pointwise(m, container)`, but ignores the order of elements. |
 | `WhenSorted(m)` | When `argument` is sorted using the `<` operator, it matches container matcher `m`. E.g. `WhenSorted(ElementsAre(1, 2, 3))` verifies that `argument` contains elements 1, 2, and 3, ignoring order. |
 | `WhenSortedBy(comparator, m)` | The same as `WhenSorted(m)`, except that the given comparator instead of `<` is used to sort `argument`. E.g. `WhenSortedBy(std::greater(), ElementsAre(3, 2, 1))`. |
-<!-- mdformat on -->
 
 **Notes:**
 
@@ -388,7 +376,6 @@ messages, you can use:
 
 ### Member Matchers
 
-<!-- mdformat off(no multiline tables) -->
 | Matcher                         | Description                                |
 | :------------------------------ | :----------------------------------------- |
 | `Field(&class::field, m)`       | `argument.field` (or `argument->field` when `argument` is a plain pointer) matches matcher `m`, where `argument` is an object of type _class_. |
@@ -398,7 +385,6 @@ messages, you can use:
 | `FieldsAre(m...)`                   | `argument` is a compatible object where each field matches piecewise with `m...`. A compatible object is any that supports the `std::tuple_size<Obj>`+`get<I>(obj)` protocol. In C++17 and up this also supports types compatible with structured bindings, like aggregates. |
 | `Property(&class::property, m)` | `argument.property()` (or `argument->property()` when `argument` is a plain pointer) matches matcher `m`, where `argument` is an object of type _class_. The method `property()` must take no argument and be declared as `const`. |
 | `Property(property_name, &class::property, m)` | The same as the two-parameter version, but provides a better error message.
-<!-- mdformat on -->
 
 **Notes:**
 
@@ -408,22 +394,18 @@ messages, you can use:
 
 ### Matching the Result of a Function, Functor, or Callback
 
-<!-- mdformat off(no multiline tables) -->
 | Matcher          | Description                                       |
 | :--------------- | :------------------------------------------------ |
 | `ResultOf(f, m)` | `f(argument)` matches matcher `m`, where `f` is a function or functor. |
-<!-- mdformat on -->
 
 ### Pointer Matchers
 
-<!-- mdformat off(no multiline tables) -->
 | Matcher                   | Description                                     |
 | :------------------------ | :---------------------------------------------- |
 | `Address(m)`              | the result of `std::addressof(argument)` matches `m`. |
 | `Pointee(m)`              | `argument` (either a smart pointer or a raw pointer) points to a value that matches matcher `m`. |
 | `Pointer(m)`              | `argument` (either a smart pointer or a raw pointer) contains a pointer that matches `m`. `m` will match against the raw pointer regardless of the type of `argument`. |
 | `WhenDynamicCastTo<T>(m)` | when `argument` is passed through `dynamic_cast<T>()`, it matches matcher `m`. |
-<!-- mdformat on -->
 
 ### Multi-argument Matchers {#MultiArgMatchers}
 
@@ -443,18 +425,15 @@ Matcher | Description
 You can use the following selectors to pick a subset of the arguments (or
 reorder them) to participate in the matching:
 
-<!-- mdformat off(no multiline tables) -->
 | Matcher                    | Description                                     |
 | :------------------------- | :---------------------------------------------- |
 | `AllArgs(m)`               | Equivalent to `m`. Useful as syntactic sugar in `.With(AllArgs(m))`. |
 | `Args<N1, N2, ..., Nk>(m)` | The tuple of the `k` selected (using 0-based indices) arguments matches `m`, e.g. `Args<1, 2>(Eq())`. |
-<!-- mdformat on -->
 
 ### Composite Matchers
 
 You can make a matcher from one or more other matchers:
 
-<!-- mdformat off(no multiline tables) -->
 | Matcher                          | Description                             |
 | :------------------------------- | :-------------------------------------- |
 | `AllOf(m1, m2, ..., mn)` | `argument` matches all of the matchers `m1` to `mn`. |
@@ -462,40 +441,33 @@ You can make a matcher from one or more other matchers:
 | `AnyOf(m1, m2, ..., mn)` | `argument` matches at least one of the matchers `m1` to `mn`. |
 | `AnyOfArray({m0, m1, ..., mn})`, `AnyOfArray(a_container)`, `AnyOfArray(begin, end)`, `AnyOfArray(array)`, or `AnyOfArray(array, count)` | The same as `AnyOf()` except that the matchers come from an initializer list, STL-style container, iterator range, or C-style array. |
 | `Not(m)` | `argument` doesn't match matcher `m`. |
-<!-- mdformat on -->
 
 ### Adapters for Matchers
 
-<!-- mdformat off(no multiline tables) -->
 | Matcher                 | Description                           |
 | :---------------------- | :------------------------------------ |
 | `MatcherCast<T>(m)`     | casts matcher `m` to type `Matcher<T>`. |
 | `SafeMatcherCast<T>(m)` | [safely casts](gmock_cook_book.md#casting-matchers) matcher `m` to type `Matcher<T>`. |
 | `Truly(predicate)`      | `predicate(argument)` returns something considered by C++ to be true, where `predicate` is a function or functor. |
-<!-- mdformat on -->
 
 `AddressSatisfies(callback)` and `Truly(callback)` take ownership of `callback`,
 which must be a permanent callback.
 
 ### Using Matchers as Predicates {#MatchersAsPredicatesCheat}
 
-<!-- mdformat off(no multiline tables) -->
 | Matcher                       | Description                                 |
 | :---------------------------- | :------------------------------------------ |
 | `Matches(m)(value)` | evaluates to `true` if `value` matches `m`. You can use `Matches(m)` alone as a unary functor. |
 | `ExplainMatchResult(m, value, result_listener)` | evaluates to `true` if `value` matches `m`, explaining the result to `result_listener`. |
 | `Value(value, m)` | evaluates to `true` if `value` matches `m`. |
-<!-- mdformat on -->
 
 ### Defining Matchers
 
-<!-- mdformat off(no multiline tables) -->
 | Matcher                              | Description                           |
 | :----------------------------------- | :------------------------------------ |
 | `MATCHER(IsEven, "") { return (arg % 2) == 0; }` | Defines a matcher `IsEven()` to match an even number. |
 | `MATCHER_P(IsDivisibleBy, n, "") { *result_listener << "where the remainder is " << (arg % n); return (arg % n) == 0; }` | Defines a matcher `IsDivisibleBy(n)` to match a number divisible by `n`. |
 | `MATCHER_P2(IsBetween, a, b, absl::StrCat(negation ? "isn't" : "is", " between ", PrintToString(a), " and ", PrintToString(b))) { return a <= arg && arg <= b; }` | Defines a matcher `IsBetween(a, b)` to match a value in the range [`a`, `b`]. |
-<!-- mdformat on -->
 
 **Notes:**
 
@@ -512,7 +484,6 @@ which must be a permanent callback.
 
 ### Returning a Value
 
-<!-- mdformat off(no multiline tables) -->
 |                                   |                                               |
 | :-------------------------------- | :-------------------------------------------- |
 | `Return()`                        | Return from a `void` mock function.           |
@@ -524,11 +495,9 @@ which must be a permanent callback.
 | `ReturnRef(variable)`             | Return a reference to `variable`.             |
 | `ReturnRefOfCopy(value)`          | Return a reference to a copy of `value`; the  copy lives as long as the action. |
 | `ReturnRoundRobin({a1, ..., ak})` | Each call will return the next `ai` in the list, starting at the beginning when the end of the list is reached. |
-<!-- mdformat on -->
 
 ### Side Effects
 
-<!-- mdformat off(no multiline tables) -->
 |                                    |                                         |
 | :--------------------------------- | :-------------------------------------- |
 | `Assign(&variable, value)` | Assign `value` to variable. |
@@ -541,14 +510,12 @@ which must be a permanent callback.
 | `SetArrayArgument<N>(first, last)` | Copies the elements in source range [`first`, `last`) to the array pointed to by the `N`-th (0-based) argument, which can be either a pointer or an iterator. The action does not take ownership of the elements in the source range. |
 | `SetErrnoAndReturn(error, value)` | Set `errno` to `error` and return `value`. |
 | `Throw(exception)` | Throws the given exception, which can be any copyable value. Available since v1.1.0. |
-<!-- mdformat on -->
 
 ### Using a Function, Functor, or Lambda as an Action
 
 In the following, by "callable" we mean a free function, `std::function`,
 functor, or lambda.
 
-<!-- mdformat off(no multiline tables) -->
 |                                     |                                        |
 | :---------------------------------- | :------------------------------------- |
 | `f` | Invoke f with the arguments passed to the mock function, where f is a callable. |
@@ -557,7 +524,6 @@ functor, or lambda.
 | `InvokeWithoutArgs(f)` | Invoke `f`, which can be a global/static function or a functor. `f` must take no arguments. |
 | `InvokeWithoutArgs(object_pointer, &class::method)` | Invoke the method on the object, which takes no arguments. |
 | `InvokeArgument<N>(arg1, arg2, ..., argk)` | Invoke the mock function's `N`-th (0-based) argument, which must be a function or a functor, with the `k` arguments. |
-<!-- mdformat on -->
 
 The return value of the invoked function is used as the return value of the
 action.
@@ -598,18 +564,15 @@ value, and `foo` by reference.
 
 ### Default Action
 
-<!-- mdformat off(no multiline tables) -->
 | Matcher       | Description                                            |
 | :------------ | :----------------------------------------------------- |
 | `DoDefault()` | Do the default action (specified by `ON_CALL()` or the built-in one). |
-<!-- mdformat on -->
 
 **Note:** due to technical reasons, `DoDefault()` cannot be used inside a
 composite action - trying to do so will result in a run-time error.
 
 ### Composite Actions
 
-<!-- mdformat off(no multiline tables) -->
 |                                |                                             |
 | :----------------------------- | :------------------------------------------ |
 | `DoAll(a1, a2, ..., an)`       | Do all actions `a1` to `an` and return the result of `an` in each invocation. The first `n - 1` sub-actions must return void and will receive a  readonly view of the arguments. |
@@ -617,17 +580,14 @@ composite action - trying to do so will result in a run-time error.
 | `WithArg<N>(a)`                | Pass the `N`-th (0-based) argument of the mock function to action `a` and perform it. |
 | `WithArgs<N1, N2, ..., Nk>(a)` | Pass the selected (0-based) arguments of the mock function to action `a` and perform it. |
 | `WithoutArgs(a)`               | Perform action `a` without any arguments. |
-<!-- mdformat on -->
 
 ### Defining Actions
 
-<!-- mdformat off(no multiline tables) -->
 |                                    |                                         |
 | :--------------------------------- | :-------------------------------------- |
 | `ACTION(Sum) { return arg0 + arg1; }` | Defines an action `Sum()` to return the sum of the mock function's argument #0 and #1. |
 | `ACTION_P(Plus, n) { return arg0 + n; }` | Defines an action `Plus(n)` to return the sum of the mock function's argument #0 and `n`. |
 | `ACTION_Pk(Foo, p1, ..., pk) { statements; }` | Defines a parameterized action `Foo(p1, ..., pk)` to execute the given `statements`. |
-<!-- mdformat on -->
 
 The `ACTION*` macros cannot be used inside a function or class.
 
@@ -636,7 +596,6 @@ The `ACTION*` macros cannot be used inside a function or class.
 These are used in `Times()` to specify how many times a mock function will be
 called:
 
-<!-- mdformat off(no multiline tables) -->
 |                   |                                                        |
 | :---------------- | :----------------------------------------------------- |
 | `AnyNumber()`     | The function can be called any number of times.        |
@@ -644,7 +603,6 @@ called:
 | `AtMost(n)`       | The call is expected at most `n` times.                |
 | `Between(m, n)`   | The call is expected between `m` and `n` (inclusive) times. |
 | `Exactly(n) or n` | The call is expected exactly `n` times. In particular, the call should never happen when `n` is 0. |
-<!-- mdformat on -->
 
 ## Expectation Order
 
@@ -770,9 +728,7 @@ it.
 
 ## Flags
 
-<!-- mdformat off(no multiline tables) -->
 | Flag                           | Description                               |
 | :----------------------------- | :---------------------------------------- |
 | `--gmock_catch_leaked_mocks=0` | Don't report leaked mock objects as failures. |
 | `--gmock_verbose=LEVEL` | Sets the default verbosity level (`info`, `warning`, or `error`) of Google Mock messages. |
-<!-- mdformat on -->
