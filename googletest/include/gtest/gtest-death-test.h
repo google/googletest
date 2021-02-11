@@ -35,8 +35,8 @@
 // directly.
 // GOOGLETEST_CM0001 DO NOT DELETE
 
-#ifndef GTEST_INCLUDE_GTEST_GTEST_DEATH_TEST_H_
-#define GTEST_INCLUDE_GTEST_GTEST_DEATH_TEST_H_
+#ifndef GOOGLETEST_INCLUDE_GTEST_GTEST_DEATH_TEST_H_
+#define GOOGLETEST_INCLUDE_GTEST_GTEST_DEATH_TEST_H_
 
 #include "gtest/internal/gtest-death-test-internal.h"
 
@@ -339,4 +339,4 @@ class GTEST_API_ KilledBySignal {
 
 }  // namespace testing
 
-#endif  // GTEST_INCLUDE_GTEST_GTEST_DEATH_TEST_H_
+#endif  // GOOGLETEST_INCLUDE_GTEST_GTEST_DEATH_TEST_H_

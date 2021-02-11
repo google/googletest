@@ -112,8 +112,8 @@
 // is defined as LinkTest1 in gmock_link_test.cc and as LinkTest2 in
 // gmock_link2_test.cc to avoid producing linker errors.
 
-#ifndef GMOCK_TEST_GMOCK_LINK_TEST_H_
-#define GMOCK_TEST_GMOCK_LINK_TEST_H_
+#ifndef GOOGLEMOCK_TEST_GMOCK_LINK_TEST_H_
+#define GOOGLEMOCK_TEST_GMOCK_LINK_TEST_H_
 
 #include "gmock/gmock.h"
 
@@ -687,4 +687,4 @@ TEST(LinkTest, TestMatcherCast) {
   EXPECT_TRUE(m.Matches(nullptr));
 }
 
-#endif  // GMOCK_TEST_GMOCK_LINK_TEST_H_
+#endif  // GOOGLEMOCK_TEST_GMOCK_LINK_TEST_H_
