@@ -145,4 +145,4 @@ $ pkg-config --libs gtest
 
 which contains the correct sysroot now. For a more comprehensive guide to also
 including `${CHOST}` in build system calls, see the excellent tutorial by Diego
-Elio Pettenò: https://autotools.io/pkgconfig/cross-compiling.html
+Elio Pettenò: <https://autotools.io/pkgconfig/cross-compiling.html>
