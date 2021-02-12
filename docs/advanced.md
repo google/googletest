@@ -1489,12 +1489,12 @@ INSTANTIATE_TEST_SUITE_P(
     MyGroup, MyTestSuite,
     testing::Combine(
         testing::Values(MyType::VALUE_0, MyType::VALUE_1),
-        testing::ValuesIn("", "")),
+        testing::Values("A", "B")),
     [](const testing::TestParamInfo<MyTestSuite::ParamType>& info) {
       std::string name = absl::StrCat(
-          std::get<0>(info.param) == MY_FOO ? "Foo" : "Bar", "_",
+          std::get<0>(info.param) == MY_FOO ? "Foo" : "Bar",
           std::get<1>(info.param));
-      absl::c_replace_if(name, [](char c) { return !std::isalnum(c); }, '_');
+      absl::c_replace_if(name, [](char c) { return !std::isalnum(c); }, '');
       return name;
     });
 ```
