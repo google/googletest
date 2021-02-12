@@ -1452,6 +1452,8 @@ using ::testing::ElementsAreArray;
 
 Use `Pair` when comparing maps or other associative containers.
 
+{% raw %}
+
 ```cpp
 using testing::ElementsAre;
 using testing::Pair;
@@ -1459,6 +1461,8 @@ using testing::Pair;
   std::map<string, int> m = {{"a", 1}, {"b", 2}, {"c", 3}};
   EXPECT_THAT(m, ElementsAre(Pair("a", 1), Pair("b", 2), Pair("c", 3)));
 ```
+
+{% endraw %}
 
 **Tips:**
 
@@ -2244,7 +2248,7 @@ former, and the former's return type can be implicitly converted to that of the
 latter. So, you can invoke something whose type is *not* exactly the same as the
 mock function, as long as it's safe to do so - nice, huh?
 
-**`Note:`{.escaped}**
+Note that:
 
 *   The action takes ownership of the callback and will delete it when the
     action itself is destructed.
@@ -2330,7 +2334,7 @@ bool Job2(int n, char c) { ... }
   foo.ComplexJob(20);  // Invokes Job2(5, 'a').
 ```
 
-**`Note:`{.escaped}**
+Note that:
 
 *   The action takes ownership of the callback and will delete it when the
     action itself is destructed.
@@ -2875,8 +2879,8 @@ work with non-copyable objects; you'll have to use functors instead.
 #### Legacy workarounds for move-only types {#LegacyMoveOnly}
 
 Support for move-only function arguments was only introduced to gMock in April
-2017. In older code, you may encounter the following workaround for the lack of
-this feature (it is no longer necessary - we're including it just for
+of 2017. In older code, you may encounter the following workaround for the lack
+of this feature (it is no longer necessary - we're including it just for
 reference):
 
 ```cpp
