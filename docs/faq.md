@@ -580,8 +580,6 @@ TEST(MyDeathTest, CompoundStatement) {
 }
 ```
 
-gtest-death-test_test.cc contains more examples if you are interested.
-
 ## I have a fixture class `FooTest`, but `TEST_F(FooTest, Bar)` gives me error ``"no matching function for call to `FooTest::FooTest()'"``. Why?
 
 Googletest needs to be able to create objects of your test fixture class, so it
@@ -663,14 +661,15 @@ break the death test (e.g. by changing the regex pattern it is expected to
 match). Admittedly, this is a hack. We'll consider a more permanent solution
 after the fork-and-exec-style death tests are implemented.
 
-## The compiler complains about "no match for 'operator<<'" when I use an assertion. What gives?
+## The compiler complains about `no match for 'operator<<'` when I use an assertion. What gives?
 
 If you use a user-defined type `FooType` in an assertion, you must make sure
 there is an `std::ostream& operator<<(std::ostream&, const FooType&)` function
 defined such that we can print a value of `FooType`.
 
 In addition, if `FooType` is declared in a name space, the `<<` operator also
-needs to be defined in the *same* name space. See abseil.io/tips/49 for details.
+needs to be defined in the *same* name space. See
+[Tip of the Week #49](http://abseil.io/tips/49) for details.
 
 ## How do I suppress the memory leak messages on Windows?
 
@@ -691,10 +690,10 @@ mistake in production. Such cleverness also leads to
 advise against the practice, and googletest doesn't provide a way to do it.
 
 In general, the recommended way to cause the code to behave differently under
-test is [Dependency Injection](https://en.wikipedia.org/wiki/Dependency_injection). You can inject
+test is [Dependency Injection](http://en.wikipedia.org/wiki/Dependency_injection). You can inject
 different functionality from the test and from the production code. Since your
 production code doesn't link in the for-test logic at all (the
-[`testonly`](https://docs.bazel.build/versions/master/be/common-definitions.html#common.testonly) attribute for BUILD targets helps to ensure
+[`testonly`](http://docs.bazel.build/versions/master/be/common-definitions.html#common.testonly) attribute for BUILD targets helps to ensure
 that), there is no danger in accidentally running it.
 
 However, if you *really*, *really*, *really* have no choice, and if you follow
