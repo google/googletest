@@ -2179,8 +2179,8 @@ class GMockVerboseFlagTest : public VerboseFlagPreservingFixture {
         "call should not happen.  Do not suppress it by blindly adding "
         "an EXPECT_CALL() if you don't mean to enforce the call.  "
         "See "
-        "https://github.com/google/googletest/blob/master/googlemock/docs/"
-        "cook_book.md#"
+        "https://github.com/google/googletest/blob/master/docs/"
+        "gmock_cook_book.md#"
         "knowing-when-to-expect for details.";
 
     // A void-returning function.
