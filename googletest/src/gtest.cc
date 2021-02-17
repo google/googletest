@@ -5714,6 +5714,14 @@ bool UnitTestImpl::RunAllTests() {
             break;
           }
         }
+      } else if (Test::HasFatalFailure()) {
+        // If there was a fatal failure during the global setup then we know we
+        // aren't going to run any tests. Explicitly mark all of the tests as
+        // skipped to make this obvious in the output.
+        for (int test_index = 0; test_index < total_test_suite_count();
+             test_index++) {
+          GetMutableSuiteCase(test_index)->Skip();
+        }
       }
 
       // Tears down all environments in reverse order afterwards.
