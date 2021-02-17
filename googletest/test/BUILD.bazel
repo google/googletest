@@ -62,6 +62,7 @@ cc_test(
             "googletest-env-var-test_.cc",
             "googletest-failfast-unittest_.cc",
             "googletest-filter-unittest_.cc",
+            "googletest-global-environment-unittest_.cc",
             "googletest-break-on-failure-unittest_.cc",
             "googletest-listener-test.cc",
             "googletest-output-test_.cc",
@@ -253,6 +254,21 @@ py_test(
     size = "medium",
     srcs = ["googletest-filter-unittest.py"],
     data = [":googletest-filter-unittest_"],
+    deps = [":gtest_test_utils"],
+)
+
+cc_binary(
+    name = "googletest-global-environment-unittest_",
+    testonly = 1,
+    srcs = ["googletest-global-environment-unittest_.cc"],
+    deps = ["//:gtest"],
+)
+
+py_test(
+    name = "googletest-global-environment-unittest",
+    size = "medium",
+    srcs = ["googletest-global-environment-unittest.py"],
+    data = [":googletest-global-environment-unittest_"],
     deps = [":gtest_test_utils"],
 )
 
@@ -551,11 +567,11 @@ py_test(
     size = "small",
     srcs = ["googletest-param-test-invalid-name1-test.py"],
     data = [":googletest-param-test-invalid-name1-test_"],
-    deps = [":gtest_test_utils"],
     tags = [
         "no_test_msvc2015",
         "no_test_msvc2017",
     ],
+    deps = [":gtest_test_utils"],
 )
 
 py_test(
@@ -563,9 +579,9 @@ py_test(
     size = "small",
     srcs = ["googletest-param-test-invalid-name2-test.py"],
     data = [":googletest-param-test-invalid-name2-test_"],
-    deps = [":gtest_test_utils"],
     tags = [
         "no_test_msvc2015",
         "no_test_msvc2017",
     ],
+    deps = [":gtest_test_utils"],
 )
