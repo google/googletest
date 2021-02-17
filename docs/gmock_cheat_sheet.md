@@ -477,6 +477,14 @@ which must be a permanent callback.
     being matched and the matcher parameters).
 3.  You can use `PrintToString(x)` to convert a value `x` of any type to a
     string.
+4.  You can use `ExplainMatchResult()` in a custom matcher to wrap another
+    matcher, for example:
+
+    ```cpp
+    MATCHER_P(NestedPropertyMatches, matcher, "") {
+      return ExplainMatchResult(matcher, arg.nested().property(), result_listener);
+    }
+    ```
 
 ## Actions {#ActionList}
 
