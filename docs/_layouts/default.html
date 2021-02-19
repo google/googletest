@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="{{ site.lang | default: "en-US" }}">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+{% seo %}
+    <link rel="stylesheet" href="{{ "/assets/css/style.css?v=" | append: site.github.build_revision | relative_url }}">
+  </head>
+  <body>
+    <div class="sidebar">
+      <div class="header">
+        <h1><a href="{{ "/" | relative_url }}">{{ site.title | default: "Documentation" }}</a></h1>
+      </div>
+      <input type="checkbox" id="nav-toggle" class="nav-toggle">
+      <label for="nav-toggle" class="expander">
+        <span class="arrow"></span>
+      </label>
+      <nav>
+        {% for item in site.data.navigation.nav %}
+        <h2>{{ item.section }}</h2>
+        <ul>
+          {% for subitem in item.items %}
+          <a href="{{subitem.url | relative_url }}">
+            <li class="{% if subitem.url == page.url %}active{% endif %}">
+              {{ subitem.title }}
+            </li>
+          </a>
+          {% endfor %}
+        </ul>
+        {% endfor %}
+      </nav>
+    </div>
+    <div class="main markdown-body">
+      <div class="main-inner">
+        {{ content }}
+      </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/anchor-js/4.1.0/anchor.min.js" integrity="sha256-lZaRhKri35AyJSypXXs4o6OPFTbTmUoltBbDCbdzegg=" crossorigin="anonymous"></script>
+    <script>anchors.add('.main h2, .main h3, .main h4, .main h5, .main h6');</script>
+    {% if site.google_analytics %}
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+      ga('create', '{{ site.google_analytics }}', 'auto');
+      ga('send', 'pageview');
+    </script>
+    {% endif %}
+  </body>
+</html>

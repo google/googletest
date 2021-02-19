@@ -334,6 +334,7 @@ says that the `turtle` object's `GetX()` method will be called five times, it
 will return 100 the first time, 150 the second time, and then 200 every time.
 Some people like to call this style of syntax a Domain-Specific Language (DSL).
 
+{: .callout .note}
 **Note:** Why do we use a macro to do this? Well it serves two purposes: first
 it makes expectations easily identifiable (either by `grep` or by a human
 reader), and second it allows gMock to include the source file location of a
@@ -543,6 +544,7 @@ error, as the last matching expectation (#2) has been saturated. If, however,
 the third `Forward(10)` call is replaced by `Forward(20)`, then it would be OK,
 as now #1 will be the matching expectation.
 
+{: .callout .note}
 **Note:** Why does gMock search for a match in the *reverse* order of the
 expectations? The reason is that this allows a user to set up the default
 expectations in a mock object's constructor or the test fixture's set-up phase
@@ -551,6 +553,7 @@ body. So, if you have two expectations on the same method, you want to put the
 one with more specific matchers **after** the other, or the more specific rule
 would be shadowed by the more general one that comes after it.
 
+{: .callout .tip}
 **Tip:** It is very common to start with a catch-all expectation for a method
 and `Times(AnyNumber())` (omitting arguments, or with `_` for all arguments, if
 overloaded). This makes any calls to the method expected. This is not necessary

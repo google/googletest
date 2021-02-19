@@ -26,6 +26,7 @@ SUCCEED();
 Generates a success. This does **NOT** make the overall test succeed. A test is
 considered successful only if none of its assertions fail during its execution.
 
+{: .callout .note}
 NOTE: `SUCCEED()` is purely documentary and currently doesn't generate any
 user-visible output. However, we may add `SUCCEED()` messages to googletest's
 output in the future.
@@ -52,6 +53,7 @@ switch(expression) {
 }
 ```
 
+{: .callout .note}
 NOTE: you can only use `FAIL()` in functions that return `void`. See the
 [Assertion Placement section](#assertion-placement) for more information.
 
@@ -143,6 +145,7 @@ b is 4
 c is 10
 ```
 
+{: .callout .note}
 > NOTE:
 >
 > 1.  If you see a compiler error "no matching function to call" when using
@@ -508,6 +511,7 @@ any assertion inside of it.
 If changing the function's type is not an option, you should just use assertions
 that generate non-fatal failures, such as `ADD_FAILURE*` and `EXPECT_*`.
 
+{: .callout .note}
 NOTE: Constructors and destructors are not considered void-returning functions,
 according to the C++ language specification, and so you may not use fatal
 assertions in them; you'll get a compilation error if you try. Instead, either
@@ -515,6 +519,7 @@ call `abort` and crash the entire test executable, or put the fatal assertion in
 a `SetUp`/`TearDown` function; see
 [constructor/destructor vs. `SetUp`/`TearDown`](faq.md#CtorVsSetUp)
 
+{: .callout .warning}
 WARNING: A fatal assertion in a helper function (private void-returning method)
 called from a constructor or destructor does not terminate the current test, as
 your intuition might suggest: it merely returns from the constructor or
@@ -645,6 +650,7 @@ to be an expression.
 As usual, the `ASSERT` variants abort the current test function, while the
 `EXPECT` variants do not.
 
+{: .callout .note}
 > NOTE: We use the word "crash" here to mean that the process terminates with a
 > *non-zero* exit status code. There are two possibilities: either the process
 > has called `exit()` or `_exit()` with a non-zero value, or it may be killed by
@@ -720,6 +726,7 @@ necessary.
 
 ### Death Test Naming
 
+{: .callout .important}
 IMPORTANT: We strongly recommend you to follow the convention of naming your
 **test suite** (not test) `*DeathTest` when it contains a death test, as
 demonstrated in the above example. The
@@ -901,6 +908,7 @@ handlers registered with `pthread_atfork(3)`.
 
 ## Using Assertions in Sub-routines
 
+{: .callout .note}
 Note: If you want to put a series of test assertions in a subroutine to check
 for a complex condition, consider using
 [a custom GMock matcher](gmock_cook_book.md#NewMatchers)
@@ -1128,6 +1136,7 @@ will output XML like this:
   ...
 ```
 
+{: .callout .note}
 > NOTE:
 >
 > *   `RecordProperty()` is a static member of the `Test` class. Therefore it
@@ -1215,6 +1224,7 @@ TEST_F(FooTest, Test2) {
 }
 ```
 
+{: .callout .note}
 NOTE: Though the above code declares `SetUpTestSuite()` protected, it may
 sometimes be necessary to declare it public, such as when using it with
 `TEST_P`.
@@ -1302,6 +1312,7 @@ and `testing::WithParamInterface<T>`. `T` can be any copyable type. If it's a
 raw pointer, you are responsible for managing the lifespan of the pointed
 values.
 
+{: .callout .note}
 NOTE: If your test fixture defines `SetUpTestSuite()` or `TearDownTestSuite()`
 they must be declared **public** rather than **protected** in order to use
 `TEST_P`.
@@ -1368,6 +1379,7 @@ INSTANTIATE_TEST_SUITE_P(InstantiationName,
                          testing::Values("meeny", "miny", "moe"));
 ```
 
+{: .callout .note}
 NOTE: The code above must be placed at global or namespace scope, not at
 function scope.
 
@@ -1456,6 +1468,7 @@ the test parameters. The function should accept one argument of type
 returns the value of `testing::PrintToString(GetParam())`. It does not work for
 `std::string` or C strings.
 
+{: .callout .note}
 NOTE: test names must be non-empty, unique, and may only contain ASCII
 alphanumeric characters. In particular, they
 [should not contain underscores](faq.md#why-should-test-suite-names-and-test-names-not-contain-underscore)
@@ -1794,6 +1807,7 @@ well, use one of the following macros instead:
   EXPECT_NONFATAL_FAILURE_ON_ALL_THREADS(statement, substring);
 ```
 
+{: .callout .note}
 NOTE: Assertions from multiple threads are currently not supported on Windows.
 
 For technical reasons, there are some caveats:
@@ -2141,10 +2155,12 @@ class DISABLED_BarTest : public testing::Test { ... };
 TEST_F(DISABLED_BarTest, DoesXyz) { ... }
 ```
 
+{: .callout .note}
 NOTE: This feature should only be used for temporary pain-relief. You still have
 to fix the disabled tests at a later date. As a reminder, googletest will print
 a banner warning you if a test program contains any disabled tests.
 
+{: .callout .tip}
 TIP: You can easily count the number of disabled tests you have using
 `grep`. This number can be used as a metric for
 improving your test quality.
@@ -2542,6 +2558,7 @@ could generate this report:
 }
 ```
 
+{: .callout .important}
 IMPORTANT: The exact format of the JSON document is subject to change.
 
 ### Controlling How Failures Are Reported
