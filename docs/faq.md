@@ -2,6 +2,7 @@
 
 ## Why should test suite names and test names not contain underscore?
 
+{: .callout .note}
 Note: Googletest reserves underscore (`_`) for special purpose keywords, such as
 [the `DISABLED_` prefix](advanced.md#temporarily-disabling-tests), in addition
 to the following rationale.
@@ -129,6 +130,7 @@ can much more easily decide which one to use the next time.
 
 ## I got some run-time errors about invalid proto descriptors when using `ProtocolMessageEquals`. Help!
 
+{: .callout .note}
 **Note:** `ProtocolMessageEquals` and `ProtocolMessageEquiv` are *deprecated*
 now. Please use `EqualsProto`, etc instead.
 
