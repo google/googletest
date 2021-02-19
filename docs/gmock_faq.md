@@ -1,4 +1,4 @@
-## Legacy gMock FAQ {#GMockFaq}
+# Legacy gMock FAQ
 
 ### When I call a method on my mock object, the method for the real object is invoked instead. What's the problem?
 
