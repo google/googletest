@@ -1,4 +1,4 @@
-# gMock for Dummies {#GMockForDummies}
+# gMock for Dummies
 
 ## What Is gMock?
 
