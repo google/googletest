@@ -4,6 +4,7 @@ You can find recipes for using gMock here. If you haven't yet, please read
 [the dummy guide](gmock_for_dummies.md) first to make sure you understand the
 basics.
 
+{: .callout .note}
 **Note:** gMock lives in the `testing` name space. For readability, it is
 recommended to write `using ::testing::Foo;` once in your file before using the
 name `Foo` defined by gMock. We omit such `using` statements in this section for
@@ -43,7 +44,8 @@ generated method:
 Unprotected commas, i.e. commas which are not surrounded by parentheses, prevent
 `MOCK_METHOD` from parsing its arguments correctly:
 
-```cpp {.bad}
+{: .bad}
+```cpp
 class MockFoo {
  public:
   MOCK_METHOD(std::pair<bool, int>, GetPair, ());  // Won't compile!
@@ -53,7 +55,8 @@ class MockFoo {
 
 Solution 1 - wrap with parentheses:
 
-```cpp {.good}
+{: .good}
+```cpp
 class MockFoo {
  public:
   MOCK_METHOD((std::pair<bool, int>), GetPair, ());
@@ -66,7 +69,8 @@ invalid C++. `MOCK_METHOD` removes the parentheses.
 
 Solution 2 - define an alias:
 
-```cpp {.good}
+{: .good}
+```cpp
 class MockFoo {
  public:
   using BoolAndInt = std::pair<bool, int>;
@@ -140,6 +144,7 @@ class MockFoo : public Foo {
 };
 ```
 
+{: .callout .note}
 **Note:** if you don't mock all versions of the overloaded method, the compiler
 will give you a warning about some methods in the base class being hidden. To
 fix that, use `using` to bring them in scope:
@@ -450,6 +455,7 @@ TEST(...) {
 }
 ```
 
+{: .callout .note}
 NOTE: `NiceMock` and `StrictMock` only affects *uninteresting* calls (calls of
 *methods* with no expectations); they do not affect *unexpected* calls (calls of
 methods with expectations, but they don't match). See
@@ -1502,6 +1508,7 @@ using ::testing::Matcher;
 
 ### Matchers must have no side-effects {#PureMatchers}
 
+{: .callout .warning}
 WARNING: gMock does not guarantee when or how many times a matcher will be
 invoked. Therefore, all matchers must be *purely functional*: they cannot have
 any side effects, and the match result must not depend on anything other than
@@ -2377,6 +2384,7 @@ using ::testing::_;
       // second argument DoThis() receives.
 ```
 
+{: .callout .note}
 NOTE: The section below is legacy documentation from before C++ had lambdas:
 
 Arghh, you need to refer to a mock function argument but C++ has no lambda
@@ -2729,6 +2737,7 @@ additional action to notify the `Notification` object. Now we can just call
 asynchronous call to finish. After that, our test suite is complete and we can
 safely exit.
 
+{: .callout .note}
 Note: this example has a downside: namely, if the expectation is not satisfied,
 our test will run forever. It will eventually time-out and fail, but it will
 take longer and be slightly harder to debug. To alleviate this problem, you can
@@ -3008,6 +3017,7 @@ TEST(MyServerTest, ProcessesRequest) {
 }  // server is destroyed when it goes out of scope here.
 ```
 
+{: .callout .tip}
 **Tip:** The `Mock::VerifyAndClearExpectations()` function returns a `bool` to
 indicate whether the verification was successful (`true` for yes), so you can
 wrap that function call inside a `ASSERT_TRUE()` if there is no point going
@@ -3324,6 +3334,7 @@ after typing `M-m`), or `M-up`/`M-down` to move back and forth between errors.
 
 ### Writing New Matchers Quickly {#NewMatchers}
 
+{: .callout .warning}
 WARNING: gMock does not guarantee when or how many times a matcher will be
 invoked. Therefore, all matchers must be functionally pure. See
 [this section](#PureMatchers) for more details.
@@ -3427,6 +3438,7 @@ match succeeds in case of a success (unless it's obvious) - this is useful when
 the matcher is used inside `Not()`. There is no need to print the argument value
 itself, as gMock already prints it for you.
 
+{: .callout .note}
 NOTE: The type of the value being matched (`arg_type`) is determined by the
 context in which you use the matcher and is supplied to you by the compiler, so
 you don't need to worry about declaring it (nor can you). This allows the
@@ -3664,6 +3676,7 @@ Expected: is divisible by 7
   Actual: 23 (the remainder is 2)
 ```
 
+{: .callout .tip}
 Tip: for convenience, `MatchAndExplain()` can take a `MatchResultListener*`
 instead of `std::ostream*`.
 
@@ -3788,6 +3801,7 @@ PolymorphicMatcher<NotNullMatcher> NotNull() {
   EXPECT_CALL(foo, Bar(NotNull()));  // The argument must be a non-NULL pointer.
 ```
 
+{: .callout .note}
 **Note:** Your polymorphic matcher class does **not** need to inherit from
 `MatcherInterface` or any other class, and its methods do **not** need to be
 virtual.

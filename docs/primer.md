@@ -44,6 +44,7 @@ minutes to learn the basics and get started. So let's go!
 
 ## Beware of the nomenclature
 
+{: .callout .note}
 _Note:_ There might be some confusion arising from different definitions of the
 terms _Test_, _Test Case_ and _Test Suite_, so beware of misunderstanding these.
 
@@ -460,6 +461,7 @@ When invoked, the `RUN_ALL_TESTS()` macro:
 
 If a fatal failure happens the subsequent steps will be skipped.
 
+{: .callout .important}
 > IMPORTANT: You must **not** ignore the return value of `RUN_ALL_TESTS()`, or
 > you will get a compiler error. The rationale for this design is that the
 > automated testing service determines whether a test has passed based on its
@@ -562,6 +564,7 @@ agree with you completely, and that's why Google Test provides a basic
 implementation of main(). If it fits your needs, then just link your test with
 the `gtest_main` library and you are good to go.
 
+{: .callout .note}
 NOTE: `ParseGUnitFlags()` is deprecated in favor of `InitGoogleTest()`.
 
 ## Known Limitations

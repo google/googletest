@@ -45,6 +45,7 @@ NaggyMock<MockFoo> naggy_foo;    // The type is a subclass of MockFoo.
 StrictMock<MockFoo> strict_foo;  // The type is a subclass of MockFoo.
 ```
 
+{: .callout .note}
 **Note:** A mock object is currently naggy by default. We may make it nice by
 default in the future.
 
@@ -231,6 +232,7 @@ A **matcher** matches a *single* argument. You can use it inside `ON_CALL()` or
 | `EXPECT_THAT(actual_value, matcher)` | Asserts that `actual_value` matches `matcher`. |
 | `ASSERT_THAT(actual_value, matcher)` | The same as `EXPECT_THAT(actual_value, matcher)`, except that it generates a **fatal** failure. |
 
+{: .callout .note}
 **Note:** Although equality matching via `EXPECT_THAT(actual_value,
 expected_value)` is supported, prefer to make the comparison explicit via
 `EXPECT_THAT(actual_value, Eq(expected_value))` or `EXPECT_EQ(actual_value,
@@ -576,6 +578,7 @@ value, and `foo` by reference.
 | :------------ | :----------------------------------------------------- |
 | `DoDefault()` | Do the default action (specified by `ON_CALL()` or the built-in one). |
 
+{: .callout .note}
 **Note:** due to technical reasons, `DoDefault()` cannot be used inside a
 composite action - trying to do so will result in a run-time error.
 
