@@ -1,4 +1,8 @@
 nav:
+- section: "Get Started"
+  items:
+  - title: "Supported Platforms"
+    url: "/platforms.html"
 - section: "Guides"
   items:
   - title: "GoogleTest Primer"
