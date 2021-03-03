@@ -1501,11 +1501,11 @@ class MyTestSuite : public testing::TestWithParam<std::tuple<MyType, std::string
 INSTANTIATE_TEST_SUITE_P(
     MyGroup, MyTestSuite,
     testing::Combine(
-        testing::Values(MyType::VALUE_0, MyType::VALUE_1),
+        testing::Values(MyType::MY_FOO, MyType::MY_BAR),
         testing::Values("A", "B")),
     [](const testing::TestParamInfo<MyTestSuite::ParamType>& info) {
       std::string name = absl::StrCat(
-          std::get<0>(info.param) == MY_FOO ? "Foo" : "Bar",
+          std::get<0>(info.param) == MyType::MY_FOO ? "Foo" : "Bar",
           std::get<1>(info.param));
       absl::c_replace_if(name, [](char c) { return !std::isalnum(c); }, '');
       return name;
