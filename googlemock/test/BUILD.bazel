@@ -54,7 +54,7 @@ py_library(
     srcs = ["gmock_test_utils.py"],
     deps = [
         "//googletest/test:gtest_test_utils",
-    ]
+    ],
 )
 
 cc_binary(
@@ -104,11 +104,11 @@ py_test(
         ":gmock_output_test_golden.txt",
     ],
     python_version = "PY2",
-    deps = [":gmock_test_utils"],
     tags = [
         "no_test_msvc2015",
         "no_test_msvc2017",
     ],
+    deps = [":gmock_test_utils"],
 )
 
 cc_test(
