@@ -1520,7 +1520,7 @@ struct ActionImpl<R(Args...), Impl> : ImplBase<Impl>::type {
     // types instantiated.  Up to 10 of the args that are provided by the
     // args_type get passed, followed by a dummy of unspecified type for the
     // remainder up to 10 explicit args.
-    static const ExcessiveArg kExcessArg;
+    static constexpr ExcessiveArg kExcessArg{};
     return static_cast<const Impl&>(*this).template gmock_PerformImpl<
         /*function_type=*/function_type, /*return_type=*/R,
         /*args_type=*/args_type,
