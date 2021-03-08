@@ -3909,6 +3909,10 @@ class XmlUnitTestResultPrinter : public EmptyTestEventListener {
   // Streams an XML CDATA section, escaping invalid CDATA sequences as needed.
   static void OutputXmlCDataSection(::std::ostream* stream, const char* data);
 
+  // Streams an XML representation of a TestResult object.
+  static void OutputXmlTestResult(::std::ostream* stream,
+                                  const TestResult& result);
+
   // Streams an XML representation of a TestInfo object.
   static void OutputXmlTestInfo(::std::ostream* stream,
                                 const char* test_suite_name,
@@ -4167,6 +4171,11 @@ void XmlUnitTestResultPrinter::OutputXmlTestInfo(::std::ostream* stream,
       FormatEpochTimeInMillisAsIso8601(result.start_timestamp()));
   OutputXmlAttribute(stream, kTestsuite, "classname", test_suite_name);
 
+  OutputXmlTestResult(stream, result);
+}
+
+void XmlUnitTestResultPrinter::OutputXmlTestResult(::std::ostream* stream,
+                                                   const TestResult& result) {
   int failures = 0;
   int skips = 0;
   for (int i = 0; i < result.total_part_count(); ++i) {
@@ -4371,6 +4380,10 @@ class JsonUnitTestResultPrinter : public EmptyTestEventListener {
                             const std::string& indent,
                             bool comma = true);
 
+  // Streams a JSON representation of a TestResult object.
+  static void OutputJsonTestResult(::std::ostream* stream,
+                                   const TestResult& result);
+
   // Streams a JSON representation of a TestInfo object.
   static void OutputJsonTestInfo(::std::ostream* stream,
                                  const char* test_suite_name,
@@ -4562,6 +4575,13 @@ void JsonUnitTestResultPrinter::OutputJsonTestInfo(::std::ostream* stream,
   OutputJsonKey(stream, kTestsuite, "classname", test_suite_name, kIndent,
                 false);
   *stream << TestPropertiesAsJson(result, kIndent);
+
+  OutputJsonTestResult(stream, result);
+}
+
+void JsonUnitTestResultPrinter::OutputJsonTestResult(::std::ostream* stream,
+                                                     const TestResult& result) {
+  const std::string kIndent = Indent(10);
 
   int failures = 0;
   for (int i = 0; i < result.total_part_count(); ++i) {
