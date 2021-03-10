@@ -19,9 +19,11 @@ problem, including your `BUILD`/`CMakeLists.txt` file and build commands. Links
 to a GitHub branch or [godbolt.org](https://godbolt.org/) that demonstrate the
 problem are also helpful.
 
-**What version of GoogleTest are you using?**
+**Does the bug persist in the most recent commit?**
 
-**What operating system and version are you using**
+We recommend using the latest commit in the master branch in your projects.
+
+**What operating system and version are you using?**
 
 If you are using a Linux distribution please include the name and version of the
 distribution as well.
