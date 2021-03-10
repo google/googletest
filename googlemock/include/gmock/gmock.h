@@ -34,8 +34,8 @@
 
 // GOOGLETEST_CM0002 DO NOT DELETE
 
-#ifndef GOOGLETEST_GOOGLEMOCK_INCLUDE_GMOCK_GMOCK_H_
-#define GOOGLETEST_GOOGLEMOCK_INCLUDE_GMOCK_GMOCK_H_
+#ifndef GOOGLEMOCK_INCLUDE_GMOCK_GMOCK_H_
+#define GOOGLEMOCK_INCLUDE_GMOCK_GMOCK_H_
 
 // This file implements the following syntax:
 //
@@ -107,4 +107,4 @@ inline void gmock_loop() { RUN_ALL_TESTS(); }
 
 }  // namespace testing
 
-#endif  // GOOGLETEST_GOOGLEMOCK_INCLUDE_GMOCK_GMOCK_H_
+#endif  // GOOGLEMOCK_INCLUDE_GMOCK_GMOCK_H_
