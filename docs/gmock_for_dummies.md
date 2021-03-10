@@ -310,8 +310,8 @@ EXPECT_CALL(mock_object, non-overloaded-method)
 
 This syntax allows the test writer to specify "called with any arguments"
 without explicitly specifying the number or types of arguments. To avoid
-unintended ambiguity, this syntax may only be used for methods which are not
-overloaded
+unintended ambiguity, this syntax may only be used for methods that are not
+overloaded.
 
 Either form of the macro can be followed by some optional *clauses* that provide
 more information about the expectation. We'll discuss how each clause works in
