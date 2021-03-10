@@ -6,6 +6,18 @@
 
 ### Announcements
 
+#### Live at Head
+
+GoogleTest now follows the
+[Abseil Live at Head philosophy](https://abseil.io/about/philosophy#upgrade-support).
+We recommend using the latest commit in the `master` branch in your projects.
+
+#### Documentation Updates
+
+Our documentation is now live on GitHub Pages at
+https://google.github.io/googletest/. We recommend browsing the documentation on
+GitHub Pages rather than directly in the repository.
+
 #### Release 1.10.x
 
 [Release 1.10.x](https://github.com/google/googletest/releases/tag/release-1.10.0)
@@ -13,10 +25,9 @@ is now available.
 
 #### Coming Soon
 
-*   Post 1.10.x googletest will follow
-    [Abseil Live at Head philosophy](https://abseil.io/about/philosophy)
-*   We are also planning to take a dependency on
+*   We are planning to take a dependency on
     [Abseil](https://github.com/abseil/abseil-cpp).
+*   More documentation improvements are planned.
 
 ## Welcome to **GoogleTest**, Google's C++ test framework!
 
@@ -26,14 +37,12 @@ release them together.
 
 ### Getting Started
 
-The information for **GoogleTest** is available in the
-[GoogleTest Primer](docs/primer.md) documentation.
+See the [GoogleTest User's Guide](https://google.github.io/googletest/) for
+documentation. We recommend starting with the
+[GoogleTest Primer](https://google.github.io/googletest/primer.html).
 
-**GoogleMock** is an extension to GoogleTest for writing and using C++ mock
-classes. See the separate [GoogleMock documentation](googlemock/README.md).
-
-More detailed documentation for googletest is in its interior
-[googletest/README.md](googletest/README.md) file.
+More information about building GoogleTest can be found at
+[googletest/README.md](googletest/README.md).
 
 ## Features
 
