@@ -30,10 +30,10 @@ gMock:
 
 Details and examples can be found here:
 
-*   [gMock for Dummies](../docs/gmock_for_dummies.md)
-*   [Legacy gMock FAQ](../docs/gmock_faq.md)
-*   [gMock Cookbook](../docs/gmock_cook_book.md)
-*   [gMock Cheat Sheet](../docs/gmock_cheat_sheet.md)
+*   [gMock for Dummies](https://google.github.io/googletest/gmock_for_dummies.html)
+*   [Legacy gMock FAQ](https://google.github.io/googletest/gmock_faq.html)
+*   [gMock Cookbook](https://google.github.io/googletest/gmock_cook_book.html)
+*   [gMock Cheat Sheet](https://google.github.io/googletest/gmock_cheat_sheet.html)
 
 Please note that code under scripts/generator/ is from the
 [cppclean project](http://code.google.com/p/cppclean/) and under the Apache
