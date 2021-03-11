@@ -216,10 +216,20 @@ EXPECTED_SHARDED_TEST_XML = """<?xml version="1.0" encoding="UTF-8"?>
   </testsuite>
 </testsuites>"""
 
-EXPECTED_EMPTY_XML = """<?xml version="1.0" encoding="UTF-8"?>
+EXPECTED_NO_TEST_XML = """<?xml version="1.0" encoding="UTF-8"?>
 <testsuites tests="0" failures="0" disabled="0" errors="0" time="*"
             timestamp="*" name="AllTests">
-</testsuites>"""
+  <testsuite name="NonTestSuiteFailure" tests="1" failures="1" disabled="0" skipped="0" errors="0" time="*" timestamp="*">
+    <testcase name="" status="run" result="completed" time="*" timestamp="*" classname="">
+      <failure message="gtest_no_test_unittest.cc:*&#x0A;Expected equality of these values:&#x0A;  1&#x0A;  2" type=""><![CDATA[gtest_no_test_unittest.cc:*
+Expected equality of these values:
+  1
+  2%(stack)s]]></failure>
+    </testcase>
+  </testsuite>
+</testsuites>""" % {
+    'stack': STACK_TRACE_TEMPLATE
+}
 
 GTEST_PROGRAM_PATH = gtest_test_utils.GetTestExecutablePath(GTEST_PROGRAM_NAME)
 
@@ -242,14 +252,14 @@ class GTestXMLOutputUnitTest(gtest_xml_test_utils.GTestXMLTestCase):
       """
       self._TestXmlOutput(GTEST_PROGRAM_NAME, EXPECTED_NON_EMPTY_XML, 1)
 
-  def testEmptyXmlOutput(self):
+  def testNoTestXmlOutput(self):
     """Verifies XML output for a Google Test binary without actual tests.
 
-    Runs a test program that generates an empty XML output, and
-    tests that the XML output is expected.
+    Runs a test program that generates an XML output for a binary without tests,
+    and tests that the XML output is expected.
     """
 
-    self._TestXmlOutput('gtest_no_test_unittest', EXPECTED_EMPTY_XML, 0)
+    self._TestXmlOutput('gtest_no_test_unittest', EXPECTED_NO_TEST_XML, 0)
 
   def testTimestampValue(self):
     """Checks whether the timestamp attribute in the XML output is valid.
