@@ -107,6 +107,14 @@ class GoogleTestFailureReporter : public FailureReporterInterface {
   }
 };
 
+static FailureReporterInterface* failure_reporter = nullptr;
+
+// Sets the failure reporter.
+// Enables overriding of the default failure reporter with a custom one that implements the interface
+GTEST_API_ void SetFailureReporter(FailureReporterInterface* const in_failure_reporter) {  
+  failure_reporter = in_failure_reporter;  
+}
+
 // Returns the global failure reporter.  Will create a
 // GoogleTestFailureReporter and return it the first time called.
 GTEST_API_ FailureReporterInterface* GetFailureReporter() {
@@ -115,8 +123,9 @@ GTEST_API_ FailureReporterInterface* GetFailureReporter() {
   // thread-safe.  We may need to add additional synchronization to
   // protect failure_reporter if we port Google Mock to other
   // compilers.
-  static FailureReporterInterface* const failure_reporter =
-      new GoogleTestFailureReporter();
+  if (failure_reporter == nullptr){
+    failure_reporter = new GoogleTestFailureReporter();
+  }
   return failure_reporter;
 }
 
