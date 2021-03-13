@@ -85,58 +85,18 @@ main build can be done a few different ways:
     is just a little more complex, but doesn't have the limitations of the other
     methods.
 
-The last of the above methods is implemented with a small piece of CMake code in
-a separate file (e.g. `CMakeLists.txt.in`) which is copied to the build area and
-then invoked as a sub-build _during the CMake stage_. That directory is then
-pulled into the main build with `add_subdirectory()`. For example:
+The last of the above methods is implemented with a small piece of CMake code so
+the code is pulled into the main build.
 
-New file `CMakeLists.txt.in`:
+Just add to your `CMakeLists.txt`:
 
 ```cmake
-cmake_minimum_required(VERSION 2.8.12)
-
-project(googletest-download NONE)
-
-include(ExternalProject)
-ExternalProject_Add(googletest
-  GIT_REPOSITORY    https://github.com/google/googletest.git
-  GIT_TAG           master
-  SOURCE_DIR        "${CMAKE_CURRENT_BINARY_DIR}/googletest-src"
-  BINARY_DIR        "${CMAKE_CURRENT_BINARY_DIR}/googletest-build"
-  CONFIGURE_COMMAND ""
-  BUILD_COMMAND     ""
-  INSTALL_COMMAND   ""
-  TEST_COMMAND      ""
+include (FetchContent)
+FetchContent_Declare(
+  googletest
+  GIT_REPOSITORY https://github.com/google/googletest.git
 )
-```
-
-Existing build's `CMakeLists.txt`:
-
-```cmake
-# Download and unpack googletest at configure time
-configure_file(CMakeLists.txt.in googletest-download/CMakeLists.txt)
-execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-  RESULT_VARIABLE result
-  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest-download )
-if(result)
-  message(FATAL_ERROR "CMake step for googletest failed: ${result}")
-endif()
-execute_process(COMMAND ${CMAKE_COMMAND} --build .
-  RESULT_VARIABLE result
-  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest-download )
-if(result)
-  message(FATAL_ERROR "Build step for googletest failed: ${result}")
-endif()
-
-# Prevent overriding the parent project's compiler/linker
-# settings on Windows
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-
-# Add googletest directly to our build. This defines
-# the gtest and gtest_main targets.
-add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
-                 ${CMAKE_CURRENT_BINARY_DIR}/googletest-build
-                 EXCLUDE_FROM_ALL)
+FetchContent_MakeAvailable(googletest)
 
 # Now simply link against gtest or gtest_main as needed. Eg
 add_executable(example example.cpp)
@@ -144,10 +104,8 @@ target_link_libraries(example gtest_main)
 add_test(NAME example_test COMMAND example)
 ```
 
-Note that this approach requires CMake 2.8.2 or later due to its use of the
-`ExternalProject_Add()` command. The above technique is discussed in more detail
-in [this separate article](http://crascit.com/2015/07/25/cmake-gtest/) which
-also contains a link to a fully generalized implementation of the technique.
+Note that this approach requires CMake 3.14 or later due to its use of the
+`FetchContent_MakeAvailable()` command.
 
 ##### Visual Studio Dynamic vs Static Runtimes
 
