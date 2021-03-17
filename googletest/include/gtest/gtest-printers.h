@@ -192,27 +192,35 @@ struct PointerPrinter {
 
 namespace internal_stream_operator_without_lexical_name_lookup {
 
-// The presence of an operator<< here will terminate lexical scope lookup
-// straight away (even though it cannot be a match because of its argument
-// types). Thus, the two operator<< calls in StreamPrinter will find only ADL
-// candidates.
-struct LookupBlocker {};
-void operator<<(LookupBlocker, LookupBlocker);
+// Uses expression SFINAE to detect whether using operator<< would work.
+template <typename T, typename = void>
+struct has_output_operator : std::false_type {};
+template <typename T>
+struct has_output_operator<T, decltype(void(std::declval<std::ostream&>()
+                                            << std::declval<T>()))>
+    : std::true_type {};
+
 
 struct StreamPrinter {
-  template <typename T,
-            // Don't accept member pointers here. We'd print them via implicit
-            // conversion to bool, which isn't useful.
-            typename = typename std::enable_if<
-                !std::is_member_pointer<T>::value>::type,
-            // Only accept types for which we can find a streaming operator via
-            // ADL (possibly involving implicit conversions).
-            typename = decltype(std::declval<std::ostream&>()
-                                << std::declval<const T&>())>
-  static void PrintValue(const T& value, ::std::ostream* os) {
-    // Call streaming operator found by ADL, possibly with implicit conversions
-    // of the arguments.
+  // Define PrintValue<T> for each T which defines operator<< for ostream.
+  template <typename T>
+  typename std::enable_if<
+      !std::is_function<typename std::remove_pointer<T>::type>::value &&
+      has_output_operator<T>::value>::type
+  static PrintValue(const T& value, ::std::ostream* os) {
     *os << value;
+  }
+
+  // Provide an overload for functions and function pointers. Function pointers
+  // don't implicitly convert to void* but do implicitly convert to bool, so
+  // without this function pointers are always printed as 1 or 0. (MSVC isn't
+  // standards-conforming here and converts function pointers to regular
+  // pointers, so this is a no-op for MSVC.)
+  template <typename T>
+  typename std::enable_if<
+      std::is_function<typename std::remove_pointer<T>::type>::value>::type
+  static PrintValue(const T& value, ::std::ostream* os) {
+    *os << reinterpret_cast<const void*>(value);
   }
 };
 
