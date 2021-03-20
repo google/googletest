@@ -83,6 +83,10 @@ cc_test(
     copts = select({
         "//:windows": ["-DGTEST_USE_OWN_TR1_TUPLE=0"],
         "//conditions:default": ["-DGTEST_USE_OWN_TR1_TUPLE=1"],
+    }) + select({
+        # Ensure MSVC treats source files as UTF-8 encoded.
+        "//:msvc_compiler": ["-utf-8"],
+        "//conditions:default": [],
     }),
     includes = [
         "googletest",

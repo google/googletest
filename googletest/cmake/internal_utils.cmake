@@ -81,6 +81,8 @@ macro(config_compiler_and_linker)
     # Suppress "unreachable code" warning
     # http://stackoverflow.com/questions/3232669 explains the issue.
     set(cxx_base_flags "${cxx_base_flags} -wd4702")
+    # Ensure MSVC treats source files as UTF-8 encoded.
+    set(cxx_base_flags "${cxx_base_flags} -utf-8")
   elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     set(cxx_base_flags "-Wall -Wshadow -Werror -Wconversion")
     set(cxx_exception_flags "-fexceptions")

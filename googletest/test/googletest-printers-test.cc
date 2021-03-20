@@ -493,6 +493,92 @@ TEST(PrintCStringTest, EscapesProperly) {
             Print(p));
 }
 
+#ifdef __cpp_char8_t
+// const char8_t*.
+TEST(PrintU8StringTest, Const) {
+  const char8_t* p = u8"界";
+  EXPECT_EQ(PrintPointer(p) + " pointing to u8\"\\xE7\\x95\\x8C\"", Print(p));
+}
+
+// char8_t*.
+TEST(PrintU8StringTest, NonConst) {
+  char8_t p[] = u8"世";
+  EXPECT_EQ(PrintPointer(p) + " pointing to u8\"\\xE4\\xB8\\x96\"",
+            Print(static_cast<char8_t*>(p)));
+}
+
+// NULL u8 string.
+TEST(PrintU8StringTest, Null) {
+  const char8_t* p = nullptr;
+  EXPECT_EQ("NULL", Print(p));
+}
+
+// Tests that u8 strings are escaped properly.
+TEST(PrintU8StringTest, EscapesProperly) {
+  const char8_t* p = u8"'\"?\\\a\b\f\n\r\t\v\x7F\xFF hello 世界";
+  EXPECT_EQ(PrintPointer(p) +
+                " pointing to u8\"'\\\"?\\\\\\a\\b\\f\\n\\r\\t\\v\\x7F\\xFF "
+                "hello \\xE4\\xB8\\x96\\xE7\\x95\\x8C\"",
+            Print(p));
+}
+#endif
+
+// const char16_t*.
+TEST(PrintU16StringTest, Const) {
+  const char16_t* p = u"界";
+  EXPECT_EQ(PrintPointer(p) + " pointing to u\"\\x754C\"", Print(p));
+}
+
+// char16_t*.
+TEST(PrintU16StringTest, NonConst) {
+  char16_t p[] = u"世";
+  EXPECT_EQ(PrintPointer(p) + " pointing to u\"\\x4E16\"",
+            Print(static_cast<char16_t*>(p)));
+}
+
+// NULL u16 string.
+TEST(PrintU16StringTest, Null) {
+  const char16_t* p = nullptr;
+  EXPECT_EQ("NULL", Print(p));
+}
+
+// Tests that u16 strings are escaped properly.
+TEST(PrintU16StringTest, EscapesProperly) {
+  const char16_t* p = u"'\"?\\\a\b\f\n\r\t\v\x7F\xFF hello 世界";
+  EXPECT_EQ(PrintPointer(p) +
+                " pointing to u\"'\\\"?\\\\\\a\\b\\f\\n\\r\\t\\v\\x7F\\xFF "
+                "hello \\x4E16\\x754C\"",
+            Print(p));
+}
+
+// const char32_t*.
+TEST(PrintU32StringTest, Const) {
+  const char32_t* p = U"🗺️";
+  EXPECT_EQ(PrintPointer(p) + " pointing to U\"\\x1F5FA\\xFE0F\"", Print(p));
+}
+
+// char32_t*.
+TEST(PrintU32StringTest, NonConst) {
+  char32_t p[] = U"🌌";
+  EXPECT_EQ(PrintPointer(p) + " pointing to U\"\\x1F30C\"",
+            Print(static_cast<char32_t*>(p)));
+}
+
+// NULL u32 string.
+TEST(PrintU32StringTest, Null) {
+  const char32_t* p = nullptr;
+  EXPECT_EQ("NULL", Print(p));
+}
+
+// Tests that u32 strings are escaped properly.
+TEST(PrintU32StringTest, EscapesProperly) {
+  const char32_t* p = U"'\"?\\\a\b\f\n\r\t\v\x7F\xFF hello 🗺️";
+  EXPECT_EQ(PrintPointer(p) +
+                " pointing to U\"'\\\"?\\\\\\a\\b\\f\\n\\r\\t\\v\\x7F\\xFF "
+                "hello \\x1F5FA\\xFE0F\"",
+            Print(p));
+}
+
 // MSVC compiler can be configured to define whar_t as a typedef
 // of unsigned short. Defining an overload for const wchar_t* in that case
 // would cause pointers to unsigned shorts be printed as wide strings,
@@ -559,56 +645,6 @@ TEST(PrintCharPointerTest, UnsignedChar) {
 // const unsigned char*.
 TEST(PrintCharPointerTest, ConstUnsignedChar) {
   const unsigned char* p = reinterpret_cast<const unsigned char*>(0x1234);
-  EXPECT_EQ(PrintPointer(p), Print(p));
-  p = nullptr;
-  EXPECT_EQ("NULL", Print(p));
-}
-
-#ifdef __cpp_char8_t
-// char8_t*
-TEST(PrintCharPointerTest, Char8) {
-  char8_t* p = reinterpret_cast<char8_t*>(0x1234);
-  EXPECT_EQ(PrintPointer(p), Print(p));
-  p = nullptr;
-  EXPECT_EQ("NULL", Print(p));
-}
-
-// const char8_t*
-TEST(PrintCharPointerTest, ConstChar8) {
-  const char8_t* p = reinterpret_cast<const char8_t*>(0x1234);
-  EXPECT_EQ(PrintPointer(p), Print(p));
-  p = nullptr;
-  EXPECT_EQ("NULL", Print(p));
-}
-#endif
-
-// char16_t*
-TEST(PrintCharPointerTest, Char16) {
-  char16_t* p = reinterpret_cast<char16_t*>(0x1234);
-  EXPECT_EQ(PrintPointer(p), Print(p));
-  p = nullptr;
-  EXPECT_EQ("NULL", Print(p));
-}
-
-// const char16_t*
-TEST(PrintCharPointerTest, ConstChar16) {
-  const char16_t* p = reinterpret_cast<const char16_t*>(0x1234);
-  EXPECT_EQ(PrintPointer(p), Print(p));
-  p = nullptr;
-  EXPECT_EQ("NULL", Print(p));
-}
-
-// char32_t*
-TEST(PrintCharPointerTest, Char32) {
-  char32_t* p = reinterpret_cast<char32_t*>(0x1234);
-  EXPECT_EQ(PrintPointer(p), Print(p));
-  p = nullptr;
-  EXPECT_EQ("NULL", Print(p));
-}
-
-// const char32_t*
-TEST(PrintCharPointerTest, ConstChar32) {
-  const char32_t* p = reinterpret_cast<const char32_t*>(0x1234);
   EXPECT_EQ(PrintPointer(p), Print(p));
   p = nullptr;
   EXPECT_EQ("NULL", Print(p));
@@ -753,62 +789,68 @@ TEST(PrintArrayTest, CharArrayWithNoTerminatingNul) {
   EXPECT_EQ("\"H\\0i\" (no terminating NUL)", PrintArrayHelper(a));
 }
 
-// const char array with terminating NUL.
-TEST(PrintArrayTest, ConstCharArrayWithTerminatingNul) {
+// char array with terminating NUL.
+TEST(PrintArrayTest, CharArrayWithTerminatingNul) {
   const char a[] = "\0Hi";
   EXPECT_EQ("\"\\0Hi\"", PrintArrayHelper(a));
 }
 
-// const wchar_t array without terminating NUL.
+#ifdef __cpp_char8_t
+// char_t array without terminating NUL.
+TEST(PrintArrayTest, Char8ArrayWithNoTerminatingNul) {
+  // Array a contains '\0' in the middle and doesn't end with '\0'.
+  const char8_t a[] = {u8'H', u8'\0', u8'i'};
+  EXPECT_EQ("u8\"H\\0i\" (no terminating NUL)", PrintArrayHelper(a));
+}
+
+// char8_t array with terminating NUL.
+TEST(PrintArrayTest, Char8ArrayWithTerminatingNul) {
+  const char8_t a[] = u8"\0世界";
+  EXPECT_EQ(
+      "u8\"\\0\\xE4\\xB8\\x96\\xE7\\x95\\x8C\"",
+      PrintArrayHelper(a));
+}
+#endif
+
+// const char16_t array without terminating NUL.
+TEST(PrintArrayTest, Char16ArrayWithNoTerminatingNul) {
+  // Array a contains '\0' in the middle and doesn't end with '\0'.
+  const char16_t a[] = {u'こ', u'\0', u'ん', u'に', u'ち', u'は'};
+  EXPECT_EQ("u\"\\x3053\\0\\x3093\\x306B\\x3061\\x306F\" (no terminating NUL)",
+            PrintArrayHelper(a));
+}
+
+// char16_t array with terminating NUL.
+TEST(PrintArrayTest, Char16ArrayWithTerminatingNul) {
+  const char16_t a[] = u"\0こんにちは";
+  EXPECT_EQ("u\"\\0\\x3053\\x3093\\x306B\\x3061\\x306F\"", PrintArrayHelper(a));
+}
+
+// char32_t array without terminating NUL.
+TEST(PrintArrayTest, Char32ArrayWithNoTerminatingNul) {
+  // Array a contains '\0' in the middle and doesn't end with '\0'.
+  const char32_t a[] = {U'👋', U'\0', U'🌌'};
+  EXPECT_EQ("U\"\\x1F44B\\0\\x1F30C\" (no terminating NUL)",
+            PrintArrayHelper(a));
+}
+
+// char32_t array with terminating NUL.
+TEST(PrintArrayTest, Char32ArrayWithTerminatingNul) {
+  const char32_t a[] = U"\0👋🌌";
+  EXPECT_EQ("U\"\\0\\x1F44B\\x1F30C\"", PrintArrayHelper(a));
+}
+
+// wchar_t array without terminating NUL.
 TEST(PrintArrayTest, WCharArrayWithNoTerminatingNul) {
   // Array a contains '\0' in the middle and doesn't end with '\0'.
-  const wchar_t a[] = { L'H', L'\0', L'i' };
+  const wchar_t a[] = {L'H', L'\0', L'i'};
   EXPECT_EQ("L\"H\\0i\" (no terminating NUL)", PrintArrayHelper(a));
 }
 
 // wchar_t array with terminating NUL.
-TEST(PrintArrayTest, WConstCharArrayWithTerminatingNul) {
+TEST(PrintArrayTest, WCharArrayWithTerminatingNul) {
   const wchar_t a[] = L"\0Hi";
   EXPECT_EQ("L\"\\0Hi\"", PrintArrayHelper(a));
-}
-
-#ifdef __cpp_char8_t
-// char8_t array.
-TEST(PrintArrayTest, Char8Array) {
-  const char8_t a[] = u8"Hello, world!";
-  EXPECT_EQ(
-      "{ U+0048, U+0065, U+006C, U+006C, U+006F, U+002C, U+0020, U+0077, "
-      "U+006F, U+0072, U+006C, U+0064, U+0021, U+0000 }",
-      PrintArrayHelper(a));
-}
-#endif
-
-// char16_t array.
-#ifdef _MSC_VER
-// TODO(b/173029407): Figure out why this doesn't work under MSVC.
-TEST(PrintArrayTest, DISABLED_Char16Array) {
-#else
-TEST(PrintArrayTest, Char16Array) {
-#endif
-  const char16_t a[] = u"Hello, 世界";
-  EXPECT_EQ(
-      "{ U+0048, U+0065, U+006C, U+006C, U+006F, U+002C, U+0020, U+4E16, "
-      "U+754C, U+0000 }",
-      PrintArrayHelper(a));
-}
-
-// char32_t array.
-#ifdef _MSC_VER
-// TODO(b/173029407): Figure out why this doesn't work under MSVC.
-TEST(PrintArrayTest, DISABLED_Char32Array) {
-#else
-TEST(PrintArrayTest, Char32Array) {
-#endif
-  const char32_t a[] = U"Hello, 世界";
-  EXPECT_EQ(
-      "{ U+0048, U+0065, U+006C, U+006C, U+006F, U+002C, U+0020, U+4E16, "
-      "U+754C, U+0000 }",
-      PrintArrayHelper(a));
 }
 
 // Array of objects.
@@ -872,41 +914,22 @@ TEST(PrintWideStringTest, StringAmbiguousHex) {
 
 #ifdef __cpp_char8_t
 TEST(PrintStringTest, U8String) {
-  std::u8string str = u8"Hello, world!";
+  std::u8string str = u8"Hello, 世界";
   EXPECT_EQ(str, str);  // Verify EXPECT_EQ compiles with this type.
-  EXPECT_EQ(
-      "{ U+0048, U+0065, U+006C, U+006C, U+006F, U+002C, U+0020, U+0077, "
-      "U+006F, U+0072, U+006C, U+0064, U+0021 }",
-      Print(str));
+  EXPECT_EQ("u8\"Hello, \\xE4\\xB8\\x96\\xE7\\x95\\x8C\"", Print(str));
 }
 #endif
 
-#ifdef _MSC_VER
-// TODO(b/173029407): Figure out why this doesn't work under MSVC.
-TEST(PrintStringTest, DISABLED_U16String) {
-#else
 TEST(PrintStringTest, U16String) {
-#endif
   std::u16string str = u"Hello, 世界";
   EXPECT_EQ(str, str);  // Verify EXPECT_EQ compiles with this type.
-  EXPECT_EQ(
-      "{ U+0048, U+0065, U+006C, U+006C, U+006F, U+002C, U+0020, U+4E16, "
-      "U+754C }",
-      Print(str));
+  EXPECT_EQ("u\"Hello, \\x4E16\\x754C\"", Print(str));
 }
 
-#ifdef _MSC_VER
-// TODO(b/173029407): Figure out why this doesn't work under MSVC.
-TEST(PrintStringTest, DISABLED_U32String) {
-#else
 TEST(PrintStringTest, U32String) {
-#endif
-  std::u32string str = U"Hello, 世界";
-  EXPECT_EQ(str, str);  // Verify EXPECT_EQ compiles with this type.
-  EXPECT_EQ(
-      "{ U+0048, U+0065, U+006C, U+006C, U+006F, U+002C, U+0020, U+4E16, "
-      "U+754C }",
-      Print(str));
+  std::u32string str = U"Hello, 🗺️";
+  EXPECT_EQ(str, str);  // Verify EXPECT_EQ compiles with this type
+  EXPECT_EQ("U\"Hello, \\x1F5FA\\xFE0F\"", Print(str));
 }
 
 // Tests printing types that support generic streaming (i.e. streaming
