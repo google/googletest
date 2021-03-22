@@ -5,6 +5,8 @@ nav:
     url: "/platforms.html"
   - title: "Quickstart: Bazel"
     url: "/quickstart-bazel.html"
+  - title: "Quickstart: CMake"
+    url: "/quickstart-cmake.html"
 - section: "Guides"
   items:
   - title: "GoogleTest Primer"
