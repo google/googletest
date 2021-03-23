@@ -123,7 +123,7 @@ TEST(BarTest, DoesThis) {
       .WillRepeatedly(Return("Category 5"));
   // ... other expectations ...
 
-  EXPECT_EQ("good", MyProductionFunction(&foo));  // #5
+  EXPECT_EQ(MyProductionFunction(&foo), "good");  // #5
 }                                                 // #6
 ```
 
@@ -162,8 +162,8 @@ Example usage:
 
   auto buzz1 = mock_buzzer_.MakeBuzz("hello");
   auto buzz2 = mock_buzzer_.MakeBuzz("hello");
-  EXPECT_NE(nullptr, buzz1);
-  EXPECT_NE(nullptr, buzz2);
+  EXPECT_NE(buzz1, nullptr);
+  EXPECT_NE(buzz2, nullptr);
   EXPECT_NE(buzz1, buzz2);
 
   // Resets the default action for return type std::unique_ptr<Buzz>,
