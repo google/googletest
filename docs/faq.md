@@ -60,9 +60,10 @@ the rule.
 
 ## Why does googletest support `EXPECT_EQ(NULL, ptr)` and `ASSERT_EQ(NULL, ptr)` but not `EXPECT_NE(NULL, ptr)` and `ASSERT_NE(NULL, ptr)`?
 
-First of all you can use `EXPECT_NE(nullptr, ptr)` and `ASSERT_NE(nullptr,
-ptr)`. This is the preferred syntax in the style guide because nullptr does not
-have the type problems that NULL does. Which is why NULL does not work.
+First of all, you can use `nullptr` with each of these macros, e.g.
+`EXPECT_EQ(ptr, nullptr)`, `EXPECT_NE(ptr, nullptr)`, `ASSERT_EQ(ptr, nullptr)`,
+`ASSERT_NE(ptr, nullptr)`. This is the preferred syntax in the style guide
+because `nullptr` does not have the type problems that `NULL` does.
 
 Due to some peculiarity of C++, it requires some non-trivial template meta
 programming tricks to support using `NULL` as an argument of the `EXPECT_XX()`
@@ -70,22 +71,21 @@ and `ASSERT_XX()` macros. Therefore we only do it where it's most needed
 (otherwise we make the implementation of googletest harder to maintain and more
 error-prone than necessary).
 
-The `EXPECT_EQ()` macro takes the *expected* value as its first argument and the
-*actual* value as the second. It's reasonable that someone wants to write
-`EXPECT_EQ(NULL, some_expression)`, and this indeed was requested several times.
-Therefore we implemented it.
+Historically, the `EXPECT_EQ()` macro took the *expected* value as its first
+argument and the *actual* value as the second, though this argument order is now
+discouraged. It was reasonable that someone wanted
+to write `EXPECT_EQ(NULL, some_expression)`, and this indeed was requested
+several times. Therefore we implemented it.
 
-The need for `EXPECT_NE(NULL, ptr)` isn't nearly as strong. When the assertion
+The need for `EXPECT_NE(NULL, ptr)` wasn't nearly as strong. When the assertion
 fails, you already know that `ptr` must be `NULL`, so it doesn't add any
 information to print `ptr` in this case. That means `EXPECT_TRUE(ptr != NULL)`
 works just as well.
 
-If we were to support `EXPECT_NE(NULL, ptr)`, for consistency we'll have to
-support `EXPECT_NE(ptr, NULL)` as well, as unlike `EXPECT_EQ`, we don't have a
-convention on the order of the two arguments for `EXPECT_NE`. This means using
-the template meta programming tricks twice in the implementation, making it even
-harder to understand and maintain. We believe the benefit doesn't justify the
-cost.
+If we were to support `EXPECT_NE(NULL, ptr)`, for consistency we'd have to
+support `EXPECT_NE(ptr, NULL)` as well. This means using the template meta
+programming tricks twice in the implementation, making it even harder to
+understand and maintain. We believe the benefit doesn't justify the cost.
 
 Finally, with the growth of the gMock matcher library, we are encouraging people
 to use the unified `EXPECT_THAT(value, matcher)` syntax more often in tests. One
