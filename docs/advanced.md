@@ -1205,10 +1205,10 @@ class FooTest : public testing::Test {
   }
 
   // You can define per-test set-up logic as usual.
-  virtual void SetUp() { ... }
+  void SetUp() override { ... }
 
   // You can define per-test tear-down logic as usual.
-  virtual void TearDown() { ... }
+  void TearDown() override { ... }
 
   // Some expensive resource shared by all tests.
   static T* shared_resource_;
@@ -1239,7 +1239,7 @@ First, you subclass the `::testing::Environment` class to define a test
 environment, which knows how to set-up and tear-down:
 
 ```c++
-class Environment : public testing::Environment {
+class Environment : public ::testing::Environment {
  public:
   ~Environment() override {}
 
@@ -1974,13 +1974,13 @@ Here's an example:
 ```c++
   class MinimalistPrinter : public testing::EmptyTestEventListener {
     // Called before a test starts.
-    virtual void OnTestStart(const testing::TestInfo& test_info) {
+    void OnTestStart(const testing::TestInfo& test_info) override {
       printf("*** Test %s.%s starting.\n",
              test_info.test_suite_name(), test_info.name());
     }
 
     // Called after a failed assertion or a SUCCESS().
-    virtual void OnTestPartResult(const testing::TestPartResult& test_part_result) {
+    void OnTestPartResult(const testing::TestPartResult& test_part_result) override {
       printf("%s in %s:%d\n%s\n",
              test_part_result.failed() ? "*** Failure" : "Success",
              test_part_result.file_name(),
@@ -1989,7 +1989,7 @@ Here's an example:
     }
 
     // Called after a test ends.
-    virtual void OnTestEnd(const testing::TestInfo& test_info) {
+    void OnTestEnd(const testing::TestInfo& test_info) override {
       printf("*** Test %s.%s ending.\n",
              test_info.test_suite_name(), test_info.name());
     }
