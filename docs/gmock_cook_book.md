@@ -251,9 +251,9 @@ tests.
 
 ### Mocking Free Functions
 
-It's possible to use gMock to mock a free function (i.e. a C-style function or a
-static method). You just need to rewrite your code to use an interface (abstract
-class).
+It is not possible to directly mock a free function (i.e. a C-style function or
+a static method). If you need to, you can rewrite your code to use an interface
+(abstract class).
 
 Instead of calling a free function (say, `OpenFile`) directly, introduce an
 interface for it and have a concrete subclass that calls the free function:
