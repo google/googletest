@@ -70,7 +70,7 @@ class GTestXMLTestCase(gtest_test_utils.TestCase):
     self.assertEquals(expected_node.tagName, actual_node.tagName)
 
     expected_attributes = expected_node.attributes
-    actual_attributes   = actual_node  .attributes
+    actual_attributes = actual_node.attributes
     self.assertEquals(
         expected_attributes.length, actual_attributes.length,
         'attribute numbers differ in element %s:\nExpected: %r\nActual: %r' % (
@@ -78,7 +78,7 @@ class GTestXMLTestCase(gtest_test_utils.TestCase):
             actual_attributes.keys()))
     for i in range(expected_attributes.length):
       expected_attr = expected_attributes.item(i)
-      actual_attr   = actual_attributes.get(expected_attr.name)
+      actual_attr = actual_attributes.get(expected_attr.name)
       self.assert_(
           actual_attr is not None,
           'expected attribute %s not found in element %s' %
