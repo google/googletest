@@ -706,12 +706,12 @@ whether the code is under test.
 ## How do I temporarily disable a test?
 
 If you have a broken test that you cannot fix right away, you can add the
-DISABLED_ prefix to its name. This will exclude it from execution. This is
-better than commenting out the code or using #if 0, as disabled tests are still
-compiled (and thus won't rot).
+`DISABLED_` prefix to its name. This will exclude it from execution. This is
+better than commenting out the code or using `#if 0`, as disabled tests are
+still compiled (and thus won't rot).
 
 To include disabled tests in test execution, just invoke the test program with
-the --gtest_also_run_disabled_tests flag.
+the `--gtest_also_run_disabled_tests` flag.
 
 ## Is it OK if I have two separate `TEST(Foo, Bar)` test methods defined in different namespaces?
 
