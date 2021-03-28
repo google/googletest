@@ -453,7 +453,7 @@ class OsStackTraceGetter : public OsStackTraceGetterInterface {
   void UponLeavingGTest() override;
 
  private:
-#if GTEST_HAS_ABSL
+#if GTEST_HAS_ABSL || GTEST_HAS_UNWIND
   Mutex mutex_;  // Protects all internal state.
 
   // We save the stack frame below the frame that calls user code.
@@ -461,7 +461,20 @@ class OsStackTraceGetter : public OsStackTraceGetterInterface {
   // the user code changes between the call to UponLeavingGTest()
   // and any calls to the stack trace code from within the user code.
   void* caller_frame_ = nullptr;
-#endif  // GTEST_HAS_ABSL
+
+  // Store stack trace information in this structure for better
+  // processing, like name demangling and file lookup
+  struct StackFrame {
+    void* frame_ = nullptr;
+    std::string proc_name_;
+#if GTEST_HAS_DWARF
+    std::string file_name_;
+    int line_number_ = -1;
+#endif
+  };
+
+  size_t UnwindGetStackTrace(std::vector<OsStackTraceGetter::StackFrame>& stack_trace, int max_depth, int skip_count, void* caller_frame = nullptr);
+#endif  // GTEST_HAS_ABSL || GTEST_HAS_UNWIND
 
   GTEST_DISALLOW_COPY_AND_ASSIGN_(OsStackTraceGetter);
 };
