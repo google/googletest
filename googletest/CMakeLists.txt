@@ -92,10 +92,13 @@ include(cmake/internal_utils.cmake)
 
 config_compiler_and_linker()  # Defined in internal_utils.cmake.
 
+# Needed to set the namespace for both the export targets and the
+# alias libraries
+set(cmake_package_name GTest CACHE INTERNAL "")
+
 # Create the CMake package file descriptors.
 if (INSTALL_GTEST)
   include(CMakePackageConfigHelpers)
-  set(cmake_package_name GTest)
   set(targets_export_name ${cmake_package_name}Targets CACHE INTERNAL "")
   set(generated_dir "${CMAKE_CURRENT_BINARY_DIR}/generated" CACHE INTERNAL "")
   set(cmake_files_install_dir "${CMAKE_INSTALL_LIBDIR}/cmake/${cmake_package_name}")
