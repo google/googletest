@@ -1962,18 +1962,37 @@ class TestWithParam : public Test, public WithParamInterface<T> {
 // Boolean assertions. Condition can be either a Boolean expression or an
 // AssertionResult. For more information on how to use AssertionResult with
 // these macros see comments on that class.
-#define EXPECT_TRUE(condition) \
+#define GTEST_EXPECT_TRUE(condition) \
   GTEST_TEST_BOOLEAN_(condition, #condition, false, true, \
                       GTEST_NONFATAL_FAILURE_)
-#define EXPECT_FALSE(condition) \
+#define GTEST_EXPECT_FALSE(condition) \
   GTEST_TEST_BOOLEAN_(!(condition), #condition, true, false, \
                       GTEST_NONFATAL_FAILURE_)
-#define ASSERT_TRUE(condition) \
+#define GTEST_ASSERT_TRUE(condition) \
   GTEST_TEST_BOOLEAN_(condition, #condition, false, true, \
                       GTEST_FATAL_FAILURE_)
-#define ASSERT_FALSE(condition) \
+#define GTEST_ASSERT_FALSE(condition) \
   GTEST_TEST_BOOLEAN_(!(condition), #condition, true, false, \
                       GTEST_FATAL_FAILURE_)
+
+// Define these macros to 1 to omit the definition of the corresponding
+// EXPECT or ASSERT, which clashes with some users' own code.
+
+#if !GTEST_DONT_DEFINE_EXPECT_TRUE
+#define EXPECT_TRUE(condition) GTEST_EXPECT_TRUE(condition)
+#endif
+
+#if !GTEST_DONT_DEFINE_EXPECT_FALSE
+#define EXPECT_FALSE(condition) GTEST_EXPECT_FALSE(condition)
+#endif
+
+#if !GTEST_DONT_DEFINE_ASSERT_TRUE
+#define ASSERT_TRUE(condition) GTEST_ASSERT_TRUE(condition)
+#endif
+
+#if !GTEST_DONT_DEFINE_ASSERT_FALSE
+#define ASSERT_FALSE(condition) GTEST_ASSERT_FALSE(condition)
+#endif
 
 // Macros for testing equalities and inequalities.
 //
