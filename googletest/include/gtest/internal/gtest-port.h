@@ -2277,11 +2277,16 @@ using Any = ::absl::any;
 }  // namespace internal
 }  // namespace testing
 #else
+#if !defined(GTEST_INTERNAL_HAS_ANY)
 #ifdef __has_include
 #if __has_include(<any>) && __cplusplus >= 201703L
 // Otherwise for C++17 and higher use std::any for UniversalPrinter<>
 // specializations.
 #define GTEST_INTERNAL_HAS_ANY 1
+#endif  // __has_include(<any>) && __cplusplus >= 201703L
+#endif  // __has_include
+#endif  // !defined(GTEST_INTERNAL_HAS_ANY)
+#if GTEST_INTERNAL_HAS_ANY
 #include <any>
 namespace testing {
 namespace internal {
@@ -2290,8 +2295,7 @@ using Any = ::std::any;
 }  // namespace testing
 // The case where absl is configured NOT to alias std::any is not
 // supported.
-#endif  // __has_include(<any>) && __cplusplus >= 201703L
-#endif  // __has_include
+#endif  // GTEST_INTERNAL_HAS_ANY
 #endif  // GTEST_HAS_ABSL
 
 #if GTEST_HAS_ABSL
@@ -2306,11 +2310,16 @@ using Optional = ::absl::optional<T>;
 }  // namespace internal
 }  // namespace testing
 #else
+#if !defined(GTEST_INTERNAL_HAS_OPTIONAL)
 #ifdef __has_include
 #if __has_include(<optional>) && __cplusplus >= 201703L
 // Otherwise for C++17 and higher use std::optional for UniversalPrinter<>
 // specializations.
 #define GTEST_INTERNAL_HAS_OPTIONAL 1
+#endif  // __has_include(<optional>) && __cplusplus >= 201703L
+#endif  // __has_include
+#endif  // !defined(GTEST_INTERNAL_HAS_OPTIONAL)
+#if GTEST_INTERNAL_HAS_OPTIONAL
 #include <optional>
 namespace testing {
 namespace internal {
@@ -2320,8 +2329,7 @@ using Optional = ::std::optional<T>;
 }  // namespace testing
 // The case where absl is configured NOT to alias std::optional is not
 // supported.
-#endif  // __has_include(<optional>) && __cplusplus >= 201703L
-#endif  // __has_include
+#endif  // GTEST_INTERNAL_HAS_OPTIONAL
 #endif  // GTEST_HAS_ABSL
 
 #if GTEST_HAS_ABSL
@@ -2335,11 +2343,16 @@ using StringView = ::absl::string_view;
 }  // namespace internal
 }  // namespace testing
 #else
-# ifdef __has_include
-#   if __has_include(<string_view>) && __cplusplus >= 201703L
+#if !defined(GTEST_INTERNAL_HAS_STRING_VIEW)
+#ifdef __has_include
+#if __has_include(<string_view>) && __cplusplus >= 201703L
 // Otherwise for C++17 and higher use std::string_view for Matcher<>
 // specializations.
-#   define GTEST_INTERNAL_HAS_STRING_VIEW 1
+#define GTEST_INTERNAL_HAS_STRING_VIEW 1
+#endif  // __has_include(<string_view>) && __cplusplus >= 201703L
+#endif  // __has_include
+#endif  // !defined(GTEST_INTERNAL_HAS_STRING_VIEW)
+#if GTEST_INTERNAL_HAS_STRING_VIEW
 #include <string_view>
 namespace testing {
 namespace internal {
@@ -2348,8 +2361,7 @@ using StringView = ::std::string_view;
 }  // namespace testing
 // The case where absl is configured NOT to alias std::string_view is not
 // supported.
-#  endif  // __has_include(<string_view>) && __cplusplus >= 201703L
-# endif  // __has_include
+#endif  // GTEST_INTERNAL_HAS_STRING_VIEW
 #endif  // GTEST_HAS_ABSL
 
 #if GTEST_HAS_ABSL
@@ -2364,11 +2376,16 @@ using Variant = ::absl::variant<T...>;
 }  // namespace internal
 }  // namespace testing
 #else
+#if !defined(GTEST_INTERNAL_HAS_VARIANT)
 #ifdef __has_include
 #if __has_include(<variant>) && __cplusplus >= 201703L
 // Otherwise for C++17 and higher use std::variant for UniversalPrinter<>
 // specializations.
 #define GTEST_INTERNAL_HAS_VARIANT 1
+#endif  // __has_include(<variant>) && __cplusplus >= 201703L
+#endif  // __has_include
+#endif  // !defined(GTEST_INTERNAL_HAS_VARIANT)
+#if GTEST_INTERNAL_HAS_VARIANT
 #include <variant>
 namespace testing {
 namespace internal {
@@ -2377,8 +2394,7 @@ using Variant = ::std::variant<T...>;
 }  // namespace internal
 }  // namespace testing
 // The case where absl is configured NOT to alias std::variant is not supported.
-#endif  // __has_include(<variant>) && __cplusplus >= 201703L
-#endif  // __has_include
+#endif  // GTEST_INTERNAL_HAS_VARIANT
 #endif  // GTEST_HAS_ABSL
 
 #endif  // GOOGLETEST_INCLUDE_GTEST_INTERNAL_GTEST_PORT_H_
