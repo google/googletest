@@ -953,12 +953,12 @@ int FuchsiaDeathTest::Wait() {
 
   ReadAndInterpretStatusByte();
 
-  zx_info_process_t buffer;
+  zx_info_process_v2_t buffer;
   status_zx = child_process_.get_info(
-      ZX_INFO_PROCESS, &buffer, sizeof(buffer), nullptr, nullptr);
+      ZX_INFO_PROCESS_V2, &buffer, sizeof(buffer), nullptr, nullptr);
   GTEST_DEATH_TEST_CHECK_(status_zx == ZX_OK);
 
-  GTEST_DEATH_TEST_CHECK_(buffer.exited);
+  GTEST_DEATH_TEST_CHECK_(buffer.flags & ZX_INFO_PROCESS_FLAG_EXITED);
   set_status(buffer.return_code);
   return status();
 }
