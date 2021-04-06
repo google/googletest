@@ -362,10 +362,11 @@ messages, you can use:
         int len)` -- see [Multi-argument Matchers](#MultiArgMatchers)).
 *   The array being matched may be multi-dimensional (i.e. its elements can be
     arrays).
-*   `m` in `Pointwise(m, ...)` should be a matcher for `::std::tuple<T, U>`
-    where `T` and `U` are the element type of the actual container and the
-    expected container, respectively. For example, to compare two `Foo`
-    containers where `Foo` doesn't support `operator==`, one might write:
+*   `m` in `Pointwise(m, ...)` and `UnorderedPointwise(m, ...)` should be a
+    matcher for `::std::tuple<T, U>` where `T` and `U` are the element type of
+    the actual container and the expected container, respectively. For example,
+    to compare two `Foo` containers where `Foo` doesn't support `operator==`,
+    one might write:
 
     ```cpp
     using ::std::get;
