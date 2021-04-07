@@ -150,7 +150,6 @@ cc_test(
     name = "gtest_unittest",
     size = "small",
     srcs = ["gtest_unittest.cc"],
-    args = ["--heap_check=strict"],
     shard_count = 2,
     deps = ["//:gtest_main"],
 )
