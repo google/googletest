@@ -2705,17 +2705,9 @@ behavior nondeterministic. A better way is to use gMock actions and
 `Notification` objects to force your asynchronous test to behave synchronously.
 
 ```cpp
-using ::testing::DoAll;
-using ::testing::InvokeWithoutArgs;
-using ::testing::Return;
-
 class MockEventDispatcher : public EventDispatcher {
   MOCK_METHOD(bool, DispatchEvent, (int32), (override));
 };
-
-ACTION_P(Notify, notification) {
-  notification->Notify();
-}
 
 TEST(EventQueueTest, EnqueueEventTest) {
   MockEventDispatcher mock_event_dispatcher;
@@ -2724,7 +2716,7 @@ TEST(EventQueueTest, EnqueueEventTest) {
   const int32 kEventId = 321;
   absl::Notification done;
   EXPECT_CALL(mock_event_dispatcher, DispatchEvent(kEventId))
-      .WillOnce(Notify(&done));
+      .WillOnce([&done] { done.Notify(); });
 
   event_queue.EnqueueEvent(kEventId);
   done.WaitForNotification();
