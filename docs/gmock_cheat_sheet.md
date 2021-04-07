@@ -385,11 +385,27 @@ messages, you can use:
 | `Field(field_name, &class::field, m)` | The same as the two-parameter version, but provides a better error message. |
 | `Key(e)`                        | `argument.first` matches `e`, which can be either a value or a matcher. E.g. `Contains(Key(Le(5)))` can verify that a `map` contains a key `<= 5`. |
 | `Pair(m1, m2)`                  | `argument` is an `std::pair` whose `first` field matches `m1` and `second` field matches `m2`. |
-| `FieldsAre(m...)`                   | `argument` is a compatible object where each field matches piecewise with `m...`. A compatible object is any that supports the `std::tuple_size<Obj>`+`get<I>(obj)` protocol. In C++17 and up this also supports types compatible with structured bindings, like aggregates. |
+| `FieldsAre(m...)`                   | `argument` is a compatible object where each field matches piecewise with the matchers `m...`. A compatible object is any that supports the `std::tuple_size<Obj>`+`get<I>(obj)` protocol. In C++17 and up this also supports types compatible with structured bindings, like aggregates. |
 | `Property(&class::property, m)` | `argument.property()` (or `argument->property()` when `argument` is a plain pointer) matches matcher `m`, where `argument` is an object of type _class_. The method `property()` must take no argument and be declared as `const`. |
 | `Property(property_name, &class::property, m)` | The same as the two-parameter version, but provides a better error message.
 
 **Notes:**
+
+*   You can use `FieldsAre()` to match any type that supports structured
+    bindings, such as `std::tuple`, `std::pair`, `std::array`, and aggregate
+    types. For example:
+
+    ```cpp
+    std::tuple<int, std::string> my_tuple{7, "hello world"};
+    EXPECT_THAT(my_tuple, FieldsAre(Ge(0), HasSubstr("hello")));
+
+    struct MyStruct {
+      int value = 42;
+      std::string greeting = "aloha";
+    };
+    MyStruct s;
+    EXPECT_THAT(s, FieldsAre(42, "aloha"));
+    ```
 
 *   Don't use `Property()` against member functions that you do not own, because
     taking addresses of functions is fragile and generally not part of the
