@@ -34,7 +34,9 @@ set -euox pipefail
 readonly LINUX_LATEST_CONTAINER="gcr.io/google.com/absl-177019/linux_hybrid-latest:20201008"
 readonly LINUX_GCC_FLOOR_CONTAINER="gcr.io/google.com/absl-177019/linux_gcc-floor:20201015"
 
-SRC=$(realpath git/googletest)
+if [[ -z ${GTEST_ROOT:-} ]]; then
+  GTEST_ROOT="$(realpath $(dirname ${0})/..)"
+fi
 
 if [[ -z ${STD:-} ]]; then
   STD="c++11 c++14 c++17 c++20"
@@ -44,7 +46,7 @@ fi
 for cc in /usr/local/bin/gcc /opt/llvm/clang/bin/clang; do
   for cmake_off_on in OFF ON; do
     time docker run \
-      --volume="${SRC}:/src:ro" \
+      --volume="${GTEST_ROOT}:/src:ro" \
       --tmpfs="/build:exec" \
       --workdir="/build" \
       --rm \
@@ -66,7 +68,7 @@ done
 
 # Do one test with an older version of GCC
 time docker run \
-  --volume="${SRC}:/src:ro" \
+  --volume="${GTEST_ROOT}:/src:ro" \
   --workdir="/src" \
   --rm \
   --env="CC=/usr/local/bin/gcc" \
@@ -83,7 +85,7 @@ time docker run \
 for std in ${STD}; do
   for absl in 0 1; do
     time docker run \
-      --volume="${SRC}:/src:ro" \
+      --volume="${GTEST_ROOT}:/src:ro" \
       --workdir="/src" \
       --rm \
       --env="CC=/usr/local/bin/gcc" \
@@ -103,7 +105,7 @@ done
 for std in ${STD}; do
   for absl in 0 1; do
     time docker run \
-      --volume="${SRC}:/src:ro" \
+      --volume="${GTEST_ROOT}:/src:ro" \
       --workdir="/src" \
       --rm \
       --env="CC=/opt/llvm/clang/bin/clang" \
