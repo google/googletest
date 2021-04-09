@@ -166,6 +166,8 @@ GTEST_DECLARE_string_(flagfile);
 // The upper limit for valid stack trace depths.
 const int kMaxStackTraceDepth = 100;
 
+constexpr int kFoo = 1;
+
 namespace internal {
 
 class AssertHelper;
