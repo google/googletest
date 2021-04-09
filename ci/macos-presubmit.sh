@@ -31,13 +31,15 @@
 
 set -euox pipefail
 
-SRC=$(realpath git/googletest)
+if [[ -z ${GTEST_ROOT:-} ]]; then
+  GTEST_ROOT="$(realpath $(dirname ${0})/..)"
+fi
 
 # Test the CMake build
 for cmake_off_on in OFF ON; do
   BUILD_DIR=$(mktemp -d build_dir.XXXXXXXX)
   cd ${BUILD_DIR}
-  time cmake ${SRC} \
+  time cmake ${GTEST_ROOT} \
     -DCMAKE_CXX_STANDARD=11 \
     -Dgtest_build_samples=ON \
     -Dgtest_build_tests=ON \
@@ -59,7 +61,7 @@ else
   BAZEL_BIN="bazel"
 fi
 
-cd ${SRC}
+cd ${GTEST_ROOT}
 for absl in 0 1; do
   ${BAZEL_BIN} test ... \
     --copt="-Wall" \
