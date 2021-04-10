@@ -1741,10 +1741,11 @@ To test them, we use the following special techniques:
     }
     ```
 
-    Pay special attention when your class is defined in a namespace, as you
-    should define your test fixtures and tests in the same namespace if you want
-    them to be friends of your class. For example, if the code to be tested
-    looks like:
+    Pay special attention when your class is defined in a namespace. If you want
+    your test fixtures and tests to be friends of your class, then they must be
+    defined in the exact same namespace (no anonymous or inline namespaces).
+
+    For example, if the code to be tested looks like:
 
     ```c++
     namespace my_namespace {
