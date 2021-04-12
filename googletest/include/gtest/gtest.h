@@ -169,7 +169,7 @@ const int kMaxStackTraceDepth = 100;
 constexpr int kFoo = 1;
 
 #ifdef GTEST_OS_WINDOWS
-garbage lets break windows lmao
+lets break windows lmao
 #endif  // GTEST_OS_WINDOWS
 
 namespace internal {
