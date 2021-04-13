@@ -168,9 +168,9 @@ const int kMaxStackTraceDepth = 100;
 
 constexpr int kFoo = 1;
 
-#ifdef GTEST_OS_WINDOWS
-lets break windows lmao
-#endif  // GTEST_OS_WINDOWS
+#ifdef GTEST_OS_MAC
+lets break apples lmao
+#endif  // GTEST_OS_MAC
 
 namespace internal {
 
