@@ -60,8 +60,8 @@ If you want to use GoogleTest in a project which already uses CMake, the easiest
 way is to get installed libraries and headers.
 
 *   Import GoogleTest by using `find_package` (or `pkg_check_modules`). For
-    example, if `find_package(GTest CONFIG REQUIRED)` is succeed, you can use
-    the libraries as `GTest::gtest`, `GTest::gmock`.
+    example, if `find_package(GTest CONFIG REQUIRED)` succeeds, you can use the
+    libraries as `GTest::gtest`, `GTest::gmock`.
 
 And a more robust and flexible approach is to build GoogleTest as part of that
 project directly. This is done by making the GoogleTest source code available to
