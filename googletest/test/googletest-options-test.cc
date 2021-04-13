@@ -42,6 +42,9 @@
 # include <windows.h>
 #elif GTEST_OS_WINDOWS
 # include <direct.h>
+#elif GTEST_OS_OS2
+// For strcasecmp on OS/2
+#include <strings.h>
 #endif  // GTEST_OS_WINDOWS_MOBILE
 
 #include "src/gtest-internal-inl.h"
