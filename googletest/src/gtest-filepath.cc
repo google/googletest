@@ -322,7 +322,7 @@ bool FilePath::CreateFolder() const {
   delete [] unicode;
 #elif GTEST_OS_WINDOWS
   int result = _mkdir(pathname_.c_str());
-#elif GTEST_OS_ESP8266
+#elif GTEST_OS_ESP8266 || GTEST_OS_XTENSA
   // do nothing
   int result = 0;
 #else
