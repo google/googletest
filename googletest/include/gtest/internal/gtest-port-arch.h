@@ -107,6 +107,8 @@
 #define GTEST_OS_ESP8266 1
 #elif defined ESP32
 #define GTEST_OS_ESP32 1
+#elif defined(__XTENSA__)
+#define GTEST_OS_XTENSA 1
 #endif  // __CYGWIN__
 
 #endif  // GOOGLETEST_INCLUDE_GTEST_INTERNAL_GTEST_PORT_ARCH_H_

@@ -4096,6 +4096,10 @@ static bool PortableLocaltime(time_t seconds, struct tm* out) {
   if (tm_ptr == nullptr) return false;
   *out = *tm_ptr;
   return true;
+#elif defined(__STDC_LIB_EXT1__)
+  // Uses localtime_s when available as localtime_r is only available from
+  // C23 standard.
+  return localtime_s(&seconds, out) != nullptr;
 #else
   return localtime_r(&seconds, out) != nullptr;
 #endif
