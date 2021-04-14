@@ -865,7 +865,7 @@ class Arguments {
   }
 
   int size() {
-    return args_.size() - 1;
+    return static_cast<int>(args_.size()) - 1;
   }
 
  private:
@@ -959,7 +959,7 @@ int FuchsiaDeathTest::Wait() {
   GTEST_DEATH_TEST_CHECK_(status_zx == ZX_OK);
 
   GTEST_DEATH_TEST_CHECK_(buffer.flags & ZX_INFO_PROCESS_FLAG_EXITED);
-  set_status(buffer.return_code);
+  set_status(static_cast<int>(buffer.return_code));
   return status();
 }
 
