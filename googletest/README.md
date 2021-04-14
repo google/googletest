@@ -85,8 +85,8 @@ main build can be done a few different ways:
     is just a little more complex, but doesn't have the limitations of the other
     methods.
 
-The last of the above methods is implemented with a small piece of CMake code so
-the code is pulled into the main build.
+The last of the above methods is implemented with a small piece of CMake so the
+code is pulled into the main build.
 
 Just add to your `CMakeLists.txt`:
 
