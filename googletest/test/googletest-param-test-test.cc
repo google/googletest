@@ -835,14 +835,14 @@ TEST(MacroNameing, LookupNames) {
     }
   }
 
-  // Check that the expected form of the test suit name actualy exists.
+  // Check that the expected form of the test suit name actually exists.
   EXPECT_NE(  //
       know_suite_names.find("FortyTwo/MacroNamingTest"),
       know_suite_names.end());
   EXPECT_NE(
       know_suite_names.find("MacroNamingTestNonParametrized"),
       know_suite_names.end());
-  // Check that the expected form of the test name actualy exists.
+  // Check that the expected form of the test name actually exists.
   EXPECT_NE(  //
       know_test_names.find("FortyTwo/MacroNamingTest.FooSomeTestName/0"),
       know_test_names.end());
