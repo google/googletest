@@ -529,25 +529,31 @@ partially-destructed state! You almost certainly want to `abort` or use
 
 ## Skipping test execution
 
-Related to pseudo assertions `SUCCEED()` and `FAIL()` you can prevent further test
-execution with the `GTEST_SKIP()` macro.
+Related to the assertions `SUCCEED()` and `FAIL()`, you can prevent further test
+execution at runtime with the `GTEST_SKIP()` macro. This is useful when you need
+to check for preconditions of the system under test during runtime and skip tests
+in a meaningful way.
 
-`GTEST_SKIP` can be used in test cases or in `SetUp()` methods of classes inherited
-from either `::testing::Environment` or `::testing::Test`. The latter is a convenient
-way to check for preconditions of the system under test during runtime and skip
-the test in a meaningful way.
+`GTEST_SKIP()` can be used in individual test cases or in the `SetUp()` methods of
+classes derived from either `::testing::Environment` or `::testing::Test`. For
+example:
 
-Based on googletest's own test code:
 ```c++
-class Fixture : public Test {
+TEST(SkipTest, DoesSkip) {
+  GTEST_SKIP() << "Skipping single test";
+  EXPECT_EQ(0, 1);  // Won't fail; it won't be executed
+}
+
+class SkipFixture : public ::testing::Test {
  protected:
   void SetUp() override {
-    GTEST_SKIP() << "skipping all tests for this fixture";
+    GTEST_SKIP() << "Skipping all tests for this fixture";
   }
 };
 
-TEST_F(Fixture, SkipsOneTest) {
-  EXPECT_EQ(5, 7); // won't fail, it won't get executed
+// Tests for SkipFixture won't be executed.
+TEST_F(SkipFixture, SkipsOneTest) {
+  EXPECT_EQ(5, 7);  // Won't fail
 }
 ```
 
