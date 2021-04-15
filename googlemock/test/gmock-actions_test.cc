@@ -795,7 +795,7 @@ TEST(DoDefaultDeathTest, DiesIfUsedInCompositeAction) {
 }
 
 // Tests that DoDefault() returns the default value set by
-// DefaultValue<T>::Set() when it's not overriden by an ON_CALL().
+// DefaultValue<T>::Set() when it's not overridden by an ON_CALL().
 TEST(DoDefaultTest, ReturnsUserSpecifiedPerTypeDefaultValueWhenThereIsOne) {
   DefaultValue<int>::Set(1);
   MockClass mock;

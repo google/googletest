@@ -201,7 +201,7 @@ OutputStream& operator<<(OutputStream& os,
   return os;
 }
 
-// A user-defined streamable but recursivly-defined container type in
+// A user-defined streamable but recursively-defined container type in
 // a user namespace, it mimics therefore std::filesystem::path or
 // boost::filesystem::path.
 class PathLike {
