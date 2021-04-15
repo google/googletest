@@ -544,7 +544,7 @@ TEST_F(Fixture, SkipsOneTest) {
 }
 ```
 
-The informational text is optional.
+As with assertion macros, you can stream a custom message into `GTEST_SKIP()`.
 
 ## Teaching googletest How to Print Your Values
 
