@@ -1044,7 +1044,7 @@ class Timer {
   }
 
  private:
-  std::chrono::time_point<std::chrono::steady_clock> start_;
+  std::chrono::steady_clock::time_point start_;
 };
 
 // Returns a timestamp as milliseconds since the epoch. Note this time may jump
