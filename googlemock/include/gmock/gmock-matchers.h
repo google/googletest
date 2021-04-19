@@ -3484,7 +3484,7 @@ class ElementsAreMatcherImpl : public MatcherInterface<Container> {
 // Initially, there are no edges.
 // Use NextGraph() to iterate over all possible edge configurations.
 // Use Randomize() to generate a random edge configuration.
-class GTEST_API_ MatchMatrix {
+class GMOCK_API_ MatchMatrix {
  public:
   MatchMatrix(size_t num_elements, size_t num_matchers)
       : num_elements_(num_elements),
@@ -3529,7 +3529,7 @@ typedef ::std::vector<ElementMatcherPair> ElementMatcherPairs;
 
 // Returns a maximum bipartite matching for the specified graph 'g'.
 // The matching is represented as a vector of {element, matcher} pairs.
-GTEST_API_ ElementMatcherPairs
+GMOCK_API_ ElementMatcherPairs
 FindMaxBipartiteMatching(const MatchMatrix& g);
 
 struct UnorderedMatcherRequire {
@@ -3543,7 +3543,7 @@ struct UnorderedMatcherRequire {
 // Untyped base class for implementing UnorderedElementsAre.  By
 // putting logic that's not specific to the element type here, we
 // reduce binary bloat and increase compilation speed.
-class GTEST_API_ UnorderedElementsAreMatcherImplBase {
+class GMOCK_API_ UnorderedElementsAreMatcherImplBase {
  protected:
   explicit UnorderedElementsAreMatcherImplBase(
       UnorderedMatcherRequire::Flags matcher_flags)
@@ -3867,7 +3867,7 @@ BoundSecondMatcher<Tuple2Matcher, Second> MatcherBindSecond(
 // 'negation' is false; otherwise returns the description of the
 // negation of the matcher.  'param_values' contains a list of strings
 // that are the print-out of the matcher's parameters.
-GTEST_API_ std::string FormatMatcherDescription(bool negation,
+GMOCK_API_ std::string FormatMatcherDescription(bool negation,
                                                 const char* matcher_name,
                                                 const Strings& param_values);
 

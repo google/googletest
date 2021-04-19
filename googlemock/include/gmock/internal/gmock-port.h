@@ -60,6 +60,27 @@
 # error "At least Visual C++ 2015 (14.0) is required to compile Google Mock."
 #endif
 
+// GMOCK_API_ qualifies all symbols that must be exported. The definitions below
+// are guarded by #ifndef to give embedders a chance to define GMOCK_API_ in
+// gmock/internal/custom/gmock-port.h
+#ifndef GMOCK_API_
+
+#ifdef _MSC_VER
+# if GMOCK_LINKED_AS_SHARED_LIBRARY
+#  define GMOCK_API_ __declspec(dllimport)
+# elif GMOCK_CREATE_SHARED_LIBRARY
+#  define GMOCK_API_ __declspec(dllexport)
+# endif
+#elif __GNUC__ >= 4 || defined(__clang__)
+# define GMOCK_API_ __attribute__((visibility ("default")))
+#endif  // _MSC_VER
+
+#endif  // GMOCK_API_
+
+#ifndef GMOCK_API_
+# define GMOCK_API_
+#endif  // GMOCK_API_
+
 // Macro for referencing flags.  This is public as we want the user to
 // use this syntax to reference Google Mock flags.
 #define GMOCK_FLAG(name) FLAGS_gmock_##name
@@ -69,29 +90,29 @@
 // Macros for declaring flags.
 #define GMOCK_DECLARE_bool_(name)          \
   namespace testing {                      \
-  GTEST_API_ extern bool GMOCK_FLAG(name); \
+  GMOCK_API_ extern bool GMOCK_FLAG(name); \
   }
 #define GMOCK_DECLARE_int32_(name)            \
   namespace testing {                         \
-  GTEST_API_ extern int32_t GMOCK_FLAG(name); \
+  GMOCK_API_ extern int32_t GMOCK_FLAG(name); \
   }
 #define GMOCK_DECLARE_string_(name)                 \
   namespace testing {                               \
-  GTEST_API_ extern ::std::string GMOCK_FLAG(name); \
+  GMOCK_API_ extern ::std::string GMOCK_FLAG(name); \
   }
 
 // Macros for defining flags.
 #define GMOCK_DEFINE_bool_(name, default_val, doc)  \
   namespace testing {                               \
-  GTEST_API_ bool GMOCK_FLAG(name) = (default_val); \
+  GMOCK_API_ bool GMOCK_FLAG(name) = (default_val); \
   }
 #define GMOCK_DEFINE_int32_(name, default_val, doc)    \
   namespace testing {                                  \
-  GTEST_API_ int32_t GMOCK_FLAG(name) = (default_val); \
+  GMOCK_API_ int32_t GMOCK_FLAG(name) = (default_val); \
   }
 #define GMOCK_DEFINE_string_(name, default_val, doc)         \
   namespace testing {                                        \
-  GTEST_API_ ::std::string GMOCK_FLAG(name) = (default_val); \
+  GMOCK_API_ ::std::string GMOCK_FLAG(name) = (default_val); \
   }
 #endif  // !defined(GMOCK_DECLARE_bool_)
 
