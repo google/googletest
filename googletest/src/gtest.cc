@@ -2241,7 +2241,7 @@ void TestResult::RecordProperty(const std::string& xml_element,
   if (!ValidateTestProperty(xml_element, test_property)) {
     return;
   }
-  internal::MutexLock lock(&test_properites_mutex_);
+  internal::MutexLock lock(&test_properties_mutex_);
   const std::vector<TestProperty>::iterator property_with_matching_key =
       std::find_if(test_properties_.begin(), test_properties_.end(),
                    internal::TestPropertyKeyIs(test_property.key()));

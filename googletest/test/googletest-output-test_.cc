@@ -1029,7 +1029,7 @@ auto dynamic_test = (
         "BadDynamicFixture1", "TestBase", nullptr, nullptr, __FILE__, __LINE__,
         []() -> testing::Test* { return new DynamicTest<true>; }),
 
-    // Register two tests with the same fixture incorrectly by ommiting the
+    // Register two tests with the same fixture incorrectly by omitting the
     // return type.
     testing::RegisterTest(
         "BadDynamicFixture2", "FixtureBase", nullptr, nullptr, __FILE__,

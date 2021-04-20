@@ -343,7 +343,7 @@ class MatcherCastImpl {
     // constructor from M (this usually happens when T has an implicit
     // constructor from any type).
     //
-    // It won't work to unconditionally implict_cast
+    // It won't work to unconditionally implicit_cast
     // polymorphic_matcher_or_value to Matcher<T> because it won't trigger
     // a user-defined conversion from M to T if one exists (assuming M is
     // a value).
