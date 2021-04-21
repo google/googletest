@@ -673,7 +673,7 @@ class GTEST_API_ TestResult {
 
   // Protects mutable state of the property vector and of owned
   // properties, whose values may be updated.
-  internal::Mutex test_properites_mutex_;
+  internal::Mutex test_properties_mutex_;
 
   // The vector of TestPartResults
   std::vector<TestPartResult> test_part_results_;

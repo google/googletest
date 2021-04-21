@@ -1164,13 +1164,13 @@ class StreamingListener : public EmptyTestEventListener {
   }
 
   // Note that "event=TestCaseStart" is a wire format and has to remain
-  // "case" for compatibilty
+  // "case" for compatibility
   void OnTestCaseStart(const TestCase& test_case) override {
     SendLn(std::string("event=TestCaseStart&name=") + test_case.name());
   }
 
   // Note that "event=TestCaseEnd" is a wire format and has to remain
-  // "case" for compatibilty
+  // "case" for compatibility
   void OnTestCaseEnd(const TestCase& test_case) override {
     SendLn("event=TestCaseEnd&passed=" + FormatBool(test_case.Passed()) +
            "&elapsed_time=" + StreamableToString(test_case.elapsed_time()) +
