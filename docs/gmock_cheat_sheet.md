@@ -675,7 +675,7 @@ meaning of the `.After()`.
 ### Sequences {#UsingSequences}
 
 When you have a long chain of sequential expectations, it's easier to specify
-the order using **sequences**, which don't require you to given each expectation
+the order using **sequences**, which don't require you to give each expectation
 in the chain a different name. *All expected calls* in the same sequence must
 occur in the order they are specified.
 
