@@ -527,6 +527,38 @@ destructor early, possibly leaving your object in a partially-constructed or
 partially-destructed state! You almost certainly want to `abort` or use
 `SetUp`/`TearDown` instead.
 
+## Skipping test execution
+
+Related to the assertions `SUCCEED()` and `FAIL()`, you can prevent further test
+execution at runtime with the `GTEST_SKIP()` macro. This is useful when you need
+to check for preconditions of the system under test during runtime and skip
+tests in a meaningful way.
+
+`GTEST_SKIP()` can be used in individual test cases or in the `SetUp()` methods
+of classes derived from either `::testing::Environment` or `::testing::Test`.
+For example:
+
+```c++
+TEST(SkipTest, DoesSkip) {
+  GTEST_SKIP() << "Skipping single test";
+  EXPECT_EQ(0, 1);  // Won't fail; it won't be executed
+}
+
+class SkipFixture : public ::testing::Test {
+ protected:
+  void SetUp() override {
+    GTEST_SKIP() << "Skipping all tests for this fixture";
+  }
+};
+
+// Tests for SkipFixture won't be executed.
+TEST_F(SkipFixture, SkipsOneTest) {
+  EXPECT_EQ(5, 7);  // Won't fail
+}
+```
+
+As with assertion macros, you can stream a custom message into `GTEST_SKIP()`.
+
 ## Teaching googletest How to Print Your Values
 
 When a test assertion such as `EXPECT_EQ` fails, googletest prints the argument
