@@ -1184,11 +1184,12 @@ Hamcrest project, which adds `assertThat()` to JUnit.
 
 ### Using Predicates as Matchers
 
-gMock provides a [built-in set](gmock_cheat_sheet.md#MatcherList) of matchers.
-In case you find them lacking, you can use an arbitrary unary predicate function
-or functor as a matcher - as long as the predicate accepts a value of the type
-you want. You do this by wrapping the predicate inside the `Truly()` function,
-for example:
+gMock provides a set of built-in matchers for matching arguments with expected
+values—see the [Matchers Reference](reference/matchers.md) for more information.
+In case you find the built-in set lacking, you can use an arbitrary unary
+predicate function or functor as a matcher - as long as the predicate accepts a
+value of the type you want. You do this by wrapping the predicate inside the
+`Truly()` function, for example:
 
 ```cpp
 using ::testing::Truly;
