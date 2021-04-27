@@ -3696,7 +3696,7 @@ class NotNullMatcher {
   }
 
   // Describes the property of a value matching this matcher.
-  void DescribeTo(std::ostream& os) const { *os << "is not NULL"; }
+  void DescribeTo(std::ostream* os) const { *os << "is not NULL"; }
 
   // Describes the property of a value NOT matching this matcher.
   void DescribeNegationTo(std::ostream* os) const { *os << "is NULL"; }
