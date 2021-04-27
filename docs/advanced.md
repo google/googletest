@@ -364,11 +364,9 @@ Verifies that `val1` is less than, or almost equal to, `val2`. You can replace
 
 ### Asserting Using gMock Matchers
 
-[gMock](gmock_for_dummies.md) comes with
-[a library of matchers](gmock_cheat_sheet.md#MatcherList) for
-validating arguments passed to mock objects. A gMock *matcher* is basically a
-predicate that knows how to describe itself. It can be used in these assertion
-macros:
+gMock comes with a library of *matchers* for validating arguments passed to mock
+objects. A gMock matcher is basically a predicate that knows how to describe
+itself. It can be used in these assertion macros:
 
 
 | Fatal assertion                | Nonfatal assertion             | Verifies              |
@@ -386,14 +384,11 @@ using ::testing::StartsWith;
     EXPECT_THAT(Foo(), StartsWith("Hello"));
 ```
 
-Read this
-[recipe](gmock_cook_book.md#using-matchers-in-googletest-assertions)
-in the gMock Cookbook for more details.
-
-gMock has a rich set of matchers. You can do many things googletest cannot do
-alone with them. For a list of matchers gMock provides, read
-[this](gmock_cook_book.md##using-matchers). It's easy to write
-your [own matchers](gmock_cook_book.md#NewMatchers) too.
+See
+[Using Matchers in googletest Assertions](gmock_cook_book.md#using-matchers-in-googletest-assertions)
+in the gMock Cookbook for more details. For a list of built-in matchers, see the
+[Matchers Reference](reference/matchers.md). You can also write your own
+matchers—see [Writing New Matchers Quickly](gmock_cook_book.md#NewMatchers).
 
 gMock is bundled with googletest, so you don't need to add any build dependency
 in order to take advantage of this. Just include `"gmock/gmock.h"`

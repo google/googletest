@@ -371,8 +371,8 @@ convenient way of saying "any value".
 In the above examples, `100` and `50` are also matchers; implicitly, they are
 the same as `Eq(100)` and `Eq(50)`, which specify that the argument must be
 equal (using `operator==`) to the matcher argument. There are many
-[built-in matchers](gmock_cheat_sheet.md#MatcherList) for common types (as well
-as [custom matchers](gmock_cook_book.md#NewMatchers)); for example:
+[built-in matchers](reference/matchers.md) for common types (as well as
+[custom matchers](gmock_cook_book.md#NewMatchers)); for example:
 
 ```cpp
 using ::testing::Ge;
