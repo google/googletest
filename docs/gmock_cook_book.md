@@ -1088,7 +1088,8 @@ z`. Note that in this example, it wasn't necessary specify the positional
 matchers.
 
 As a convenience and example, gMock provides some matchers for 2-tuples,
-including the `Lt()` matcher above. See [here](#MultiArgMatchers) for the
+including the `Lt()` matcher above. See
+[Multi-argument Matchers](reference/matchers.md#MultiArgMatchers) for the
 complete list.
 
 Note that if you want to pass the arguments to a predicate of your own (e.g.
