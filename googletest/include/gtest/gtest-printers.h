@@ -113,11 +113,6 @@
 #include "gtest/internal/gtest-internal.h"
 #include "gtest/internal/gtest-port.h"
 
-#if GTEST_HAS_RTTI
-#include <typeindex>
-#include <typeinfo>
-#endif  // GTEST_HAS_RTTI
-
 namespace testing {
 
 // Definitions in the internal* namespaces are subject to change without notice.
@@ -671,18 +666,6 @@ void PrintTo(const ::std::pair<T1, T2>& value, ::std::ostream* os) {
   UniversalPrinter<T2>::Print(value.second, os);
   *os << ')';
 }
-
-#if GTEST_HAS_RTTI
-inline void PrintTo(const ::std::type_info& value, ::std::ostream* os) {
-  internal::PrintTo<::std::type_info>(value, os);
-  *os << " (\"" << value.name() << "\")";
-}
-
-inline void PrintTo(const ::std::type_index& value, ::std::ostream* os) {
-  internal::PrintTo<::std::type_index>(value, os);
-  *os << " (\"" << value.name() << "\")";
-}
-#endif  // GTEST_HAS_RTTI
 
 // Implements printing a non-reference type T by letting the compiler
 // pick the right overload of PrintTo() for T.
