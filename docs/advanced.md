@@ -399,9 +399,8 @@ and you're ready to go.
 (Please read the [previous](#asserting-using-gmock-matchers) section first if
 you haven't.)
 
-You can use the gMock
-[string matchers](gmock_cheat_sheet.md#string-matchers) with
-`EXPECT_THAT()` or `ASSERT_THAT()` to do more string comparison tricks
+You can use the gMock [string matchers](reference/matchers.md#string-matchers)
+with `EXPECT_THAT()` or `ASSERT_THAT()` to do more string comparison tricks
 (sub-string, prefix, suffix, regular expression, and etc). For example,
 
 ```c++
