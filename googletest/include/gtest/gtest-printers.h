@@ -113,11 +113,6 @@
 #include "gtest/internal/gtest-internal.h"
 #include "gtest/internal/gtest-port.h"
 
-#if GTEST_HAS_RTTI
-#include <typeindex>
-#include <typeinfo>
-#endif  // GTEST_HAS_RTTI
-
 namespace testing {
 
 // Definitions in the internal* namespaces are subject to change without notice.
