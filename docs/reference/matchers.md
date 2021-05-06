@@ -55,7 +55,7 @@ will be changed.
 `IsTrue` and `IsFalse` are useful when you need to use a matcher, or for types
 that can be explicitly converted to Boolean, but are not implicitly converted to
 Boolean. In other cases, you can use the basic
-[`EXPECT_TRUE` and `EXPECT_FALSE`](primer.md#basic-assertions) assertions.
+[`EXPECT_TRUE` and `EXPECT_FALSE`](../primer.md#basic-assertions) assertions.
 
 ### Floating-Point Matchers {#FpMatchers}
 
@@ -100,7 +100,7 @@ The `argument` can be either a C string or a C++ string object:
 
 `ContainsRegex()` and `MatchesRegex()` take ownership of the `RE` object. They
 use the regular expression syntax defined
-[here](advanced.md#regular-expression-syntax). All of these matchers, except
+[here](../advanced.md#regular-expression-syntax). All of these matchers, except
 `ContainsRegex()` and `MatchesRegex()` work for wide strings as well.
 
 ### Container Matchers
@@ -242,7 +242,7 @@ You can make a matcher from one or more other matchers:
 | Matcher                 | Description                           |
 | :---------------------- | :------------------------------------ |
 | `MatcherCast<T>(m)`     | casts matcher `m` to type `Matcher<T>`. |
-| `SafeMatcherCast<T>(m)` | [safely casts](gmock_cook_book.md#casting-matchers) matcher `m` to type `Matcher<T>`. |
+| `SafeMatcherCast<T>(m)` | [safely casts](../gmock_cook_book.md#SafeMatcherCast) matcher `m` to type `Matcher<T>`. |
 | `Truly(predicate)`      | `predicate(argument)` returns something considered by C++ to be true, where `predicate` is a function or functor. |
 
 `AddressSatisfies(callback)` and `Truly(callback)` take ownership of `callback`,
