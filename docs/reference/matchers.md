@@ -17,16 +17,17 @@ expected_value)`.
 Built-in matchers (where `argument` is the function argument, e.g.
 `actual_value` in the example above, or when used in the context of
 `EXPECT_CALL(mock_object, method(matchers))`, the arguments of `method`) are
-divided into several categories:
+divided into several categories. All matchers are defined in the `::testing`
+namespace unless otherwise noted.
 
-### Wildcard
+## Wildcard
 
 Matcher                     | Description
 :-------------------------- | :-----------------------------------------------
 `_`                         | `argument` can be any value of the correct type.
 `A<type>()` or `An<type>()` | `argument` can be any value of type `type`.
 
-### Generic Comparison
+## Generic Comparison
 
 | Matcher                | Description                                         |
 | :--------------------- | :-------------------------------------------------- |
@@ -57,7 +58,7 @@ that can be explicitly converted to Boolean, but are not implicitly converted to
 Boolean. In other cases, you can use the basic
 [`EXPECT_TRUE` and `EXPECT_FALSE`](../primer.md#basic-assertions) assertions.
 
-### Floating-Point Matchers {#FpMatchers}
+## Floating-Point Matchers {#FpMatchers}
 
 | Matcher                          | Description                        |
 | :------------------------------- | :--------------------------------- |
@@ -81,7 +82,7 @@ user wants.
 | `NanSensitiveDoubleNear(a_double, max_abs_error)` | `argument` is a `double` value close to `a_double` (absolute error <= `max_abs_error`), treating two NaNs as equal. |
 | `NanSensitiveFloatNear(a_float, max_abs_error)`   | `argument` is a `float` value close to `a_float` (absolute error <= `max_abs_error`), treating two NaNs as equal. |
 
-### String Matchers
+## String Matchers
 
 The `argument` can be either a C string or a C++ string object:
 
@@ -103,7 +104,7 @@ use the regular expression syntax defined
 [here](../advanced.md#regular-expression-syntax). All of these matchers, except
 `ContainsRegex()` and `MatchesRegex()` work for wide strings as well.
 
-### Container Matchers
+## Container Matchers
 
 Most STL-style containers support `==`, so you can use `Eq(expected_container)`
 or simply `expected_container` to match a container exactly. If you want to
@@ -153,7 +154,7 @@ messages, you can use:
     EXPECT_THAT(actual_foos, Pointwise(FooEq(), expected_foos));
     ```
 
-### Member Matchers
+## Member Matchers
 
 | Matcher                         | Description                                |
 | :------------------------------ | :----------------------------------------- |
@@ -187,13 +188,13 @@ messages, you can use:
     taking addresses of functions is fragile and generally not part of the
     contract of the function.
 
-### Matching the Result of a Function, Functor, or Callback
+## Matching the Result of a Function, Functor, or Callback
 
 | Matcher          | Description                                       |
 | :--------------- | :------------------------------------------------ |
 | `ResultOf(f, m)` | `f(argument)` matches matcher `m`, where `f` is a function or functor. |
 
-### Pointer Matchers
+## Pointer Matchers
 
 | Matcher                   | Description                                     |
 | :------------------------ | :---------------------------------------------- |
@@ -202,7 +203,7 @@ messages, you can use:
 | `Pointer(m)`              | `argument` (either a smart pointer or a raw pointer) contains a pointer that matches `m`. `m` will match against the raw pointer regardless of the type of `argument`. |
 | `WhenDynamicCastTo<T>(m)` | when `argument` is passed through `dynamic_cast<T>()`, it matches matcher `m`. |
 
-### Multi-argument Matchers {#MultiArgMatchers}
+## Multi-argument Matchers {#MultiArgMatchers}
 
 Technically, all matchers match a *single* value. A "multi-argument" matcher is
 just one that matches a *tuple*. The following matchers can be used to match a
@@ -225,7 +226,7 @@ reorder them) to participate in the matching:
 | `AllArgs(m)`               | Equivalent to `m`. Useful as syntactic sugar in `.With(AllArgs(m))`. |
 | `Args<N1, N2, ..., Nk>(m)` | The tuple of the `k` selected (using 0-based indices) arguments matches `m`, e.g. `Args<1, 2>(Eq())`. |
 
-### Composite Matchers
+## Composite Matchers
 
 You can make a matcher from one or more other matchers:
 
@@ -237,7 +238,7 @@ You can make a matcher from one or more other matchers:
 | `AnyOfArray({m0, m1, ..., mn})`, `AnyOfArray(a_container)`, `AnyOfArray(begin, end)`, `AnyOfArray(array)`, or `AnyOfArray(array, count)` | The same as `AnyOf()` except that the matchers come from an initializer list, STL-style container, iterator range, or C-style array. |
 | `Not(m)` | `argument` doesn't match matcher `m`. |
 
-### Adapters for Matchers
+## Adapters for Matchers
 
 | Matcher                 | Description                           |
 | :---------------------- | :------------------------------------ |
@@ -248,7 +249,7 @@ You can make a matcher from one or more other matchers:
 `AddressSatisfies(callback)` and `Truly(callback)` take ownership of `callback`,
 which must be a permanent callback.
 
-### Using Matchers as Predicates {#MatchersAsPredicatesCheat}
+## Using Matchers as Predicates {#MatchersAsPredicatesCheat}
 
 | Matcher                       | Description                                 |
 | :---------------------------- | :------------------------------------------ |
@@ -256,7 +257,7 @@ which must be a permanent callback.
 | `ExplainMatchResult(m, value, result_listener)` | evaluates to `true` if `value` matches `m`, explaining the result to `result_listener`. |
 | `Value(value, m)` | evaluates to `true` if `value` matches `m`. |
 
-### Defining Matchers
+## Defining Matchers
 
 | Matcher                              | Description                           |
 | :----------------------------------- | :------------------------------------ |
