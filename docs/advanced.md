@@ -1537,7 +1537,7 @@ INSTANTIATE_TEST_SUITE_P(
       std::string name = absl::StrCat(
           std::get<0>(info.param) == MyType::MY_FOO ? "Foo" : "Bar",
           std::get<1>(info.param));
-      absl::c_replace_if(name, [](char c) { return !std::isalnum(c); }, '');
+      absl::c_replace_if(name, [](char c) { return !std::isalnum(c); }, '_');
       return name;
     });
 ```
