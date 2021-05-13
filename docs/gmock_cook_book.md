@@ -3017,31 +3017,21 @@ indicate whether the verification was successful (`true` for yes), so you can
 wrap that function call inside a `ASSERT_TRUE()` if there is no point going
 further when the verification has failed.
 
-### Using Check Points {#UsingCheckPoints}
+Do not set new expectations after verifying and clearing a mock after its use.
+Setting expectations after code that exercises the mock has undefined behavior.
+See [Using Mocks in Tests](gmock_for_dummies.md#using-mocks-in-tests) for more
+information.
 
-Sometimes you may want to "reset" a mock object at various check points in your
-test: at each check point, you verify that all existing expectations on the mock
-object have been satisfied, and then you set some new expectations on it as if
-it's newly created. This allows you to work with a mock object in "phases" whose
-sizes are each manageable.
+### Using Checkpoints {#UsingCheckPoints}
 
-One such scenario is that in your test's `SetUp()` function, you may want to put
-the object you are testing into a certain state, with the help from a mock
-object. Once in the desired state, you want to clear all expectations on the
-mock, such that in the `TEST_F` body you can set fresh expectations on it.
+Sometimes you might want to test a mock object's behavior in phases whose sizes
+are each manageable, or you might want to set more detailed expectations about
+which API calls invoke which mock functions.
 
-As you may have figured out, the `Mock::VerifyAndClearExpectations()` function
-we saw in the previous recipe can help you here. Or, if you are using
-`ON_CALL()` to set default actions on the mock object and want to clear the
-default actions as well, use `Mock::VerifyAndClear(&mock_object)` instead. This
-function does what `Mock::VerifyAndClearExpectations(&mock_object)` does and
-returns the same `bool`, **plus** it clears the `ON_CALL()` statements on
-`mock_object` too.
-
-Another trick you can use to achieve the same effect is to put the expectations
-in sequences and insert calls to a dummy "check-point" function at specific
-places. Then you can verify that the mock function calls do happen at the right
-time. For example, if you are exercising code:
+A technique you can use is to put the expectations in a sequence and insert
+calls to a dummy "checkpoint" function at specific places. Then you can verify
+that the mock function calls do happen at the right time. For example, if you
+are exercising the code:
 
 ```cpp
   Foo(1);
@@ -3050,7 +3040,7 @@ time. For example, if you are exercising code:
 ```
 
 and want to verify that `Foo(1)` and `Foo(3)` both invoke `mock.Bar("a")`, but
-`Foo(2)` doesn't invoke anything. You can write:
+`Foo(2)` doesn't invoke anything, you can write:
 
 ```cpp
 using ::testing::MockFunction;
@@ -3076,10 +3066,10 @@ TEST(FooTest, InvokesBarCorrectly) {
 }
 ```
 
-The expectation spec says that the first `Bar("a")` must happen before check
-point "1", the second `Bar("a")` must happen after check point "2", and nothing
-should happen between the two check points. The explicit check points make it
-easy to tell which `Bar("a")` is called by which call to `Foo()`.
+The expectation spec says that the first `Bar("a")` call must happen before
+checkpoint "1", the second `Bar("a")` call must happen after checkpoint "2", and
+nothing should happen between the two checkpoints. The explicit checkpoints make
+it clear which `Bar("a")` is called by which call to `Foo()`.
 
 ### Mocking Destructors
 
