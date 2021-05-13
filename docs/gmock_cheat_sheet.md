@@ -344,6 +344,11 @@ Mock::VerifyAndClearExpectations(&mock_obj);
 Mock::VerifyAndClear(&mock_obj);
 ```
 
+Do not set new expectations after verifying and clearing a mock after its use.
+Setting expectations after code that exercises the mock has undefined behavior.
+See [Using Mocks in Tests](gmock_for_dummies.md#using-mocks-in-tests) for more
+information.
+
 You can also tell gMock that a mock object can be leaked and doesn't need to be
 verified:
 
