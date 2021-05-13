@@ -871,13 +871,13 @@ TYPED_TEST_SUITE(MockMethodMockFunctionSignatureTest, MockMethodMockFunctionSign
 TYPED_TEST(MockMethodMockFunctionSignatureTest, IsMockFunctionTemplateArgumentDeducedForRawSignature) {
   using Argument = TypeParam;
   MockFunction<Argument> foo;
-  EXPECT_TRUE(IsMockFunctionTemplateArgumentDeducedTo<Argument>(foo));
+  EXPECT_TRUE(IsMockFunctionTemplateArgumentDeducedTo<TypeParam>(foo));
 }
 
 TYPED_TEST(MockMethodMockFunctionSignatureTest, IsMockFunctionTemplateArgumentDeducedForStdFunction) {
   using Argument = std::function<TypeParam>;
   MockFunction<Argument> foo;
-  EXPECT_TRUE(IsMockFunctionTemplateArgumentDeducedTo<Argument>(foo));
+  EXPECT_TRUE(IsMockFunctionTemplateArgumentDeducedTo<TypeParam>(foo));
 }
 
 TYPED_TEST(MockMethodMockFunctionSignatureTest, IsMockFunctionCallMethodSignatureTheSameForRawSignatureAndStdFunction) {
