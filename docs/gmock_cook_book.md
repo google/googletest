@@ -3363,7 +3363,7 @@ or,
 ```cpp
   using ::testing::Not;
   ...
-  // Verifies that two values are divisible by 7.
+  // Verifies that a value is divisible by 7 and the other is not.
   EXPECT_THAT(some_expression, IsDivisibleBy7());
   EXPECT_THAT(some_other_expression, Not(IsDivisibleBy7()));
 ```
