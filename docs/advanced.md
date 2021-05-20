@@ -640,7 +640,7 @@ exception and avoid the crash. If you want to verify exceptions thrown by your
 code, see [Exception Assertions](#ExceptionAssertions).
 
 If you want to test `EXPECT_*()/ASSERT_*()` failures in your test code, see
-Catching Failures
+["Catching" Failures](#catching-failures).
 
 ### How to Write a Death Test
 
