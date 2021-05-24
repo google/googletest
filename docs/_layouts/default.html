@@ -7,6 +7,15 @@
 
 {% seo %}
     <link rel="stylesheet" href="{{ "/assets/css/style.css?v=" | append: site.github.build_revision | relative_url }}">
+    <script>
+      window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+      ga('create', 'UA-197576187-1', { 'storage': 'none' });
+      ga('set', 'referrer', document.referrer.split('?')[0]);
+      ga('set', 'location', window.location.href.split('?')[0]);
+      ga('set', 'anonymizeIp', true);
+      ga('send', 'pageview');
+    </script>
+    <script async src='https://www.google-analytics.com/analytics.js'></script>
   </head>
   <body>
     <div class="sidebar">
@@ -36,18 +45,14 @@
       <div class="main-inner">
         {{ content }}
       </div>
+      <div class="footer">
+        GoogleTest &middot;
+        <a href="https://github.com/google/googletest">GitHub Repository</a> &middot;
+        <a href="https://github.com/google/googletest/blob/master/LICENSE">License</a> &middot;
+        <a href="https://policies.google.com/privacy">Privacy Policy</a>
+      </div>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/anchor-js/4.1.0/anchor.min.js" integrity="sha256-lZaRhKri35AyJSypXXs4o6OPFTbTmUoltBbDCbdzegg=" crossorigin="anonymous"></script>
     <script>anchors.add('.main h2, .main h3, .main h4, .main h5, .main h6');</script>
-    {% if site.google_analytics %}
-    <script>
-      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-      ga('create', '{{ site.google_analytics }}', 'auto');
-      ga('send', 'pageview');
-    </script>
-    {% endif %}
   </body>
 </html>
