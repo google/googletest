@@ -56,12 +56,6 @@ config_setting(
     values = {"define": "absl=1"},
 )
 
-config_setting(
-    name = "ios",
-    values = {"apple_platform_type": "ios"},
-    visibility = [":__subpackages__"],
-)
-
 # Library that defines the FRIEND_TEST macro.
 cc_library(
     name = "gtest_prod",
@@ -92,10 +86,6 @@ cc_library(
         "googlemock/include/gmock/*.h",
     ]),
     copts = select({
-        ":ios": [
-            "-xobjective-c++",
-            "-pthread",
-        ],
         ":windows": [],
         "//conditions:default": ["-pthread"],
     }),
