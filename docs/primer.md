@@ -116,7 +116,10 @@ Depending on the nature of the leak, it may or may not be worth fixing - so keep
 this in mind if you get a heap checker error in addition to assertion errors.
 
 To provide a custom failure message, simply stream it into the macro using the
-`<<` operator or a sequence of such operators. An example:
+`<<` operator or a sequence of such operators. See the following example, using
+the
+[`ASSERT_EQ` and `EXPECT_EQ`](reference/assertions.md?cl=374325853#EXPECT_EQ)
+macros to verify value equality:
 
 ```c++
 ASSERT_EQ(x.size(), y.size()) << "Vectors x and y are of unequal length";

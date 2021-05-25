@@ -21,6 +21,8 @@ nav:
     url: "/gmock_cheat_sheet.html"
 - section: "References"
   items:
+  - title: "Assertions"
+    url: "/reference/assertions.html"
   - title: "Matchers"
     url: "/reference/matchers.html"
   - title: "Actions"
