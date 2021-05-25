@@ -1137,51 +1137,8 @@ Matches(AllOf(Ge(0), Le(100), Ne(50)))
 
 ### Using Matchers in googletest Assertions
 
-Since matchers are basically predicates that also know how to describe
-themselves, there is a way to take advantage of them in googletest assertions.
-It's called `ASSERT_THAT` and `EXPECT_THAT`:
-
-```cpp
-  ASSERT_THAT(value, matcher);  // Asserts that value matches matcher.
-  EXPECT_THAT(value, matcher);  // The non-fatal version.
-```
-
-For example, in a googletest test you can write:
-
-```cpp
-#include "gmock/gmock.h"
-
-using ::testing::AllOf;
-using ::testing::Ge;
-using ::testing::Le;
-using ::testing::MatchesRegex;
-using ::testing::StartsWith;
-
-...
-  EXPECT_THAT(Foo(), StartsWith("Hello"));
-  EXPECT_THAT(Bar(), MatchesRegex("Line \\d+"));
-  ASSERT_THAT(Baz(), AllOf(Ge(5), Le(10)));
-```
-
-which (as you can probably guess) executes `Foo()`, `Bar()`, and `Baz()`, and
-verifies that:
-
-*   `Foo()` returns a string that starts with `"Hello"`.
-*   `Bar()` returns a string that matches regular expression `"Line \\d+"`.
-*   `Baz()` returns a number in the range [5, 10].
-
-The nice thing about these macros is that *they read like English*. They
-generate informative messages too. For example, if the first `EXPECT_THAT()`
-above fails, the message will be something like:
-
-```cpp
-Value of: Foo()
-  Actual: "Hi, world!"
-Expected: starts with "Hello"
-```
-
-**Credit:** The idea of `(ASSERT|EXPECT)_THAT` was borrowed from Joe Walnes'
-Hamcrest project, which adds `assertThat()` to JUnit.
+See [`EXPECT_THAT`](reference/assertions.md#EXPECT_THAT) in the Assertions
+Reference.
 
 ### Using Predicates as Matchers
 
