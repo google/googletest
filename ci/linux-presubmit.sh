@@ -31,7 +31,7 @@
 
 set -euox pipefail
 
-readonly LINUX_LATEST_CONTAINER="gcr.io/google.com/absl-177019/linux_hybrid-latest:20201008"
+readonly LINUX_LATEST_CONTAINER="gcr.io/google.com/absl-177019/linux_hybrid-latest:20210525"
 readonly LINUX_GCC_FLOOR_CONTAINER="gcr.io/google.com/absl-177019/linux_gcc-floor:20201015"
 
 if [[ -z ${GTEST_ROOT:-} ]]; then
@@ -95,6 +95,7 @@ for std in ${STD}; do
         --copt="-Wall" \
         --copt="-Werror" \
         --define="absl=${absl}" \
+        --distdir="/bazel-distdir" \
         --keep_going \
         --show_timestamps \
         --test_output=errors
@@ -116,6 +117,7 @@ for std in ${STD}; do
         --copt="-Wall" \
         --copt="-Werror" \
         --define="absl=${absl}" \
+        --distdir="/bazel-distdir" \
         --keep_going \
         --linkopt="--gcc-toolchain=/usr/local" \
         --show_timestamps \
