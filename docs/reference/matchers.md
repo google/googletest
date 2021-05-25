@@ -56,7 +56,7 @@ will be changed.
 `IsTrue` and `IsFalse` are useful when you need to use a matcher, or for types
 that can be explicitly converted to Boolean, but are not implicitly converted to
 Boolean. In other cases, you can use the basic
-[`EXPECT_TRUE` and `EXPECT_FALSE`](../primer.md#basic-assertions) assertions.
+[`EXPECT_TRUE` and `EXPECT_FALSE`](assertions.md#boolean) assertions.
 
 ## Floating-Point Matchers {#FpMatchers}
 
