@@ -478,7 +478,7 @@ class ParameterizedTestSuiteInfoBase {
 //
 // Report a the name of a test_suit as safe to ignore
 // as the side effect of construction of this type.
-struct MarkAsIgnored {
+struct GTEST_API_ MarkAsIgnored {
   explicit MarkAsIgnored(const char* test_suite);
 };
 
