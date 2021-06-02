@@ -1157,11 +1157,11 @@ TEST_P(FooTest, HasBlahBlah) {
 }
 ```
 
-Finally, you can use `INSTANTIATE_TEST_SUITE_P` to instantiate the test suite
-with any set of parameters you want. googletest defines a number of functions
-for generating test parameters. They return what we call (surprise!) *parameter
-generators*. Here is a summary of them, which are all in the `testing`
-namespace:
+Finally, you can use the `INSTANTIATE_TEST_SUITE_P` macro to instantiate the
+test suite with any set of parameters you want. GoogleTest defines a number of
+functions for generating test parameters—see details at
+[`INSTANTIATE_TEST_SUITE_P`](reference/testing.md#INSTANTIATE_TEST_SUITE_P) in
+the Testing Reference.
 
 | Parameter Generator                                                                       | Behavior                                                                                                          |
 | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
@@ -1189,7 +1189,8 @@ function scope.
 
 The first argument to `INSTANTIATE_TEST_SUITE_P` is a unique name for the
 instantiation of the test suite. The next argument is the name of the test
-pattern, and the last is the parameter generator.
+pattern, and the last is the
+[parameter generator](reference/testing.md#param-generators).
 
 You can instantiate a test pattern more than once, so to distinguish different
 instances of the pattern, the instantiation name is added as a prefix to the
@@ -1206,7 +1207,8 @@ instantiations. The tests from the instantiation above will have these names:
 You can use these names in [`--gtest_filter`](#running-a-subset-of-the-tests).
 
 The following statement will instantiate all tests from `FooTest` again, each
-with parameter values `"cat"` and `"dog"`:
+with parameter values `"cat"` and `"dog"` using the
+[`ValuesIn`](reference/testing.md#param-generators) parameter generator:
 
 ```c++
 const char* pets[] = {"cat", "dog"};
@@ -1704,27 +1706,12 @@ int main(int argc, char** argv) {
 
 Sometimes a function may need to know the name of the currently running test.
 For example, you may be using the `SetUp()` method of your test fixture to set
-the golden file name based on which test is running. The `::testing::TestInfo`
-class has this information:
-
-```c++
-namespace testing {
-
-class TestInfo {
- public:
-  // Returns the test suite name and the test name, respectively.
-  //
-  // Do NOT delete or free the return value - it's managed by the
-  // TestInfo class.
-  const char* test_suite_name() const;
-  const char* name() const;
-};
-
-}
-```
+the golden file name based on which test is running. The
+[`TestInfo`](reference/testing.md#TestInfo) class has this information.
 
 To obtain a `TestInfo` object for the currently running test, call
-`current_test_info()` on the `UnitTest` singleton object:
+`current_test_info()` on the [`UnitTest`](reference/testing.md#UnitTest)
+singleton object:
 
 ```c++
   // Gets information about the currently running test.
@@ -1754,12 +1741,14 @@ checkpoints to implement a resource leak checker, for example.
 
 ### Defining Event Listeners
 
-To define a event listener, you subclass either testing::TestEventListener or
-testing::EmptyTestEventListener The former is an (abstract) interface, where
-*each pure virtual method can be overridden to handle a test event* (For
-example, when a test starts, the `OnTestStart()` method will be called.). The
-latter provides an empty implementation of all methods in the interface, such
-that a subclass only needs to override the methods it cares about.
+To define a event listener, you subclass either
+[`testing::TestEventListener`](reference/testing.md#TestEventListener) or
+[`testing::EmptyTestEventListener`](reference/testing.md#EmptyTestEventListener)
+The former is an (abstract) interface, where *each pure virtual method can be
+overridden to handle a test event* (For example, when a test starts, the
+`OnTestStart()` method will be called.). The latter provides an empty
+implementation of all methods in the interface, such that a subclass only needs
+to override the methods it cares about.
 
 When an event is fired, its context is passed to the handler function as an
 argument. The following argument types are used:
@@ -1803,8 +1792,9 @@ Here's an example:
 ### Using Event Listeners
 
 To use the event listener you have defined, add an instance of it to the
-googletest event listener list (represented by class TestEventListeners - note
-the "s" at the end of the name) in your `main()` function, before calling
+googletest event listener list (represented by class
+[`TestEventListeners`](reference/testing.md#TestEventListeners) - note the "s"
+at the end of the name) in your `main()` function, before calling
 `RUN_ALL_TESTS()`:
 
 ```c++
