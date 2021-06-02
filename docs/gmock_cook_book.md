@@ -1711,7 +1711,7 @@ the test should reflect our real intent, instead of being overly constraining.
 
 gMock allows you to impose an arbitrary DAG (directed acyclic graph) on the
 calls. One way to express the DAG is to use the
-[After](gmock_cheat_sheet.md#AfterClause) clause of `EXPECT_CALL`.
+[`After` clause](reference/mocking.md#EXPECT_CALL.After) of `EXPECT_CALL`.
 
 Another way is via the `InSequence()` clause (not the same as the `InSequence`
 class), which we borrowed from jMock 2. It's less flexible than `After()`, but
