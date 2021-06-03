@@ -3993,8 +3993,8 @@ inline internal::ElementsAreArrayMatcher<T> ElementsAreArray(
 }
 
 template <typename Container>
-inline internal::ElementsAreArrayMatcher<typename Container::value_type>
-ElementsAreArray(const Container& container) {
+inline auto ElementsAreArray(const Container& container)
+    -> decltype(ElementsAreArray(container.begin(), container.end())) {
   return ElementsAreArray(container.begin(), container.end());
 }
 
