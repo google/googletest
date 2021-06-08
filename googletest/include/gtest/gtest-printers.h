@@ -501,18 +501,18 @@ inline void PrintTo(unsigned char* s, ::std::ostream* os) {
 }
 #ifdef __cpp_char8_t
 // Overloads for u8 strings.
-void PrintTo(const char8_t* s, ::std::ostream* os);
+GTEST_API_ void PrintTo(const char8_t* s, ::std::ostream* os);
 inline void PrintTo(char8_t* s, ::std::ostream* os) {
   PrintTo(ImplicitCast_<const char8_t*>(s), os);
 }
 #endif
 // Overloads for u16 strings.
-void PrintTo(const char16_t* s, ::std::ostream* os);
+GTEST_API_ void PrintTo(const char16_t* s, ::std::ostream* os);
 inline void PrintTo(char16_t* s, ::std::ostream* os) {
   PrintTo(ImplicitCast_<const char16_t*>(s), os);
 }
 // Overloads for u32 strings.
-void PrintTo(const char32_t* s, ::std::ostream* os);
+GTEST_API_ void PrintTo(const char32_t* s, ::std::ostream* os);
 inline void PrintTo(char32_t* s, ::std::ostream* os) {
   PrintTo(ImplicitCast_<const char32_t*>(s), os);
 }
