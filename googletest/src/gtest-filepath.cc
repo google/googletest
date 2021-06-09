@@ -208,7 +208,7 @@ bool FilePath::FileOrDirectoryExists() const {
   delete [] unicode;
   return attributes != kInvalidFileAttributes;
 #else
-  posix::StatStruct file_stat;
+  posix::StatStruct file_stat{};
   return posix::Stat(pathname_.c_str(), &file_stat) == 0;
 #endif  // GTEST_OS_WINDOWS_MOBILE
 }
