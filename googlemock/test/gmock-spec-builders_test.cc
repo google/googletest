@@ -2760,6 +2760,9 @@ TEST(ParameterlessExpectationsTest,
 // Allows the user to define their own main and then invoke gmock_main
 // from it. This might be necessary on some platforms which require
 // specific setup and teardown.
+#ifndef GMOCK_RENAME_MAIN
+# define GMOCK_RENAME_MAIN 0
+#endif
 #if GMOCK_RENAME_MAIN
 int gmock_main(int argc, char **argv) {
 #else

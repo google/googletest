@@ -39,7 +39,7 @@
 
 #include <stdlib.h>
 
-#if _MSC_VER
+#ifdef _MSC_VER
 GTEST_DISABLE_MSC_WARNINGS_PUSH_(4127 /* conditional expression is constant */)
 #endif  //  _MSC_VER
 
@@ -1101,7 +1101,7 @@ int main(int argc, char **argv) {
   // are registered, and torn down in the reverse order.
   testing::AddGlobalTestEnvironment(new FooEnvironment);
   testing::AddGlobalTestEnvironment(new BarEnvironment);
-#if _MSC_VER
+#ifdef _MSC_VER
 GTEST_DISABLE_MSC_WARNINGS_POP_()  //  4127
 #endif  //  _MSC_VER
   return RunAllTests();

@@ -88,6 +88,7 @@ inline Element* GetRawPointer(Element* p) { return p; }
 // is a native type.
 #if defined(_MSC_VER) && !defined(_NATIVE_WCHAR_T_DEFINED)
 // wchar_t is a typedef.
+# define GMOCK_WCHAR_T_IS_NATIVE_ 0
 #else
 # define GMOCK_WCHAR_T_IS_NATIVE_ 1
 #endif
