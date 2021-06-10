@@ -319,7 +319,7 @@ The above uses both `ASSERT_*` and `EXPECT_*` assertions. The rule of thumb is
 to use `EXPECT_*` when you want the test to continue to reveal more errors after
 the assertion failure, and use `ASSERT_*` when continuing after failure doesn't
 make sense. For example, the second assertion in the `Dequeue` test is
-`ASSERT_NE(nullptr, n)`, as we need to dereference the pointer `n` later, which
+`ASSERT_NE(n, nullptr)`, as we need to dereference the pointer `n` later, which
 would lead to a segfault when `n` is `NULL`.
 
 When these tests run, the following happens:
