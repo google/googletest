@@ -105,7 +105,7 @@ includedir=/usr/include
 
 Name: gtest
 Description: GoogleTest (without main() function)
-Version: 1.10.0
+Version: 1.11.0
 URL: https://github.com/google/googletest
 Libs: -L${libdir} -lgtest -lpthread
 Cflags: -I${includedir} -DGTEST_HAS_PTHREAD=1 -lpthread
