@@ -480,7 +480,7 @@ the *default* action for the function every time (unless, of course, you have a
 `WillRepeatedly()`.).
 
 What can we do inside `WillOnce()` besides `Return()`? You can return a
-reference using `ReturnRef(*variable*)`, or invoke a pre-defined function, among
+reference using `ReturnRef(`*`variable`*`)`, or invoke a pre-defined function, among
 [others](gmock_cook_book.md#using-actions).
 
 **Important note:** The `EXPECT_CALL()` statement evaluates the action clause
