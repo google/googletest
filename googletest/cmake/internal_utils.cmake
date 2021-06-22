@@ -154,10 +154,6 @@ function(cxx_library_with_type name type cxx_flags)
   set_target_properties(${name}
     PROPERTIES
     COMPILE_FLAGS "${cxx_flags}")
-  # Generate debug library name with a postfix.
-  set_target_properties(${name}
-    PROPERTIES
-    DEBUG_POSTFIX "d")
   # Set the output directory for build artifacts
   set_target_properties(${name}
     PROPERTIES
