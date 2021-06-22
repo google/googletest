@@ -230,7 +230,7 @@ class MockFunction<R(A1, ..., An)> {
 };
 ```
 
-See this [recipe](gmock_cook_book.md#using-check-points) for one application of
+See this [recipe](gmock_cook_book.md#UsingCheckPoints) for one application of
 it.
 
 ## Flags
