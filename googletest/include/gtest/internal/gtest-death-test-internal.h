@@ -236,8 +236,6 @@ inline Matcher<const ::std::string&> MakeDeathTestMatcher(
           gtest_dt->Abort(::testing::internal::DeathTest::TEST_DID_NOT_DIE);   \
           break;                                                               \
         }                                                                      \
-        default:                                                               \
-          break;                                                               \
       }                                                                        \
     }                                                                          \
   } else                                                                       \
