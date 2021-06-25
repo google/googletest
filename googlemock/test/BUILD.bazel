@@ -41,6 +41,7 @@ cc_test(
     size = "small",
     srcs = glob(include = ["gmock-*.cc"]),
     linkopts = select({
+        "//:qnx": [],
         "//:windows": [],
         "//conditions:default": ["-pthread"],
     }),
