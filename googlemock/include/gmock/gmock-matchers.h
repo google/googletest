@@ -2581,7 +2581,7 @@ class PointwiseMatcher {
           StringMatchResultListener inner_listener;
           // Create InnerMatcherArg as a temporarily object to avoid it outlives
           // *left and *right. Dereference or the conversion to `const T&` may
-          // return temp objects, e.g for vector<bool>.
+          // return temp objects, e.g. for vector<bool>.
           if (!mono_tuple_matcher_.MatchAndExplain(
                   InnerMatcherArg(ImplicitCast_<const LhsValue&>(*left),
                                   ImplicitCast_<const RhsValue&>(*right)),
@@ -2653,6 +2653,54 @@ class QuantifierMatcherImpl : public MatcherInterface<Container> {
     return all_elements_should_match;
   }
 
+  bool MatchAndExplainImpl(const Matcher<size_t>& count_matcher,
+                           Container container,
+                           MatchResultListener* listener) const {
+    StlContainerReference stl_container = View::ConstReference(container);
+    size_t i = 0;
+    std::vector<size_t> match_elements;
+    for (auto it = stl_container.begin(); it != stl_container.end();
+         ++it, ++i) {
+      StringMatchResultListener inner_listener;
+      const bool matches = inner_matcher_.MatchAndExplain(*it, &inner_listener);
+      if (matches) {
+        match_elements.push_back(i);
+      }
+    }
+    if (listener->IsInterested()) {
+      if (match_elements.empty()) {
+        *listener << "has no element that matches";
+      } else if (match_elements.size() == 1) {
+        *listener << "whose element #" << match_elements[0] << " matches";
+      } else {
+        *listener << "whose elements (";
+        std::string sep = "";
+        for (size_t e : match_elements) {
+          *listener << sep << e;
+          sep = ", ";
+        }
+        *listener << ") match";
+      }
+    }
+    StringMatchResultListener count_listener;
+    if (count_matcher.MatchAndExplain(match_elements.size(), &count_listener)) {
+      *listener << " and whose match quantity of " << match_elements.size()
+                << " matches";
+      PrintIfNotEmpty(count_listener.str(), listener->stream());
+      return true;
+    } else {
+      if (match_elements.empty()) {
+        *listener << " and";
+      } else {
+        *listener << " but";
+      }
+      *listener << " whose match quantity of " << match_elements.size()
+                << " does not match";
+      PrintIfNotEmpty(count_listener.str(), listener->stream());
+      return false;
+    }
+  }
+
  protected:
   const Matcher<const Element&> inner_matcher_;
 };
@@ -2709,6 +2757,58 @@ class EachMatcherImpl : public QuantifierMatcherImpl<Container> {
   }
 };
 
+// Implements Contains(element_matcher).Times(n) for the given argument type
+// Container.
+template <typename Container>
+class ContainsTimesMatcherImpl : public QuantifierMatcherImpl<Container> {
+ public:
+  template <typename InnerMatcher>
+  explicit ContainsTimesMatcherImpl(InnerMatcher inner_matcher,
+                                    Matcher<size_t> count_matcher)
+      : QuantifierMatcherImpl<Container>(inner_matcher),
+        count_matcher_(std::move(count_matcher)) {}
+
+  void DescribeTo(::std::ostream* os) const override {
+    *os << "quantity of elements that match ";
+    this->inner_matcher_.DescribeTo(os);
+    *os << " ";
+    count_matcher_.DescribeTo(os);
+  }
+
+  void DescribeNegationTo(::std::ostream* os) const override {
+    *os << "quantity of elements that match ";
+    this->inner_matcher_.DescribeTo(os);
+    *os << " ";
+    count_matcher_.DescribeNegationTo(os);
+  }
+
+  bool MatchAndExplain(Container container,
+                       MatchResultListener* listener) const override {
+    return this->MatchAndExplainImpl(count_matcher_, container, listener);
+  }
+
+ private:
+  const Matcher<size_t> count_matcher_;
+};
+
+// Implements polymorphic Contains(element_matcher).Times(n).
+template <typename M>
+class ContainsTimesMatcher {
+ public:
+  explicit ContainsTimesMatcher(M m, Matcher<size_t> count_matcher)
+      : inner_matcher_(m), count_matcher_(std::move(count_matcher)) {}
+
+  template <typename Container>
+  operator Matcher<Container>() const {  // NOLINT
+    return Matcher<Container>(new ContainsTimesMatcherImpl<const Container&>(
+        inner_matcher_, count_matcher_));
+  }
+
+ private:
+  const M inner_matcher_;
+  const Matcher<size_t> count_matcher_;
+};
+
 // Implements polymorphic Contains(element_matcher).
 template <typename M>
 class ContainsMatcher {
@@ -2716,9 +2816,13 @@ class ContainsMatcher {
   explicit ContainsMatcher(M m) : inner_matcher_(m) {}
 
   template <typename Container>
-  operator Matcher<Container>() const {
+  operator Matcher<Container>() const {  // NOLINT
     return Matcher<Container>(
         new ContainsMatcherImpl<const Container&>(inner_matcher_));
+  }
+
+  ContainsTimesMatcher<M> Times(Matcher<size_t> count_matcher) const {
+    return ContainsTimesMatcher<M>(inner_matcher_, std::move(count_matcher));
   }
 
  private:
@@ -2732,7 +2836,7 @@ class EachMatcher {
   explicit EachMatcher(M m) : inner_matcher_(m) {}
 
   template <typename Container>
-  operator Matcher<Container>() const {
+  operator Matcher<Container>() const {  // NOLINT
     return Matcher<Container>(
         new EachMatcherImpl<const Container&>(inner_matcher_));
   }
@@ -4615,7 +4719,6 @@ UnorderedPointwise(const Tuple2Matcher& tuple2_matcher,
   return UnorderedPointwise(tuple2_matcher, std::vector<T>(rhs));
 }
 
-
 // Matches an STL-style container or a native array that contains at
 // least one element matching the given value or matcher.
 //
@@ -4625,7 +4728,7 @@ UnorderedPointwise(const Tuple2Matcher& tuple2_matcher,
 //   page_ids.insert(1);
 //   EXPECT_THAT(page_ids, Contains(1));
 //   EXPECT_THAT(page_ids, Contains(Gt(2)));
-//   EXPECT_THAT(page_ids, Not(Contains(4)));
+//   EXPECT_THAT(page_ids, Not(Contains(4)));  // See below for Times(0)
 //
 //   ::std::map<int, size_t> page_lengths;
 //   page_lengths[1] = 100;
@@ -4634,6 +4737,19 @@ UnorderedPointwise(const Tuple2Matcher& tuple2_matcher,
 //
 //   const char* user_ids[] = { "joe", "mike", "tom" };
 //   EXPECT_THAT(user_ids, Contains(Eq(::std::string("tom"))));
+//
+// The matcher supports a modifier `Times` that allows to check for arbitrary
+// occurrences including testing for absence with Times(0).
+//
+// Examples:
+//   ::std::vector<int> ids;
+//   ids.insert(1);
+//   ids.insert(1);
+//   ids.insert(3);
+//   EXPECT_THAT(ids, Contains(1).Times(2));      // 1 occurs 2 times
+//   EXPECT_THAT(ids, Contains(2).Times(0));      // 2 is not present
+//   EXPECT_THAT(ids, Contains(3).Times(Ge(1)));  // 3 occurs at least once
+
 template <typename M>
 inline internal::ContainsMatcher<M> Contains(M matcher) {
   return internal::ContainsMatcher<M>(matcher);
@@ -4760,7 +4876,7 @@ inline internal::UnorderedElementsAreArrayMatcher<T> IsSubsetOf(
 // Matches an STL-style container or a native array that contains only
 // elements matching the given value or matcher.
 //
-// Each(m) is semantically equivalent to Not(Contains(Not(m))). Only
+// Each(m) is semantically equivalent to `Not(Contains(Not(m)))`. Only
 // the messages are different.
 //
 // Examples:

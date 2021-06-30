@@ -114,31 +114,32 @@ std::vector<std::unique_ptr<int>> MakeUniquePtrs(const std::vector<int>& ints) {
 }
 
 // For testing ExplainMatchResultTo().
-class GreaterThanMatcher : public MatcherInterface<int> {
+template <typename T = int>
+class GreaterThanMatcher : public MatcherInterface<T> {
  public:
-  explicit GreaterThanMatcher(int rhs) : rhs_(rhs) {}
+  explicit GreaterThanMatcher(T rhs) : rhs_(rhs) {}
 
   void DescribeTo(ostream* os) const override { *os << "is > " << rhs_; }
 
-  bool MatchAndExplain(int lhs, MatchResultListener* listener) const override {
-    const int diff = lhs - rhs_;
-    if (diff > 0) {
-      *listener << "which is " << diff << " more than " << rhs_;
-    } else if (diff == 0) {
+  bool MatchAndExplain(T lhs, MatchResultListener* listener) const override {
+    if (lhs > rhs_) {
+      *listener << "which is " << (lhs - rhs_) << " more than " << rhs_;
+    } else if (lhs == rhs_) {
       *listener << "which is the same as " << rhs_;
     } else {
-      *listener << "which is " << -diff << " less than " << rhs_;
+      *listener << "which is " << (rhs_ - lhs) << " less than " << rhs_;
     }
 
     return lhs > rhs_;
   }
 
  private:
-  int rhs_;
+  const T rhs_;
 };
 
-Matcher<int> GreaterThan(int n) {
-  return MakeMatcher(new GreaterThanMatcher(n));
+template <typename T>
+Matcher<T> GreaterThan(T n) {
+  return MakeMatcher(new GreaterThanMatcher<T>(n));
 }
 
 std::string OfType(const std::string& type_name) {
@@ -8023,6 +8024,7 @@ TEST(ContainsTest, ListMatchesWhenElementIsInContainer) {
   some_list.push_back(3);
   some_list.push_back(1);
   some_list.push_back(2);
+  some_list.push_back(3);
   EXPECT_THAT(some_list, Contains(1));
   EXPECT_THAT(some_list, Contains(Gt(2.5)));
   EXPECT_THAT(some_list, Contains(Eq(2.0f)));
@@ -8146,6 +8148,79 @@ TEST(ContainsTest, WorksForTwoDimensionalNativeArray) {
   EXPECT_THAT(a, Not(Contains(ElementsAre(3, 4, 5))));
   EXPECT_THAT(a, Contains(Not(Contains(5))));
 }
+
+// Tests Contains().Times().
+
+TEST(ContainsTimes, ListMatchesWhenElementQuantityMatches) {
+  list<int> some_list;
+  some_list.push_back(3);
+  some_list.push_back(1);
+  some_list.push_back(2);
+  some_list.push_back(3);
+  EXPECT_THAT(some_list, Contains(3).Times(2));
+  EXPECT_THAT(some_list, Contains(2).Times(1));
+  EXPECT_THAT(some_list, Contains(Ge(2)).Times(3));
+  EXPECT_THAT(some_list, Contains(Ge(2)).Times(Gt(2)));
+  EXPECT_THAT(some_list, Contains(4).Times(0));
+  EXPECT_THAT(some_list, Contains(_).Times(4));
+  EXPECT_THAT(some_list, Not(Contains(5).Times(1)));
+  EXPECT_THAT(some_list, Contains(5).Times(_));  // Times(_) always matches
+  EXPECT_THAT(some_list, Not(Contains(3).Times(1)));
+  EXPECT_THAT(some_list, Contains(3).Times(Not(1)));
+  EXPECT_THAT(list<int>{}, Not(Contains(_)));
+}
+
+TEST(ContainsTimes, ExplainsMatchResultCorrectly) {
+  const int a[2] = {1, 2};
+  Matcher<const int(&)[2]> m = Contains(2).Times(3);
+  EXPECT_EQ(
+      "whose element #1 matches but whose match quantity of 1 does not match",
+      Explain(m, a));
+
+  m = Contains(3).Times(0);
+  EXPECT_EQ("has no element that matches and whose match quantity of 0 matches",
+            Explain(m, a));
+
+  m = Contains(3).Times(4);
+  EXPECT_EQ(
+      "has no element that matches and whose match quantity of 0 does not "
+      "match",
+      Explain(m, a));
+
+  m = Contains(2).Times(4);
+  EXPECT_EQ(
+      "whose element #1 matches but whose match quantity of 1 does not "
+      "match",
+      Explain(m, a));
+
+  m = Contains(GreaterThan(0)).Times(2);
+  EXPECT_EQ("whose elements (0, 1) match and whose match quantity of 2 matches",
+            Explain(m, a));
+
+  m = Contains(GreaterThan(10)).Times(Gt(1));
+  EXPECT_EQ(
+      "has no element that matches and whose match quantity of 0 does not "
+      "match",
+      Explain(m, a));
+
+  m = Contains(GreaterThan(0)).Times(GreaterThan<size_t>(5));
+  EXPECT_EQ(
+      "whose elements (0, 1) match but whose match quantity of 2 does not "
+      "match, which is 3 less than 5",
+      Explain(m, a));
+}
+
+TEST(ContainsTimes, DescribesItselfCorrectly) {
+  Matcher<vector<int>> m = Contains(1).Times(2);
+  EXPECT_EQ("quantity of elements that match is equal to 1 is equal to 2",
+            Describe(m));
+
+  Matcher<vector<int>> m2 = Not(m);
+  EXPECT_EQ("quantity of elements that match is equal to 1 isn't equal to 2",
+            Describe(m2));
+}
+
+// Tests AllOfArray()
 
 TEST(AllOfArrayTest, BasicForms) {
   // Iterator
