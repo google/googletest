@@ -502,7 +502,7 @@ void ConditionalPrintAsText(const char* str, size_t length, ostream* os) {
 
 void PrintStringTo(const ::std::string& s, ostream* os) {
   if (PrintCharsAsStringTo(s.data(), s.size(), os) == kHexEscape) {
-    if (GTEST_FLAG(print_utf8)) {
+    if (GTEST_FLAG_GET(print_utf8)) {
       ConditionalPrintAsText(s.data(), s.size(), os);
     }
   }
