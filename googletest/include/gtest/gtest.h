@@ -73,17 +73,6 @@
 GTEST_DISABLE_MSC_WARNINGS_PUSH_(4251 \
 /* class A needs to have dll-interface to be used by clients of class B */)
 
-namespace testing {
-
-// Silence C4100 (unreferenced formal parameter) and 4805
-// unsafe mix of type 'const int' and type 'const bool'
-#ifdef _MSC_VER
-# pragma warning(push)
-# pragma warning(disable:4805)
-# pragma warning(disable:4100)
-#endif
-
-
 // Declares the flags.
 
 // This flag temporary enables the disabled tests.
@@ -168,6 +157,16 @@ GTEST_DECLARE_string_(stream_result_to);
 #if GTEST_USE_OWN_FLAGFILE_FLAG_
 GTEST_DECLARE_string_(flagfile);
 #endif  // GTEST_USE_OWN_FLAGFILE_FLAG_
+
+namespace testing {
+
+// Silence C4100 (unreferenced formal parameter) and 4805
+// unsafe mix of type 'const int' and type 'const bool'
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4805)
+#pragma warning(disable : 4100)
+#endif
 
 // The upper limit for valid stack trace depths.
 const int kMaxStackTraceDepth = 100;

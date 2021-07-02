@@ -42,10 +42,10 @@
 #include <stdio.h>
 #include <memory>
 
+GTEST_DECLARE_string_(internal_run_death_test);
+
 namespace testing {
 namespace internal {
-
-GTEST_DECLARE_string_(internal_run_death_test);
 
 // Names of the flags (needed for parsing Google Test flags).
 const char kDeathTestStyleFlag[] = "death_test_style";
