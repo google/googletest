@@ -48,6 +48,7 @@ TEST(CommandLineFlagsTest, CanBeAccessedInCodeOnceGTestHIsIncluded) {
                testing::GTEST_FLAG(print_time) ||
                testing::GTEST_FLAG(random_seed) ||
                testing::GTEST_FLAG(repeat) > 0 ||
+               testing::GTEST_FLAG(recreate_environments_when_repeating) ||
                testing::GTEST_FLAG(show_internal_stack_frames) ||
                testing::GTEST_FLAG(shuffle) ||
                testing::GTEST_FLAG(stack_trace_depth) > 0 ||
@@ -211,6 +212,7 @@ using testing::GTEST_FLAG(brief);
 using testing::GTEST_FLAG(print_time);
 using testing::GTEST_FLAG(random_seed);
 using testing::GTEST_FLAG(repeat);
+using testing::GTEST_FLAG(recreate_environments_when_repeating);
 using testing::GTEST_FLAG(show_internal_stack_frames);
 using testing::GTEST_FLAG(shuffle);
 using testing::GTEST_FLAG(stack_trace_depth);
@@ -1606,6 +1608,7 @@ class GTestFlagSaverTest : public Test {
     GTEST_FLAG(print_time) = true;
     GTEST_FLAG(random_seed) = 0;
     GTEST_FLAG(repeat) = 1;
+    GTEST_FLAG(recreate_environments_when_repeating) = true;
     GTEST_FLAG(shuffle) = false;
     GTEST_FLAG(stack_trace_depth) = kMaxStackTraceDepth;
     GTEST_FLAG(stream_result_to) = "";
@@ -1635,6 +1638,7 @@ class GTestFlagSaverTest : public Test {
     EXPECT_TRUE(GTEST_FLAG(print_time));
     EXPECT_EQ(0, GTEST_FLAG(random_seed));
     EXPECT_EQ(1, GTEST_FLAG(repeat));
+    EXPECT_TRUE(GTEST_FLAG(recreate_environments_when_repeating));
     EXPECT_FALSE(GTEST_FLAG(shuffle));
     EXPECT_EQ(kMaxStackTraceDepth, GTEST_FLAG(stack_trace_depth));
     EXPECT_STREQ("", GTEST_FLAG(stream_result_to).c_str());
@@ -1653,6 +1657,7 @@ class GTestFlagSaverTest : public Test {
     GTEST_FLAG(print_time) = false;
     GTEST_FLAG(random_seed) = 1;
     GTEST_FLAG(repeat) = 100;
+    GTEST_FLAG(recreate_environments_when_repeating) = false;
     GTEST_FLAG(shuffle) = true;
     GTEST_FLAG(stack_trace_depth) = 1;
     GTEST_FLAG(stream_result_to) = "localhost:1234";
@@ -5565,6 +5570,7 @@ struct Flags {
         print_time(true),
         random_seed(0),
         repeat(1),
+        recreate_environments_when_repeating(true),
         shuffle(false),
         stack_trace_depth(kMaxStackTraceDepth),
         stream_result_to(""),
@@ -5668,6 +5674,16 @@ struct Flags {
     return flags;
   }
 
+  // Creates a Flags struct where the gtest_recreate_environments_when_repeating
+  // flag has the given value.
+  static Flags RecreateEnvironmentsWhenRepeating(
+      bool recreate_environments_when_repeating) {
+    Flags flags;
+    flags.recreate_environments_when_repeating =
+        recreate_environments_when_repeating;
+    return flags;
+  }
+
   // Creates a Flags struct where the gtest_shuffle flag has the given
   // value.
   static Flags Shuffle(bool shuffle) {
@@ -5713,6 +5729,7 @@ struct Flags {
   bool print_time;
   int32_t random_seed;
   int32_t repeat;
+  bool recreate_environments_when_repeating;
   bool shuffle;
   int32_t stack_trace_depth;
   const char* stream_result_to;
@@ -5736,6 +5753,7 @@ class ParseFlagsTest : public Test {
     GTEST_FLAG(print_time) = true;
     GTEST_FLAG(random_seed) = 0;
     GTEST_FLAG(repeat) = 1;
+    GTEST_FLAG(recreate_environments_when_repeating) = true;
     GTEST_FLAG(shuffle) = false;
     GTEST_FLAG(stack_trace_depth) = kMaxStackTraceDepth;
     GTEST_FLAG(stream_result_to) = "";
@@ -5768,6 +5786,8 @@ class ParseFlagsTest : public Test {
     EXPECT_EQ(expected.print_time, GTEST_FLAG(print_time));
     EXPECT_EQ(expected.random_seed, GTEST_FLAG(random_seed));
     EXPECT_EQ(expected.repeat, GTEST_FLAG(repeat));
+    EXPECT_EQ(expected.recreate_environments_when_repeating,
+              GTEST_FLAG(recreate_environments_when_repeating));
     EXPECT_EQ(expected.shuffle, GTEST_FLAG(shuffle));
     EXPECT_EQ(expected.stack_trace_depth, GTEST_FLAG(stack_trace_depth));
     EXPECT_STREQ(expected.stream_result_to,
@@ -6144,6 +6164,20 @@ TEST_F(ParseFlagsTest, Repeat) {
   const char* argv2[] = {"foo.exe", nullptr};
 
   GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::Repeat(1000), false);
+}
+
+// Tests parsing --gtest_recreate_environments_when_repeating
+TEST_F(ParseFlagsTest, RecreateEnvironmentsWhenRepeating) {
+  const char* argv[] = {
+      "foo.exe",
+      "--gtest_recreate_environments_when_repeating=0",
+      nullptr,
+  };
+
+  const char* argv2[] = {"foo.exe", nullptr};
+
+  GTEST_TEST_PARSING_FLAGS_(
+      argv, argv2, Flags::RecreateEnvironmentsWhenRepeating(false), false);
 }
 
 // Tests having a --gtest_also_run_disabled_tests flag

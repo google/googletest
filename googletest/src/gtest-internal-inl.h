@@ -93,6 +93,8 @@ const char kPrintTimeFlag[] = "print_time";
 const char kPrintUTF8Flag[] = "print_utf8";
 const char kRandomSeedFlag[] = "random_seed";
 const char kRepeatFlag[] = "repeat";
+const char kRecreateEnvironmentsWhenRepeatingFlag[] =
+    "recreate_environments_when_repeating";
 const char kShuffleFlag[] = "shuffle";
 const char kStackTraceDepthFlag[] = "stack_trace_depth";
 const char kStreamResultToFlag[] = "stream_result_to";
@@ -176,6 +178,8 @@ class GTestFlagSaver {
     print_utf8_ = GTEST_FLAG(print_utf8);
     random_seed_ = GTEST_FLAG(random_seed);
     repeat_ = GTEST_FLAG(repeat);
+    recreate_environments_when_repeating_ =
+        GTEST_FLAG(recreate_environments_when_repeating);
     shuffle_ = GTEST_FLAG(shuffle);
     stack_trace_depth_ = GTEST_FLAG(stack_trace_depth);
     stream_result_to_ = GTEST_FLAG(stream_result_to);
@@ -200,6 +204,8 @@ class GTestFlagSaver {
     GTEST_FLAG(print_utf8) = print_utf8_;
     GTEST_FLAG(random_seed) = random_seed_;
     GTEST_FLAG(repeat) = repeat_;
+    GTEST_FLAG(recreate_environments_when_repeating) =
+        recreate_environments_when_repeating_;
     GTEST_FLAG(shuffle) = shuffle_;
     GTEST_FLAG(stack_trace_depth) = stack_trace_depth_;
     GTEST_FLAG(stream_result_to) = stream_result_to_;
@@ -224,6 +230,7 @@ class GTestFlagSaver {
   bool print_utf8_;
   int32_t random_seed_;
   int32_t repeat_;
+  bool recreate_environments_when_repeating_;
   bool shuffle_;
   int32_t stack_trace_depth_;
   std::string stream_result_to_;
