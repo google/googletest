@@ -446,8 +446,10 @@ struct Function<R(Args...)> {
   using MakeResultIgnoredValue = IgnoredValue(Args...);
 };
 
+#if __cplusplus <= 201703L
 template <typename R, typename... Args>
 constexpr size_t Function<R(Args...)>::ArgumentCount;
+#endif
 
 #ifdef _MSC_VER
 # pragma warning(pop)
