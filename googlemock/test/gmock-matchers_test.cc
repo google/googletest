@@ -2772,6 +2772,34 @@ TEST(AnyOfTest, VariadicMatchesWhenAnyMatches) {
                 "43", "44", "45", "46", "47", "48", "49", "50"));
 }
 
+TEST(ConditionalTest, MatchesFirstIfCondition) {
+  Matcher<std::string> eq_red = Eq("red");
+  Matcher<std::string> ne_red = Ne("red");
+  Matcher<std::string> m = Conditional(true, eq_red, ne_red);
+  EXPECT_TRUE(m.Matches("red"));
+  EXPECT_FALSE(m.Matches("green"));
+
+  StringMatchResultListener listener;
+  StringMatchResultListener expected;
+  EXPECT_FALSE(m.MatchAndExplain("green", &listener));
+  EXPECT_FALSE(eq_red.MatchAndExplain("green", &expected));
+  EXPECT_THAT(listener.str(), Eq(expected.str()));
+}
+
+TEST(ConditionalTest, MatchesSecondIfCondition) {
+  Matcher<std::string> eq_red = Eq("red");
+  Matcher<std::string> ne_red = Ne("red");
+  Matcher<std::string> m = Conditional(false, eq_red, ne_red);
+  EXPECT_FALSE(m.Matches("red"));
+  EXPECT_TRUE(m.Matches("green"));
+
+  StringMatchResultListener listener;
+  StringMatchResultListener expected;
+  EXPECT_FALSE(m.MatchAndExplain("red", &listener));
+  EXPECT_FALSE(ne_red.MatchAndExplain("red", &expected));
+  EXPECT_THAT(listener.str(), Eq(expected.str()));
+}
+
 // Tests the variadic version of the ElementsAreMatcher
 TEST(ElementsAreTest, HugeMatcher) {
   vector<int> test_vector{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};

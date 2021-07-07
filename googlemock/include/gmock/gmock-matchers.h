@@ -1405,6 +1405,30 @@ class AnyOfMatcherImpl : public MatcherInterface<const T&> {
 template <typename... Args>
 using AnyOfMatcher = VariadicMatcher<AnyOfMatcherImpl, Args...>;
 
+// ConditionalMatcher is the implementation of Conditional(cond, m1, m2)
+template <typename MatcherTrue, typename MatcherFalse>
+class ConditionalMatcher {
+ public:
+  ConditionalMatcher(bool condition, MatcherTrue matcher_true,
+                     MatcherFalse matcher_false)
+      : condition_(condition),
+        matcher_true_(std::move(matcher_true)),
+        matcher_false_(std::move(matcher_false)) {}
+
+  template <typename T>
+  operator Matcher<T>() const {  // NOLINT(runtime/explicit)
+    return condition_ ? SafeMatcherCast<T>(matcher_true_)
+                      : SafeMatcherCast<T>(matcher_false_);
+  }
+
+ private:
+  bool condition_;
+  MatcherTrue matcher_true_;
+  MatcherFalse matcher_false_;
+
+  GTEST_DISALLOW_ASSIGN_(ConditionalMatcher);
+};
+
 // Wrapper for implementation of Any/AllOfArray().
 template <template <class> class MatcherImpl, typename T>
 class SomeOfArrayMatcher {
@@ -4926,6 +4950,18 @@ Pair(FirstMatcher first_matcher, SecondMatcher second_matcher) {
 }
 
 namespace no_adl {
+// Conditional() creates a matcher that conditionally uses either the first or
+// second matcher provided. For example, we could create an `equal if, and only
+// if' matcher using the Conditonal wrapper as follows:
+//
+//   EXPECT_THAT(result, Conditional(condition, Eq(expected), Ne(expected)));
+template <typename MatcherTrue, typename MatcherFalse>
+internal::ConditionalMatcher<MatcherTrue, MatcherFalse> Conditional(
+    bool condition, MatcherTrue matcher_true, MatcherFalse matcher_false) {
+  return internal::ConditionalMatcher<MatcherTrue, MatcherFalse>(
+      condition, std::move(matcher_true), std::move(matcher_false));
+}
+
 // FieldsAre(matchers...) matches piecewise the fields of compatible structs.
 // These include those that support `get<I>(obj)`, and when structured bindings
 // are enabled any class that supports them.
