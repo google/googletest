@@ -5400,6 +5400,7 @@ PolymorphicMatcher<internal::ExceptionMatcherImpl<Err>> ThrowsMessage(
                                                                                \
      private:                                                                  \
       ::std::string FormatDescription(bool negation) const {                   \
+        /* NOLINTNEXTLINE readability-redundant-string-init */                 \
         ::std::string gmock_description = (description);                       \
         if (!gmock_description.empty()) {                                      \
           return gmock_description;                                            \
