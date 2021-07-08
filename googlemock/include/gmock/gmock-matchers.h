@@ -5388,6 +5388,7 @@ ThrowsMessage(const MessageMatcher& messageMatcher) {
                                                                                \
      private:                                                                  \
       ::std::string FormatDescription(bool negation) const {                   \
+        /* NOLINTNEXTLINE readability-redundant-string-init */                 \
         ::std::string gmock_description = (description);                       \
         if (!gmock_description.empty()) {                                      \
           return gmock_description;                                            \
