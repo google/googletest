@@ -147,7 +147,6 @@ messages, you can use:
     one might write:
 
     ```cpp
-    using ::std::get;
     MATCHER(FooEq, "") {
       return std::get<0>(arg).Equals(std::get<1>(arg));
     }
