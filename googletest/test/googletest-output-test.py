@@ -34,8 +34,8 @@ r"""Tests the text output of Google C++ Testing and Mocking Framework.
 To update the golden file:
 googletest_output_test.py --build_dir=BUILD/DIR --gengolden
 where BUILD/DIR contains the built googletest-output-test_ file.
-googletest_output_test.py --gengolden
-googletest_output_test.py
+googletest-output-test.py --gengolden
+googletest-output-test.py
 """
 
 import difflib
@@ -55,7 +55,8 @@ NO_STACKTRACE_SUPPORT_FLAG = '--no_stacktrace_support'
 IS_LINUX = os.name == 'posix' and os.uname()[0] == 'Linux'
 IS_WINDOWS = os.name == 'nt'
 
-GOLDEN_NAME = 'googletest-output-test-golden-lin.txt'
+GOLDEN_WITH_THREADS = 'googletest-output-test-with-threads-golden-lin.txt'
+GOLDEN_WITHOUT_THREADS = 'googletest-output-test-without-threads-golden-lin.txt'
 
 PROGRAM_PATH = gtest_test_utils.GetTestExecutablePath('googletest-output-test_')
 
@@ -78,7 +79,6 @@ COMMAND_WITH_SHARDING = (
      'internal_skip_environment_and_ad_hoc_tests',
      '--gtest_filter=PassingTest.*'])
 
-GOLDEN_PATH = os.path.join(gtest_test_utils.GetSourceDir(), GOLDEN_NAME)
 
 
 def ToUnixLineEnding(s):
@@ -255,7 +255,6 @@ SUPPORTS_STACK_TRACES = NO_STACKTRACE_SUPPORT_FLAG not in sys.argv
 
 CAN_GENERATE_GOLDEN_FILE = (SUPPORTS_DEATH_TESTS and
                             SUPPORTS_TYPED_TESTS and
-                            SUPPORTS_THREADS and
                             SUPPORTS_STACK_TRACES)
 
 class GTestOutputTest(gtest_test_utils.TestCase):
@@ -281,7 +280,13 @@ class GTestOutputTest(gtest_test_utils.TestCase):
   def testOutput(self):
     output = GetOutputOfAllCommands()
 
-    golden_file = open(GOLDEN_PATH, 'rb')
+    if SUPPORTS_THREADS:
+      golden_file = open(os.path.join(gtest_test_utils.GetSourceDir(),
+                                      GOLDEN_WITH_THREADS), 'rb')
+    else:
+      golden_file = open(os.path.join(gtest_test_utils.GetSourceDir(),
+                                      GOLDEN_WITHOUT_THREADS), 'rb')
+
     # A mis-configured source control system can cause \r appear in EOL
     # sequences when we read the golden file irrespective of an operating
     # system used. Therefore, we need to strip those \r's from newlines
@@ -330,7 +335,14 @@ if __name__ == '__main__':
   if GENGOLDEN_FLAG in sys.argv:
     if CAN_GENERATE_GOLDEN_FILE:
       output = GetOutputOfAllCommands()
-      golden_file = open(GOLDEN_PATH, 'wb')
+
+      if SUPPORTS_THREADS:
+        golden_file = open(os.path.join(gtest_test_utils.GetSourceDir(),
+                                        GOLDEN_WITH_THREADS), 'wb')
+      else:
+        golden_file = open(os.path.join(gtest_test_utils.GetSourceDir(),
+                                        GOLDEN_WITHOUT_THREADS), 'wb')
+
       golden_file.write(output.encode())
       golden_file.close()
     else:
@@ -338,7 +350,7 @@ if __name__ == '__main__':
           """Unable to write a golden file when compiled in an environment
 that does not support all the required features (death tests,
 typed tests, stack traces, and multiple threads).
-Please build this test and generate the golden file using Blaze on Linux.""")
+Please build this test and generate the golden file using Bazel on Linux.""")
 
       sys.stderr.write(message)
       sys.exit(1)

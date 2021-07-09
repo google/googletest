@@ -281,6 +281,7 @@ TEST(FormatCompilerIndependentFileLocationTest, FormatsUknownFileAndLine) {
 #if GTEST_OS_LINUX || GTEST_OS_MAC || GTEST_OS_QNX || GTEST_OS_FUCHSIA || \
     GTEST_OS_DRAGONFLY || GTEST_OS_FREEBSD || GTEST_OS_GNU_KFREEBSD || \
     GTEST_OS_NETBSD || GTEST_OS_OPENBSD || GTEST_OS_GNU_HURD
+# if GTEST_HAS_PTHREAD
 void* ThreadFunc(void* data) {
   internal::Mutex* mutex = static_cast<internal::Mutex*>(data);
   mutex->Lock();
@@ -345,6 +346,7 @@ TEST(GetThreadCountTest, ReturnsCorrectValue) {
   EXPECT_EQ(thread_count_after_create, starting_count + 1);
   EXPECT_EQ(thread_count_after_join, starting_count);
 }
+# endif  // GTEST_HAS_PTHREAD
 #else
 TEST(GetThreadCountTest, ReturnsZeroWhenUnableToCountThreads) {
   EXPECT_EQ(0U, GetThreadCount());
