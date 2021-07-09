@@ -110,7 +110,7 @@ cc_library(
         "googletest/include",
     ],
     linkopts = select({
-        ":qnx": [],
+        ":qnx": ["-lregex"],
         ":windows": [],
         "//conditions:default": ["-pthread"],
     }),
