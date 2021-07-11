@@ -160,8 +160,8 @@ def RemoveTestCounts(output):
                   '? tests, listed below', output)
   output = re.sub(r'\d+ FAILED TESTS',
                   '? FAILED TESTS', output)
-  output = re.sub(r'\d+ tests? from \d+ test cases?',
-                  '? tests from ? test cases', output)
+  output = re.sub(r'\d+ tests? from \d+ test suites?',
+                  '? tests from ? test suites', output)
   output = re.sub(r'\d+ tests? from ([a-zA-Z_])',
                   r'? tests from \1', output)
   return re.sub(r'\d+ tests?\.', '? tests.', output)
