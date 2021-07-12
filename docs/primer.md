@@ -118,7 +118,9 @@ Depending on the nature of the leak, it may or may not be worth fixing - so keep
 this in mind if you get a heap checker error in addition to assertion errors.
 
 To provide a custom failure message, simply stream it into the macro using the
-`<<` operator or a sequence of such operators. An example:
+`<<` operator or a sequence of such operators. See the following example, using
+the [`ASSERT_EQ` and `EXPECT_EQ`](reference/assertions.md#EXPECT_EQ) macros to
+verify value equality:
 
 ```c++
 ASSERT_EQ(x.size(), y.size()) << "Vectors x and y are of unequal length";
@@ -133,110 +135,12 @@ macro--in particular, C strings and `string` objects. If a wide string
 (`wchar_t*`, `TCHAR*` in `UNICODE` mode on Windows, or `std::wstring`) is
 streamed to an assertion, it will be translated to UTF-8 when printed.
 
-### Basic Assertions
-
-These assertions do basic true/false condition testing.
-
-Fatal assertion            | Nonfatal assertion         | Verifies
--------------------------- | -------------------------- | --------------------
-`ASSERT_TRUE(condition);`  | `EXPECT_TRUE(condition);`  | `condition` is true
-`ASSERT_FALSE(condition);` | `EXPECT_FALSE(condition);` | `condition` is false
-
-Remember, when they fail, `ASSERT_*` yields a fatal failure and returns from the
-current function, while `EXPECT_*` yields a nonfatal failure, allowing the
-function to continue running. In either case, an assertion failure means its
-containing test fails.
-
-**Availability**: Linux, Windows, Mac.
-
-### Binary Comparison
-
-This section describes assertions that compare two values.
-
-Fatal assertion          | Nonfatal assertion       | Verifies
------------------------- | ------------------------ | --------------
-`ASSERT_EQ(val1, val2);` | `EXPECT_EQ(val1, val2);` | `val1 == val2`
-`ASSERT_NE(val1, val2);` | `EXPECT_NE(val1, val2);` | `val1 != val2`
-`ASSERT_LT(val1, val2);` | `EXPECT_LT(val1, val2);` | `val1 < val2`
-`ASSERT_LE(val1, val2);` | `EXPECT_LE(val1, val2);` | `val1 <= val2`
-`ASSERT_GT(val1, val2);` | `EXPECT_GT(val1, val2);` | `val1 > val2`
-`ASSERT_GE(val1, val2);` | `EXPECT_GE(val1, val2);` | `val1 >= val2`
-
-Value arguments must be comparable by the assertion's comparison operator or
-you'll get a compiler error. We used to require the arguments to support the
-`<<` operator for streaming to an `ostream`, but this is no longer necessary. If
-`<<` is supported, it will be called to print the arguments when the assertion
-fails; otherwise googletest will attempt to print them in the best way it can.
-For more details and how to customize the printing of the arguments, see the
-[documentation](./advanced.md#teaching-googletest-how-to-print-your-values).
-
-These assertions can work with a user-defined type, but only if you define the
-corresponding comparison operator (e.g., `==` or `<`). Since this is discouraged
-by the Google
-[C++ Style Guide](https://google.github.io/styleguide/cppguide.html#Operator_Overloading),
-you may need to use `ASSERT_TRUE()` or `EXPECT_TRUE()` to assert the equality of
-two objects of a user-defined type.
-
-However, when possible, `ASSERT_EQ(actual, expected)` is preferred to
-`ASSERT_TRUE(actual == expected)`, since it tells you `actual` and `expected`'s
-values on failure.
-
-Arguments are always evaluated exactly once. Therefore, it's OK for the
-arguments to have side effects. However, as with any ordinary C/C++ function,
-the arguments' evaluation order is undefined (i.e., the compiler is free to
-choose any order), and your code should not depend on any particular argument
-evaluation order.
-
-`ASSERT_EQ()` does pointer equality on pointers. If used on two C strings, it
-tests if they are in the same memory location, not if they have the same value.
-Therefore, if you want to compare C strings (e.g. `const char*`) by value, use
-`ASSERT_STREQ()`, which will be described later on. In particular, to assert
-that a C string is `NULL`, use `ASSERT_STREQ(c_string, NULL)`. Consider using
-`ASSERT_EQ(c_string, nullptr)` if c++11 is supported. To compare two `string`
-objects, you should use `ASSERT_EQ`.
-
-When doing pointer comparisons use `*_EQ(ptr, nullptr)` and `*_NE(ptr, nullptr)`
-instead of `*_EQ(ptr, NULL)` and `*_NE(ptr, NULL)`. This is because `nullptr` is
-typed, while `NULL` is not. See the [FAQ](faq.md) for more details.
-
-If you're working with floating point numbers, you may want to use the floating
-point variations of some of these macros in order to avoid problems caused by
-rounding. See [Advanced googletest Topics](advanced.md) for details.
-
-Macros in this section work with both narrow and wide string objects (`string`
-and `wstring`).
-
-**Availability**: Linux, Windows, Mac.
-
-**Historical note**: Before February 2016 `*_EQ` had a convention of calling it
-as `ASSERT_EQ(expected, actual)`, so lots of existing code uses this order. Now
-`*_EQ` treats both parameters in the same way.
-
-### String Comparison
-
-The assertions in this group compare two **C strings**. If you want to compare
-two `string` objects, use `EXPECT_EQ`, `EXPECT_NE`, and etc instead.
-
-
-| Fatal assertion                | Nonfatal assertion             | Verifies                                                 |
-| --------------------------     | ------------------------------ | -------------------------------------------------------- |
-| `ASSERT_STREQ(str1,str2);`     | `EXPECT_STREQ(str1,str2);`     | the two C strings have the same content   		     |
-| `ASSERT_STRNE(str1,str2);`     | `EXPECT_STRNE(str1,str2);`     | the two C strings have different contents 		     |
-| `ASSERT_STRCASEEQ(str1,str2);` | `EXPECT_STRCASEEQ(str1,str2);` | the two C strings have the same content, ignoring case   |
-| `ASSERT_STRCASENE(str1,str2);` | `EXPECT_STRCASENE(str1,str2);` | the two C strings have different contents, ignoring case |
-
-
-Note that "CASE" in an assertion name means that case is ignored. A `NULL`
-pointer and an empty string are considered *different*.
-
-`*STREQ*` and `*STRNE*` also accept wide C strings (`wchar_t*`). If a comparison
-of two wide strings fails, their values will be printed as UTF-8 narrow strings.
-
-**Availability**: Linux, Windows, Mac.
-
-**See also**: For more string comparison tricks (substring, prefix, suffix, and
-regular expression matching, for example), see [this](advanced.md) in the
-Advanced googletest Guide.
+GoogleTest provides a collection of assertions for verifying the behavior of
+your code in various ways. You can check Boolean conditions, compare values
+based on relational operators, verify string values, floating-point values, and
+much more. There are even assertions that enable you to verify more complex
+states by providing custom predicates. For the complete list of assertions
+provided by GoogleTest, see the [Assertions Reference](reference/assertions.md).
 
 ## Simple Tests
 
@@ -415,7 +319,7 @@ The above uses both `ASSERT_*` and `EXPECT_*` assertions. The rule of thumb is
 to use `EXPECT_*` when you want the test to continue to reveal more errors after
 the assertion failure, and use `ASSERT_*` when continuing after failure doesn't
 make sense. For example, the second assertion in the `Dequeue` test is
-`ASSERT_NE(nullptr, n)`, as we need to dereference the pointer `n` later, which
+`ASSERT_NE(n, nullptr)`, as we need to dereference the pointer `n` later, which
 would lead to a segfault when `n` is `NULL`.
 
 When these tests run, the following happens:

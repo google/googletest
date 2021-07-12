@@ -14,9 +14,9 @@ Our documentation is now live on GitHub Pages at
 https://google.github.io/googletest/. We recommend browsing the documentation on
 GitHub Pages rather than directly in the repository.
 
-#### Release 1.10.x
+#### Release 1.11.0
 
-[Release 1.10.x](https://github.com/google/googletest/releases/tag/release-1.10.0)
+[Release 1.11.0](https://github.com/google/googletest/releases/tag/release-1.11.0)
 is now available.
 
 #### Coming Soon
@@ -109,8 +109,8 @@ Windows and Linux platforms.
 
 [GoogleTest UI](https://github.com/ospector/gtest-gbar) is a test runner that
 runs your test binary, allows you to track its progress via a progress bar, and
-displays a list of test failures. Clicking on one shows failure text. Google
-Test UI is written in C#.
+displays a list of test failures. Clicking on one shows failure text. GoogleTest
+UI is written in C#.
 
 [GTest TAP Listener](https://github.com/kinow/gtest-tap-listener) is an event
 listener for GoogleTest that implements the

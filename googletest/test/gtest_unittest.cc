@@ -37,22 +37,19 @@
 // code once "gtest.h" has been #included.
 // Do not move it after other gtest #includes.
 TEST(CommandLineFlagsTest, CanBeAccessedInCodeOnceGTestHIsIncluded) {
-  bool dummy = testing::GTEST_FLAG(also_run_disabled_tests) ||
-               testing::GTEST_FLAG(break_on_failure) ||
-               testing::GTEST_FLAG(catch_exceptions) ||
-               testing::GTEST_FLAG(color) != "unknown" ||
-               testing::GTEST_FLAG(fail_fast) ||
-               testing::GTEST_FLAG(filter) != "unknown" ||
-               testing::GTEST_FLAG(list_tests) ||
-               testing::GTEST_FLAG(output) != "unknown" ||
-               testing::GTEST_FLAG(brief) || testing::GTEST_FLAG(print_time) ||
-               testing::GTEST_FLAG(random_seed) ||
-               testing::GTEST_FLAG(repeat) > 0 ||
-               testing::GTEST_FLAG(show_internal_stack_frames) ||
-               testing::GTEST_FLAG(shuffle) ||
-               testing::GTEST_FLAG(stack_trace_depth) > 0 ||
-               testing::GTEST_FLAG(stream_result_to) != "unknown" ||
-               testing::GTEST_FLAG(throw_on_failure);
+  bool dummy =
+      GTEST_FLAG_GET(also_run_disabled_tests) ||
+      GTEST_FLAG_GET(break_on_failure) || GTEST_FLAG_GET(catch_exceptions) ||
+      GTEST_FLAG_GET(color) != "unknown" || GTEST_FLAG_GET(fail_fast) ||
+      GTEST_FLAG_GET(filter) != "unknown" || GTEST_FLAG_GET(list_tests) ||
+      GTEST_FLAG_GET(output) != "unknown" || GTEST_FLAG_GET(brief) ||
+      GTEST_FLAG_GET(print_time) || GTEST_FLAG_GET(random_seed) ||
+      GTEST_FLAG_GET(repeat) > 0 ||
+      GTEST_FLAG_GET(recreate_environments_when_repeating) ||
+      GTEST_FLAG_GET(show_internal_stack_frames) || GTEST_FLAG_GET(shuffle) ||
+      GTEST_FLAG_GET(stack_trace_depth) > 0 ||
+      GTEST_FLAG_GET(stream_result_to) != "unknown" ||
+      GTEST_FLAG_GET(throw_on_failure);
   EXPECT_TRUE(dummy || !dummy);  // Suppresses warning that dummy is unused.
 }
 
@@ -199,24 +196,6 @@ using testing::DoubleLE;
 using testing::EmptyTestEventListener;
 using testing::Environment;
 using testing::FloatLE;
-using testing::GTEST_FLAG(also_run_disabled_tests);
-using testing::GTEST_FLAG(break_on_failure);
-using testing::GTEST_FLAG(catch_exceptions);
-using testing::GTEST_FLAG(color);
-using testing::GTEST_FLAG(death_test_use_fork);
-using testing::GTEST_FLAG(fail_fast);
-using testing::GTEST_FLAG(filter);
-using testing::GTEST_FLAG(list_tests);
-using testing::GTEST_FLAG(output);
-using testing::GTEST_FLAG(brief);
-using testing::GTEST_FLAG(print_time);
-using testing::GTEST_FLAG(random_seed);
-using testing::GTEST_FLAG(repeat);
-using testing::GTEST_FLAG(show_internal_stack_frames);
-using testing::GTEST_FLAG(shuffle);
-using testing::GTEST_FLAG(stack_trace_depth);
-using testing::GTEST_FLAG(stream_result_to);
-using testing::GTEST_FLAG(throw_on_failure);
 using testing::IsNotSubstring;
 using testing::IsSubstring;
 using testing::kMaxStackTraceDepth;
@@ -265,7 +244,7 @@ using testing::internal::kTestTypeIdInGoogleTest;
 using testing::internal::NativeArray;
 using testing::internal::OsStackTraceGetter;
 using testing::internal::OsStackTraceGetterInterface;
-using testing::internal::ParseInt32Flag;
+using testing::internal::ParseFlag;
 using testing::internal::RelationToSourceCopy;
 using testing::internal::RelationToSourceReference;
 using testing::internal::ShouldRunTestOnShard;
@@ -1597,23 +1576,24 @@ class GTestFlagSaverTest : public Test {
   static void SetUpTestSuite() {
     saver_ = new GTestFlagSaver;
 
-    GTEST_FLAG(also_run_disabled_tests) = false;
-    GTEST_FLAG(break_on_failure) = false;
-    GTEST_FLAG(catch_exceptions) = false;
-    GTEST_FLAG(death_test_use_fork) = false;
-    GTEST_FLAG(color) = "auto";
-    GTEST_FLAG(fail_fast) = false;
-    GTEST_FLAG(filter) = "";
-    GTEST_FLAG(list_tests) = false;
-    GTEST_FLAG(output) = "";
-    GTEST_FLAG(brief) = false;
-    GTEST_FLAG(print_time) = true;
-    GTEST_FLAG(random_seed) = 0;
-    GTEST_FLAG(repeat) = 1;
-    GTEST_FLAG(shuffle) = false;
-    GTEST_FLAG(stack_trace_depth) = kMaxStackTraceDepth;
-    GTEST_FLAG(stream_result_to) = "";
-    GTEST_FLAG(throw_on_failure) = false;
+    GTEST_FLAG_SET(also_run_disabled_tests, false);
+    GTEST_FLAG_SET(break_on_failure, false);
+    GTEST_FLAG_SET(catch_exceptions, false);
+    GTEST_FLAG_SET(death_test_use_fork, false);
+    GTEST_FLAG_SET(color, "auto");
+    GTEST_FLAG_SET(fail_fast, false);
+    GTEST_FLAG_SET(filter, "");
+    GTEST_FLAG_SET(list_tests, false);
+    GTEST_FLAG_SET(output, "");
+    GTEST_FLAG_SET(brief, false);
+    GTEST_FLAG_SET(print_time, true);
+    GTEST_FLAG_SET(random_seed, 0);
+    GTEST_FLAG_SET(repeat, 1);
+    GTEST_FLAG_SET(recreate_environments_when_repeating, true);
+    GTEST_FLAG_SET(shuffle, false);
+    GTEST_FLAG_SET(stack_trace_depth, kMaxStackTraceDepth);
+    GTEST_FLAG_SET(stream_result_to, "");
+    GTEST_FLAG_SET(throw_on_failure, false);
   }
 
   // Restores the Google Test flags that the tests have modified.  This will
@@ -1626,41 +1606,43 @@ class GTestFlagSaverTest : public Test {
   // Verifies that the Google Test flags have their default values, and then
   // modifies each of them.
   void VerifyAndModifyFlags() {
-    EXPECT_FALSE(GTEST_FLAG(also_run_disabled_tests));
-    EXPECT_FALSE(GTEST_FLAG(break_on_failure));
-    EXPECT_FALSE(GTEST_FLAG(catch_exceptions));
-    EXPECT_STREQ("auto", GTEST_FLAG(color).c_str());
-    EXPECT_FALSE(GTEST_FLAG(death_test_use_fork));
-    EXPECT_FALSE(GTEST_FLAG(fail_fast));
-    EXPECT_STREQ("", GTEST_FLAG(filter).c_str());
-    EXPECT_FALSE(GTEST_FLAG(list_tests));
-    EXPECT_STREQ("", GTEST_FLAG(output).c_str());
-    EXPECT_FALSE(GTEST_FLAG(brief));
-    EXPECT_TRUE(GTEST_FLAG(print_time));
-    EXPECT_EQ(0, GTEST_FLAG(random_seed));
-    EXPECT_EQ(1, GTEST_FLAG(repeat));
-    EXPECT_FALSE(GTEST_FLAG(shuffle));
-    EXPECT_EQ(kMaxStackTraceDepth, GTEST_FLAG(stack_trace_depth));
-    EXPECT_STREQ("", GTEST_FLAG(stream_result_to).c_str());
-    EXPECT_FALSE(GTEST_FLAG(throw_on_failure));
+    EXPECT_FALSE(GTEST_FLAG_GET(also_run_disabled_tests));
+    EXPECT_FALSE(GTEST_FLAG_GET(break_on_failure));
+    EXPECT_FALSE(GTEST_FLAG_GET(catch_exceptions));
+    EXPECT_STREQ("auto", GTEST_FLAG_GET(color).c_str());
+    EXPECT_FALSE(GTEST_FLAG_GET(death_test_use_fork));
+    EXPECT_FALSE(GTEST_FLAG_GET(fail_fast));
+    EXPECT_STREQ("", GTEST_FLAG_GET(filter).c_str());
+    EXPECT_FALSE(GTEST_FLAG_GET(list_tests));
+    EXPECT_STREQ("", GTEST_FLAG_GET(output).c_str());
+    EXPECT_FALSE(GTEST_FLAG_GET(brief));
+    EXPECT_TRUE(GTEST_FLAG_GET(print_time));
+    EXPECT_EQ(0, GTEST_FLAG_GET(random_seed));
+    EXPECT_EQ(1, GTEST_FLAG_GET(repeat));
+    EXPECT_TRUE(GTEST_FLAG_GET(recreate_environments_when_repeating));
+    EXPECT_FALSE(GTEST_FLAG_GET(shuffle));
+    EXPECT_EQ(kMaxStackTraceDepth, GTEST_FLAG_GET(stack_trace_depth));
+    EXPECT_STREQ("", GTEST_FLAG_GET(stream_result_to).c_str());
+    EXPECT_FALSE(GTEST_FLAG_GET(throw_on_failure));
 
-    GTEST_FLAG(also_run_disabled_tests) = true;
-    GTEST_FLAG(break_on_failure) = true;
-    GTEST_FLAG(catch_exceptions) = true;
-    GTEST_FLAG(color) = "no";
-    GTEST_FLAG(death_test_use_fork) = true;
-    GTEST_FLAG(fail_fast) = true;
-    GTEST_FLAG(filter) = "abc";
-    GTEST_FLAG(list_tests) = true;
-    GTEST_FLAG(output) = "xml:foo.xml";
-    GTEST_FLAG(brief) = true;
-    GTEST_FLAG(print_time) = false;
-    GTEST_FLAG(random_seed) = 1;
-    GTEST_FLAG(repeat) = 100;
-    GTEST_FLAG(shuffle) = true;
-    GTEST_FLAG(stack_trace_depth) = 1;
-    GTEST_FLAG(stream_result_to) = "localhost:1234";
-    GTEST_FLAG(throw_on_failure) = true;
+    GTEST_FLAG_SET(also_run_disabled_tests, true);
+    GTEST_FLAG_SET(break_on_failure, true);
+    GTEST_FLAG_SET(catch_exceptions, true);
+    GTEST_FLAG_SET(color, "no");
+    GTEST_FLAG_SET(death_test_use_fork, true);
+    GTEST_FLAG_SET(fail_fast, true);
+    GTEST_FLAG_SET(filter, "abc");
+    GTEST_FLAG_SET(list_tests, true);
+    GTEST_FLAG_SET(output, "xml:foo.xml");
+    GTEST_FLAG_SET(brief, true);
+    GTEST_FLAG_SET(print_time, false);
+    GTEST_FLAG_SET(random_seed, 1);
+    GTEST_FLAG_SET(repeat, 100);
+    GTEST_FLAG_SET(recreate_environments_when_repeating, false);
+    GTEST_FLAG_SET(shuffle, true);
+    GTEST_FLAG_SET(stack_trace_depth, 1);
+    GTEST_FLAG_SET(stream_result_to, "localhost:1234");
+    GTEST_FLAG_SET(throw_on_failure, true);
   }
 
  private:
@@ -1776,29 +1758,29 @@ TEST(Int32FromGTestEnvTest, ParsesAndReturnsValidValue) {
 }
 #endif  // !GTEST_OS_WINDOWS_MOBILE
 
-// Tests ParseInt32Flag().
+// Tests ParseFlag().
 
 // Tests that ParseInt32Flag() returns false and doesn't change the
 // output value when the flag has wrong format
 TEST(ParseInt32FlagTest, ReturnsFalseForInvalidFlag) {
   int32_t value = 123;
-  EXPECT_FALSE(ParseInt32Flag("--a=100", "b", &value));
+  EXPECT_FALSE(ParseFlag("--a=100", "b", &value));
   EXPECT_EQ(123, value);
 
-  EXPECT_FALSE(ParseInt32Flag("a=100", "a", &value));
+  EXPECT_FALSE(ParseFlag("a=100", "a", &value));
   EXPECT_EQ(123, value);
 }
 
-// Tests that ParseInt32Flag() returns false and doesn't change the
+// Tests that ParseFlag() returns false and doesn't change the
 // output value when the flag overflows as an Int32.
 TEST(ParseInt32FlagTest, ReturnsDefaultWhenValueOverflows) {
   printf("(expecting 2 warnings)\n");
 
   int32_t value = 123;
-  EXPECT_FALSE(ParseInt32Flag("--abc=12345678987654321", "abc", &value));
+  EXPECT_FALSE(ParseFlag("--abc=12345678987654321", "abc", &value));
   EXPECT_EQ(123, value);
 
-  EXPECT_FALSE(ParseInt32Flag("--abc=-12345678987654321", "abc", &value));
+  EXPECT_FALSE(ParseFlag("--abc=-12345678987654321", "abc", &value));
   EXPECT_EQ(123, value);
 }
 
@@ -1809,10 +1791,10 @@ TEST(ParseInt32FlagTest, ReturnsDefaultWhenValueIsInvalid) {
   printf("(expecting 2 warnings)\n");
 
   int32_t value = 123;
-  EXPECT_FALSE(ParseInt32Flag("--abc=A1", "abc", &value));
+  EXPECT_FALSE(ParseFlag("--abc=A1", "abc", &value));
   EXPECT_EQ(123, value);
 
-  EXPECT_FALSE(ParseInt32Flag("--abc=12X", "abc", &value));
+  EXPECT_FALSE(ParseFlag("--abc=12X", "abc", &value));
   EXPECT_EQ(123, value);
 }
 
@@ -1821,11 +1803,10 @@ TEST(ParseInt32FlagTest, ReturnsDefaultWhenValueIsInvalid) {
 // the range of an Int32.
 TEST(ParseInt32FlagTest, ParsesAndReturnsValidValue) {
   int32_t value = 123;
-  EXPECT_TRUE(ParseInt32Flag("--" GTEST_FLAG_PREFIX_ "abc=456", "abc", &value));
+  EXPECT_TRUE(ParseFlag("--" GTEST_FLAG_PREFIX_ "abc=456", "abc", &value));
   EXPECT_EQ(456, value);
 
-  EXPECT_TRUE(ParseInt32Flag("--" GTEST_FLAG_PREFIX_ "abc=-789",
-                             "abc", &value));
+  EXPECT_TRUE(ParseFlag("--" GTEST_FLAG_PREFIX_ "abc=-789", "abc", &value));
   EXPECT_EQ(-789, value);
 }
 
@@ -5580,6 +5561,7 @@ struct Flags {
         print_time(true),
         random_seed(0),
         repeat(1),
+        recreate_environments_when_repeating(true),
         shuffle(false),
         stack_trace_depth(kMaxStackTraceDepth),
         stream_result_to(""),
@@ -5683,6 +5665,16 @@ struct Flags {
     return flags;
   }
 
+  // Creates a Flags struct where the gtest_recreate_environments_when_repeating
+  // flag has the given value.
+  static Flags RecreateEnvironmentsWhenRepeating(
+      bool recreate_environments_when_repeating) {
+    Flags flags;
+    flags.recreate_environments_when_repeating =
+        recreate_environments_when_repeating;
+    return flags;
+  }
+
   // Creates a Flags struct where the gtest_shuffle flag has the given
   // value.
   static Flags Shuffle(bool shuffle) {
@@ -5728,6 +5720,7 @@ struct Flags {
   bool print_time;
   int32_t random_seed;
   int32_t repeat;
+  bool recreate_environments_when_repeating;
   bool shuffle;
   int32_t stack_trace_depth;
   const char* stream_result_to;
@@ -5739,22 +5732,23 @@ class ParseFlagsTest : public Test {
  protected:
   // Clears the flags before each test.
   void SetUp() override {
-    GTEST_FLAG(also_run_disabled_tests) = false;
-    GTEST_FLAG(break_on_failure) = false;
-    GTEST_FLAG(catch_exceptions) = false;
-    GTEST_FLAG(death_test_use_fork) = false;
-    GTEST_FLAG(fail_fast) = false;
-    GTEST_FLAG(filter) = "";
-    GTEST_FLAG(list_tests) = false;
-    GTEST_FLAG(output) = "";
-    GTEST_FLAG(brief) = false;
-    GTEST_FLAG(print_time) = true;
-    GTEST_FLAG(random_seed) = 0;
-    GTEST_FLAG(repeat) = 1;
-    GTEST_FLAG(shuffle) = false;
-    GTEST_FLAG(stack_trace_depth) = kMaxStackTraceDepth;
-    GTEST_FLAG(stream_result_to) = "";
-    GTEST_FLAG(throw_on_failure) = false;
+    GTEST_FLAG_SET(also_run_disabled_tests, false);
+    GTEST_FLAG_SET(break_on_failure, false);
+    GTEST_FLAG_SET(catch_exceptions, false);
+    GTEST_FLAG_SET(death_test_use_fork, false);
+    GTEST_FLAG_SET(fail_fast, false);
+    GTEST_FLAG_SET(filter, "");
+    GTEST_FLAG_SET(list_tests, false);
+    GTEST_FLAG_SET(output, "");
+    GTEST_FLAG_SET(brief, false);
+    GTEST_FLAG_SET(print_time, true);
+    GTEST_FLAG_SET(random_seed, 0);
+    GTEST_FLAG_SET(repeat, 1);
+    GTEST_FLAG_SET(recreate_environments_when_repeating, true);
+    GTEST_FLAG_SET(shuffle, false);
+    GTEST_FLAG_SET(stack_trace_depth, kMaxStackTraceDepth);
+    GTEST_FLAG_SET(stream_result_to, "");
+    GTEST_FLAG_SET(throw_on_failure, false);
   }
 
   // Asserts that two narrow or wide string arrays are equal.
@@ -5771,23 +5765,26 @@ class ParseFlagsTest : public Test {
   // Verifies that the flag values match the expected values.
   static void CheckFlags(const Flags& expected) {
     EXPECT_EQ(expected.also_run_disabled_tests,
-              GTEST_FLAG(also_run_disabled_tests));
-    EXPECT_EQ(expected.break_on_failure, GTEST_FLAG(break_on_failure));
-    EXPECT_EQ(expected.catch_exceptions, GTEST_FLAG(catch_exceptions));
-    EXPECT_EQ(expected.death_test_use_fork, GTEST_FLAG(death_test_use_fork));
-    EXPECT_EQ(expected.fail_fast, GTEST_FLAG(fail_fast));
-    EXPECT_STREQ(expected.filter, GTEST_FLAG(filter).c_str());
-    EXPECT_EQ(expected.list_tests, GTEST_FLAG(list_tests));
-    EXPECT_STREQ(expected.output, GTEST_FLAG(output).c_str());
-    EXPECT_EQ(expected.brief, GTEST_FLAG(brief));
-    EXPECT_EQ(expected.print_time, GTEST_FLAG(print_time));
-    EXPECT_EQ(expected.random_seed, GTEST_FLAG(random_seed));
-    EXPECT_EQ(expected.repeat, GTEST_FLAG(repeat));
-    EXPECT_EQ(expected.shuffle, GTEST_FLAG(shuffle));
-    EXPECT_EQ(expected.stack_trace_depth, GTEST_FLAG(stack_trace_depth));
+              GTEST_FLAG_GET(also_run_disabled_tests));
+    EXPECT_EQ(expected.break_on_failure, GTEST_FLAG_GET(break_on_failure));
+    EXPECT_EQ(expected.catch_exceptions, GTEST_FLAG_GET(catch_exceptions));
+    EXPECT_EQ(expected.death_test_use_fork,
+              GTEST_FLAG_GET(death_test_use_fork));
+    EXPECT_EQ(expected.fail_fast, GTEST_FLAG_GET(fail_fast));
+    EXPECT_STREQ(expected.filter, GTEST_FLAG_GET(filter).c_str());
+    EXPECT_EQ(expected.list_tests, GTEST_FLAG_GET(list_tests));
+    EXPECT_STREQ(expected.output, GTEST_FLAG_GET(output).c_str());
+    EXPECT_EQ(expected.brief, GTEST_FLAG_GET(brief));
+    EXPECT_EQ(expected.print_time, GTEST_FLAG_GET(print_time));
+    EXPECT_EQ(expected.random_seed, GTEST_FLAG_GET(random_seed));
+    EXPECT_EQ(expected.repeat, GTEST_FLAG_GET(repeat));
+    EXPECT_EQ(expected.recreate_environments_when_repeating,
+              GTEST_FLAG_GET(recreate_environments_when_repeating));
+    EXPECT_EQ(expected.shuffle, GTEST_FLAG_GET(shuffle));
+    EXPECT_EQ(expected.stack_trace_depth, GTEST_FLAG_GET(stack_trace_depth));
     EXPECT_STREQ(expected.stream_result_to,
-                 GTEST_FLAG(stream_result_to).c_str());
-    EXPECT_EQ(expected.throw_on_failure, GTEST_FLAG(throw_on_failure));
+                 GTEST_FLAG_GET(stream_result_to).c_str());
+    EXPECT_EQ(expected.throw_on_failure, GTEST_FLAG_GET(throw_on_failure));
   }
 
   // Parses a command line (specified by argc1 and argv1), then
@@ -6159,6 +6156,20 @@ TEST_F(ParseFlagsTest, Repeat) {
   const char* argv2[] = {"foo.exe", nullptr};
 
   GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::Repeat(1000), false);
+}
+
+// Tests parsing --gtest_recreate_environments_when_repeating
+TEST_F(ParseFlagsTest, RecreateEnvironmentsWhenRepeating) {
+  const char* argv[] = {
+      "foo.exe",
+      "--gtest_recreate_environments_when_repeating=0",
+      nullptr,
+  };
+
+  const char* argv2[] = {"foo.exe", nullptr};
+
+  GTEST_TEST_PARSING_FLAGS_(
+      argv, argv2, Flags::RecreateEnvironmentsWhenRepeating(false), false);
 }
 
 // Tests having a --gtest_also_run_disabled_tests flag
@@ -6605,7 +6616,7 @@ TEST(StreamingAssertionsTest, AnyThrow) {
 // Tests that Google Test correctly decides whether to use colors in the output.
 
 TEST(ColoredOutputTest, UsesColorsWhenGTestColorFlagIsYes) {
-  GTEST_FLAG(color) = "yes";
+  GTEST_FLAG_SET(color, "yes");
 
   SetEnv("TERM", "xterm");  // TERM supports colors.
   EXPECT_TRUE(ShouldUseColor(true));  // Stdout is a TTY.
@@ -6619,18 +6630,18 @@ TEST(ColoredOutputTest, UsesColorsWhenGTestColorFlagIsYes) {
 TEST(ColoredOutputTest, UsesColorsWhenGTestColorFlagIsAliasOfYes) {
   SetEnv("TERM", "dumb");  // TERM doesn't support colors.
 
-  GTEST_FLAG(color) = "True";
+  GTEST_FLAG_SET(color, "True");
   EXPECT_TRUE(ShouldUseColor(false));  // Stdout is not a TTY.
 
-  GTEST_FLAG(color) = "t";
+  GTEST_FLAG_SET(color, "t");
   EXPECT_TRUE(ShouldUseColor(false));  // Stdout is not a TTY.
 
-  GTEST_FLAG(color) = "1";
+  GTEST_FLAG_SET(color, "1");
   EXPECT_TRUE(ShouldUseColor(false));  // Stdout is not a TTY.
 }
 
 TEST(ColoredOutputTest, UsesNoColorWhenGTestColorFlagIsNo) {
-  GTEST_FLAG(color) = "no";
+  GTEST_FLAG_SET(color, "no");
 
   SetEnv("TERM", "xterm");  // TERM supports colors.
   EXPECT_FALSE(ShouldUseColor(true));  // Stdout is a TTY.
@@ -6644,18 +6655,18 @@ TEST(ColoredOutputTest, UsesNoColorWhenGTestColorFlagIsNo) {
 TEST(ColoredOutputTest, UsesNoColorWhenGTestColorFlagIsInvalid) {
   SetEnv("TERM", "xterm");  // TERM supports colors.
 
-  GTEST_FLAG(color) = "F";
+  GTEST_FLAG_SET(color, "F");
   EXPECT_FALSE(ShouldUseColor(true));  // Stdout is a TTY.
 
-  GTEST_FLAG(color) = "0";
+  GTEST_FLAG_SET(color, "0");
   EXPECT_FALSE(ShouldUseColor(true));  // Stdout is a TTY.
 
-  GTEST_FLAG(color) = "unknown";
+  GTEST_FLAG_SET(color, "unknown");
   EXPECT_FALSE(ShouldUseColor(true));  // Stdout is a TTY.
 }
 
 TEST(ColoredOutputTest, UsesColorsWhenStdoutIsTty) {
-  GTEST_FLAG(color) = "auto";
+  GTEST_FLAG_SET(color, "auto");
 
   SetEnv("TERM", "xterm");  // TERM supports colors.
   EXPECT_FALSE(ShouldUseColor(false));  // Stdout is not a TTY.
@@ -6663,7 +6674,7 @@ TEST(ColoredOutputTest, UsesColorsWhenStdoutIsTty) {
 }
 
 TEST(ColoredOutputTest, UsesColorsWhenTermSupportsColors) {
-  GTEST_FLAG(color) = "auto";
+  GTEST_FLAG_SET(color, "auto");
 
 #if GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_MINGW
   // On Windows, we ignore the TERM variable as it's usually not set.

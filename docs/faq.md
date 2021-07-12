@@ -279,8 +279,9 @@ disabled by our build system. Please see more details
 ## My death test hangs (or seg-faults). How do I fix it?
 
 In googletest, death tests are run in a child process and the way they work is
-delicate. To write death tests you really need to understand how they work.
-Please make sure you have read [this](advanced.md#how-it-works).
+delicate. To write death tests you really need to understand how they work—see
+the details at [Death Assertions](reference/assertions.md#death) in the
+Assertions Reference.
 
 In particular, death tests don't like having multiple threads in the parent
 process. So the first thing you can try is to eliminate creating threads outside
@@ -353,72 +354,8 @@ You may still want to use `SetUp()/TearDown()` in the following cases:
 
 ## The compiler complains "no matching function to call" when I use ASSERT_PRED*. How do I fix it?
 
-If the predicate function you use in `ASSERT_PRED*` or `EXPECT_PRED*` is
-overloaded or a template, the compiler will have trouble figuring out which
-overloaded version it should use. `ASSERT_PRED_FORMAT*` and
-`EXPECT_PRED_FORMAT*` don't have this problem.
-
-If you see this error, you might want to switch to
-`(ASSERT|EXPECT)_PRED_FORMAT*`, which will also give you a better failure
-message. If, however, that is not an option, you can resolve the problem by
-explicitly telling the compiler which version to pick.
-
-For example, suppose you have
-
-```c++
-bool IsPositive(int n) {
-  return n > 0;
-}
-
-bool IsPositive(double x) {
-  return x > 0;
-}
-```
-
-you will get a compiler error if you write
-
-```c++
-EXPECT_PRED1(IsPositive, 5);
-```
-
-However, this will work:
-
-```c++
-EXPECT_PRED1(static_cast<bool (*)(int)>(IsPositive), 5);
-```
-
-(The stuff inside the angled brackets for the `static_cast` operator is the type
-of the function pointer for the `int`-version of `IsPositive()`.)
-
-As another example, when you have a template function
-
-```c++
-template <typename T>
-bool IsNegative(T x) {
-  return x < 0;
-}
-```
-
-you can use it in a predicate assertion like this:
-
-```c++
-ASSERT_PRED1(IsNegative<int>, -5);
-```
-
-Things are more interesting if your template has more than one parameter. The
-following won't compile:
-
-```c++
-ASSERT_PRED2(GreaterThan<int, int>, 5, 0);
-```
-
-as the C++ pre-processor thinks you are giving `ASSERT_PRED2` 4 arguments, which
-is one more than expected. The workaround is to wrap the predicate function in
-parentheses:
-
-```c++
-ASSERT_PRED2((GreaterThan<int, int>), 5, 0);
-```
+See details for [`EXPECT_PRED*`](reference/assertions.md#EXPECT_PRED) in the
+Assertions Reference.
 
 ## My compiler complains about "ignoring return value" when I call RUN_ALL_TESTS(). Why?
 

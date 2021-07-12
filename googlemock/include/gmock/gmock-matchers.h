@@ -343,7 +343,7 @@ class MatcherCastImpl {
     // constructor from M (this usually happens when T has an implicit
     // constructor from any type).
     //
-    // It won't work to unconditionally implict_cast
+    // It won't work to unconditionally implicit_cast
     // polymorphic_matcher_or_value to Matcher<T> because it won't trigger
     // a user-defined conversion from M to T if one exists (assuming M is
     // a value).
@@ -1404,6 +1404,30 @@ class AnyOfMatcherImpl : public MatcherInterface<const T&> {
 // AnyOfMatcher is used for the variadic implementation of AnyOf(m_1, m_2, ...).
 template <typename... Args>
 using AnyOfMatcher = VariadicMatcher<AnyOfMatcherImpl, Args...>;
+
+// ConditionalMatcher is the implementation of Conditional(cond, m1, m2)
+template <typename MatcherTrue, typename MatcherFalse>
+class ConditionalMatcher {
+ public:
+  ConditionalMatcher(bool condition, MatcherTrue matcher_true,
+                     MatcherFalse matcher_false)
+      : condition_(condition),
+        matcher_true_(std::move(matcher_true)),
+        matcher_false_(std::move(matcher_false)) {}
+
+  template <typename T>
+  operator Matcher<T>() const {  // NOLINT(runtime/explicit)
+    return condition_ ? SafeMatcherCast<T>(matcher_true_)
+                      : SafeMatcherCast<T>(matcher_false_);
+  }
+
+ private:
+  bool condition_;
+  MatcherTrue matcher_true_;
+  MatcherFalse matcher_false_;
+
+  GTEST_DISALLOW_ASSIGN_(ConditionalMatcher);
+};
 
 // Wrapper for implementation of Any/AllOfArray().
 template <template <class> class MatcherImpl, typename T>
@@ -2581,7 +2605,7 @@ class PointwiseMatcher {
           StringMatchResultListener inner_listener;
           // Create InnerMatcherArg as a temporarily object to avoid it outlives
           // *left and *right. Dereference or the conversion to `const T&` may
-          // return temp objects, e.g for vector<bool>.
+          // return temp objects, e.g. for vector<bool>.
           if (!mono_tuple_matcher_.MatchAndExplain(
                   InnerMatcherArg(ImplicitCast_<const LhsValue&>(*left),
                                   ImplicitCast_<const RhsValue&>(*right)),
@@ -2653,6 +2677,54 @@ class QuantifierMatcherImpl : public MatcherInterface<Container> {
     return all_elements_should_match;
   }
 
+  bool MatchAndExplainImpl(const Matcher<size_t>& count_matcher,
+                           Container container,
+                           MatchResultListener* listener) const {
+    StlContainerReference stl_container = View::ConstReference(container);
+    size_t i = 0;
+    std::vector<size_t> match_elements;
+    for (auto it = stl_container.begin(); it != stl_container.end();
+         ++it, ++i) {
+      StringMatchResultListener inner_listener;
+      const bool matches = inner_matcher_.MatchAndExplain(*it, &inner_listener);
+      if (matches) {
+        match_elements.push_back(i);
+      }
+    }
+    if (listener->IsInterested()) {
+      if (match_elements.empty()) {
+        *listener << "has no element that matches";
+      } else if (match_elements.size() == 1) {
+        *listener << "whose element #" << match_elements[0] << " matches";
+      } else {
+        *listener << "whose elements (";
+        std::string sep = "";
+        for (size_t e : match_elements) {
+          *listener << sep << e;
+          sep = ", ";
+        }
+        *listener << ") match";
+      }
+    }
+    StringMatchResultListener count_listener;
+    if (count_matcher.MatchAndExplain(match_elements.size(), &count_listener)) {
+      *listener << " and whose match quantity of " << match_elements.size()
+                << " matches";
+      PrintIfNotEmpty(count_listener.str(), listener->stream());
+      return true;
+    } else {
+      if (match_elements.empty()) {
+        *listener << " and";
+      } else {
+        *listener << " but";
+      }
+      *listener << " whose match quantity of " << match_elements.size()
+                << " does not match";
+      PrintIfNotEmpty(count_listener.str(), listener->stream());
+      return false;
+    }
+  }
+
  protected:
   const Matcher<const Element&> inner_matcher_;
 };
@@ -2709,6 +2781,58 @@ class EachMatcherImpl : public QuantifierMatcherImpl<Container> {
   }
 };
 
+// Implements Contains(element_matcher).Times(n) for the given argument type
+// Container.
+template <typename Container>
+class ContainsTimesMatcherImpl : public QuantifierMatcherImpl<Container> {
+ public:
+  template <typename InnerMatcher>
+  explicit ContainsTimesMatcherImpl(InnerMatcher inner_matcher,
+                                    Matcher<size_t> count_matcher)
+      : QuantifierMatcherImpl<Container>(inner_matcher),
+        count_matcher_(std::move(count_matcher)) {}
+
+  void DescribeTo(::std::ostream* os) const override {
+    *os << "quantity of elements that match ";
+    this->inner_matcher_.DescribeTo(os);
+    *os << " ";
+    count_matcher_.DescribeTo(os);
+  }
+
+  void DescribeNegationTo(::std::ostream* os) const override {
+    *os << "quantity of elements that match ";
+    this->inner_matcher_.DescribeTo(os);
+    *os << " ";
+    count_matcher_.DescribeNegationTo(os);
+  }
+
+  bool MatchAndExplain(Container container,
+                       MatchResultListener* listener) const override {
+    return this->MatchAndExplainImpl(count_matcher_, container, listener);
+  }
+
+ private:
+  const Matcher<size_t> count_matcher_;
+};
+
+// Implements polymorphic Contains(element_matcher).Times(n).
+template <typename M>
+class ContainsTimesMatcher {
+ public:
+  explicit ContainsTimesMatcher(M m, Matcher<size_t> count_matcher)
+      : inner_matcher_(m), count_matcher_(std::move(count_matcher)) {}
+
+  template <typename Container>
+  operator Matcher<Container>() const {  // NOLINT
+    return Matcher<Container>(new ContainsTimesMatcherImpl<const Container&>(
+        inner_matcher_, count_matcher_));
+  }
+
+ private:
+  const M inner_matcher_;
+  const Matcher<size_t> count_matcher_;
+};
+
 // Implements polymorphic Contains(element_matcher).
 template <typename M>
 class ContainsMatcher {
@@ -2716,9 +2840,13 @@ class ContainsMatcher {
   explicit ContainsMatcher(M m) : inner_matcher_(m) {}
 
   template <typename Container>
-  operator Matcher<Container>() const {
+  operator Matcher<Container>() const {  // NOLINT
     return Matcher<Container>(
         new ContainsMatcherImpl<const Container&>(inner_matcher_));
+  }
+
+  ContainsTimesMatcher<M> Times(Matcher<size_t> count_matcher) const {
+    return ContainsTimesMatcher<M>(inner_matcher_, std::move(count_matcher));
   }
 
  private:
@@ -2732,7 +2860,7 @@ class EachMatcher {
   explicit EachMatcher(M m) : inner_matcher_(m) {}
 
   template <typename Container>
-  operator Matcher<Container>() const {
+  operator Matcher<Container>() const {  // NOLINT
     return Matcher<Container>(
         new EachMatcherImpl<const Container&>(inner_matcher_));
   }
@@ -3981,26 +4109,26 @@ ElementsAreArray(Iter first, Iter last) {
 }
 
 template <typename T>
-inline internal::ElementsAreArrayMatcher<T> ElementsAreArray(
-    const T* pointer, size_t count) {
+inline auto ElementsAreArray(const T* pointer, size_t count)
+    -> decltype(ElementsAreArray(pointer, pointer + count)) {
   return ElementsAreArray(pointer, pointer + count);
 }
 
 template <typename T, size_t N>
-inline internal::ElementsAreArrayMatcher<T> ElementsAreArray(
-    const T (&array)[N]) {
+inline auto ElementsAreArray(const T (&array)[N])
+    -> decltype(ElementsAreArray(array, N)) {
   return ElementsAreArray(array, N);
 }
 
 template <typename Container>
-inline internal::ElementsAreArrayMatcher<typename Container::value_type>
-ElementsAreArray(const Container& container) {
+inline auto ElementsAreArray(const Container& container)
+    -> decltype(ElementsAreArray(container.begin(), container.end())) {
   return ElementsAreArray(container.begin(), container.end());
 }
 
 template <typename T>
-inline internal::ElementsAreArrayMatcher<T>
-ElementsAreArray(::std::initializer_list<T> xs) {
+inline auto ElementsAreArray(::std::initializer_list<T> xs)
+    -> decltype(ElementsAreArray(xs.begin(), xs.end())) {
   return ElementsAreArray(xs.begin(), xs.end());
 }
 
@@ -4615,7 +4743,6 @@ UnorderedPointwise(const Tuple2Matcher& tuple2_matcher,
   return UnorderedPointwise(tuple2_matcher, std::vector<T>(rhs));
 }
 
-
 // Matches an STL-style container or a native array that contains at
 // least one element matching the given value or matcher.
 //
@@ -4625,7 +4752,7 @@ UnorderedPointwise(const Tuple2Matcher& tuple2_matcher,
 //   page_ids.insert(1);
 //   EXPECT_THAT(page_ids, Contains(1));
 //   EXPECT_THAT(page_ids, Contains(Gt(2)));
-//   EXPECT_THAT(page_ids, Not(Contains(4)));
+//   EXPECT_THAT(page_ids, Not(Contains(4)));  // See below for Times(0)
 //
 //   ::std::map<int, size_t> page_lengths;
 //   page_lengths[1] = 100;
@@ -4634,6 +4761,19 @@ UnorderedPointwise(const Tuple2Matcher& tuple2_matcher,
 //
 //   const char* user_ids[] = { "joe", "mike", "tom" };
 //   EXPECT_THAT(user_ids, Contains(Eq(::std::string("tom"))));
+//
+// The matcher supports a modifier `Times` that allows to check for arbitrary
+// occurrences including testing for absence with Times(0).
+//
+// Examples:
+//   ::std::vector<int> ids;
+//   ids.insert(1);
+//   ids.insert(1);
+//   ids.insert(3);
+//   EXPECT_THAT(ids, Contains(1).Times(2));      // 1 occurs 2 times
+//   EXPECT_THAT(ids, Contains(2).Times(0));      // 2 is not present
+//   EXPECT_THAT(ids, Contains(3).Times(Ge(1)));  // 3 occurs at least once
+
 template <typename M>
 inline internal::ContainsMatcher<M> Contains(M matcher) {
   return internal::ContainsMatcher<M>(matcher);
@@ -4760,7 +4900,7 @@ inline internal::UnorderedElementsAreArrayMatcher<T> IsSubsetOf(
 // Matches an STL-style container or a native array that contains only
 // elements matching the given value or matcher.
 //
-// Each(m) is semantically equivalent to Not(Contains(Not(m))). Only
+// Each(m) is semantically equivalent to `Not(Contains(Not(m)))`. Only
 // the messages are different.
 //
 // Examples:
@@ -4810,6 +4950,18 @@ Pair(FirstMatcher first_matcher, SecondMatcher second_matcher) {
 }
 
 namespace no_adl {
+// Conditional() creates a matcher that conditionally uses either the first or
+// second matcher provided. For example, we could create an `equal if, and only
+// if' matcher using the Conditonal wrapper as follows:
+//
+//   EXPECT_THAT(result, Conditional(condition, Eq(expected), Ne(expected)));
+template <typename MatcherTrue, typename MatcherFalse>
+internal::ConditionalMatcher<MatcherTrue, MatcherFalse> Conditional(
+    bool condition, MatcherTrue matcher_true, MatcherFalse matcher_false) {
+  return internal::ConditionalMatcher<MatcherTrue, MatcherFalse>(
+      condition, std::move(matcher_true), std::move(matcher_false));
+}
+
 // FieldsAre(matchers...) matches piecewise the fields of compatible structs.
 // These include those that support `get<I>(obj)`, and when structured bindings
 // are enabled any class that supports them.
@@ -5248,6 +5400,7 @@ PolymorphicMatcher<internal::ExceptionMatcherImpl<Err>> ThrowsMessage(
                                                                                \
      private:                                                                  \
       ::std::string FormatDescription(bool negation) const {                   \
+        /* NOLINTNEXTLINE readability-redundant-string-init */                 \
         ::std::string gmock_description = (description);                       \
         if (!gmock_description.empty()) {                                      \
           return gmock_description;                                            \

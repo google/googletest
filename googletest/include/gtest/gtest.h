@@ -73,17 +73,6 @@
 GTEST_DISABLE_MSC_WARNINGS_PUSH_(4251 \
 /* class A needs to have dll-interface to be used by clients of class B */)
 
-namespace testing {
-
-// Silence C4100 (unreferenced formal parameter) and 4805
-// unsafe mix of type 'const int' and type 'const bool'
-#ifdef _MSC_VER
-# pragma warning(push)
-# pragma warning(disable:4805)
-# pragma warning(disable:4100)
-#endif
-
-
 // Declares the flags.
 
 // This flag temporary enables the disabled tests.
@@ -138,6 +127,12 @@ GTEST_DECLARE_int32_(random_seed);
 // is 1. If the value is -1 the tests are repeating forever.
 GTEST_DECLARE_int32_(repeat);
 
+// This flag controls whether Google Test Environments are recreated for each
+// repeat of the tests. The default value is true. If set to false the global
+// test Environment objects are only set up once, for the first iteration, and
+// only torn down once, for the last.
+GTEST_DECLARE_bool_(recreate_environments_when_repeating);
+
 // This flag controls whether Google Test includes Google Test internal
 // stack frames in failure stack traces.
 GTEST_DECLARE_bool_(show_internal_stack_frames);
@@ -162,6 +157,16 @@ GTEST_DECLARE_string_(stream_result_to);
 #if GTEST_USE_OWN_FLAGFILE_FLAG_
 GTEST_DECLARE_string_(flagfile);
 #endif  // GTEST_USE_OWN_FLAGFILE_FLAG_
+
+namespace testing {
+
+// Silence C4100 (unreferenced formal parameter) and 4805
+// unsafe mix of type 'const int' and type 'const bool'
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4805)
+#pragma warning(disable : 4100)
+#endif
 
 // The upper limit for valid stack trace depths.
 const int kMaxStackTraceDepth = 100;
@@ -673,7 +678,7 @@ class GTEST_API_ TestResult {
 
   // Protects mutable state of the property vector and of owned
   // properties, whose values may be updated.
-  internal::Mutex test_properites_mutex_;
+  internal::Mutex test_properties_mutex_;
 
   // The vector of TestPartResults
   std::vector<TestPartResult> test_part_results_;

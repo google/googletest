@@ -64,8 +64,6 @@
 GTEST_DISABLE_MSC_WARNINGS_PUSH_(4251 \
 /* class A needs to have dll-interface to be used by clients of class B */)
 
-namespace testing {
-
 // Declares the flags.
 //
 // We don't want the users to modify this flag in the code, but want
@@ -73,31 +71,12 @@ namespace testing {
 // declare it here as opposed to in gtest.h.
 GTEST_DECLARE_bool_(death_test_use_fork);
 
+namespace testing {
 namespace internal {
 
 // The value of GetTestTypeId() as seen from within the Google Test
 // library.  This is solely for testing GetTestTypeId().
 GTEST_API_ extern const TypeId kTestTypeIdInGoogleTest;
-
-// Names of the flags (needed for parsing Google Test flags).
-const char kAlsoRunDisabledTestsFlag[] = "also_run_disabled_tests";
-const char kBreakOnFailureFlag[] = "break_on_failure";
-const char kCatchExceptionsFlag[] = "catch_exceptions";
-const char kColorFlag[] = "color";
-const char kFailFast[] = "fail_fast";
-const char kFilterFlag[] = "filter";
-const char kListTestsFlag[] = "list_tests";
-const char kOutputFlag[] = "output";
-const char kBriefFlag[] = "brief";
-const char kPrintTimeFlag[] = "print_time";
-const char kPrintUTF8Flag[] = "print_utf8";
-const char kRandomSeedFlag[] = "random_seed";
-const char kRepeatFlag[] = "repeat";
-const char kShuffleFlag[] = "shuffle";
-const char kStackTraceDepthFlag[] = "stack_trace_depth";
-const char kStreamResultToFlag[] = "stream_result_to";
-const char kThrowOnFailureFlag[] = "throw_on_failure";
-const char kFlagfileFlag[] = "flagfile";
 
 // A valid random seed must be in [1, kMaxRandomSeed].
 const int kMaxRandomSeed = 99999;
@@ -125,8 +104,7 @@ GTEST_API_ std::string FormatEpochTimeInMillisAsIso8601(TimeInMillis ms);
 //
 // On success, stores the value of the flag in *value, and returns
 // true.  On failure, returns false without changing *value.
-GTEST_API_ bool ParseInt32Flag(
-    const char* str, const char* flag, int32_t* value);
+GTEST_API_ bool ParseFlag(const char* str, const char* flag, int32_t* value);
 
 // Returns a random seed in range [1, kMaxRandomSeed] based on the
 // given --gtest_random_seed flag value.
@@ -160,50 +138,54 @@ class GTestFlagSaver {
  public:
   // The c'tor.
   GTestFlagSaver() {
-    also_run_disabled_tests_ = GTEST_FLAG(also_run_disabled_tests);
-    break_on_failure_ = GTEST_FLAG(break_on_failure);
-    catch_exceptions_ = GTEST_FLAG(catch_exceptions);
-    color_ = GTEST_FLAG(color);
-    death_test_style_ = GTEST_FLAG(death_test_style);
-    death_test_use_fork_ = GTEST_FLAG(death_test_use_fork);
-    fail_fast_ = GTEST_FLAG(fail_fast);
-    filter_ = GTEST_FLAG(filter);
-    internal_run_death_test_ = GTEST_FLAG(internal_run_death_test);
-    list_tests_ = GTEST_FLAG(list_tests);
-    output_ = GTEST_FLAG(output);
-    brief_ = GTEST_FLAG(brief);
-    print_time_ = GTEST_FLAG(print_time);
-    print_utf8_ = GTEST_FLAG(print_utf8);
-    random_seed_ = GTEST_FLAG(random_seed);
-    repeat_ = GTEST_FLAG(repeat);
-    shuffle_ = GTEST_FLAG(shuffle);
-    stack_trace_depth_ = GTEST_FLAG(stack_trace_depth);
-    stream_result_to_ = GTEST_FLAG(stream_result_to);
-    throw_on_failure_ = GTEST_FLAG(throw_on_failure);
+    also_run_disabled_tests_ = GTEST_FLAG_GET(also_run_disabled_tests);
+    break_on_failure_ = GTEST_FLAG_GET(break_on_failure);
+    catch_exceptions_ = GTEST_FLAG_GET(catch_exceptions);
+    color_ = GTEST_FLAG_GET(color);
+    death_test_style_ = GTEST_FLAG_GET(death_test_style);
+    death_test_use_fork_ = GTEST_FLAG_GET(death_test_use_fork);
+    fail_fast_ = GTEST_FLAG_GET(fail_fast);
+    filter_ = GTEST_FLAG_GET(filter);
+    internal_run_death_test_ = GTEST_FLAG_GET(internal_run_death_test);
+    list_tests_ = GTEST_FLAG_GET(list_tests);
+    output_ = GTEST_FLAG_GET(output);
+    brief_ = GTEST_FLAG_GET(brief);
+    print_time_ = GTEST_FLAG_GET(print_time);
+    print_utf8_ = GTEST_FLAG_GET(print_utf8);
+    random_seed_ = GTEST_FLAG_GET(random_seed);
+    repeat_ = GTEST_FLAG_GET(repeat);
+    recreate_environments_when_repeating_ =
+        GTEST_FLAG_GET(recreate_environments_when_repeating);
+    shuffle_ = GTEST_FLAG_GET(shuffle);
+    stack_trace_depth_ = GTEST_FLAG_GET(stack_trace_depth);
+    stream_result_to_ = GTEST_FLAG_GET(stream_result_to);
+    throw_on_failure_ = GTEST_FLAG_GET(throw_on_failure);
   }
 
   // The d'tor is not virtual.  DO NOT INHERIT FROM THIS CLASS.
   ~GTestFlagSaver() {
-    GTEST_FLAG(also_run_disabled_tests) = also_run_disabled_tests_;
-    GTEST_FLAG(break_on_failure) = break_on_failure_;
-    GTEST_FLAG(catch_exceptions) = catch_exceptions_;
-    GTEST_FLAG(color) = color_;
-    GTEST_FLAG(death_test_style) = death_test_style_;
-    GTEST_FLAG(death_test_use_fork) = death_test_use_fork_;
-    GTEST_FLAG(filter) = filter_;
-    GTEST_FLAG(fail_fast) = fail_fast_;
-    GTEST_FLAG(internal_run_death_test) = internal_run_death_test_;
-    GTEST_FLAG(list_tests) = list_tests_;
-    GTEST_FLAG(output) = output_;
-    GTEST_FLAG(brief) = brief_;
-    GTEST_FLAG(print_time) = print_time_;
-    GTEST_FLAG(print_utf8) = print_utf8_;
-    GTEST_FLAG(random_seed) = random_seed_;
-    GTEST_FLAG(repeat) = repeat_;
-    GTEST_FLAG(shuffle) = shuffle_;
-    GTEST_FLAG(stack_trace_depth) = stack_trace_depth_;
-    GTEST_FLAG(stream_result_to) = stream_result_to_;
-    GTEST_FLAG(throw_on_failure) = throw_on_failure_;
+    GTEST_FLAG_SET(also_run_disabled_tests, also_run_disabled_tests_);
+    GTEST_FLAG_SET(break_on_failure, break_on_failure_);
+    GTEST_FLAG_SET(catch_exceptions, catch_exceptions_);
+    GTEST_FLAG_SET(color, color_);
+    GTEST_FLAG_SET(death_test_style, death_test_style_);
+    GTEST_FLAG_SET(death_test_use_fork, death_test_use_fork_);
+    GTEST_FLAG_SET(filter, filter_);
+    GTEST_FLAG_SET(fail_fast, fail_fast_);
+    GTEST_FLAG_SET(internal_run_death_test, internal_run_death_test_);
+    GTEST_FLAG_SET(list_tests, list_tests_);
+    GTEST_FLAG_SET(output, output_);
+    GTEST_FLAG_SET(brief, brief_);
+    GTEST_FLAG_SET(print_time, print_time_);
+    GTEST_FLAG_SET(print_utf8, print_utf8_);
+    GTEST_FLAG_SET(random_seed, random_seed_);
+    GTEST_FLAG_SET(repeat, repeat_);
+    GTEST_FLAG_SET(recreate_environments_when_repeating,
+                   recreate_environments_when_repeating_);
+    GTEST_FLAG_SET(shuffle, shuffle_);
+    GTEST_FLAG_SET(stack_trace_depth, stack_trace_depth_);
+    GTEST_FLAG_SET(stream_result_to, stream_result_to_);
+    GTEST_FLAG_SET(throw_on_failure, throw_on_failure_);
   }
 
  private:
@@ -224,6 +206,7 @@ class GTestFlagSaver {
   bool print_utf8_;
   int32_t random_seed_;
   int32_t repeat_;
+  bool recreate_environments_when_repeating_;
   bool shuffle_;
   int32_t stack_trace_depth_;
   std::string stream_result_to_;
@@ -1164,13 +1147,13 @@ class StreamingListener : public EmptyTestEventListener {
   }
 
   // Note that "event=TestCaseStart" is a wire format and has to remain
-  // "case" for compatibilty
+  // "case" for compatibility
   void OnTestCaseStart(const TestCase& test_case) override {
     SendLn(std::string("event=TestCaseStart&name=") + test_case.name());
   }
 
   // Note that "event=TestCaseEnd" is a wire format and has to remain
-  // "case" for compatibilty
+  // "case" for compatibility
   void OnTestCaseEnd(const TestCase& test_case) override {
     SendLn("event=TestCaseEnd&passed=" + FormatBool(test_case.Passed()) +
            "&elapsed_time=" + StreamableToString(test_case.elapsed_time()) +

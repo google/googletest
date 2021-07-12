@@ -26,6 +26,8 @@ The following macros can be defined:
 *   `GTEST_DEFINE_bool_(name, default_val, doc)`
 *   `GTEST_DEFINE_int32_(name, default_val, doc)`
 *   `GTEST_DEFINE_string_(name, default_val, doc)`
+*   `GTEST_FLAG_GET(flag_name)`
+*   `GTEST_FLAG_SET(flag_name, value)`
 
 ### Logging:
 

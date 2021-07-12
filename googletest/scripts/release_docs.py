@@ -37,7 +37,7 @@ SYNOPSIS
        interlinked wiki files.  When we release a new version of
        Google Test or Google Mock, we need to branch the wiki files
        such that users of a specific version of Google Test/Mock can
-       look up documenation relevant for that version.  This script
+       look up documentation relevant for that version.  This script
        automates that process by:
 
          - branching the current wiki pages (which document the

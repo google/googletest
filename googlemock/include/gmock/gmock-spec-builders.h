@@ -1838,12 +1838,12 @@ corresponding to the provided F argument.
 It makes use of MockFunction easier by allowing it to accept more F arguments
 than just function signatures.
 
-Specializations provided here cover only a signature type itself and
-std::function. However, if need be it can be easily extended to cover also other
-types (like for example boost::function).
+Specializations provided here cover a signature type itself and any template
+that can be parameterized with a signature, including std::function and
+boost::function.
 */
 
-template <typename F>
+template <typename F, typename = void>
 struct SignatureOf;
 
 template <typename R, typename... Args>
@@ -1851,8 +1851,10 @@ struct SignatureOf<R(Args...)> {
   using type = R(Args...);
 };
 
-template <typename F>
-struct SignatureOf<std::function<F>> : SignatureOf<F> {};
+template <template <typename> class C, typename F>
+struct SignatureOf<C<F>,
+                   typename std::enable_if<std::is_function<F>::value>::type>
+    : SignatureOf<F> {};
 
 template <typename F>
 using SignatureOfT = typename SignatureOf<F>::type;

@@ -106,7 +106,7 @@ inline MatchResultListener::~MatchResultListener() {
 
 // An instance of a subclass of this knows how to describe itself as a
 // matcher.
-class MatcherDescriberInterface {
+class GTEST_API_ MatcherDescriberInterface {
  public:
   virtual ~MatcherDescriberInterface() {}
 

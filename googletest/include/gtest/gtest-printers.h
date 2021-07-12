@@ -113,11 +113,6 @@
 #include "gtest/internal/gtest-internal.h"
 #include "gtest/internal/gtest-port.h"
 
-#if GTEST_HAS_RTTI
-#include <typeindex>
-#include <typeinfo>
-#endif  // GTEST_HAS_RTTI
-
 namespace testing {
 
 // Definitions in the internal* namespaces are subject to change without notice.
@@ -365,7 +360,7 @@ GTEST_IMPL_FORMAT_C_STRING_AS_POINTER_(char);
 GTEST_IMPL_FORMAT_C_STRING_AS_POINTER_(const char);
 GTEST_IMPL_FORMAT_C_STRING_AS_POINTER_(wchar_t);
 GTEST_IMPL_FORMAT_C_STRING_AS_POINTER_(const wchar_t);
-#ifdef __cpp_char8_t
+#ifdef __cpp_lib_char8_t
 GTEST_IMPL_FORMAT_C_STRING_AS_POINTER_(char8_t);
 GTEST_IMPL_FORMAT_C_STRING_AS_POINTER_(const char8_t);
 #endif
@@ -506,18 +501,18 @@ inline void PrintTo(unsigned char* s, ::std::ostream* os) {
 }
 #ifdef __cpp_char8_t
 // Overloads for u8 strings.
-void PrintTo(const char8_t* s, ::std::ostream* os);
+GTEST_API_ void PrintTo(const char8_t* s, ::std::ostream* os);
 inline void PrintTo(char8_t* s, ::std::ostream* os) {
   PrintTo(ImplicitCast_<const char8_t*>(s), os);
 }
 #endif
 // Overloads for u16 strings.
-void PrintTo(const char16_t* s, ::std::ostream* os);
+GTEST_API_ void PrintTo(const char16_t* s, ::std::ostream* os);
 inline void PrintTo(char16_t* s, ::std::ostream* os) {
   PrintTo(ImplicitCast_<const char16_t*>(s), os);
 }
 // Overloads for u32 strings.
-void PrintTo(const char32_t* s, ::std::ostream* os);
+GTEST_API_ void PrintTo(const char32_t* s, ::std::ostream* os);
 inline void PrintTo(char32_t* s, ::std::ostream* os) {
   PrintTo(ImplicitCast_<const char32_t*>(s), os);
 }
@@ -671,18 +666,6 @@ void PrintTo(const ::std::pair<T1, T2>& value, ::std::ostream* os) {
   UniversalPrinter<T2>::Print(value.second, os);
   *os << ')';
 }
-
-#if GTEST_HAS_RTTI
-inline void PrintTo(const ::std::type_info& value, ::std::ostream* os) {
-  internal::PrintTo<::std::type_info>(value, os);
-  *os << " (\"" << value.name() << "\")";
-}
-
-inline void PrintTo(const ::std::type_index& value, ::std::ostream* os) {
-  internal::PrintTo<::std::type_index>(value, os);
-  *os << " (\"" << value.name() << "\")";
-}
-#endif  // GTEST_HAS_RTTI
 
 // Implements printing a non-reference type T by letting the compiler
 // pick the right overload of PrintTo() for T.

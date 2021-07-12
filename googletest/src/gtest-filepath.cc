@@ -210,7 +210,7 @@ bool FilePath::FileOrDirectoryExists() const {
   delete [] unicode;
   return attributes != kInvalidFileAttributes;
 #else
-  posix::StatStruct file_stat;
+  posix::StatStruct file_stat{};
   return posix::Stat(pathname_.c_str(), &file_stat) == 0;
 #endif  // GTEST_OS_WINDOWS_MOBILE
 }
@@ -237,7 +237,7 @@ bool FilePath::DirectoryExists() const {
     result = true;
   }
 #else
-  posix::StatStruct file_stat;
+  posix::StatStruct file_stat{};
   result = posix::Stat(path.c_str(), &file_stat) == 0 &&
       posix::IsDir(file_stat);
 #endif  // GTEST_OS_WINDOWS_MOBILE

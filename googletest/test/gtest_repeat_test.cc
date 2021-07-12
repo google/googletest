@@ -35,18 +35,6 @@
 #include "gtest/gtest.h"
 #include "src/gtest-internal-inl.h"
 
-namespace testing {
-
-GTEST_DECLARE_string_(death_test_style);
-GTEST_DECLARE_string_(filter);
-GTEST_DECLARE_int32_(repeat);
-
-}  // namespace testing
-
-using testing::GTEST_FLAG(death_test_style);
-using testing::GTEST_FLAG(filter);
-using testing::GTEST_FLAG(repeat);
-
 namespace {
 
 // We need this when we are testing Google Test itself and therefore
@@ -103,10 +91,10 @@ int g_death_test_count = 0;
 TEST(BarDeathTest, ThreadSafeAndFast) {
   g_death_test_count++;
 
-  GTEST_FLAG(death_test_style) = "threadsafe";
+  GTEST_FLAG_SET(death_test_style, "threadsafe");
   EXPECT_DEATH_IF_SUPPORTED(::testing::internal::posix::Abort(), "");
 
-  GTEST_FLAG(death_test_style) = "fast";
+  GTEST_FLAG_SET(death_test_style, "fast");
   EXPECT_DEATH_IF_SUPPORTED(::testing::internal::posix::Abort(), "");
 }
 
@@ -153,7 +141,7 @@ void TestRepeatUnspecified() {
 
 // Tests the behavior of Google Test when --gtest_repeat has the given value.
 void TestRepeat(int repeat) {
-  GTEST_FLAG(repeat) = repeat;
+  GTEST_FLAG_SET(repeat, repeat);
 
   ResetCounts();
   GTEST_CHECK_INT_EQ_(repeat > 0 ? 1 : 0, RUN_ALL_TESTS());
@@ -163,8 +151,8 @@ void TestRepeat(int repeat) {
 // Tests using --gtest_repeat when --gtest_filter specifies an empty
 // set of tests.
 void TestRepeatWithEmptyFilter(int repeat) {
-  GTEST_FLAG(repeat) = repeat;
-  GTEST_FLAG(filter) = "None";
+  GTEST_FLAG_SET(repeat, repeat);
+  GTEST_FLAG_SET(filter, "None");
 
   ResetCounts();
   GTEST_CHECK_INT_EQ_(0, RUN_ALL_TESTS());
@@ -174,8 +162,8 @@ void TestRepeatWithEmptyFilter(int repeat) {
 // Tests using --gtest_repeat when --gtest_filter specifies a set of
 // successful tests.
 void TestRepeatWithFilterForSuccessfulTests(int repeat) {
-  GTEST_FLAG(repeat) = repeat;
-  GTEST_FLAG(filter) = "*-*ShouldFail";
+  GTEST_FLAG_SET(repeat, repeat);
+  GTEST_FLAG_SET(filter, "*-*ShouldFail");
 
   ResetCounts();
   GTEST_CHECK_INT_EQ_(0, RUN_ALL_TESTS());
@@ -190,8 +178,8 @@ void TestRepeatWithFilterForSuccessfulTests(int repeat) {
 // Tests using --gtest_repeat when --gtest_filter specifies a set of
 // failed tests.
 void TestRepeatWithFilterForFailedTests(int repeat) {
-  GTEST_FLAG(repeat) = repeat;
-  GTEST_FLAG(filter) = "*ShouldFail";
+  GTEST_FLAG_SET(repeat, repeat);
+  GTEST_FLAG_SET(filter, "*ShouldFail");
 
   ResetCounts();
   GTEST_CHECK_INT_EQ_(1, RUN_ALL_TESTS());

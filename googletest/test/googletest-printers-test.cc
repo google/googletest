@@ -201,7 +201,7 @@ OutputStream& operator<<(OutputStream& os,
   return os;
 }
 
-// A user-defined streamable but recursivly-defined container type in
+// A user-defined streamable but recursively-defined container type in
 // a user namespace, it mimics therefore std::filesystem::path or
 // boost::filesystem::path.
 class PathLike {
@@ -1611,61 +1611,6 @@ TEST(PrintToStringTest, WorksForCharArrayWithEmbeddedNul) {
                           "\"From \\xC3\\xA4 \\xE2\\x80\\x94 \\xE1\\xBA\\x91\""
                           "\n    As Text: \"From ä — ẑ\"");
 }
-
-#if GTEST_HAS_RTTI
-template <typename T>
-class PrintToStringTest : public testing::Test {
- public:
-  using TestType = T;
-};
-
-struct PrintBase {
-  virtual ~PrintBase() = default;
-};
-struct PrintDerived : PrintBase {};
-
-using PrintToStringTestTypes =
-    testing::Types<void, int, const volatile int*, PrintBase, PrintDerived>;
-TYPED_TEST_SUITE(PrintToStringTest, PrintToStringTestTypes);
-
-// Returns `true` if `haystack` contains `needle`.
-//
-// FIXME: Replace with `EXPECT_THAT(haystack, HasSubstr(needle))` once
-// GoogleTest starts depending on GoogleMock.
-bool ContainsSubstr(const std::string& haystack, const std::string& needle) {
-  return haystack.find(needle) != std::string::npos;
-}
-
-TYPED_TEST(PrintToStringTest, IncludesNameWithTypeInfoAndTypeIndex) {
-  const ::std::type_info& info = typeid(typename TestFixture::TestType);
-  SCOPED_TRACE(info.name());
-  EXPECT_TRUE(ContainsSubstr(PrintToString(info), info.name()));
-  EXPECT_TRUE(
-      ContainsSubstr(PrintToString(::std::type_index{info}), info.name()));
-}
-
-TEST(PrintToStringTest, IncludesNameWithTypeInfoAndTypeIndexViaBaseRef) {
-  PrintDerived derived;
-  PrintBase& base = derived;
-
-  {
-    const ::std::type_info& derived_info = typeid(derived);
-    SCOPED_TRACE(derived_info.name());
-    EXPECT_TRUE(
-        ContainsSubstr(PrintToString(derived_info), derived_info.name()));
-    EXPECT_TRUE(ContainsSubstr(PrintToString(::std::type_index{derived_info}),
-                               derived_info.name()));
-  }
-  {
-    const ::std::type_info& base_ref_info = typeid(base);
-    SCOPED_TRACE(base_ref_info.name());
-    EXPECT_TRUE(
-        ContainsSubstr(PrintToString(base_ref_info), base_ref_info.name()));
-    EXPECT_TRUE(ContainsSubstr(PrintToString(::std::type_index{base_ref_info}),
-                               base_ref_info.name()));
-  }
-}
-#endif  // GTEST_HAS_RTTI
 
 TEST(IsValidUTF8Test, IllFormedUTF8) {
   // The following test strings are ill-formed UTF-8 and are printed

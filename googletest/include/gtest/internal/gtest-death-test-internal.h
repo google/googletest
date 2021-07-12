@@ -42,10 +42,10 @@
 #include <stdio.h>
 #include <memory>
 
+GTEST_DECLARE_string_(internal_run_death_test);
+
 namespace testing {
 namespace internal {
-
-GTEST_DECLARE_string_(internal_run_death_test);
 
 // Names of the flags (needed for parsing Google Test flags).
 const char kDeathTestStyleFlag[] = "death_test_style";
@@ -236,8 +236,6 @@ inline Matcher<const ::std::string&> MakeDeathTestMatcher(
           gtest_dt->Abort(::testing::internal::DeathTest::TEST_DID_NOT_DIE);   \
           break;                                                               \
         }                                                                      \
-        default:                                                               \
-          break;                                                               \
       }                                                                        \
     }                                                                          \
   } else                                                                       \

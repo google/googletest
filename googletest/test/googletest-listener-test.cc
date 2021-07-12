@@ -284,7 +284,7 @@ int main(int argc, char **argv) {
   GTEST_CHECK_(events.size() == 0)
       << "AddGlobalTestEnvironment should not generate any events itself.";
 
-  ::testing::GTEST_FLAG(repeat) = 2;
+  GTEST_FLAG_SET(repeat, 2);
   int ret_val = RUN_ALL_TESTS();
 
 #ifndef GTEST_REMOVE_LEGACY_TEST_CASEAPI_

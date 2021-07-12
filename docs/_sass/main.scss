@@ -61,7 +61,7 @@ body {
 }
 
 .sidebar .expander .arrow {
-  border: solid white;
+  border: solid $white;
   border-width: 0 3px 3px 0;
   display: block;
   height: 0.7em;
@@ -105,11 +105,18 @@ body {
 }
 
 .main {
+  background-color: $bg-gray;
   width: calc(100% - #{$sidebar-width});
 }
 
 .main .main-inner {
-  margin: 2em;
+  background-color: $white;
+  padding: 2em;
+}
+
+.main .footer {
+  margin: 0;
+  padding: 2em;
 }
 
 .main table th {
@@ -117,7 +124,7 @@ body {
 }
 
 .main .callout {
-  border-left: 0.25em solid white;
+  border-left: 0.25em solid $white;
   padding: 1em;
 
   a {

@@ -39,6 +39,11 @@ licenses(["notice"])
 exports_files(["LICENSE"])
 
 config_setting(
+    name = "qnx",
+    constraint_values = ["@platforms//os:qnx"],
+)
+
+config_setting(
     name = "windows",
     constraint_values = ["@platforms//os:windows"],
 )
@@ -86,6 +91,7 @@ cc_library(
         "googlemock/include/gmock/*.h",
     ]),
     copts = select({
+        ":qnx": [],
         ":windows": [],
         "//conditions:default": ["-pthread"],
     }),
@@ -104,6 +110,7 @@ cc_library(
         "googletest/include",
     ],
     linkopts = select({
+        ":qnx": [],
         ":windows": [],
         "//conditions:default": ["-pthread"],
     }),
