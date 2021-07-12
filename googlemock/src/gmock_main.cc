@@ -58,9 +58,9 @@ void loop() { RUN_ALL_TESTS(); }
 #if GTEST_OS_WINDOWS_MOBILE
 # include <tchar.h>  // NOLINT
 
-GTEST_API_ int _tmain(int argc, TCHAR** argv) {
+GMOCK_API_ int _tmain(int argc, TCHAR** argv) {
 #else
-GTEST_API_ int main(int argc, char** argv) {
+GMOCK_API_ int main(int argc, char** argv) {
 #endif  // GTEST_OS_WINDOWS_MOBILE
   std::cout << "Running main() from gmock_main.cc\n";
   // Since Google Mock depends on Google Test, InitGoogleMock() is

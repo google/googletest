@@ -7,4 +7,3 @@ Version: @PROJECT_VERSION@
 URL: https://github.com/google/googletest
 Requires: gtest = @PROJECT_VERSION@
 Libs: -L${libdir} -lgtest_main @CMAKE_THREAD_LIBS_INIT@
-Cflags: -I${includedir} @GTEST_HAS_PTHREAD_MACRO@

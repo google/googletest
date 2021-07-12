@@ -48,7 +48,7 @@ namespace internal {
 // 'negation' is false; otherwise returns the description of the
 // negation of the matcher.  'param_values' contains a list of strings
 // that are the print-out of the matcher's parameters.
-GTEST_API_ std::string FormatMatcherDescription(bool negation,
+GMOCK_API_ std::string FormatMatcherDescription(bool negation,
                                                 const char* matcher_name,
                                                 const Strings& param_values) {
   std::string result = ConvertIdentifierNameToWords(matcher_name);
@@ -222,7 +222,7 @@ class MaxBipartiteMatchState {
 
 const size_t MaxBipartiteMatchState::kUnused;
 
-GTEST_API_ ElementMatcherPairs FindMaxBipartiteMatching(const MatchMatrix& g) {
+GMOCK_API_ ElementMatcherPairs FindMaxBipartiteMatching(const MatchMatrix& g) {
   return MaxBipartiteMatchState(g).Compute();
 }
 
