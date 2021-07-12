@@ -63,8 +63,8 @@
 #endif
 
 // GMOCK_API_ qualifies all symbols that must be exported. The definitions below
-// are guarded by #ifndef to give embedders a chance to define GTEST_API_ in
-// gtest/internal/custom/gtest-port.h
+// are guarded by #ifndef to give embedders a chance to define GMOCK_API_ in
+// gmock/internal/custom/gmock-port.h
 #ifndef GMOCK_API_
 
 #ifdef _MSC_VER
