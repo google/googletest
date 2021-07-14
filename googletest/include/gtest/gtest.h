@@ -2379,10 +2379,10 @@ constexpr bool StaticAssertTypeEq() noexcept {
 //     EXPECT_EQ(b_.size(), 1);
 //   }
 //
+// GOOGLETEST_CM0011 DO NOT DELETE
 #define GTEST_TEST_F(test_fixture, test_name)\
   GTEST_TEST_(test_fixture, test_name, test_fixture, \
               ::testing::internal::GetTypeId<test_fixture>())
-// GOOGLETEST_CM0011 DO NOT DELETE
 #if !GTEST_DONT_DEFINE_TEST_F
 #define TEST_F(test_fixture, test_name) GTEST_TEST_F(test_fixture, test_name)
 #endif
