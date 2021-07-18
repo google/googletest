@@ -42,7 +42,7 @@ More information about building GoogleTest can be found at
 
 ## Features
 
-*   An [xUnit](https://en.wikipedia.org/wiki/XUnit) test framework.
+*   A [xUnit](https://en.wikipedia.org/wiki/XUnit) test framework.
 *   Test discovery.
 *   A rich set of assertions.
 *   User-defined assertions.
@@ -94,11 +94,9 @@ CMake is supported on a best-effort basis and by the community.
 In addition to many internal projects at Google, GoogleTest is also used by the
 following notable projects:
 
-*   The [Chromium projects](http://www.chromium.org/) (behind the Chrome browser
-    and Chrome OS).
+*   The [Chromium projects](http://www.chromium.org/) (behind the Chrome browser and Chrome OS).
 *   The [LLVM](http://llvm.org/) compiler.
-*   [Protocol Buffers](https://github.com/google/protobuf), Google's data
-    interchange format.
+*   [Protocol Buffers](https://github.com/google/protobuf), Google's data interchange format.
 *   The [OpenCV](http://opencv.org/) computer vision library.
 
 ## Related Open Source Projects
@@ -121,11 +119,11 @@ result output. If your test runner understands TAP, you may find it useful.
 runs tests from your binary in parallel to provide significant speed-up.
 
 [GoogleTest Adapter](https://marketplace.visualstudio.com/items?itemName=DavidSchuldenfrei.gtest-adapter)
-is a VS Code extension allowing to view GoogleTest in a tree view, and run/debug
+is a VS Code extension allowing to view GoogleTest in a tree view and run/debug
 your tests.
 
 [C++ TestMate](https://github.com/matepek/vscode-catch2-test-adapter) is a VS
-Code extension allowing to view GoogleTest in a tree view, and run/debug your
+Code extension allowing to view GoogleTest in a tree view and run/debug your
 tests.
 
 [Cornichon](https://pypi.org/project/cornichon/) is a small Gherkin DSL parser
