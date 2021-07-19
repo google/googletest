@@ -42,7 +42,7 @@
 #include <stdio.h>
 #include <memory>
 
-GTEST_DECLARE_string_(internal_run_death_test);
+GTEST_DECLARE_string_(internal_run_death_test)
 
 namespace testing {
 namespace internal {

@@ -45,7 +45,7 @@
 // from the start, running only a single death test, or "fast",
 // meaning that the child process will execute the test logic immediately
 // after forking.
-GTEST_DECLARE_string_(death_test_style);
+GTEST_DECLARE_string_(death_test_style)
 
 namespace testing {
 

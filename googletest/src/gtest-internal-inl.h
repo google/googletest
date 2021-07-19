@@ -69,7 +69,7 @@ GTEST_DISABLE_MSC_WARNINGS_PUSH_(4251 \
 // We don't want the users to modify this flag in the code, but want
 // Google Test's own unit tests to be able to access it. Therefore we
 // declare it here as opposed to in gtest.h.
-GTEST_DECLARE_bool_(death_test_use_fork);
+GTEST_DECLARE_bool_(death_test_use_fork)
 
 namespace testing {
 namespace internal {
