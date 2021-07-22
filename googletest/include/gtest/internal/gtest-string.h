@@ -36,8 +36,6 @@
 // This header file is #included by gtest-internal.h.
 // It should not be #included by other files.
 
-// GOOGLETEST_CM0001 DO NOT DELETE
-
 #ifndef GOOGLETEST_INCLUDE_GTEST_INTERNAL_GTEST_STRING_H_
 #define GOOGLETEST_INCLUDE_GTEST_INTERNAL_GTEST_STRING_H_
 
