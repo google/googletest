@@ -30,8 +30,6 @@
 
 // Type and function utilities for implementing parameterized tests.
 
-// GOOGLETEST_CM0001 DO NOT DELETE
-
 #ifndef GOOGLETEST_INCLUDE_GTEST_INTERNAL_GTEST_PARAM_UTIL_H_
 #define GOOGLETEST_INCLUDE_GTEST_INTERNAL_GTEST_PARAM_UTIL_H_
 

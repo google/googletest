@@ -32,8 +32,6 @@
 //
 // This is the main header file a user should include.
 
-// GOOGLETEST_CM0002 DO NOT DELETE
-
 #ifndef GOOGLEMOCK_INCLUDE_GMOCK_GMOCK_H_
 #define GOOGLEMOCK_INCLUDE_GMOCK_GMOCK_H_
 

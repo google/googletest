@@ -31,8 +31,6 @@
 // Utilities for testing Google Test itself and code that uses Google Test
 // (e.g. frameworks built on top of Google Test).
 
-// GOOGLETEST_CM0004 DO NOT DELETE
-
 #ifndef GOOGLETEST_INCLUDE_GTEST_GTEST_SPI_H_
 #define GOOGLETEST_INCLUDE_GTEST_GTEST_SPI_H_
 

@@ -33,7 +33,6 @@
 // This header file defines the public API for death tests.  It is
 // #included by gtest.h so a user doesn't need to include this
 // directly.
-// GOOGLETEST_CM0001 DO NOT DELETE
 
 #ifndef GOOGLETEST_INCLUDE_GTEST_GTEST_DEATH_TEST_H_
 #define GOOGLETEST_INCLUDE_GTEST_GTEST_DEATH_TEST_H_
@@ -103,7 +102,6 @@ GTEST_API_ bool InDeathTestChild();
 //
 // On the regular expressions used in death tests:
 //
-//   GOOGLETEST_CM0005 DO NOT DELETE
 //   On POSIX-compliant systems (*nix), we use the <regex.h> library,
 //   which uses the POSIX extended regex syntax.
 //
@@ -204,7 +202,6 @@ class GTEST_API_ ExitedWithCode {
 # if !GTEST_OS_WINDOWS && !GTEST_OS_FUCHSIA
 // Tests that an exit code describes an exit due to termination by a
 // given signal.
-// GOOGLETEST_CM0006 DO NOT DELETE
 class GTEST_API_ KilledBySignal {
  public:
   explicit KilledBySignal(int signum);
