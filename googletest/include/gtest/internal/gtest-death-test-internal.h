@@ -31,7 +31,6 @@
 //
 // This header file defines internal utilities needed for implementing
 // death tests.  They are subject to change without notice.
-// GOOGLETEST_CM0001 DO NOT DELETE
 
 #ifndef GOOGLETEST_INCLUDE_GTEST_INTERNAL_GTEST_DEATH_TEST_INTERNAL_H_
 #define GOOGLETEST_INCLUDE_GTEST_INTERNAL_GTEST_DEATH_TEST_INTERNAL_H_

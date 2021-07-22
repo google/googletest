@@ -4091,7 +4091,6 @@ std::string XmlUnitTestResultPrinter::RemoveInvalidXmlCharacters(
 
 // The following routines generate an XML representation of a UnitTest
 // object.
-// GOOGLETEST_CM0009 DO NOT DELETE
 //
 // This is how Google Test concepts map to the DTD:
 //
