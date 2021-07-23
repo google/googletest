@@ -61,7 +61,25 @@ struct ThisRefAdjuster {
     return static_cast<AdjustT<MockType>>(const_cast<MockType&>(mock));
   }
 };
+  class IMockBase {
+        static int genId();
+        int id;
+    public:
+        IMockBase();
+        virtual ~IMockBase();
+        virtual void Reset() const = 0;
+        int GetId();
+    };
+    class MockVerifyAndClearExpectation : public ::testing::EmptyTestEventListener
+    {
+    public:
+        virtual void OnTestStart(::testing::TestInfo const&);
+        virtual void OnTestEnd(::testing::TestInfo const&);
+        virtual void OnTestProgramEnd(::testing::UnitTest const&);
 
+        static void  add(IMockBase* obj);
+        static void  remove(IMockBase* obj);
+    };
 }  // namespace internal
 
 // The style guide prohibits "using" statements in a namespace scope
@@ -74,6 +92,25 @@ using internal::FunctionMocker;
 
 #define MOCK_METHOD(...) \
   GMOCK_PP_VARIADIC_CALL(GMOCK_INTERNAL_MOCK_METHOD_ARG_, __VA_ARGS__)
+
+#define MOCK_FUNCTION(...) \
+  GMOCK_PP_VARIADIC_CALL(GMOCK_EXTENSION_FUNCTION_INTERNAL_ARG_, __VA_ARGS__)
+
+#define MOCK_FUNCTION_OVERLOAD(...) \
+  GMOCK_PP_VARIADIC_CALL(GMOCK_EXTENSION_FUNCTION_OVERLOAD_INTERNAL_ARG_, __VA_ARGS__)
+
+#define MOCK_CLASS_METHOD(...) \
+  GMOCK_PP_VARIADIC_CALL(GMOCK_EXTENSION_CLASS_METHOD_INTERNAL_ARG_, __VA_ARGS__)
+
+#define MOCK_CLASS_METHOD_OVERLOAD(...) \
+  GMOCK_PP_VARIADIC_CALL(GMOCK_EXTENSION_CLASS_METHOD_OVERLOAD_INTERNAL_ARG_, __VA_ARGS__)
+
+#define MOCK_CLASS_CTOR(  ...  ) \
+  GMOCK_PP_VARIADIC_CALL(GMOCK_EXTENSION_CLASS_CTOR_INTERNAL_ARG_, __VA_ARGS__)
+
+#define MOCK_CLASS_DTOR( ... ) \
+  GMOCK_PP_VARIADIC_CALL(GMOCK_EXTENSION_CLASS_DTOR_ARG_, __VA_ARGS__ )
+
 
 #define GMOCK_INTERNAL_MOCK_METHOD_ARG_1(...) \
   GMOCK_INTERNAL_WRONG_ARITY(__VA_ARGS__)
@@ -473,5 +510,253 @@ using internal::FunctionMocker;
 
 #define GMOCK_MOCKER_(arity, constness, Method) \
   GTEST_CONCAT_TOKEN_(gmock##constness##arity##_##Method##_, __LINE__)
+
+#define PpTestName     ::testing::UnitTest::GetInstance( )->current_test_info( )->name( )
+#define PpTestCaseName ::testing::UnitTest::GetInstance( )->current_test_info( )->test_case_name( )
+#define PpMockName(FUNC_NAME, overloadId)      GMOCK_PP_CAT(GMOCK_PP_CAT( FUNC_NAME, _MOCK_TYPE ), overloadId)
+
+#define PpMockAccessHead( FUNC_NAME, overloadId )                                                  \
+  struct PpMockName(FUNC_NAME, overloadId) : public ::testing::internal::IMockBase {
+
+#define PpMockAccessTail( FUNC_NAME, overloadId)                                                   \
+     static PpMockName(FUNC_NAME, overloadId) & Create( )                                          \
+     {                                                                                             \
+        Replace( new PpMockName(FUNC_NAME, overloadId) );                                          \
+        return *GetPtr( );                                                                         \
+     }                                                                                             \
+     static PpMockName(FUNC_NAME, overloadId) & CreateStrict( )                                    \
+     {                                                                                             \
+        Replace( new ::testing::StrictMock< PpMockName(FUNC_NAME, overloadId) > );                 \
+        return *GetPtr( );                                                                         \
+     }                                                                                             \
+     static PpMockName(FUNC_NAME, overloadId) & CreateNice( )                                      \
+     {                                                                                             \
+        Replace( new ::testing::NiceMock< PpMockName(FUNC_NAME, overloadId) > );                   \
+        return *GetPtr( );                                                                         \
+     }                                                                                             \
+     static PpMockName(FUNC_NAME, overloadId) * & GetPtr( )                                        \
+     {                                                                                             \
+        static PpMockName(FUNC_NAME, overloadId) * tmp;                                            \
+        return tmp;                                                                                \
+     }                                                                                             \
+     static void AssertWhenNotInit( )                                                              \
+     {                                                                                             \
+       void * ptr_to_mock_obj = GetPtr( );                                                         \
+       EXPECT_TRUE( ptr_to_mock_obj ) <<                                                           \
+         "\nPLEASE CREATE MOCK OBJECT FOR FUNCTION " GMOCK_PP_STRINGIZE( FUNC_NAME )               \
+         " IN TEST( " <<  PpTestCaseName << " , " << PpTestName << " )"                            \
+         "\n Use ONE of the following code lines:\n"                                               \
+         "  auto & naggyMock  = "                                                                  \
+            GMOCK_PP_STRINGIZE(PpMockName(FUNC_NAME, overloadId)) "::Create( );\n"                 \
+         "  auto & strictMock = "                                                                  \
+            GMOCK_PP_STRINGIZE(PpMockName(FUNC_NAME, overloadId)) "::CreateStrict( );\n"           \
+         "  auto & niceMock   = "                                                                  \
+            GMOCK_PP_STRINGIZE(PpMockName(FUNC_NAME, overloadId)) "::CreateNice( );\n";            \
+       if( !ptr_to_mock_obj )                                                                      \
+           throw std::runtime_error("MISSING MOCK OBJECT FOR THE FUNCTION "                        \
+                                      GMOCK_PP_STRINGIZE(FUNC_NAME));                              \
+     }                                                                                             \
+     virtual void Reset( ) const                                                                   \
+     {                                                                                             \
+       GetPtr( ) = nullptr;                                                                        \
+     }                                                                                             \
+  private:                                                                                         \
+   static void Replace( PpMockName(FUNC_NAME, overloadId) * p )                                    \
+   {                                                                                               \
+     auto * tmp = GetPtr( );                                                                       \
+     if( tmp ) {                                                                                   \
+         ::testing::internal::MockVerifyAndClearExpectation::remove( tmp );                         \
+         delete tmp;                                                                               \
+     }                                                                                             \
+     GetPtr( ) = p;                                                                                \
+     ::testing::internal::MockVerifyAndClearExpectation::add( p );                                  \
+   }                                                                                               \
+  };
+
+#define GMOCK_EXTENSION_FUNCTION_INTERNAL_ARG_1(...) \
+  GMOCK_INTERNAL_WRONG_ARITY(__VA_ARGS__)
+
+#define GMOCK_EXTENSION_FUNCTION_INTERNAL_ARG_2(...) \
+  GMOCK_INTERNAL_WRONG_ARITY(__VA_ARGS__)
+
+#define GMOCK_EXTENSION_FUNCTION_INTERNAL_ARG_3(_Ret, _FunctionName, _Args)        \
+  PpMockAccessHead( _FunctionName, )                                               \
+  GMOCK_INTERNAL_MOCK_METHOD_ARG_3( _Ret, _FunctionName, _Args );                  \
+  PpMockAccessTail( _FunctionName, )                                               \
+    GMOCK_EXTENSION_FUNCTION_INTERNAL( GMOCK_PP_NARG0 _Args, _FunctionName, , , ,  \
+      (GMOCK_INTERNAL_SIGNATURE(_Ret, _Args)) )
+
+#define GMOCK_EXTENSION_FUNCTION_INTERNAL_ARG_4(_Ret, _FunctionName, _Args, _Spec) \
+  PpMockAccessHead( _FunctionName, )                                               \
+  GMOCK_INTERNAL_MOCK_METHOD_ARG_4( _Ret, _FunctionName, _Args, _Spec );           \
+  PpMockAccessTail( _FunctionName, )                                               \
+  GMOCK_EXTENSION_FUNCTION_INTERNAL( GMOCK_PP_NARG0 _Args, _FunctionName, ,        \
+      GMOCK_INTERNAL_GET_NOEXCEPT_SPEC(_Spec),                                     \
+      GMOCK_INTERNAL_GET_CALLTYPE(_Spec),                                          \
+      (GMOCK_INTERNAL_SIGNATURE(_Ret, _Args)) )
+
+#define GMOCK_EXTENSION_FUNCTION_OVERLOAD_INTERNAL_ARG_1(...) \
+  GMOCK_INTERNAL_WRONG_ARITY(__VA_ARGS__)
+
+#define GMOCK_EXTENSION_FUNCTION_OVERLOAD_INTERNAL_ARG_2(...) \
+  GMOCK_INTERNAL_WRONG_ARITY(__VA_ARGS__)
+
+#define GMOCK_EXTENSION_FUNCTION_OVERLOAD_INTERNAL_ARG_3(...) \
+  GMOCK_INTERNAL_WRONG_ARITY(__VA_ARGS__)
+
+#define GMOCK_EXTENSION_FUNCTION_OVERLOAD_INTERNAL_ARG_4(overloadId, _Ret, _FunctionName, _Args) \
+  PpMockAccessHead( _FunctionName, overloadId)                                                   \
+  GMOCK_INTERNAL_MOCK_METHOD_ARG_3( _Ret, _FunctionName, _Args );                                \
+  PpMockAccessTail( _FunctionName, overloadId)                                                   \
+  GMOCK_EXTENSION_FUNCTION_INTERNAL( GMOCK_PP_NARG0 _Args, _FunctionName, overloadId, , ,        \
+                                     (GMOCK_INTERNAL_SIGNATURE(_Ret, _Args)))
+
+#define GMOCK_EXTENSION_FUNCTION_OVERLOAD_INTERNAL_ARG_5(overloadId, _Ret, _FunctionName, _Args, _Spec) \
+  PpMockAccessHead( _FunctionName, overloadId)                                                   \
+  GMOCK_INTERNAL_MOCK_METHOD_ARG_4( _Ret, _FunctionName, _Args, _Spec );                         \
+  PpMockAccessTail( _FunctionName, overloadId)                                                   \
+  GMOCK_EXTENSION_FUNCTION_INTERNAL( GMOCK_PP_NARG0 _Args, _FunctionName, overloadId,            \
+      GMOCK_INTERNAL_GET_NOEXCEPT_SPEC(_Spec), GMOCK_INTERNAL_GET_CALLTYPE(_Spec),               \
+      (GMOCK_INTERNAL_SIGNATURE(_Ret, _Args)))
+
+#define GMOCK_EXTENSION_FUNCTION_INTERNAL( _N, _FunctionName, overloadId,            \
+                                 _Noexcept, _CallType, _Signature)                   \
+  typename ::testing::internal::Function<GMOCK_PP_REMOVE_PARENS(_Signature)>::Result \
+   GMOCK_INTERNAL_EXPAND(_CallType)                                                  \
+  _FunctionName(GMOCK_PP_REPEAT(GMOCK_INTERNAL_PARAMETER, _Signature, _N)) _Noexcept \
+  {                                                                                  \
+    PpMockName(_FunctionName, overloadId)::AssertWhenNotInit();                      \
+    return PpMockName(_FunctionName, overloadId)::GetPtr( )->_FunctionName(          \
+            GMOCK_PP_REPEAT(GMOCK_INTERNAL_FORWARD_ARG, _Signature, _N));            \
+  }
+
+#define GMOCK_EXTENSION_CLASS_METHOD_INTERNAL_ARG_1(...) \
+  GMOCK_INTERNAL_WRONG_ARITY(__VA_ARGS__)
+
+#define GMOCK_EXTENSION_CLASS_METHOD_INTERNAL_ARG_2(...) \
+  GMOCK_INTERNAL_WRONG_ARITY(__VA_ARGS__)
+
+#define GMOCK_EXTENSION_CLASS_METHOD_INTERNAL_ARG_3(...) \
+  GMOCK_INTERNAL_WRONG_ARITY(__VA_ARGS__)
+
+#define GMOCK_EXTENSION_CLASS_METHOD_INTERNAL_ARG_4(_class, _Ret, _FunctionName, _Args)     \
+  PpMockAccessHead( _class##_##_FunctionName, )                                             \
+  GMOCK_INTERNAL_MOCK_METHOD_ARG_3( _Ret, _FunctionName, _Args );                           \
+  PpMockAccessTail( _class##_##_FunctionName, )                                             \
+  GMOCK_EXTENSION_CLASS_METHOD_INTERNAL( GMOCK_PP_NARG0 _Args, _class, _FunctionName, ,     \
+       0 , , , 0, 0, , (GMOCK_INTERNAL_SIGNATURE(_Ret, _Args)))
+
+#define GMOCK_EXTENSION_CLASS_METHOD_INTERNAL_ARG_5(_class, _Ret, _FunctionName, _Args, _Spec)  \
+  PpMockAccessHead( _class##_##_FunctionName, )                                         \
+  GMOCK_INTERNAL_MOCK_METHOD_ARG_4( _Ret, _FunctionName, _Args, _Spec );                \
+  PpMockAccessTail( _class##_##_FunctionName, )                                         \
+  GMOCK_EXTENSION_CLASS_METHOD_INTERNAL( GMOCK_PP_NARG0 _Args, _class, _FunctionName, , \
+      GMOCK_INTERNAL_HAS_CONST(_Spec),                                                  \
+      GMOCK_INTERNAL_GET_NOEXCEPT_SPEC(_Spec),                                          \
+      GMOCK_INTERNAL_GET_REF_SPEC(_Spec),                                               \
+      GMOCK_INTERNAL_HAS_OVERRIDE(_Spec),                                               \
+      GMOCK_INTERNAL_HAS_FINAL(_Spec),                                                  \
+      GMOCK_INTERNAL_GET_CALLTYPE(_Spec),                                               \
+      (GMOCK_INTERNAL_SIGNATURE(_Ret, _Args)))
+
+#define GMOCK_EXTENSION_CLASS_METHOD_OVERLOAD_INTERNAL_ARG_1(...) \
+  GMOCK_INTERNAL_WRONG_ARITY(__VA_ARGS__)
+
+#define GMOCK_EXTENSION_CLASS_METHOD_OVERLOAD_INTERNAL_ARG_2(...) \
+  GMOCK_INTERNAL_WRONG_ARITY(__VA_ARGS__)
+
+#define GMOCK_EXTENSION_CLASS_METHOD_OVERLOAD_INTERNAL_ARG_3(...) \
+  GMOCK_INTERNAL_WRONG_ARITY(__VA_ARGS__)
+
+#define GMOCK_EXTENSION_CLASS_METHOD_OVERLOAD_INTERNAL_ARG_4(...) \
+  GMOCK_INTERNAL_WRONG_ARITY(__VA_ARGS__)
+
+#define GMOCK_EXTENSION_CLASS_METHOD_OVERLOAD_INTERNAL_ARG_5(_class, overloadId, _Ret, _FunctionName, _Args) \
+  PpMockAccessHead( _class##_##_FunctionName, overloadId)                                                    \
+  GMOCK_INTERNAL_MOCK_METHOD_ARG_3( _Ret, _FunctionName, _Args );                                            \
+  PpMockAccessTail( _class##_##_FunctionName, overloadId)                                                    \
+  GMOCK_EXTENSION_CLASS_METHOD_INTERNAL( GMOCK_PP_NARG0 _Args, _class, _FunctionName, overloadId,            \
+       0 , , , 0, 0, , (GMOCK_INTERNAL_SIGNATURE(_Ret, _Args)))
+
+#define GMOCK_EXTENSION_CLASS_METHOD_OVERLOAD_INTERNAL_ARG_6(_class, overloadId, _Ret, _FunctionName, _Args, _Spec) \
+  PpMockAccessHead( _class##_##_FunctionName, overloadId)                                                           \
+  GMOCK_INTERNAL_MOCK_METHOD_ARG_4( _Ret, _FunctionName, _Args, _Spec );                                            \
+  PpMockAccessTail( _class##_##_FunctionName, overloadId)                                                           \
+  GMOCK_EXTENSION_CLASS_METHOD_INTERNAL( GMOCK_PP_NARG0 _Args, _class, _FunctionName, overloadId,                   \
+      GMOCK_INTERNAL_HAS_CONST(_Spec),                                                                              \
+      GMOCK_INTERNAL_GET_NOEXCEPT_SPEC(_Spec),                                                                      \
+      GMOCK_INTERNAL_GET_REF_SPEC(_Spec),                                                                           \
+      GMOCK_INTERNAL_HAS_OVERRIDE(_Spec),                                                                           \
+      GMOCK_INTERNAL_HAS_FINAL(_Spec),                                                                              \
+      GMOCK_INTERNAL_GET_CALLTYPE(_Spec),                                                                           \
+      (GMOCK_INTERNAL_SIGNATURE(_Ret, _Args)))
+
+
+#define GMOCK_EXTENSION_CLASS_METHOD_INTERNAL( _N, _Class, _FunctionName, overloadId,           \
+                                  _Const, _Noexcept, _RefSpec, _Override, _Final, _CallType, _Signature)  \
+  typename ::testing::internal::Function<GMOCK_PP_REMOVE_PARENS(_Signature)>::Result            \
+   GMOCK_INTERNAL_EXPAND(_CallType)                                                             \
+  _Class::_FunctionName(GMOCK_PP_REPEAT(GMOCK_INTERNAL_PARAMETER, _Signature, _N))              \
+   GMOCK_PP_IF(_Const,    const   , )                                                           \
+   _RefSpec _Noexcept                                                                           \
+   GMOCK_PP_IF(_Override, override, )                                                           \
+   GMOCK_PP_IF(_Final,    final, ) {                                                            \
+    PpMockName(_Class##_##_FunctionName, overloadId)::AssertWhenNotInit();                      \
+    return PpMockName(_Class##_##_FunctionName, overloadId)::GetPtr( )->_FunctionName(          \
+            GMOCK_PP_REPEAT(GMOCK_INTERNAL_FORWARD_ARG, _Signature, _N));                       \
+  }
+
+#define GMOCK_EXTENSION_CLASS_DTOR_ARG_1(CLASS)          \
+  PpMockAccessHead( CLASS##_dtor, )                      \
+  GMOCK_INTERNAL_MOCK_METHOD_ARG_3( void, dtor, ());     \
+  PpMockAccessTail( CLASS##_dtor, )                      \
+    CLASS::~CLASS( )                                     \
+    {   PpMockName(CLASS##_dtor, )::AssertWhenNotInit(); \
+        PpMockName(CLASS##_dtor, )::GetPtr()->dtor( );   \
+    }
+
+#define GMOCK_EXTENSION_CLASS_DTOR_ARG_2(CLASS, _spec )        \
+  PpMockAccessHead( CLASS##_dtor, )                            \
+  GMOCK_INTERNAL_MOCK_METHOD_ARG_3( void, dtor, () );          \
+  PpMockAccessTail( CLASS##_dtor, )                            \
+    CLASS::~CLASS( )                                           \
+    GMOCK_INTERNAL_GET_NOEXCEPT_SPEC(_Spec)                    \
+    {   PpMockName(CLASS##_dtor, )::AssertWhenNotInit();       \
+        PpMockName(CLASS##_dtor, )::GetPtr()->dtor( );         \
+    }
+
+#define GMOCK_EXTENSION_CLASS_CTOR_INTERNAL_ARG_1(...) \
+  GMOCK_INTERNAL_WRONG_ARITY(__VA_ARGS__)
+
+#define GMOCK_EXTENSION_CLASS_CTOR_INTERNAL_ARG_2(...) \
+  GMOCK_INTERNAL_WRONG_ARITY(__VA_ARGS__)
+
+#define GMOCK_EXTENSION_CLASS_CTOR_INTERNAL_ARG_3(_class, overloadId, _Args)        \
+  PpMockAccessHead( _class##_ctor, overloadId)                                      \
+  GMOCK_INTERNAL_MOCK_METHOD_ARG_3( void, ctor , _Args );                           \
+  PpMockAccessTail( _class##_ctor, overloadId)                                      \
+  GMOCK_EXTENSION_CLASS_CTOR_INTERNAL( GMOCK_PP_NARG0 _Args, _class, overloadId,    \
+         , , (GMOCK_INTERNAL_SIGNATURE(void, _Args)))
+
+#define GMOCK_EXTENSION_CLASS_CTOR_INTERNAL_ARG_4(_class, overloadId, _Args, _Spec)  \
+  PpMockAccessHead( _class##_ctor, overloadId)                                       \
+  GMOCK_INTERNAL_MOCK_METHOD_ARG_4( void, ctor, _Args, _Spec );                      \
+  PpMockAccessTail( _class##_ctor, overloadId)                                       \
+  GMOCK_EXTENSION_CLASS_CTOR_INTERNAL( GMOCK_PP_NARG0 _Args, _class, overloadId,     \
+      GMOCK_INTERNAL_GET_NOEXCEPT_SPEC(_Spec),                                       \
+      GMOCK_INTERNAL_GET_CALLTYPE(_Spec),                                            \
+      (GMOCK_INTERNAL_SIGNATURE(void, _Args)))
+
+
+#define GMOCK_EXTENSION_CLASS_CTOR_INTERNAL( _N, _Class, overloadId, _Noexcept, \
+                                            _CallType, _Signature)              \
+   GMOCK_INTERNAL_EXPAND(_CallType)                                             \
+   _Class::_Class(GMOCK_PP_REPEAT(GMOCK_INTERNAL_PARAMETER, _Signature, _N))    \
+   _Noexcept                                                                    \
+   {                                                                            \
+    PpMockName(_Class##_ctor, overloadId)::AssertWhenNotInit();                 \
+    PpMockName(_Class##_ctor, overloadId)::GetPtr( )->ctor(                     \
+            GMOCK_PP_REPEAT(GMOCK_INTERNAL_FORWARD_ARG, _Signature, _N));       \
+   }
 
 #endif  // GOOGLEMOCK_INCLUDE_GMOCK_INTERNAL_GMOCK_FUNCTION_MOCKER_H_
