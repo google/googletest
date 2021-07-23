@@ -173,7 +173,67 @@ void InitGoogleMockImpl(int* argc, CharType** argv) {
       i--;
     }
   }
+  // handle MOCK_FUNCTION Expectations
+  ::testing::UnitTest::GetInstance( )->
+  listeners( ).Append( new ::testing::internal::MockVerifyAndClearExpectation( ) );
 }
+
+   int IMockBase::genId( ) { static int cnt = 0; return cnt++; }
+   IMockBase::IMockBase( ) : id( genId( ) ) { }
+   IMockBase::~IMockBase( ) { }
+   int IMockBase::GetId( ) { return this->id; }
+
+  typedef std::vector<IMockBase *> MyMockList;
+  static MyMockList * getLIstOfMocks( );
+
+  void MockVerifyAndClearExpectation::OnTestStart( ::testing::TestInfo const& )
+  {
+    for( MyMockList::iterator i = getLIstOfMocks( )->begin( ); i != getLIstOfMocks( )->end( ); ++i )
+    {
+      (*i)->Reset( );
+    }
+  }
+
+  void MockVerifyAndClearExpectation::OnTestEnd( ::testing::TestInfo const&  )
+  {
+    for( MyMockList::iterator i = getLIstOfMocks( )->begin( ); i != getLIstOfMocks( )->end( ); ++i )
+    {
+      ::testing::Mock::VerifyAndClearExpectations( *i );
+    }
+  }
+
+  void MockVerifyAndClearExpectation::OnTestProgramEnd( ::testing::UnitTest const&  )
+  {
+    for( MyMockList::iterator i = getLIstOfMocks( )->begin( ); i != getLIstOfMocks( )->end( ); ++i )
+    {
+      delete *i;
+    }
+    getLIstOfMocks( )->clear();
+  }
+  void MockVerifyAndClearExpectation::add( IMockBase * obj )
+  {
+    getLIstOfMocks( )->push_back( obj );
+  }
+
+  namespace { 
+      struct Pred { 
+        IMockBase * obj;
+        explicit Pred( IMockBase * o ) : obj(o) { }
+        bool operator()( IMockBase * t ) { return obj->GetId( ) == t->GetId( ); }
+      };
+  }
+
+  void MockVerifyAndClearExpectation::remove( IMockBase * obj )
+  {
+      MyMockList::iterator t =  std::find_if( getLIstOfMocks( )->begin( ), getLIstOfMocks( )->end( ), Pred(obj) );
+      if( t != getLIstOfMocks( )->end( ) )
+        getLIstOfMocks( )->erase( t );
+  }
+  static MyMockList * getLIstOfMocks( )
+  {
+    static MyMockList mock_list;
+    return &mock_list;
+  }
 
 }  // namespace internal
 
