@@ -177,7 +177,7 @@ const char kStackTraceMarker[] = "\nStack trace:\n";
 // is specified on the command line.
 bool g_help_flag = false;
 
-// Utilty function to Open File for Writing
+// Utility function to Open File for Writing
 static FILE* OpenFileForWriting(const std::string& output_file) {
   FILE* fileout = nullptr;
   FilePath output_file_path(output_file);
@@ -443,7 +443,7 @@ void AssertHelper::operator=(const Message& message) const {
 namespace {
 
 // When TEST_P is found without a matching INSTANTIATE_TEST_SUITE_P
-// to creates test cases for it, a syntetic test case is
+// to creates test cases for it, a synthetic test case is
 // inserted to report ether an error or a log message.
 //
 // This configuration bit will likely be removed at some point.

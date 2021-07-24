@@ -4950,7 +4950,7 @@ Pair(FirstMatcher first_matcher, SecondMatcher second_matcher) {
 namespace no_adl {
 // Conditional() creates a matcher that conditionally uses either the first or
 // second matcher provided. For example, we could create an `equal if, and only
-// if' matcher using the Conditonal wrapper as follows:
+// if' matcher using the Conditional wrapper as follows:
 //
 //   EXPECT_THAT(result, Conditional(condition, Eq(expected), Ne(expected)));
 template <typename MatcherTrue, typename MatcherFalse>
