@@ -383,10 +383,10 @@ EXPECT_TRUE(IsCorrectBarIntVector(bar_ints))
 ## Death Tests
 
 In many applications, there are assertions that can cause application failure if
-a condition is not met. These sanity checks, which ensure that the program is in
-a known good state, are there to fail at the earliest possible time after some
-program state is corrupted. If the assertion checks the wrong condition, then
-the program may proceed in an erroneous state, which could lead to memory
+a condition is not met. These consistency checks, which ensure that the program
+is in a known good state, are there to fail at the earliest possible time after
+some program state is corrupted. If the assertion checks the wrong condition,
+then the program may proceed in an erroneous state, which could lead to memory
 corruption, security holes, or worse. Hence it is vitally important to test that
 such assertion statements work as expected.
 
