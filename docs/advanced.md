@@ -78,11 +78,11 @@ write a predicate function that returns `AssertionResult` instead of `bool`. For
 example, if you define `IsEven()` as:
 
 ```c++
-testing::AssertionResult IsEven(int n) {
+::testing::AssertionResult IsEven(int n) {
   if ((n % 2) == 0)
-    return testing::AssertionSuccess();
+    return ::testing::AssertionSuccess();
   else
-    return testing::AssertionFailure() << n << " is odd";
+    return ::testing::AssertionFailure() << n << " is odd";
 }
 ```
 
@@ -116,11 +116,11 @@ are fine with making the predicate slower in the success case, you can supply a
 success message:
 
 ```c++
-testing::AssertionResult IsEven(int n) {
+::testing::AssertionResult IsEven(int n) {
   if ((n % 2) == 0)
-    return testing::AssertionSuccess() << n << " is even";
+    return ::testing::AssertionSuccess() << n << " is even";
   else
-    return testing::AssertionFailure() << n << " is odd";
+    return ::testing::AssertionFailure() << n << " is odd";
 }
 ```
 
@@ -157,8 +157,8 @@ that can be used in the predicate assertion macro
 example:
 
 ```c++
-EXPECT_PRED_FORMAT2(testing::FloatLE, val1, val2);
-EXPECT_PRED_FORMAT2(testing::DoubleLE, val1, val2);
+EXPECT_PRED_FORMAT2(::testing::FloatLE, val1, val2);
+EXPECT_PRED_FORMAT2(::testing::DoubleLE, val1, val2);
 ```
 
 The above code verifies that `val1` is less than, or approximately equal to,
@@ -214,7 +214,7 @@ instantiated. For example, given:
 ```c++
 template <typename T> class Foo {
  public:
-  void Bar() { testing::StaticAssertTypeEq<int, T>(); }
+  void Bar() { ::testing::StaticAssertTypeEq<int, T>(); }
 };
 ```
 
@@ -377,7 +377,7 @@ call `::testing::PrintToString(x)`, which returns an `std::string`:
 vector<pair<Bar, int> > bar_ints = GetBarIntVector();
 
 EXPECT_TRUE(IsCorrectBarIntVector(bar_ints))
-    << "bar_ints = " << testing::PrintToString(bar_ints);
+    << "bar_ints = " << ::testing::PrintToString(bar_ints);
 ```
 
 ## Death Tests
@@ -421,11 +421,11 @@ TEST(MyDeathTest, Foo) {
 }
 
 TEST(MyDeathTest, NormalExit) {
-  EXPECT_EXIT(NormalExit(), testing::ExitedWithCode(0), "Success");
+  EXPECT_EXIT(NormalExit(), ::testing::ExitedWithCode(0), "Success");
 }
 
 TEST(MyDeathTest, KillProcess) {
-  EXPECT_EXIT(KillProcess(), testing::KilledBySignal(SIGKILL),
+  EXPECT_EXIT(KillProcess(), ::testing::KilledBySignal(SIGKILL),
               "Sending myself unblockable signal");
 }
 ```
@@ -465,7 +465,7 @@ If a test fixture class is shared by normal tests and death tests, you can use
 duplicating its code:
 
 ```c++
-class FooTest : public testing::Test { ... };
+class FooTest : public ::testing::Test { ... };
 
 using FooDeathTest = FooTest;
 
@@ -558,7 +558,7 @@ The automated testing framework does not set the style flag. You can choose a
 particular style of death tests by setting the flag programmatically:
 
 ```c++
-testing::FLAGS_gtest_death_test_style="threadsafe"
+::testing::FLAGS_gtest_death_test_style="threadsafe"
 ```
 
 You can do this in `main()` to set the style for all death tests in the binary,
@@ -567,13 +567,13 @@ restored afterwards, so you need not do that yourself. For example:
 
 ```c++
 int main(int argc, char** argv) {
-  testing::InitGoogleTest(&argc, argv);
-  testing::FLAGS_gtest_death_test_style = "fast";
+  ::testing::InitGoogleTest(&argc, argv);
+  ::testing::FLAGS_gtest_death_test_style = "fast";
   return RUN_ALL_TESTS();
 }
 
 TEST(MyDeathTest, TestOne) {
-  testing::FLAGS_gtest_death_test_style = "threadsafe";
+  ::testing::FLAGS_gtest_death_test_style = "threadsafe";
   // This test is run in the "threadsafe" style:
   ASSERT_DEATH(ThisShouldDie(), "");
 }
@@ -732,16 +732,16 @@ subsections.
 The following code can turn ASSERT-failure into an exception:
 
 ```c++
-class ThrowListener : public testing::EmptyTestEventListener {
-  void OnTestPartResult(const testing::TestPartResult& result) override {
-    if (result.type() == testing::TestPartResult::kFatalFailure) {
-      throw testing::AssertionException(result);
+class ThrowListener : public ::testing::EmptyTestEventListener {
+  void OnTestPartResult(const ::testing::TestPartResult& result) override {
+    if (result.type() == ::testing::TestPartResult::kFatalFailure) {
+      throw ::testing::AssertionException(result);
     }
   }
 };
 int main(int argc, char** argv) {
   ...
-  testing::UnitTest::GetInstance()->listeners().Append(new ThrowListener);
+  ::testing::UnitTest::GetInstance()->listeners().Append(new ThrowListener);
   return RUN_ALL_TESTS();
 }
 ```
@@ -811,7 +811,7 @@ If `HasFatalFailure()` is used outside of `TEST()` , `TEST_F()` , or a test
 fixture, you must add the `::testing::Test::` prefix, as in:
 
 ```c++
-if (testing::Test::HasFatalFailure()) return;
+if (::testing::Test::HasFatalFailure()) return;
 ```
 
 Similarly, `HasNonfatalFailure()` returns `true` if the current test has at
@@ -891,7 +891,7 @@ state to its original value before passing control to the next test.
 Here's an example of per-test-suite set-up and tear-down:
 
 ```c++
-class FooTest : public testing::Test {
+class FooTest : public ::testing::Test {
  protected:
   // Per-test-suite set-up.
   // Called before the first test in this test suite.
@@ -981,8 +981,8 @@ probably in `main()`. If you use `gtest_main`, you need to call this before
 variable like this:
 
 ```c++
-testing::Environment* const foo_env =
-    testing::AddGlobalTestEnvironment(new FooEnvironment);
+::testing::Environment* const foo_env =
+    ::testing::AddGlobalTestEnvironment(new FooEnvironment);
 ```
 
 However, we strongly recommend you to write your own `main()` and call
@@ -1009,13 +1009,13 @@ number of situations, for example:
 ### How to Write Value-Parameterized Tests
 
 To write value-parameterized tests, first you should define a fixture class. It
-must be derived from both `testing::Test` and `testing::WithParamInterface<T>`
-(the latter is a pure interface), where `T` is the type of your parameter
-values. For convenience, you can just derive the fixture class from
-`testing::TestWithParam<T>`, which itself is derived from both `testing::Test`
-and `testing::WithParamInterface<T>`. `T` can be any copyable type. If it's a
-raw pointer, you are responsible for managing the lifespan of the pointed
-values.
+must be derived from both `::testing::Test` and
+`::testing::WithParamInterface<T>` (the latter is a pure interface), where `T`
+is the type of your parameter values. For convenience, you can just derive the
+fixture class from `::testing::TestWithParam<T>`, which itself is derived from
+both `::testing::Test` and `::testing::WithParamInterface<T>`. `T` can be any
+copyable type. If it's a raw pointer, you are responsible for managing the
+lifespan of the pointed values.
 
 {: .callout .note}
 NOTE: If your test fixture defines `SetUpTestSuite()` or `TearDownTestSuite()`
@@ -1024,18 +1024,18 @@ they must be declared **public** rather than **protected** in order to use
 
 ```c++
 class FooTest :
-    public testing::TestWithParam<const char*> {
+    public ::testing::TestWithParam<const char*> {
   // You can implement all the usual fixture class members here.
   // To access the test parameter, call GetParam() from class
   // TestWithParam<T>.
 };
 
 // Or, when you want to add parameters to a pre-existing fixture class:
-class BaseTest : public testing::Test {
+class BaseTest : public ::testing::Test {
   ...
 };
 class BarTest : public BaseTest,
-                public testing::WithParamInterface<const char*> {
+                public ::testing::WithParamInterface<const char*> {
   ...
 };
 ```
@@ -1070,7 +1070,7 @@ test suite each with parameter values `"meeny"`, `"miny"`, and `"moe"` using the
 ```c++
 INSTANTIATE_TEST_SUITE_P(MeenyMinyMoe,
                          FooTest,
-                         testing::Values("meeny", "miny", "moe"));
+                         ::testing::Values("meeny", "miny", "moe"));
 ```
 
 {: .callout .note}
@@ -1102,7 +1102,7 @@ with parameter values `"cat"` and `"dog"` using the
 
 ```c++
 const char* pets[] = {"cat", "dog"};
-INSTANTIATE_TEST_SUITE_P(Pets, FooTest, testing::ValuesIn(pets));
+INSTANTIATE_TEST_SUITE_P(Pets, FooTest, ::testing::ValuesIn(pets));
 ```
 
 The tests from the instantiation above will have these names:
@@ -1161,11 +1161,11 @@ multiple times, possibly in different source files.
 The optional last argument to `INSTANTIATE_TEST_SUITE_P()` allows the user to
 specify a function or functor that generates custom test name suffixes based on
 the test parameters. The function should accept one argument of type
-`testing::TestParamInfo<class ParamType>`, and return `std::string`.
+`::testing::TestParamInfo<class ParamType>`, and return `std::string`.
 
-`testing::PrintToStringParamName` is a builtin test suffix generator that
-returns the value of `testing::PrintToString(GetParam())`. It does not work for
-`std::string` or C strings.
+`::testing::PrintToStringParamName` is a builtin test suffix generator that
+returns the value of `::testing::PrintToString(GetParam())`. It does not work
+for `std::string` or C strings.
 
 {: .callout .note}
 NOTE: test names must be non-empty, unique, and may only contain ASCII
@@ -1173,15 +1173,15 @@ alphanumeric characters. In particular, they
 [should not contain underscores](faq.md#why-should-test-suite-names-and-test-names-not-contain-underscore)
 
 ```c++
-class MyTestSuite : public testing::TestWithParam<int> {};
+class MyTestSuite : public ::testing::TestWithParam<int> {};
 
 TEST_P(MyTestSuite, MyTest)
 {
   std::cout << "Example Test Param: " << GetParam() << std::endl;
 }
 
-INSTANTIATE_TEST_SUITE_P(MyGroup, MyTestSuite, testing::Range(0, 10),
-                         testing::PrintToStringParamName());
+INSTANTIATE_TEST_SUITE_P(MyGroup, MyTestSuite, ::testing::Range(0, 10),
+                         ::testing::PrintToStringParamName());
 ```
 
 Providing a custom functor allows for more control over test parameter name
@@ -1194,15 +1194,15 @@ for conciseness:
 ```c++
 enum class MyType { MY_FOO = 0, MY_BAR = 1 };
 
-class MyTestSuite : public testing::TestWithParam<std::tuple<MyType, std::string>> {
+class MyTestSuite : public ::testing::TestWithParam<std::tuple<MyType, std::string>> {
 };
 
 INSTANTIATE_TEST_SUITE_P(
     MyGroup, MyTestSuite,
-    testing::Combine(
-        testing::Values(MyType::MY_FOO, MyType::MY_BAR),
-        testing::Values("A", "B")),
-    [](const testing::TestParamInfo<MyTestSuite::ParamType>& info) {
+    ::testing::Combine(
+        ::testing::Values(MyType::MY_FOO, MyType::MY_BAR),
+        ::testing::Values("A", "B")),
+    [](const ::testing::TestParamInfo<MyTestSuite::ParamType>& info) {
       std::string name = absl::StrCat(
           std::get<0>(info.param) == MyType::MY_FOO ? "Foo" : "Bar",
           std::get<1>(info.param));
@@ -1233,7 +1233,7 @@ Remember to derive it from `::testing::Test`:
 
 ```c++
 template <typename T>
-class FooTest : public testing::Test {
+class FooTest : public ::testing::Test {
  public:
   ...
   using List = std::list<T>;
@@ -1301,7 +1301,7 @@ First, define a fixture class template, as we did with typed tests:
 
 ```c++
 template <typename T>
-class FooTest : public testing::Test {
+class FooTest : public ::testing::Test {
   ...
 };
 ```
@@ -1460,7 +1460,7 @@ To test them, we use the following special techniques:
     ```c++
     namespace my_namespace {
 
-    class FooTest : public testing::Test {
+    class FooTest : public ::testing::Test {
      protected:
       ...
     };
@@ -1556,7 +1556,7 @@ undefined.
 Use case example:
 
 ```c++
-class MyFixture : public testing::Test {
+class MyFixture : public ::testing::Test {
  public:
   // All of these optional, just like in regular macro usage.
   static void SetUpTestSuite() { ... }
@@ -1576,7 +1576,7 @@ class MyTest : public MyFixture {
 
 void RegisterMyTests(const std::vector<int>& values) {
   for (int v : values) {
-    testing::RegisterTest(
+    ::testing::RegisterTest(
         "MyFixture", ("Test" + std::to_string(v)).c_str(), nullptr,
         std::to_string(v).c_str(),
         __FILE__, __LINE__,
@@ -1606,8 +1606,8 @@ singleton object:
 ```c++
   // Gets information about the currently running test.
   // Do NOT delete the returned object - it's managed by the UnitTest class.
-  const testing::TestInfo* const test_info =
-      testing::UnitTest::GetInstance()->current_test_info();
+  const ::testing::TestInfo* const test_info =
+      ::testing::UnitTest::GetInstance()->current_test_info();
 
   printf("We are in test %s of test suite %s.\n",
          test_info->name(),
@@ -1632,8 +1632,8 @@ checkpoints to implement a resource leak checker, for example.
 ### Defining Event Listeners
 
 To define a event listener, you subclass either
-[`testing::TestEventListener`](reference/testing.md#TestEventListener) or
-[`testing::EmptyTestEventListener`](reference/testing.md#EmptyTestEventListener)
+[`::testing::TestEventListener`](reference/testing.md#TestEventListener) or
+[`::testing::EmptyTestEventListener`](reference/testing.md#EmptyTestEventListener)
 The former is an (abstract) interface, where *each pure virtual method can be
 overridden to handle a test event* (For example, when a test starts, the
 `OnTestStart()` method will be called.). The latter provides an empty
@@ -1655,15 +1655,15 @@ interesting information about the event and the test program's state.
 Here's an example:
 
 ```c++
-  class MinimalistPrinter : public testing::EmptyTestEventListener {
+  class MinimalistPrinter : public ::testing::EmptyTestEventListener {
     // Called before a test starts.
-    void OnTestStart(const testing::TestInfo& test_info) override {
+    void OnTestStart(const ::testing::TestInfo& test_info) override {
       printf("*** Test %s.%s starting.\n",
              test_info.test_suite_name(), test_info.name());
     }
 
     // Called after a failed assertion or a SUCCESS().
-    void OnTestPartResult(const testing::TestPartResult& test_part_result) override {
+    void OnTestPartResult(const ::testing::TestPartResult& test_part_result) override {
       printf("%s in %s:%d\n%s\n",
              test_part_result.failed() ? "*** Failure" : "Success",
              test_part_result.file_name(),
@@ -1672,7 +1672,7 @@ Here's an example:
     }
 
     // Called after a test ends.
-    void OnTestEnd(const testing::TestInfo& test_info) override {
+    void OnTestEnd(const ::testing::TestInfo& test_info) override {
       printf("*** Test %s.%s ending.\n",
              test_info.test_suite_name(), test_info.name());
     }
@@ -1689,10 +1689,10 @@ at the end of the name) in your `main()` function, before calling
 
 ```c++
 int main(int argc, char** argv) {
-  testing::InitGoogleTest(&argc, argv);
+  ::testing::InitGoogleTest(&argc, argv);
   // Gets hold of the event listener list.
-  testing::TestEventListeners& listeners =
-      testing::UnitTest::GetInstance()->listeners();
+  ::testing::TestEventListeners& listeners =
+      ::testing::UnitTest::GetInstance()->listeners();
   // Adds a listener to the end.  googletest takes the ownership.
   listeners.Append(new MinimalistPrinter);
   return RUN_ALL_TESTS();
@@ -1837,7 +1837,7 @@ will still be compiled:
 // Tests that Foo does Abc.
 TEST(FooTest, DISABLED_DoesAbc) { ... }
 
-class DISABLED_BarTest : public testing::Test { ... };
+class DISABLED_BarTest : public ::testing::Test { ... };
 
 // Tests that Bar does Xyz.
 TEST_F(DISABLED_BarTest, DoesXyz) { ... }

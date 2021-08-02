@@ -44,11 +44,11 @@ GTEST_DISABLE_MSC_WARNINGS_PUSH_(4127 /* conditional expression is constant */)
 #endif  //  _MSC_VER
 
 #if GTEST_IS_THREADSAFE
-using testing::ScopedFakeTestPartResultReporter;
-using testing::TestPartResultArray;
+using ::testing::ScopedFakeTestPartResultReporter;
+using ::testing::TestPartResultArray;
 
-using testing::internal::Notification;
-using testing::internal::ThreadWithParam;
+using ::testing::internal::Notification;
+using ::testing::internal::ThreadWithParam;
 #endif
 
 namespace posix = ::testing::internal::posix;
@@ -68,9 +68,9 @@ void TryTestSubroutine() {
 
   // Catches the fatal failure and aborts the test.
   //
-  // The testing::Test:: prefix is necessary when calling
+  // The ::testing::Test:: prefix is necessary when calling
   // HasFatalFailure() outside of a TEST, TEST_F, or test fixture.
-  if (testing::Test::HasFatalFailure()) return;
+  if (::testing::Test::HasFatalFailure()) return;
 
   // If we get here, something is wrong.
   FAIL() << "This should never be reached.";
@@ -84,7 +84,7 @@ TEST(PassingTest, PassingTest2) {
 
 // Tests that parameters of failing parameterized tests are printed in the
 // failing test summary.
-class FailingParamTest : public testing::TestWithParam<int> {};
+class FailingParamTest : public ::testing::TestWithParam<int> {};
 
 TEST_P(FailingParamTest, Fails) {
   EXPECT_EQ(1, GetParam());
@@ -94,15 +94,15 @@ TEST_P(FailingParamTest, Fails) {
 // its parameter when it outputs the list of all failed tests.
 INSTANTIATE_TEST_SUITE_P(PrintingFailingParams,
                          FailingParamTest,
-                         testing::Values(2));
+                         ::testing::Values(2));
 
 // Tests that an empty value for the test suite basename yields just
 // the test name without any prior /
-class EmptyBasenameParamInst : public testing::TestWithParam<int> {};
+class EmptyBasenameParamInst : public ::testing::TestWithParam<int> {};
 
 TEST_P(EmptyBasenameParamInst, Passes) { EXPECT_EQ(1, GetParam()); }
 
-INSTANTIATE_TEST_SUITE_P(, EmptyBasenameParamInst, testing::Values(1));
+INSTANTIATE_TEST_SUITE_P(, EmptyBasenameParamInst, ::testing::Values(1));
 
 static const char kGoldenString[] = "\"Line\0 1\"\nLine 2";
 
@@ -136,7 +136,7 @@ TEST(FatalFailureTest, FatalFailureInNestedSubroutine) {
   // Catches the fatal failure and aborts the test.
   //
   // When calling HasFatalFailure() inside a TEST, TEST_F, or test
-  // fixture, the testing::Test:: prefix is not needed.
+  // fixture, the ::testing::Test:: prefix is not needed.
   if (HasFatalFailure()) return;
 
   // If we get here, something is wrong.
@@ -173,7 +173,7 @@ void SubWithoutTrace(int n) {
 
 // Another helper function for testing SCOPED_TRACE.
 void SubWithTrace(int n) {
-  SCOPED_TRACE(testing::Message() << "n = " << n);
+  SCOPED_TRACE(::testing::Message() << "n = " << n);
 
   SubWithoutTrace(n);
 }
@@ -212,7 +212,7 @@ TEST(SCOPED_TRACETest, WorksInLoop) {
   printf("(expected to fail)\n");
 
   for (int i = 1; i <= 2; i++) {
-    SCOPED_TRACE(testing::Message() << "i = " << i);
+    SCOPED_TRACE(::testing::Message() << "i = " << i);
 
     SubWithoutTrace(i);
   }
@@ -337,7 +337,8 @@ TEST(SCOPED_TRACETest, WorksConcurrently) {
 // Tests basic functionality of the ScopedTrace utility (most of its features
 // are already tested in SCOPED_TRACETest).
 TEST(ScopedTraceTest, WithExplicitFileAndLine) {
-  testing::ScopedTrace trace("explicit_file.cc", 123, "expected trace message");
+  ::testing::ScopedTrace trace("explicit_file.cc", 123,
+                               "expected trace message");
   ADD_FAILURE() << "Check that the trace is attached to a particular location.";
 }
 
@@ -365,7 +366,7 @@ int RunAllTests() {
 }
 
 // Tests non-fatal failures in the fixture constructor.
-class NonFatalFailureInFixtureConstructorTest : public testing::Test {
+class NonFatalFailureInFixtureConstructorTest : public ::testing::Test {
  protected:
   NonFatalFailureInFixtureConstructorTest() {
     printf("(expecting 5 failures)\n");
@@ -388,7 +389,7 @@ TEST_F(NonFatalFailureInFixtureConstructorTest, FailureInConstructor) {
 }
 
 // Tests fatal failures in the fixture constructor.
-class FatalFailureInFixtureConstructorTest : public testing::Test {
+class FatalFailureInFixtureConstructorTest : public ::testing::Test {
  protected:
   FatalFailureInFixtureConstructorTest() {
     printf("(expecting 2 failures)\n");
@@ -424,7 +425,7 @@ TEST_F(FatalFailureInFixtureConstructorTest, FailureInConstructor) {
 }
 
 // Tests non-fatal failures in SetUp().
-class NonFatalFailureInSetUpTest : public testing::Test {
+class NonFatalFailureInSetUpTest : public ::testing::Test {
  protected:
   ~NonFatalFailureInSetUpTest() override { Deinit(); }
 
@@ -446,7 +447,7 @@ TEST_F(NonFatalFailureInSetUpTest, FailureInSetUp) {
 }
 
 // Tests fatal failures in SetUp().
-class FatalFailureInSetUpTest : public testing::Test {
+class FatalFailureInSetUpTest : public ::testing::Test {
  protected:
   ~FatalFailureInSetUpTest() override { Deinit(); }
 
@@ -488,13 +489,13 @@ TEST(GtestFailAtTest, MessageContainsSpecifiedFileAndLineNumber) {
 
 namespace foo {
 
-class MixedUpTestSuiteTest : public testing::Test {
+class MixedUpTestSuiteTest : public ::testing::Test {
 };
 
 TEST_F(MixedUpTestSuiteTest, FirstTestFromNamespaceFoo) {}
 TEST_F(MixedUpTestSuiteTest, SecondTestFromNamespaceFoo) {}
 
-class MixedUpTestSuiteWithSameTestNameTest : public testing::Test {
+class MixedUpTestSuiteWithSameTestNameTest : public ::testing::Test {
 };
 
 TEST_F(MixedUpTestSuiteWithSameTestNameTest,
@@ -504,7 +505,7 @@ TEST_F(MixedUpTestSuiteWithSameTestNameTest,
 
 namespace bar {
 
-class MixedUpTestSuiteTest : public testing::Test {
+class MixedUpTestSuiteTest : public ::testing::Test {
 };
 
 // The following two tests are expected to fail.  We rely on the
@@ -512,7 +513,7 @@ class MixedUpTestSuiteTest : public testing::Test {
 TEST_F(MixedUpTestSuiteTest, ThisShouldFail) {}
 TEST_F(MixedUpTestSuiteTest, ThisShouldFailToo) {}
 
-class MixedUpTestSuiteWithSameTestNameTest : public testing::Test {
+class MixedUpTestSuiteWithSameTestNameTest : public ::testing::Test {
 };
 
 // Expected to fail.  We rely on the golden file to check that Google Test
@@ -527,7 +528,7 @@ TEST_F(MixedUpTestSuiteWithSameTestNameTest,
 // test case checks the scenario where TEST_F appears before TEST, and
 // the second one checks where TEST appears before TEST_F.
 
-class TEST_F_before_TEST_in_same_test_case : public testing::Test {
+class TEST_F_before_TEST_in_same_test_case : public ::testing::Test {
 };
 
 TEST_F(TEST_F_before_TEST_in_same_test_case, DefinedUsingTEST_F) {}
@@ -536,7 +537,7 @@ TEST_F(TEST_F_before_TEST_in_same_test_case, DefinedUsingTEST_F) {}
 // generates the right error message.
 TEST(TEST_F_before_TEST_in_same_test_case, DefinedUsingTESTAndShouldFail) {}
 
-class TEST_before_TEST_F_in_same_test_case : public testing::Test {
+class TEST_before_TEST_F_in_same_test_case : public ::testing::Test {
 };
 
 TEST(TEST_before_TEST_F_in_same_test_case, DefinedUsingTEST) {}
@@ -713,11 +714,11 @@ TEST(ExpectFatalFailureTest, FailsWhenStatementThrows) {
 
 // This #ifdef block tests the output of value-parameterized tests.
 
-std::string ParamNameFunc(const testing::TestParamInfo<std::string>& info) {
+std::string ParamNameFunc(const ::testing::TestParamInfo<std::string>& info) {
   return info.param;
 }
 
-class ParamTest : public testing::TestWithParam<std::string> {
+class ParamTest : public ::testing::TestWithParam<std::string> {
 };
 
 TEST_P(ParamTest, Success) {
@@ -730,7 +731,7 @@ TEST_P(ParamTest, Failure) {
 
 INSTANTIATE_TEST_SUITE_P(PrintingStrings,
                          ParamTest,
-                         testing::Values(std::string("a")),
+                         ::testing::Values(std::string("a")),
                          ParamNameFunc);
 
 // The case where a suite has INSTANTIATE_TEST_SUITE_P but not TEST_P.
@@ -738,17 +739,18 @@ using NoTests = ParamTest;
 INSTANTIATE_TEST_SUITE_P(ThisIsOdd, NoTests, ::testing::Values("Hello"));
 
 // fails under kErrorOnUninstantiatedParameterizedTest=true
-class DetectNotInstantiatedTest : public testing::TestWithParam<int> {};
+class DetectNotInstantiatedTest : public ::testing::TestWithParam<int> {};
 TEST_P(DetectNotInstantiatedTest, Used) { }
 
 // This would make the test failure from the above go away.
-// INSTANTIATE_TEST_SUITE_P(Fix, DetectNotInstantiatedTest, testing::Values(1));
+// INSTANTIATE_TEST_SUITE_P(
+//     Fix, DetectNotInstantiatedTest, ::testing::Values(1));
 
 template <typename T>
-class TypedTest : public testing::Test {
+class TypedTest : public ::testing::Test {
 };
 
-TYPED_TEST_SUITE(TypedTest, testing::Types<int>);
+TYPED_TEST_SUITE(TypedTest, ::testing::Types<int>);
 
 TYPED_TEST(TypedTest, Success) {
   EXPECT_EQ(0, TypeParam());
@@ -758,10 +760,10 @@ TYPED_TEST(TypedTest, Failure) {
   EXPECT_EQ(1, TypeParam()) << "Expected failure";
 }
 
-typedef testing::Types<char, int> TypesForTestWithNames;
+typedef ::testing::Types<char, int> TypesForTestWithNames;
 
 template <typename T>
-class TypedTestWithNames : public testing::Test {};
+class TypedTestWithNames : public ::testing::Test {};
 
 class TypedTestNames {
  public:
@@ -781,7 +783,7 @@ TYPED_TEST(TypedTestWithNames, Success) {}
 TYPED_TEST(TypedTestWithNames, Failure) { FAIL(); }
 
 template <typename T>
-class TypedTestP : public testing::Test {
+class TypedTestP : public ::testing::Test {
 };
 
 TYPED_TEST_SUITE_P(TypedTestP);
@@ -796,7 +798,7 @@ TYPED_TEST_P(TypedTestP, Failure) {
 
 REGISTER_TYPED_TEST_SUITE_P(TypedTestP, Success, Failure);
 
-typedef testing::Types<unsigned char, unsigned int> UnsignedTypes;
+typedef ::testing::Types<unsigned char, unsigned int> UnsignedTypes;
 INSTANTIATE_TYPED_TEST_SUITE_P(Unsigned, TypedTestP, UnsignedTypes);
 
 class TypedTestPNames {
@@ -816,7 +818,7 @@ INSTANTIATE_TYPED_TEST_SUITE_P(UnsignedCustomName, TypedTestP, UnsignedTypes,
                               TypedTestPNames);
 
 template <typename T>
-class DetectNotInstantiatedTypesTest : public testing::Test {};
+class DetectNotInstantiatedTypesTest : public ::testing::Test {};
 TYPED_TEST_SUITE_P(DetectNotInstantiatedTypesTest);
 TYPED_TEST_P(DetectNotInstantiatedTypesTest, Used) {
   TypeParam instantiate;
@@ -842,10 +844,10 @@ TEST(ADeathTest, ShouldRunFirst) {
 // case name ends with DeathTest are run first.
 
 template <typename T>
-class ATypedDeathTest : public testing::Test {
+class ATypedDeathTest : public ::testing::Test {
 };
 
-typedef testing::Types<int, double> NumericTypes;
+typedef ::testing::Types<int, double> NumericTypes;
 TYPED_TEST_SUITE(ATypedDeathTest, NumericTypes);
 
 TYPED_TEST(ATypedDeathTest, ShouldRunFirst) {
@@ -856,7 +858,7 @@ TYPED_TEST(ATypedDeathTest, ShouldRunFirst) {
 // whose test case name ends with DeathTest are run first.
 
 template <typename T>
-class ATypeParamDeathTest : public testing::Test {
+class ATypeParamDeathTest : public ::testing::Test {
 };
 
 TYPED_TEST_SUITE_P(ATypeParamDeathTest);
@@ -872,7 +874,7 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, ATypeParamDeathTest, NumericTypes);
 
 // Tests various failure conditions of
 // EXPECT_{,NON}FATAL_FAILURE{,_ON_ALL_THREADS}.
-class ExpectFailureTest : public testing::Test {
+class ExpectFailureTest : public ::testing::Test {
  public:  // Must be public and not protected due to a bug in g++ 3.4.2.
   enum FailureMode {
     FATAL_FAILURE,
@@ -987,7 +989,7 @@ TEST_F(ExpectFailureTest, ExpectNonFatalFailureOnAllThreads) {
                                          "Some other non-fatal failure.");
 }
 
-class DynamicFixture : public testing::Test {
+class DynamicFixture : public ::testing::Test {
  protected:
   DynamicFixture() { printf("DynamicFixture()\n"); }
   ~DynamicFixture() override { printf("~DynamicFixture()\n"); }
@@ -1008,39 +1010,39 @@ class DynamicTest : public DynamicFixture {
 
 auto dynamic_test = (
     // Register two tests with the same fixture correctly.
-    testing::RegisterTest(
+    ::testing::RegisterTest(
         "DynamicFixture", "DynamicTestPass", nullptr, nullptr, __FILE__,
         __LINE__, []() -> DynamicFixture* { return new DynamicTest<true>; }),
-    testing::RegisterTest(
+    ::testing::RegisterTest(
         "DynamicFixture", "DynamicTestFail", nullptr, nullptr, __FILE__,
         __LINE__, []() -> DynamicFixture* { return new DynamicTest<false>; }),
 
     // Register the same fixture with another name. That's fine.
-    testing::RegisterTest(
+    ::testing::RegisterTest(
         "DynamicFixtureAnotherName", "DynamicTestPass", nullptr, nullptr,
         __FILE__, __LINE__,
         []() -> DynamicFixture* { return new DynamicTest<true>; }),
 
     // Register two tests with the same fixture incorrectly.
-    testing::RegisterTest(
+    ::testing::RegisterTest(
         "BadDynamicFixture1", "FixtureBase", nullptr, nullptr, __FILE__,
         __LINE__, []() -> DynamicFixture* { return new DynamicTest<true>; }),
-    testing::RegisterTest(
+    ::testing::RegisterTest(
         "BadDynamicFixture1", "TestBase", nullptr, nullptr, __FILE__, __LINE__,
-        []() -> testing::Test* { return new DynamicTest<true>; }),
+        []() -> ::testing::Test* { return new DynamicTest<true>; }),
 
     // Register two tests with the same fixture incorrectly by omitting the
     // return type.
-    testing::RegisterTest(
+    ::testing::RegisterTest(
         "BadDynamicFixture2", "FixtureBase", nullptr, nullptr, __FILE__,
         __LINE__, []() -> DynamicFixture* { return new DynamicTest<true>; }),
-    testing::RegisterTest("BadDynamicFixture2", "Derived", nullptr, nullptr,
-                          __FILE__, __LINE__,
-                          []() { return new DynamicTest<true>; }));
+    ::testing::RegisterTest("BadDynamicFixture2", "Derived", nullptr, nullptr,
+                            __FILE__, __LINE__,
+                            []() { return new DynamicTest<true>; }));
 
-// Two test environments for testing testing::AddGlobalTestEnvironment().
+// Two test environments for testing ::testing::AddGlobalTestEnvironment().
 
-class FooEnvironment : public testing::Environment {
+class FooEnvironment : public ::testing::Environment {
  public:
   void SetUp() override { printf("%s", "FooEnvironment::SetUp() called.\n"); }
 
@@ -1050,7 +1052,7 @@ class FooEnvironment : public testing::Environment {
   }
 };
 
-class BarEnvironment : public testing::Environment {
+class BarEnvironment : public ::testing::Environment {
  public:
   void SetUp() override { printf("%s", "BarEnvironment::SetUp() called.\n"); }
 
@@ -1075,7 +1077,7 @@ int main(int argc, char **argv) {
   // It's hard to test InitGoogleTest() directly, as it has many
   // global side effects.  The following line serves as a sanity test
   // for it.
-  testing::InitGoogleTest(&argc, argv);
+  ::testing::InitGoogleTest(&argc, argv);
   bool internal_skip_environment_and_ad_hoc_tests =
       std::count(argv, argv + argc,
                  std::string("internal_skip_environment_and_ad_hoc_tests")) > 0;
@@ -1099,8 +1101,8 @@ int main(int argc, char **argv) {
   // Registers two global test environments.
   // The golden file verifies that they are set up in the order they
   // are registered, and torn down in the reverse order.
-  testing::AddGlobalTestEnvironment(new FooEnvironment);
-  testing::AddGlobalTestEnvironment(new BarEnvironment);
+  ::testing::AddGlobalTestEnvironment(new FooEnvironment);
+  ::testing::AddGlobalTestEnvironment(new BarEnvironment);
 #if _MSC_VER
 GTEST_DISABLE_MSC_WARNINGS_POP_()  //  4127
 #endif  //  _MSC_VER

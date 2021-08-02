@@ -567,7 +567,7 @@ TEST(ReturnTest, IsCovariant) {
 
 // Tests that the type of the value passed into Return is converted into T
 // when the action is cast to Action<T(...)> rather than when the action is
-// performed. See comments on testing::internal::ReturnAction in
+// performed. See comments on ::testing::internal::ReturnAction in
 // gmock-actions.h for more information.
 class FromType {
  public:
@@ -1175,13 +1175,13 @@ TEST(WithArgsTest, ReturnReference) {
 
 TEST(WithArgsTest, InnerActionWithConversion) {
   Action<Derived*()> inner = [] { return nullptr; };
-  Action<Base*(double)> a = testing::WithoutArgs(inner);
+  Action<Base*(double)> a = ::testing::WithoutArgs(inner);
   EXPECT_EQ(nullptr, a.Perform(std::make_tuple(1.1)));
 }
 
 #if !GTEST_OS_WINDOWS_MOBILE
 
-class SetErrnoAndReturnTest : public testing::Test {
+class SetErrnoAndReturnTest : public ::testing::Test {
  protected:
   void SetUp() override { errno = 0; }
   void TearDown() override { errno = 0; }
@@ -1286,8 +1286,8 @@ TEST(ByRefTest, ExplicitType) {
 TEST(ByRefTest, PrintsCorrectly) {
   int n = 42;
   ::std::stringstream expected, actual;
-  testing::internal::UniversalPrinter<const int&>::Print(n, &expected);
-  testing::internal::UniversalPrint(ByRef(n), &actual);
+  ::testing::internal::UniversalPrinter<const int&>::Print(n, &expected);
+  ::testing::internal::UniversalPrint(ByRef(n), &actual);
   EXPECT_EQ(expected.str(), actual.str());
 }
 
@@ -1371,12 +1371,12 @@ TEST(MockMethodTest, CanReturnMoveOnlyValue_Return) {
 }
 
 TEST(MockMethodTest, CanReturnMoveOnlyValue_DoAllReturn) {
-  testing::MockFunction<void()> mock_function;
+  ::testing::MockFunction<void()> mock_function;
   MockClass mock;
   std::unique_ptr<int> i(new int(19));
   EXPECT_CALL(mock_function, Call());
   EXPECT_CALL(mock, MakeUnique()).WillOnce(DoAll(
-      InvokeWithoutArgs(&mock_function, &testing::MockFunction<void()>::Call),
+      InvokeWithoutArgs(&mock_function, &::testing::MockFunction<void()>::Call),
       Return(ByMove(std::move(i)))));
 
   std::unique_ptr<int> result1 = mock.MakeUnique();
@@ -1418,10 +1418,10 @@ TEST(MockMethodTest, CanTakeMoveOnlyValue) {
   // EXPECT_CALL(mock, TakeUnique(_, _))
   //     .WillRepeatedly(DoAll(Invoke([](std::unique_ptr<int> j) {}),
   //     Return(1)));
-  EXPECT_CALL(mock, TakeUnique(testing::Pointee(7)))
+  EXPECT_CALL(mock, TakeUnique(::testing::Pointee(7)))
       .WillOnce(Return(-7))
       .RetiresOnSaturation();
-  EXPECT_CALL(mock, TakeUnique(testing::IsNull()))
+  EXPECT_CALL(mock, TakeUnique(::testing::IsNull()))
       .WillOnce(Return(-1))
       .RetiresOnSaturation();
 
@@ -1543,10 +1543,10 @@ TEST(MoveOnlyArgumentsTest, ReturningActions) {
   Action<int(std::unique_ptr<int>)> a = Return(1);
   EXPECT_EQ(1, a.Perform(std::make_tuple(nullptr)));
 
-  a = testing::WithoutArgs([]() { return 7; });
+  a = ::testing::WithoutArgs([]() { return 7; });
   EXPECT_EQ(7, a.Perform(std::make_tuple(nullptr)));
 
-  Action<void(std::unique_ptr<int>, int*)> a2 = testing::SetArgPointee<1>(3);
+  Action<void(std::unique_ptr<int>, int*)> a2 = ::testing::SetArgPointee<1>(3);
   int x = 0;
   a2.Perform(std::make_tuple(nullptr, &x));
   EXPECT_EQ(x, 3);
@@ -1558,16 +1558,17 @@ ACTION(ReturnArity) {
 
 TEST(ActionMacro, LargeArity) {
   EXPECT_EQ(
-      1, testing::Action<int(int)>(ReturnArity()).Perform(std::make_tuple(0)));
+      1,
+      ::testing::Action<int(int)>(ReturnArity()).Perform(std::make_tuple(0)));
   EXPECT_EQ(
       10,
-      testing::Action<int(int, int, int, int, int, int, int, int, int, int)>(
+      ::testing::Action<int(int, int, int, int, int, int, int, int, int, int)>(
           ReturnArity())
           .Perform(std::make_tuple(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)));
   EXPECT_EQ(
       20,
-      testing::Action<int(int, int, int, int, int, int, int, int, int, int, int,
-                          int, int, int, int, int, int, int, int, int)>(
+      ::testing::Action<int(int, int, int, int, int, int, int, int, int, int,
+                            int, int, int, int, int, int, int, int, int, int)>(
           ReturnArity())
           .Perform(std::make_tuple(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13,
                                    14, 15, 16, 17, 18, 19)));

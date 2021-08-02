@@ -96,7 +96,7 @@ class StreamingListenerTest : public Test {
   FakeSocketWriter* const fake_sock_writer_;
   StreamingListener streamer_;
   UnitTest unit_test_;
-  TestInfo test_info_obj_;  // The name test_info_ was taken by testing::Test.
+  TestInfo test_info_obj_;  // The name test_info_ was taken by ::testing::Test.
 };
 
 TEST_F(StreamingListenerTest, OnTestProgramEnd) {
@@ -189,87 +189,87 @@ class UnitTestRecordPropertyTestHelper : public Test {
 }  // namespace internal
 }  // namespace testing
 
-using testing::AssertionFailure;
-using testing::AssertionResult;
-using testing::AssertionSuccess;
-using testing::DoubleLE;
-using testing::EmptyTestEventListener;
-using testing::Environment;
-using testing::FloatLE;
-using testing::IsNotSubstring;
-using testing::IsSubstring;
-using testing::kMaxStackTraceDepth;
-using testing::Message;
-using testing::ScopedFakeTestPartResultReporter;
-using testing::StaticAssertTypeEq;
-using testing::Test;
-using testing::TestEventListeners;
-using testing::TestInfo;
-using testing::TestPartResult;
-using testing::TestPartResultArray;
-using testing::TestProperty;
-using testing::TestResult;
-using testing::TestSuite;
-using testing::TimeInMillis;
-using testing::UnitTest;
-using testing::internal::AlwaysFalse;
-using testing::internal::AlwaysTrue;
-using testing::internal::AppendUserMessage;
-using testing::internal::ArrayAwareFind;
-using testing::internal::ArrayEq;
-using testing::internal::CodePointToUtf8;
-using testing::internal::CopyArray;
-using testing::internal::CountIf;
-using testing::internal::EqFailure;
-using testing::internal::FloatingPoint;
-using testing::internal::ForEach;
-using testing::internal::FormatEpochTimeInMillisAsIso8601;
-using testing::internal::FormatTimeInMillisAsSeconds;
-using testing::internal::GetCurrentOsStackTraceExceptTop;
-using testing::internal::GetElementOr;
-using testing::internal::GetNextRandomSeed;
-using testing::internal::GetRandomSeedFromFlag;
-using testing::internal::GetTestTypeId;
-using testing::internal::GetTimeInMillis;
-using testing::internal::GetTypeId;
-using testing::internal::GetUnitTestImpl;
-using testing::internal::GTestFlagSaver;
-using testing::internal::HasDebugStringAndShortDebugString;
-using testing::internal::Int32FromEnvOrDie;
-using testing::internal::IsContainer;
-using testing::internal::IsContainerTest;
-using testing::internal::IsNotContainer;
-using testing::internal::kMaxRandomSeed;
-using testing::internal::kTestTypeIdInGoogleTest;
-using testing::internal::NativeArray;
-using testing::internal::OsStackTraceGetter;
-using testing::internal::OsStackTraceGetterInterface;
-using testing::internal::ParseFlag;
-using testing::internal::RelationToSourceCopy;
-using testing::internal::RelationToSourceReference;
-using testing::internal::ShouldRunTestOnShard;
-using testing::internal::ShouldShard;
-using testing::internal::ShouldUseColor;
-using testing::internal::Shuffle;
-using testing::internal::ShuffleRange;
-using testing::internal::SkipPrefix;
-using testing::internal::StreamableToString;
-using testing::internal::String;
-using testing::internal::TestEventListenersAccessor;
-using testing::internal::TestResultAccessor;
-using testing::internal::UnitTestImpl;
-using testing::internal::WideStringToUtf8;
-using testing::internal::edit_distance::CalculateOptimalEdits;
-using testing::internal::edit_distance::CreateUnifiedDiff;
-using testing::internal::edit_distance::EditType;
+using ::testing::AssertionFailure;
+using ::testing::AssertionResult;
+using ::testing::AssertionSuccess;
+using ::testing::DoubleLE;
+using ::testing::EmptyTestEventListener;
+using ::testing::Environment;
+using ::testing::FloatLE;
+using ::testing::IsNotSubstring;
+using ::testing::IsSubstring;
+using ::testing::kMaxStackTraceDepth;
+using ::testing::Message;
+using ::testing::ScopedFakeTestPartResultReporter;
+using ::testing::StaticAssertTypeEq;
+using ::testing::Test;
+using ::testing::TestEventListeners;
+using ::testing::TestInfo;
+using ::testing::TestPartResult;
+using ::testing::TestPartResultArray;
+using ::testing::TestProperty;
+using ::testing::TestResult;
+using ::testing::TestSuite;
+using ::testing::TimeInMillis;
+using ::testing::UnitTest;
+using ::testing::internal::AlwaysFalse;
+using ::testing::internal::AlwaysTrue;
+using ::testing::internal::AppendUserMessage;
+using ::testing::internal::ArrayAwareFind;
+using ::testing::internal::ArrayEq;
+using ::testing::internal::CodePointToUtf8;
+using ::testing::internal::CopyArray;
+using ::testing::internal::CountIf;
+using ::testing::internal::EqFailure;
+using ::testing::internal::FloatingPoint;
+using ::testing::internal::ForEach;
+using ::testing::internal::FormatEpochTimeInMillisAsIso8601;
+using ::testing::internal::FormatTimeInMillisAsSeconds;
+using ::testing::internal::GetCurrentOsStackTraceExceptTop;
+using ::testing::internal::GetElementOr;
+using ::testing::internal::GetNextRandomSeed;
+using ::testing::internal::GetRandomSeedFromFlag;
+using ::testing::internal::GetTestTypeId;
+using ::testing::internal::GetTimeInMillis;
+using ::testing::internal::GetTypeId;
+using ::testing::internal::GetUnitTestImpl;
+using ::testing::internal::GTestFlagSaver;
+using ::testing::internal::HasDebugStringAndShortDebugString;
+using ::testing::internal::Int32FromEnvOrDie;
+using ::testing::internal::IsContainer;
+using ::testing::internal::IsContainerTest;
+using ::testing::internal::IsNotContainer;
+using ::testing::internal::kMaxRandomSeed;
+using ::testing::internal::kTestTypeIdInGoogleTest;
+using ::testing::internal::NativeArray;
+using ::testing::internal::OsStackTraceGetter;
+using ::testing::internal::OsStackTraceGetterInterface;
+using ::testing::internal::ParseFlag;
+using ::testing::internal::RelationToSourceCopy;
+using ::testing::internal::RelationToSourceReference;
+using ::testing::internal::ShouldRunTestOnShard;
+using ::testing::internal::ShouldShard;
+using ::testing::internal::ShouldUseColor;
+using ::testing::internal::Shuffle;
+using ::testing::internal::ShuffleRange;
+using ::testing::internal::SkipPrefix;
+using ::testing::internal::StreamableToString;
+using ::testing::internal::String;
+using ::testing::internal::TestEventListenersAccessor;
+using ::testing::internal::TestResultAccessor;
+using ::testing::internal::UnitTestImpl;
+using ::testing::internal::WideStringToUtf8;
+using ::testing::internal::edit_distance::CalculateOptimalEdits;
+using ::testing::internal::edit_distance::CreateUnifiedDiff;
+using ::testing::internal::edit_distance::EditType;
 
 #if GTEST_HAS_STREAM_REDIRECTION
-using testing::internal::CaptureStdout;
-using testing::internal::GetCapturedStdout;
+using ::testing::internal::CaptureStdout;
+using ::testing::internal::GetCapturedStdout;
 #endif
 
 #if GTEST_IS_THREADSAFE
-using testing::internal::ThreadWithParam;
+using ::testing::internal::ThreadWithParam;
 #endif
 
 class TestingVector : public std::vector<int> {
@@ -759,24 +759,24 @@ TEST(WideStringToUtf8Test, ConcatenatesCodepointsCorrectly) {
 // Tests the Random class.
 
 TEST(RandomDeathTest, GeneratesCrashesOnInvalidRange) {
-  testing::internal::Random random(42);
+  ::testing::internal::Random random(42);
   EXPECT_DEATH_IF_SUPPORTED(
       random.Generate(0),
       "Cannot generate a number in the range \\[0, 0\\)");
   EXPECT_DEATH_IF_SUPPORTED(
-      random.Generate(testing::internal::Random::kMaxRange + 1),
+      random.Generate(::testing::internal::Random::kMaxRange + 1),
       "Generation of a number in \\[0, 2147483649\\) was requested, "
       "but this can only generate numbers in \\[0, 2147483648\\)");
 }
 
 TEST(RandomTest, GeneratesNumbersWithinRange) {
   constexpr uint32_t kRange = 10000;
-  testing::internal::Random random(12345);
+  ::testing::internal::Random random(12345);
   for (int i = 0; i < 10; i++) {
     EXPECT_LT(random.Generate(kRange), kRange) << " for iteration " << i;
   }
 
-  testing::internal::Random random2(testing::internal::Random::kMaxRange);
+  ::testing::internal::Random random2(::testing::internal::Random::kMaxRange);
   for (int i = 0; i < 10; i++) {
     EXPECT_LT(random2.Generate(kRange), kRange) << " for iteration " << i;
   }
@@ -788,7 +788,7 @@ TEST(RandomTest, RepeatsWhenReseeded) {
   constexpr uint32_t kRange = 10000;
   uint32_t values[kArraySize];
 
-  testing::internal::Random random(kSeed);
+  ::testing::internal::Random random(kSeed);
   for (int i = 0; i < kArraySize; i++) {
     values[i] = random.Generate(kRange);
   }
@@ -860,7 +860,7 @@ TEST(ContainerUtilityDeathTest, ShuffleRange) {
   a.push_back(0);
   a.push_back(1);
   a.push_back(2);
-  testing::internal::Random random(1);
+  ::testing::internal::Random random(1);
 
   EXPECT_DEATH_IF_SUPPORTED(
       ShuffleRange(&random, -1, 1, &a),
@@ -931,7 +931,7 @@ class VectorShuffleTest : public Test {
     return !VectorIsShuffled(vector);
   }
 
-  testing::internal::Random random_;
+  ::testing::internal::Random random_;
   TestingVector vector_;
 };  // class VectorShuffleTest
 
@@ -1046,7 +1046,7 @@ TEST_F(VectorShuffleTest, ShufflesRepeatably) {
 TEST(AssertHelperTest, AssertHelperIsSmall) {
   // To avoid breaking clients that use lots of assertions in one
   // function, we cannot grow the size of AssertHelper.
-  EXPECT_LE(sizeof(testing::internal::AssertHelper), sizeof(void*));
+  EXPECT_LE(sizeof(::testing::internal::AssertHelper), sizeof(void*));
 }
 
 // Tests String::EndsWithCaseInsensitive().
@@ -1707,7 +1707,7 @@ static void SetEnv(const char* name, const char* value) {
 #if !GTEST_OS_WINDOWS_MOBILE
 // Environment variables are not supported on Windows CE.
 
-using testing::internal::Int32FromGTestEnv;
+using ::testing::internal::Int32FromGTestEnv;
 
 // Tests Int32FromGTestEnv().
 
@@ -1851,7 +1851,7 @@ TEST(ShouldRunTestOnShardTest, IsPartitionWhenThereIsOneShard) {
   EXPECT_TRUE(ShouldRunTestOnShard(1, 0, 4));
 }
 
-class ShouldShardTest : public testing::Test {
+class ShouldShardTest : public ::testing::Test {
  protected:
   void SetUp() override {
     index_var_ = GTEST_FLAG_PREFIX_UPPER_ "INDEX";
@@ -2003,7 +2003,7 @@ void ExpectNonFatalFailureRecordingPropertyWithReservedKeyForCurrentTest(
 
 void ExpectNonFatalFailureRecordingPropertyWithReservedKeyForCurrentTestSuite(
     const char* key) {
-  const testing::TestSuite* test_suite =
+  const ::testing::TestSuite* test_suite =
       UnitTest::GetInstance()->current_test_suite();
   ASSERT_TRUE(test_suite != nullptr);
   ExpectNonFatalFailureRecordingPropertyWithReservedKey(
@@ -2017,10 +2017,10 @@ void ExpectNonFatalFailureRecordingPropertyWithReservedKeyOutsideOfTestSuite(
 }
 
 // Tests that property recording functions in UnitTest outside of tests
-// functions correcly.  Creating a separate instance of UnitTest ensures it
+// functions correctly.  Creating a separate instance of UnitTest ensures it
 // is in a state similar to the UnitTest's singleton's between tests.
 class UnitTestRecordPropertyTest :
-    public testing::internal::UnitTestRecordPropertyTestHelper {
+    public ::testing::internal::UnitTestRecordPropertyTestHelper {
  public:
   static void SetUpTestSuite() {
     ExpectNonFatalFailureRecordingPropertyWithReservedKeyForCurrentTestSuite(
@@ -2038,7 +2038,7 @@ class UnitTestRecordPropertyTest :
 
     Test::RecordProperty("test_case_key_1", "1");
 
-    const testing::TestSuite* test_suite =
+    const ::testing::TestSuite* test_suite =
         UnitTest::GetInstance()->current_test_suite();
 
     ASSERT_TRUE(test_suite != nullptr);
@@ -2745,7 +2745,7 @@ class FloatingPointTest : public Test {
     RawType nan2;
   };
 
-  typedef typename testing::internal::FloatingPoint<RawType> Floating;
+  typedef typename ::testing::internal::FloatingPoint<RawType> Floating;
   typedef typename Floating::Bits Bits;
 
   void SetUp() override {
@@ -3172,7 +3172,7 @@ template <typename T>
 class TypedTest : public Test {
 };
 
-typedef testing::Types<int, double> NumericTypes;
+typedef ::testing::Types<int, double> NumericTypes;
 TYPED_TEST_SUITE(TypedTest, NumericTypes);
 
 TYPED_TEST(TypedTest, DISABLED_ShouldNotRun) {
@@ -3446,9 +3446,9 @@ TEST_F(NoFatalFailureTest, AssertNoFatalFailureOnFatalFailure) {
             gtest_failures.GetTestPartResult(0).type());
   EXPECT_EQ(TestPartResult::kFatalFailure,
             gtest_failures.GetTestPartResult(1).type());
-  EXPECT_PRED_FORMAT2(testing::IsSubstring, "some fatal failure",
+  EXPECT_PRED_FORMAT2(::testing::IsSubstring, "some fatal failure",
                       gtest_failures.GetTestPartResult(0).message());
-  EXPECT_PRED_FORMAT2(testing::IsSubstring, "it does",
+  EXPECT_PRED_FORMAT2(::testing::IsSubstring, "it does",
                       gtest_failures.GetTestPartResult(1).message());
 }
 
@@ -3465,11 +3465,11 @@ TEST_F(NoFatalFailureTest, ExpectNoFatalFailureOnFatalFailure) {
             gtest_failures.GetTestPartResult(1).type());
   EXPECT_EQ(TestPartResult::kNonFatalFailure,
             gtest_failures.GetTestPartResult(2).type());
-  EXPECT_PRED_FORMAT2(testing::IsSubstring, "some fatal failure",
+  EXPECT_PRED_FORMAT2(::testing::IsSubstring, "some fatal failure",
                       gtest_failures.GetTestPartResult(0).message());
-  EXPECT_PRED_FORMAT2(testing::IsSubstring, "it does",
+  EXPECT_PRED_FORMAT2(::testing::IsSubstring, "it does",
                       gtest_failures.GetTestPartResult(1).message());
-  EXPECT_PRED_FORMAT2(testing::IsSubstring, "other failure",
+  EXPECT_PRED_FORMAT2(::testing::IsSubstring, "other failure",
                       gtest_failures.GetTestPartResult(2).message());
 }
 
@@ -3484,9 +3484,9 @@ TEST_F(NoFatalFailureTest, MessageIsStreamable) {
             gtest_failures.GetTestPartResult(0).type());
   EXPECT_EQ(TestPartResult::kNonFatalFailure,
             gtest_failures.GetTestPartResult(1).type());
-  EXPECT_PRED_FORMAT2(testing::IsSubstring, "foo",
+  EXPECT_PRED_FORMAT2(::testing::IsSubstring, "foo",
                       gtest_failures.GetTestPartResult(0).message());
-  EXPECT_PRED_FORMAT2(testing::IsSubstring, "my message",
+  EXPECT_PRED_FORMAT2(::testing::IsSubstring, "my message",
                       gtest_failures.GetTestPartResult(1).message());
 }
 
@@ -3964,7 +3964,7 @@ enum {
   // On Linux, kCaseB and kCaseA have the same value when truncated to
   // int size.  We want to test whether this will confuse the
   // assertions.
-  kCaseB = testing::internal::kMaxBiggestInt,
+  kCaseB = ::testing::internal::kMaxBiggestInt,
 
 # else
 
@@ -4708,7 +4708,7 @@ TEST(StreamableTest, NullCharPtr) {
 }
 
 // Tests that basic IO manipulators (endl, ends, and flush) can be
-// streamed to testing::Message.
+// streamed to ::testing::Message.
 TEST(StreamableTest, BasicIoManip) {
   EXPECT_FATAL_FAILURE({  // NOLINT
     FAIL() << "Line 1." << std::endl
@@ -5282,7 +5282,7 @@ TEST(MessageTest, CanStreamUserTypeInUserNameSpaceWithStreamOperatorInGlobal) {
   EXPECT_STREQ("1(1)", msg.GetString().c_str());
 }
 
-// Tests streaming NULL pointers to testing::Message.
+// Tests streaming NULL pointers to ::testing::Message.
 TEST(MessageTest, NullPointers) {
   Message msg;
   char* const p1 = nullptr;
@@ -5297,7 +5297,7 @@ TEST(MessageTest, NullPointers) {
                msg.GetString().c_str());
 }
 
-// Tests streaming wide strings to testing::Message.
+// Tests streaming wide strings to ::testing::Message.
 TEST(MessageTest, WideStrings) {
   // Streams a NULL of type const wchar_t*.
   const wchar_t* const_wstr = nullptr;
@@ -5321,7 +5321,7 @@ TEST(MessageTest, WideStrings) {
 }
 
 
-// This line tests that we can define tests in the testing namespace.
+// This line tests that we can define tests in the ::testing namespace.
 namespace testing {
 
 // Tests the TestInfo class.
@@ -6795,7 +6795,7 @@ TEST(HasNonfatalFailureTest, ReturnsTrueWhenThereAreFatalAndNonfatalFailures) {
 
 // A wrapper for calling HasNonfatalFailure outside of a test body.
 static bool HasNonfatalFailureHelper() {
-  return testing::Test::HasNonfatalFailure();
+  return ::testing::Test::HasNonfatalFailure();
 }
 
 TEST(HasNonfatalFailureTest, WorksOutsideOfTestBody) {
@@ -6836,7 +6836,7 @@ TEST(HasFailureTest, ReturnsTrueWhenThereAreFatalAndNonfatalFailures) {
 }
 
 // A wrapper for calling HasFailure outside of a test body.
-static bool HasFailureHelper() { return testing::Test::HasFailure(); }
+static bool HasFailureHelper() { return ::testing::Test::HasFailure(); }
 
 TEST(HasFailureTest, WorksOutsideOfTestBody) {
   EXPECT_FALSE(HasFailureHelper());
@@ -7366,10 +7366,10 @@ struct NotReallyAHashTable {
   typedef void reverse_iterator;
 };
 TEST(IsHashTable, Basic) {
-  EXPECT_TRUE(testing::internal::IsHashTable<AHashTable>::value);
-  EXPECT_FALSE(testing::internal::IsHashTable<NotReallyAHashTable>::value);
-  EXPECT_FALSE(testing::internal::IsHashTable<std::vector<int>>::value);
-  EXPECT_TRUE(testing::internal::IsHashTable<std::unordered_set<int>>::value);
+  EXPECT_TRUE(::testing::internal::IsHashTable<AHashTable>::value);
+  EXPECT_FALSE(::testing::internal::IsHashTable<NotReallyAHashTable>::value);
+  EXPECT_FALSE(::testing::internal::IsHashTable<std::vector<int>>::value);
+  EXPECT_TRUE(::testing::internal::IsHashTable<std::unordered_set<int>>::value);
 }
 
 // Tests ArrayEq().
@@ -7521,8 +7521,8 @@ TEST(NativeArrayTest, WorksForTwoDimensionalArray) {
 
 // IndexSequence
 TEST(IndexSequence, MakeIndexSequence) {
-  using testing::internal::IndexSequence;
-  using testing::internal::MakeIndexSequence;
+  using ::testing::internal::IndexSequence;
+  using ::testing::internal::MakeIndexSequence;
   EXPECT_TRUE(
       (std::is_same<IndexSequence<>, MakeIndexSequence<0>::type>::value));
   EXPECT_TRUE(
@@ -7537,7 +7537,7 @@ TEST(IndexSequence, MakeIndexSequence) {
 
 // ElemFromList
 TEST(ElemFromList, Basic) {
-  using testing::internal::ElemFromList;
+  using ::testing::internal::ElemFromList;
   EXPECT_TRUE(
       (std::is_same<int, ElemFromList<0, int, double, char>::type>::value));
   EXPECT_TRUE(
@@ -7551,7 +7551,7 @@ TEST(ElemFromList, Basic) {
 
 // FlatTuple
 TEST(FlatTuple, Basic) {
-  using testing::internal::FlatTuple;
+  using ::testing::internal::FlatTuple;
 
   FlatTuple<int, double, const char*> tuple = {};
   EXPECT_EQ(0, tuple.Get<0>());
@@ -7559,7 +7559,7 @@ TEST(FlatTuple, Basic) {
   EXPECT_EQ(nullptr, tuple.Get<2>());
 
   tuple = FlatTuple<int, double, const char*>(
-      testing::internal::FlatTupleConstructTag{}, 7, 3.2, "Foo");
+      ::testing::internal::FlatTupleConstructTag{}, 7, 3.2, "Foo");
   EXPECT_EQ(7, tuple.Get<0>());
   EXPECT_EQ(3.2, tuple.Get<1>());
   EXPECT_EQ(std::string("Foo"), tuple.Get<2>());
@@ -7575,10 +7575,10 @@ std::string AddIntToString(int i, const std::string& s) {
 }  // namespace
 
 TEST(FlatTuple, Apply) {
-  using testing::internal::FlatTuple;
+  using ::testing::internal::FlatTuple;
 
-  FlatTuple<int, std::string> tuple{testing::internal::FlatTupleConstructTag{},
-                                    5, "Hello"};
+  FlatTuple<int, std::string> tuple{
+      ::testing::internal::FlatTupleConstructTag{}, 5, "Hello"};
 
   // Lambda.
   EXPECT_TRUE(tuple.Apply([](int i, const std::string& s) -> bool {
@@ -7636,7 +7636,7 @@ int ConstructionCounting::copy_assignment_calls = 0;
 int ConstructionCounting::move_assignment_calls = 0;
 
 TEST(FlatTuple, ConstructorCalls) {
-  using testing::internal::FlatTuple;
+  using ::testing::internal::FlatTuple;
 
   // Default construction.
   ConstructionCounting::Reset();
@@ -7653,7 +7653,7 @@ TEST(FlatTuple, ConstructorCalls) {
   {
     ConstructionCounting elem;
     FlatTuple<ConstructionCounting> tuple{
-        testing::internal::FlatTupleConstructTag{}, elem};
+        ::testing::internal::FlatTupleConstructTag{}, elem};
   }
   EXPECT_EQ(ConstructionCounting::default_ctor_calls, 1);
   EXPECT_EQ(ConstructionCounting::dtor_calls, 2);
@@ -7666,7 +7666,7 @@ TEST(FlatTuple, ConstructorCalls) {
   ConstructionCounting::Reset();
   {
     FlatTuple<ConstructionCounting> tuple{
-        testing::internal::FlatTupleConstructTag{}, ConstructionCounting{}};
+        ::testing::internal::FlatTupleConstructTag{}, ConstructionCounting{}};
   }
   EXPECT_EQ(ConstructionCounting::default_ctor_calls, 1);
   EXPECT_EQ(ConstructionCounting::dtor_calls, 2);
@@ -7710,7 +7710,7 @@ TEST(FlatTuple, ConstructorCalls) {
 }
 
 TEST(FlatTuple, ManyTypes) {
-  using testing::internal::FlatTuple;
+  using ::testing::internal::FlatTuple;
 
   // Instantiate FlatTuple with 257 ints.
   // Tests show that we can do it with thousands of elements, but very long
@@ -7762,23 +7762,23 @@ TEST(SkipPrefixTest, DoesNotSkipWhenPrefixDoesNotMatch) {
 
 // Tests ad_hoc_test_result().
 TEST(AdHocTestResultTest, AdHocTestResultForUnitTestDoesNotShowFailure) {
-  const testing::TestResult& test_result =
-      testing::UnitTest::GetInstance()->ad_hoc_test_result();
+  const ::testing::TestResult& test_result =
+      ::testing::UnitTest::GetInstance()->ad_hoc_test_result();
   EXPECT_FALSE(test_result.Failed());
 }
 
-class DynamicUnitTestFixture : public testing::Test {};
+class DynamicUnitTestFixture : public ::testing::Test {};
 
 class DynamicTest : public DynamicUnitTestFixture {
   void TestBody() override { EXPECT_TRUE(true); }
 };
 
-auto* dynamic_test = testing::RegisterTest(
+auto* dynamic_test = ::testing::RegisterTest(
     "DynamicUnitTestFixture", "DynamicTest", "TYPE", "VALUE", __FILE__,
     __LINE__, []() -> DynamicUnitTestFixture* { return new DynamicTest; });
 
 TEST(RegisterTest, WasRegistered) {
-  auto* unittest = testing::UnitTest::GetInstance();
+  auto* unittest = ::testing::UnitTest::GetInstance();
   for (int i = 0; i < unittest->total_test_suite_count(); ++i) {
     auto* tests = unittest->GetTestSuite(i);
     if (tests->name() != std::string("DynamicUnitTestFixture")) continue;

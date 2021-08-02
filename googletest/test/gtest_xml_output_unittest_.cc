@@ -140,12 +140,12 @@ TEST(NoFixtureTest, RecordProperty) {
 }
 
 void ExternalUtilityThatCallsRecordProperty(const std::string& key, int value) {
-  testing::Test::RecordProperty(key, value);
+  ::testing::Test::RecordProperty(key, value);
 }
 
 void ExternalUtilityThatCallsRecordProperty(const std::string& key,
                                             const std::string& value) {
-  testing::Test::RecordProperty(key, value);
+  ::testing::Test::RecordProperty(key, value);
 }
 
 TEST(NoFixtureTest, ExternalUtilityThatCallsRecordIntValuedProperty) {
@@ -166,7 +166,7 @@ INSTANTIATE_TEST_SUITE_P(Single, ValueParamTest, Values(33, 42));
 // Verifies that the type parameter name is output in the 'type_param'
 // XML attribute for typed tests.
 template <typename T> class TypedTest : public Test {};
-typedef testing::Types<int, long> TypedTestTypes;
+typedef ::testing::Types<int, long> TypedTestTypes;
 TYPED_TEST_SUITE(TypedTest, TypedTestTypes);
 TYPED_TEST(TypedTest, HasTypeParamAttribute) {}
 
@@ -177,7 +177,7 @@ class TypeParameterizedTestSuite : public Test {};
 TYPED_TEST_SUITE_P(TypeParameterizedTestSuite);
 TYPED_TEST_P(TypeParameterizedTestSuite, HasTypeParamAttribute) {}
 REGISTER_TYPED_TEST_SUITE_P(TypeParameterizedTestSuite, HasTypeParamAttribute);
-typedef testing::Types<int, long> TypeParameterizedTestSuiteTypes;  // NOLINT
+typedef ::testing::Types<int, long> TypeParameterizedTestSuiteTypes;  // NOLINT
 INSTANTIATE_TYPED_TEST_SUITE_P(Single, TypeParameterizedTestSuite,
                                TypeParameterizedTestSuiteTypes);
 
@@ -188,6 +188,6 @@ int main(int argc, char** argv) {
     TestEventListeners& listeners = UnitTest::GetInstance()->listeners();
     delete listeners.Release(listeners.default_xml_generator());
   }
-  testing::Test::RecordProperty("ad_hoc_property", "42");
+  ::testing::Test::RecordProperty("ad_hoc_property", "42");
   return RUN_ALL_TESTS();
 }

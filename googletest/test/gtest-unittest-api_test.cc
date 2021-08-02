@@ -322,7 +322,7 @@ class FinalSuccessChecker : public Environment {
 int main(int argc, char **argv) {
   InitGoogleTest(&argc, argv);
 
-  AddGlobalTestEnvironment(new testing::internal::FinalSuccessChecker());
+  AddGlobalTestEnvironment(new ::testing::internal::FinalSuccessChecker());
 
   return RUN_ALL_TESTS();
 }

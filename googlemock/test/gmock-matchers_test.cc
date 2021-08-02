@@ -6173,7 +6173,7 @@ TEST_F(UnorderedElementsAreTest, DescribeNegation) {
 namespace {
 
 // Used as a check on the more complex max flow method used in the
-// real testing::internal::FindMaxBipartiteMatching. This method is
+// real ::testing::internal::FindMaxBipartiteMatching. This method is
 // compatible but runs in worst-case factorial time, so we only
 // use it in testing for small problem sizes.
 template <typename Graph>
@@ -8356,7 +8356,7 @@ TEST(AnyOfArrayTest, Matchers) {
 }
 
 TEST(AnyOfArrayTest, ExplainsMatchResultCorrectly) {
-  // AnyOfArray and AllOfArry use the same underlying template-template,
+  // AnyOfArray and AllOfArray use the same underlying template-template,
   // thus it is sufficient to test one here.
   const std::vector<int> v0{};
   const std::vector<int> v1{1};
@@ -8378,7 +8378,7 @@ TEST(AnyOfArrayTest, ExplainsMatchResultCorrectly) {
   // Explain with matchers
   const Matcher<int> g1 = AnyOfArray({GreaterThan(1)});
   const Matcher<int> g2 = AnyOfArray({GreaterThan(1), GreaterThan(2)});
-  // Explains the first positiv match and all prior negative matches...
+  // Explains the first positive match and all prior negative matches...
   EXPECT_EQ("which is 1 less than 1", Explain(g1, 0));
   EXPECT_EQ("which is the same as 1", Explain(g1, 1));
   EXPECT_EQ("which is 1 more than 1", Explain(g1, 2));

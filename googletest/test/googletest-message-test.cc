@@ -38,7 +38,7 @@ namespace {
 
 using ::testing::Message;
 
-// Tests the testing::Message class
+// Tests the ::testing::Message class
 
 // Tests the default constructor.
 TEST(MessageTest, DefaultConstructor) {
@@ -63,8 +63,8 @@ TEST(MessageTest, ConstructsFromCString) {
 TEST(MessageTest, StreamsFloat) {
   const std::string s = (Message() << 1.23456F << " " << 2.34567F).GetString();
   // Both numbers should be printed with enough precision.
-  EXPECT_PRED_FORMAT2(testing::IsSubstring, "1.234560", s.c_str());
-  EXPECT_PRED_FORMAT2(testing::IsSubstring, " 2.345669", s.c_str());
+  EXPECT_PRED_FORMAT2(::testing::IsSubstring, "1.234560", s.c_str());
+  EXPECT_PRED_FORMAT2(::testing::IsSubstring, " 2.345669", s.c_str());
 }
 
 // Tests streaming a double.
@@ -72,8 +72,8 @@ TEST(MessageTest, StreamsDouble) {
   const std::string s = (Message() << 1260570880.4555497 << " "
                                   << 1260572265.1954534).GetString();
   // Both numbers should be printed with enough precision.
-  EXPECT_PRED_FORMAT2(testing::IsSubstring, "1260570880.45", s.c_str());
-  EXPECT_PRED_FORMAT2(testing::IsSubstring, " 1260572265.19", s.c_str());
+  EXPECT_PRED_FORMAT2(::testing::IsSubstring, "1260570880.45", s.c_str());
+  EXPECT_PRED_FORMAT2(::testing::IsSubstring, " 1260572265.19", s.c_str());
 }
 
 // Tests streaming a non-char pointer.
@@ -147,7 +147,7 @@ TEST(MessageTest, StreamsToOStream) {
   Message msg("Hello");
   ::std::stringstream ss;
   ss << msg;
-  EXPECT_EQ("Hello", testing::internal::StringStreamToString(&ss));
+  EXPECT_EQ("Hello", ::testing::internal::StringStreamToString(&ss));
 }
 
 // Tests that a Message object doesn't take up too much stack space.

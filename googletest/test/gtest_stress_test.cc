@@ -227,7 +227,7 @@ TEST(NonFatalFailureOnAllThreadsTest, ExpectNonFatalFailureOnAllThreads) {
 }  // namespace testing
 
 int main(int argc, char **argv) {
-  testing::InitGoogleTest(&argc, argv);
+  ::testing::InitGoogleTest(&argc, argv);
 
   const int result = RUN_ALL_TESTS();  // Expected to fail.
   GTEST_CHECK_(result == 1) << "RUN_ALL_TESTS() did not fail as expected";
@@ -242,7 +242,7 @@ TEST(StressTest,
 }
 
 int main(int argc, char **argv) {
-  testing::InitGoogleTest(&argc, argv);
+  ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
 #endif  // GTEST_IS_THREADSAFE

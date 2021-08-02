@@ -36,9 +36,9 @@
 #if GTEST_HAS_EXCEPTIONS
 namespace {
 
-using testing::HasSubstr;
+using ::testing::HasSubstr;
 
-using testing::internal::GoogleTestFailureException;
+using ::testing::internal::GoogleTestFailureException;
 
 // A type that cannot be default constructed.
 class NonDefaultConstructible {

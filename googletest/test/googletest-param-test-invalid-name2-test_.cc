@@ -34,7 +34,7 @@ namespace {
 class DummyTest : public ::testing::TestWithParam<const char *> {};
 
 std::string StringParamTestSuffix(
-    const testing::TestParamInfo<const char*>& info) {
+    const ::testing::TestParamInfo<const char*>& info) {
   return std::string(info.param);
 }
 
@@ -48,8 +48,6 @@ INSTANTIATE_TEST_SUITE_P(DuplicateTestNames,
 }  // namespace
 
 int main(int argc, char *argv[]) {
-  testing::InitGoogleTest(&argc, argv);
+  ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
-
-

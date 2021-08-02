@@ -46,7 +46,7 @@
 # include <stdexcept>
 #endif
 
-using testing::Test;
+using ::testing::Test;
 
 #if GTEST_HAS_SEH
 
@@ -288,6 +288,6 @@ int main(int argc, char** argv) {
 #if GTEST_HAS_EXCEPTIONS
   std::set_terminate(&TerminateHandler);
 #endif
-  testing::InitGoogleTest(&argc, argv);
+  ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

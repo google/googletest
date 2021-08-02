@@ -62,50 +62,50 @@ class ExpectationTester {
 
 namespace {
 
-using testing::_;
-using testing::AnyNumber;
-using testing::AtLeast;
-using testing::AtMost;
-using testing::Between;
-using testing::Cardinality;
-using testing::CardinalityInterface;
-using testing::Const;
-using testing::ContainsRegex;
-using testing::DoAll;
-using testing::DoDefault;
-using testing::Eq;
-using testing::Expectation;
-using testing::ExpectationSet;
-using testing::GMOCK_FLAG(verbose);
-using testing::Gt;
-using testing::IgnoreResult;
-using testing::InSequence;
-using testing::Invoke;
-using testing::InvokeWithoutArgs;
-using testing::IsNotSubstring;
-using testing::IsSubstring;
-using testing::Lt;
-using testing::Message;
-using testing::Mock;
-using testing::NaggyMock;
-using testing::Ne;
-using testing::Return;
-using testing::SaveArg;
-using testing::Sequence;
-using testing::SetArgPointee;
-using testing::internal::ExpectationTester;
-using testing::internal::FormatFileLocation;
-using testing::internal::kAllow;
-using testing::internal::kErrorVerbosity;
-using testing::internal::kFail;
-using testing::internal::kInfoVerbosity;
-using testing::internal::kWarn;
-using testing::internal::kWarningVerbosity;
+using ::testing::_;
+using ::testing::AnyNumber;
+using ::testing::AtLeast;
+using ::testing::AtMost;
+using ::testing::Between;
+using ::testing::Cardinality;
+using ::testing::CardinalityInterface;
+using ::testing::Const;
+using ::testing::ContainsRegex;
+using ::testing::DoAll;
+using ::testing::DoDefault;
+using ::testing::Eq;
+using ::testing::Expectation;
+using ::testing::ExpectationSet;
+using ::testing::GMOCK_FLAG(verbose);
+using ::testing::Gt;
+using ::testing::IgnoreResult;
+using ::testing::InSequence;
+using ::testing::Invoke;
+using ::testing::InvokeWithoutArgs;
+using ::testing::IsNotSubstring;
+using ::testing::IsSubstring;
+using ::testing::Lt;
+using ::testing::Message;
+using ::testing::Mock;
+using ::testing::NaggyMock;
+using ::testing::Ne;
+using ::testing::Return;
+using ::testing::SaveArg;
+using ::testing::Sequence;
+using ::testing::SetArgPointee;
+using ::testing::internal::ExpectationTester;
+using ::testing::internal::FormatFileLocation;
+using ::testing::internal::kAllow;
+using ::testing::internal::kErrorVerbosity;
+using ::testing::internal::kFail;
+using ::testing::internal::kInfoVerbosity;
+using ::testing::internal::kWarn;
+using ::testing::internal::kWarningVerbosity;
 
 #if GTEST_HAS_STREAM_REDIRECTION
-using testing::HasSubstr;
-using testing::internal::CaptureStdout;
-using testing::internal::GetCapturedStdout;
+using ::testing::HasSubstr;
+using ::testing::internal::CaptureStdout;
+using ::testing::internal::GetCapturedStdout;
 #endif
 
 class Incomplete;
@@ -696,9 +696,9 @@ TEST(ExpectCallSyntaxTest, WarnsOnTooFewActions) {
 }
 
 TEST(ExpectCallSyntaxTest, WarningIsErrorWithFlag) {
-  int original_behavior = testing::GMOCK_FLAG(default_mock_behavior);
+  int original_behavior = ::testing::GMOCK_FLAG(default_mock_behavior);
 
-  testing::GMOCK_FLAG(default_mock_behavior) = kAllow;
+  ::testing::GMOCK_FLAG(default_mock_behavior) = kAllow;
   CaptureStdout();
   {
     MockA a;
@@ -707,7 +707,7 @@ TEST(ExpectCallSyntaxTest, WarningIsErrorWithFlag) {
   std::string output = GetCapturedStdout();
   EXPECT_TRUE(output.empty()) << output;
 
-  testing::GMOCK_FLAG(default_mock_behavior) = kWarn;
+  ::testing::GMOCK_FLAG(default_mock_behavior) = kWarn;
   CaptureStdout();
   {
     MockA a;
@@ -718,14 +718,14 @@ TEST(ExpectCallSyntaxTest, WarningIsErrorWithFlag) {
   EXPECT_PRED_FORMAT2(IsSubstring, "Uninteresting mock function call",
                       warning_output);
 
-  testing::GMOCK_FLAG(default_mock_behavior) = kFail;
+  ::testing::GMOCK_FLAG(default_mock_behavior) = kFail;
   EXPECT_NONFATAL_FAILURE({
     MockA a;
     a.DoA(0);
   }, "Uninteresting mock function call");
 
   // Out of bounds values are converted to kWarn
-  testing::GMOCK_FLAG(default_mock_behavior) = -1;
+  ::testing::GMOCK_FLAG(default_mock_behavior) = -1;
   CaptureStdout();
   {
     MockA a;
@@ -735,7 +735,7 @@ TEST(ExpectCallSyntaxTest, WarningIsErrorWithFlag) {
   EXPECT_PRED_FORMAT2(IsSubstring, "GMOCK WARNING", warning_output);
   EXPECT_PRED_FORMAT2(IsSubstring, "Uninteresting mock function call",
                       warning_output);
-  testing::GMOCK_FLAG(default_mock_behavior) = 3;
+  ::testing::GMOCK_FLAG(default_mock_behavior) = 3;
   CaptureStdout();
   {
     MockA a;
@@ -746,7 +746,7 @@ TEST(ExpectCallSyntaxTest, WarningIsErrorWithFlag) {
   EXPECT_PRED_FORMAT2(IsSubstring, "Uninteresting mock function call",
                       warning_output);
 
-  testing::GMOCK_FLAG(default_mock_behavior) = original_behavior;
+  ::testing::GMOCK_FLAG(default_mock_behavior) = original_behavior;
 }
 
 #endif  // GTEST_HAS_STREAM_REDIRECTION
@@ -1375,7 +1375,7 @@ TEST(SequenceTest, CallsMustBeInStrictOrderWhenSaidSo2) {
 }
 
 // Tests specifying a DAG using multiple sequences.
-class PartialOrderTest : public testing::Test {
+class PartialOrderTest : public ::testing::Test {
  protected:
   PartialOrderTest() {
     ON_CALL(a_, ReturnResult(_))
@@ -2021,7 +2021,7 @@ class MockC {
   GTEST_DISALLOW_COPY_AND_ASSIGN_(MockC);
 };
 
-class VerboseFlagPreservingFixture : public testing::Test {
+class VerboseFlagPreservingFixture : public ::testing::Test {
  protected:
   VerboseFlagPreservingFixture()
       : saved_verbose_flag_(GMOCK_FLAG(verbose)) {}
@@ -2765,11 +2765,11 @@ int gmock_main(int argc, char **argv) {
 #else
 int main(int argc, char **argv) {
 #endif  // GMOCK_RENAME_MAIN
-  testing::InitGoogleMock(&argc, argv);
+  ::testing::InitGoogleMock(&argc, argv);
   // Ensures that the tests pass no matter what value of
   // --gmock_catch_leaked_mocks and --gmock_verbose the user specifies.
-  testing::GMOCK_FLAG(catch_leaked_mocks) = true;
-  testing::GMOCK_FLAG(verbose) = testing::internal::kWarningVerbosity;
+  ::testing::GMOCK_FLAG(catch_leaked_mocks) = true;
+  ::testing::GMOCK_FLAG(verbose) = ::testing::internal::kWarningVerbosity;
 
   return RUN_ALL_TESTS();
 }

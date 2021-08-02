@@ -294,7 +294,7 @@
 #endif  // !defined(GTEST_DEV_EMAIL_)
 
 #if !defined(GTEST_INIT_GOOGLE_TEST_NAME_)
-# define GTEST_INIT_GOOGLE_TEST_NAME_ "testing::InitGoogleTest"
+# define GTEST_INIT_GOOGLE_TEST_NAME_ "::testing::InitGoogleTest"
 #endif  // !defined(GTEST_INIT_GOOGLE_TEST_NAME_)
 
 // Determines the version of gcc that is used to compile this.
@@ -337,7 +337,7 @@
     GTEST_DISABLE_MSC_WARNINGS_POP_()
 #endif
 
-// Brings in definitions for functions used in the testing::internal::posix
+// Brings in definitions for functions used in the ::testing::internal::posix
 // namespace (read, write, close, chdir, isatty, stat). We do not currently
 // use them on Windows Mobile.
 #if GTEST_OS_WINDOWS
@@ -1971,7 +1971,7 @@ inline std::string StripTrailingSpaces(std::string str) {
   return str;
 }
 
-// The testing::internal::posix namespace holds wrappers for common
+// The ::testing::internal::posix namespace holds wrappers for common
 // POSIX functions.  These wrappers hide the differences between
 // Windows/MSVC and POSIX systems.  Since some compilers define these
 // standard functions as macros, the wrapper cannot have the same name

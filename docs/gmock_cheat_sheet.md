@@ -96,7 +96,7 @@ where `STDMETHODCALLTYPE` is defined by `<objbase.h>` on Windows.
 The typical work flow is:
 
 1.  Import the gMock names you need to use. All gMock symbols are in the
-    `testing` namespace unless they are macros or otherwise noted.
+    `::testing` namespace unless they are macros or otherwise noted.
 2.  Create the mock objects.
 3.  Optionally, set the default actions of the mock objects.
 4.  Set your expectations on the mock objects (How will they be called? What

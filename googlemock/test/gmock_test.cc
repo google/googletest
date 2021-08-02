@@ -40,9 +40,9 @@
 
 #if !defined(GTEST_CUSTOM_INIT_GOOGLE_TEST_FUNCTION_)
 
-using testing::GMOCK_FLAG(default_mock_behavior);
-using testing::GMOCK_FLAG(verbose);
-using testing::InitGoogleMock;
+using ::testing::GMOCK_FLAG(default_mock_behavior);
+using ::testing::GMOCK_FLAG(verbose);
+using ::testing::InitGoogleMock;
 
 // Verifies that calling InitGoogleMock() on argv results in new_argv,
 // and the gmock_verbose flag's value is set to expected_gmock_verbose.
@@ -175,7 +175,7 @@ TEST(WideInitGoogleMockTest, ParsesGoogleMockFlagAndUnrecognizedFlag) {
 
 // Makes sure Google Mock flags can be accessed in code.
 TEST(FlagTest, IsAccessibleInCode) {
-  bool dummy = testing::GMOCK_FLAG(catch_leaked_mocks) &&
-      testing::GMOCK_FLAG(verbose) == "";
+  bool dummy = ::testing::GMOCK_FLAG(catch_leaked_mocks) &&
+      ::testing::GMOCK_FLAG(verbose) == "";
   (void)dummy;  // Avoids the "unused local variable" warning.
 }

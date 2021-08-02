@@ -40,10 +40,10 @@
 #if 0
 
 // To write value-parameterized tests, first you should define a fixture
-// class. It is usually derived from testing::TestWithParam<T> (see below for
+// class. It is usually derived from ::testing::TestWithParam<T> (see below for
 // another inheritance scheme that's sometimes useful in more complicated
 // class hierarchies), where the type of your parameter values.
-// TestWithParam<T> is itself derived from testing::Test. T can be any
+// TestWithParam<T> is itself derived from ::testing::Test. T can be any
 // copyable type. If it's a raw pointer, you are responsible for managing the
 // lifespan of the pointed values.
 
@@ -70,7 +70,7 @@ TEST_P(FooTest, HasBlahBlah) {
 // case with any set of parameters you want. Google Test defines a number
 // of functions for generating test parameters. They return what we call
 // (surprise!) parameter generators. Here is a summary of them, which
-// are all in the testing namespace:
+// are all in the ::testing namespace:
 //
 //
 //  Range(begin, end [, step]) - Yields values {begin, begin+step,
@@ -142,8 +142,8 @@ INSTANTIATE_TEST_SUITE_P(AnotherInstantiationName, FooTest, ValuesIn(pets));
 // implementation and is subject to change.
 //
 //
-// A parameterized test fixture must be derived from testing::Test and from
-// testing::WithParamInterface<T>, where T is the type of the parameter
+// A parameterized test fixture must be derived from ::testing::Test and from
+// ::testing::WithParamInterface<T>, where T is the type of the parameter
 // values. Inheriting from TestWithParam<T> satisfies that requirement because
 // TestWithParam<T> inherits from both Test and WithParamInterface. In more
 // complicated hierarchies, however, it is occasionally useful to inherit
@@ -344,7 +344,7 @@ internal::ValueArray<T...> Values(T... v) {
 // In the following example all tests in the test suite FlagDependentTest
 // will be instantiated twice with parameters false and true.
 //
-// class FlagDependentTest : public testing::TestWithParam<bool> {
+// class FlagDependentTest : public ::testing::TestWithParam<bool> {
 //   virtual void SetUp() {
 //     external_flag = GetParam();
 //   }
@@ -374,7 +374,7 @@ inline internal::ParamGenerator<bool> Bool() {
 //
 // enum Color { BLACK, GRAY, WHITE };
 // class AnimalTest
-//     : public testing::TestWithParam<std::tuple<const char*, Color> > {...};
+//     : public ::testing::TestWithParam<std::tuple<const char*, Color> > {...};
 //
 // TEST_P(AnimalTest, AnimalLooksNice) {...}
 //
@@ -386,7 +386,7 @@ inline internal::ParamGenerator<bool> Bool() {
 // Boolean flags:
 //
 // class FlagDependentTest
-//     : public testing::TestWithParam<std::tuple<bool, bool> > {
+//     : public ::testing::TestWithParam<std::tuple<bool, bool> > {
 //   virtual void SetUp() {
 //     // Assigns external_flag_1 and external_flag_2 values from the tuple.
 //     std::tie(external_flag_1, external_flag_2) = GetParam();
@@ -437,11 +437,11 @@ internal::CartesianProductHolder<Generator...> Combine(const Generator&... g) {
 // The last argument to INSTANTIATE_TEST_SUITE_P allows the user to specify
 // generator and an optional function or functor that generates custom test name
 // suffixes based on the test parameters. Such a function or functor should
-// accept one argument of type testing::TestParamInfo<class ParamType>, and
+// accept one argument of type ::testing::TestParamInfo<class ParamType>, and
 // return std::string.
 //
-// testing::PrintToStringParamName is a builtin test suffix generator that
-// returns the value of testing::PrintToString(GetParam()).
+// ::testing::PrintToStringParamName is a builtin test suffix generator that
+// returns the value of ::testing::PrintToString(GetParam()).
 //
 // Note: test names must be non-empty, unique, and may only contain ASCII
 // alphanumeric characters or underscore. Because PrintToString adds quotes

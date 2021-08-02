@@ -35,8 +35,8 @@
 #include "gtest/gtest.h"
 #include "gtest/internal/gtest-filepath.h"
 
-using testing::internal::AlwaysFalse;
-using testing::internal::AlwaysTrue;
+using ::testing::internal::AlwaysFalse;
+using ::testing::internal::AlwaysTrue;
 
 #if GTEST_HAS_DEATH_TEST
 
@@ -62,16 +62,16 @@ using testing::internal::AlwaysTrue;
 
 namespace posix = ::testing::internal::posix;
 
-using testing::ContainsRegex;
-using testing::Matcher;
-using testing::Message;
-using testing::internal::DeathTest;
-using testing::internal::DeathTestFactory;
-using testing::internal::FilePath;
-using testing::internal::GetLastErrnoDescription;
-using testing::internal::GetUnitTestImpl;
-using testing::internal::InDeathTestChild;
-using testing::internal::ParseNaturalNumber;
+using ::testing::ContainsRegex;
+using ::testing::Matcher;
+using ::testing::Message;
+using ::testing::internal::DeathTest;
+using ::testing::internal::DeathTestFactory;
+using ::testing::internal::FilePath;
+using ::testing::internal::GetLastErrnoDescription;
+using ::testing::internal::GetUnitTestImpl;
+using ::testing::internal::InDeathTestChild;
+using ::testing::internal::ParseNaturalNumber;
 
 namespace testing {
 namespace internal {
@@ -126,7 +126,7 @@ void DieInside(const ::std::string& function) {
 
 // Tests that death tests work.
 
-class TestForDeathTest : public testing::Test {
+class TestForDeathTest : public ::testing::Test {
  protected:
   TestForDeathTest() : original_dir_(FilePath::GetCurrentDir()) {}
 
@@ -230,11 +230,11 @@ int DieInCRTDebugElse12(int* sideeffect) {
 TEST(ExitStatusPredicateTest, ExitedWithCode) {
   // On Windows, the process's exit code is the same as its exit status,
   // so the predicate just compares the its input with its parameter.
-  EXPECT_TRUE(testing::ExitedWithCode(0)(0));
-  EXPECT_TRUE(testing::ExitedWithCode(1)(1));
-  EXPECT_TRUE(testing::ExitedWithCode(42)(42));
-  EXPECT_FALSE(testing::ExitedWithCode(0)(1));
-  EXPECT_FALSE(testing::ExitedWithCode(1)(0));
+  EXPECT_TRUE(::testing::ExitedWithCode(0)(0));
+  EXPECT_TRUE(::testing::ExitedWithCode(1)(1));
+  EXPECT_TRUE(::testing::ExitedWithCode(42)(42));
+  EXPECT_FALSE(::testing::ExitedWithCode(0)(1));
+  EXPECT_FALSE(::testing::ExitedWithCode(1)(0));
 }
 
 # else
@@ -273,9 +273,9 @@ TEST(ExitStatusPredicateTest, ExitedWithCode) {
   const int status0  = NormalExitStatus(0);
   const int status1  = NormalExitStatus(1);
   const int status42 = NormalExitStatus(42);
-  const testing::ExitedWithCode pred0(0);
-  const testing::ExitedWithCode pred1(1);
-  const testing::ExitedWithCode pred42(42);
+  const ::testing::ExitedWithCode pred0(0);
+  const ::testing::ExitedWithCode pred1(1);
+  const ::testing::ExitedWithCode pred42(42);
   EXPECT_PRED1(pred0,  status0);
   EXPECT_PRED1(pred1,  status1);
   EXPECT_PRED1(pred42, status42);
@@ -288,8 +288,8 @@ TEST(ExitStatusPredicateTest, ExitedWithCode) {
 TEST(ExitStatusPredicateTest, KilledBySignal) {
   const int status_segv = KilledExitStatus(SIGSEGV);
   const int status_kill = KilledExitStatus(SIGKILL);
-  const testing::KilledBySignal pred_segv(SIGSEGV);
-  const testing::KilledBySignal pred_kill(SIGKILL);
+  const ::testing::KilledBySignal pred_segv(SIGSEGV);
+  const ::testing::KilledBySignal pred_kill(SIGKILL);
   EXPECT_PRED1(pred_segv, status_segv);
   EXPECT_PRED1(pred_kill, status_kill);
   EXPECT_FALSE(pred_segv(status_kill));
@@ -390,7 +390,7 @@ TEST_F(TestForDeathTest, FastDeathTestInChangedDir) {
   GTEST_FLAG_SET(death_test_style, "fast");
 
   ChangeToRootDir();
-  EXPECT_EXIT(_exit(1), testing::ExitedWithCode(1), "");
+  EXPECT_EXIT(_exit(1), ::testing::ExitedWithCode(1), "");
 
   ChangeToRootDir();
   ASSERT_DEATH(_exit(1), "");
@@ -467,14 +467,14 @@ TEST_F(TestForDeathTest, ThreadsafeDeathTestInLoop) {
   GTEST_FLAG_SET(death_test_style, "threadsafe");
 
   for (int i = 0; i < 3; ++i)
-    EXPECT_EXIT(_exit(i), testing::ExitedWithCode(i), "") << ": i = " << i;
+    EXPECT_EXIT(_exit(i), ::testing::ExitedWithCode(i), "") << ": i = " << i;
 }
 
 TEST_F(TestForDeathTest, ThreadsafeDeathTestInChangedDir) {
   GTEST_FLAG_SET(death_test_style, "threadsafe");
 
   ChangeToRootDir();
-  EXPECT_EXIT(_exit(1), testing::ExitedWithCode(1), "");
+  EXPECT_EXIT(_exit(1), ::testing::ExitedWithCode(1), "");
 
   ChangeToRootDir();
   ASSERT_DEATH(_exit(1), "");
@@ -524,7 +524,7 @@ TEST_F(TestForDeathTest, AcceptsAnythingConvertibleToRE) {
   static const char regex_c_str[] = "GlobalFunction";
   EXPECT_DEATH(GlobalFunction(), regex_c_str);
 
-  const testing::internal::RE regex(regex_c_str);
+  const ::testing::internal::RE regex(regex_c_str);
   EXPECT_DEATH(GlobalFunction(), regex);
 
 # if !GTEST_USES_PCRE
@@ -842,31 +842,31 @@ TEST_F(TestForDeathTest, AssertDebugDeathAborts10) {
 
 // Tests the *_EXIT family of macros, using a variety of predicates.
 static void TestExitMacros() {
-  EXPECT_EXIT(_exit(1),  testing::ExitedWithCode(1),  "");
-  ASSERT_EXIT(_exit(42), testing::ExitedWithCode(42), "");
+  EXPECT_EXIT(_exit(1),  ::testing::ExitedWithCode(1),  "");
+  ASSERT_EXIT(_exit(42), ::testing::ExitedWithCode(42), "");
 
 # if GTEST_OS_WINDOWS
 
   // Of all signals effects on the process exit code, only those of SIGABRT
   // are documented on Windows.
   // See https://msdn.microsoft.com/en-us/query-bi/m/dwwzkt4c.
-  EXPECT_EXIT(raise(SIGABRT), testing::ExitedWithCode(3), "") << "b_ar";
+  EXPECT_EXIT(raise(SIGABRT), ::testing::ExitedWithCode(3), "") << "b_ar";
 
 # elif !GTEST_OS_FUCHSIA
 
   // Fuchsia has no unix signals.
-  EXPECT_EXIT(raise(SIGKILL), testing::KilledBySignal(SIGKILL), "") << "foo";
-  ASSERT_EXIT(raise(SIGUSR2), testing::KilledBySignal(SIGUSR2), "") << "bar";
+  EXPECT_EXIT(raise(SIGKILL), ::testing::KilledBySignal(SIGKILL), "") << "foo";
+  ASSERT_EXIT(raise(SIGUSR2), ::testing::KilledBySignal(SIGUSR2), "") << "bar";
 
   EXPECT_FATAL_FAILURE({  // NOLINT
-    ASSERT_EXIT(_exit(0), testing::KilledBySignal(SIGSEGV), "")
+    ASSERT_EXIT(_exit(0), ::testing::KilledBySignal(SIGSEGV), "")
       << "This failure is expected, too.";
   }, "This failure is expected, too.");
 
 # endif  // GTEST_OS_WINDOWS
 
   EXPECT_NONFATAL_FAILURE({  // NOLINT
-    EXPECT_EXIT(raise(SIGSEGV), testing::ExitedWithCode(0), "")
+    EXPECT_EXIT(raise(SIGSEGV), ::testing::ExitedWithCode(0), "")
       << "This failure is expected.";
   }, "This failure is expected.");
 }
@@ -913,7 +913,7 @@ TEST_F(TestForDeathTest, DeathTestBadExitCodeOutput) {
   GTEST_FLAG_SET(death_test_style, "fast");
   EXPECT_NONFATAL_FAILURE(
       EXPECT_EXIT(DieWithMessage("exiting with rc 1\n"),
-                  testing::ExitedWithCode(3),
+                  ::testing::ExitedWithCode(3),
                   "expected message"),
       "    Result: died but not with expected exit code:\n"
       "            Exited with exit status 1\n"
@@ -943,7 +943,7 @@ class MockDeathTestFactory : public DeathTestFactory {
  public:
   MockDeathTestFactory();
   bool Create(const char* statement,
-              testing::Matcher<const std::string&> matcher, const char* file,
+              ::testing::Matcher<const std::string&> matcher, const char* file,
               int line, DeathTest** test) override;
 
   // Sets the parameters for subsequent calls to Create.
@@ -1059,7 +1059,8 @@ void MockDeathTestFactory::SetParameters(bool create,
 // MockDeathTest object with parameters taken from the last call
 // to SetParameters (if create_ is true).  Always returns true.
 bool MockDeathTestFactory::Create(
-    const char* /*statement*/, testing::Matcher<const std::string&> /*matcher*/,
+    const char* /*statement*/,
+    ::testing::Matcher<const std::string&> /*matcher*/,
     const char* /*file*/, int /*line*/, DeathTest** test) {
   test_deleted_ = false;
   if (create_) {
@@ -1073,14 +1074,14 @@ bool MockDeathTestFactory::Create(
 // A test fixture for testing the logic of the GTEST_DEATH_TEST_ macro.
 // It installs a MockDeathTestFactory that is used for the duration
 // of the test case.
-class MacroLogicDeathTest : public testing::Test {
+class MacroLogicDeathTest : public ::testing::Test {
  protected:
-  static testing::internal::ReplaceDeathTestFactory* replacer_;
+  static ::testing::internal::ReplaceDeathTestFactory* replacer_;
   static MockDeathTestFactory* factory_;
 
   static void SetUpTestSuite() {
     factory_ = new MockDeathTestFactory;
-    replacer_ = new testing::internal::ReplaceDeathTestFactory(factory_);
+    replacer_ = new ::testing::internal::ReplaceDeathTestFactory(factory_);
   }
 
   static void TearDownTestSuite() {
@@ -1101,7 +1102,7 @@ class MacroLogicDeathTest : public testing::Test {
   }
 };
 
-testing::internal::ReplaceDeathTestFactory* MacroLogicDeathTest::replacer_ =
+::testing::internal::ReplaceDeathTestFactory* MacroLogicDeathTest::replacer_ =
     nullptr;
 MockDeathTestFactory* MacroLogicDeathTest::factory_ = nullptr;
 
@@ -1222,7 +1223,7 @@ TEST(AutoHandleTest, AutoHandleWorks) {
   ASSERT_NE(INVALID_HANDLE_VALUE, handle);
 
   // Tests that the AutoHandle is correctly initialized with a handle.
-  testing::internal::AutoHandle auto_handle(handle);
+  ::testing::internal::AutoHandle auto_handle(handle);
   EXPECT_EQ(handle, auto_handle.Get());
 
   // Tests that Reset assigns INVALID_HANDLE_VALUE.
@@ -1238,7 +1239,7 @@ TEST(AutoHandleTest, AutoHandleWorks) {
   EXPECT_EQ(handle, auto_handle.Get());
 
   // Tests that AutoHandle contains INVALID_HANDLE_VALUE by default.
-  testing::internal::AutoHandle auto_handle2;
+  ::testing::internal::AutoHandle auto_handle2;
   EXPECT_EQ(INVALID_HANDLE_VALUE, auto_handle2.Get());
 }
 # endif  // GTEST_OS_WINDOWS
@@ -1426,8 +1427,8 @@ TEST(MatcherDeathTest, PolymorphicMatcherDoesNotMatch) {
 
 namespace {
 
-using testing::internal::CaptureStderr;
-using testing::internal::GetCapturedStderr;
+using ::testing::internal::CaptureStderr;
+using ::testing::internal::GetCapturedStderr;
 
 // Tests that EXPECT_DEATH_IF_SUPPORTED/ASSERT_DEATH_IF_SUPPORTED are still
 // defined but do not trigger failures when death tests are not available on

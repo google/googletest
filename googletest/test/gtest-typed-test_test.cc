@@ -40,7 +40,7 @@
 GTEST_DISABLE_MSC_WARNINGS_PUSH_(4127 /* conditional expression is constant */)
 #endif  //  _MSC_VER
 
-using testing::Test;
+using ::testing::Test;
 
 // Used for testing that SetUpTestSuite()/TearDownTestSuite(), fixture
 // ctor/dtor, and SetUp()/TearDown() work correctly in typed tests and
@@ -88,7 +88,7 @@ class CommonTest : public Test {
 template <typename T>
 T* CommonTest<T>::shared_ = nullptr;
 
-using testing::Types;
+using ::testing::Types;
 
 // Tests that SetUpTestSuite()/TearDownTestSuite(), fixture ctor/dtor,
 // and SetUp()/TearDown() work correctly in typed tests
@@ -201,8 +201,8 @@ TYPED_TEST(TypedTestWithNames, TestSuiteName) {
   }
 }
 
-using testing::Types;
-using testing::internal::TypedTestSuitePState;
+using ::testing::Types;
+using ::testing::internal::TypedTestSuitePState;
 
 // Tests TypedTestSuitePState.
 
@@ -415,7 +415,7 @@ typedef Types<int, double> NumericTypes;
 INSTANTIATE_TYPED_TEST_SUITE_P(My, NumericTest, NumericTypes);
 
 static const char* GetTestName() {
-  return testing::UnitTest::GetInstance()->current_test_info()->name();
+  return ::testing::UnitTest::GetInstance()->current_test_info()->name();
 }
 // Test the stripping of space from test names
 template <typename T> class TrimmedTest : public Test { };

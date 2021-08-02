@@ -37,10 +37,10 @@
 #include <string.h>
 #include <stdexcept>
 
-class ThrowListener : public testing::EmptyTestEventListener {
-  void OnTestPartResult(const testing::TestPartResult& result) override {
-    if (result.type() == testing::TestPartResult::kFatalFailure) {
-      throw testing::AssertionException(result);
+class ThrowListener : public ::testing::EmptyTestEventListener {
+  void OnTestPartResult(const ::testing::TestPartResult& result) override {
+    if (result.type() == ::testing::TestPartResult::kFatalFailure) {
+      throw ::testing::AssertionException(result);
     }
   }
 };
@@ -79,7 +79,7 @@ TEST(Test, Test) {
   // A failed assertion should throw.
   try {
     AssertFalse();
-  } catch(const testing::AssertionException& e) {
+  } catch(const ::testing::AssertionException& e) {
     if (strstr(e.what(), "Expected failure") != nullptr) throw;
 
     printf("%s",
@@ -100,8 +100,8 @@ TEST(Test, Test2) {
 }
 
 int main(int argc, char** argv) {
-  testing::InitGoogleTest(&argc, argv);
-  testing::UnitTest::GetInstance()->listeners().Append(new ThrowListener);
+  ::testing::InitGoogleTest(&argc, argv);
+  ::testing::UnitTest::GetInstance()->listeners().Append(new ThrowListener);
 
   int result = RUN_ALL_TESTS();
   if (result == 0) {

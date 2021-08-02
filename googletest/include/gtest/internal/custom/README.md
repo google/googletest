@@ -8,8 +8,8 @@ The custom directory is an injection point for custom user configurations.
 
 *   `GTEST_OS_STACK_TRACE_GETTER_` - The name of an implementation of
     `OsStackTraceGetterInterface`.
-*   `GTEST_CUSTOM_TEMPDIR_FUNCTION_` - An override for `testing::TempDir()`. See
-    `testing::TempDir` for semantics and signature.
+*   `GTEST_CUSTOM_TEMPDIR_FUNCTION_` - An override for `::testing::TempDir()`.
+    See `::testing::TempDir` for semantics and signature.
 
 ## Header `gtest-port.h`
 

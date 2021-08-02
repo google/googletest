@@ -220,29 +220,29 @@ static bool GetDefaultFailFast() {
 
 GTEST_DEFINE_bool_(
     fail_fast,
-    testing::internal::BoolFromGTestEnv("fail_fast",
-                                        testing::GetDefaultFailFast()),
+    ::testing::internal::BoolFromGTestEnv("fail_fast",
+                                          ::testing::GetDefaultFailFast()),
     "True if and only if a test failure should stop further test execution.");
 
 GTEST_DEFINE_bool_(
     also_run_disabled_tests,
-    testing::internal::BoolFromGTestEnv("also_run_disabled_tests", false),
+    ::testing::internal::BoolFromGTestEnv("also_run_disabled_tests", false),
     "Run disabled tests too, in addition to the tests normally being run.");
 
 GTEST_DEFINE_bool_(
     break_on_failure,
-    testing::internal::BoolFromGTestEnv("break_on_failure", false),
+    ::testing::internal::BoolFromGTestEnv("break_on_failure", false),
     "True if and only if a failed assertion should be a debugger "
     "break-point.");
 
 GTEST_DEFINE_bool_(catch_exceptions,
-                   testing::internal::BoolFromGTestEnv("catch_exceptions",
-                                                       true),
+                   ::testing::internal::BoolFromGTestEnv("catch_exceptions",
+                                                         true),
                    "True if and only if " GTEST_NAME_
                    " should catch exceptions and treat them as test failures.");
 
 GTEST_DEFINE_string_(
-    color, testing::internal::StringFromGTestEnv("color", "auto"),
+    color, ::testing::internal::StringFromGTestEnv("color", "auto"),
     "Whether to use colors in the output.  Valid values: yes, no, "
     "and auto.  'auto' means to use colors if the output is "
     "being sent to a terminal and the TERM environment variable "
@@ -250,8 +250,8 @@ GTEST_DEFINE_string_(
 
 GTEST_DEFINE_string_(
     filter,
-    testing::internal::StringFromGTestEnv("filter",
-                                          testing::GetDefaultFilter()),
+    ::testing::internal::StringFromGTestEnv("filter",
+                                            ::testing::GetDefaultFilter()),
     "A colon-separated list of glob (not regex) patterns "
     "for filtering the tests to run, optionally followed by a "
     "'-' and a : separated list of negative patterns (tests to "
@@ -260,8 +260,8 @@ GTEST_DEFINE_string_(
 
 GTEST_DEFINE_bool_(
     install_failure_signal_handler,
-    testing::internal::BoolFromGTestEnv("install_failure_signal_handler",
-                                        false),
+    ::testing::internal::BoolFromGTestEnv("install_failure_signal_handler",
+                                          false),
     "If true and supported on the current platform, " GTEST_NAME_
     " should "
     "install a signal handler that dumps debugging information when fatal "
@@ -277,8 +277,8 @@ GTEST_DEFINE_bool_(list_tests, false,
 //   ''
 GTEST_DEFINE_string_(
     output,
-    testing::internal::StringFromGTestEnv(
-        "output", testing::internal::OutputFlagAlsoCheckEnvVar().c_str()),
+    ::testing::internal::StringFromGTestEnv(
+        "output", ::testing::internal::OutputFlagAlsoCheckEnvVar().c_str()),
     "A format (defaults to \"xml\" but can be specified to be \"json\"), "
     "optionally followed by a colon and an output file name or directory. "
     "A directory is indicated by a trailing pathname separator. "
@@ -289,33 +289,33 @@ GTEST_DEFINE_string_(
     "digits.");
 
 GTEST_DEFINE_bool_(
-    brief, testing::internal::BoolFromGTestEnv("brief", false),
+    brief, ::testing::internal::BoolFromGTestEnv("brief", false),
     "True if only test failures should be displayed in text output.");
 
 GTEST_DEFINE_bool_(print_time,
-                   testing::internal::BoolFromGTestEnv("print_time", true),
+                   ::testing::internal::BoolFromGTestEnv("print_time", true),
                    "True if and only if " GTEST_NAME_
                    " should display elapsed time in text output.");
 
 GTEST_DEFINE_bool_(print_utf8,
-                   testing::internal::BoolFromGTestEnv("print_utf8", true),
+                   ::testing::internal::BoolFromGTestEnv("print_utf8", true),
                    "True if and only if " GTEST_NAME_
                    " prints UTF8 characters as text.");
 
 GTEST_DEFINE_int32_(
-    random_seed, testing::internal::Int32FromGTestEnv("random_seed", 0),
+    random_seed, ::testing::internal::Int32FromGTestEnv("random_seed", 0),
     "Random number seed to use when shuffling test orders.  Must be in range "
     "[1, 99999], or 0 to use a seed based on the current time.");
 
 GTEST_DEFINE_int32_(
-    repeat, testing::internal::Int32FromGTestEnv("repeat", 1),
+    repeat, ::testing::internal::Int32FromGTestEnv("repeat", 1),
     "How many times to repeat each test.  Specify a negative number "
     "for repeating forever.  Useful for shaking out flaky tests.");
 
 GTEST_DEFINE_bool_(
     recreate_environments_when_repeating,
-    testing::internal::BoolFromGTestEnv("recreate_environments_when_repeating",
-                                        true),
+    ::testing::internal::BoolFromGTestEnv(
+        "recreate_environments_when_repeating", true),
     "Controls whether global test environments are recreated for each repeat "
     "of the tests. If set to false the global test environments are only set "
     "up once, for the first iteration, and only torn down once, for the last. "
@@ -330,34 +330,34 @@ GTEST_DEFINE_bool_(show_internal_stack_frames, false,
                    "printing test failure stack traces.");
 
 GTEST_DEFINE_bool_(shuffle,
-                   testing::internal::BoolFromGTestEnv("shuffle", false),
+                   ::testing::internal::BoolFromGTestEnv("shuffle", false),
                    "True if and only if " GTEST_NAME_
                    " should randomize tests' order on every run.");
 
 GTEST_DEFINE_int32_(
     stack_trace_depth,
-    testing::internal::Int32FromGTestEnv("stack_trace_depth",
-                                         testing::kMaxStackTraceDepth),
+    ::testing::internal::Int32FromGTestEnv("stack_trace_depth",
+                                           ::testing::kMaxStackTraceDepth),
     "The maximum number of stack frames to print when an "
     "assertion fails.  The valid range is 0 through 100, inclusive.");
 
 GTEST_DEFINE_string_(
     stream_result_to,
-    testing::internal::StringFromGTestEnv("stream_result_to", ""),
+    ::testing::internal::StringFromGTestEnv("stream_result_to", ""),
     "This flag specifies the host name and the port number on which to stream "
     "test results. Example: \"localhost:555\". The flag is effective only on "
     "Linux.");
 
 GTEST_DEFINE_bool_(
     throw_on_failure,
-    testing::internal::BoolFromGTestEnv("throw_on_failure", false),
+    ::testing::internal::BoolFromGTestEnv("throw_on_failure", false),
     "When this flag is specified, a failed assertion will throw an exception "
     "if exceptions are enabled or exit the program with a non-zero code "
     "otherwise. For use with an external test framework.");
 
 #if GTEST_USE_OWN_FLAGFILE_FLAG_
 GTEST_DEFINE_string_(
-    flagfile, testing::internal::StringFromGTestEnv("flagfile", ""),
+    flagfile, ::testing::internal::StringFromGTestEnv("flagfile", ""),
     "This flag specifies the flagfile to read command-line flags from.");
 #endif  // GTEST_USE_OWN_FLAGFILE_FLAG_
 
@@ -862,7 +862,7 @@ namespace internal {
 
 // Returns the type ID of ::testing::Test.  We should always call this
 // instead of GetTypeId< ::testing::Test>() to get the type ID of
-// testing::Test.  This is to work around a suspected linker bug when
+// ::testing::Test.  This is to work around a suspected linker bug when
 // using Google Test as a framework on Mac OS X.  The bug causes
 // GetTypeId< ::testing::Test>() to return different values depending
 // on whether the call is from the Google Test framework itself or

@@ -1126,11 +1126,11 @@ using STL's `<functional>` header is just painful). For example, here's a
 predicate that's satisfied by any number that is >= 0, <= 100, and != 50:
 
 ```cpp
-using testing::AllOf;
-using testing::Ge;
-using testing::Le;
-using testing::Matches;
-using testing::Ne;
+using ::testing::AllOf;
+using ::testing::Ge;
+using ::testing::Le;
+using ::testing::Matches;
+using ::testing::Ne;
 ...
 Matches(AllOf(Ge(0), Le(100), Ne(50)))
 ```
@@ -1420,8 +1420,8 @@ Use `Pair` when comparing maps or other associative containers.
 {% raw %}
 
 ```cpp
-using testing::ElementsAre;
-using testing::Pair;
+using ::testing::ElementsAre;
+using ::testing::Pair;
 ...
   std::map<string, int> m = {{"a", 1}, {"b", 2}, {"c", 3}};
   EXPECT_THAT(m, ElementsAre(Pair("a", 1), Pair("b", 2), Pair("c", 3)));
@@ -1852,7 +1852,7 @@ error. So, what shall you do?
 Though you may be tempted, DO NOT use `std::ref()`:
 
 ```cpp
-using testing::Return;
+using ::testing::Return;
 
 class MockFoo : public Foo {
  public:
@@ -1886,7 +1886,7 @@ the expectation is set, and `Return(std::ref(x))` will always return 0.
 returns the value pointed to by `pointer` at the time the action is *executed*:
 
 ```cpp
-using testing::ReturnPointee;
+using ::testing::ReturnPointee;
 ...
   int x = 0;
   MockFoo foo;
@@ -2174,7 +2174,8 @@ If the built-in actions don't suit you, you can use an existing callable
 (function, `std::function`, method, functor, lambda) as an action.
 
 ```cpp
-using ::testing::_; using ::testing::Invoke;
+using ::testing::_;
+using ::testing::Invoke;
 
 class MockFoo : public Foo {
  public:
@@ -3192,9 +3193,9 @@ flag. For example, given the test program:
 ```cpp
 #include "gmock/gmock.h"
 
-using testing::_;
-using testing::HasSubstr;
-using testing::Return;
+using ::testing::_;
+using ::testing::HasSubstr;
+using ::testing::Return;
 
 class MockFoo {
  public:

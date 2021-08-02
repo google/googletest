@@ -1472,8 +1472,8 @@ namespace internal {
 // Therefore, the action implementation must be prepared to take more
 // arguments than it needs.  The ExcessiveArg type is used to
 // represent those excessive arguments.  In order to keep the compiler
-// error messages tractable, we define it in the testing namespace
-// instead of testing::internal.  However, this is an INTERNAL TYPE
+// error messages tractable, we define it in the ::testing namespace
+// instead of ::testing::internal.  However, this is an INTERNAL TYPE
 // and subject to change without notice, so a user MUST NOT USE THIS
 // TYPE DIRECTLY.
 struct ExcessiveArg {};

@@ -53,7 +53,7 @@ int main(int argc, char** argv) {
 #if GTEST_HAS_EXCEPTIONS
   std::set_terminate(&TerminateHandler);
 #endif
-  testing::InitGoogleTest(&argc, argv);
+  ::testing::InitGoogleTest(&argc, argv);
 
   // We want to ensure that people can use Google Test assertions in
   // other testing frameworks, as long as they initialize Google Test

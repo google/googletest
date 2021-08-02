@@ -44,15 +44,15 @@
 # pragma warning(disable:4100)
 #endif
 
-using testing::_;
-using testing::AnyNumber;
-using testing::Ge;
-using testing::InSequence;
-using testing::NaggyMock;
-using testing::Ref;
-using testing::Return;
-using testing::Sequence;
-using testing::Value;
+using ::testing::_;
+using ::testing::AnyNumber;
+using ::testing::Ge;
+using ::testing::InSequence;
+using ::testing::NaggyMock;
+using ::testing::Ref;
+using ::testing::Return;
+using ::testing::Sequence;
+using ::testing::Value;
 
 class MockFoo {
  public:
@@ -66,27 +66,27 @@ class MockFoo {
   GTEST_DISALLOW_COPY_AND_ASSIGN_(MockFoo);
 };
 
-class GMockOutputTest : public testing::Test {
+class GMockOutputTest : public ::testing::Test {
  protected:
   NaggyMock<MockFoo> foo_;
 };
 
 TEST_F(GMockOutputTest, ExpectedCall) {
-  testing::GMOCK_FLAG(verbose) = "info";
+  ::testing::GMOCK_FLAG(verbose) = "info";
 
   EXPECT_CALL(foo_, Bar2(0, _));
   foo_.Bar2(0, 0);  // Expected call
 
-  testing::GMOCK_FLAG(verbose) = "warning";
+  ::testing::GMOCK_FLAG(verbose) = "warning";
 }
 
 TEST_F(GMockOutputTest, ExpectedCallToVoidFunction) {
-  testing::GMOCK_FLAG(verbose) = "info";
+  ::testing::GMOCK_FLAG(verbose) = "info";
 
   EXPECT_CALL(foo_, Bar3(0, _));
   foo_.Bar3(0, 0);  // Expected call
 
-  testing::GMOCK_FLAG(verbose) = "warning";
+  ::testing::GMOCK_FLAG(verbose) = "warning";
 }
 
 TEST_F(GMockOutputTest, ExplicitActionsRunOut) {
@@ -279,7 +279,7 @@ MATCHER_P2(IsPair, first, second, "") {
 }
 
 TEST_F(GMockOutputTest, PrintsMatcher) {
-  const testing::Matcher<int> m1 = Ge(48);
+  const ::testing::Matcher<int> m1 = Ge(48);
   EXPECT_THAT((std::pair<int, bool>(42, true)), IsPair(m1, true));
 }
 
@@ -294,11 +294,11 @@ void TestCatchesLeakedMocksInAdHocTests() {
 }
 
 int main(int argc, char **argv) {
-  testing::InitGoogleMock(&argc, argv);
+  ::testing::InitGoogleMock(&argc, argv);
   // Ensures that the tests pass no matter what value of
   // --gmock_catch_leaked_mocks and --gmock_verbose the user specifies.
-  testing::GMOCK_FLAG(catch_leaked_mocks) = true;
-  testing::GMOCK_FLAG(verbose) = "warning";
+  ::testing::GMOCK_FLAG(catch_leaked_mocks) = true;
+  ::testing::GMOCK_FLAG(verbose) = "warning";
 
   TestCatchesLeakedMocksInAdHocTests();
   return RUN_ALL_TESTS();

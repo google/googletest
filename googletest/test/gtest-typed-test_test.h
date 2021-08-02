@@ -32,7 +32,7 @@
 
 #include "gtest/gtest.h"
 
-using testing::Test;
+using ::testing::Test;
 
 // For testing that the same type-parameterized test case can be
 // instantiated in different translation units linked together.

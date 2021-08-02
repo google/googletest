@@ -33,7 +33,7 @@
 #include <iostream>
 #include "gtest/gtest.h"
 
-class SetupEnvironment : public testing::Environment {
+class SetupEnvironment : public ::testing::Environment {
  public:
   void SetUp() override { GTEST_SKIP() << "Skipping the entire environment"; }
 };
@@ -41,9 +41,9 @@ class SetupEnvironment : public testing::Environment {
 TEST(Test, AlwaysFails) { EXPECT_EQ(true, false); }
 
 int main(int argc, char **argv) {
-  testing::InitGoogleTest(&argc, argv);
+  ::testing::InitGoogleTest(&argc, argv);
 
-  testing::AddGlobalTestEnvironment(new SetupEnvironment());
+  ::testing::AddGlobalTestEnvironment(new SetupEnvironment());
 
   return RUN_ALL_TESTS();
 }

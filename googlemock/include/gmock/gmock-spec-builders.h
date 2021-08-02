@@ -1248,7 +1248,7 @@ class TypedExpectation : public ExpectationBase {
 // ::testing::internal and import it into ::testing.
 
 // Logs a message including file and line number information.
-GTEST_API_ void LogWithLocation(testing::internal::LogSeverity severity,
+GTEST_API_ void LogWithLocation(::testing::internal::LogSeverity severity,
                                 const char* file, int line,
                                 const std::string& message);
 

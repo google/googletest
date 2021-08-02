@@ -219,11 +219,11 @@ class UnitTest;
 //
 // For example, if you define IsEven predicate:
 //
-//   testing::AssertionResult IsEven(int n) {
+//   ::testing::AssertionResult IsEven(int n) {
 //     if ((n % 2) == 0)
-//       return testing::AssertionSuccess();
+//       return ::testing::AssertionSuccess();
 //     else
-//       return testing::AssertionFailure() << n << " is odd";
+//       return ::testing::AssertionFailure() << n << " is odd";
 //   }
 //
 // Then the failed expectation EXPECT_TRUE(IsEven(Fib(5)))
@@ -246,11 +246,11 @@ class UnitTest;
 // about half as often as positive ones in our tests), supply messages for
 // both success and failure cases:
 //
-//   testing::AssertionResult IsEven(int n) {
+//   ::testing::AssertionResult IsEven(int n) {
 //     if ((n % 2) == 0)
-//       return testing::AssertionSuccess() << n << " is even";
+//       return ::testing::AssertionSuccess() << n << " is even";
 //     else
-//       return testing::AssertionFailure() << n << " is odd";
+//       return ::testing::AssertionFailure() << n << " is odd";
 //   }
 //
 // Then a statement EXPECT_FALSE(IsEven(Fib(6))) will print
@@ -270,11 +270,11 @@ class UnitTest;
 //
 // you need to define:
 //
-//   testing::AssertionResult IsEven(const char* expr, int n) {
+//   ::testing::AssertionResult IsEven(const char* expr, int n) {
 //     if ((n % 2) == 0)
-//       return testing::AssertionSuccess();
+//       return ::testing::AssertionSuccess();
 //     else
-//       return testing::AssertionFailure()
+//       return ::testing::AssertionFailure()
 //         << "Expected: " << expr << " is even\n  Actual: it's " << n;
 //   }
 //
@@ -403,7 +403,7 @@ namespace testing {
 // The only time you derive from Test is when defining a test fixture
 // to be used in a TEST_F.  For example:
 //
-//   class FooTest : public testing::Test {
+//   class FooTest : public ::testing::Test {
 //    protected:
 //     void SetUp() override { ... }
 //     void TearDown() override { ... }
@@ -1483,8 +1483,8 @@ class GTEST_API_ UnitTest {
 // starts for it to take effect.  For example, you can define a global
 // variable like this:
 //
-//   testing::Environment* const foo_env =
-//       testing::AddGlobalTestEnvironment(new FooEnvironment);
+//   ::testing::Environment* const foo_env =
+//       ::testing::AddGlobalTestEnvironment(new FooEnvironment);
 //
 // However, we strongly recommend you to write your own main() and
 // call AddGlobalTestEnvironment() there, as relying on initialization
@@ -2171,7 +2171,7 @@ class TestWithParam : public Test, public WithParamInterface<T> {
 // These predicate format functions work on floating-point values, and
 // can be used in {ASSERT|EXPECT}_PRED_FORMAT2*(), e.g.
 //
-//   EXPECT_PRED_FORMAT2(testing::DoubleLE, Foo(), 5.0);
+//   EXPECT_PRED_FORMAT2(::testing::DoubleLE, Foo(), 5.0);
 
 // Asserts that val1 is less than, or almost equal to, val2.  Fails
 // otherwise.  In particular, it fails if either val1 or val2 is NaN.
@@ -2229,7 +2229,7 @@ GTEST_API_ AssertionResult DoubleLE(const char* expr1, const char* expr2,
 // The message argument can be anything streamable to std::ostream.
 //
 // Example:
-//   testing::ScopedTrace trace("file.cc", 123, "message");
+//   ::testing::ScopedTrace trace("file.cc", 123, "message");
 //
 class GTEST_API_ ScopedTrace {
  public:
@@ -2302,7 +2302,7 @@ class GTEST_API_ ScopedTrace {
 //
 //   template <typename T> class Foo {
 //    public:
-//     void Bar() { testing::StaticAssertTypeEq<int, T>(); }
+//     void Bar() { ::testing::StaticAssertTypeEq<int, T>(); }
 //   };
 //
 // the code:
@@ -2338,7 +2338,7 @@ constexpr bool StaticAssertTypeEq() noexcept {
 //   }
 
 // Note that we call GetTestTypeId() instead of GetTypeId<
-// ::testing::Test>() here to get the type ID of testing::Test.  This
+// ::testing::Test>() here to get the type ID of ::testing::Test.  This
 // is to work around a suspected linker bug when using Google Test as
 // a framework on Mac OS X.  The bug causes GetTypeId<
 // ::testing::Test>() to return different values depending on whether
@@ -2365,7 +2365,7 @@ constexpr bool StaticAssertTypeEq() noexcept {
 // A test fixture class must be declared earlier.  The user should put
 // the test code between braces after using this macro.  Example:
 //
-//   class FooTest : public testing::Test {
+//   class FooTest : public ::testing::Test {
 //    protected:
 //     void SetUp() override { b_.AddElement(3); }
 //

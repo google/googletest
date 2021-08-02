@@ -272,8 +272,8 @@ debugging, just choose a less verbose level.
 ### How can I delete the mock function's argument in an action?
 
 If your mock function takes a pointer argument and you want to delete that
-argument, you can use testing::DeleteArg<N>() to delete the N'th (zero-indexed)
-argument:
+argument, you can use `::testing::DeleteArg<N>()` to delete the N'th
+(zero-indexed) argument:
 
 ```cpp
 using ::testing::_;
@@ -281,7 +281,7 @@ using ::testing::_;
   MOCK_METHOD(void, Bar, (X* x, const Y& y));
   ...
   EXPECT_CALL(mock_foo_, Bar(_, _))
-      .WillOnce(testing::DeleteArg<0>()));
+      .WillOnce(::testing::DeleteArg<0>()));
 ```
 
 ### How can I perform an arbitrary action on a mock function's argument?
