@@ -31,10 +31,10 @@
 
 #include "gtest/gtest.h"
 
-using testing::Message;
-using testing::Test;
-using testing::TestPartResult;
-using testing::TestPartResultArray;
+using ::testing::Message;
+using ::testing::Test;
+using ::testing::TestPartResult;
+using ::testing::TestPartResultArray;
 
 namespace {
 
@@ -56,7 +56,7 @@ class TestPartResultTest : public Test {
 TEST_F(TestPartResultTest, ConstructorWorks) {
   Message message;
   message << "something is terribly wrong";
-  message << static_cast<const char*>(testing::internal::kStackTraceMarker);
+  message << static_cast<const char*>(::testing::internal::kStackTraceMarker);
   message << "some unimportant stack trace";
 
   const TestPartResult result(TestPartResult::kNonFatalFailure,

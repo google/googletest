@@ -55,7 +55,7 @@ INSTANTIATE_TEST_SUITE_P(ValueParam, ValueParamTest, ::testing::Values(33, 42));
 
 template <typename T>
 class TypedTest : public ::testing::Test {};
-typedef testing::Types<int, bool> TypedTestTypes;
+typedef ::testing::Types<int, bool> TypedTestTypes;
 TYPED_TEST_SUITE(TypedTest, TypedTestTypes);
 TYPED_TEST(TypedTest, Test7) {}
 TYPED_TEST(TypedTest, Test8) {}
@@ -66,7 +66,7 @@ TYPED_TEST_SUITE_P(TypeParameterizedTestSuite);
 TYPED_TEST_P(TypeParameterizedTestSuite, Test9) {}
 TYPED_TEST_P(TypeParameterizedTestSuite, Test10) {}
 REGISTER_TYPED_TEST_SUITE_P(TypeParameterizedTestSuite, Test9, Test10);
-typedef testing::Types<int, bool> TypeParameterizedTestSuiteTypes;  // NOLINT
+typedef ::testing::Types<int, bool> TypeParameterizedTestSuiteTypes;  // NOLINT
 INSTANTIATE_TYPED_TEST_SUITE_P(Single, TypeParameterizedTestSuite,
                                TypeParameterizedTestSuiteTypes);
 

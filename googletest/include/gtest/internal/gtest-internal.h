@@ -511,7 +511,7 @@ template <typename T>
 //  SetUpTestSuite()/TearDownTestSuite() could be protected. Ths way
 //  SuiteApiResolver can access them.
 struct SuiteApiResolver : T {
-  // testing::Test is only forward declared at this point. So we make it a
+  // ::testing::Test is only forward declared at this point. So we make it a
   // dependend class for the compiler to be OK with it.
   using Test =
       typename std::conditional<sizeof(T) != 0, ::testing::Test, void>::type;
@@ -1326,7 +1326,7 @@ namespace std {
 #pragma clang diagnostic ignored "-Wmismatched-tags"
 #endif
 template <typename... Ts>
-struct tuple_size<testing::internal::FlatTuple<Ts...>>
+struct tuple_size<::testing::internal::FlatTuple<Ts...>>
     : std::integral_constant<size_t, sizeof...(Ts)> {};
 #ifdef __clang__
 #pragma clang diagnostic pop

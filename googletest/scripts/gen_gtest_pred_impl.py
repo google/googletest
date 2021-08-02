@@ -127,7 +127,7 @@ namespace testing {
 //
 // where pred_format is a function or functor that takes n (in the
 // case of ASSERT_PRED_FORMATn) values and their source expression
-// text, and returns a testing::AssertionResult.  See the definition
+// text, and returns a ::testing::AssertionResult.  See the definition
 // of ASSERT_EQ in gtest.h for an example.
 //
 // If you don't care about formatting, you can use the more
@@ -464,7 +464,7 @@ struct PredFunctor%(n)s {
   tests += """
 // A %(arity)s predicate-formatter function.
 template <%(types)s>
-testing::AssertionResult PredFormatFunction%(n)s(""" % DEFS
+::testing::AssertionResult PredFormatFunction%(n)s(""" % DEFS
 
   tests += Iter(n, 'const char* e%s', sep=""",
                                              """)
@@ -474,9 +474,9 @@ testing::AssertionResult PredFormatFunction%(n)s(""" % DEFS
 
   tests += """) {
   if (PredFunction%(n)s(%(vs)s))
-    return testing::AssertionSuccess();
+    return ::testing::AssertionSuccess();
 
-  return testing::AssertionFailure()
+  return ::testing::AssertionFailure()
       << """ % DEFS
 
   tests += Iter(n, 'e%s', sep=' << " + " << ')
@@ -491,7 +491,7 @@ testing::AssertionResult PredFormatFunction%(n)s(""" % DEFS
 // A %(arity)s predicate-formatter functor.
 struct PredFormatFunctor%(n)s {
   template <%(types)s>
-  testing::AssertionResult operator()(""" % DEFS
+  ::testing::AssertionResult operator()(""" % DEFS
 
   tests += Iter(n, 'const char* e%s', sep=""",
                                       """)
@@ -508,7 +508,7 @@ struct PredFormatFunctor%(n)s {
   tests += """
 // Tests for {EXPECT|ASSERT}_PRED_FORMAT%(n)s.
 
-class Predicate%(n)sTest : public testing::Test {
+class Predicate%(n)sTest : public ::testing::Test {
  protected:
   void SetUp() override {
     expected_to_finish_ = true;

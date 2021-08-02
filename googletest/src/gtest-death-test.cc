@@ -100,8 +100,8 @@ static const char kDefaultDeathTestStyle[] = GTEST_DEFAULT_DEATH_TEST_STYLE;
 
 GTEST_DEFINE_string_(
     death_test_style,
-    testing::internal::StringFromGTestEnv("death_test_style",
-                                          testing::kDefaultDeathTestStyle),
+    ::testing::internal::StringFromGTestEnv("death_test_style",
+                                            ::testing::kDefaultDeathTestStyle),
     "Indicates how to run a death test in a forked child process: "
     "\"threadsafe\" (child process re-executes the test binary "
     "from the beginning, running only the specific death test) or "
@@ -110,7 +110,7 @@ GTEST_DEFINE_string_(
 
 GTEST_DEFINE_bool_(
     death_test_use_fork,
-    testing::internal::BoolFromGTestEnv("death_test_use_fork", false),
+    ::testing::internal::BoolFromGTestEnv("death_test_use_fork", false),
     "Instructs to use fork()/_exit() instead of clone() in death tests. "
     "Ignored and always uses fork() on POSIX systems where clone() is not "
     "implemented. Useful when running under valgrind or similar tools if "

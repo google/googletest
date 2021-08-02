@@ -62,7 +62,7 @@ struct TestParamInfo {
 };
 
 // A builtin parameterized test name generator which returns the result of
-// testing::PrintToString.
+// ::testing::PrintToString.
 struct PrintToStringParamName {
   template <class ParamType>
   std::string operator()(const TestParamInfo<ParamType>& info) const {

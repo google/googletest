@@ -59,7 +59,7 @@ namespace {
 int g_environment_set_up_count = 0;
 int g_environment_tear_down_count = 0;
 
-class MyEnvironment : public testing::Environment {
+class MyEnvironment : public ::testing::Environment {
  public:
   MyEnvironment() {}
   void SetUp() override { g_environment_set_up_count++; }
@@ -102,7 +102,7 @@ int g_param_test_count = 0;
 
 const int kNumberOfParamTests = 10;
 
-class MyParamTest : public testing::TestWithParam<int> {};
+class MyParamTest : public ::testing::TestWithParam<int> {};
 
 TEST_P(MyParamTest, ShouldPass) {
   GTEST_CHECK_INT_EQ_(g_param_test_count % kNumberOfParamTests, GetParam());
@@ -110,7 +110,7 @@ TEST_P(MyParamTest, ShouldPass) {
 }
 INSTANTIATE_TEST_SUITE_P(MyParamSequence,
                          MyParamTest,
-                         testing::Range(0, kNumberOfParamTests));
+                         ::testing::Range(0, kNumberOfParamTests));
 
 // Resets the count for each test.
 void ResetCounts() {
@@ -194,9 +194,9 @@ void TestRepeatWithFilterForFailedTests(int repeat) {
 }  // namespace
 
 int main(int argc, char **argv) {
-  testing::InitGoogleTest(&argc, argv);
+  ::testing::InitGoogleTest(&argc, argv);
 
-  testing::AddGlobalTestEnvironment(new MyEnvironment);
+  ::testing::AddGlobalTestEnvironment(new MyEnvironment);
 
   TestRepeatUnspecified();
   TestRepeat(0);

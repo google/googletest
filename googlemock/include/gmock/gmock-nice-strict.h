@@ -88,7 +88,7 @@ constexpr bool HasStrictnessModifier() {
   return decltype(StrictnessModifierProbe(std::declval<const T&>()))::value;
 }
 
-// Base classes that register and deregister with testing::Mock to alter the
+// Base classes that register and deregister with ::testing::Mock to alter the
 // default behavior around uninteresting calls. Inheriting from one of these
 // classes first and then MockClass ensures the MockClass constructor is run
 // after registration, and that the MockClass destructor runs before

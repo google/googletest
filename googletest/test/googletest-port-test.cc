@@ -399,11 +399,11 @@ TEST(RegexEngineSelectionTest, SelectsCorrectRegexEngine) {
 #if GTEST_USES_POSIX_RE
 
 template <typename Str>
-class RETest : public ::testing::Test {};
+class RETest : public testing::Test {};
 
 // Defines StringTypes as the list of all string types that class RE
 // supports.
-typedef testing::Types< ::std::string, const char*> StringTypes;
+typedef ::testing::Types< ::std::string, const char*> StringTypes;
 
 TYPED_TEST_SUITE(RETest, StringTypes);
 

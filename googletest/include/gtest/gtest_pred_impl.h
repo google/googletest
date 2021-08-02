@@ -48,7 +48,7 @@ namespace testing {
 //
 // where pred_format is a function or functor that takes n (in the
 // case of ASSERT_PRED_FORMATn) values and their source expression
-// text, and returns a testing::AssertionResult.  See the definition
+// text, and returns a ::testing::AssertionResult.  See the definition
 // of ASSERT_EQ in gtest.h for an example.
 //
 // If you don't care about formatting, you can use the more

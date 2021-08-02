@@ -63,8 +63,8 @@
 #include "sample3-inl.h"
 #include "gtest/gtest.h"
 namespace {
-// To use a test fixture, derive a class from testing::Test.
-class QueueTestSmpl3 : public testing::Test {
+// To use a test fixture, derive a class from ::testing::Test.
+class QueueTestSmpl3 : public ::testing::Test {
  protected:  // You should make the members protected s.t. they can be
              // accessed from sub-classes.
 

@@ -32,7 +32,7 @@
 
 #include "gtest/gtest.h"
 
-class PropertyOne : public testing::Test {
+class PropertyOne : public ::testing::Test {
  protected:
   void SetUp() override { RecordProperty("SetUpProp", 1); }
   void TearDown() override { RecordProperty("TearDownProp", 1); }

@@ -208,7 +208,7 @@ specific domain much better than `Foo` does.
 
 Once you have a mock class, using it is easy. The typical work flow is:
 
-1.  Import the gMock names from the `testing` namespace such that you can use
+1.  Import the gMock names from the `::testing` namespace such that you can use
     them unqualified (You only have to do it once per file). Remember that
     namespaces are a good idea.
 2.  Create some mock objects.

@@ -37,7 +37,7 @@
 #include "gtest/gtest.h"
 #include "src/gtest-internal-inl.h"
 
-using testing::internal::ShouldUseColor;
+using ::testing::internal::ShouldUseColor;
 
 // The purpose of this is to ensure that the UnitTest singleton is
 // created before main() is entered, and thus that ShouldUseColor()
@@ -47,7 +47,7 @@ TEST(GTestColorTest, Dummy) {
 }
 
 int main(int argc, char** argv) {
-  testing::InitGoogleTest(&argc, argv);
+  ::testing::InitGoogleTest(&argc, argv);
 
   if (ShouldUseColor(true)) {
     // Google Test decides to use colors in the output (assuming it

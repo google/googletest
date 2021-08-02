@@ -86,7 +86,7 @@ TEST(SehExceptionDeasTest, CatchExceptionsDoesNotInterfere) {
 #endif  // GTEST_HAS_DEATH_TEST
 
 int main(int argc, char** argv) {
-  testing::InitGoogleTest(&argc, argv);
+  ::testing::InitGoogleTest(&argc, argv);
   GTEST_FLAG_SET(catch_exceptions, GTEST_ENABLE_CATCH_EXCEPTIONS_ != 0);
   return RUN_ALL_TESTS();
 }

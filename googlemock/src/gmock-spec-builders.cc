@@ -645,7 +645,7 @@ class MockObjectRegistry {
                    "means that its expectations aren't verified, which is "
                    "usually a test bug. If you really intend to leak a mock, "
                    "you can suppress this error using "
-                   "testing::Mock::AllowLeak(mock_object), or you may use a "
+                   "::testing::Mock::AllowLeak(mock_object), or you may use a "
                    "fake or stub instead of a mock.\n";
       std::cout.flush();
       ::std::cerr.flush();

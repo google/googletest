@@ -39,15 +39,15 @@
 namespace {
 
 using std::stringstream;
-using testing::AnyNumber;
-using testing::AtLeast;
-using testing::AtMost;
-using testing::Between;
-using testing::Cardinality;
-using testing::CardinalityInterface;
-using testing::Exactly;
-using testing::IsSubstring;
-using testing::MakeCardinality;
+using ::testing::AnyNumber;
+using ::testing::AtLeast;
+using ::testing::AtMost;
+using ::testing::Between;
+using ::testing::Cardinality;
+using ::testing::CardinalityInterface;
+using ::testing::Exactly;
+using ::testing::IsSubstring;
+using ::testing::MakeCardinality;
 
 class MockFoo {
  public:

@@ -59,7 +59,7 @@ namespace {
 // the name "QuickTest".  This is OK.
 //
 // Later, we will derive multiple test fixtures from QuickTest.
-class QuickTest : public testing::Test {
+class QuickTest : public ::testing::Test {
  protected:
   // Remember that SetUp() is run immediately before a test starts.
   // This is a good place to record the start time.

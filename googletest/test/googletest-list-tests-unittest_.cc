@@ -58,7 +58,7 @@ TEST(Abc, Def) {
 TEST(FooBar, Baz) {
 }
 
-class FooTest : public testing::Test {
+class FooTest : public ::testing::Test {
 };
 
 TEST_F(FooTest, Test1) {
@@ -90,7 +90,7 @@ void PrintTo(const MyType& x, std::ostream* os) {
   *os << x.value();
 }
 
-class ValueParamTest : public testing::TestWithParam<MyType> {
+class ValueParamTest : public ::testing::TestWithParam<MyType> {
 };
 
 TEST_P(ValueParamTest, TestA) {
@@ -101,9 +101,9 @@ TEST_P(ValueParamTest, TestB) {
 
 INSTANTIATE_TEST_SUITE_P(
     MyInstantiation, ValueParamTest,
-    testing::Values(MyType("one line"),
-                    MyType("two\nlines"),
-                    MyType("a very\nloooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong line")));  // NOLINT
+    ::testing::Values(MyType("one line"),
+                      MyType("two\nlines"),
+                      MyType("a very\nloooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong line")));  // NOLINT
 
 // A group of typed tests.
 
@@ -113,15 +113,15 @@ class VeryLooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 };
 
 template <typename T>
-class TypedTest : public testing::Test {
+class TypedTest : public ::testing::Test {
 };
 
 template <typename T, int kSize>
 class MyArray {
 };
 
-typedef testing::Types<VeryLoooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooogName,  // NOLINT
-                       int*, MyArray<bool, 42> > MyTypes;
+typedef ::testing::Types<VeryLoooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooogName,  // NOLINT
+                         int*, MyArray<bool, 42> > MyTypes;
 
 TYPED_TEST_SUITE(TypedTest, MyTypes);
 
@@ -134,7 +134,7 @@ TYPED_TEST(TypedTest, TestB) {
 // A group of type-parameterized tests.
 
 template <typename T>
-class TypeParamTest : public testing::Test {
+class TypeParamTest : public ::testing::Test {
 };
 
 TYPED_TEST_SUITE_P(TypeParamTest);

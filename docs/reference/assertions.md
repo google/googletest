@@ -435,14 +435,14 @@ The parameter *`pred_formatter`* is a *predicate-formatter*, which is a function
 or functor with the signature:
 
 ```cpp
-testing::AssertionResult PredicateFormatter(const char* expr1,
-                                            const char* expr2,
-                                            ...
-                                            const char* exprn,
-                                            T1 val1,
-                                            T2 val2,
-                                            ...
-                                            Tn valn);
+::testing::AssertionResult PredicateFormatter(const char* expr1,
+                                              const char* expr2,
+                                              ...
+                                              const char* exprn,
+                                              T1 val1,
+                                              T2 val2,
+                                              ...
+                                              Tn valn);
 ```
 
 where *`val1`*, *`val2`*, ..., *`valn`* are the values of the predicate
@@ -450,7 +450,7 @@ arguments, and *`expr1`*, *`expr2`*, ..., *`exprn`* are the corresponding
 expressions as they appear in the source code. The types `T1`, `T2`, ..., `Tn`
 can be either value types or reference types; if an argument has type `T`, it
 can be declared as either `T` or `const T&`, whichever is appropriate. For more
-about the return type `testing::AssertionResult`, see
+about the return type `::testing::AssertionResult`, see
 [Using a Function That Returns an AssertionResult](../advanced.md#using-a-function-that-returns-an-assertionresult).
 
 As an example, see the following code:
@@ -464,13 +464,13 @@ int SmallestPrimeCommonDivisor(int m, int n) { ... }
 bool MutuallyPrime(int m, int n) { ... }
 
 // A predicate-formatter for asserting that two integers are mutually prime.
-testing::AssertionResult AssertMutuallyPrime(const char* m_expr,
-                                             const char* n_expr,
-                                             int m,
-                                             int n) {
-  if (MutuallyPrime(m, n)) return testing::AssertionSuccess();
+::testing::AssertionResult AssertMutuallyPrime(const char* m_expr,
+                                               const char* n_expr,
+                                               int m,
+                                               int n) {
+  if (MutuallyPrime(m, n)) return ::testing::AssertionSuccess();
 
-  return testing::AssertionFailure() << m_expr << " and " << n_expr
+  return ::testing::AssertionFailure() << m_expr << " and " << n_expr
       << " (" << m << " and " << n << ") are not mutually prime, "
       << "as they have a common divisor " << SmallestPrimeCommonDivisor(m, n);
 }
@@ -629,5 +629,5 @@ process to print a message containing the text `Success` to `stderr` and exit
 with exit status code 0:
 
 ```cpp
-EXPECT_EXIT(NormalExit(), testing::ExitedWithCode(0), "Success");
+EXPECT_EXIT(NormalExit(), ::testing::ExitedWithCode(0), "Success");
 ```

@@ -42,7 +42,7 @@ enum FailureType {
 };
 
 // For testing using global test environments.
-class MyEnvironment : public testing::Environment {
+class MyEnvironment : public ::testing::Environment {
  public:
   MyEnvironment() { Reset(); }
 
@@ -108,7 +108,7 @@ TEST(FooTest, Bar) {
 void Check(bool condition, const char* msg) {
   if (!condition) {
     printf("FAILED: %s\n", msg);
-    testing::internal::posix::Abort();
+    ::testing::internal::posix::Abort();
   }
 }
 
@@ -120,19 +120,19 @@ int RunAllTests(MyEnvironment* env, FailureType failure) {
   env->Reset();
   env->set_failure_in_set_up(failure);
   test_was_run = false;
-  testing::internal::GetUnitTestImpl()->ClearAdHocTestResult();
+  ::testing::internal::GetUnitTestImpl()->ClearAdHocTestResult();
   return RUN_ALL_TESTS();
 }
 
 }  // namespace
 
 int main(int argc, char **argv) {
-  testing::InitGoogleTest(&argc, argv);
+  ::testing::InitGoogleTest(&argc, argv);
 
   // Registers a global test environment, and verifies that the
   // registration function returns its argument.
   MyEnvironment* const env = new MyEnvironment;
-  Check(testing::AddGlobalTestEnvironment(env) == env,
+  Check(::testing::AddGlobalTestEnvironment(env) == env,
         "AddGlobalTestEnvironment() should return its argument.");
 
   // Verifies that RUN_ALL_TESTS() runs the tests when the global

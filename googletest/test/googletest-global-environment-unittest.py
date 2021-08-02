@@ -28,7 +28,7 @@
 """Unit test for Google Test's global test environment behavior.
 
 A user can specify a global test environment via
-testing::AddGlobalTestEnvironment. Failures in the global environment should
+::testing::AddGlobalTestEnvironment. Failures in the global environment should
 result in all unit tests being skipped.
 
 This script tests such functionality by invoking

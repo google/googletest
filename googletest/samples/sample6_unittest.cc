@@ -55,7 +55,7 @@ PrimeTable* CreatePrimeTable<PreCalculatedPrimeTable>() {
 
 // Then we define a test fixture class template.
 template <class T>
-class PrimeTableTest : public testing::Test {
+class PrimeTableTest : public ::testing::Test {
  protected:
   // The ctor calls the factory function to create a prime table
   // implemented by T.
@@ -73,7 +73,7 @@ class PrimeTableTest : public testing::Test {
   PrimeTable* const table_;
 };
 
-using testing::Types;
+using ::testing::Types;
 
 // Google Test offers two ways for reusing tests for different types.
 // The first is called "typed tests".  You should use it if you
@@ -132,7 +132,7 @@ TYPED_TEST(PrimeTableTest, CanGetNextPrime) {
 // in the type list specified in TYPED_TEST_SUITE.  Sit back and be
 // happy that you don't have to define them multiple times.
 
-using testing::Types;
+using ::testing::Types;
 
 // Sometimes, however, you don't yet know all the types that you want
 // to test when you write the tests.  For example, if you are the

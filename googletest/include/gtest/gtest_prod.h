@@ -43,7 +43,7 @@
 //   FRIEND_TEST(MyClassTest, PrivateMethodWorks);
 // };
 //
-// class MyClassTest : public testing::Test {
+// class MyClassTest : public ::testing::Test {
 //   // ...
 // };
 //

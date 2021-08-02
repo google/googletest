@@ -120,13 +120,13 @@ void PrintFlag(const char* flag) {
 }  // namespace testing
 
 int main(int argc, char** argv) {
-  testing::InitGoogleTest(&argc, argv);
+  ::testing::InitGoogleTest(&argc, argv);
 
   if (argc != 2) {
     cout << "Usage: googletest-env-var-test_ NAME_OF_FLAG\n";
     return 1;
   }
 
-  testing::PrintFlag(argv[1]);
+  ::testing::PrintFlag(argv[1]);
   return 0;
 }

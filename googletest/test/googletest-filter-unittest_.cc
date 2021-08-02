@@ -43,7 +43,7 @@ namespace {
 
 // Test case FooTest.
 
-class FooTest : public testing::Test {
+class FooTest : public ::testing::Test {
 };
 
 TEST_F(FooTest, Abc) {
@@ -116,7 +116,7 @@ TEST(DISABLED_FoobarbazTest, TestA) {
   FAIL() << "Expected failure.";
 }
 
-class ParamTest : public testing::TestWithParam<int> {
+class ParamTest : public ::testing::TestWithParam<int> {
 };
 
 TEST_P(ParamTest, TestX) {
@@ -125,8 +125,8 @@ TEST_P(ParamTest, TestX) {
 TEST_P(ParamTest, TestY) {
 }
 
-INSTANTIATE_TEST_SUITE_P(SeqP, ParamTest, testing::Values(1, 2));
-INSTANTIATE_TEST_SUITE_P(SeqQ, ParamTest, testing::Values(5, 6));
+INSTANTIATE_TEST_SUITE_P(SeqP, ParamTest, ::testing::Values(1, 2));
+INSTANTIATE_TEST_SUITE_P(SeqQ, ParamTest, ::testing::Values(5, 6));
 
 }  // namespace
 

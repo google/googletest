@@ -43,7 +43,7 @@ TEST(PrivateCodeTest, CanAccessPrivateMembers) {
   EXPECT_EQ(1, a.x_);
 }
 
-typedef testing::Test PrivateCodeFixtureTest;
+typedef ::testing::Test PrivateCodeFixtureTest;
 
 // Tests that private members can be accessed from a TEST_F declared
 // as a friend of the class.

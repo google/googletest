@@ -43,7 +43,7 @@ namespace {
 
 // Test HasFixtureTest.
 
-class HasFixtureTest : public testing::Test {};
+class HasFixtureTest : public ::testing::Test {};
 
 TEST_F(HasFixtureTest, Test0) {}
 
@@ -113,14 +113,14 @@ TEST(DISABLED_HasDisabledSuite, Test4) { FAIL() << "Expected failure."; }
 
 // Test HasParametersTest
 
-class HasParametersTest : public testing::TestWithParam<int> {};
+class HasParametersTest : public ::testing::TestWithParam<int> {};
 
 TEST_P(HasParametersTest, Test1) { FAIL() << "Expected failure."; }
 
 TEST_P(HasParametersTest, Test2) { FAIL() << "Expected failure."; }
 
 INSTANTIATE_TEST_SUITE_P(HasParametersSuite, HasParametersTest,
-                         testing::Values(1, 2));
+                         ::testing::Values(1, 2));
 
 class MyTestListener : public ::testing::EmptyTestEventListener {
   void OnTestSuiteStart(const ::testing::TestSuite& test_suite) override {

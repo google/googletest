@@ -132,7 +132,7 @@
 // otherwise it should evaluate to the description of the negation of
 // the matcher.  For example,
 //
-//   using testing::PrintToString;
+//   using ::testing::PrintToString;
 //
 //   MATCHER_P2(InClosedRange, low, hi,
 //       std::string(negation ? "is not" : "is") + " in range [" +
@@ -2650,7 +2650,7 @@ class QuantifierMatcherImpl : public MatcherInterface<Container> {
   template <typename InnerMatcher>
   explicit QuantifierMatcherImpl(InnerMatcher inner_matcher)
       : inner_matcher_(
-           testing::SafeMatcherCast<const Element&>(inner_matcher)) {}
+            testing::SafeMatcherCast<const Element&>(inner_matcher)) {}
 
   // Checks whether:
   // * All elements in the container match, if all_elements_should_match.
@@ -2904,7 +2904,7 @@ class KeyMatcherImpl : public MatcherInterface<PairType> {
   template <typename InnerMatcher>
   explicit KeyMatcherImpl(InnerMatcher inner_matcher)
       : inner_matcher_(
-          testing::SafeMatcherCast<const KeyType&>(inner_matcher)) {
+            testing::SafeMatcherCast<const KeyType&>(inner_matcher)) {
   }
 
   // Returns true if and only if 'key_value.first' (the key) matches the inner
