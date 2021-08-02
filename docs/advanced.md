@@ -568,12 +568,12 @@ restored afterwards, so you need not do that yourself. For example:
 ```c++
 int main(int argc, char** argv) {
   testing::InitGoogleTest(&argc, argv);
-  testing::FLAGS_gtest_death_test_style = "fast";
+  GTEST_FLAG_SET(gtest_death_test_style, "fast");
   return RUN_ALL_TESTS();
 }
 
 TEST(MyDeathTest, TestOne) {
-  testing::FLAGS_gtest_death_test_style = "threadsafe";
+  GTEST_FLAG_SET(gtest_death_test_style, "threadsafe");
   // This test is run in the "threadsafe" style:
   ASSERT_DEATH(ThisShouldDie(), "");
 }
