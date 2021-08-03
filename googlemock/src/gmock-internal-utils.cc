@@ -37,8 +37,14 @@
 #include "gmock/internal/gmock-internal-utils.h"
 
 #include <ctype.h>
+
+#include <array>
+#include <cctype>
+#include <cstdint>
+#include <cstring>
 #include <ostream>  // NOLINT
 #include <string>
+
 #include "gmock/gmock.h"
 #include "gmock/internal/gmock-port.h"
 #include "gtest/gtest.h"
@@ -194,6 +200,54 @@ GTEST_API_ void IllegalDoDefault(const char* file, int line) {
       "reasons.  Please instead spell out the default action, or "
       "assign the default action to an Action variable and use "
       "the variable in various places.");
+}
+
+constexpr char UnBase64Impl(char c, const char* const base64, char carry) {
+  return *base64 == 0   ? static_cast<char>(65)
+         : *base64 == c ? carry
+                        : UnBase64Impl(c, base64 + 1, carry + 1);
+}
+
+template <size_t... I>
+constexpr std::array<char, 256> UnBase64Impl(IndexSequence<I...>,
+                                             const char* const base64) {
+  return {UnBase64Impl(I, base64, 0)...};
+}
+
+constexpr std::array<char, 256> UnBase64(const char* const base64) {
+  return UnBase64Impl(MakeIndexSequence<256>{}, base64);
+}
+
+static constexpr char kBase64[] =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+static constexpr std::array<char, 256> kUnBase64 = UnBase64(kBase64);
+
+bool Base64Unescape(const std::string& encoded, std::string* decoded) {
+  decoded->clear();
+  size_t encoded_len = encoded.size();
+  decoded->reserve(3 * (encoded_len / 4) + (encoded_len % 4));
+  int bit_pos = 0;
+  char dst = 0;
+  for (int src : encoded) {
+    if (std::isspace(src) || src == '=') {
+      continue;
+    }
+    char src_bin = kUnBase64[src];
+    if (src_bin >= 64) {
+      decoded->clear();
+      return false;
+    }
+    if (bit_pos == 0) {
+      dst |= src_bin << 2;
+      bit_pos = 6;
+    } else {
+      dst |= static_cast<char>(src_bin >> (bit_pos - 2));
+      decoded->push_back(dst);
+      dst = static_cast<char>(src_bin << (10 - bit_pos));
+      bit_pos = (bit_pos + 6) % 8;
+    }
+  }
+  return true;
 }
 
 }  // namespace internal
