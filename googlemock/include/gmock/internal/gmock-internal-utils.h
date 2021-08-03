@@ -447,6 +447,8 @@ struct Function<R(Args...)> {
 template <typename R, typename... Args>
 constexpr size_t Function<R(Args...)>::ArgumentCount;
 
+bool Base64Unescape(const std::string& encoded, std::string* decoded);
+
 #ifdef _MSC_VER
 # pragma warning(pop)
 #endif

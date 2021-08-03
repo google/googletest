@@ -1122,6 +1122,45 @@ class EndsWithMatcher {
   const StringType suffix_;
 };
 
+// Implements the polymorphic WhenBase64Unescaped(matcher) matcher, which can be
+// used as a Matcher<T> as long as T can be converted to a string.
+class WhenBase64UnescapedMatcher {
+ public:
+  using is_gtest_matcher = void;
+
+  explicit WhenBase64UnescapedMatcher(
+      const Matcher<const std::string&>& internal_matcher)
+      : internal_matcher_(internal_matcher) {}
+
+  // Matches anything that can convert to std::string.
+  template <typename MatcheeStringType>
+  bool MatchAndExplain(const MatcheeStringType& s,
+                       MatchResultListener* listener) const {
+    const std::string s2(s);  // NOLINT (needed for working with string_view).
+    std::string unescaped;
+    if (!internal::Base64Unescape(s2, &unescaped)) {
+      if (listener != nullptr) {
+        *listener << "is not a valid base64 escaped string";
+      }
+      return false;
+    }
+    return MatchPrintAndExplain(unescaped, internal_matcher_, listener);
+  }
+
+  void DescribeTo(::std::ostream* os) const {
+    *os << "matches after Base64Unescape ";
+    internal_matcher_.DescribeTo(os);
+  }
+
+  void DescribeNegationTo(::std::ostream* os) const {
+    *os << "does not match after Base64Unescape ";
+    internal_matcher_.DescribeTo(os);
+  }
+
+ private:
+  const Matcher<const std::string&> internal_matcher_;
+};
+
 // Implements a matcher that compares the two fields of a 2-tuple
 // using one of the ==, <=, <, etc, operators.  The two fields being
 // compared don't have to have the same type.
@@ -4985,6 +5024,14 @@ template <typename InnerMatcher>
 inline internal::AddressMatcher<InnerMatcher> Address(
     const InnerMatcher& inner_matcher) {
   return internal::AddressMatcher<InnerMatcher>(inner_matcher);
+}
+
+// Matches a base64 escaped string, when the unescaped string matches the
+// internal matcher.
+template <typename MatcherType>
+internal::WhenBase64UnescapedMatcher WhenBase64Unescaped(
+    const MatcherType& internal_matcher) {
+  return internal::WhenBase64UnescapedMatcher(internal_matcher);
 }
 }  // namespace no_adl
 
