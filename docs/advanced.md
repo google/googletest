@@ -202,10 +202,9 @@ You can call the function
 
 to assert that types `T1` and `T2` are the same. The function does nothing if
 the assertion is satisfied. If the types are different, the function call will
-fail to compile, the compiler error message will say that
-`T1 and T2 are not the same type` and most likely (depending on the compiler)
-show you the actual values of `T1` and `T2`. This is mainly useful inside
-template code.
+fail to compile, the compiler error message will say that `T1 and T2 are not the
+same type` and most likely (depending on the compiler) show you the actual
+values of `T1` and `T2`. This is mainly useful inside template code.
 
 **Caveat**: When used inside a member function of a class template or a function
 template, `StaticAssertTypeEq<T1, T2>()` is effective only if the function is
@@ -610,15 +609,14 @@ Despite the improved thread safety afforded by the "threadsafe" style of death
 test, thread problems such as deadlock are still possible in the presence of
 handlers registered with `pthread_atfork(3)`.
 
-
 ## Using Assertions in Sub-routines
 
 {: .callout .note}
 Note: If you want to put a series of test assertions in a subroutine to check
 for a complex condition, consider using
-[a custom GMock matcher](gmock_cook_book.md#NewMatchers)
-instead. This lets you provide a more readable error message in case of failure
-and avoid all of the issues described below.
+[a custom GMock matcher](gmock_cook_book.md#NewMatchers) instead. This lets you
+provide a more readable error message in case of failure and avoid all of the
+issues described below.
 
 ### Adding Traces to Assertions
 
@@ -631,6 +629,7 @@ the `SCOPED_TRACE` macro or the `ScopedTrace` utility:
 ```c++
 SCOPED_TRACE(message);
 ```
+
 ```c++
 ScopedTrace trace("file_path", line_number, message);
 ```
@@ -1481,8 +1480,8 @@ In frameworks that report a failure by throwing an exception, you could catch
 the exception and assert on it. But googletest doesn't use exceptions, so how do
 we test that a piece of code generates an expected failure?
 
-`"gtest/gtest-spi.h"` contains some constructs to do this. After #including this header,
-you can use
+`"gtest/gtest-spi.h"` contains some constructs to do this.
+After #including this header, you can use
 
 ```c++
   EXPECT_FATAL_FAILURE(statement, substring);
@@ -1592,6 +1591,7 @@ int main(int argc, char** argv) {
   return RUN_ALL_TESTS();
 }
 ```
+
 ## Getting the Current Test's Name
 
 Sometimes a function may need to know the name of the currently running test.
@@ -1816,8 +1816,7 @@ By default, a googletest program runs all tests the user has defined. In some
 cases (e.g. iterative test development & execution) it may be desirable stop
 test execution upon first failure (trading improved latency for completeness).
 If `GTEST_FAIL_FAST` environment variable or `--gtest_fail_fast` flag is set,
-the test runner will stop execution as soon as the first test failure is
-found.
+the test runner will stop execution as soon as the first test failure is found.
 
 #### Temporarily Disabling Tests
 
@@ -1964,8 +1963,6 @@ they contain valid non-ASCII UTF-8 characters. If you want to suppress the UTF-8
 text because, for example, you don't have an UTF-8 compatible output medium, run
 the test program with `--gtest_print_utf8=0` or set the `GTEST_PRINT_UTF8`
 environment variable to `0`.
-
-
 
 #### Generating an XML Report
 
@@ -2253,12 +2250,11 @@ IMPORTANT: The exact format of the JSON document is subject to change.
 
 #### Detecting Test Premature Exit
 
-Google Test implements the _premature-exit-file_ protocol for test runners
-to catch any kind of unexpected exits of test programs. Upon start,
-Google Test creates the file which will be automatically deleted after
-all work has been finished. Then, the test runner can check if this file
-exists. In case the file remains undeleted, the inspected test has exited
-prematurely.
+Google Test implements the _premature-exit-file_ protocol for test runners to
+catch any kind of unexpected exits of test programs. Upon start, Google Test
+creates the file which will be automatically deleted after all work has been
+finished. Then, the test runner can check if this file exists. In case the file
+remains undeleted, the inspected test has exited prematurely.
 
 This feature is enabled only if the `TEST_PREMATURE_EXIT_FILE` environment
 variable has been set.
