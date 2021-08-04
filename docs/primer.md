@@ -162,9 +162,9 @@ TEST(TestSuiteName, TestName) {
 
 `TEST()` arguments go from general to specific. The *first* argument is the name
 of the test suite, and the *second* argument is the test's name within the test
-suite. Both names must be valid C++ identifiers, and they should not contain
-any underscores (`_`). A test's *full name* consists of its containing test suite and
-its individual name. Tests from different test suites can have the same
+suite. Both names must be valid C++ identifiers, and they should not contain any
+underscores (`_`). A test's *full name* consists of its containing test suite
+and its individual name. Tests from different test suites can have the same
 individual name.
 
 For example, let's take a simple integer function:
@@ -245,8 +245,8 @@ Also, you must first define a test fixture class before using it in a
 declaration`".
 
 For each test defined with `TEST_F()`, googletest will create a *fresh* test
-fixture at runtime, immediately initialize it via `SetUp()`, run the test,
-clean up by calling `TearDown()`, and then delete the test fixture. Note that
+fixture at runtime, immediately initialize it via `SetUp()`, run the test, clean
+up by calling `TearDown()`, and then delete the test fixture. Note that
 different tests in the same test suite have different test fixture objects, and
 googletest always deletes a test fixture before it creates the next one.
 googletest does **not** reuse the same test fixture for multiple tests. Any
@@ -342,8 +342,8 @@ your defined tests in order to run them.
 
 After defining your tests, you can run them with `RUN_ALL_TESTS()`, which
 returns `0` if all the tests are successful, or `1` otherwise. Note that
-`RUN_ALL_TESTS()` runs *all tests* in your link unit--they can be from
-different test suites, or even different source files.
+`RUN_ALL_TESTS()` runs *all tests* in your link unit--they can be from different
+test suites, or even different source files.
 
 When invoked, the `RUN_ALL_TESTS()` macro:
 
@@ -456,8 +456,8 @@ int main(int argc, char **argv) {
 
 The `::testing::InitGoogleTest()` function parses the command line for
 googletest flags, and removes all recognized flags. This allows the user to
-control a test program's behavior via various flags, which we'll cover in
-the [AdvancedGuide](advanced.md). You **must** call this function before calling
+control a test program's behavior via various flags, which we'll cover in the
+[AdvancedGuide](advanced.md). You **must** call this function before calling
 `RUN_ALL_TESTS()`, or the flags won't be properly initialized.
 
 On Windows, `InitGoogleTest()` also works with wide strings, so it can be used

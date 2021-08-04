@@ -410,7 +410,6 @@ C++ is case-sensitive. Did you spell it as `Setup()`?
 Similarly, sometimes people spell `SetUpTestSuite()` as `SetupTestSuite()` and
 wonder why it's never called.
 
-
 ## I have several test suites which share the same test fixture logic, do I have to define a new test fixture class for each of them? This seems pretty tedious.
 
 You don't have to. Instead of
