@@ -43,6 +43,8 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <exception>
+#include <functional>
 #include <memory>
 #include <string>
 #include <vector>
@@ -824,6 +826,8 @@ class GTEST_API_ UnitTestImpl {
   // Returns the value of GTEST_FLAG(catch_exceptions) at the moment
   // UnitTest::Run() starts.
   bool catch_exceptions() const { return catch_exceptions_; }
+
+  std::function<void(std::exception_ptr)> UserExceptionHandler = nullptr;
 
  private:
   friend class ::testing::UnitTest;

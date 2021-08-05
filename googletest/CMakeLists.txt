@@ -169,6 +169,7 @@ if (gtest_build_samples)
   cxx_executable(sample8_unittest samples gtest_main)
   cxx_executable(sample9_unittest samples gtest)
   cxx_executable(sample10_unittest samples gtest)
+  cxx_executable(sample11_unittest samples gtest)
 endif()
 
 ########################################################################
@@ -218,6 +219,7 @@ if (gtest_build_tests)
   cxx_test(gtest-unittest-api_test gtest)
   cxx_test(gtest_skip_in_environment_setup_test gtest_main)
   cxx_test(gtest_skip_test gtest_main)
+  cxx_test(gtest_user_exception gtest)
 
   ############################################################
   # C++ tests built with non-standard compiler flags.

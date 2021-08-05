@@ -46,6 +46,7 @@
 #include <chrono>  // NOLINT
 #include <cmath>
 #include <cstdint>
+#include <exception>
 #include <iomanip>
 #include <limits>
 #include <list>
@@ -2661,7 +2662,8 @@ Result HandleExceptionsInMethodIfSupported(
   // throw statement in the code under test.  For this reason, we perform
   // the check early, sacrificing the ability to affect Google Test's
   // exception handling in the method where the exception is thrown.
-  if (internal::GetUnitTestImpl()->catch_exceptions()) {
+  auto unitTestImpl = internal::GetUnitTestImpl();
+  if (unitTestImpl->catch_exceptions()) {
 #if GTEST_HAS_EXCEPTIONS
     try {
       return HandleSehExceptionsInMethodIfSupported(object, method, location);
@@ -2677,6 +2679,9 @@ Result HandleExceptionsInMethodIfSupported(
           TestPartResult::kFatalFailure,
           FormatCxxExceptionMessage(e.what(), location));
     } catch (...) {  // NOLINT
+      if (unitTestImpl->UserExceptionHandler != nullptr) {
+        unitTestImpl->UserExceptionHandler(std::current_exception());
+      }
       internal::ReportFailureInUnknownLocation(
           TestPartResult::kFatalFailure,
           FormatCxxExceptionMessage(nullptr, location));
@@ -5417,6 +5422,7 @@ int UnitTest::Run() {
   // Captures the value of GTEST_FLAG(catch_exceptions).  This value will be
   // used for the duration of the program.
   impl()->set_catch_exceptions(GTEST_FLAG_GET(catch_exceptions));
+  impl()->UserExceptionHandler = UserExceptionHandler;
 
 #if GTEST_OS_WINDOWS
   // Either the user wants Google Test to catch exceptions thrown by the

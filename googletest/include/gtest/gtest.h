@@ -1394,6 +1394,8 @@ class GTEST_API_ UnitTest {
   // inside Google Test.
   TestEventListeners& listeners();
 
+  std::function<void(std::exception_ptr)> UserExceptionHandler = nullptr;
+
  private:
   // Registers and returns a global test environment.  When a test
   // program is run, all global test environments will be set-up in
