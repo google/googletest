@@ -211,7 +211,7 @@ constexpr char UnBase64Impl(char c, const char* const base64, char carry) {
 template <size_t... I>
 constexpr std::array<char, 256> UnBase64Impl(IndexSequence<I...>,
                                              const char* const base64) {
-  return {UnBase64Impl(I, base64, 0)...};
+  return {{UnBase64Impl(I, base64, 0)...}};
 }
 
 constexpr std::array<char, 256> UnBase64(const char* const base64) {
