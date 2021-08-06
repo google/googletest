@@ -4436,15 +4436,15 @@ void XmlUnitTestResultPrinter::OutputXmlTestProperties(
     return;
   }
 
-  *stream << "<" << kProperties << ">\n";
+  *stream << "      <" << kProperties << ">\n";
   for (int i = 0; i < result.test_property_count(); ++i) {
     const TestProperty& property = result.GetTestProperty(i);
-    *stream << "<" << kProperty;
+    *stream << "        <" << kProperty;
     *stream << " name=\"" << EscapeXmlAttribute(property.key()) << "\"";
     *stream << " value=\"" << EscapeXmlAttribute(property.value()) << "\"";
     *stream << "/>\n";
   }
-  *stream << "</" << kProperties << ">\n";
+  *stream << "      </" << kProperties << ">\n";
 }
 
 // End XmlUnitTestResultPrinter
