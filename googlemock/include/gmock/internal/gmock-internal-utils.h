@@ -279,7 +279,7 @@ class WithoutMatchers {
 GTEST_API_ WithoutMatchers GetWithoutMatchers();
 
 // Disable MSVC warnings for infinite recursion, since in this case the
-// the recursion is unreachable.
+// recursion is unreachable.
 #ifdef _MSC_VER
 # pragma warning(push)
 # pragma warning(disable:4717)
