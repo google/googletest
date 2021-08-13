@@ -1754,7 +1754,7 @@ specifies the following DAG (where `s1` is `A -> B`, and `s2` is `A -> C -> D`):
        |
   A ---|
        |
-        +---> C ---> D
+       +---> C ---> D
 ```
 
 This means that A must occur before B and C, and C must occur before D. There's
