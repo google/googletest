@@ -557,7 +557,7 @@ The automated testing framework does not set the style flag. You can choose a
 particular style of death tests by setting the flag programmatically:
 
 ```c++
-testing::FLAGS_gtest_death_test_style="threadsafe"
+GTEST_FLAG_SET(death_test_style, "threadsafe")
 ```
 
 You can do this in `main()` to set the style for all death tests in the binary,
@@ -567,12 +567,12 @@ restored afterwards, so you need not do that yourself. For example:
 ```c++
 int main(int argc, char** argv) {
   testing::InitGoogleTest(&argc, argv);
-  GTEST_FLAG_SET(gtest_death_test_style, "fast");
+  GTEST_FLAG_SET(death_test_style, "fast");
   return RUN_ALL_TESTS();
 }
 
 TEST(MyDeathTest, TestOne) {
-  GTEST_FLAG_SET(gtest_death_test_style, "threadsafe");
+  GTEST_FLAG_SET(death_test_style, "threadsafe");
   // This test is run in the "threadsafe" style:
   ASSERT_DEATH(ThisShouldDie(), "");
 }
