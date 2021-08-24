@@ -738,8 +738,8 @@ class Action<R(Args...)> {
 
     template <typename... InArgs>
     typename internal::Function<F>::Result operator()(InArgs&&... args) {
-      return impl_->Perform(
-          ::std::forward_as_tuple(::std::forward<InArgs>(args)...));
+      auto tuple_args = std::forward_as_tuple(std::forward<InArgs>(args)...);
+      return impl_->Perform(tuple_args);
     }
   };
 
