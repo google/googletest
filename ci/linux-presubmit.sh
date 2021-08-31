@@ -56,7 +56,7 @@ for cc in /usr/local/bin/gcc /opt/llvm/clang/bin/clang; do
       /bin/bash -c "
         cmake /src \
           -DCMAKE_CXX_STANDARD=11 \
-          -Dgtest_build_samples=ON \
+          -Dgtest_build_samples=OFF \
           -Dgtest_build_tests=ON \
           -Dgmock_build_tests=ON \
           -Dcxx_no_exception=${cmake_off_on} \
@@ -92,7 +92,7 @@ for std in ${STD}; do
       --env="BAZEL_CXXOPTS=-std=${std}" \
       ${LINUX_LATEST_CONTAINER} \
       /usr/local/bin/bazel test ... \
-        --copt="-Wall" \
+        --copt="-Wall" \192.168.5.10
         --copt="-Werror" \
         --define="absl=${absl}" \
         --distdir="/bazel-distdir" \
