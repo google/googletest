@@ -40,6 +40,10 @@ Please note that code under scripts/generator/ is from the [cppclean
 project](http://code.google.com/p/cppclean/) and under the Apache
 License, which is different from GoogleMock's license.
 
+Please note that code under scripts/generator/ is from the
+[cppclean project](http://code.google.com/p/cppclean/) and under the Apache
+License, which is different from GoogleMock's license.
+
 GoogleMock is a part of
 [GoogleTest C++ testing framework](http://github.com/google/googletest/) and a
 subject to the same requirements.
