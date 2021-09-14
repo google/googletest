@@ -72,21 +72,21 @@ class GMockOutputTest : public testing::Test {
 };
 
 TEST_F(GMockOutputTest, ExpectedCall) {
-  testing::GMOCK_FLAG(verbose) = "info";
+  GMOCK_FLAG_SET(verbose, "info");
 
   EXPECT_CALL(foo_, Bar2(0, _));
   foo_.Bar2(0, 0);  // Expected call
 
-  testing::GMOCK_FLAG(verbose) = "warning";
+  GMOCK_FLAG_SET(verbose, "warning");
 }
 
 TEST_F(GMockOutputTest, ExpectedCallToVoidFunction) {
-  testing::GMOCK_FLAG(verbose) = "info";
+  GMOCK_FLAG_SET(verbose, "info");
 
   EXPECT_CALL(foo_, Bar3(0, _));
   foo_.Bar3(0, 0);  // Expected call
 
-  testing::GMOCK_FLAG(verbose) = "warning";
+  GMOCK_FLAG_SET(verbose, "warning");
 }
 
 TEST_F(GMockOutputTest, ExplicitActionsRunOut) {
@@ -297,8 +297,8 @@ int main(int argc, char **argv) {
   testing::InitGoogleMock(&argc, argv);
   // Ensures that the tests pass no matter what value of
   // --gmock_catch_leaked_mocks and --gmock_verbose the user specifies.
-  testing::GMOCK_FLAG(catch_leaked_mocks) = true;
-  testing::GMOCK_FLAG(verbose) = "warning";
+  GMOCK_FLAG_SET(catch_leaked_mocks, true);
+  GMOCK_FLAG_SET(verbose, "warning");
 
   TestCatchesLeakedMocksInAdHocTests();
   return RUN_ALL_TESTS();

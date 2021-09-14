@@ -63,12 +63,12 @@
 #include "gmock/gmock-nice-strict.h"
 #include "gmock/internal/gmock-internal-utils.h"
 
-namespace testing {
-
 // Declares Google Mock flags that we want a user to use programmatically.
 GMOCK_DECLARE_bool_(catch_leaked_mocks);
 GMOCK_DECLARE_string_(verbose);
 GMOCK_DECLARE_int32_(default_mock_behavior);
+
+namespace testing {
 
 // Initializes Google Mock.  This must be called before running the
 // tests.  In particular, it parses the command line for the flags
