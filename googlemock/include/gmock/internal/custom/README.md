@@ -14,3 +14,5 @@ The following macros can be defined:
 *   `GMOCK_DEFINE_bool_(name, default_val, doc)`
 *   `GMOCK_DEFINE_int32_(name, default_val, doc)`
 *   `GMOCK_DEFINE_string_(name, default_val, doc)`
+*   `GMOCK_FLAG_GET(flag_name)`
+*   `GMOCK_FLAG_SET(flag_name, value)`

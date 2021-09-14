@@ -132,10 +132,10 @@ static GTEST_DEFINE_STATIC_MUTEX_(g_log_mutex);
 // Returns true if and only if a log with the given severity is visible
 // according to the --gmock_verbose flag.
 GTEST_API_ bool LogIsVisible(LogSeverity severity) {
-  if (GMOCK_FLAG(verbose) == kInfoVerbosity) {
+  if (GMOCK_FLAG_GET(verbose) == kInfoVerbosity) {
     // Always show the log if --gmock_verbose=info.
     return true;
-  } else if (GMOCK_FLAG(verbose) == kErrorVerbosity) {
+  } else if (GMOCK_FLAG_GET(verbose) == kErrorVerbosity) {
     // Always hide it if --gmock_verbose=error.
     return false;
   } else {
