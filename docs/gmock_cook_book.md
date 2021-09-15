@@ -289,7 +289,7 @@ recipe for [mocking non-virtual methods](#MockingNonVirtualMethods).
 
 Before the generic `MOCK_METHOD` macro
 [was introduced in 2018](https://github.com/google/googletest/commit/c5f08bf91944ce1b19bcf414fa1760e69d20afc2),
-mocks where created using a family of macros collectively called `MOCK_METHODn`.
+mocks were created using a family of macros collectively called `MOCK_METHODn`.
 These macros are still supported, though migration to the new `MOCK_METHOD` is
 recommended.
 
