@@ -69,7 +69,7 @@ Let's keep it that way. Let's strive to be one of the friendliest communities in
 all of open source.
 
 As always, discuss Google Test in the official GoogleTest discussion group. You
-don't have to actually submit a code in order to sign up. Your participation
+don't have to actually submit code in order to sign up. Your participation
 itself is a valuable contribution.
 
 ## Style
