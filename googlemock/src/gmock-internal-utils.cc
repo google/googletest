@@ -211,7 +211,7 @@ constexpr char UnBase64Impl(char c, const char* const base64, char carry) {
 template <size_t... I>
 constexpr std::array<char, 256> UnBase64Impl(IndexSequence<I...>,
                                              const char* const base64) {
-  return {{UnBase64Impl(I, base64, 0)...}};
+  return {{UnBase64Impl(static_cast<char>(I), base64, 0)...}};
 }
 
 constexpr std::array<char, 256> UnBase64(const char* const base64) {
@@ -232,7 +232,7 @@ bool Base64Unescape(const std::string& encoded, std::string* decoded) {
     if (std::isspace(src) || src == '=') {
       continue;
     }
-    char src_bin = kUnBase64[src];
+    char src_bin = kUnBase64[static_cast<size_t>(src)];
     if (src_bin >= 64) {
       decoded->clear();
       return false;
