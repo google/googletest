@@ -8,6 +8,13 @@
 # ctest.  You can select which tests to run using 'ctest -R regex'.
 # For more options, run 'ctest --help'.
 
+if(NOT GOOGLETEST_TOPLEVEL)
+    message(FATAL_ERROR
+        "Directly including ${CMAKE_CURRENT_SOURCE_DIR} is no longer supported."
+        "Please use the toplevel CMakeLists.txt instead."
+    )
+endif()
+
 option(gmock_build_tests "Build all of Google Mock's own tests" ${GOOGLETEST_STANDALONE})
 mark_as_advanced(gmock_build_tests)
 

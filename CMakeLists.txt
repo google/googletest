@@ -19,6 +19,7 @@ else()
     message(STATUS "Vendored build detected")
 endif()
 
+set(GOOGLETEST_TOPLEVEL TRUE)
 option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
 option(INSTALL_GTEST "Install Googletest" ${GOOGLETEST_STANDALONE})
 option(BUILD_GMOCK "Build googlemock" ON)

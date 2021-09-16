@@ -8,6 +8,13 @@
 # ctest.  You can select which tests to run using 'ctest -R regex'.
 # For more options, run 'ctest --help'.
 
+if(NOT GOOGLETEST_TOPLEVEL)
+    message(FATAL_ERROR
+        "Directly including ${CMAKE_CURRENT_SOURCE_DIR} is no longer supported."
+        "Please use the toplevel CMakeLists.txt instead."
+    )
+endif()
+
 option(gtest_build_tests "Build all of gtest's own tests" ${GOOGLETEST_STANDALONE})
 option(gtest_build_samples "Build gtest's sample programs" OFF)
 option(gtest_disable_pthreads "Disable uses of pthreads in gtest" OFF)
