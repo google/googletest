@@ -36,7 +36,8 @@ PR is acceptable as an alternative.
     This ensures that work isn't being duplicated and communicating your plan
     early also generally leads to better patches.
 4.  If your proposed change is accepted, and you haven't already done so, sign a
-    Contributor License Agreement (see details above).
+    Contributor License Agreement
+    ([see details above](#contributor-license-agreements)).
 5.  Fork the desired repo, develop and test your code changes.
 6.  Ensure that your code adheres to the existing style in the sample to which
     you are contributing.
