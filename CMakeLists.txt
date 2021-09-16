@@ -82,6 +82,9 @@ if(INSTALL_GTEST)
     )
     write_basic_package_version_file(GTestConfigVersion.cmake COMPATIBILITY SameMajorVersion)
     install(EXPORT GTestTargets NAMESPACE GTest:: DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/GTest)
+    if(BUILD_GMOCK)
+        install(EXPORT GMockTargets NAMESPACE GTest:: DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/GTest)
+    endif()
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/GTestConfig.cmake ${CMAKE_CURRENT_BINARY_DIR}/GTestConfigVersion.cmake
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/GTest
     )

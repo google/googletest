@@ -54,7 +54,7 @@ if(INSTALL_GTEST)
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/gmock.pc ${CMAKE_CURRENT_BINARY_DIR}/gmock_main.pc
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
     )
-    install(TARGETS gmock gmock_main EXPORT GTestTargets
+    install(TARGETS gmock gmock_main EXPORT GMockTargets
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
