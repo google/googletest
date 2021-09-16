@@ -887,6 +887,12 @@ preceding or following another. Also, the tests must either not modify the state
 of any shared resource, or, if they do modify the state, they must restore the
 state to its original value before passing control to the next test.
 
+Note that `SetUpTestSuite()` may be called multiple times for a test fixture
+class that has derived classes, so you should not expect code in the function
+body to be run only once. Also, derived classes still have access to shared
+resources defined as static members, so careful consideration is needed when
+managing shared resources to avoid memory leaks.
+
 Here's an example of per-test-suite set-up and tear-down:
 
 ```c++
@@ -896,7 +902,10 @@ class FooTest : public testing::Test {
   // Called before the first test in this test suite.
   // Can be omitted if not needed.
   static void SetUpTestSuite() {
-    shared_resource_ = new ...;
+    // Avoid reallocating static objects if called in subclasses of FooTest.
+    if (shared_resource_ == nullptr) {
+      shared_resource_ = new ...;
+    }
   }
 
   // Per-test-suite tear-down.
