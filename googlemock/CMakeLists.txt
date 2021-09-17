@@ -9,9 +9,10 @@
 # For more options, run 'ctest --help'.
 
 if(NOT GOOGLETEST_TOPLEVEL)
+    get_filename_component(gtest_toplevel ${CMAKE_CURRENT_LIST_DIR} DIRECTORY)
     message(FATAL_ERROR
-        "Directly including ${CMAKE_CURRENT_SOURCE_DIR} is no longer supported."
-        "Please use the toplevel CMakeLists.txt instead."
+        "Directly including GMock from ${CMAKE_CURRENT_LIST_DIR} is no longer "
+        "supported. Please include the toplevel ${gtest_toplevel} instead."
     )
 endif()
 
