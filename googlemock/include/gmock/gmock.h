@@ -81,15 +81,15 @@ namespace testing {
 // Since Google Test is needed for Google Mock to work, this function
 // also initializes Google Test and parses its flags, if that hasn't
 // been done.
-GTEST_API_ void InitGoogleMock(int* argc, char** argv);
+GMOCK_API_ void InitGoogleMock(int* argc, char** argv);
 
 // This overloaded version can be used in Windows programs compiled in
 // UNICODE mode.
-GTEST_API_ void InitGoogleMock(int* argc, wchar_t** argv);
+GMOCK_API_ void InitGoogleMock(int* argc, wchar_t** argv);
 
 // This overloaded version can be used on Arduino/embedded platforms where
 // there is no argc/argv.
-GTEST_API_ void InitGoogleMock();
+GMOCK_API_ void InitGoogleMock();
 
 }  // namespace testing
 

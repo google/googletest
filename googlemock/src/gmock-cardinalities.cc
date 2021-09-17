@@ -136,20 +136,20 @@ void Cardinality::DescribeActualCallCountTo(int actual_call_count,
 }
 
 // Creates a cardinality that allows at least n calls.
-GTEST_API_ Cardinality AtLeast(int n) { return Between(n, INT_MAX); }
+GMOCK_API_ Cardinality AtLeast(int n) { return Between(n, INT_MAX); }
 
 // Creates a cardinality that allows at most n calls.
-GTEST_API_ Cardinality AtMost(int n) { return Between(0, n); }
+GMOCK_API_ Cardinality AtMost(int n) { return Between(0, n); }
 
 // Creates a cardinality that allows any number of calls.
-GTEST_API_ Cardinality AnyNumber() { return AtLeast(0); }
+GMOCK_API_ Cardinality AnyNumber() { return AtLeast(0); }
 
 // Creates a cardinality that allows between min and max calls.
-GTEST_API_ Cardinality Between(int min, int max) {
+GMOCK_API_ Cardinality Between(int min, int max) {
   return Cardinality(new BetweenCardinalityImpl(min, max));
 }
 
 // Creates a cardinality that allows exactly n calls.
-GTEST_API_ Cardinality Exactly(int n) { return Between(n, n); }
+GMOCK_API_ Cardinality Exactly(int n) { return Between(n, n); }
 
 }  // namespace testing

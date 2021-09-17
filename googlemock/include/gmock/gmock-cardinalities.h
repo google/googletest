@@ -84,7 +84,7 @@ class CardinalityInterface {
 // object that specifies how many times a mock function is expected to
 // be called.  The implementation of Cardinality is just a std::shared_ptr
 // to const CardinalityInterface. Don't inherit from Cardinality!
-class GTEST_API_ Cardinality {
+class GMOCK_API_ Cardinality {
  public:
   // Constructs a null cardinality.  Needed for storing Cardinality
   // objects in STL containers.
@@ -129,19 +129,19 @@ class GTEST_API_ Cardinality {
 };
 
 // Creates a cardinality that allows at least n calls.
-GTEST_API_ Cardinality AtLeast(int n);
+GMOCK_API_ Cardinality AtLeast(int n);
 
 // Creates a cardinality that allows at most n calls.
-GTEST_API_ Cardinality AtMost(int n);
+GMOCK_API_ Cardinality AtMost(int n);
 
 // Creates a cardinality that allows any number of calls.
-GTEST_API_ Cardinality AnyNumber();
+GMOCK_API_ Cardinality AnyNumber();
 
 // Creates a cardinality that allows between min and max calls.
-GTEST_API_ Cardinality Between(int min, int max);
+GMOCK_API_ Cardinality Between(int min, int max);
 
 // Creates a cardinality that allows exactly n calls.
-GTEST_API_ Cardinality Exactly(int n);
+GMOCK_API_ Cardinality Exactly(int n);
 
 // Creates a cardinality from its implementation.
 inline Cardinality MakeCardinality(const CardinalityInterface* c) {
