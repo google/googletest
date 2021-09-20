@@ -1060,6 +1060,14 @@ class BarEnvironment : public testing::Environment {
   }
 };
 
+class TestSuiteThatFailsToSetUp : public testing::Test {
+ public:
+  static void SetUpTestSuite() { EXPECT_TRUE(false); }
+};
+TEST_F(TestSuiteThatFailsToSetUp, ShouldNotRun) {
+  std::abort();
+}
+
 // The main function.
 //
 // The idea is to use Google Test to run all the tests we have defined (some
