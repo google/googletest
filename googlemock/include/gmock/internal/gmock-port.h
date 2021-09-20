@@ -70,29 +70,29 @@
 #define GMOCK_DECLARE_bool_(name)          \
   namespace testing {                      \
   GTEST_API_ extern bool GMOCK_FLAG(name); \
-  }
+  } static_assert(true, "no-op to require trailing semicolon")
 #define GMOCK_DECLARE_int32_(name)            \
   namespace testing {                         \
   GTEST_API_ extern int32_t GMOCK_FLAG(name); \
-  }
+  } static_assert(true, "no-op to require trailing semicolon")
 #define GMOCK_DECLARE_string_(name)                 \
   namespace testing {                               \
   GTEST_API_ extern ::std::string GMOCK_FLAG(name); \
-  }
+  } static_assert(true, "no-op to require trailing semicolon")
 
 // Macros for defining flags.
 #define GMOCK_DEFINE_bool_(name, default_val, doc)  \
   namespace testing {                               \
   GTEST_API_ bool GMOCK_FLAG(name) = (default_val); \
-  }
+  } static_assert(true, "no-op to require trailing semicolon")
 #define GMOCK_DEFINE_int32_(name, default_val, doc)    \
   namespace testing {                                  \
   GTEST_API_ int32_t GMOCK_FLAG(name) = (default_val); \
-  }
+  } static_assert(true, "no-op to require trailing semicolon")
 #define GMOCK_DEFINE_string_(name, default_val, doc)         \
   namespace testing {                                        \
   GTEST_API_ ::std::string GMOCK_FLAG(name) = (default_val); \
-  }
+  } static_assert(true, "no-op to require trailing semicolon")
 #endif  // !defined(GMOCK_DECLARE_bool_)
 
 #if !defined(GMOCK_FLAG_GET)
