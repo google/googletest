@@ -147,19 +147,19 @@ class CatchCxxExceptionsTest(gtest_test_utils.TestCase):
     self.assertTrue(
         'CxxExceptionInConstructorTest::TearDownTestSuite() '
         'called as expected.' in EX_BINARY_OUTPUT, EX_BINARY_OUTPUT)
-    self.assertTrue(
+    self.assertFalse(
         'CxxExceptionInSetUpTestSuiteTest constructor '
         'called as expected.' in EX_BINARY_OUTPUT, EX_BINARY_OUTPUT)
-    self.assertTrue(
+    self.assertFalse(
         'CxxExceptionInSetUpTestSuiteTest destructor '
         'called as expected.' in EX_BINARY_OUTPUT, EX_BINARY_OUTPUT)
-    self.assertTrue(
+    self.assertFalse(
         'CxxExceptionInSetUpTestSuiteTest::SetUp() '
         'called as expected.' in EX_BINARY_OUTPUT, EX_BINARY_OUTPUT)
-    self.assertTrue(
+    self.assertFalse(
         'CxxExceptionInSetUpTestSuiteTest::TearDown() '
         'called as expected.' in EX_BINARY_OUTPUT, EX_BINARY_OUTPUT)
-    self.assertTrue(
+    self.assertFalse(
         'CxxExceptionInSetUpTestSuiteTest test body '
         'called as expected.' in EX_BINARY_OUTPUT, EX_BINARY_OUTPUT)
 

@@ -3033,10 +3033,16 @@ void TestSuite::Run() {
   internal::HandleExceptionsInMethodIfSupported(
       this, &TestSuite::RunSetUpTestSuite, "SetUpTestSuite()");
 
+  const bool skip_all = ad_hoc_test_result().Failed();
+
   start_timestamp_ = internal::GetTimeInMillis();
   internal::Timer timer;
   for (int i = 0; i < total_test_count(); i++) {
-    GetMutableTestInfo(i)->Run();
+    if (skip_all) {
+      GetMutableTestInfo(i)->Skip();
+    } else {
+      GetMutableTestInfo(i)->Run();
+    }
     if (GTEST_FLAG_GET(fail_fast) &&
         GetMutableTestInfo(i)->result()->Failed()) {
       for (int j = i + 1; j < total_test_count(); j++) {

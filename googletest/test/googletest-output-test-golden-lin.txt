@@ -12,7 +12,7 @@ Expected equality of these values:
   3
 Stack trace: (omitted)
 
-[0;32m[==========] [mRunning 88 tests from 41 test suites.
+[0;32m[==========] [mRunning 89 tests from 42 test suites.
 [0;32m[----------] [mGlobal test environment set-up.
 FooEnvironment::SetUp() called.
 BarEnvironment::SetUp() called.
@@ -956,6 +956,17 @@ Stack trace: (omitted)
 ~DynamicFixture()
 [0;31m[  FAILED  ] [mBadDynamicFixture2.Derived
 DynamicFixture::TearDownTestSuite
+[0;32m[----------] [m1 test from TestSuiteThatFailsToSetUp
+googletest-output-test_.cc:#: Failure
+Value of: false
+  Actual: false
+Expected: true
+Stack trace: (omitted)
+
+[0;32m[ RUN      ] [mTestSuiteThatFailsToSetUp.ShouldNotRun
+googletest-output-test_.cc:#: Skipped
+
+[0;32m[  SKIPPED ] [mTestSuiteThatFailsToSetUp.ShouldNotRun
 [0;32m[----------] [m1 test from PrintingFailingParams/FailingParamTest
 [0;32m[ RUN      ] [mPrintingFailingParams/FailingParamTest.Fails/0
 googletest-output-test_.cc:#: Failure
@@ -1032,8 +1043,10 @@ Failed
 Expected fatal failure.
 Stack trace: (omitted)
 
-[0;32m[==========] [m88 tests from 41 test suites ran.
+[0;32m[==========] [m89 tests from 42 test suites ran.
 [0;32m[  PASSED  ] [m31 tests.
+[0;32m[  SKIPPED ] [m1 test, listed below:
+[0;32m[  SKIPPED ] [mTestSuiteThatFailsToSetUp.ShouldNotRun
 [0;31m[  FAILED  ] [m57 tests, listed below:
 [0;31m[  FAILED  ] [mNonfatalFailureTest.EscapesStringOperands
 [0;31m[  FAILED  ] [mNonfatalFailureTest.DiffForLongStrings
@@ -1094,6 +1107,9 @@ Stack trace: (omitted)
 [0;31m[  FAILED  ] [mGoogleTestVerification.UninstantiatedTypeParameterizedTestSuite<DetectNotInstantiatedTypesTest>
 
 57 FAILED TESTS
+[0;31m[  FAILED  ] [mTestSuiteThatFailsToSetUp: SetUpTestSuite or TearDownTestSuite
+
+ 1 FAILED TEST SUITE
 [0;33m  YOU HAVE 1 DISABLED TEST
 
 [mNote: Google Test filter = FatalFailureTest.*:LoggingTest.*
