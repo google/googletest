@@ -404,7 +404,7 @@ TEST(FormatTimeInMillisAsSecondsTest, FormatsNegativeNumber) {
 
 // Tests FormatEpochTimeInMillisAsIso8601().  The correctness of conversion
 // for particular dates below was verified in Python using
-// datetime.datetime.fromutctimestamp(<timetamp>/1000).
+// datetime.datetime.fromutctimestamp(<timestamp>/1000).
 
 // FormatEpochTimeInMillisAsIso8601 depends on the current timezone, so we
 // have to set up a particular timezone to obtain predictable results.
