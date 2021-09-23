@@ -62,18 +62,6 @@ as a ZIP archive from GitHub. In the above example,
 GoogleTest version to use; we recommend updating the hash often to point to the
 latest version.
 
-Bazel also needs a dependency on the
-[`rules_cc` repository](https://github.com/bazelbuild/rules_cc) to build C++
-code, so add the following to the `WORKSPACE` file:
-
-```
-http_archive(
-  name = "rules_cc",
-  urls = ["https://github.com/bazelbuild/rules_cc/archive/40548a2974f1aea06215272d9c2b47a14a24e556.zip"],
-  strip_prefix = "rules_cc-40548a2974f1aea06215272d9c2b47a14a24e556",
-)
-```
-
 Now you're ready to build C++ code that uses GoogleTest.
 
 ## Create and run a binary
@@ -104,8 +92,6 @@ To build the code, create a file named `BUILD` in the same directory with the
 following contents:
 
 ```
-load("@rules_cc//cc:defs.bzl", "cc_test")
-
 cc_test(
   name = "hello_test",
   size = "small",
