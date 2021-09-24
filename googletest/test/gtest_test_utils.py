@@ -224,7 +224,7 @@ class Subprocess:
                                combined in a string.
     """
 
-    # The subprocess module is the preferrable way of running programs
+    # The subprocess module is the preferable way of running programs
     # since it is available and behaves consistently on all platforms,
     # including Windows. But it is only available starting in python 2.4.
     # In earlier python versions, we revert to the popen2 module, which is
