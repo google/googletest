@@ -8405,7 +8405,7 @@ TEST(AnyOfArrayTest, ExplainsMatchResultCorrectly) {
   // Explain with matchers
   const Matcher<int> g1 = AnyOfArray({GreaterThan(1)});
   const Matcher<int> g2 = AnyOfArray({GreaterThan(1), GreaterThan(2)});
-  // Explains the first positiv match and all prior negative matches...
+  // Explains the first positive match and all prior negative matches...
   EXPECT_EQ("which is 1 less than 1", Explain(g1, 0));
   EXPECT_EQ("which is the same as 1", Explain(g1, 1));
   EXPECT_EQ("which is 1 more than 1", Explain(g1, 2));

@@ -1508,7 +1508,7 @@ class FunctionMocker<R(Args...)> final : public UntypedFunctionMockerBase {
 
   // Performs the default action of this mock function on the given
   // arguments and returns the result. Asserts (or throws if
-  // exceptions are enabled) with a helpful call descrption if there
+  // exceptions are enabled) with a helpful call description if there
   // is no valid return value. This method doesn't depend on the
   // mutable state of this object, and thus can be called concurrently
   // without locking.

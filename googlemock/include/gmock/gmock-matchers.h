@@ -5421,7 +5421,7 @@ PolymorphicMatcher<internal::ExceptionMatcherImpl<Err>> ThrowsMessage(
 #define EXPECT_THAT(value, matcher) EXPECT_PRED_FORMAT1(\
     ::testing::internal::MakePredicateFormatterFromMatcher(matcher), value)
 
-// MATCHER* macroses itself are listed below.
+// MATCHER* macros itself are listed below.
 #define MATCHER(name, description)                                             \
   class name##Matcher                                                          \
       : public ::testing::internal::MatcherBaseImpl<name##Matcher> {           \
