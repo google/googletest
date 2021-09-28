@@ -8512,6 +8512,12 @@ TEST(ThrowsTest, Examples) {
           Property(&std::runtime_error::what, HasSubstr("message"))));
 }
 
+TEST(ThrowsTest, PrintsExceptionWhat) {
+  EXPECT_THAT(
+      std::function<void()>([]() { throw std::runtime_error("ABC123XYZ"); }),
+      ThrowsMessage<std::runtime_error>(HasSubstr("ABC123XYZ")));
+}
+
 TEST(ThrowsTest, DoesNotGenerateDuplicateCatchClauseWarning) {
   EXPECT_THAT(
       []() { throw std::exception(); },
