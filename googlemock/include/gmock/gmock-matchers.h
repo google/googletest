@@ -5266,7 +5266,8 @@ class WithWhatMatcherImpl {
 
   template <typename Err>
   bool MatchAndExplain(const Err& err, MatchResultListener* listener) const {
-    *listener << "which contains .what() that ";
+    *listener << "which contains .what() (of value = " << err.what()
+              << ") that ";
     return matcher_.MatchAndExplain(err.what(), listener);
   }
 

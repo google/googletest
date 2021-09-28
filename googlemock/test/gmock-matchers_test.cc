@@ -8515,6 +8515,12 @@ TEST(ThrowsTest, Examples) {
       ThrowsMessage<std::runtime_error>(HasSubstr("message")));
 }
 
+TEST(ThrowsTest, PrintsExceptionWhat) {
+  EXPECT_THAT(
+      std::function<void()>([]() { throw std::runtime_error("ABC123XYZ"); }),
+      ThrowsMessage<std::runtime_error>(HasSubstr("ABC123XYZ")));
+}
+
 TEST(ThrowsTest, DoesNotGenerateDuplicateCatchClauseWarning) {
   EXPECT_THAT(std::function<void()>([]() { throw std::exception(); }),
               Throws<std::exception>());
@@ -8628,15 +8634,6 @@ TEST_P(ThrowsPredicateTest, FailWrongTypeNonStd) {
   EXPECT_FALSE(matcher.MatchAndExplain([]() { throw 10; }, &listener));
   EXPECT_THAT(listener.str(),
               HasSubstr("throws an exception of an unknown type"));
-}
-
-TEST_P(ThrowsPredicateTest, FailWrongMessage) {
-  Matcher<std::function<void()>> matcher = GetParam();
-  StringMatchResultListener listener;
-  EXPECT_FALSE(matcher.MatchAndExplain(
-      []() { throw std::runtime_error("wrong message"); }, &listener));
-  EXPECT_THAT(listener.str(), HasSubstr("std::runtime_error"));
-  EXPECT_THAT(listener.str(), Not(HasSubstr("wrong message")));
 }
 
 TEST_P(ThrowsPredicateTest, FailNoThrow) {
