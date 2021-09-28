@@ -238,7 +238,7 @@ You can make a matcher from one or more other matchers:
 | `AnyOf(m1, m2, ..., mn)` | `argument` matches at least one of the matchers `m1` to `mn`. |
 | `AnyOfArray({m0, m1, ..., mn})`, `AnyOfArray(a_container)`, `AnyOfArray(begin, end)`, `AnyOfArray(array)`, or `AnyOfArray(array, count)` | The same as `AnyOf()` except that the matchers come from an initializer list, STL-style container, iterator range, or C-style array. |
 | `Not(m)` | `argument` doesn't match matcher `m`. |
-| `Conditional(cond, m1, m2)` | Matches matcher `m1` if `cond` evaluates to true, else matches `m2`.|
+| `Conditional(cond, m1, m2)` | Matches matcher `m1` if `cond` evalutes to true, else matches `m2`.|
 
 ## Adapters for Matchers
 
@@ -269,7 +269,7 @@ which must be a permanent callback.
 
 **Notes:**
 
-1.  The `MATCHER*` macros cannot be used inside a function or class.
+1.  The `MATCHER*` macros cannot be used inside a function or class. foo
 2.  The matcher body must be *purely functional* (i.e. it cannot have any side
     effect, and the result must not depend on anything other than the value
     being matched and the matcher parameters).
