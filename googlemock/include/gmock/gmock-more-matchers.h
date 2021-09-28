@@ -33,7 +33,7 @@
 // This file implements some matchers that depend on gmock-matchers.h.
 //
 // Note that tests are implemented in gmock-matchers_test.cc rather than
-// gmock-more-matchers-test.cc.
+// gmock-more-matchers-test.cc. foo
 
 #ifndef GOOGLEMOCK_INCLUDE_GMOCK_GMOCK_MORE_MATCHERS_H_
 #define GOOGLEMOCK_INCLUDE_GMOCK_GMOCK_MORE_MATCHERS_H_
