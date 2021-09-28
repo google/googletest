@@ -36,13 +36,9 @@ endif()
 # as ${gmock_SOURCE_DIR} and to the root binary directory as
 # ${gmock_BINARY_DIR}.
 # Language "C" is required for find_package(Threads).
-if (CMAKE_VERSION VERSION_LESS 3.0)
-  project(gmock CXX C)
-else()
-  cmake_policy(SET CMP0048 NEW)
-  project(gmock VERSION ${GOOGLETEST_VERSION} LANGUAGES CXX C)
-endif()
-cmake_minimum_required(VERSION 2.6.4)
+cmake_minimum_required(VERSION 3.5)
+cmake_policy(SET CMP0048 NEW)
+project(gmock VERSION ${GOOGLETEST_VERSION} LANGUAGES CXX C)
 
 if (COMMAND set_up_hermetic_build)
   set_up_hermetic_build()
@@ -100,8 +96,10 @@ if (MSVC)
 else()
   cxx_library(gmock "${cxx_strict}" src/gmock-all.cc)
   target_link_libraries(gmock PUBLIC gtest)
+  set_target_properties(gmock PROPERTIES VERSION ${GOOGLETEST_VERSION})
   cxx_library(gmock_main "${cxx_strict}" src/gmock_main.cc)
   target_link_libraries(gmock_main PUBLIC gmock)
+  set_target_properties(gmock_main PROPERTIES VERSION ${GOOGLETEST_VERSION})
 endif()
 # If the CMake version supports it, attach header directory information
 # to the targets for when we are part of a parent build (ie being pulled
@@ -136,20 +134,6 @@ if (gmock_build_tests)
   # 'make test' or ctest.
   enable_testing()
 
-  if (WIN32)
-    file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/RunTest.ps1"
-         CONTENT
-"$project_bin = \"${CMAKE_BINARY_DIR}/bin/$<CONFIG>\"
-$env:Path = \"$project_bin;$env:Path\"
-& $args")
-  elseif (MINGW OR CYGWIN)
-    file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/RunTest.ps1"
-         CONTENT
-"$project_bin = (cygpath --windows ${CMAKE_BINARY_DIR}/bin)
-$env:Path = \"$project_bin;$env:Path\"
-& $args")
-  endif()
-
   if (MINGW OR CYGWIN)
     if (CMAKE_VERSION VERSION_LESS "2.8.12")
       add_compile_options("-Wa,-mbig-obj")
@@ -165,9 +149,6 @@ $env:Path = \"$project_bin;$env:Path\"
   cxx_test(gmock-cardinalities_test gmock_main)
   cxx_test(gmock_ex_test gmock_main)
   cxx_test(gmock-function-mocker_test gmock_main)
-  cxx_test(gmock-generated-actions_test gmock_main)
-  cxx_test(gmock-generated-function-mockers_test gmock_main)
-  cxx_test(gmock-generated-matchers_test gmock_main)
   cxx_test(gmock-internal-utils_test gmock_main)
   cxx_test(gmock-matchers_test gmock_main)
   cxx_test(gmock-more-actions_test gmock_main)

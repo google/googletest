@@ -92,8 +92,9 @@ static bool IsPathSeparator(char c) {
 
 // Returns the current working directory, or "" if unsuccessful.
 FilePath FilePath::GetCurrentDir() {
-#if GTEST_OS_WINDOWS_MOBILE || GTEST_OS_WINDOWS_PHONE || \
-    GTEST_OS_WINDOWS_RT || GTEST_OS_ESP8266 || GTEST_OS_ESP32
+#if GTEST_OS_WINDOWS_MOBILE || GTEST_OS_WINDOWS_PHONE ||         \
+    GTEST_OS_WINDOWS_RT || GTEST_OS_ESP8266 || GTEST_OS_ESP32 || \
+    GTEST_OS_XTENSA
   // These platforms do not have a current directory, so we just return
   // something reasonable.
   return FilePath(kCurrentDirectoryString);
@@ -209,7 +210,7 @@ bool FilePath::FileOrDirectoryExists() const {
   delete [] unicode;
   return attributes != kInvalidFileAttributes;
 #else
-  posix::StatStruct file_stat;
+  posix::StatStruct file_stat{};
   return posix::Stat(pathname_.c_str(), &file_stat) == 0;
 #endif  // GTEST_OS_WINDOWS_MOBILE
 }
@@ -236,7 +237,7 @@ bool FilePath::DirectoryExists() const {
     result = true;
   }
 #else
-  posix::StatStruct file_stat;
+  posix::StatStruct file_stat{};
   result = posix::Stat(path.c_str(), &file_stat) == 0 &&
       posix::IsDir(file_stat);
 #endif  // GTEST_OS_WINDOWS_MOBILE
@@ -323,7 +324,7 @@ bool FilePath::CreateFolder() const {
   delete [] unicode;
 #elif GTEST_OS_WINDOWS
   int result = _mkdir(pathname_.c_str());
-#elif GTEST_OS_ESP8266
+#elif GTEST_OS_ESP8266 || GTEST_OS_XTENSA
   // do nothing
   int result = 0;
 #else
@@ -349,33 +350,19 @@ FilePath FilePath::RemoveTrailingPathSeparator() const {
 // For example, "bar///foo" becomes "bar/foo". Does not eliminate other
 // redundancies that might be in a pathname involving "." or "..".
 void FilePath::Normalize() {
-  if (pathname_.c_str() == nullptr) {
-    pathname_ = "";
-    return;
-  }
-  const char* src = pathname_.c_str();
-  char* const dest = new char[pathname_.length() + 1];
-  char* dest_ptr = dest;
-  memset(dest_ptr, 0, pathname_.length() + 1);
+  auto out = pathname_.begin();
 
-  while (*src != '\0') {
-    *dest_ptr = *src;
-    if (!IsPathSeparator(*src)) {
-      src++;
+  for (const char character : pathname_) {
+    if (!IsPathSeparator(character)) {
+      *(out++) = character;
+    } else if (out == pathname_.begin() || *std::prev(out) != kPathSeparator) {
+      *(out++) = kPathSeparator;
     } else {
-#if GTEST_HAS_ALT_PATH_SEP_
-      if (*dest_ptr == kAlternatePathSeparator) {
-        *dest_ptr = kPathSeparator;
-      }
-#endif
-      while (IsPathSeparator(*src))
-        src++;
+      continue;
     }
-    dest_ptr++;
   }
-  *dest_ptr = '\0';
-  pathname_ = dest;
-  delete[] dest;
+
+  pathname_.erase(out, pathname_.end());
 }
 
 }  // namespace internal

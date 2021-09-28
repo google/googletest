@@ -31,8 +31,8 @@
 // This file contains purely Google Test's internal implementation.  Please
 // DO NOT #INCLUDE IT IN A USER PROGRAM.
 
-#ifndef GTEST_SRC_GTEST_INTERNAL_INL_H_
-#define GTEST_SRC_GTEST_INTERNAL_INL_H_
+#ifndef GOOGLETEST_SRC_GTEST_INTERNAL_INL_H_
+#define GOOGLETEST_SRC_GTEST_INTERNAL_INL_H_
 
 #ifndef _WIN32_WCE
 # include <errno.h>
@@ -42,6 +42,7 @@
 #include <string.h>  // For memmove.
 
 #include <algorithm>
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <vector>
@@ -63,8 +64,6 @@
 GTEST_DISABLE_MSC_WARNINGS_PUSH_(4251 \
 /* class A needs to have dll-interface to be used by clients of class B */)
 
-namespace testing {
-
 // Declares the flags.
 //
 // We don't want the users to modify this flag in the code, but want
@@ -72,29 +71,12 @@ namespace testing {
 // declare it here as opposed to in gtest.h.
 GTEST_DECLARE_bool_(death_test_use_fork);
 
+namespace testing {
 namespace internal {
 
 // The value of GetTestTypeId() as seen from within the Google Test
 // library.  This is solely for testing GetTestTypeId().
 GTEST_API_ extern const TypeId kTestTypeIdInGoogleTest;
-
-// Names of the flags (needed for parsing Google Test flags).
-const char kAlsoRunDisabledTestsFlag[] = "also_run_disabled_tests";
-const char kBreakOnFailureFlag[] = "break_on_failure";
-const char kCatchExceptionsFlag[] = "catch_exceptions";
-const char kColorFlag[] = "color";
-const char kFilterFlag[] = "filter";
-const char kListTestsFlag[] = "list_tests";
-const char kOutputFlag[] = "output";
-const char kPrintTimeFlag[] = "print_time";
-const char kPrintUTF8Flag[] = "print_utf8";
-const char kRandomSeedFlag[] = "random_seed";
-const char kRepeatFlag[] = "repeat";
-const char kShuffleFlag[] = "shuffle";
-const char kStackTraceDepthFlag[] = "stack_trace_depth";
-const char kStreamResultToFlag[] = "stream_result_to";
-const char kThrowOnFailureFlag[] = "throw_on_failure";
-const char kFlagfileFlag[] = "flagfile";
 
 // A valid random seed must be in [1, kMaxRandomSeed].
 const int kMaxRandomSeed = 99999;
@@ -122,12 +104,11 @@ GTEST_API_ std::string FormatEpochTimeInMillisAsIso8601(TimeInMillis ms);
 //
 // On success, stores the value of the flag in *value, and returns
 // true.  On failure, returns false without changing *value.
-GTEST_API_ bool ParseInt32Flag(
-    const char* str, const char* flag, Int32* value);
+GTEST_API_ bool ParseFlag(const char* str, const char* flag, int32_t* value);
 
 // Returns a random seed in range [1, kMaxRandomSeed] based on the
 // given --gtest_random_seed flag value.
-inline int GetRandomSeedFromFlag(Int32 random_seed_flag) {
+inline int GetRandomSeedFromFlag(int32_t random_seed_flag) {
   const unsigned int raw_seed = (random_seed_flag == 0) ?
       static_cast<unsigned int>(GetTimeInMillis()) :
       static_cast<unsigned int>(random_seed_flag);
@@ -157,46 +138,54 @@ class GTestFlagSaver {
  public:
   // The c'tor.
   GTestFlagSaver() {
-    also_run_disabled_tests_ = GTEST_FLAG(also_run_disabled_tests);
-    break_on_failure_ = GTEST_FLAG(break_on_failure);
-    catch_exceptions_ = GTEST_FLAG(catch_exceptions);
-    color_ = GTEST_FLAG(color);
-    death_test_style_ = GTEST_FLAG(death_test_style);
-    death_test_use_fork_ = GTEST_FLAG(death_test_use_fork);
-    filter_ = GTEST_FLAG(filter);
-    internal_run_death_test_ = GTEST_FLAG(internal_run_death_test);
-    list_tests_ = GTEST_FLAG(list_tests);
-    output_ = GTEST_FLAG(output);
-    print_time_ = GTEST_FLAG(print_time);
-    print_utf8_ = GTEST_FLAG(print_utf8);
-    random_seed_ = GTEST_FLAG(random_seed);
-    repeat_ = GTEST_FLAG(repeat);
-    shuffle_ = GTEST_FLAG(shuffle);
-    stack_trace_depth_ = GTEST_FLAG(stack_trace_depth);
-    stream_result_to_ = GTEST_FLAG(stream_result_to);
-    throw_on_failure_ = GTEST_FLAG(throw_on_failure);
+    also_run_disabled_tests_ = GTEST_FLAG_GET(also_run_disabled_tests);
+    break_on_failure_ = GTEST_FLAG_GET(break_on_failure);
+    catch_exceptions_ = GTEST_FLAG_GET(catch_exceptions);
+    color_ = GTEST_FLAG_GET(color);
+    death_test_style_ = GTEST_FLAG_GET(death_test_style);
+    death_test_use_fork_ = GTEST_FLAG_GET(death_test_use_fork);
+    fail_fast_ = GTEST_FLAG_GET(fail_fast);
+    filter_ = GTEST_FLAG_GET(filter);
+    internal_run_death_test_ = GTEST_FLAG_GET(internal_run_death_test);
+    list_tests_ = GTEST_FLAG_GET(list_tests);
+    output_ = GTEST_FLAG_GET(output);
+    brief_ = GTEST_FLAG_GET(brief);
+    print_time_ = GTEST_FLAG_GET(print_time);
+    print_utf8_ = GTEST_FLAG_GET(print_utf8);
+    random_seed_ = GTEST_FLAG_GET(random_seed);
+    repeat_ = GTEST_FLAG_GET(repeat);
+    recreate_environments_when_repeating_ =
+        GTEST_FLAG_GET(recreate_environments_when_repeating);
+    shuffle_ = GTEST_FLAG_GET(shuffle);
+    stack_trace_depth_ = GTEST_FLAG_GET(stack_trace_depth);
+    stream_result_to_ = GTEST_FLAG_GET(stream_result_to);
+    throw_on_failure_ = GTEST_FLAG_GET(throw_on_failure);
   }
 
   // The d'tor is not virtual.  DO NOT INHERIT FROM THIS CLASS.
   ~GTestFlagSaver() {
-    GTEST_FLAG(also_run_disabled_tests) = also_run_disabled_tests_;
-    GTEST_FLAG(break_on_failure) = break_on_failure_;
-    GTEST_FLAG(catch_exceptions) = catch_exceptions_;
-    GTEST_FLAG(color) = color_;
-    GTEST_FLAG(death_test_style) = death_test_style_;
-    GTEST_FLAG(death_test_use_fork) = death_test_use_fork_;
-    GTEST_FLAG(filter) = filter_;
-    GTEST_FLAG(internal_run_death_test) = internal_run_death_test_;
-    GTEST_FLAG(list_tests) = list_tests_;
-    GTEST_FLAG(output) = output_;
-    GTEST_FLAG(print_time) = print_time_;
-    GTEST_FLAG(print_utf8) = print_utf8_;
-    GTEST_FLAG(random_seed) = random_seed_;
-    GTEST_FLAG(repeat) = repeat_;
-    GTEST_FLAG(shuffle) = shuffle_;
-    GTEST_FLAG(stack_trace_depth) = stack_trace_depth_;
-    GTEST_FLAG(stream_result_to) = stream_result_to_;
-    GTEST_FLAG(throw_on_failure) = throw_on_failure_;
+    GTEST_FLAG_SET(also_run_disabled_tests, also_run_disabled_tests_);
+    GTEST_FLAG_SET(break_on_failure, break_on_failure_);
+    GTEST_FLAG_SET(catch_exceptions, catch_exceptions_);
+    GTEST_FLAG_SET(color, color_);
+    GTEST_FLAG_SET(death_test_style, death_test_style_);
+    GTEST_FLAG_SET(death_test_use_fork, death_test_use_fork_);
+    GTEST_FLAG_SET(filter, filter_);
+    GTEST_FLAG_SET(fail_fast, fail_fast_);
+    GTEST_FLAG_SET(internal_run_death_test, internal_run_death_test_);
+    GTEST_FLAG_SET(list_tests, list_tests_);
+    GTEST_FLAG_SET(output, output_);
+    GTEST_FLAG_SET(brief, brief_);
+    GTEST_FLAG_SET(print_time, print_time_);
+    GTEST_FLAG_SET(print_utf8, print_utf8_);
+    GTEST_FLAG_SET(random_seed, random_seed_);
+    GTEST_FLAG_SET(repeat, repeat_);
+    GTEST_FLAG_SET(recreate_environments_when_repeating,
+                   recreate_environments_when_repeating_);
+    GTEST_FLAG_SET(shuffle, shuffle_);
+    GTEST_FLAG_SET(stack_trace_depth, stack_trace_depth_);
+    GTEST_FLAG_SET(stream_result_to, stream_result_to_);
+    GTEST_FLAG_SET(throw_on_failure, throw_on_failure_);
   }
 
  private:
@@ -207,16 +196,19 @@ class GTestFlagSaver {
   std::string color_;
   std::string death_test_style_;
   bool death_test_use_fork_;
+  bool fail_fast_;
   std::string filter_;
   std::string internal_run_death_test_;
   bool list_tests_;
   std::string output_;
+  bool brief_;
   bool print_time_;
   bool print_utf8_;
-  internal::Int32 random_seed_;
-  internal::Int32 repeat_;
+  int32_t random_seed_;
+  int32_t repeat_;
+  bool recreate_environments_when_repeating_;
   bool shuffle_;
-  internal::Int32 stack_trace_depth_;
+  int32_t stack_trace_depth_;
   std::string stream_result_to_;
   bool throw_on_failure_;
 } GTEST_ATTRIBUTE_UNUSED_;
@@ -227,7 +219,7 @@ class GTestFlagSaver {
 // If the code_point is not a valid Unicode code point
 // (i.e. outside of Unicode range U+0 to U+10FFFF) it will be converted
 // to "(Invalid Unicode 0xXXXXXXXX)".
-GTEST_API_ std::string CodePointToUtf8(UInt32 code_point);
+GTEST_API_ std::string CodePointToUtf8(uint32_t code_point);
 
 // Converts a wide string to a narrow string in UTF-8 encoding.
 // The wide string is assumed to have the following encoding:
@@ -260,10 +252,10 @@ GTEST_API_ bool ShouldShard(const char* total_shards_str,
                             const char* shard_index_str,
                             bool in_subprocess_for_death_test);
 
-// Parses the environment variable var as an Int32. If it is unset,
-// returns default_val. If it is not an Int32, prints an error and
+// Parses the environment variable var as a 32-bit integer. If it is unset,
+// returns default_val. If it is not a 32-bit integer, prints an error and
 // and aborts.
-GTEST_API_ Int32 Int32FromEnvOrDie(const char* env_var, Int32 default_val);
+GTEST_API_ int32_t Int32FromEnvOrDie(const char* env_var, int32_t default_val);
 
 // Given the total number of shards, the shard index, and the test id,
 // returns true if and only if the test should be run on this shard. The test id
@@ -281,7 +273,7 @@ inline int CountIf(const Container& c, Predicate predicate) {
   // Implemented as an explicit loop since std::count_if() in libCstd on
   // Solaris has a non-standard signature.
   int count = 0;
-  for (typename Container::const_iterator it = c.begin(); it != c.end(); ++it) {
+  for (auto it = c.begin(); it != c.end(); ++it) {
     if (predicate(*it))
       ++count;
   }
@@ -323,7 +315,7 @@ void ShuffleRange(internal::Random* random, int begin, int end,
     const int last_in_range = begin + range_width - 1;
     const int selected =
         begin +
-        static_cast<int>(random->Generate(static_cast<UInt32>(range_width)));
+        static_cast<int>(random->Generate(static_cast<uint32_t>(range_width)));
     std::swap((*v)[static_cast<size_t>(selected)],
               (*v)[static_cast<size_t>(last_in_range)]);
   }
@@ -384,13 +376,6 @@ class GTEST_API_ UnitTestOptions {
   static std::string GetAbsolutePathToOutputFile();
 
   // Functions for processing the gtest_filter flag.
-
-  // Returns true if and only if the wildcard pattern matches the string.
-  // The first ':' or '\0' character in pattern marks the end of it.
-  //
-  // This recursive algorithm isn't very efficient, but is clear and
-  // works well enough for matching test names, which are short.
-  static bool PatternMatchesString(const char *pattern, const char *str);
 
   // Returns true if and only if the user-specified filter matches the test
   // suite name and the test name.
@@ -646,10 +631,10 @@ class GTEST_API_ UnitTestImpl {
   // Arguments:
   //
   //   test_suite_name: name of the test suite
-  //   type_param:     the name of the test's type parameter, or NULL if
-  //                   this is not a typed or a type-parameterized test.
-  //   set_up_tc:      pointer to the function that sets up the test suite
-  //   tear_down_tc:   pointer to the function that tears down the test suite
+  //   type_param:      the name of the test's type parameter, or NULL if
+  //                    this is not a typed or a type-parameterized test.
+  //   set_up_tc:       pointer to the function that sets up the test suite
+  //   tear_down_tc:    pointer to the function that tears down the test suite
   TestSuite* GetTestSuite(const char* test_suite_name, const char* type_param,
                           internal::SetUpTestSuiteFunc set_up_tc,
                           internal::TearDownTestSuiteFunc tear_down_tc);
@@ -673,6 +658,7 @@ class GTEST_API_ UnitTestImpl {
   void AddTestInfo(internal::SetUpTestSuiteFunc set_up_tc,
                    internal::TearDownTestSuiteFunc tear_down_tc,
                    TestInfo* test_info) {
+#if GTEST_HAS_DEATH_TEST
     // In order to support thread-safe death tests, we need to
     // remember the original working directory when the test program
     // was first invoked.  We cannot do this in RUN_ALL_TESTS(), as
@@ -685,6 +671,7 @@ class GTEST_API_ UnitTestImpl {
       GTEST_CHECK_(!original_working_dir_.IsEmpty())
           << "Failed to get the current working directory.";
     }
+#endif  // GTEST_HAS_DEATH_TEST
 
     GetTestSuite(test_info->test_suite_name(), test_info->type_param(),
                  set_up_tc, tear_down_tc)
@@ -695,6 +682,17 @@ class GTEST_API_ UnitTestImpl {
   // value-parameterized tests and instantiate and register them.
   internal::ParameterizedTestSuiteRegistry& parameterized_test_registry() {
     return parameterized_test_registry_;
+  }
+
+  std::set<std::string>* ignored_parameterized_test_suites() {
+    return &ignored_parameterized_test_suites_;
+  }
+
+  // Returns TypeParameterizedTestSuiteRegistry object used to keep track of
+  // type-parameterized tests and instantiations of them.
+  internal::TypeParameterizedTestSuiteRegistry&
+  type_parameterized_test_registry() {
+    return type_parameterized_test_registry_;
   }
 
   // Sets the TestSuite object for the test that's currently running.
@@ -873,6 +871,12 @@ class GTEST_API_ UnitTestImpl {
   // ParameterizedTestRegistry object used to register value-parameterized
   // tests.
   internal::ParameterizedTestSuiteRegistry parameterized_test_registry_;
+  internal::TypeParameterizedTestSuiteRegistry
+      type_parameterized_test_registry_;
+
+  // The set holding the name of parameterized
+  // test suites that may go uninstantiated.
+  std::set<std::string> ignored_parameterized_test_suites_;
 
   // Indicates whether RegisterParameterizedTests() has been called already.
   bool parameterized_tests_registered_;
@@ -999,20 +1003,9 @@ bool ParseNaturalNumber(const ::std::string& str, Integer* number) {
   char* end;
   // BiggestConvertible is the largest integer type that system-provided
   // string-to-number conversion routines can return.
+  using BiggestConvertible = unsigned long long;  // NOLINT
 
-# if GTEST_OS_WINDOWS && !defined(__GNUC__)
-
-  // MSVC and C++ Builder define __int64 instead of the standard long long.
-  typedef unsigned __int64 BiggestConvertible;
-  const BiggestConvertible parsed = _strtoui64(str.c_str(), &end, 10);
-
-# else
-
-  typedef unsigned long long BiggestConvertible;  // NOLINT
-  const BiggestConvertible parsed = strtoull(str.c_str(), &end, 10);
-
-# endif  // GTEST_OS_WINDOWS && !defined(__GNUC__)
-
+  const BiggestConvertible parsed = strtoull(str.c_str(), &end, 10);  // NOLINT
   const bool parse_success = *end == '\0' && errno == 0;
 
   GTEST_CHECK_(sizeof(Integer) <= sizeof(parsed));
@@ -1154,13 +1147,13 @@ class StreamingListener : public EmptyTestEventListener {
   }
 
   // Note that "event=TestCaseStart" is a wire format and has to remain
-  // "case" for compatibilty
+  // "case" for compatibility
   void OnTestCaseStart(const TestCase& test_case) override {
     SendLn(std::string("event=TestCaseStart&name=") + test_case.name());
   }
 
   // Note that "event=TestCaseEnd" is a wire format and has to remain
-  // "case" for compatibilty
+  // "case" for compatibility
   void OnTestCaseEnd(const TestCase& test_case) override {
     SendLn("event=TestCaseEnd&passed=" + FormatBool(test_case.Passed()) +
            "&elapsed_time=" + StreamableToString(test_case.elapsed_time()) +
@@ -1208,4 +1201,4 @@ class StreamingListener : public EmptyTestEventListener {
 
 GTEST_DISABLE_MSC_WARNINGS_POP_()  //  4251
 
-#endif  // GTEST_SRC_GTEST_INTERNAL_INL_H_
+#endif  // GOOGLETEST_SRC_GTEST_INTERNAL_INL_H_

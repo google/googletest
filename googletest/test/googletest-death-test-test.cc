@@ -298,6 +298,13 @@ TEST(ExitStatusPredicateTest, KilledBySignal) {
 
 # endif  // GTEST_OS_WINDOWS || GTEST_OS_FUCHSIA
 
+// The following code intentionally tests a suboptimal syntax.
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdangling-else"
+#pragma GCC diagnostic ignored "-Wempty-body"
+#pragma GCC diagnostic ignored "-Wpragmas"
+#endif
 // Tests that the death test macros expand to code which may or may not
 // be followed by operator<<, and that in either case the complete text
 // comprises only a single C++ statement.
@@ -321,6 +328,9 @@ TEST_F(TestForDeathTest, SingleStatement) {
   else
     EXPECT_DEATH(_exit(1), "") << 1 << 2 << 3;
 }
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
 
 # if GTEST_USES_PCRE
 
@@ -360,14 +370,14 @@ TEST_F(TestForDeathTest, SwitchStatement) {
 // Tests that a static member function can be used in a "fast" style
 // death test.
 TEST_F(TestForDeathTest, StaticMemberFunctionFastStyle) {
-  testing::GTEST_FLAG(death_test_style) = "fast";
+  GTEST_FLAG_SET(death_test_style, "fast");
   ASSERT_DEATH(StaticMemberFunction(), "death.*StaticMember");
 }
 
 // Tests that a method of the test fixture can be used in a "fast"
 // style death test.
 TEST_F(TestForDeathTest, MemberFunctionFastStyle) {
-  testing::GTEST_FLAG(death_test_style) = "fast";
+  GTEST_FLAG_SET(death_test_style, "fast");
   should_die_ = true;
   EXPECT_DEATH(MemberFunction(), "inside.*MemberFunction");
 }
@@ -377,7 +387,7 @@ void ChangeToRootDir() { posix::ChDir(GTEST_PATH_SEP_); }
 // Tests that death tests work even if the current directory has been
 // changed.
 TEST_F(TestForDeathTest, FastDeathTestInChangedDir) {
-  testing::GTEST_FLAG(death_test_style) = "fast";
+  GTEST_FLAG_SET(death_test_style, "fast");
 
   ChangeToRootDir();
   EXPECT_EXIT(_exit(1), testing::ExitedWithCode(1), "");
@@ -391,17 +401,19 @@ void SigprofAction(int, siginfo_t*, void*) { /* no op */ }
 
 // Sets SIGPROF action and ITIMER_PROF timer (interval: 1ms).
 void SetSigprofActionAndTimer() {
-  struct itimerval timer;
-  timer.it_interval.tv_sec = 0;
-  timer.it_interval.tv_usec = 1;
-  timer.it_value = timer.it_interval;
-  ASSERT_EQ(0, setitimer(ITIMER_PROF, &timer, nullptr));
   struct sigaction signal_action;
   memset(&signal_action, 0, sizeof(signal_action));
   sigemptyset(&signal_action.sa_mask);
   signal_action.sa_sigaction = SigprofAction;
   signal_action.sa_flags = SA_RESTART | SA_SIGINFO;
   ASSERT_EQ(0, sigaction(SIGPROF, &signal_action, nullptr));
+  // timer comes second, to avoid SIGPROF premature delivery, as suggested at
+  // https://www.gnu.org/software/libc/manual/html_node/Setting-an-Alarm.html
+  struct itimerval timer;
+  timer.it_interval.tv_sec = 0;
+  timer.it_interval.tv_usec = 1;
+  timer.it_value = timer.it_interval;
+  ASSERT_EQ(0, setitimer(ITIMER_PROF, &timer, nullptr));
 }
 
 // Disables ITIMER_PROF timer and ignores SIGPROF signal.
@@ -420,7 +432,7 @@ void DisableSigprofActionAndTimer(struct sigaction* old_signal_action) {
 
 // Tests that death tests work when SIGPROF handler and timer are set.
 TEST_F(TestForDeathTest, FastSigprofActionSet) {
-  testing::GTEST_FLAG(death_test_style) = "fast";
+  GTEST_FLAG_SET(death_test_style, "fast");
   SetSigprofActionAndTimer();
   EXPECT_DEATH(_exit(1), "");
   struct sigaction old_signal_action;
@@ -429,7 +441,7 @@ TEST_F(TestForDeathTest, FastSigprofActionSet) {
 }
 
 TEST_F(TestForDeathTest, ThreadSafeSigprofActionSet) {
-  testing::GTEST_FLAG(death_test_style) = "threadsafe";
+  GTEST_FLAG_SET(death_test_style, "threadsafe");
   SetSigprofActionAndTimer();
   EXPECT_DEATH(_exit(1), "");
   struct sigaction old_signal_action;
@@ -441,25 +453,25 @@ TEST_F(TestForDeathTest, ThreadSafeSigprofActionSet) {
 // Repeats a representative sample of death tests in the "threadsafe" style:
 
 TEST_F(TestForDeathTest, StaticMemberFunctionThreadsafeStyle) {
-  testing::GTEST_FLAG(death_test_style) = "threadsafe";
+  GTEST_FLAG_SET(death_test_style, "threadsafe");
   ASSERT_DEATH(StaticMemberFunction(), "death.*StaticMember");
 }
 
 TEST_F(TestForDeathTest, MemberFunctionThreadsafeStyle) {
-  testing::GTEST_FLAG(death_test_style) = "threadsafe";
+  GTEST_FLAG_SET(death_test_style, "threadsafe");
   should_die_ = true;
   EXPECT_DEATH(MemberFunction(), "inside.*MemberFunction");
 }
 
 TEST_F(TestForDeathTest, ThreadsafeDeathTestInLoop) {
-  testing::GTEST_FLAG(death_test_style) = "threadsafe";
+  GTEST_FLAG_SET(death_test_style, "threadsafe");
 
   for (int i = 0; i < 3; ++i)
     EXPECT_EXIT(_exit(i), testing::ExitedWithCode(i), "") << ": i = " << i;
 }
 
 TEST_F(TestForDeathTest, ThreadsafeDeathTestInChangedDir) {
-  testing::GTEST_FLAG(death_test_style) = "threadsafe";
+  GTEST_FLAG_SET(death_test_style, "threadsafe");
 
   ChangeToRootDir();
   EXPECT_EXIT(_exit(1), testing::ExitedWithCode(1), "");
@@ -469,9 +481,9 @@ TEST_F(TestForDeathTest, ThreadsafeDeathTestInChangedDir) {
 }
 
 TEST_F(TestForDeathTest, MixedStyles) {
-  testing::GTEST_FLAG(death_test_style) = "threadsafe";
+  GTEST_FLAG_SET(death_test_style, "threadsafe");
   EXPECT_DEATH(_exit(1), "");
-  testing::GTEST_FLAG(death_test_style) = "fast";
+  GTEST_FLAG_SET(death_test_style, "fast");
   EXPECT_DEATH(_exit(1), "");
 }
 
@@ -484,8 +496,8 @@ void SetPthreadFlag() {
 }
 
 TEST_F(TestForDeathTest, DoesNotExecuteAtforkHooks) {
-  if (!testing::GTEST_FLAG(death_test_use_fork)) {
-    testing::GTEST_FLAG(death_test_style) = "threadsafe";
+  if (!GTEST_FLAG_GET(death_test_use_fork)) {
+    GTEST_FLAG_SET(death_test_style, "threadsafe");
     pthread_flag = false;
     ASSERT_EQ(0, pthread_atfork(&SetPthreadFlag, nullptr, nullptr));
     ASSERT_DEATH(_exit(1), "");
@@ -728,10 +740,12 @@ TEST(PopUpDeathTest, DoesNotShowPopUpOnAbort) {
          "any pop-up dialogs.\n");
   fflush(stdout);
 
-  EXPECT_DEATH({
-    testing::GTEST_FLAG(catch_exceptions) = false;
-    abort();
-  }, "");
+  EXPECT_DEATH(
+      {
+        GTEST_FLAG_SET(catch_exceptions, false);
+        abort();
+      },
+      "");
 }
 #  endif  // GTEST_OS_WINDOWS
 
@@ -862,19 +876,19 @@ TEST_F(TestForDeathTest, ExitMacros) {
 }
 
 TEST_F(TestForDeathTest, ExitMacrosUsingFork) {
-  testing::GTEST_FLAG(death_test_use_fork) = true;
+  GTEST_FLAG_SET(death_test_use_fork, true);
   TestExitMacros();
 }
 
 TEST_F(TestForDeathTest, InvalidStyle) {
-  testing::GTEST_FLAG(death_test_style) = "rococo";
+  GTEST_FLAG_SET(death_test_style, "rococo");
   EXPECT_NONFATAL_FAILURE({  // NOLINT
     EXPECT_DEATH(_exit(0), "") << "This failure is expected.";
   }, "This failure is expected.");
 }
 
 TEST_F(TestForDeathTest, DeathTestFailedOutput) {
-  testing::GTEST_FLAG(death_test_style) = "fast";
+  GTEST_FLAG_SET(death_test_style, "fast");
   EXPECT_NONFATAL_FAILURE(
       EXPECT_DEATH(DieWithMessage("death\n"),
                    "expected message"),
@@ -883,7 +897,7 @@ TEST_F(TestForDeathTest, DeathTestFailedOutput) {
 }
 
 TEST_F(TestForDeathTest, DeathTestUnexpectedReturnOutput) {
-  testing::GTEST_FLAG(death_test_style) = "fast";
+  GTEST_FLAG_SET(death_test_style, "fast");
   EXPECT_NONFATAL_FAILURE(
       EXPECT_DEATH({
           fprintf(stderr, "returning\n");
@@ -896,7 +910,7 @@ TEST_F(TestForDeathTest, DeathTestUnexpectedReturnOutput) {
 }
 
 TEST_F(TestForDeathTest, DeathTestBadExitCodeOutput) {
-  testing::GTEST_FLAG(death_test_style) = "fast";
+  GTEST_FLAG_SET(death_test_style, "fast");
   EXPECT_NONFATAL_FAILURE(
       EXPECT_EXIT(DieWithMessage("exiting with rc 1\n"),
                   testing::ExitedWithCode(3),
@@ -908,7 +922,7 @@ TEST_F(TestForDeathTest, DeathTestBadExitCodeOutput) {
 }
 
 TEST_F(TestForDeathTest, DeathTestMultiLineMatchFail) {
-  testing::GTEST_FLAG(death_test_style) = "fast";
+  GTEST_FLAG_SET(death_test_style, "fast");
   EXPECT_NONFATAL_FAILURE(
       EXPECT_DEATH(DieWithMessage("line 1\nline 2\nline 3\n"),
                    "line 1\nxyz\nline 3\n"),
@@ -919,7 +933,7 @@ TEST_F(TestForDeathTest, DeathTestMultiLineMatchFail) {
 }
 
 TEST_F(TestForDeathTest, DeathTestMultiLineMatchPass) {
-  testing::GTEST_FLAG(death_test_style) = "fast";
+  GTEST_FLAG_SET(death_test_style, "fast");
   EXPECT_DEATH(DieWithMessage("line 1\nline 2\nline 3\n"),
                "line 1\nline 2\nline 3\n");
 }
@@ -1346,7 +1360,7 @@ TEST(ConditionalDeathMacrosDeathTest, ExpectsDeathWhenDeathTestsAvailable) {
 }
 
 TEST(InDeathTestChildDeathTest, ReportsDeathTestCorrectlyInFastStyle) {
-  testing::GTEST_FLAG(death_test_style) = "fast";
+  GTEST_FLAG_SET(death_test_style, "fast");
   EXPECT_FALSE(InDeathTestChild());
   EXPECT_DEATH({
     fprintf(stderr, InDeathTestChild() ? "Inside" : "Outside");
@@ -1356,7 +1370,7 @@ TEST(InDeathTestChildDeathTest, ReportsDeathTestCorrectlyInFastStyle) {
 }
 
 TEST(InDeathTestChildDeathTest, ReportsDeathTestCorrectlyInThreadSafeStyle) {
-  testing::GTEST_FLAG(death_test_style) = "threadsafe";
+  GTEST_FLAG_SET(death_test_style, "threadsafe");
   EXPECT_FALSE(InDeathTestChild());
   EXPECT_DEATH({
     fprintf(stderr, InDeathTestChild() ? "Inside" : "Outside");
@@ -1374,7 +1388,11 @@ void DieWithMessage(const char* message) {
 TEST(MatcherDeathTest, DoesNotBreakBareRegexMatching) {
   // googletest tests this, of course; here we ensure that including googlemock
   // has not broken it.
+#if GTEST_USES_POSIX_RE
   EXPECT_DEATH(DieWithMessage("O, I die, Horatio."), "I d[aeiou]e");
+#else
+  EXPECT_DEATH(DieWithMessage("O, I die, Horatio."), "I di?e");
+#endif
 }
 
 TEST(MatcherDeathTest, MonomorphicMatcherMatches) {
@@ -1462,6 +1480,13 @@ TEST(ConditionalDeathMacrosTest, AssertDeatDoesNotReturnhIfUnsupported) {
 
 namespace {
 
+// The following code intentionally tests a suboptimal syntax.
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdangling-else"
+#pragma GCC diagnostic ignored "-Wempty-body"
+#pragma GCC diagnostic ignored "-Wpragmas"
+#endif
 // Tests that the death test macros expand to code which may or may not
 // be followed by operator<<, and that in either case the complete text
 // comprises only a single C++ statement.
@@ -1487,6 +1512,9 @@ TEST(ConditionalDeathMacrosSyntaxDeathTest, SingleStatement) {
   else
     EXPECT_DEATH_IF_SUPPORTED(_exit(1), "") << 1 << 2 << 3;
 }
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
 
 // Tests that conditional death test macros expand to code which interacts
 // well with switch statements.

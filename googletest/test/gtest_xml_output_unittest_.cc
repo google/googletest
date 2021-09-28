@@ -74,6 +74,15 @@ TEST_F(SkippedTest, Skipped) {
   GTEST_SKIP();
 }
 
+TEST_F(SkippedTest, SkippedWithMessage) {
+  GTEST_SKIP() << "It is good practice to tell why you skip a test.";
+}
+
+TEST_F(SkippedTest, SkippedAfterFailure) {
+  EXPECT_EQ(1, 2);
+  GTEST_SKIP() << "It is good practice to tell why you skip a test.";
+}
+
 TEST(MixedResultTest, Succeeds) {
   EXPECT_EQ(1, 1);
   ASSERT_EQ(1, 1);
@@ -154,16 +163,13 @@ TEST_P(ValueParamTest, HasValueParamAttribute) {}
 TEST_P(ValueParamTest, AnotherTestThatHasValueParamAttribute) {}
 INSTANTIATE_TEST_SUITE_P(Single, ValueParamTest, Values(33, 42));
 
-#if GTEST_HAS_TYPED_TEST
 // Verifies that the type parameter name is output in the 'type_param'
 // XML attribute for typed tests.
 template <typename T> class TypedTest : public Test {};
 typedef testing::Types<int, long> TypedTestTypes;
 TYPED_TEST_SUITE(TypedTest, TypedTestTypes);
 TYPED_TEST(TypedTest, HasTypeParamAttribute) {}
-#endif
 
-#if GTEST_HAS_TYPED_TEST_P
 // Verifies that the type parameter name is output in the 'type_param'
 // XML attribute for type-parameterized tests.
 template <typename T>
@@ -174,7 +180,6 @@ REGISTER_TYPED_TEST_SUITE_P(TypeParameterizedTestSuite, HasTypeParamAttribute);
 typedef testing::Types<int, long> TypeParameterizedTestSuiteTypes;  // NOLINT
 INSTANTIATE_TYPED_TEST_SUITE_P(Single, TypeParameterizedTestSuite,
                                TypeParameterizedTestSuiteTypes);
-#endif
 
 int main(int argc, char** argv) {
   InitGoogleTest(&argc, argv);

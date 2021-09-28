@@ -82,7 +82,7 @@ class TestNamePrinter : public EmptyTestEventListener {
   }
 
   void OnTestStart(const TestInfo& test_info) override {
-    printf("%s.%s\n", test_info.test_case_name(), test_info.name());
+    printf("%s.%s\n", test_info.test_suite_name(), test_info.name());
   }
 };
 

@@ -56,10 +56,8 @@
 // where all clauses are optional, and .InSequence()/.After()/
 // .WillOnce() can appear any number of times.
 
-// GOOGLETEST_CM0002 DO NOT DELETE
-
-#ifndef GMOCK_INCLUDE_GMOCK_GMOCK_SPEC_BUILDERS_H_
-#define GMOCK_INCLUDE_GMOCK_GMOCK_SPEC_BUILDERS_H_
+#ifndef GOOGLEMOCK_INCLUDE_GMOCK_GMOCK_SPEC_BUILDERS_H_
+#define GOOGLEMOCK_INCLUDE_GMOCK_GMOCK_SPEC_BUILDERS_H_
 
 #include <functional>
 #include <map>
@@ -107,6 +105,14 @@ template <typename F> class TypedExpectation;
 
 // Helper class for testing the Expectation class template.
 class ExpectationTester;
+
+// Helper classes for implementing NiceMock, StrictMock, and NaggyMock.
+template <typename MockClass>
+class NiceMockImpl;
+template <typename MockClass>
+class StrictMockImpl;
+template <typename MockClass>
+class NaggyMockImpl;
 
 // Protects the mock object registry (in class Mock), all function
 // mockers, and all expectations.
@@ -413,14 +419,12 @@ class GTEST_API_ Mock {
   template <typename F>
   friend class internal::FunctionMocker;
 
-  template <typename M>
-  friend class NiceMock;
-
-  template <typename M>
-  friend class NaggyMock;
-
-  template <typename M>
-  friend class StrictMock;
+  template <typename MockClass>
+  friend class internal::NiceMockImpl;
+  template <typename MockClass>
+  friend class internal::NaggyMockImpl;
+  template <typename MockClass>
+  friend class internal::StrictMockImpl;
 
   // Tells Google Mock to allow uninteresting calls on the given mock
   // object.
@@ -499,7 +503,10 @@ class GTEST_API_ Expectation {
  public:
   // Constructs a null object that doesn't reference any expectation.
   Expectation();
-
+  Expectation(Expectation&&) = default;
+  Expectation(const Expectation&) = default;
+  Expectation& operator=(Expectation&&) = default;
+  Expectation& operator=(const Expectation&) = default;
   ~Expectation();
 
   // This single-argument ctor must not be explicit, in order to support the
@@ -879,11 +886,9 @@ class GTEST_API_ ExpectationBase {
   Clause last_clause_;
   mutable bool action_count_checked_;  // Under mutex_.
   mutable Mutex mutex_;  // Protects action_count_checked_.
-
-  GTEST_DISALLOW_ASSIGN_(ExpectationBase);
 };  // class ExpectationBase
 
-// Impements an expectation for the given function type.
+// Implements an expectation for the given function type.
 template <typename F>
 class TypedExpectation : public ExpectationBase {
  public:
@@ -1295,8 +1300,6 @@ class MockSpec {
   internal::FunctionMocker<F>* const function_mocker_;
   // The argument matchers specified in the spec.
   ArgumentMatcherTuple matchers_;
-
-  GTEST_DISALLOW_ASSIGN_(MockSpec);
 };  // class MockSpec
 
 // Wrapper type for generically holding an ordinary value or lvalue reference.
@@ -1349,12 +1352,6 @@ class ReferenceOrValueWrapper<T&> {
  private:
   T* value_ptr_;
 };
-
-// MSVC warns about using 'this' in base member initializer list, so
-// we need to temporarily disable the warning.  We have to do it for
-// the entire class to suppress the warning, even though it's about
-// the constructor only.
-GTEST_DISABLE_MSC_WARNINGS_PUSH_(4355)
 
 // C++ treats the void type specially.  For example, you cannot define
 // a void-typed variable or pass a void value to a function.
@@ -1786,18 +1783,87 @@ class FunctionMocker<R(Args...)> final : public UntypedFunctionMockerBase {
   }
 };  // class FunctionMocker
 
-GTEST_DISABLE_MSC_WARNINGS_POP_()  //  4355
-
 // Reports an uninteresting call (whose description is in msg) in the
 // manner specified by 'reaction'.
 void ReportUninterestingCall(CallReaction reaction, const std::string& msg);
 
 }  // namespace internal
 
-// A MockFunction<F> class has one mock method whose type is F.  It is
-// useful when you just want your test code to emit some messages and
-// have Google Mock verify the right messages are sent (and perhaps at
-// the right times).  For example, if you are exercising code:
+namespace internal {
+
+template <typename F>
+class MockFunction;
+
+template <typename R, typename... Args>
+class MockFunction<R(Args...)> {
+ public:
+  MockFunction(const MockFunction&) = delete;
+  MockFunction& operator=(const MockFunction&) = delete;
+
+  std::function<R(Args...)> AsStdFunction() {
+    return [this](Args... args) -> R {
+      return this->Call(std::forward<Args>(args)...);
+    };
+  }
+
+  // Implementation detail: the expansion of the MOCK_METHOD macro.
+  R Call(Args... args) {
+    mock_.SetOwnerAndName(this, "Call");
+    return mock_.Invoke(std::forward<Args>(args)...);
+  }
+
+  MockSpec<R(Args...)> gmock_Call(Matcher<Args>... m) {
+    mock_.RegisterOwner(this);
+    return mock_.With(std::move(m)...);
+  }
+
+  MockSpec<R(Args...)> gmock_Call(const WithoutMatchers&, R (*)(Args...)) {
+    return this->gmock_Call(::testing::A<Args>()...);
+  }
+
+ protected:
+  MockFunction() = default;
+  ~MockFunction() = default;
+
+ private:
+  FunctionMocker<R(Args...)> mock_;
+};
+
+/*
+The SignatureOf<F> struct is a meta-function returning function signature
+corresponding to the provided F argument.
+
+It makes use of MockFunction easier by allowing it to accept more F arguments
+than just function signatures.
+
+Specializations provided here cover a signature type itself and any template
+that can be parameterized with a signature, including std::function and
+boost::function.
+*/
+
+template <typename F, typename = void>
+struct SignatureOf;
+
+template <typename R, typename... Args>
+struct SignatureOf<R(Args...)> {
+  using type = R(Args...);
+};
+
+template <template <typename> class C, typename F>
+struct SignatureOf<C<F>,
+                   typename std::enable_if<std::is_function<F>::value>::type>
+    : SignatureOf<F> {};
+
+template <typename F>
+using SignatureOfT = typename SignatureOf<F>::type;
+
+}  // namespace internal
+
+// A MockFunction<F> type has one mock method whose type is
+// internal::SignatureOfT<F>.  It is useful when you just want your
+// test code to emit some messages and have Google Mock verify the
+// right messages are sent (and perhaps at the right times).  For
+// example, if you are exercising code:
 //
 //   Foo(1);
 //   Foo(2);
@@ -1831,49 +1897,34 @@ void ReportUninterestingCall(CallReaction reaction, const std::string& msg);
 // Bar("a") is called by which call to Foo().
 //
 // MockFunction<F> can also be used to exercise code that accepts
-// std::function<F> callbacks. To do so, use AsStdFunction() method
-// to create std::function proxy forwarding to original object's Call.
-// Example:
+// std::function<internal::SignatureOfT<F>> callbacks. To do so, use
+// AsStdFunction() method to create std::function proxy forwarding to
+// original object's Call. Example:
 //
 // TEST(FooTest, RunsCallbackWithBarArgument) {
 //   MockFunction<int(string)> callback;
 //   EXPECT_CALL(callback, Call("bar")).WillOnce(Return(1));
 //   Foo(callback.AsStdFunction());
 // }
+//
+// The internal::SignatureOfT<F> indirection allows to use other types
+// than just function signature type. This is typically useful when
+// providing a mock for a predefined std::function type. Example:
+//
+// using FilterPredicate = std::function<bool(string)>;
+// void MyFilterAlgorithm(FilterPredicate predicate);
+//
+// TEST(FooTest, FilterPredicateAlwaysAccepts) {
+//   MockFunction<FilterPredicate> predicateMock;
+//   EXPECT_CALL(predicateMock, Call(_)).WillRepeatedly(Return(true));
+//   MyFilterAlgorithm(predicateMock.AsStdFunction());
+// }
 template <typename F>
-class MockFunction;
+class MockFunction : public internal::MockFunction<internal::SignatureOfT<F>> {
+  using Base = internal::MockFunction<internal::SignatureOfT<F>>;
 
-template <typename R, typename... Args>
-class MockFunction<R(Args...)> {
  public:
-  MockFunction() {}
-  MockFunction(const MockFunction&) = delete;
-  MockFunction& operator=(const MockFunction&) = delete;
-
-  std::function<R(Args...)> AsStdFunction() {
-    return [this](Args... args) -> R {
-      return this->Call(std::forward<Args>(args)...);
-    };
-  }
-
-  // Implementation detail: the expansion of the MOCK_METHOD macro.
-  R Call(Args... args) {
-    mock_.SetOwnerAndName(this, "Call");
-    return mock_.Invoke(std::forward<Args>(args)...);
-  }
-
-  internal::MockSpec<R(Args...)> gmock_Call(Matcher<Args>... m) {
-    mock_.RegisterOwner(this);
-    return mock_.With(std::move(m)...);
-  }
-
-  internal::MockSpec<R(Args...)> gmock_Call(const internal::WithoutMatchers&,
-                                            R (*)(Args...)) {
-    return this->gmock_Call(::testing::A<Args>()...);
-  }
-
- private:
-  internal::FunctionMocker<R(Args...)> mock_;
+  using Base::Base;
 };
 
 // The style guide prohibits "using" statements in a namespace scope
@@ -1982,4 +2033,4 @@ GTEST_DISABLE_MSC_WARNINGS_POP_()  //  4251
 #define EXPECT_CALL(obj, call) \
   GMOCK_ON_CALL_IMPL_(obj, InternalExpectedAt, call)
 
-#endif  // GMOCK_INCLUDE_GMOCK_GMOCK_SPEC_BUILDERS_H_
+#endif  // GOOGLEMOCK_INCLUDE_GMOCK_GMOCK_SPEC_BUILDERS_H_

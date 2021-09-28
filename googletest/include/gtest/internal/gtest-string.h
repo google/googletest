@@ -36,10 +36,8 @@
 // This header file is #included by gtest-internal.h.
 // It should not be #included by other files.
 
-// GOOGLETEST_CM0001 DO NOT DELETE
-
-#ifndef GTEST_INCLUDE_GTEST_INTERNAL_GTEST_STRING_H_
-#define GTEST_INCLUDE_GTEST_INTERNAL_GTEST_STRING_H_
+#ifndef GOOGLETEST_INCLUDE_GTEST_INTERNAL_GTEST_STRING_H_
+#define GOOGLETEST_INCLUDE_GTEST_INTERNAL_GTEST_STRING_H_
 
 #ifdef __BORLANDC__
 // string.h is not guaranteed to provide strcpy on C++ Builder.
@@ -47,6 +45,7 @@
 #endif
 
 #include <string.h>
+#include <cstdint>
 #include <string>
 
 #include "gtest/internal/gtest-port.h"
@@ -148,11 +147,14 @@ class GTEST_API_ String {
   // Formats an int value as "%02d".
   static std::string FormatIntWidth2(int value);  // "%02d" for width == 2
 
+  // Formats an int value to given width with leading zeros.
+  static std::string FormatIntWidthN(int value, int width);
+
   // Formats an int value as "%X".
   static std::string FormatHexInt(int value);
 
   // Formats an int value as "%X".
-  static std::string FormatHexUInt32(UInt32 value);
+  static std::string FormatHexUInt32(uint32_t value);
 
   // Formats a byte as "%02X".
   static std::string FormatByte(unsigned char value);
@@ -168,4 +170,4 @@ GTEST_API_ std::string StringStreamToString(::std::stringstream* stream);
 }  // namespace internal
 }  // namespace testing
 
-#endif  // GTEST_INCLUDE_GTEST_INTERNAL_GTEST_STRING_H_
+#endif  // GOOGLETEST_INCLUDE_GTEST_INTERNAL_GTEST_STRING_H_

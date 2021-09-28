@@ -58,9 +58,9 @@ else:
 
 EXPECTED_NON_EMPTY = {
     u'tests':
-        24,
+        26,
     u'failures':
-        4,
+        5,
     u'disabled':
         2,
     u'errors':
@@ -158,9 +158,9 @@ EXPECTED_NON_EMPTY = {
         u'name':
             u'SkippedTest',
         u'tests':
-            1,
+            3,
         u'failures':
-            0,
+            1,
         u'disabled':
             0,
         u'errors':
@@ -176,6 +176,32 @@ EXPECTED_NON_EMPTY = {
             u'time': u'*',
             u'timestamp': u'*',
             u'classname': u'SkippedTest'
+        }, {
+            u'name': u'SkippedWithMessage',
+            u'status': u'RUN',
+            u'result': u'SKIPPED',
+            u'time': u'*',
+            u'timestamp': u'*',
+            u'classname': u'SkippedTest'
+        }, {
+            u'name':
+                u'SkippedAfterFailure',
+            u'status':
+                u'RUN',
+            u'result':
+                u'COMPLETED',
+            u'time':
+                u'*',
+            u'timestamp':
+                u'*',
+            u'classname':
+                u'SkippedTest',
+            u'failures': [{
+                u'failure': u'gtest_xml_output_unittest_.cc:*\n'
+                            u'Expected equality of these values:\n'
+                            u'  1\n  2' + STACK_TRACE_TEMPLATE,
+                u'type': u''
+            }]
         }]
     }, {
         u'name':
@@ -586,15 +612,59 @@ EXPECTED_FILTERED = {
     }],
 }
 
-EXPECTED_EMPTY = {
-    u'tests': 0,
-    u'failures': 0,
-    u'disabled': 0,
-    u'errors': 0,
-    u'time': u'*',
-    u'timestamp': u'*',
-    u'name': u'AllTests',
-    u'testsuites': [],
+EXPECTED_NO_TEST = {
+    u'tests':
+        0,
+    u'failures':
+        0,
+    u'disabled':
+        0,
+    u'errors':
+        0,
+    u'time':
+        u'*',
+    u'timestamp':
+        u'*',
+    u'name':
+        u'AllTests',
+    u'testsuites': [{
+        u'name':
+            u'NonTestSuiteFailure',
+        u'tests':
+            1,
+        u'failures':
+            1,
+        u'disabled':
+            0,
+        u'skipped':
+            0,
+        u'errors':
+            0,
+        u'time':
+            u'*',
+        u'timestamp':
+            u'*',
+        u'testsuite': [{
+            u'name':
+                u'',
+            u'status':
+                u'RUN',
+            u'result':
+                u'COMPLETED',
+            u'time':
+                u'*',
+            u'timestamp':
+                u'*',
+            u'classname':
+                u'',
+            u'failures': [{
+                u'failure': u'gtest_no_test_unittest.cc:*\n'
+                            u'Expected equality of these values:\n'
+                            u'  1\n  2' + STACK_TRACE_TEMPLATE,
+                u'type': u'',
+            }]
+        }]
+    }],
 }
 
 GTEST_PROGRAM_PATH = gtest_test_utils.GetTestExecutablePath(GTEST_PROGRAM_NAME)
@@ -619,14 +689,14 @@ class GTestJsonOutputUnitTest(gtest_test_utils.TestCase):
       """
       self._TestJsonOutput(GTEST_PROGRAM_NAME, EXPECTED_NON_EMPTY, 1)
 
-  def testEmptyJsonOutput(self):
+  def testNoTestJsonOutput(self):
     """Verifies JSON output for a Google Test binary without actual tests.
 
-    Runs a test program that generates an empty JSON output, and
-    tests that the JSON output is expected.
+    Runs a test program that generates an JSON output for a binary with no
+    tests, and tests that the JSON output is expected.
     """
 
-    self._TestJsonOutput('gtest_no_test_unittest', EXPECTED_EMPTY, 0)
+    self._TestJsonOutput('gtest_no_test_unittest', EXPECTED_NO_TEST, 0)
 
   def testTimestampValue(self):
     """Checks whether the timestamp attribute in the JSON output is valid.

@@ -96,6 +96,14 @@ INSTANTIATE_TEST_SUITE_P(PrintingFailingParams,
                          FailingParamTest,
                          testing::Values(2));
 
+// Tests that an empty value for the test suite basename yields just
+// the test name without any prior /
+class EmptyBasenameParamInst : public testing::TestWithParam<int> {};
+
+TEST_P(EmptyBasenameParamInst, Passes) { EXPECT_EQ(1, GetParam()); }
+
+INSTANTIATE_TEST_SUITE_P(, EmptyBasenameParamInst, testing::Values(1));
+
 static const char kGoldenString[] = "\"Line\0 1\"\nLine 2";
 
 TEST(NonfatalFailureTest, EscapesStringOperands) {
@@ -468,63 +476,6 @@ TEST(GtestFailAtTest, MessageContainsSpecifiedFileAndLineNumber) {
   GTEST_FAIL_AT("foo.cc", 42) << "Expected fatal failure in foo.cc";
 }
 
-#if GTEST_IS_THREADSAFE
-
-// A unary function that may die.
-void DieIf(bool should_die) {
-  GTEST_CHECK_(!should_die) << " - death inside DieIf().";
-}
-
-// Tests running death tests in a multi-threaded context.
-
-// Used for coordination between the main and the spawn thread.
-struct SpawnThreadNotifications {
-  SpawnThreadNotifications() {}
-
-  Notification spawn_thread_started;
-  Notification spawn_thread_ok_to_terminate;
-
- private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(SpawnThreadNotifications);
-};
-
-// The function to be executed in the thread spawn by the
-// MultipleThreads test (below).
-static void ThreadRoutine(SpawnThreadNotifications* notifications) {
-  // Signals the main thread that this thread has started.
-  notifications->spawn_thread_started.Notify();
-
-  // Waits for permission to finish from the main thread.
-  notifications->spawn_thread_ok_to_terminate.WaitForNotification();
-}
-
-// This is a death-test test, but it's not named with a DeathTest
-// suffix.  It starts threads which might interfere with later
-// death tests, so it must run after all other death tests.
-class DeathTestAndMultiThreadsTest : public testing::Test {
- protected:
-  // Starts a thread and waits for it to begin.
-  void SetUp() override {
-    thread_.reset(new ThreadWithParam<SpawnThreadNotifications*>(
-        &ThreadRoutine, &notifications_, nullptr));
-    notifications_.spawn_thread_started.WaitForNotification();
-  }
-  // Tells the thread to finish, and reaps it.
-  // Depending on the version of the thread library in use,
-  // a manager thread might still be left running that will interfere
-  // with later death tests.  This is unfortunate, but this class
-  // cleans up after itself as best it can.
-  void TearDown() override {
-    notifications_.spawn_thread_ok_to_terminate.Notify();
-  }
-
- private:
-  SpawnThreadNotifications notifications_;
-  std::unique_ptr<ThreadWithParam<SpawnThreadNotifications*> > thread_;
-};
-
-#endif  // GTEST_IS_THREADSAFE
-
 // The MixedUpTestSuiteTest test case verifies that Google Test will fail a
 // test if it uses a different fixture class than what other tests in
 // the same test case use.  It deliberately contains two fixture
@@ -782,8 +733,16 @@ INSTANTIATE_TEST_SUITE_P(PrintingStrings,
                          testing::Values(std::string("a")),
                          ParamNameFunc);
 
-// This #ifdef block tests the output of typed tests.
-#if GTEST_HAS_TYPED_TEST
+// The case where a suite has INSTANTIATE_TEST_SUITE_P but not TEST_P.
+using NoTests = ParamTest;
+INSTANTIATE_TEST_SUITE_P(ThisIsOdd, NoTests, ::testing::Values("Hello"));
+
+// fails under kErrorOnUninstantiatedParameterizedTest=true
+class DetectNotInstantiatedTest : public testing::TestWithParam<int> {};
+TEST_P(DetectNotInstantiatedTest, Used) { }
+
+// This would make the test failure from the above go away.
+// INSTANTIATE_TEST_SUITE_P(Fix, DetectNotInstantiatedTest, testing::Values(1));
 
 template <typename T>
 class TypedTest : public testing::Test {
@@ -821,11 +780,6 @@ TYPED_TEST(TypedTestWithNames, Success) {}
 
 TYPED_TEST(TypedTestWithNames, Failure) { FAIL(); }
 
-#endif  // GTEST_HAS_TYPED_TEST
-
-// This #ifdef block tests the output of type-parameterized tests.
-#if GTEST_HAS_TYPED_TEST_P
-
 template <typename T>
 class TypedTestP : public testing::Test {
 };
@@ -861,7 +815,20 @@ class TypedTestPNames {
 INSTANTIATE_TYPED_TEST_SUITE_P(UnsignedCustomName, TypedTestP, UnsignedTypes,
                               TypedTestPNames);
 
-#endif  // GTEST_HAS_TYPED_TEST_P
+template <typename T>
+class DetectNotInstantiatedTypesTest : public testing::Test {};
+TYPED_TEST_SUITE_P(DetectNotInstantiatedTypesTest);
+TYPED_TEST_P(DetectNotInstantiatedTypesTest, Used) {
+  TypeParam instantiate;
+  (void)instantiate;
+}
+REGISTER_TYPED_TEST_SUITE_P(DetectNotInstantiatedTypesTest, Used);
+
+// kErrorOnUninstantiatedTypeParameterizedTest=true would make the above fail.
+// Adding the following would make that test failure go away.
+//
+// typedef ::testing::Types<char, int, unsigned int> MyTypes;
+// INSTANTIATE_TYPED_TEST_SUITE_P(All, DetectNotInstantiatedTypesTest, MyTypes);
 
 #if GTEST_HAS_DEATH_TEST
 
@@ -870,8 +837,6 @@ INSTANTIATE_TYPED_TEST_SUITE_P(UnsignedCustomName, TypedTestP, UnsignedTypes,
 
 TEST(ADeathTest, ShouldRunFirst) {
 }
-
-# if GTEST_HAS_TYPED_TEST
 
 // We rely on the golden file to verify that typed tests whose test
 // case name ends with DeathTest are run first.
@@ -885,10 +850,6 @@ TYPED_TEST_SUITE(ATypedDeathTest, NumericTypes);
 
 TYPED_TEST(ATypedDeathTest, ShouldRunFirst) {
 }
-
-# endif  // GTEST_HAS_TYPED_TEST
-
-# if GTEST_HAS_TYPED_TEST_P
 
 
 // We rely on the golden file to verify that type-parameterized tests
@@ -906,8 +867,6 @@ TYPED_TEST_P(ATypeParamDeathTest, ShouldRunFirst) {
 REGISTER_TYPED_TEST_SUITE_P(ATypeParamDeathTest, ShouldRunFirst);
 
 INSTANTIATE_TYPED_TEST_SUITE_P(My, ATypeParamDeathTest, NumericTypes);
-
-# endif  // GTEST_HAS_TYPED_TEST_P
 
 #endif  // GTEST_HAS_DEATH_TEST
 
@@ -1070,7 +1029,7 @@ auto dynamic_test = (
         "BadDynamicFixture1", "TestBase", nullptr, nullptr, __FILE__, __LINE__,
         []() -> testing::Test* { return new DynamicTest<true>; }),
 
-    // Register two tests with the same fixture incorrectly by ommiting the
+    // Register two tests with the same fixture incorrectly by omitting the
     // return type.
     testing::RegisterTest(
         "BadDynamicFixture2", "FixtureBase", nullptr, nullptr, __FILE__,
@@ -1101,13 +1060,21 @@ class BarEnvironment : public testing::Environment {
   }
 };
 
+class TestSuiteThatFailsToSetUp : public testing::Test {
+ public:
+  static void SetUpTestSuite() { EXPECT_TRUE(false); }
+};
+TEST_F(TestSuiteThatFailsToSetUp, ShouldNotRun) {
+  std::abort();
+}
+
 // The main function.
 //
 // The idea is to use Google Test to run all the tests we have defined (some
 // of them are intended to fail), and then compare the test results
 // with the "golden" file.
 int main(int argc, char **argv) {
-  testing::GTEST_FLAG(print_time) = false;
+  GTEST_FLAG_SET(print_time, false);
 
   // We just run the tests, knowing some of them are intended to fail.
   // We will use a separate Python script to compare the output of
@@ -1122,7 +1089,7 @@ int main(int argc, char **argv) {
                  std::string("internal_skip_environment_and_ad_hoc_tests")) > 0;
 
 #if GTEST_HAS_DEATH_TEST
-  if (testing::internal::GTEST_FLAG(internal_run_death_test) != "") {
+  if (GTEST_FLAG_GET(internal_run_death_test) != "") {
     // Skip the usual output capturing if we're running as the child
     // process of an threadsafe-style death test.
 # if GTEST_OS_WINDOWS

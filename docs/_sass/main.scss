@@ -1,0 +1,200 @@
+// Styles for GoogleTest docs website on GitHub Pages.
+// Color variables are defined in
+// https://github.com/pages-themes/primer/tree/master/_sass/primer-support/lib/variables
+
+$sidebar-width: 260px;
+
+body {
+  display: flex;
+  margin: 0;
+}
+
+.sidebar {
+  background: $black;
+  color: $text-white;
+  flex-shrink: 0;
+  height: 100vh;
+  overflow: auto;
+  position: sticky;
+  top: 0;
+  width: $sidebar-width;
+}
+
+.sidebar h1 {
+  font-size: 1.5em;
+}
+
+.sidebar h2 {
+  color: $gray-light;
+  font-size: 0.8em;
+  font-weight: normal;
+  margin-bottom: 0.8em;
+  padding-left: 2.5em;
+  text-transform: uppercase;
+}
+
+.sidebar .header {
+  background: $black;
+  padding: 2em;
+  position: sticky;
+  top: 0;
+  width: 100%;
+}
+
+.sidebar .header a {
+  color: $text-white;
+  text-decoration: none;
+}
+
+.sidebar .nav-toggle {
+  display: none;
+}
+
+.sidebar .expander {
+  cursor: pointer;
+  display: none;
+  height: 3em;
+  position: absolute;
+  right: 1em;
+  top: 1.5em;
+  width: 3em;
+}
+
+.sidebar .expander .arrow {
+  border: solid $white;
+  border-width: 0 3px 3px 0;
+  display: block;
+  height: 0.7em;
+  margin: 1em auto;
+  transform: rotate(45deg);
+  transition: transform 0.5s;
+  width: 0.7em;
+}
+
+.sidebar nav {
+  width: 100%;
+}
+
+.sidebar nav ul {
+  list-style-type: none;
+  margin-bottom: 1em;
+  padding: 0;
+
+  &:last-child {
+    margin-bottom: 2em;
+  }
+
+  a {
+   text-decoration: none;
+  }
+
+  li {
+    color: $text-white;
+    padding-left: 2em;
+    text-decoration: none;
+  }
+
+  li.active {
+    background: $border-gray-darker;
+    font-weight: bold;
+  }
+
+  li:hover {
+    background: $border-gray-darker;
+  }
+}
+
+.main {
+  background-color: $bg-gray;
+  width: calc(100% - #{$sidebar-width});
+}
+
+.main .main-inner {
+  background-color: $white;
+  padding: 2em;
+}
+
+.main .footer {
+  margin: 0;
+  padding: 2em;
+}
+
+.main table th {
+  text-align: left;
+}
+
+.main .callout {
+  border-left: 0.25em solid $white;
+  padding: 1em;
+
+  a {
+    text-decoration: underline;
+  }
+
+  &.important {
+    background-color: $bg-yellow-light;
+    border-color: $bg-yellow;
+    color: $black;
+  }
+
+  &.note {
+    background-color: $bg-blue-light;
+    border-color: $text-blue;
+    color: $text-blue;
+  }
+
+  &.tip {
+    background-color: $green-000;
+    border-color: $green-700;
+    color: $green-700;
+  }
+
+  &.warning {
+    background-color: $red-000;
+    border-color: $text-red;
+    color: $text-red;
+  }
+}
+
+.main .good pre {
+  background-color: $bg-green-light;
+}
+
+.main .bad pre {
+  background-color: $red-000;
+}
+
+@media all and (max-width: 768px) {
+  body {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    height: auto;
+    position: relative;
+    width: 100%;
+  }
+
+  .sidebar .expander {
+    display: block;
+  }
+
+  .sidebar nav {
+    height: 0;
+    overflow: hidden;
+  }
+
+  .sidebar .nav-toggle:checked {
+    & ~ nav {
+      height: auto;
+    }
+
+    & + .expander .arrow {
+      transform: rotate(-135deg);
+    }
+  }
+
+  .main {
+    width: 100%;
+  }
+}

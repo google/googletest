@@ -32,6 +32,7 @@
 
 #include "gtest/gtest-death-test.h"
 
+#include <functional>
 #include <utility>
 
 #include "gtest/internal/gtest-port.h"
@@ -95,9 +96,12 @@ namespace testing {
 // used internally at Google, is "threadsafe".
 static const char kDefaultDeathTestStyle[] = GTEST_DEFAULT_DEATH_TEST_STYLE;
 
+}  // namespace testing
+
 GTEST_DEFINE_string_(
     death_test_style,
-    internal::StringFromGTestEnv("death_test_style", kDefaultDeathTestStyle),
+    testing::internal::StringFromGTestEnv("death_test_style",
+                                          testing::kDefaultDeathTestStyle),
     "Indicates how to run a death test in a forked child process: "
     "\"threadsafe\" (child process re-executes the test binary "
     "from the beginning, running only the specific death test) or "
@@ -106,7 +110,7 @@ GTEST_DEFINE_string_(
 
 GTEST_DEFINE_bool_(
     death_test_use_fork,
-    internal::BoolFromGTestEnv("death_test_use_fork", false),
+    testing::internal::BoolFromGTestEnv("death_test_use_fork", false),
     "Instructs to use fork()/_exit() instead of clone() in death tests. "
     "Ignored and always uses fork() on POSIX systems where clone() is not "
     "implemented. Useful when running under valgrind or similar tools if "
@@ -116,7 +120,6 @@ GTEST_DEFINE_bool_(
     "work in 99% of the cases. Once valgrind is fixed, this flag will "
     "most likely be removed.");
 
-namespace internal {
 GTEST_DEFINE_string_(
     internal_run_death_test, "",
     "Indicates the file, line number, temporal index of "
@@ -125,7 +128,8 @@ GTEST_DEFINE_string_(
     "the '|' characters.  This flag is specified if and only if the "
     "current process is a sub-process launched for running a thread-safe "
     "death test.  FOR INTERNAL USE ONLY.");
-}  // namespace internal
+
+namespace testing {
 
 #if GTEST_HAS_DEATH_TEST
 
@@ -147,12 +151,12 @@ bool InDeathTestChild() {
 
   // On Windows and Fuchsia, death tests are thread-safe regardless of the value
   // of the death_test_style flag.
-  return !GTEST_FLAG(internal_run_death_test).empty();
+  return !GTEST_FLAG_GET(internal_run_death_test).empty();
 
 # else
 
-  if (GTEST_FLAG(death_test_style) == "threadsafe")
-    return !GTEST_FLAG(internal_run_death_test).empty();
+  if (GTEST_FLAG_GET(death_test_style) == "threadsafe")
+    return !GTEST_FLAG_GET(internal_run_death_test).empty();
   else
     return g_in_fast_death_test_child;
 #endif
@@ -247,7 +251,7 @@ static std::string DeathTestThreadWarning(size_t thread_count) {
     msg << "detected " << thread_count << " threads.";
   }
   msg << " See "
-         "https://github.com/google/googletest/blob/master/googletest/docs/"
+         "https://github.com/google/googletest/blob/master/docs/"
          "advanced.md#death-tests-and-threads"
       << " for more explanation and suggested solutions, especially if"
       << " this is the last message you see before your test times out.";
@@ -755,18 +759,18 @@ DeathTest::TestRole WindowsDeathTest::AssumeRole() {
       nullptr));  // The even is unnamed.
   GTEST_DEATH_TEST_CHECK_(event_handle_.Get() != nullptr);
   const std::string filter_flag = std::string("--") + GTEST_FLAG_PREFIX_ +
-                                  kFilterFlag + "=" + info->test_suite_name() +
-                                  "." + info->name();
+                                  "filter=" + info->test_suite_name() + "." +
+                                  info->name();
   const std::string internal_flag =
-      std::string("--") + GTEST_FLAG_PREFIX_ + kInternalRunDeathTestFlag +
-      "=" + file_ + "|" + StreamableToString(line_) + "|" +
-      StreamableToString(death_test_index) + "|" +
+      std::string("--") + GTEST_FLAG_PREFIX_ +
+      "internal_run_death_test=" + file_ + "|" + StreamableToString(line_) +
+      "|" + StreamableToString(death_test_index) + "|" +
       StreamableToString(static_cast<unsigned int>(::GetCurrentProcessId())) +
       // size_t has the same width as pointers on both 32-bit and 64-bit
       // Windows platforms.
       // See http://msdn.microsoft.com/en-us/library/tcxf1dw6.aspx.
-      "|" + StreamableToString(reinterpret_cast<size_t>(write_handle)) +
-      "|" + StreamableToString(reinterpret_cast<size_t>(event_handle_.Get()));
+      "|" + StreamableToString(reinterpret_cast<size_t>(write_handle)) + "|" +
+      StreamableToString(reinterpret_cast<size_t>(event_handle_.Get()));
 
   char executable_path[_MAX_PATH + 1];  // NOLINT
   GTEST_DEATH_TEST_CHECK_(_MAX_PATH + 1 != ::GetModuleFileNameA(nullptr,
@@ -795,8 +799,8 @@ DeathTest::TestRole WindowsDeathTest::AssumeRole() {
   GTEST_DEATH_TEST_CHECK_(
       ::CreateProcessA(
           executable_path, const_cast<char*>(command_line.c_str()),
-          nullptr,  // Retuned process handle is not inheritable.
-          nullptr,  // Retuned thread handle is not inheritable.
+          nullptr,  // Returned process handle is not inheritable.
+          nullptr,  // Returned thread handle is not inheritable.
           TRUE,  // Child inherits all inheritable handles (for write_handle_).
           0x0,   // Default creation flags.
           nullptr,  // Inherit the parent's environment.
@@ -864,7 +868,7 @@ class Arguments {
   }
 
   int size() {
-    return args_.size() - 1;
+    return static_cast<int>(args_.size()) - 1;
   }
 
  private:
@@ -890,18 +894,17 @@ int FuchsiaDeathTest::Wait() {
 
   // Register to wait for the child process to terminate.
   status_zx = child_process_.wait_async(
-      port, kProcessKey, ZX_PROCESS_TERMINATED, ZX_WAIT_ASYNC_ONCE);
+      port, kProcessKey, ZX_PROCESS_TERMINATED, 0);
   GTEST_DEATH_TEST_CHECK_(status_zx == ZX_OK);
 
   // Register to wait for the socket to be readable or closed.
   status_zx = stderr_socket_.wait_async(
-      port, kSocketKey, ZX_SOCKET_READABLE | ZX_SOCKET_PEER_CLOSED,
-      ZX_WAIT_ASYNC_ONCE);
+      port, kSocketKey, ZX_SOCKET_READABLE | ZX_SOCKET_PEER_CLOSED, 0);
   GTEST_DEATH_TEST_CHECK_(status_zx == ZX_OK);
 
   // Register to wait for an exception.
   status_zx = exception_channel_.wait_async(
-      port, kExceptionKey, ZX_CHANNEL_READABLE, ZX_WAIT_ASYNC_ONCE);
+      port, kExceptionKey, ZX_CHANNEL_READABLE, 0);
   GTEST_DEATH_TEST_CHECK_(status_zx == ZX_OK);
 
   bool process_terminated = false;
@@ -941,8 +944,7 @@ int FuchsiaDeathTest::Wait() {
         } else {
           GTEST_DEATH_TEST_CHECK_(status_zx == ZX_ERR_SHOULD_WAIT);
           status_zx = stderr_socket_.wait_async(
-              port, kSocketKey, ZX_SOCKET_READABLE | ZX_SOCKET_PEER_CLOSED,
-              ZX_WAIT_ASYNC_ONCE);
+              port, kSocketKey, ZX_SOCKET_READABLE | ZX_SOCKET_PEER_CLOSED, 0);
           GTEST_DEATH_TEST_CHECK_(status_zx == ZX_OK);
         }
       } else {
@@ -955,12 +957,12 @@ int FuchsiaDeathTest::Wait() {
   ReadAndInterpretStatusByte();
 
   zx_info_process_t buffer;
-  status_zx = child_process_.get_info(
-      ZX_INFO_PROCESS, &buffer, sizeof(buffer), nullptr, nullptr);
+  status_zx = child_process_.get_info(ZX_INFO_PROCESS, &buffer, sizeof(buffer),
+                                      nullptr, nullptr);
   GTEST_DEATH_TEST_CHECK_(status_zx == ZX_OK);
 
-  GTEST_DEATH_TEST_CHECK_(buffer.exited);
-  set_status(buffer.return_code);
+  GTEST_DEATH_TEST_CHECK_(buffer.flags & ZX_INFO_PROCESS_FLAG_EXITED);
+  set_status(static_cast<int>(buffer.return_code));
   return status();
 }
 
@@ -988,8 +990,8 @@ DeathTest::TestRole FuchsiaDeathTest::AssumeRole() {
 
   // Build the child process command line.
   const std::string filter_flag = std::string("--") + GTEST_FLAG_PREFIX_ +
-                                  kFilterFlag + "=" + info->test_suite_name() +
-                                  "." + info->name();
+                                  "filter=" + info->test_suite_name() + "." +
+                                  info->name();
   const std::string internal_flag =
       std::string("--") + GTEST_FLAG_PREFIX_ + kInternalRunDeathTestFlag + "="
       + file_ + "|"
@@ -1225,21 +1227,9 @@ struct ExecDeathTestArgs {
   int close_fd;       // File descriptor to close; the read end of a pipe
 };
 
-#  if GTEST_OS_MAC
-inline char** GetEnviron() {
-  // When Google Test is built as a framework on MacOS X, the environ variable
-  // is unavailable. Apple's documentation (man environ) recommends using
-  // _NSGetEnviron() instead.
-  return *_NSGetEnviron();
-}
-#  else
-// Some POSIX platforms expect you to declare environ. extern "C" makes
-// it reside in the global namespace.
+#  if GTEST_OS_QNX
 extern "C" char** environ;
-inline char** GetEnviron() { return environ; }
-#  endif  // GTEST_OS_MAC
-
-#  if !GTEST_OS_QNX
+#  else  // GTEST_OS_QNX
 // The main function for a threadsafe-style death test child process.
 // This function is called in a clone()-ed process and thus must avoid
 // any potentially unsafe operations like malloc or libc functions.
@@ -1259,18 +1249,18 @@ static int ExecDeathTestChildMain(void* child_arg) {
     return EXIT_FAILURE;
   }
 
-  // We can safely call execve() as it's a direct system call.  We
+  // We can safely call execv() as it's almost a direct system call. We
   // cannot use execvp() as it's a libc function and thus potentially
-  // unsafe.  Since execve() doesn't search the PATH, the user must
+  // unsafe.  Since execv() doesn't search the PATH, the user must
   // invoke the test program via a valid path that contains at least
   // one path separator.
-  execve(args->argv[0], args->argv, GetEnviron());
-  DeathTestAbort(std::string("execve(") + args->argv[0] + ", ...) in " +
+  execv(args->argv[0], args->argv);
+  DeathTestAbort(std::string("execv(") + args->argv[0] + ", ...) in " +
                  original_dir + " failed: " +
                  GetLastErrnoDescription());
   return EXIT_FAILURE;
 }
-#  endif  // !GTEST_OS_QNX
+#  endif  // GTEST_OS_QNX
 
 #  if GTEST_HAS_CLONE
 // Two utility routines that together determine the direction the stack
@@ -1284,19 +1274,24 @@ static int ExecDeathTestChildMain(void* child_arg) {
 // correct answer.
 static void StackLowerThanAddress(const void* ptr,
                                   bool* result) GTEST_NO_INLINE_;
+// Make sure sanitizers do not tamper with the stack here.
+// Ideally, we want to use `__builtin_frame_address` instead of a local variable
+// address with sanitizer disabled, but it does not work when the
+// compiler optimizes the stack frame out, which happens on PowerPC targets.
 // HWAddressSanitizer add a random tag to the MSB of the local variable address,
 // making comparison result unpredictable.
+GTEST_ATTRIBUTE_NO_SANITIZE_ADDRESS_
 GTEST_ATTRIBUTE_NO_SANITIZE_HWADDRESS_
 static void StackLowerThanAddress(const void* ptr, bool* result) {
-  int dummy;
-  *result = (&dummy < ptr);
+  int dummy = 0;
+  *result = std::less<const void*>()(&dummy, ptr);
 }
 
 // Make sure AddressSanitizer does not tamper with the stack here.
 GTEST_ATTRIBUTE_NO_SANITIZE_ADDRESS_
 GTEST_ATTRIBUTE_NO_SANITIZE_HWADDRESS_
 static bool StackGrowsDown() {
-  int dummy;
+  int dummy = 0;
   bool result;
   StackLowerThanAddress(&dummy, &result);
   return result;
@@ -1339,8 +1334,7 @@ static pid_t ExecDeathTestSpawnChild(char* const* argv, int close_fd) {
                                         fd_flags | FD_CLOEXEC));
   struct inheritance inherit = {0};
   // spawn is a system call.
-  child_pid =
-      spawn(args.argv[0], 0, nullptr, &inherit, args.argv, GetEnviron());
+  child_pid = spawn(args.argv[0], 0, nullptr, &inherit, args.argv, environ);
   // Restores the current working directory.
   GTEST_DEATH_TEST_CHECK_(fchdir(cwd_fd) != -1);
   GTEST_DEATH_TEST_CHECK_SYSCALL_(close(cwd_fd));
@@ -1360,11 +1354,11 @@ static pid_t ExecDeathTestSpawnChild(char* const* argv, int close_fd) {
 #   endif  // GTEST_OS_LINUX
 
 #   if GTEST_HAS_CLONE
-  const bool use_fork = GTEST_FLAG(death_test_use_fork);
+  const bool use_fork = GTEST_FLAG_GET(death_test_use_fork);
 
   if (!use_fork) {
     static const bool stack_grows_down = StackGrowsDown();
-    const auto stack_size = static_cast<size_t>(getpagesize());
+    const auto stack_size = static_cast<size_t>(getpagesize() * 2);
     // MMAP_ANONYMOUS is not defined on Mac, so we use MAP_ANON instead.
     void* const stack = mmap(nullptr, stack_size, PROT_READ | PROT_WRITE,
                              MAP_ANON | MAP_PRIVATE, -1, 0);
@@ -1429,13 +1423,13 @@ DeathTest::TestRole ExecDeathTest::AssumeRole() {
   GTEST_DEATH_TEST_CHECK_(fcntl(pipe_fd[1], F_SETFD, 0) != -1);
 
   const std::string filter_flag = std::string("--") + GTEST_FLAG_PREFIX_ +
-                                  kFilterFlag + "=" + info->test_suite_name() +
-                                  "." + info->name();
-  const std::string internal_flag =
-      std::string("--") + GTEST_FLAG_PREFIX_ + kInternalRunDeathTestFlag + "="
-      + file_ + "|" + StreamableToString(line_) + "|"
-      + StreamableToString(death_test_index) + "|"
-      + StreamableToString(pipe_fd[1]);
+                                  "filter=" + info->test_suite_name() + "." +
+                                  info->name();
+  const std::string internal_flag = std::string("--") + GTEST_FLAG_PREFIX_ +
+                                    "internal_run_death_test=" + file_ + "|" +
+                                    StreamableToString(line_) + "|" +
+                                    StreamableToString(death_test_index) + "|" +
+                                    StreamableToString(pipe_fd[1]);
   Arguments args;
   args.AddArguments(GetArgvsForDeathTestChildProcess());
   args.AddArgument(filter_flag.c_str());
@@ -1491,32 +1485,32 @@ bool DefaultDeathTestFactory::Create(const char* statement,
 
 # if GTEST_OS_WINDOWS
 
-  if (GTEST_FLAG(death_test_style) == "threadsafe" ||
-      GTEST_FLAG(death_test_style) == "fast") {
+  if (GTEST_FLAG_GET(death_test_style) == "threadsafe" ||
+      GTEST_FLAG_GET(death_test_style) == "fast") {
     *test = new WindowsDeathTest(statement, std::move(matcher), file, line);
   }
 
 # elif GTEST_OS_FUCHSIA
 
-  if (GTEST_FLAG(death_test_style) == "threadsafe" ||
-      GTEST_FLAG(death_test_style) == "fast") {
+  if (GTEST_FLAG_GET(death_test_style) == "threadsafe" ||
+      GTEST_FLAG_GET(death_test_style) == "fast") {
     *test = new FuchsiaDeathTest(statement, std::move(matcher), file, line);
   }
 
 # else
 
-  if (GTEST_FLAG(death_test_style) == "threadsafe") {
+  if (GTEST_FLAG_GET(death_test_style) == "threadsafe") {
     *test = new ExecDeathTest(statement, std::move(matcher), file, line);
-  } else if (GTEST_FLAG(death_test_style) == "fast") {
+  } else if (GTEST_FLAG_GET(death_test_style) == "fast") {
     *test = new NoExecDeathTest(statement, std::move(matcher));
   }
 
 # endif  // GTEST_OS_WINDOWS
 
   else {  // NOLINT - this is more readable than unbalanced brackets inside #if.
-    DeathTest::set_last_death_test_message(
-        "Unknown death test style \"" + GTEST_FLAG(death_test_style)
-        + "\" encountered");
+    DeathTest::set_last_death_test_message("Unknown death test style \"" +
+                                           GTEST_FLAG_GET(death_test_style) +
+                                           "\" encountered");
     return false;
   }
 
@@ -1593,14 +1587,14 @@ static int GetStatusFileDescriptor(unsigned int parent_process_id,
 // initialized from the GTEST_FLAG(internal_run_death_test) flag if
 // the flag is specified; otherwise returns NULL.
 InternalRunDeathTestFlag* ParseInternalRunDeathTestFlag() {
-  if (GTEST_FLAG(internal_run_death_test) == "") return nullptr;
+  if (GTEST_FLAG_GET(internal_run_death_test) == "") return nullptr;
 
   // GTEST_HAS_DEATH_TEST implies that we have ::std::string, so we
   // can use it here.
   int line = -1;
   int index = -1;
   ::std::vector< ::std::string> fields;
-  SplitString(GTEST_FLAG(internal_run_death_test).c_str(), '|', &fields);
+  SplitString(GTEST_FLAG_GET(internal_run_death_test), '|', &fields);
   int write_fd = -1;
 
 # if GTEST_OS_WINDOWS
@@ -1616,7 +1610,7 @@ InternalRunDeathTestFlag* ParseInternalRunDeathTestFlag() {
       || !ParseNaturalNumber(fields[4], &write_handle_as_size_t)
       || !ParseNaturalNumber(fields[5], &event_handle_as_size_t)) {
     DeathTestAbort("Bad --gtest_internal_run_death_test flag: " +
-                   GTEST_FLAG(internal_run_death_test));
+                   GTEST_FLAG_GET(internal_run_death_test));
   }
   write_fd = GetStatusFileDescriptor(parent_process_id,
                                      write_handle_as_size_t,
@@ -1627,8 +1621,8 @@ InternalRunDeathTestFlag* ParseInternalRunDeathTestFlag() {
   if (fields.size() != 3
       || !ParseNaturalNumber(fields[1], &line)
       || !ParseNaturalNumber(fields[2], &index)) {
-    DeathTestAbort("Bad --gtest_internal_run_death_test flag: "
-        + GTEST_FLAG(internal_run_death_test));
+    DeathTestAbort("Bad --gtest_internal_run_death_test flag: " +
+                   GTEST_FLAG_GET(internal_run_death_test));
   }
 
 # else
@@ -1637,8 +1631,8 @@ InternalRunDeathTestFlag* ParseInternalRunDeathTestFlag() {
       || !ParseNaturalNumber(fields[1], &line)
       || !ParseNaturalNumber(fields[2], &index)
       || !ParseNaturalNumber(fields[3], &write_fd)) {
-    DeathTestAbort("Bad --gtest_internal_run_death_test flag: "
-        + GTEST_FLAG(internal_run_death_test));
+    DeathTestAbort("Bad --gtest_internal_run_death_test flag: " +
+                   GTEST_FLAG_GET(internal_run_death_test));
   }
 
 # endif  // GTEST_OS_WINDOWS

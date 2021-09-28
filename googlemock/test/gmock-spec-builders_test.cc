@@ -76,7 +76,6 @@ using testing::DoDefault;
 using testing::Eq;
 using testing::Expectation;
 using testing::ExpectationSet;
-using testing::GMOCK_FLAG(verbose);
 using testing::Gt;
 using testing::IgnoreResult;
 using testing::InSequence;
@@ -696,9 +695,9 @@ TEST(ExpectCallSyntaxTest, WarnsOnTooFewActions) {
 }
 
 TEST(ExpectCallSyntaxTest, WarningIsErrorWithFlag) {
-  int original_behavior = testing::GMOCK_FLAG(default_mock_behavior);
+  int original_behavior = GMOCK_FLAG_GET(default_mock_behavior);
 
-  testing::GMOCK_FLAG(default_mock_behavior) = kAllow;
+  GMOCK_FLAG_SET(default_mock_behavior, kAllow);
   CaptureStdout();
   {
     MockA a;
@@ -707,7 +706,7 @@ TEST(ExpectCallSyntaxTest, WarningIsErrorWithFlag) {
   std::string output = GetCapturedStdout();
   EXPECT_TRUE(output.empty()) << output;
 
-  testing::GMOCK_FLAG(default_mock_behavior) = kWarn;
+  GMOCK_FLAG_SET(default_mock_behavior, kWarn);
   CaptureStdout();
   {
     MockA a;
@@ -718,14 +717,14 @@ TEST(ExpectCallSyntaxTest, WarningIsErrorWithFlag) {
   EXPECT_PRED_FORMAT2(IsSubstring, "Uninteresting mock function call",
                       warning_output);
 
-  testing::GMOCK_FLAG(default_mock_behavior) = kFail;
+  GMOCK_FLAG_SET(default_mock_behavior, kFail);
   EXPECT_NONFATAL_FAILURE({
     MockA a;
     a.DoA(0);
   }, "Uninteresting mock function call");
 
   // Out of bounds values are converted to kWarn
-  testing::GMOCK_FLAG(default_mock_behavior) = -1;
+  GMOCK_FLAG_SET(default_mock_behavior, -1);
   CaptureStdout();
   {
     MockA a;
@@ -735,7 +734,7 @@ TEST(ExpectCallSyntaxTest, WarningIsErrorWithFlag) {
   EXPECT_PRED_FORMAT2(IsSubstring, "GMOCK WARNING", warning_output);
   EXPECT_PRED_FORMAT2(IsSubstring, "Uninteresting mock function call",
                       warning_output);
-  testing::GMOCK_FLAG(default_mock_behavior) = 3;
+  GMOCK_FLAG_SET(default_mock_behavior, 3);
   CaptureStdout();
   {
     MockA a;
@@ -746,7 +745,7 @@ TEST(ExpectCallSyntaxTest, WarningIsErrorWithFlag) {
   EXPECT_PRED_FORMAT2(IsSubstring, "Uninteresting mock function call",
                       warning_output);
 
-  testing::GMOCK_FLAG(default_mock_behavior) = original_behavior;
+  GMOCK_FLAG_SET(default_mock_behavior, original_behavior);
 }
 
 #endif  // GTEST_HAS_STREAM_REDIRECTION
@@ -2024,10 +2023,10 @@ class MockC {
 class VerboseFlagPreservingFixture : public testing::Test {
  protected:
   VerboseFlagPreservingFixture()
-      : saved_verbose_flag_(GMOCK_FLAG(verbose)) {}
+      : saved_verbose_flag_(GMOCK_FLAG_GET(verbose)) {}
 
   ~VerboseFlagPreservingFixture() override {
-    GMOCK_FLAG(verbose) = saved_verbose_flag_;
+    GMOCK_FLAG_SET(verbose, saved_verbose_flag_);
   }
 
  private:
@@ -2043,7 +2042,7 @@ class VerboseFlagPreservingFixture : public testing::Test {
 // --gmock_verbose=warning is specified.
 TEST(FunctionCallMessageTest,
      UninterestingCallOnNaggyMockGeneratesNoStackTraceWhenVerboseWarning) {
-  GMOCK_FLAG(verbose) = kWarningVerbosity;
+  GMOCK_FLAG_SET(verbose, kWarningVerbosity);
   NaggyMock<MockC> c;
   CaptureStdout();
   c.VoidMethod(false, 5, "Hi", nullptr, Printable(), Unprintable());
@@ -2057,7 +2056,7 @@ TEST(FunctionCallMessageTest,
 // --gmock_verbose=info is specified.
 TEST(FunctionCallMessageTest,
      UninterestingCallOnNaggyMockGeneratesFyiWithStackTraceWhenVerboseInfo) {
-  GMOCK_FLAG(verbose) = kInfoVerbosity;
+  GMOCK_FLAG_SET(verbose, kInfoVerbosity);
   NaggyMock<MockC> c;
   CaptureStdout();
   c.VoidMethod(false, 5, "Hi", nullptr, Printable(), Unprintable());
@@ -2179,8 +2178,8 @@ class GMockVerboseFlagTest : public VerboseFlagPreservingFixture {
         "call should not happen.  Do not suppress it by blindly adding "
         "an EXPECT_CALL() if you don't mean to enforce the call.  "
         "See "
-        "https://github.com/google/googletest/blob/master/googlemock/docs/"
-        "cook_book.md#"
+        "https://github.com/google/googletest/blob/master/docs/"
+        "gmock_cook_book.md#"
         "knowing-when-to-expect for details.";
 
     // A void-returning function.
@@ -2213,7 +2212,7 @@ class GMockVerboseFlagTest : public VerboseFlagPreservingFixture {
 // Tests that --gmock_verbose=info causes both expected and
 // uninteresting calls to be reported.
 TEST_F(GMockVerboseFlagTest, Info) {
-  GMOCK_FLAG(verbose) = kInfoVerbosity;
+  GMOCK_FLAG_SET(verbose, kInfoVerbosity);
   TestExpectedCall(true);
   TestUninterestingCallOnNaggyMock(true);
 }
@@ -2221,7 +2220,7 @@ TEST_F(GMockVerboseFlagTest, Info) {
 // Tests that --gmock_verbose=warning causes uninteresting calls to be
 // reported.
 TEST_F(GMockVerboseFlagTest, Warning) {
-  GMOCK_FLAG(verbose) = kWarningVerbosity;
+  GMOCK_FLAG_SET(verbose, kWarningVerbosity);
   TestExpectedCall(false);
   TestUninterestingCallOnNaggyMock(true);
 }
@@ -2229,7 +2228,7 @@ TEST_F(GMockVerboseFlagTest, Warning) {
 // Tests that --gmock_verbose=warning causes neither expected nor
 // uninteresting calls to be reported.
 TEST_F(GMockVerboseFlagTest, Error) {
-  GMOCK_FLAG(verbose) = kErrorVerbosity;
+  GMOCK_FLAG_SET(verbose, kErrorVerbosity);
   TestExpectedCall(false);
   TestUninterestingCallOnNaggyMock(false);
 }
@@ -2237,7 +2236,7 @@ TEST_F(GMockVerboseFlagTest, Error) {
 // Tests that --gmock_verbose=SOME_INVALID_VALUE has the same effect
 // as --gmock_verbose=warning.
 TEST_F(GMockVerboseFlagTest, InvalidFlagIsTreatedAsWarning) {
-  GMOCK_FLAG(verbose) = "invalid";  // Treated as "warning".
+  GMOCK_FLAG_SET(verbose, "invalid");  // Treated as "warning".
   TestExpectedCall(false);
   TestUninterestingCallOnNaggyMock(true);
 }
@@ -2270,21 +2269,21 @@ class GMockLogTest : public VerboseFlagPreservingFixture {
 };
 
 TEST_F(GMockLogTest, DoesNotPrintGoodCallInternallyIfVerbosityIsWarning) {
-  GMOCK_FLAG(verbose) = kWarningVerbosity;
+  GMOCK_FLAG_SET(verbose, kWarningVerbosity);
   EXPECT_CALL(helper_, Foo(_))
       .WillOnce(Return(PrintMeNot()));
   helper_.Foo(PrintMeNot());  // This is an expected call.
 }
 
 TEST_F(GMockLogTest, DoesNotPrintGoodCallInternallyIfVerbosityIsError) {
-  GMOCK_FLAG(verbose) = kErrorVerbosity;
+  GMOCK_FLAG_SET(verbose, kErrorVerbosity);
   EXPECT_CALL(helper_, Foo(_))
       .WillOnce(Return(PrintMeNot()));
   helper_.Foo(PrintMeNot());  // This is an expected call.
 }
 
 TEST_F(GMockLogTest, DoesNotPrintWarningInternallyIfVerbosityIsError) {
-  GMOCK_FLAG(verbose) = kErrorVerbosity;
+  GMOCK_FLAG_SET(verbose, kErrorVerbosity);
   ON_CALL(helper_, Foo(_))
       .WillByDefault(Return(PrintMeNot()));
   helper_.Foo(PrintMeNot());  // This should generate a warning.
@@ -2768,8 +2767,8 @@ int main(int argc, char **argv) {
   testing::InitGoogleMock(&argc, argv);
   // Ensures that the tests pass no matter what value of
   // --gmock_catch_leaked_mocks and --gmock_verbose the user specifies.
-  testing::GMOCK_FLAG(catch_leaked_mocks) = true;
-  testing::GMOCK_FLAG(verbose) = testing::internal::kWarningVerbosity;
+  GMOCK_FLAG_SET(catch_leaked_mocks, true);
+  GMOCK_FLAG_SET(verbose, testing::internal::kWarningVerbosity);
 
   return RUN_ALL_TESTS();
 }

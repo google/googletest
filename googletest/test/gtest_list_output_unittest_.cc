@@ -44,6 +44,32 @@ TEST(FooTest, Test1) {}
 
 TEST(FooTest, Test2) {}
 
+class FooTestFixture : public ::testing::Test {};
+TEST_F(FooTestFixture, Test3) {}
+TEST_F(FooTestFixture, Test4) {}
+
+class ValueParamTest : public ::testing::TestWithParam<int> {};
+TEST_P(ValueParamTest, Test5) {}
+TEST_P(ValueParamTest, Test6) {}
+INSTANTIATE_TEST_SUITE_P(ValueParam, ValueParamTest, ::testing::Values(33, 42));
+
+template <typename T>
+class TypedTest : public ::testing::Test {};
+typedef testing::Types<int, bool> TypedTestTypes;
+TYPED_TEST_SUITE(TypedTest, TypedTestTypes);
+TYPED_TEST(TypedTest, Test7) {}
+TYPED_TEST(TypedTest, Test8) {}
+
+template <typename T>
+class TypeParameterizedTestSuite : public ::testing::Test {};
+TYPED_TEST_SUITE_P(TypeParameterizedTestSuite);
+TYPED_TEST_P(TypeParameterizedTestSuite, Test9) {}
+TYPED_TEST_P(TypeParameterizedTestSuite, Test10) {}
+REGISTER_TYPED_TEST_SUITE_P(TypeParameterizedTestSuite, Test9, Test10);
+typedef testing::Types<int, bool> TypeParameterizedTestSuiteTypes;  // NOLINT
+INSTANTIATE_TYPED_TEST_SUITE_P(Single, TypeParameterizedTestSuite,
+                               TypeParameterizedTestSuiteTypes);
+
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
 
