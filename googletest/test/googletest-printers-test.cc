@@ -1873,6 +1873,7 @@ TEST_F(PrintAnyTest, NonEmpty) {
 
 #if GTEST_INTERNAL_HAS_OPTIONAL
 TEST(PrintOptionalTest, Basic) {
+  EXPECT_EQ("(nullopt)", PrintToString(internal::Nullopt()));
   internal::Optional<int> value;
   EXPECT_EQ("(nullopt)", PrintToString(value));
   value = {7};
