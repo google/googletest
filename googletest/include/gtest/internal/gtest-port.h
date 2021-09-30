@@ -2310,6 +2310,7 @@ namespace testing {
 namespace internal {
 template <typename T>
 using Optional = ::absl::optional<T>;
+inline ::absl::nullopt_t Nullopt() { return ::absl::nullopt; }
 }  // namespace internal
 }  // namespace testing
 #else
@@ -2323,6 +2324,7 @@ namespace testing {
 namespace internal {
 template <typename T>
 using Optional = ::std::optional<T>;
+inline ::std::nullopt_t Nullopt() { return ::std::nullopt; }
 }  // namespace internal
 }  // namespace testing
 // The case where absl is configured NOT to alias std::optional is not

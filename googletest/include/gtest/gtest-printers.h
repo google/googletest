@@ -775,6 +775,14 @@ class UniversalPrinter<Optional<T>> {
   }
 };
 
+template <>
+class UniversalPrinter<decltype(Nullopt())> {
+ public:
+  static void Print(decltype(Nullopt()), ::std::ostream* os) {
+    *os << "(nullopt)";
+  }
+};
+
 #endif  // GTEST_INTERNAL_HAS_OPTIONAL
 
 #if GTEST_INTERNAL_HAS_VARIANT
