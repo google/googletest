@@ -47,6 +47,16 @@ config_setting(
 )
 
 config_setting(
+    name = "freebsd",
+    constraint_values = ["@platforms//os:freebsd"],
+)
+
+config_setting(
+    name = "openbsd",
+    constraint_values = ["@platforms//os:openbsd"],
+)
+
+config_setting(
     name = "msvc_compiler",
     flag_values = {
         "@bazel_tools//tools/cpp:compiler": "msvc-cl",
@@ -110,6 +120,8 @@ cc_library(
     linkopts = select({
         ":qnx": ["-lregex"],
         ":windows": [],
+        ":freebsd": ["-lm", "-pthread"],
+        ":openbsd": ["-lm", "-pthread"],
         "//conditions:default": ["-pthread"],
     }),
     deps = select({
