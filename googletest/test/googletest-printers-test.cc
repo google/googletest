@@ -449,6 +449,24 @@ TEST(PrintBuiltInTypeTest, Size_t) {
 #endif  // !GTEST_OS_WINDOWS
 }
 
+// gcc/clang __{u,}int128_t values.
+#if defined(__SIZEOF_INT128__)
+TEST(PrintBuiltInTypeTest, Int128) {
+  // Small ones
+  EXPECT_EQ("0", Print(__int128_t{0}));
+  EXPECT_EQ("0", Print(__uint128_t{0}));
+  EXPECT_EQ("12345", Print(__int128_t{12345}));
+  EXPECT_EQ("12345", Print(__uint128_t{12345}));
+  EXPECT_EQ("-12345", Print(__int128_t{-12345}));
+
+  // Large ones
+  EXPECT_EQ("340282366920938463463374607431768211455", Print(~__uint128_t{}));
+  __int128_t max_128 = static_cast<__int128_t>(~__uint128_t{} / 2);
+  EXPECT_EQ("-170141183460469231731687303715884105728", Print(~max_128));
+  EXPECT_EQ("170141183460469231731687303715884105727", Print(max_128));
+}
+#endif  // __SIZEOF_INT128__
+
 // Floating-points.
 TEST(PrintBuiltInTypeTest, FloatingPoints) {
   EXPECT_EQ("1.5", Print(1.5f));   // float
