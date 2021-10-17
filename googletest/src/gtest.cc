@@ -748,6 +748,72 @@ bool UnitTestOptions::MatchesFilter(const std::string& name_str,
   return true;
 }
 
+class Filter {
+  std::vector<std::string> patterns_;
+
+ public:
+  explicit Filter(const std::string& filter) {
+    if (filter.empty()) return;
+
+    auto pattern_start = filter.begin();
+    while (true) {
+      const auto delimiter = std::find(pattern_start, filter.end(), ':');
+      patterns_.emplace_back(pattern_start, delimiter);
+
+      if (delimiter == filter.end())
+        break;
+      pattern_start = std::next(delimiter);
+    }
+  }
+
+  bool MatchesName(const std::string& name) const {
+    const auto pattern_matches_name = [&name](const std::string& pattern) {
+      return PatternMatchesString(name, pattern.c_str(),
+                                  pattern.c_str() + pattern.size());
+    };
+    return std::any_of(patterns_.begin(), patterns_.end(),
+                       pattern_matches_name);
+  }
+};
+
+class PositiveAndNegativeFilter {
+  Filter positive_filter_;
+  Filter negative_filter_;
+
+  static std::pair<std::string, std::string>
+  BreakIntoPositiveAndNegativeFilters(const std::string& filter) {
+    const auto dash_pos = filter.find('-');
+    if (dash_pos == std::string::npos) {
+      return {filter, {}};  // Whole string is a positive filter
+    } else {
+      return {dash_pos ? filter.substr(0, dash_pos) : kUniversalFilter,
+              filter.substr(dash_pos + 1)};
+    }
+  }
+
+  PositiveAndNegativeFilter(
+      const std::pair<std::string, std::string>& positive_and_negative_filters)
+      : positive_filter_(positive_and_negative_filters.first),
+        negative_filter_(positive_and_negative_filters.second) {}
+
+ public:
+  explicit PositiveAndNegativeFilter(const std::string& filter)
+      : PositiveAndNegativeFilter(BreakIntoPositiveAndNegativeFilters(filter)) {
+  }
+
+  bool MatchesTest(const std::string& test_suite_name,
+                   const std::string& test_name) const {
+    const std::string& full_name = test_suite_name + "." + test_name.c_str();
+
+    return MatchesName(full_name);
+  }
+
+  bool MatchesName(const std::string& name) const {
+    return positive_filter_.MatchesName(name) &&
+           !negative_filter_.MatchesName(name);
+  }
+};
+
 // Returns true if and only if the user-specified filter matches the test
 // suite name and the test name.
 bool UnitTestOptions::FilterMatchesTest(const std::string& test_suite_name,
@@ -5754,9 +5820,9 @@ TestSuite* UnitTestImpl::GetTestSuite(
   auto* const new_test_suite =
       new TestSuite(test_suite_name, type_param, set_up_tc, tear_down_tc);
 
+  const Filter death_test_suite_filter{kDeathTestSuiteFilter};
   // Is this a death test suite?
-  if (internal::UnitTestOptions::MatchesFilter(test_suite_name,
-                                               kDeathTestSuiteFilter)) {
+  if (death_test_suite_filter.MatchesName(test_suite_name)) {
     // Yes.  Inserts the test suite after the last death test suite
     // defined so far.  This only works when the test suites haven't
     // been shuffled.  Otherwise we may end up running a death test
@@ -6089,6 +6155,8 @@ int UnitTestImpl::FilterTests(ReactionToSharding shard_tests) {
   const int32_t shard_index = shard_tests == HONOR_SHARDING_PROTOCOL ?
       Int32FromEnvOrDie(kTestShardIndex, -1) : -1;
 
+  const PositiveAndNegativeFilter gtest_flag_filter{GTEST_FLAG_GET(filter)};
+  const Filter disable_test_filter{kDisableTestFilter};
   // num_runnable_tests are the number of tests that will
   // run across all shards (i.e., match filter and are not disabled).
   // num_selected_tests are the number of tests to be run on
@@ -6104,14 +6172,11 @@ int UnitTestImpl::FilterTests(ReactionToSharding shard_tests) {
       const std::string test_name(test_info->name());
       // A test is disabled if test suite name or test name matches
       // kDisableTestFilter.
-      const bool is_disabled = internal::UnitTestOptions::MatchesFilter(
-                                   test_suite_name, kDisableTestFilter) ||
-                               internal::UnitTestOptions::MatchesFilter(
-                                   test_name, kDisableTestFilter);
+      const bool is_disabled = disable_test_filter.MatchesName(test_suite_name) ||
+                               disable_test_filter.MatchesName(test_name);
       test_info->is_disabled_ = is_disabled;
 
-      const bool matches_filter = internal::UnitTestOptions::FilterMatchesTest(
-          test_suite_name, test_name);
+      const bool matches_filter = gtest_flag_filter.MatchesTest(test_suite_name, test_name);
       test_info->matches_filter_ = matches_filter;
 
       const bool is_runnable =
