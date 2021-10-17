@@ -723,31 +723,6 @@ static bool PatternMatchesString(const std::string& name_str,
   return true;
 }
 
-bool UnitTestOptions::MatchesFilter(const std::string& name_str,
-                                    const char* filter) {
-  // The filter is a list of patterns separated by colons (:).
-  const char* pattern = filter;
-  while (true) {
-    // Find the bounds of this pattern.
-    const char* const next_sep = strchr(pattern, ':');
-    const char* const pattern_end =
-        next_sep != nullptr ? next_sep : pattern + strlen(pattern);
-
-    // Check if this pattern matches name_str.
-    if (PatternMatchesString(name_str, pattern, pattern_end)) {
-      return true;
-    }
-
-    // Give up on this pattern. However, if we found a pattern separator (:),
-    // advance to the next pattern (skipping over the separator) and restart.
-    if (next_sep == nullptr) {
-      return false;
-    }
-    pattern = next_sep + 1;
-  }
-  return true;
-}
-
 class Filter {
   std::vector<std::string> patterns_;
 
@@ -830,31 +805,9 @@ class PositiveAndNegativeFilter {
 // suite name and the test name.
 bool UnitTestOptions::FilterMatchesTest(const std::string& test_suite_name,
                                         const std::string& test_name) {
-  const std::string& full_name = test_suite_name + "." + test_name.c_str();
-
   // Split --gtest_filter at '-', if there is one, to separate into
   // positive filter and negative filter portions
-  std::string str = GTEST_FLAG_GET(filter);
-  const char* const p = str.c_str();
-  const char* const dash = strchr(p, '-');
-  std::string positive;
-  std::string negative;
-  if (dash == nullptr) {
-    positive = str.c_str();  // Whole string is a positive filter
-    negative = "";
-  } else {
-    positive = std::string(p, dash);   // Everything up to the dash
-    negative = std::string(dash + 1);  // Everything after the dash
-    if (positive.empty()) {
-      // Treat '-test1' as the same as '*-test1'
-      positive = kUniversalFilter;
-    }
-  }
-
-  // A filter is a colon-separated list of patterns.  It matches a
-  // test if any pattern in it matches the test.
-  return (MatchesFilter(full_name, positive.c_str()) &&
-          !MatchesFilter(full_name, negative.c_str()));
+  return PositiveAndNegativeFilter{GTEST_FLAG_GET(filter)}.MatchesTest(test_suite_name, test_name);
 }
 
 #if GTEST_HAS_SEH
