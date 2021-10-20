@@ -1,0 +1,40 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  Linux:
+    runs-on: ubuntu-latest
+    steps:
+
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Tests
+      run: bazel test --test_output=errors //...
+
+  MacOs:
+    runs-on: macos-latest
+    steps:
+
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Tests
+      run: bazel test --test_output=errors //...
+
+
+  Windows:
+    runs-on: windows-latest
+    steps:
+
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Tests
+      run: bazel test --test_output=errors //...
