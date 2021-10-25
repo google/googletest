@@ -322,23 +322,6 @@ bool AutoHandle::IsCloseable() const {
   return handle_ != nullptr && handle_ != INVALID_HANDLE_VALUE;
 }
 
-Notification::Notification()
-    : event_(::CreateEvent(nullptr,     // Default security attributes.
-                           TRUE,        // Do not reset automatically.
-                           FALSE,       // Initially unset.
-                           nullptr)) {  // Anonymous event.
-  GTEST_CHECK_(event_.Get() != nullptr);
-}
-
-void Notification::Notify() {
-  GTEST_CHECK_(::SetEvent(event_.Get()) != FALSE);
-}
-
-void Notification::WaitForNotification() {
-  GTEST_CHECK_(
-      ::WaitForSingleObject(event_.Get(), INFINITE) == WAIT_OBJECT_0);
-}
-
 Mutex::Mutex()
     : owner_thread_id_(0),
       type_(kDynamic),
