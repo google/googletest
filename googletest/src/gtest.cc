@@ -3929,7 +3929,7 @@ class XmlUnitTestResultPrinter : public EmptyTestEventListener {
 
   // May c appear in a well-formed XML document?
   static bool IsValidXmlCharacter(char c) {
-    return IsNormalizableWhitespace(c) || c >= 0x20;
+    return IsNormalizableWhitespace(c) || !((0x00 <= c) && (c < 0x20));
   }
 
   // Returns an XML-escaped copy of the input string str.  If
