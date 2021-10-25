@@ -1163,21 +1163,8 @@ void ClearInjectableArgvs();
 
 // Defines synchronization primitives.
 #if GTEST_IS_THREADSAFE
-# if GTEST_HAS_PTHREAD
-// Sleeps for (roughly) n milliseconds.  This function is only for testing
-// Google Test's own constructs.  Don't use it in user tests, either
-// directly or indirectly.
-inline void SleepMilliseconds(int n) {
-  const timespec time = {
-    0,                  // 0 seconds.
-    n * 1000L * 1000L,  // And n ms.
-  };
-  nanosleep(&time, nullptr);
-}
 
-# elif GTEST_OS_WINDOWS
-GTEST_API_ void SleepMilliseconds(int n);
-
+# if GTEST_OS_WINDOWS
 // Provides leak-safe Windows kernel handle ownership.
 // Used in death tests and in threading support.
 class GTEST_API_ AutoHandle {
@@ -1206,7 +1193,6 @@ class GTEST_API_ AutoHandle {
 
   GTEST_DISALLOW_COPY_AND_ASSIGN_(AutoHandle);
 };
-
 # endif
 
 # if GTEST_HAS_NOTIFICATION_
