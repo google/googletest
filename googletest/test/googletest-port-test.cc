@@ -36,8 +36,10 @@
 # include <time.h>
 #endif  // GTEST_OS_MAC
 
+#include <chrono>  // NOLINT
 #include <list>
 #include <memory>
+#include <thread>  // NOLINT
 #include <utility>  // For std::pair and std::make_pair.
 #include <vector>
 
@@ -333,7 +335,7 @@ TEST(GetThreadCountTest, ReturnsCorrectValue) {
         break;
       }
 
-      SleepMilliseconds(100);
+      std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 
     // Retry if an arbitrary other thread was created or destroyed.
@@ -1050,7 +1052,7 @@ class AtomicCounterWithMutex {
     int temp = value_;
     {
       // We need to put up a memory barrier to prevent reads and writes to
-      // value_ rearranged with the call to SleepMilliseconds when observed
+      // value_ rearranged with the call to sleep_for when observed
       // from other threads.
 #if GTEST_HAS_PTHREAD
       // On POSIX, locking a mutex puts up a memory barrier.  We cannot use
@@ -1061,7 +1063,8 @@ class AtomicCounterWithMutex {
           pthread_mutex_init(&memory_barrier_mutex, nullptr));
       GTEST_CHECK_POSIX_SUCCESS_(pthread_mutex_lock(&memory_barrier_mutex));
 
-      SleepMilliseconds(static_cast<int>(random_.Generate(30)));
+      std::this_thread::sleep_for(
+          std::chrono::milliseconds(random_.Generate(30)));
 
       GTEST_CHECK_POSIX_SUCCESS_(pthread_mutex_unlock(&memory_barrier_mutex));
       GTEST_CHECK_POSIX_SUCCESS_(pthread_mutex_destroy(&memory_barrier_mutex));
@@ -1069,7 +1072,8 @@ class AtomicCounterWithMutex {
       // On Windows, performing an interlocked access puts up a memory barrier.
       volatile LONG dummy = 0;
       ::InterlockedIncrement(&dummy);
-      SleepMilliseconds(static_cast<int>(random_.Generate(30)));
+      std::this_thread::sleep_for(
+          std::chrono::milliseconds(random_.Generate(30)));
       ::InterlockedIncrement(&dummy);
 #else
 # error "Memory barrier not implemented on this platform."

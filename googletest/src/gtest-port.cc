@@ -280,10 +280,6 @@ size_t GetThreadCount() {
 
 #if GTEST_IS_THREADSAFE && GTEST_OS_WINDOWS
 
-void SleepMilliseconds(int n) {
-  ::Sleep(static_cast<DWORD>(n));
-}
-
 AutoHandle::AutoHandle()
     : handle_(INVALID_HANDLE_VALUE) {}
 
