@@ -1,8 +1,8 @@
-# GoogleTest
+# GoogleTest #
 
-### Announcements
+### Announcements ###
 
-#### Live at Head
+#### Live at Head ####
 
 GoogleTest now follows the
 [Abseil Live at Head philosophy](https://abseil.io/about/philosophy#upgrade-support).
@@ -19,7 +19,7 @@ GitHub Pages rather than directly in the repository.
 [Release 1.11.0](https://github.com/google/googletest/releases/tag/release-1.11.0)
 is now available.
 
-#### Coming Soon
+#### Wait a little bit Coming Soon
 
 *   We are planning to take a dependency on
     [Abseil](https://github.com/abseil/abseil-cpp).
