@@ -394,7 +394,7 @@ TEST_F(LogIsVisibleTest, WorksWhenVerbosityIsWarning) {
 // and log severity.
 void TestLogWithSeverity(const std::string& verbosity, LogSeverity severity,
                          bool should_print) {
-  const std::string old_flag = GMOCK_FLAG(verbose);
+  const std::string old_flag = GMOCK_FLAG_GET(verbose);
   GMOCK_FLAG_SET(verbose, verbosity);
   CaptureStdout();
   Log(severity, "Test log.\n", 0);
@@ -413,7 +413,7 @@ void TestLogWithSeverity(const std::string& verbosity, LogSeverity severity,
 // Tests that when the stack_frames_to_skip parameter is negative,
 // Log() doesn't include the stack trace in the output.
 TEST(LogTest, NoStackTraceWhenStackFramesToSkipIsNegative) {
-  const std::string saved_flag = GMOCK_FLAG(verbose);
+  const std::string saved_flag = GMOCK_FLAG_GET(verbose);
   GMOCK_FLAG_SET(verbose, kInfoVerbosity);
   CaptureStdout();
   Log(kInfo, "Test log.\n", -1);
@@ -499,7 +499,7 @@ TEST(LogTest, OnlyWarningsArePrintedWhenVerbosityIsInvalid) {
 // Verifies that Log() behaves correctly for the given verbosity level
 // and log severity.
 std::string GrabOutput(void(*logger)(), const char* verbosity) {
-  const std::string saved_flag = GMOCK_FLAG(verbose);
+  const std::string saved_flag = GMOCK_FLAG_GET(verbose);
   GMOCK_FLAG_SET(verbose, verbosity);
   CaptureStdout();
   logger();
