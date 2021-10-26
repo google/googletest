@@ -1919,6 +1919,58 @@ time.
 If you combine this with `--gtest_repeat=N`, googletest will pick a different
 random seed and re-shuffle the tests in each iteration.
 
+### Distributing Test Functions to Multiple Machines
+
+If you have more than one machine you can use to run a test program, you might
+want to run the test functions in parallel and get the result faster. We call
+this technique *sharding*, where each machine is called a *shard*.
+
+GoogleTest is compatible with test sharding. To take advantage of this feature,
+your test runner (not part of GoogleTest) needs to do the following:
+
+1.  Allocate a number of machines (shards) to run the tests.
+1.  On each shard, set the `GTEST_TOTAL_SHARDS` environment variable to the total
+    number of shards. It must be the same for all shards.
+1.  On each shard, set the `GTEST_SHARD_INDEX` environment variable to the index
+    of the shard. Different shards must be assigned different indices, which
+    must be in the range `[0, GTEST_TOTAL_SHARDS - 1]`.
+1.  Run the same test program on all shards. When GoogleTest sees the above two
+    environment variables, it will select a subset of the test functions to run.
+    Across all shards, each test function in the program will be run exactly
+    once.
+1.  Wait for all shards to finish, then collect and report the results.
+
+Your project may have tests that were written without GoogleTest and thus don't
+understand this protocol. In order for your test runner to figure out which test
+supports sharding, it can set the environment variable `GTEST_SHARD_STATUS_FILE`
+to a non-existent file path. If a test program supports sharding, it will create
+this file to acknowledge that fact; otherwise it will not create it. The actual
+contents of the file are not important at this time, although we may put some
+useful information in it in the future.
+
+Here's an example to make it clear. Suppose you have a test program `foo_test`
+that contains the following 5 test functions:
+
+```
+TEST(A, V)
+TEST(A, W)
+TEST(B, X)
+TEST(B, Y)
+TEST(B, Z)
+```
+
+Suppose you have 3 machines at your disposal. To run the test functions in
+parallel, you would set `GTEST_TOTAL_SHARDS` to 3 on all machines, and set
+`GTEST_SHARD_INDEX` to 0, 1, and 2 on the machines respectively. Then you would
+run the same `foo_test` on each machine.
+
+GoogleTest reserves the right to change how the work is distributed across the
+shards, but here's one possible scenario:
+
+*   Machine #0 runs `A.V` and `B.X`.
+*   Machine #1 runs `A.W` and `B.Y`.
+*   Machine #2 runs `B.Z`.
+
 ### Controlling Test Output
 
 #### Colored Terminal Output
