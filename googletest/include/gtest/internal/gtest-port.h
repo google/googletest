@@ -260,9 +260,17 @@
 #include <string.h>
 
 #include <cerrno>
+// #include <condition_variable>  // Guarded by GTEST_IS_THREADSAFE below
 #include <cstdint>
+#include <iostream>
 #include <limits>
+#include <locale>
+#include <memory>
+#include <string>
+// #include <mutex>  // Guarded by GTEST_IS_THREADSAFE below
+#include <tuple>
 #include <type_traits>
+#include <vector>
 
 #ifndef _WIN32_WCE
 # include <sys/types.h>
@@ -273,15 +281,6 @@
 # include <AvailabilityMacros.h>
 # include <TargetConditionals.h>
 #endif
-
-#include <condition_variable>  // NOLINT
-#include <iostream>
-#include <locale>
-#include <memory>
-#include <mutex>  // NOLINT
-#include <string>
-#include <tuple>
-#include <vector>
 
 #include "gtest/internal/custom/gtest-port.h"
 #include "gtest/internal/gtest-port-arch.h"
@@ -757,6 +756,12 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
    (GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_PHONE && !GTEST_OS_WINDOWS_RT) || \
    GTEST_HAS_PTHREAD)
 
+#endif  // GTEST_IS_THREADSAFE
+
+#if GTEST_IS_THREADSAFE
+// Some platforms don't support including these threading related headers.
+#include <condition_variable>  // NOLINT
+#include <mutex>  // NOLINT
 #endif  // GTEST_IS_THREADSAFE
 
 // GTEST_API_ qualifies all symbols that must be exported. The definitions below
