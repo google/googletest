@@ -256,9 +256,17 @@
 #include <stdlib.h>
 #include <string.h>
 #include <cerrno>
+// #include <condition_variable>  // Guarded by GTEST_IS_THREADSAFE below
 #include <cstdint>
+#include <iostream>
 #include <limits>
+#include <locale>
+#include <memory>
+#include <string>
+// #include <mutex>  // Guarded by GTEST_IS_THREADSAFE below
+#include <tuple>
 #include <type_traits>
+#include <vector>
 
 #ifndef _WIN32_WCE
 # include <sys/types.h>
@@ -749,6 +757,12 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
       || GTEST_HAS_PTHREAD)
 
 #endif // GTEST_IS_THREADSAFE
+
+#if GTEST_IS_THREADSAFE
+// Some platforms don't support including these threading related headers.
+#include <condition_variable>  // NOLINT
+#include <mutex>  // NOLINT
+#endif  // GTEST_IS_THREADSAFE
 
 // GTEST_API_ qualifies all symbols that must be exported. The definitions below
 // are guarded by #ifndef to give embedders a chance to define GTEST_API_ in
