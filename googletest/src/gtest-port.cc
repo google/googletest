@@ -574,6 +574,9 @@ class ThreadLocalRegistryImpl {
     // defer the destruction of the ThreadLocalValueHolderBases.
     {
       MutexLock lock(&mutex_);
+#ifdef _MSC_VER
+      MemoryIsNotDeallocated memory_is_not_deallocated;
+#endif  // _MSC_VER        
       ThreadIdToThreadLocals* const thread_to_thread_locals =
           GetThreadLocalsMapLocked();
       for (ThreadIdToThreadLocals::iterator it =
