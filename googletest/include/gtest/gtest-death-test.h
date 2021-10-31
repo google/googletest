@@ -331,10 +331,18 @@ class GTEST_API_ KilledBySignal {
     EXPECT_DEATH(statement, regex)
 # define ASSERT_DEATH_IF_SUPPORTED(statement, regex) \
     ASSERT_DEATH(statement, regex)
+# define EXPECT_EXIT_IF_SUPPORTED(statement, predicate, regex) \
+    EXPECT_EXIT(statement, predicate, regex)
+# define ASSERT_EXIT_IF_SUPPORTED(statement, predicate, regex) \
+    ASSERT_EXIT(statement, predicate, regex)
 #else
 # define EXPECT_DEATH_IF_SUPPORTED(statement, regex) \
     GTEST_UNSUPPORTED_DEATH_TEST(statement, regex, )
 # define ASSERT_DEATH_IF_SUPPORTED(statement, regex) \
+    GTEST_UNSUPPORTED_DEATH_TEST(statement, regex, return)
+# define EXPECT_EXIT_IF_SUPPORTED(statement, predicate, regex) \
+    GTEST_UNSUPPORTED_DEATH_TEST(statement, regex, )
+# define ASSERT_EXIT_IF_SUPPORTED(statement, predicate, regex) \
     GTEST_UNSUPPORTED_DEATH_TEST(statement, regex, return)
 #endif
 
