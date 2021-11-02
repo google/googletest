@@ -3254,6 +3254,8 @@ static const char* GetAnsiColorCode(GTestColor color) {
       return "2";
     case GTestColor::kYellow:
       return "3";
+    case GTestColor::kDefault:
+      [[fallthrough]];
     default:
       return nullptr;
   }
@@ -3502,6 +3504,12 @@ void PrettyUnitTestResultPrinter::OnTestPartResult(
     // If the test part succeeded, we don't need to do anything.
     case TestPartResult::kSuccess:
       return;
+    case TestPartResult::kNonFatalFailure:
+      [[fallthrough]];
+    case TestPartResult::kFatalFailure:
+      [[fallthrough]];
+    case TestPartResult::kSkip:
+      [[fallthrough]];
     default:
       // Print failure message from the assertion
       // (e.g. expected this and got that).
@@ -3719,6 +3727,12 @@ void BriefUnitTestResultPrinter::OnTestPartResult(
     // If the test part succeeded, we don't need to do anything.
     case TestPartResult::kSuccess:
       return;
+    case TestPartResult::kNonFatalFailure:
+      [[fallthrough]];
+    case TestPartResult::kFatalFailure:
+      [[fallthrough]];
+    case TestPartResult::kSkip:
+      [[fallthrough]];
     default:
       // Print failure message from the assertion
       // (e.g. expected this and got that).
