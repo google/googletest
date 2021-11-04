@@ -63,7 +63,6 @@ jobs:
       working-directory: ${{ runner.workspace }}/_build
       run: >
         cmake $GITHUB_WORKSPACE
-        -DBOMBYX_BUILD_BENCHMARKS=OFF
         -DCMAKE_C_COMPILER=${{ env.CC }}
         -DCMAKE_CXX_COMPILER=${{ env.CXX }}
         -DCMAKE_C_FLAGS="${{ env.EXTRA_FLAGS }}"
