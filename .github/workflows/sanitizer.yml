@@ -1,0 +1,76 @@
+name: sanitizer
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+env:
+  CC: clang
+  CXX: clang++
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        build_type: ['Debug']
+        sanitizer: ['asan', 'msan', 'tsan', 'ubsan']
+        compiler: ['clang']
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: configure msan env
+      if: matrix.sanitizer == 'msan'
+      run: |
+        echo "EXTRA_FLAGS=-g -O2 -fno-omit-frame-pointer -fsanitize=memory -fsanitize-memory-track-origins" >> $GITHUB_ENV
+        echo "LIBCXX_SANITIZER=MemoryWithOrigins" >> $GITHUB_ENV
+
+    - name: configure ubsan env
+      if: matrix.sanitizer == 'ubsan'
+      run: |
+        echo "EXTRA_FLAGS=-g -O2 -fno-omit-frame-pointer -fsanitize=undefined -fno-sanitize-recover=all" >> $GITHUB_ENV
+        echo "LIBCXX_SANITIZER=Undefined" >> $GITHUB_ENV
+
+    - name: configure asan env
+      if: matrix.sanitizer == 'asan'
+      run: |
+        echo "EXTRA_FLAGS=-g -O2 -fno-omit-frame-pointer -fsanitize=address -fno-sanitize-recover=all" >> $GITHUB_ENV
+        echo "LIBCXX_SANITIZER=Address" >> $GITHUB_ENV
+
+    - name: configure tsan env
+      if: matrix.sanitizer == 'tsan'
+      run: |
+        echo "EXTRA_FLAGS=-g -O2 -fno-omit-frame-pointer -fsanitize=thread -fno-sanitize-recover=all" >> $GITHUB_ENV
+        echo "LIBCXX_SANITIZER=Thread" >> $GITHUB_ENV
+
+    - name: install llvm stuff
+      if: matrix.compiler == 'clang'
+      run: |
+        sudo apt-get upgrade -y
+        sudo apt-get install clang
+        "${GITHUB_WORKSPACE}/.github/.libcxx-setup.sh"
+        echo "EXTRA_CXX_FLAGS=\"-stdlib=libc++\"" >> $GITHUB_ENV
+
+    - name: create build environment
+      run: cmake -E make_directory ${{ runner.workspace }}/_build
+
+    - name: configure cmake
+      shell: bash
+      working-directory: ${{ runner.workspace }}/_build
+      run: >
+        cmake $GITHUB_WORKSPACE
+        -DBOMBYX_BUILD_BENCHMARKS=OFF
+        -DCMAKE_C_COMPILER=${{ env.CC }}
+        -DCMAKE_CXX_COMPILER=${{ env.CXX }}
+        -DCMAKE_C_FLAGS="${{ env.EXTRA_FLAGS }}"
+        -DCMAKE_CXX_FLAGS="${{ env.EXTRA_FLAGS }} ${{ env.EXTRA_CXX_FLAGS }}"
+        -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+
+    - name: build
+      shell: bash
+      working-directory: ${{ runner.workspace }}/_build
+      run: cmake --build . --config ${{ matrix.build_type }}

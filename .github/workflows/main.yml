@@ -1,0 +1,41 @@
+name: CI release check
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+env:
+  CC: clang
+  CXX: clang++
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        build_type: ['Release']
+        compiler: ['clang']
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: prerequisite dependencies
+        shell: bash
+        run: |
+          sudo apt update -y
+          sudo apt -y install clang cmake
+
+      - name: configure cmake
+        shell: bash
+        run: >
+          cmake -B ${{github.workspace}}/_build
+          -DCMAKE_C_COMPILER=${{ env.CC }}
+          -DCMAKE_CXX_COMPILER=${{ env.CXX }}
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+
+      - name: build
+        shell: bash
+        run: cmake --build ${{github.workspace}}/_build --config ${{ matrix.build_type }}
