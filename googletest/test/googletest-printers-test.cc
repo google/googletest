@@ -473,6 +473,16 @@ TEST(PrintBuiltInTypeTest, FloatingPoints) {
   EXPECT_EQ("-2.5", Print(-2.5));  // double
 }
 
+#if GTEST_HAS_RTTI
+TEST(PrintBuiltInTypeTest, TypeInfo) {
+  struct MyStruct {};
+  auto res = Print(typeid(MyStruct{}));
+  // We can't guarantee that we can demangle the name, but either name should
+  // contain the substring "MyStruct".
+  EXPECT_NE(res.find("MyStruct"), res.npos) << res;
+}
+#endif  // GTEST_HAS_RTTI
+
 // Since ::std::stringstream::operator<<(const void *) formats the pointer
 // output differently with different compilers, we have to create the expected
 // output first and use it as our expectation.
