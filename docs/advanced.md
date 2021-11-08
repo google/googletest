@@ -1597,6 +1597,7 @@ void RegisterMyTests(const std::vector<int>& values) {
 }
 ...
 int main(int argc, char** argv) {
+  testing::InitGoogleTest(&argc, argv);
   std::vector<int> values_to_test = LoadValuesFromConfig();
   RegisterMyTests(values_to_test);
   ...
