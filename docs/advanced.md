@@ -926,10 +926,8 @@ class FooTest : public testing::Test {
   void TearDown() override { ... }
 
   // Some expensive resource shared by all tests.
-  static T* shared_resource_;
+  static T* shared_resource_ = nullptr;
 };
-
-T* FooTest::shared_resource_ = nullptr;
 
 TEST_F(FooTest, Test1) {
   ... you can refer to shared_resource_ here ...
