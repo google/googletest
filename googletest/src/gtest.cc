@@ -3934,12 +3934,13 @@ class XmlUnitTestResultPrinter : public EmptyTestEventListener {
  private:
   // Is c a whitespace character that is normalized to a space character
   // when it appears in an XML attribute value?
-  static bool IsNormalizableWhitespace(char c) {
-    return c == 0x9 || c == 0xA || c == 0xD;
+  static bool IsNormalizableWhitespace(unsigned char c) {
+    return c == '\t' || c == '\n' || c == '\r';
   }
 
   // May c appear in a well-formed XML document?
-  static bool IsValidXmlCharacter(char c) {
+  // https://www.w3.org/TR/REC-xml/#charsets
+  static bool IsValidXmlCharacter(unsigned char c) {
     return IsNormalizableWhitespace(c) || c >= 0x20;
   }
 
