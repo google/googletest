@@ -38,7 +38,7 @@ licenses(["notice"])
 cc_test(
     name = "gmock_all_test",
     size = "small",
-    srcs = glob(include = ["gmock-*.cc"]),
+    srcs = glob(include = ["gmock-*.cc"]) + ["gmock-matchers_test.h"],
     linkopts = select({
         "//:qnx": [],
         "//:windows": [],
