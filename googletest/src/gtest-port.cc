@@ -629,7 +629,8 @@ class ThreadLocalRegistryImpl {
         &ThreadLocalRegistryImpl::WatcherThreadFunc,
         reinterpret_cast<LPVOID>(new ThreadIdAndHandle(thread_id, thread)),
         CREATE_SUSPENDED, &watcher_thread_id);
-    GTEST_CHECK_(watcher_thread != nullptr);
+    GTEST_CHECK_(watcher_thread != nullptr)
+      << "CreateThread failed with error " << ::GetLastError() << ".";
     // Give the watcher thread the same priority as ours to avoid being
     // blocked by it.
     ::SetThreadPriority(watcher_thread,
