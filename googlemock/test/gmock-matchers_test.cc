@@ -5424,12 +5424,14 @@ class Streamlike {
   }
 
  private:
-  class ConstIter : public std::iterator<std::input_iterator_tag,
-                                         value_type,
-                                         ptrdiff_t,
-                                         const value_type*,
-                                         const value_type&> {
+  class ConstIter {
    public:
+    using iterator_category = std::input_iterator_tag;
+    using value_type = T;
+    using difference_type = ptrdiff_t;
+    using pointer = const value_type*;
+    using reference = const value_type&;
+
     ConstIter(const Streamlike* s,
               typename std::list<value_type>::iterator pos)
         : s_(s), pos_(pos) {}
@@ -7287,7 +7289,7 @@ TEST(ElementsAreTest, CanDescribeNegationOfExpectingNoElement) {
   EXPECT_EQ("isn't empty", DescribeNegation(m));
 }
 
-TEST(ElementsAreTest, CanDescribeNegationOfExpectingOneElment) {
+TEST(ElementsAreTest, CanDescribeNegationOfExpectingOneElement) {
   Matcher<const list<int>&> m = ElementsAre(Gt(5));
   EXPECT_EQ(
       "doesn't have 1 element, or\n"
