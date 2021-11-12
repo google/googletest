@@ -7284,7 +7284,7 @@ TEST(ElementsAreTest, CanDescribeNegationOfExpectingNoElement) {
   EXPECT_EQ("isn't empty", DescribeNegation(m));
 }
 
-TEST(ElementsAreTest, CanDescribeNegationOfExpectingOneElment) {
+TEST(ElementsAreTest, CanDescribeNegationOfExpectingOneElement) {
   Matcher<const list<int>&> m = ElementsAre(Gt(5));
   EXPECT_EQ(
       "doesn't have 1 element, or\n"
