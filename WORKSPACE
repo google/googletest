@@ -10,8 +10,8 @@ http_archive(
 )
 
 http_archive(
-    name = "rules_python",
+    name = "rules_java",
     sha256 = "98b3c592faea9636ac8444bfd9de7f3fb4c60590932d6e6ac5946e3f8dbd5ff6",
     strip_prefix = "rules_python-ed6cc8f2c3692a6a7f013ff8bc185ba77eb9b4d2",
-    urls = ["https://github.com/bazelbuild/rules_python/archive/ed6cc8f2c3692a6a7f013ff8bc185ba77eb9b4d2.zip"],  # 2021-05-17T00:24:16Z
+    urls = ["https://github.com/bazelbuild/rules_java/archive/ed6cc8f2c3692a6a7f013ff8bc185ba77eb9b4d2.zip"],  # 2021-05-17T00:24:16Z
 )
