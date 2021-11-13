@@ -79,29 +79,6 @@ else()
 
 endif()
 
-include(CheckCXXCompilerFlag)
-function(add_flag_or_print_warning flag name)
-  check_cxx_compiler_flag("-Werror ${flag}" "CXX_SUPPORTS_${name}")
-  if (CXX_SUPPORTS_${name})
-    message(STATUS "Building with ${flag}")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${flag}" PARENT_SCOPE)
-  else()
-    message(WARNING "${flag} is not supported.")
-  endif()
-endfunction()
-
-if (gtest_enable_pic)
-  if (XCODE)
-    # Xcode has -mdynamic-no-pic on by default, which overrides -fPIC. I don't
-    # know how to disable this, so just force gtest_enable_pic off for now.
-    message(WARNING "-fPIC not supported with Xcode.")
-  elseif(WIN32 OR CYGWIN)
-    # On Windows all code is PIC. MinGW warns if -fPIC is used.
-  else()
-    add_flag_or_print_warning("-fPIC" FPIC)
-  endif()
-endif()
-
 
 if (gtest_hide_internal_symbols)
   set(CMAKE_CXX_VISIBILITY_PRESET hidden)
@@ -164,6 +141,12 @@ if (DEFINED CMAKE_VERSION AND NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.11")
     "$<BUILD_INTERFACE:${gtest_build_include_dirs}>"
     "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
 endif()
+
+if (gtest_enable_pic)
+  set_target_properties(gtest PROPERTIES POSITION_INDEPENDENT_CODE ON)
+  set_target_properties(gtest_main PROPERTIES POSITION_INDEPENDENT_CODE ON)
+endif()
+
 target_link_libraries(gtest_main PUBLIC gtest)
 
 ########################################################################
