@@ -26,6 +26,8 @@ option(
   "Build gtest with internal symbols hidden in shared libraries."
   OFF)
 
+option(gtest_enable_pic "Build with -fPIC flag." OFF)
+
 # Defines pre_project_set_up_hermetic_build() and set_up_hermetic_build().
 include(cmake/hermetic_build.cmake OPTIONAL)
 
@@ -72,8 +74,32 @@ else()
     gtest_build_tests
     gtest_build_samples
     gtest_disable_pthreads
-    gtest_hide_internal_symbols)
+    gtest_hide_internal_symbols
+    gtest_enable_pic)
 
+endif()
+
+include(CheckCXXCompilerFlag)
+function(add_flag_or_print_warning flag name)
+  check_cxx_compiler_flag("-Werror ${flag}" "CXX_SUPPORTS_${name}")
+  if (CXX_SUPPORTS_${name})
+    message(STATUS "Building with ${flag}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${flag}" PARENT_SCOPE)
+  else()
+    message(WARNING "${flag} is not supported.")
+  endif()
+endfunction()
+
+if (gtest_enable_pic)
+  if (XCODE)
+    # Xcode has -mdynamic-no-pic on by default, which overrides -fPIC. I don't
+    # know how to disable this, so just force gtest_enable_pic off for now.
+    message(WARNING "-fPIC not supported with Xcode.")
+  elseif(WIN32 OR CYGWIN)
+    # On Windows all code is PIC. MinGW warns if -fPIC is used.
+  else()
+    add_flag_or_print_warning("-fPIC" FPIC)
+  endif()
 endif()
 
 
