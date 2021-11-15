@@ -264,10 +264,10 @@ void ExpectationBase::UntypedTimes(const Cardinality& a_cardinality) {
                        ".Times() cannot appear "
                        "more than once in an EXPECT_CALL().");
   } else {
-    ExpectSpecProperty(last_clause_ < kTimes,
-                       ".Times() cannot appear after "
-                       ".InSequence(), .WillOnce(), .WillRepeatedly(), "
-                       "or .RetiresOnSaturation().");
+    ExpectSpecProperty(
+        last_clause_ < kTimes,
+        ".Times() may only appear *before* .InSequence(), .WillOnce(), "
+        ".WillRepeatedly(), or .RetiresonSaturation(), not after.");
   }
   last_clause_ = kTimes;
 
