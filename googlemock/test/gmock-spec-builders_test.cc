@@ -390,7 +390,7 @@ TEST(ExpectCallSyntaxTest, TimesMustBeBeforeInSequence) {
     EXPECT_CALL(a, DoA(1))
         .InSequence(s)
         .Times(1);
-  }, ".Times() cannot appear after ");
+  }, ".Times() may only appear *before* ");
 
   a.DoA(1);
 }
