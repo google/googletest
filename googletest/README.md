@@ -1,5 +1,7 @@
 ### Generic Build Instructions
 
+### Change a lil bit
+
 #### Setup
 
 To build GoogleTest and your tests that use it, you need to tell your build
@@ -59,9 +61,9 @@ On Mac OS X with Xcode installed, a `.xcodeproj` file will be generated.
 If you want to use GoogleTest in a project which already uses CMake, the easiest
 way is to get installed libraries and headers.
 
-*   Import GoogleTest by using `find_package` (or `pkg_check_modules`). For
-    example, if `find_package(GTest CONFIG REQUIRED)` succeeds, you can use the
-    libraries as `GTest::gtest`, `GTest::gmock`.
+- Import GoogleTest by using `find_package` (or `pkg_check_modules`). For
+  example, if `find_package(GTest CONFIG REQUIRED)` succeeds, you can use the
+  libraries as `GTest::gtest`, `GTest::gmock`.
 
 And a more robust and flexible approach is to build GoogleTest as part of that
 project directly. This is done by making the GoogleTest source code available to
@@ -72,17 +74,17 @@ using incompatible libraries (eg debug/release), etc. are avoided. This is
 particularly useful on Windows. Making GoogleTest's source code available to the
 main build can be done a few different ways:
 
-*   Download the GoogleTest source code manually and place it at a known
-    location. This is the least flexible approach and can make it more difficult
-    to use with continuous integration systems, etc.
-*   Embed the GoogleTest source code as a direct copy in the main project's
-    source tree. This is often the simplest approach, but is also the hardest to
-    keep up to date. Some organizations may not permit this method.
-*   Add GoogleTest as a git submodule or equivalent. This may not always be
-    possible or appropriate. Git submodules, for example, have their own set of
-    advantages and drawbacks.
-*   Use CMake to download GoogleTest as part of the build's configure step. This
-    approach doesn't have the limitations of the other methods.
+- Download the GoogleTest source code manually and place it at a known
+  location. This is the least flexible approach and can make it more difficult
+  to use with continuous integration systems, etc.
+- Embed the GoogleTest source code as a direct copy in the main project's
+  source tree. This is often the simplest approach, but is also the hardest to
+  keep up to date. Some organizations may not permit this method.
+- Add GoogleTest as a git submodule or equivalent. This may not always be
+  possible or appropriate. Git submodules, for example, have their own set of
+  advantages and drawbacks.
+- Use CMake to download GoogleTest as part of the build's configure step. This
+  approach doesn't have the limitations of the other methods.
 
 The last of the above methods is implemented with a small piece of CMake code
 that downloads and pulls the GoogleTest code into the main build.
@@ -170,14 +172,14 @@ GoogleTest is compact, so most users can build and link it as a static library
 for the simplicity. You can choose to use GoogleTest as a shared library (known
 as a DLL on Windows) if you prefer.
 
-To compile *gtest* as a shared library, add
+To compile _gtest_ as a shared library, add
 
     -DGTEST_CREATE_SHARED_LIBRARY=1
 
 to the compiler flags. You'll also need to tell the linker to produce a shared
 library instead - consult your linker's manual for how to do it.
 
-To compile your *tests* that use the gtest shared library, add
+To compile your _tests_ that use the gtest shared library, add
 
     -DGTEST_LINKED_AS_SHARED_LIBRARY=1
 
