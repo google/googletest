@@ -6,7 +6,7 @@
 
 GoogleTest now follows the
 [Abseil Live at Head philosophy](https://abseil.io/about/philosophy#upgrade-support).
-We recommend using the latest commit in the `master` branch in your projects.
+We recommend using the latest commit in the `main` branch in your projects.
 
 #### Documentation Updates
 
