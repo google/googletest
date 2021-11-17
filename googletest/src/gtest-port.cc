@@ -377,12 +377,12 @@ class MemoryIsNotDeallocated
     old_crtdbg_flag_ = _CrtSetDbgFlag(_CRTDBG_REPORT_FLAG);
     // Set heap allocation block type to _IGNORE_BLOCK so that MS debug CRT
     // doesn't report mem leak if there's no matching deallocation.
-    _CrtSetDbgFlag(old_crtdbg_flag_ & ~_CRTDBG_ALLOC_MEM_DF);
+    (void)_CrtSetDbgFlag(old_crtdbg_flag_ & ~_CRTDBG_ALLOC_MEM_DF);
   }
 
   ~MemoryIsNotDeallocated() {
     // Restore the original _CRTDBG_ALLOC_MEM_DF flag
-    _CrtSetDbgFlag(old_crtdbg_flag_);
+    (void)_CrtSetDbgFlag(old_crtdbg_flag_);
   }
 
  private:
