@@ -407,31 +407,36 @@ internal::CartesianProductHolder<Generator...> Combine(const Generator&... g) {
 }
 
 #define TEST_P(test_suite_name, test_name)                                     \
-  class GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)                     \
+  class GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)    /* NOLINT */                 \
       : public test_suite_name {                                               \
    public:                                                                     \
-    GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)() {}                    \
+    GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)() {}    /* NOLINT */                \
     void TestBody() override;                                                  \
                                                                                \
    private:                                                                    \
-    static int AddToRegistry() {                                               \
+    static int AddToRegistry() {    /* NOLINT */                               \
       ::testing::UnitTest::GetInstance()                                       \
           ->parameterized_test_registry()                                      \
           .GetTestSuitePatternHolder<test_suite_name>(                         \
               GTEST_STRINGIFY_(test_suite_name),                               \
+              /* NOLINTNEXTLINE */                                             \
               ::testing::internal::CodeLocation(__FILE__, __LINE__))           \
           ->AddTestPattern(                                                    \
               GTEST_STRINGIFY_(test_suite_name), GTEST_STRINGIFY_(test_name),  \
+              /* NOLINTNEXTLINE */                                             \
               new ::testing::internal::TestMetaFactory<GTEST_TEST_CLASS_NAME_( \
                   test_suite_name, test_name)>(),                              \
+              /* NOLINTNEXTLINE */                                             \
               ::testing::internal::CodeLocation(__FILE__, __LINE__));          \
       return 0;                                                                \
     }                                                                          \
-    static int gtest_registering_dummy_ GTEST_ATTRIBUTE_UNUSED_;               \
+    static int gtest_registering_dummy_ GTEST_ATTRIBUTE_UNUSED_; /* NOLINT */  \
     GTEST_DISALLOW_COPY_AND_ASSIGN_(GTEST_TEST_CLASS_NAME_(test_suite_name,    \
                                                            test_name));        \
   };                                                                           \
+  /* NOLINTNEXTLINE */ \
   int GTEST_TEST_CLASS_NAME_(test_suite_name,                                  \
+  /* NOLINTNEXTLINE */ \
                              test_name)::gtest_registering_dummy_ =            \
       GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)::AddToRegistry();     \
   void GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)::TestBody()
