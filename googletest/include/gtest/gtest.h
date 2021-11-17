@@ -1984,19 +1984,19 @@ class TestWithParam : public Test, public WithParamInterface<T> {
 // EXPECT or ASSERT, which clashes with some users' own code.
 
 #if !GTEST_DONT_DEFINE_EXPECT_TRUE
-#define EXPECT_TRUE(condition) GTEST_EXPECT_TRUE(condition)
+#define EXPECT_TRUE(condition) GTEST_EXPECT_TRUE(condition) // NOLINT
 #endif
 
 #if !GTEST_DONT_DEFINE_EXPECT_FALSE
-#define EXPECT_FALSE(condition) GTEST_EXPECT_FALSE(condition)
+#define EXPECT_FALSE(condition) GTEST_EXPECT_FALSE(condition) // NOLINT
 #endif
 
 #if !GTEST_DONT_DEFINE_ASSERT_TRUE
-#define ASSERT_TRUE(condition) GTEST_ASSERT_TRUE(condition)
+#define ASSERT_TRUE(condition) GTEST_ASSERT_TRUE(condition) // NOLINT
 #endif
 
 #if !GTEST_DONT_DEFINE_ASSERT_FALSE
-#define ASSERT_FALSE(condition) GTEST_ASSERT_FALSE(condition)
+#define ASSERT_FALSE(condition) GTEST_ASSERT_FALSE(condition) // NOLINT
 #endif
 
 // Macros for testing equalities and inequalities.
