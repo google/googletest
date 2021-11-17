@@ -203,7 +203,7 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes);
     typedef gtest_TypeParam_ TypeParam;                                       \
     void TestBody() override;                                                 \
   };                                                                          \
-  static bool gtest_##CaseName##_##TestName##_registered_                     \
+  static bool gtest_##CaseName##_##TestName##_registered_ /* NOLINT */        \
       GTEST_ATTRIBUTE_UNUSED_ = ::testing::internal::TypeParameterizedTest<   \
           CaseName,                                                           \
           ::testing::internal::TemplateSel<GTEST_TEST_CLASS_NAME_(CaseName,   \
@@ -211,7 +211,7 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes);
           GTEST_TYPE_PARAMS_(                                                 \
               CaseName)>::Register("",                                        \
                                    ::testing::internal::CodeLocation(         \
-                                       __FILE__, __LINE__),                   \
+                                       __FILE__, __LINE__), /* NOLINT */      \
                                    GTEST_STRINGIFY_(CaseName),                \
                                    GTEST_STRINGIFY_(TestName), 0,             \
                                    ::testing::internal::GenerateNames<        \
