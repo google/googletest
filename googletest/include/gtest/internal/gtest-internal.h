@@ -1541,18 +1541,22 @@ class NeverThrown {
                                                                               \
    private:                                                                   \
     void TestBody() override;                                                 \
+    /* NOLINTNEXTLINE */                                                      \
     static ::testing::TestInfo* const test_info_ GTEST_ATTRIBUTE_UNUSED_;     \
   };                                                                          \
-                                                                              \
+  /* NOLINTNEXTLINE */                                                        \
   ::testing::TestInfo* const GTEST_TEST_CLASS_NAME_(test_suite_name,          \
+  /* NOLINTNEXTLINE */                                                        \
                                                     test_name)::test_info_ =  \
       ::testing::internal::MakeAndRegisterTestInfo(                           \
           #test_suite_name, #test_name, nullptr, nullptr,                     \
-          ::testing::internal::CodeLocation(__FILE__, __LINE__), (parent_id), \
+          /* NOLINTNEXTLINE */                                                \
+          ::testing::internal::CodeLocation(__FILE__, __LINE__), (parent_id), \          
           ::testing::internal::SuiteApiResolver<                              \
               parent_class>::GetSetUpCaseOrSuite(__FILE__, __LINE__),         \
           ::testing::internal::SuiteApiResolver<                              \
               parent_class>::GetTearDownCaseOrSuite(__FILE__, __LINE__),      \
+          /* NOLINTNEXTLINE */                                                \
           new ::testing::internal::TestFactoryImpl<GTEST_TEST_CLASS_NAME_(    \
               test_suite_name, test_name)>);                                  \
   void GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)::TestBody()
