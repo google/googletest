@@ -274,6 +274,7 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes);
       typedef gtest_TypeParam_ TypeParam;                             \
       void TestBody() override;                                       \
     };                                                                \
+    /* NOLINTNEXTLINE */                                              \
     static bool gtest_##TestName##_defined_ GTEST_ATTRIBUTE_UNUSED_ = \
         GTEST_TYPED_TEST_SUITE_P_STATE_(SuiteName).AddTestName(       \
             __FILE__, __LINE__, GTEST_STRINGIFY_(SuiteName),          \
