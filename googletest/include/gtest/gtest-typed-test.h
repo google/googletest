@@ -254,9 +254,9 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes);
 // The variables defined in the type-parameterized test macros are
 // static as typically these macros are used in a .h file that can be
 // #included in multiple translation units linked together.
-#define TYPED_TEST_SUITE_P(SuiteName)              \
-  static ::testing::internal::TypedTestSuitePState \
-      GTEST_TYPED_TEST_SUITE_P_STATE_(SuiteName)
+#define TYPED_TEST_SUITE_P(SuiteName)                           \
+  static ::testing::internal::TypedTestSuitePState /* NOLINT */ \
+      GTEST_TYPED_TEST_SUITE_P_STATE_(SuiteName) // NOLINT
 
 // Legacy API is deprecated but still available
 #ifndef GTEST_REMOVE_LEGACY_TEST_CASEAPI_
