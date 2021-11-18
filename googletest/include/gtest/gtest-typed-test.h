@@ -289,7 +289,7 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes);
   namespace GTEST_SUITE_NAMESPACE_(SuiteName) {                             \
     typedef ::testing::internal::Templates<__VA_ARGS__> gtest_AllTests_;    \
   }                                                                         \
-  static const char* const GTEST_REGISTERED_TEST_NAMES_(                    \
+  static const char* const GTEST_REGISTERED_TEST_NAMES_( /* NOLINT */       \
       SuiteName) GTEST_ATTRIBUTE_UNUSED_ =                                  \
       GTEST_TYPED_TEST_SUITE_P_STATE_(SuiteName).VerifyRegisteredTestNames( \
           GTEST_STRINGIFY_(SuiteName), __FILE__, __LINE__, #__VA_ARGS__)
