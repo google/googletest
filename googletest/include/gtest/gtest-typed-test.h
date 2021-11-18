@@ -305,11 +305,13 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes);
 #define INSTANTIATE_TYPED_TEST_SUITE_P(Prefix, SuiteName, Types, ...)       \
   static_assert(sizeof(GTEST_STRINGIFY_(Prefix)) > 1,                       \
                 "test-suit-prefix must not be empty");                      \
+  /* NOLINTNEXTLINE */                                                      \
   static bool gtest_##Prefix##_##SuiteName GTEST_ATTRIBUTE_UNUSED_ =        \
       ::testing::internal::TypeParameterizedTestSuite<                      \
           SuiteName, GTEST_SUITE_NAMESPACE_(SuiteName)::gtest_AllTests_,    \
           ::testing::internal::GenerateTypeList<Types>::type>::             \
           Register(GTEST_STRINGIFY_(Prefix),                                \
+                   /* NOLINTNEXTLINE */                                     \
                    ::testing::internal::CodeLocation(__FILE__, __LINE__),   \
                    &GTEST_TYPED_TEST_SUITE_P_STATE_(SuiteName),             \
                    GTEST_STRINGIFY_(SuiteName),                             \
