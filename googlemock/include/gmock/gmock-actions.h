@@ -1586,7 +1586,7 @@ template <typename F, typename Impl>
 
 #define GMOCK_INTERNAL_ACTION(name, full_name, params)                        \
   template <GMOCK_ACTION_TYPENAME_PARAMS_(params)>                            \
-  class full_name {                                                           \
+  class full_name { /* NOLINT */                                              \
    public:                                                                    \
     explicit full_name(GMOCK_ACTION_TYPE_GVALUE_PARAMS_(params))              \
         : impl_(std::make_shared<gmock_Impl>(                                 \
@@ -1604,12 +1604,14 @@ template <typename F, typename Impl>
           : GMOCK_ACTION_INIT_PARAMS_(params) {}                              \
       template <typename function_type, typename return_type,                 \
                 typename args_type, GMOCK_ACTION_TEMPLATE_ARGS_NAMES_>        \
+      /* NOLINTNEXTLINE */                                                    \
       return_type gmock_PerformImpl(GMOCK_ACTION_ARG_TYPES_AND_NAMES_) const; \
       GMOCK_ACTION_FIELD_PARAMS_(params)                                      \
     };                                                                        \
     std::shared_ptr<const gmock_Impl> impl_;                                  \
   };                                                                          \
   template <GMOCK_ACTION_TYPENAME_PARAMS_(params)>                            \
+  /* NOLINTNEXTLINE */                                                        \
   inline full_name<GMOCK_ACTION_TYPE_PARAMS_(params)> name(                   \
       GMOCK_ACTION_TYPE_GVALUE_PARAMS_(params)) {                             \
     return full_name<GMOCK_ACTION_TYPE_PARAMS_(params)>(                      \
@@ -1619,7 +1621,7 @@ template <typename F, typename Impl>
   template <typename function_type, typename return_type, typename args_type, \
             GMOCK_ACTION_TEMPLATE_ARGS_NAMES_>                                \
   return_type full_name<GMOCK_ACTION_TYPE_PARAMS_(params)>::gmock_Impl::      \
-  gmock_PerformImpl(GMOCK_ACTION_ARG_TYPES_AND_NAMES_UNUSED_) const
+  gmock_PerformImpl(GMOCK_ACTION_ARG_TYPES_AND_NAMES_UNUSED_) const // NOLINT
 
 }  // namespace internal
 
