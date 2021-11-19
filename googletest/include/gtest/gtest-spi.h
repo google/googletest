@@ -142,13 +142,14 @@ GTEST_DISABLE_MSC_WARNINGS_POP_()  //  4251
 // works.  The AcceptsMacroThatExpandsToUnprotectedComma test in
 // gtest_unittest.cc will fail to compile if we do that.
 #define EXPECT_FATAL_FAILURE(statement, substr) \
-  do { \
+  do { /* NOLINT */ \
     class GTestExpectFatalFailureHelper {\
      public:\
       static void Execute() { statement; }\
     };\
     ::testing::TestPartResultArray gtest_failures;\
     ::testing::internal::SingleFailureChecker gtest_checker(\
+        /* NOLINTNEXTLINE */ \
         &gtest_failures, ::testing::TestPartResult::kFatalFailure, (substr));\
     {\
       ::testing::ScopedFakeTestPartResultReporter gtest_reporter(\
@@ -159,13 +160,14 @@ GTEST_DISABLE_MSC_WARNINGS_POP_()  //  4251
   } while (::testing::internal::AlwaysFalse())
 
 #define EXPECT_FATAL_FAILURE_ON_ALL_THREADS(statement, substr) \
-  do { \
+  do { /* NOLINT */ \
     class GTestExpectFatalFailureHelper {\
      public:\
       static void Execute() { statement; }\
     };\
     ::testing::TestPartResultArray gtest_failures;\
     ::testing::internal::SingleFailureChecker gtest_checker(\
+        /* NOLINTNEXTLINE */ \
         &gtest_failures, ::testing::TestPartResult::kFatalFailure, (substr));\
     {\
       ::testing::ScopedFakeTestPartResultReporter gtest_reporter(\
@@ -208,11 +210,11 @@ GTEST_DISABLE_MSC_WARNINGS_POP_()  //  4251
 //   GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement)
 // to avoid an MSVC warning on unreachable code.
 #define EXPECT_NONFATAL_FAILURE(statement, substr) \
-  do {\
+  do { /* NOLINT */ \
     ::testing::TestPartResultArray gtest_failures;\
     ::testing::internal::SingleFailureChecker gtest_checker(\
         &gtest_failures, ::testing::TestPartResult::kNonFatalFailure, \
-        (substr));\
+        (substr)); /* NOLINT */ \
     {\
       ::testing::ScopedFakeTestPartResultReporter gtest_reporter(\
           ::testing::ScopedFakeTestPartResultReporter:: \
@@ -222,11 +224,11 @@ GTEST_DISABLE_MSC_WARNINGS_POP_()  //  4251
   } while (::testing::internal::AlwaysFalse())
 
 #define EXPECT_NONFATAL_FAILURE_ON_ALL_THREADS(statement, substr) \
-  do {\
+  do { /* NOLINT */ \
     ::testing::TestPartResultArray gtest_failures;\
     ::testing::internal::SingleFailureChecker gtest_checker(\
         &gtest_failures, ::testing::TestPartResult::kNonFatalFailure, \
-        (substr));\
+        (substr)); /* NOLINT */ \
     {\
       ::testing::ScopedFakeTestPartResultReporter gtest_reporter(\
           ::testing::ScopedFakeTestPartResultReporter::INTERCEPT_ALL_THREADS, \
