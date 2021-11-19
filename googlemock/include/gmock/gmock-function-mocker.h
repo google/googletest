@@ -140,7 +140,7 @@ using internal::FunctionMocker;
                                         _CallType, _RefSpec, _Signature)       \
   typename ::testing::internal::Function<GMOCK_PP_REMOVE_PARENS(               \
       _Signature)>::Result                                                     \
-  GMOCK_INTERNAL_EXPAND(_CallType)                                             \
+  GMOCK_INTERNAL_EXPAND(_CallType) /* NOLINTNEXTLINE */                        \
       _MethodName(GMOCK_PP_REPEAT(GMOCK_INTERNAL_PARAMETER, _Signature, _N))   \
           GMOCK_PP_IF(_Constness, const, ) _RefSpec _NoexceptSpec              \
           GMOCK_PP_IF(_Override, override, ) GMOCK_PP_IF(_Final, final, ) {    \
