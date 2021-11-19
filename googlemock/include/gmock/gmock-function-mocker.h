@@ -149,6 +149,7 @@ using internal::FunctionMocker;
     return GMOCK_MOCKER_(_N, _Constness, _MethodName)                          \
         .Invoke(GMOCK_PP_REPEAT(GMOCK_INTERNAL_FORWARD_ARG, _Signature, _N));  \
   }                                                                            \
+  /* NOLINTNEXTLINE */                                                         \
   ::testing::MockSpec<GMOCK_PP_REMOVE_PARENS(_Signature)> gmock_##_MethodName( \
       GMOCK_PP_REPEAT(GMOCK_INTERNAL_MATCHER_PARAMETER, _Signature, _N))       \
       GMOCK_PP_IF(_Constness, const, ) _RefSpec {                              \
@@ -156,6 +157,7 @@ using internal::FunctionMocker;
     return GMOCK_MOCKER_(_N, _Constness, _MethodName)                          \
         .With(GMOCK_PP_REPEAT(GMOCK_INTERNAL_MATCHER_ARGUMENT, , _N));         \
   }                                                                            \
+  /* NOLINTNEXTLINE */                                                         \
   ::testing::MockSpec<GMOCK_PP_REMOVE_PARENS(_Signature)> gmock_##_MethodName( \
       const ::testing::internal::WithoutMatchers&,                             \
       GMOCK_PP_IF(_Constness, const, )::testing::internal::Function<           \
@@ -166,7 +168,7 @@ using internal::FunctionMocker;
             GMOCK_INTERNAL_A_MATCHER_ARGUMENT, _Signature, _N));               \
   }                                                                            \
   mutable ::testing::FunctionMocker<GMOCK_PP_REMOVE_PARENS(_Signature)>        \
-      GMOCK_MOCKER_(_N, _Constness, _MethodName)
+      GMOCK_MOCKER_(_N, _Constness, _MethodName) // NOLINT
 
 #define GMOCK_INTERNAL_EXPAND(...) __VA_ARGS__
 
