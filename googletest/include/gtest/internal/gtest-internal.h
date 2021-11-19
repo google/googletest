@@ -1405,7 +1405,7 @@ class NeverThrown {
     gtest_msg.value += " with description \"";                                 \
     gtest_msg.value += e.what();                                               \
     gtest_msg.value += "\".";                                                  \
-    goto GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__);                \
+    goto GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__); /* NOLINT */   \
   }
 
 #else  // GTEST_HAS_EXCEPTIONS
@@ -1428,12 +1428,14 @@ class NeverThrown {
       gtest_msg.value = "Expected: " #statement                             \
                         " throws an exception of type " #expected_exception \
                         ".\n  Actual: it throws a different type.";         \
+      /* NOLINTNEXTLINE */                                                  \
       goto GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__);           \
     }                                                                       \
     if (!gtest_caught_expected) {                                           \
       gtest_msg.value = "Expected: " #statement                             \
                         " throws an exception of type " #expected_exception \
                         ".\n  Actual: it throws nothing.";                  \
+      /* NOLINTNEXTLINE */                                                  \
       goto GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__);           \
     }                                                                       \
   } else /*NOLINT*/                                                         \
@@ -1449,6 +1451,7 @@ class NeverThrown {
     gtest_msg.value += " with description \"";                    \
     gtest_msg.value += e.what();                                  \
     gtest_msg.value += "\".";                                     \
+    /* NOLINTNEXTLINE */                                          \
     goto GTEST_CONCAT_TOKEN_(gtest_label_testnothrow_, __LINE__); \
   }
 
@@ -1467,6 +1470,7 @@ class NeverThrown {
     GTEST_TEST_NO_THROW_CATCH_STD_EXCEPTION_() \
     catch (...) { \
       gtest_msg.value = "it throws."; \
+      /*NOLINTNEXTLINE*/ \
       goto GTEST_CONCAT_TOKEN_(gtest_label_testnothrow_, __LINE__); \
     } \
   } else \
@@ -1485,6 +1489,7 @@ class NeverThrown {
       gtest_caught_any = true; \
     } \
     if (!gtest_caught_any) { \
+      /* NOLINTNEXTLINE */ \
       goto GTEST_CONCAT_TOKEN_(gtest_label_testanythrow_, __LINE__); \
     } \
   } else \
