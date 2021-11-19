@@ -1625,7 +1625,7 @@ template <typename F, typename Impl>
 
 // Similar to GMOCK_INTERNAL_ACTION, but no bound parameters are stored.
 #define ACTION(name)                                                          \
-  class name##Action {                                                        \
+  class name##Action { /* NOLINT */                                           \
    public:                                                                    \
    explicit name##Action() noexcept {}                                        \
    name##Action(const name##Action&) noexcept {}                              \
@@ -1638,13 +1638,17 @@ template <typename F, typename Impl>
      public:                                                                  \
       template <typename function_type, typename return_type,                 \
                 typename args_type, GMOCK_ACTION_TEMPLATE_ARGS_NAMES_>        \
+      /* NOLINTNEXTLINE */                                                    \
       return_type gmock_PerformImpl(GMOCK_ACTION_ARG_TYPES_AND_NAMES_) const; \
     };                                                                        \
   };                                                                          \
+  /* NOLINTNEXTLINE */                                                        \
   inline name##Action name() GTEST_MUST_USE_RESULT_;                          \
+  /* NOLINTNEXTLINE */                                                        \
   inline name##Action name() { return name##Action(); }                       \
   template <typename function_type, typename return_type, typename args_type, \
             GMOCK_ACTION_TEMPLATE_ARGS_NAMES_>                                \
+  /* NOLINTNEXTLINE */                                                        \
   return_type name##Action::gmock_Impl::gmock_PerformImpl(                    \
       GMOCK_ACTION_ARG_TYPES_AND_NAMES_UNUSED_) const
 
