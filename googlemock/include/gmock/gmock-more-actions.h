@@ -428,7 +428,7 @@
 #define ACTION_TEMPLATE(name, template_params, value_params)                   \
   template <GMOCK_INTERNAL_DECL_##template_params                              \
             GMOCK_INTERNAL_DECL_TYPE_##value_params>                           \
-  class GMOCK_ACTION_CLASS_(name, value_params) {                              \
+  class GMOCK_ACTION_CLASS_(name, value_params) { /* NOLINT */                 \
    public:                                                                     \
     explicit GMOCK_ACTION_CLASS_(name, value_params)(                          \
         GMOCK_INTERNAL_DECL_##value_params)                                    \
@@ -455,8 +455,9 @@
       explicit gmock_Impl GMOCK_INTERNAL_INIT_##value_params {}                \
       template <typename function_type, typename return_type,                  \
                 typename args_type, GMOCK_ACTION_TEMPLATE_ARGS_NAMES_>         \
+      /* NOLINTNEXTLINE */                                                     \
       return_type gmock_PerformImpl(GMOCK_ACTION_ARG_TYPES_AND_NAMES_) const;  \
-      GMOCK_INTERNAL_DEFN_##value_params                                       \
+      GMOCK_INTERNAL_DEFN_##value_params /* NOLINT */                           \
     };                                                                         \
     GMOCK_PP_IF(GMOCK_PP_IS_EMPTY(GMOCK_INTERNAL_COUNT_##value_params),        \
                 , std::shared_ptr<const gmock_Impl> impl_;)                    \
@@ -465,13 +466,13 @@
             GMOCK_INTERNAL_DECL_TYPE_##value_params>                           \
   GMOCK_ACTION_CLASS_(name, value_params)<                                     \
       GMOCK_INTERNAL_LIST_##template_params                                    \
-      GMOCK_INTERNAL_LIST_TYPE_##value_params> name(                           \
+      GMOCK_INTERNAL_LIST_TYPE_##value_params> name( /* NOLINT*/               \
           GMOCK_INTERNAL_DECL_##value_params) GTEST_MUST_USE_RESULT_;          \
   template <GMOCK_INTERNAL_DECL_##template_params                              \
             GMOCK_INTERNAL_DECL_TYPE_##value_params>                           \
   inline GMOCK_ACTION_CLASS_(name, value_params)<                              \
       GMOCK_INTERNAL_LIST_##template_params                                    \
-      GMOCK_INTERNAL_LIST_TYPE_##value_params> name(                           \
+      GMOCK_INTERNAL_LIST_TYPE_##value_params> name( /* NOLINT */              \
           GMOCK_INTERNAL_DECL_##value_params) {                                \
     return GMOCK_ACTION_CLASS_(name, value_params)<                            \
         GMOCK_INTERNAL_LIST_##template_params                                  \
@@ -484,6 +485,7 @@
             GMOCK_ACTION_TEMPLATE_ARGS_NAMES_>                                 \
   return_type GMOCK_ACTION_CLASS_(name, value_params)<                         \
       GMOCK_INTERNAL_LIST_##template_params                                    \
+      /* NOLINTNEXTLINE */                                                     \
       GMOCK_INTERNAL_LIST_TYPE_##value_params>::gmock_Impl::gmock_PerformImpl( \
           GMOCK_ACTION_ARG_TYPES_AND_NAMES_UNUSED_) const
 
