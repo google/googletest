@@ -1606,6 +1606,7 @@ template <typename F, typename Impl>
                 typename args_type, GMOCK_ACTION_TEMPLATE_ARGS_NAMES_>        \
       /* NOLINTNEXTLINE */                                                    \
       return_type gmock_PerformImpl(GMOCK_ACTION_ARG_TYPES_AND_NAMES_) const; \
+      /* NOLINTNEXTLINE */                                                    \
       GMOCK_ACTION_FIELD_PARAMS_(params)                                      \
     };                                                                        \
     std::shared_ptr<const gmock_Impl> impl_;                                  \
