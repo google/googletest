@@ -5454,7 +5454,7 @@ PolymorphicMatcher<internal::ExceptionMatcherImpl<Err>> ThrowsMessage(
      public:                                                                   \
       explicit gmock_Impl(GMOCK_INTERNAL_MATCHER_FUNCTION_ARGS(args))          \
           : GMOCK_INTERNAL_MATCHER_FORWARD_ARGS(args) {}                       \
-      bool MatchAndExplain(                                                    \
+      bool MatchAndExplain( /* NOLINT */                                       \
           const arg_type& arg,                                                 \
           ::testing::MatchResultListener* result_listener) const override;     \
       void DescribeTo(::std::ostream* gmock_os) const override {               \
@@ -5463,11 +5463,11 @@ PolymorphicMatcher<internal::ExceptionMatcherImpl<Err>> ThrowsMessage(
       void DescribeNegationTo(::std::ostream* gmock_os) const override {       \
         *gmock_os << FormatDescription(true);                                  \
       }                                                                        \
-      GMOCK_INTERNAL_MATCHER_MEMBERS(args)                                     \
+      GMOCK_INTERNAL_MATCHER_MEMBERS(args) /* NOLINT */                        \
                                                                                \
      private:                                                                  \
-      ::std::string FormatDescription(bool negation) const {                   \
-        ::std::string gmock_description = (description);                       \
+      ::std::string FormatDescription(bool negation) const { /* NOLINT */      \
+        ::std::string gmock_description = (description); /* NOLINT */          \
         if (!gmock_description.empty()) {                                      \
           return gmock_description;                                            \
         }                                                                      \
@@ -5480,7 +5480,7 @@ PolymorphicMatcher<internal::ExceptionMatcherImpl<Err>> ThrowsMessage(
     };                                                                         \
   };                                                                           \
   template <GMOCK_INTERNAL_MATCHER_TEMPLATE_PARAMS(args)>                      \
-  inline full_name<GMOCK_INTERNAL_MATCHER_TYPE_PARAMS(args)> name(             \
+  inline full_name<GMOCK_INTERNAL_MATCHER_TYPE_PARAMS(args)> name( /* NOLINT */\
       GMOCK_INTERNAL_MATCHER_FUNCTION_ARGS(args)) {                            \
     return full_name<GMOCK_INTERNAL_MATCHER_TYPE_PARAMS(args)>(                \
         GMOCK_INTERNAL_MATCHER_ARGS_USAGE(args));                              \
@@ -5488,7 +5488,7 @@ PolymorphicMatcher<internal::ExceptionMatcherImpl<Err>> ThrowsMessage(
   template <GMOCK_INTERNAL_MATCHER_TEMPLATE_PARAMS(args)>                      \
   template <typename arg_type>                                                 \
   bool full_name<GMOCK_INTERNAL_MATCHER_TYPE_PARAMS(args)>::gmock_Impl<        \
-      arg_type>::MatchAndExplain(const arg_type& arg,                          \
+      arg_type>::MatchAndExplain(const arg_type& arg, /* NOLINT */             \
                                  ::testing::MatchResultListener*               \
                                      result_listener GTEST_ATTRIBUTE_UNUSED_)  \
       const
