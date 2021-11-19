@@ -267,7 +267,7 @@ void ExpectationBase::UntypedTimes(const Cardinality& a_cardinality) {
     ExpectSpecProperty(
         last_clause_ < kTimes,
         ".Times() may only appear *before* .InSequence(), .WillOnce(), "
-        ".WillRepeatedly(), or .RetiresonSaturation(), not after.");
+        ".WillRepeatedly(), or .RetiresOnSaturation(), not after.");
   }
   last_clause_ = kTimes;
 
