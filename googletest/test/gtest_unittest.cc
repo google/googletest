@@ -5707,6 +5707,14 @@ struct Flags {
     return flags;
   }
 
+  // Creates a Flags struct where the gtest_output_succeeded flag has the given
+  // value.
+  static Flags OutputSucceed(bool output_succeeded) {
+    Flags flags;
+    flags.output_succeeded = output_succeeded;
+    return flags;
+  }
+
   // These fields store the flag values.
   bool also_run_disabled_tests;
   bool break_on_failure;
@@ -5725,6 +5733,7 @@ struct Flags {
   int32_t stack_trace_depth;
   const char* stream_result_to;
   bool throw_on_failure;
+  bool output_succeeded;
 };
 
 // Fixture for testing ParseGoogleTestFlagsOnly().

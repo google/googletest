@@ -361,6 +361,10 @@ GTEST_DEFINE_string_(
     "This flag specifies the flagfile to read command-line flags from.");
 #endif  // GTEST_USE_OWN_FLAGFILE_FLAG_
 
+GTEST_DEFINE_bool_(
+    output_succeeded, testing::internal::BoolFromGTestEnv("output_succeeded", false),
+    "True if all successfull assertions should be displayed in text output.");
+
 namespace testing {
 namespace internal {
 
@@ -913,7 +917,9 @@ static AssertionResult HasOneFailure(const char* /* results_expr */,
                               << r;
   }
 
-  return AssertionSuccess();
+  return AssertionSuccess() << "Expected: " << expected << "\n"
+                              << "  Actual:\n"
+                              << r;
 }
 
 // The constructor of SingleFailureChecker remembers where to look up
@@ -1518,22 +1524,7 @@ std::vector<std::string> SplitEscapedString(const std::string& str) {
 
 }  // namespace
 
-// Constructs and returns the message for an equality assertion
-// (e.g. ASSERT_EQ, EXPECT_STREQ, etc) failure.
-//
-// The first four parameters are the expressions used in the assertion
-// and their values, as strings.  For example, for ASSERT_EQ(foo, bar)
-// where foo is 5 and bar is 6, we have:
-//
-//   lhs_expression: "foo"
-//   rhs_expression: "bar"
-//   lhs_value:      "5"
-//   rhs_value:      "6"
-//
-// The ignoring_case parameter is true if and only if the assertion is a
-// *_STRCASEEQ*.  When it's true, the string "Ignoring case" will
-// be inserted into the message.
-AssertionResult EqFailure(const char* lhs_expression,
+Message EqMessage(const char* lhs_expression,
                           const char* rhs_expression,
                           const std::string& lhs_value,
                           const std::string& rhs_value,
@@ -1563,8 +1554,31 @@ AssertionResult EqFailure(const char* lhs_expression,
           << edit_distance::CreateUnifiedDiff(lhs_lines, rhs_lines);
     }
   }
+  return msg;
+}
 
-  return AssertionFailure() << msg;
+// Constructs and returns the message for an equality assertion
+// (e.g. ASSERT_EQ, EXPECT_STREQ, etc) failure.
+//
+// The first four parameters are the expressions used in the assertion
+// and their values, as strings.  For example, for ASSERT_EQ(foo, bar)
+// where foo is 5 and bar is 6, we have:
+//
+//   lhs_expression: "foo"
+//   rhs_expression: "bar"
+//   lhs_value:      "5"
+//   rhs_value:      "6"
+//
+// The ignoring_case parameter is true if and only if the assertion is a
+// *_STRCASEEQ*.  When it's true, the string "Ignoring case" will
+// be inserted into the message.
+AssertionResult EqFailure(const char* lhs_expression,
+                          const char* rhs_expression,
+                          const std::string& lhs_value,
+                          const std::string& rhs_value,
+                          bool ignoring_case) {
+
+  return AssertionFailure() << EqMessage(lhs_expression, rhs_expression, lhs_value, rhs_value, ignoring_case);
 }
 
 // Constructs a failure message for Boolean assertions such as EXPECT_TRUE.
@@ -1591,7 +1605,13 @@ AssertionResult DoubleNearPredFormat(const char* expr1,
                                      double val2,
                                      double abs_error) {
   const double diff = fabs(val1 - val2);
-  if (diff <= abs_error) return AssertionSuccess();
+  AssertionResult result = [&]{
+    if (diff <= abs_error) {
+      return AssertionSuccess();
+    }else{
+      return AssertionFailure();
+    }
+  }();
 
   // Find the value which is closest to zero.
   const double min_abs = std::min(fabs(val1), fabs(val2));
@@ -1618,7 +1638,7 @@ AssertionResult DoubleNearPredFormat(const char* expr1,
            << ", thus making this EXPECT_NEAR check equivalent to "
               "EXPECT_EQUAL. Consider using EXPECT_DOUBLE_EQ instead.";
   }
-  return AssertionFailure()
+  return std::move(result)
       << "The difference between " << expr1 << " and " << expr2
       << " is " << diff << ", which exceeds " << abs_error_expr << ", where\n"
       << expr1 << " evaluates to " << val1 << ",\n"
@@ -1633,21 +1653,6 @@ AssertionResult FloatingPointLE(const char* expr1,
                                 const char* expr2,
                                 RawType val1,
                                 RawType val2) {
-  // Returns success if val1 is less than val2,
-  if (val1 < val2) {
-    return AssertionSuccess();
-  }
-
-  // or if val1 is almost equal to val2.
-  const FloatingPoint<RawType> lhs(val1), rhs(val2);
-  if (lhs.AlmostEquals(rhs)) {
-    return AssertionSuccess();
-  }
-
-  // Note that the above two checks will both fail if either val1 or
-  // val2 is NaN, as the IEEE floating-point standard requires that
-  // any predicate involving a NaN must return false.
-
   ::std::stringstream val1_ss;
   val1_ss << std::setprecision(std::numeric_limits<RawType>::digits10 + 2)
           << val1;
@@ -1656,7 +1661,25 @@ AssertionResult FloatingPointLE(const char* expr1,
   val2_ss << std::setprecision(std::numeric_limits<RawType>::digits10 + 2)
           << val2;
 
-  return AssertionFailure()
+  AssertionResult result = [&]{
+    // Returns success if val1 is less than val2,
+    if (val1 < val2) {
+      return AssertionSuccess();
+    }
+
+    // or if val1 is almost equal to val2.
+    const FloatingPoint<RawType> lhs(val1), rhs(val2);
+    if (lhs.AlmostEquals(rhs)) {
+      return AssertionSuccess();
+    }
+    // Note that the above two checks will both fail if either val1 or
+    // val2 is NaN, as the IEEE floating-point standard requires that
+    // any predicate involving a NaN must return false.
+    return AssertionFailure();
+  }();
+
+
+  return std::move(result)
       << "Expected: (" << expr1 << ") <= (" << expr2 << ")\n"
       << "  Actual: " << StringStreamToString(&val1_ss) << " vs "
       << StringStreamToString(&val2_ss);
@@ -1685,11 +1708,14 @@ AssertionResult CmpHelperSTREQ(const char* lhs_expression,
                                const char* rhs_expression,
                                const char* lhs,
                                const char* rhs) {
-  if (String::CStringEquals(lhs, rhs)) {
-    return AssertionSuccess();
-  }
+  AssertionResult result = [&]{
+    if (String::CStringEquals(lhs, rhs)) {
+      return AssertionSuccess();
+    }
+    return AssertionFailure();
+  }();
 
-  return EqFailure(lhs_expression,
+  return std::move(result) << EqMessage(lhs_expression,
                    rhs_expression,
                    PrintToString(lhs),
                    PrintToString(rhs),
@@ -1701,11 +1727,14 @@ AssertionResult CmpHelperSTRCASEEQ(const char* lhs_expression,
                                    const char* rhs_expression,
                                    const char* lhs,
                                    const char* rhs) {
-  if (String::CaseInsensitiveCStringEquals(lhs, rhs)) {
-    return AssertionSuccess();
-  }
+  AssertionResult result = [&]{
+    if (String::CaseInsensitiveCStringEquals(lhs, rhs)) {
+      return AssertionSuccess();
+    }
+    return AssertionFailure();
+  }();
 
-  return EqFailure(lhs_expression,
+  return std::move(result) << EqMessage(lhs_expression,
                    rhs_expression,
                    PrintToString(lhs),
                    PrintToString(rhs),
@@ -1717,13 +1746,16 @@ AssertionResult CmpHelperSTRNE(const char* s1_expression,
                                const char* s2_expression,
                                const char* s1,
                                const char* s2) {
-  if (!String::CStringEquals(s1, s2)) {
-    return AssertionSuccess();
-  } else {
-    return AssertionFailure() << "Expected: (" << s1_expression << ") != ("
+  AssertionResult result = [&]{
+    if (!String::CStringEquals(s1, s2)) {
+      return AssertionSuccess();
+    } else {
+      return AssertionFailure();
+    }
+  }();
+  return std::move(result) << "Expected: (" << s1_expression << ") != ("
                               << s2_expression << "), actual: \""
                               << s1 << "\" vs \"" << s2 << "\"";
-  }
 }
 
 // The helper function for {ASSERT|EXPECT}_STRCASENE.
@@ -1731,14 +1763,16 @@ AssertionResult CmpHelperSTRCASENE(const char* s1_expression,
                                    const char* s2_expression,
                                    const char* s1,
                                    const char* s2) {
-  if (!String::CaseInsensitiveCStringEquals(s1, s2)) {
-    return AssertionSuccess();
-  } else {
-    return AssertionFailure()
-        << "Expected: (" << s1_expression << ") != ("
+  AssertionResult result = [&]{
+    if (!String::CaseInsensitiveCStringEquals(s1, s2)) {
+      return AssertionSuccess();
+    } else {
+      return AssertionFailure();
+    }
+  }();
+  return std::move(result) << "Expected: (" << s1_expression << ") != ("
         << s2_expression << ") (ignoring case), actual: \""
         << s1 << "\" vs \"" << s2 << "\"";
-  }
 }
 
 }  // namespace internal
@@ -1779,12 +1813,16 @@ AssertionResult IsSubstringImpl(
     bool expected_to_be_substring,
     const char* needle_expr, const char* haystack_expr,
     const StringType& needle, const StringType& haystack) {
-  if (IsSubstringPred(needle, haystack) == expected_to_be_substring)
-    return AssertionSuccess();
-
+  AssertionResult result = [&]{
+    if (IsSubstringPred(needle, haystack) == expected_to_be_substring){
+      return AssertionSuccess();
+    } else{
+      return AssertionFailure();
+    }
+  }();
   const bool is_wide_string = sizeof(needle[0]) > 1;
   const char* const begin_string_quote = is_wide_string ? "L\"" : "\"";
-  return AssertionFailure()
+  return std::move(result)
       << "Value of: " << needle_expr << "\n"
       << "  Actual: " << begin_string_quote << needle << "\"\n"
       << "Expected: " << (expected_to_be_substring ? "" : "not ")
@@ -1855,7 +1893,7 @@ namespace internal {
 namespace {
 
 // Helper function for IsHRESULT{SuccessFailure} predicates
-AssertionResult HRESULTFailureHelper(const char* expr,
+Message HRESULTFailureHelper(const char* expr,
                                      const char* expected,
                                      long hr) {  // NOLINT
 # if GTEST_OS_WINDOWS_MOBILE || GTEST_OS_WINDOWS_TV_TITLE
@@ -1889,7 +1927,7 @@ AssertionResult HRESULTFailureHelper(const char* expr,
 # endif  // GTEST_OS_WINDOWS_MOBILE
 
   const std::string error_hex("0x" + String::FormatHexInt(hr));
-  return ::testing::AssertionFailure()
+  return Message()
       << "Expected: " << expr << " " << expected << ".\n"
       << "  Actual: " << error_hex << " " << error_text << "\n";
 }
@@ -1897,17 +1935,25 @@ AssertionResult HRESULTFailureHelper(const char* expr,
 }  // namespace
 
 AssertionResult IsHRESULTSuccess(const char* expr, long hr) {  // NOLINT
-  if (SUCCEEDED(hr)) {
-    return AssertionSuccess();
-  }
-  return HRESULTFailureHelper(expr, "succeeds", hr);
+  AssertionResult result = [&]{
+    if (SUCCEEDED(hr)) {
+      return AssertionSuccess();
+    }else{
+      return AssertionFailure();
+    }
+  }();
+  return std::move(result) << HRESULTFailureHelper(expr, "succeeds", hr);
 }
 
 AssertionResult IsHRESULTFailure(const char* expr, long hr) {  // NOLINT
-  if (FAILED(hr)) {
-    return AssertionSuccess();
-  }
-  return HRESULTFailureHelper(expr, "fails", hr);
+  AssertionResult result = [&]{
+    if (FAILED(hr)) {
+      return AssertionSuccess();
+    }else{
+      return AssertionFailure();
+    }
+  }();
+  return std::move(result) << HRESULTFailureHelper(expr, "fails", hr);
 }
 
 #endif  // GTEST_OS_WINDOWS
@@ -2084,11 +2130,15 @@ AssertionResult CmpHelperSTRNE(const char* s1_expression,
                                const char* s2_expression,
                                const wchar_t* s1,
                                const wchar_t* s2) {
-  if (!String::WideCStringEquals(s1, s2)) {
-    return AssertionSuccess();
-  }
+  AssertionResult result = [&]{
+    if (!String::WideCStringEquals(s1, s2)) {
+      return AssertionSuccess();
+    }else{
+      return AssertionFailure();
+    }
+  }();
 
-  return AssertionFailure() << "Expected: (" << s1_expression << ") != ("
+  return std::move(result) << "Expected: (" << s1_expression << ") != ("
                             << s2_expression << "), actual: "
                             << PrintToString(s1)
                             << " vs " << PrintToString(s2);
@@ -3506,11 +3556,8 @@ void PrettyUnitTestResultPrinter::OnTestDisabled(const TestInfo& test_info) {
 // Called after an assertion failure.
 void PrettyUnitTestResultPrinter::OnTestPartResult(
     const TestPartResult& result) {
-  switch (result.type()) {
-    // If the test part succeeded, we don't need to do anything.
-    case TestPartResult::kSuccess:
-      return;
-    default:
+    // If the test part succeeded and printing is not enforced we don't need to do anything.
+  if (result.type() != TestPartResult::kSuccess || GTEST_FLAG_GET(output_succeeded)){
       // Print failure message from the assertion
       // (e.g. expected this and got that).
       PrintTestPartResult(result);
@@ -3724,13 +3771,8 @@ class BriefUnitTestResultPrinter : public TestEventListener {
 // Called after an assertion failure.
 void BriefUnitTestResultPrinter::OnTestPartResult(
     const TestPartResult& result) {
-  switch (result.type()) {
-    // If the test part succeeded, we don't need to do anything.
-    case TestPartResult::kSuccess:
-      return;
-    default:
-      // Print failure message from the assertion
-      // (e.g. expected this and got that).
+    // If the test part succeeded and printing is not enforced we don't need to do anything.
+  if (result.type() != TestPartResult::kSuccess || GTEST_FLAG_GET(output_succeeded)){
       PrintTestPartResult(result);
       fflush(stdout);
   }
@@ -4288,10 +4330,11 @@ void XmlUnitTestResultPrinter::OutputXmlTestResult(::std::ostream* stream,
                                                    const TestResult& result) {
   int failures = 0;
   int skips = 0;
+  int succeed = 0;
   for (int i = 0; i < result.total_part_count(); ++i) {
     const TestPartResult& part = result.GetTestPartResult(i);
     if (part.failed()) {
-      if (++failures == 1 && skips == 0) {
+      if (++failures == 1 && skips == 0 && succeed == 0) {
         *stream << ">\n";
       }
       const std::string location =
@@ -4305,7 +4348,7 @@ void XmlUnitTestResultPrinter::OutputXmlTestResult(::std::ostream* stream,
       OutputXmlCDataSection(stream, RemoveInvalidXmlCharacters(detail).c_str());
       *stream << "</failure>\n";
     } else if (part.skipped()) {
-      if (++skips == 1 && failures == 0) {
+      if (++skips == 1 && failures == 0 && succeed == 0) {
         *stream << ">\n";
       }
       const std::string location =
@@ -4317,13 +4360,26 @@ void XmlUnitTestResultPrinter::OutputXmlTestResult(::std::ostream* stream,
       const std::string detail = location + "\n" + part.message();
       OutputXmlCDataSection(stream, RemoveInvalidXmlCharacters(detail).c_str());
       *stream << "</skipped>\n";
+    } else if (!GTEST_FLAG_GET(output_succeeded)) {
+      if (++succeed == 1 && skips == 0 && failures == 0) {
+        *stream << ">\n";
+      }
+      const std::string location =
+          internal::FormatCompilerIndependentFileLocation(part.file_name(),
+                                                          part.line_number());
+      const std::string summary = location + "\n" + part.summary();
+      *stream << "      <succeeded message=\""
+              << EscapeXmlAttribute(summary.c_str()) << "\">";
+      const std::string detail = location + "\n" + part.message();
+      OutputXmlCDataSection(stream, RemoveInvalidXmlCharacters(detail).c_str());
+      *stream << "</succeeded>\n";
     }
   }
 
-  if (failures == 0 && skips == 0 && result.test_property_count() == 0) {
+  if (failures == 0 && skips == 0 && succeed == 0 && result.test_property_count() == 0) {
     *stream << " />\n";
   } else {
-    if (failures == 0 && skips == 0) {
+    if (failures == 0 && skips == 0 && succeed == 0) {
       *stream << ">\n";
     }
     OutputXmlTestProperties(stream, result);
@@ -4751,7 +4807,7 @@ void JsonUnitTestResultPrinter::OutputJsonTestResult(::std::ostream* stream,
   int failures = 0;
   for (int i = 0; i < result.total_part_count(); ++i) {
     const TestPartResult& part = result.GetTestPartResult(i);
-    if (part.failed()) {
+    if (part.failed() || GTEST_FLAG_GET(output_succeeded)) {
       *stream << ",\n";
       if (++failures == 1) {
         *stream << kIndent << "\"" << "failures" << "\": [\n";
@@ -4759,10 +4815,18 @@ void JsonUnitTestResultPrinter::OutputJsonTestResult(::std::ostream* stream,
       const std::string location =
           internal::FormatCompilerIndependentFileLocation(part.file_name(),
                                                           part.line_number());
+      const std::string type = [&part]{
+        if (part.failed())
+          return "failure";
+        else if (part.skipped())
+          return "skipped";
+        else
+          return "success";
+      }();
       const std::string message = EscapeJson(location + "\n" + part.message());
       *stream << kIndent << "  {\n"
               << kIndent << "    \"failure\": \"" << message << "\",\n"
-              << kIndent << "    \"type\": \"\"\n"
+              << kIndent << "    \"type\": \"" << type << "\"\n"
               << kIndent << "  }";
     }
   }
@@ -6596,6 +6660,7 @@ static bool ParseGoogleTestFlag(const char* const arg) {
   GTEST_INTERNAL_PARSE_FLAG(stack_trace_depth);
   GTEST_INTERNAL_PARSE_FLAG(stream_result_to);
   GTEST_INTERNAL_PARSE_FLAG(throw_on_failure);
+  GTEST_INTERNAL_PARSE_FLAG(output_succeeded);
   return false;
 }
 
