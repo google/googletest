@@ -1610,12 +1610,14 @@ class PredicateFormatterFromMatcher {
     matcher.DescribeTo(&ss);
 
     // Rerun the matcher to "PrintAndExplain" the failure.
-    StringMatchResultListener listener;
-    if (MatchPrintAndExplain(x, matcher, &listener)) {
-      ss << "\n  The matcher failed on the initial attempt; but passed when "
-            "rerun to generate the explanation.";
+    if (!result){
+      StringMatchResultListener listener;
+      if (MatchPrintAndExplain(x, matcher, &listener)) {
+        ss << "\n  The matcher failed on the initial attempt; but passed when "
+              "rerun to generate the explanation.";
+      }
+      ss << "\n  Actual: " << listener.str();
     }
-    ss << "\n  Actual: " << listener.str();
     return std::move(result) << ss.str();
   }
 

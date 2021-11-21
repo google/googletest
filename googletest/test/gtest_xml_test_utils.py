@@ -93,7 +93,7 @@ class GTestXMLTestCase(gtest_test_utils.TestCase):
     actual_children = self._GetChildren(actual_node)
     self.assertEquals(
         len(expected_children), len(actual_children),
-        'number of child elements differ in element ' + actual_node.tagName)
+        'number of child elements differ in element ' + actual_node.tagName + ' ' + actual_node.getAttribute('name'))
     for child_id, child in expected_children.items():
       self.assert_(child_id in actual_children,
                    '<%s> is not in <%s> (in element %s)' %
@@ -105,6 +105,7 @@ class GTestXMLTestCase(gtest_test_utils.TestCase):
       'testsuite': 'name',
       'testcase': 'name',
       'failure': 'message',
+      'succeeded': 'message',
       'skipped': 'message',
       'property': 'name',
   }
@@ -136,7 +137,8 @@ class GTestXMLTestCase(gtest_test_utils.TestCase):
                        'Encountered unknown element <%s>' % child.tagName)
           child_id = child.getAttribute(
               self.identifying_attribute[child.tagName])
-        self.assert_(child_id not in children)
+        self.assert_(child_id not in children, '<%s> is already in <%s> (in element %s)' %
+                   (child_id, children, element.tagName))
         children[child_id] = child
       elif child.nodeType in [Node.TEXT_NODE, Node.CDATA_SECTION_NODE]:
         if 'detail' not in children:
@@ -180,7 +182,7 @@ class GTestXMLTestCase(gtest_test_utils.TestCase):
       type_param = element.getAttributeNode('type_param')
       if type_param and type_param.value:
         type_param.value = '*'
-    elif element.tagName == 'failure' or element.tagName == 'skipped':
+    elif element.tagName == 'failure' or element.tagName == 'skipped' or element.tagName == 'succeeded':
       source_line_pat = r'^.*[/\\](.*:)\d+\n'
       # Replaces the source line information with a normalized form.
       message = element.getAttributeNode('message')

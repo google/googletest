@@ -893,17 +893,32 @@ static AssertionResult HasOneFailure(const char* /* results_expr */,
   const std::string expected(type == TestPartResult::kFatalFailure ?
                         "1 fatal failure" :
                         "1 non-fatal failure");
+  int failures = 0;
+  int last_failed = 0;
+  for (int i = 0; i < results.size(); i++) {
+    const auto& result = results.GetTestPartResult(i);
+    std::cout << result.type() << TestPartResult::kSuccess << " == " << type << std::endl;
+    if (result.type() != TestPartResult::kSuccess){
+      failures++;
+      last_failed = i;
+    }
+  }
+
   Message msg;
-  if (results.size() != 1) {
+  if (failures != 1) {
     msg << "Expected: " << expected << "\n"
-        << "  Actual: " << results.size() << " failures";
+        << " Actual: " << failures << " failures";
     for (int i = 0; i < results.size(); i++) {
-      msg << "\n" << results.GetTestPartResult(i);
+      const auto& result = results.GetTestPartResult(i);
+      if (result.type() != TestPartResult::kSuccess){
+        msg << "\n" << result;
+      }
     }
     return AssertionFailure() << msg;
   }
 
-  const TestPartResult& r = results.GetTestPartResult(0);
+
+  const TestPartResult& r = results.GetTestPartResult(last_failed);
   if (r.type() != type) {
     return AssertionFailure() << "Expected: " << expected << "\n"
                               << "  Actual:\n"
@@ -917,9 +932,7 @@ static AssertionResult HasOneFailure(const char* /* results_expr */,
                               << r;
   }
 
-  return AssertionSuccess() << "Expected: " << expected << "\n"
-                              << "  Actual:\n"
-                              << r;
+  return AssertionSuccess() << "Expected: " << expected;
 }
 
 // The constructor of SingleFailureChecker remembers where to look up
@@ -4360,7 +4373,7 @@ void XmlUnitTestResultPrinter::OutputXmlTestResult(::std::ostream* stream,
       const std::string detail = location + "\n" + part.message();
       OutputXmlCDataSection(stream, RemoveInvalidXmlCharacters(detail).c_str());
       *stream << "</skipped>\n";
-    } else if (!GTEST_FLAG_GET(output_succeeded)) {
+    } else if (GTEST_FLAG_GET(output_succeeded)) {
       if (++succeed == 1 && skips == 0 && failures == 0) {
         *stream << ">\n";
       }

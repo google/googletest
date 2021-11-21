@@ -289,6 +289,7 @@ class GTestOutputTest(gtest_test_utils.TestCase):
     golden = ToUnixLineEnding(golden_file.read().decode())
     golden_file.close()
 
+    self.maxDiff = None
     # We want the test to pass regardless of certain features being
     # supported or not.
 

@@ -1193,7 +1193,8 @@ TEST_F(MacroLogicDeathTest, ChildDoesNotDie) {
 // test part.
 TEST(SuccessRegistrationDeathTest, NoSuccessPart) {
   EXPECT_DEATH(_exit(1), "");
-  EXPECT_EQ(0, GetUnitTestImpl()->current_test_result()->total_part_count());
+  EXPECT_EQ(1, GetUnitTestImpl()->current_test_result()->total_part_count());
+  EXPECT_TRUE(GetUnitTestImpl()->current_test_result()->GetTestPartResult(0).passed());
 }
 
 TEST(StreamingAssertionsDeathTest, DeathTest) {

@@ -44,6 +44,7 @@ import gtest_xml_test_utils
 GTEST_FILTER_FLAG = '--gtest_filter'
 GTEST_LIST_TESTS_FLAG = '--gtest_list_tests'
 GTEST_OUTPUT_FLAG = '--gtest_output'
+GTEST_OUTPUT_SUCCEEDED_FLAG = '--gtest_output_succeeded'
 GTEST_DEFAULT_OUTPUT_FILE = 'test_detail.xml'
 GTEST_PROGRAM_NAME = 'gtest_xml_output_unittest_'
 
@@ -195,9 +196,20 @@ EXPECTED_FILTERED_TEST_XML = """<?xml version="1.0" encoding="UTF-8"?>
             timestamp="*" name="AllTests" ad_hoc_property="42">
   <testsuite name="SuccessfulTest" tests="1" failures="0" disabled="0" skipped="0"
              errors="0" time="*" timestamp="*">
-    <testcase name="Succeeds" status="run" result="completed" time="*" timestamp="*" classname="SuccessfulTest"/>
+    <testcase name="Succeeds" status="run" result="completed" time="*" timestamp="*" classname="SuccessfulTest">
+      <succeeded message="gtest_xml_output_unittest_.cc:*&#x0A;Succeeded&#x0A;This is a success."><![CDATA[gtest_xml_output_unittest_.cc:*
+Succeeded
+This is a success.%(stack)s]]></succeeded>
+      <succeeded message="gtest_xml_output_unittest_.cc:*&#x0A;Expected equality of these values:&#x0A;  1&#x0A;  1"><![CDATA[gtest_xml_output_unittest_.cc:*
+Expected equality of these values:
+  1
+  1%(stack)s]]></succeeded>
+    </testcase>
   </testsuite>
-</testsuites>"""
+</testsuites>""" % {
+    'stack': STACK_TRACE_TEMPLATE
+}
+
 
 EXPECTED_SHARDED_TEST_XML = """<?xml version="1.0" encoding="UTF-8"?>
 <testsuites tests="3" failures="0" disabled="0" errors="0" time="*" timestamp="*" name="AllTests" ad_hoc_property="42">
@@ -346,7 +358,7 @@ class GTestXMLOutputUnitTest(gtest_xml_test_utils.GTestXMLTestCase):
     """
 
     self._TestXmlOutput(GTEST_PROGRAM_NAME, EXPECTED_FILTERED_TEST_XML, 0,
-                        extra_args=['%s=SuccessfulTest.*' % GTEST_FILTER_FLAG])
+                        extra_args=['%s=SuccessfulTest.*' % GTEST_FILTER_FLAG, GTEST_OUTPUT_SUCCEEDED_FLAG])
 
   def testShardedTestXmlOutput(self):
     """Verifies XML output when run using multiple shards.

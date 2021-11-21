@@ -4284,25 +4284,29 @@ TEST(SuccessfulAssertionTest, SUCCEED) {
 // Tests that Google Test doesn't track successful EXPECT_*.
 TEST(SuccessfulAssertionTest, EXPECT) {
   EXPECT_TRUE(true);
-  EXPECT_EQ(0, GetUnitTestImpl()->current_test_result()->total_part_count());
+  EXPECT_EQ(1, GetUnitTestImpl()->current_test_result()->total_part_count());
+  EXPECT_TRUE(GetUnitTestImpl()->current_test_result()->GetTestPartResult(1).passed());
 }
 
 // Tests that Google Test doesn't track successful EXPECT_STR*.
 TEST(SuccessfulAssertionTest, EXPECT_STR) {
   EXPECT_STREQ("", "");
-  EXPECT_EQ(0, GetUnitTestImpl()->current_test_result()->total_part_count());
+  EXPECT_EQ(1, GetUnitTestImpl()->current_test_result()->total_part_count());
+  EXPECT_TRUE(GetUnitTestImpl()->current_test_result()->GetTestPartResult(1).passed());
 }
 
 // Tests that Google Test doesn't track successful ASSERT_*.
 TEST(SuccessfulAssertionTest, ASSERT) {
   ASSERT_TRUE(true);
-  EXPECT_EQ(0, GetUnitTestImpl()->current_test_result()->total_part_count());
+  EXPECT_EQ(1, GetUnitTestImpl()->current_test_result()->total_part_count());
+  EXPECT_TRUE(GetUnitTestImpl()->current_test_result()->GetTestPartResult(1).passed());
 }
 
 // Tests that Google Test doesn't track successful ASSERT_STR*.
 TEST(SuccessfulAssertionTest, ASSERT_STR) {
   ASSERT_STREQ("", "");
-  EXPECT_EQ(0, GetUnitTestImpl()->current_test_result()->total_part_count());
+  EXPECT_EQ(1, GetUnitTestImpl()->current_test_result()->total_part_count());
+  EXPECT_TRUE(GetUnitTestImpl()->current_test_result()->GetTestPartResult(1).passed());
 }
 
 }  // namespace testing
@@ -5361,8 +5365,9 @@ TEST_F(TestInfoTest, result) {
   // Initially, there is no TestPartResult for this test.
   ASSERT_EQ(0, GetTestResult(test_info)->total_part_count());
 
-  // After the previous assertion, there is still none.
-  ASSERT_EQ(0, GetTestResult(test_info)->total_part_count());
+  // After the previous assertion, there is one.
+  ASSERT_EQ(1, GetTestResult(test_info)->total_part_count());
+  ASSERT_TRUE(GetTestResult(test_info)->GetTestPartResult(0).passed());
 }
 
 #define VERIFY_CODE_LOCATION \

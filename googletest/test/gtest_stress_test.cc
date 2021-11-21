@@ -109,8 +109,12 @@ void ManyAsserts(int id) {
 void CheckTestFailureCount(int expected_failures) {
   const TestInfo* const info = UnitTest::GetInstance()->current_test_info();
   const TestResult* const result = info->result();
-  GTEST_CHECK_(expected_failures == result->total_part_count())
-      << "Logged " << result->total_part_count() << " failures "
+  int failcount = 0;
+  for (int i = 0; i < result->total_part_count(); i++){
+    if(!result->GetTestPartResult(i).passed()) failcount++;
+  }
+  GTEST_CHECK_(expected_failures == failcount)
+      << "Logged " << failcount << " failures "
       << " vs. " << expected_failures << " expected";
 }
 
