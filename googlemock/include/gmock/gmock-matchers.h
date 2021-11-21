@@ -1596,7 +1596,7 @@ class PredicateFormatterFromMatcher {
 
     // The expected path here is that the matcher should match (i.e. that most
     // tests pass) so optimize for this case.
-    AssertionResult result = []{
+    AssertionResult result = [&]{
       if (matcher.Matches(x)) {
         return AssertionSuccess();
       } else {

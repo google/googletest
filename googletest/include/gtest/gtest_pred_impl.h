@@ -87,9 +87,15 @@ AssertionResult AssertPred1Helper(const char* pred_text,
                                   const char* e1,
                                   Pred pred,
                                   const T1& v1) {
-  if (pred(v1)) return AssertionSuccess();
+  AssertionResult result = [&]{
+    if (pred(v1)) {
+      return AssertionSuccess();
+    }else {
+      return AssertionFailure();
+    }
+  }();
 
-  return AssertionFailure()
+  return std::move(result)
          << pred_text << "(" << e1 << ") evaluates to false, where"
          << "\n"
          << e1 << " evaluates to " << ::testing::PrintToString(v1);
@@ -103,11 +109,11 @@ AssertionResult AssertPred1Helper(const char* pred_text,
 
 // Internal macro for implementing {EXPECT|ASSERT}_PRED1.  Don't use
 // this in your code.
-#define GTEST_PRED1_(pred, v1, on_failure)\
+#define GTEST_PRED1_(pred, v1, on_failure, on_success)\
   GTEST_ASSERT_(::testing::AssertPred1Helper(#pred, \
                                              #v1, \
                                              pred, \
-                                             v1), on_failure)
+                                             v1), on_failure, on_success)
 
 // Unary predicate assertion macros.
 #define EXPECT_PRED_FORMAT1(pred_format, v1) \
@@ -132,9 +138,15 @@ AssertionResult AssertPred2Helper(const char* pred_text,
                                   Pred pred,
                                   const T1& v1,
                                   const T2& v2) {
-  if (pred(v1, v2)) return AssertionSuccess();
+  AssertionResult result = [&]{
+    if (pred(v1, v2)) {
+      return AssertionSuccess();
+    }else {
+      return AssertionFailure();
+    }
+  }();
 
-  return AssertionFailure()
+  return std::move(result)
          << pred_text << "(" << e1 << ", " << e2
          << ") evaluates to false, where"
          << "\n"
@@ -150,13 +162,13 @@ AssertionResult AssertPred2Helper(const char* pred_text,
 
 // Internal macro for implementing {EXPECT|ASSERT}_PRED2.  Don't use
 // this in your code.
-#define GTEST_PRED2_(pred, v1, v2, on_failure)\
+#define GTEST_PRED2_(pred, v1, v2, on_failure, on_success)\
   GTEST_ASSERT_(::testing::AssertPred2Helper(#pred, \
                                              #v1, \
                                              #v2, \
                                              pred, \
                                              v1, \
-                                             v2), on_failure)
+                                             v2), on_failure, on_success)
 
 // Binary predicate assertion macros.
 #define EXPECT_PRED_FORMAT2(pred_format, v1, v2) \
@@ -184,9 +196,15 @@ AssertionResult AssertPred3Helper(const char* pred_text,
                                   const T1& v1,
                                   const T2& v2,
                                   const T3& v3) {
-  if (pred(v1, v2, v3)) return AssertionSuccess();
+  AssertionResult result = [&]{
+    if (pred(v1, v2, v3)) {
+      return AssertionSuccess();
+    }else {
+      return AssertionFailure();
+    }
+  }();
 
-  return AssertionFailure()
+  return std::move(result)
          << pred_text << "(" << e1 << ", " << e2 << ", " << e3
          << ") evaluates to false, where"
          << "\n"
@@ -203,7 +221,7 @@ AssertionResult AssertPred3Helper(const char* pred_text,
 
 // Internal macro for implementing {EXPECT|ASSERT}_PRED3.  Don't use
 // this in your code.
-#define GTEST_PRED3_(pred, v1, v2, v3, on_failure)\
+#define GTEST_PRED3_(pred, v1, v2, v3, on_failure, on_success)\
   GTEST_ASSERT_(::testing::AssertPred3Helper(#pred, \
                                              #v1, \
                                              #v2, \
@@ -211,7 +229,7 @@ AssertionResult AssertPred3Helper(const char* pred_text,
                                              pred, \
                                              v1, \
                                              v2, \
-                                             v3), on_failure)
+                                             v3), on_failure, on_success)
 
 // Ternary predicate assertion macros.
 #define EXPECT_PRED_FORMAT3(pred_format, v1, v2, v3) \
@@ -242,9 +260,15 @@ AssertionResult AssertPred4Helper(const char* pred_text,
                                   const T2& v2,
                                   const T3& v3,
                                   const T4& v4) {
-  if (pred(v1, v2, v3, v4)) return AssertionSuccess();
+  AssertionResult result = [&]{
+    if (pred(v1, v2, v3, v4)) {
+      return AssertionSuccess();
+    }else {
+      return AssertionFailure();
+    }
+  }();
 
-  return AssertionFailure()
+  return std::move(result)
          << pred_text << "(" << e1 << ", " << e2 << ", " << e3 << ", " << e4
          << ") evaluates to false, where"
          << "\n"
@@ -262,7 +286,7 @@ AssertionResult AssertPred4Helper(const char* pred_text,
 
 // Internal macro for implementing {EXPECT|ASSERT}_PRED4.  Don't use
 // this in your code.
-#define GTEST_PRED4_(pred, v1, v2, v3, v4, on_failure)\
+#define GTEST_PRED4_(pred, v1, v2, v3, v4, on_failure, on_success)\
   GTEST_ASSERT_(::testing::AssertPred4Helper(#pred, \
                                              #v1, \
                                              #v2, \
@@ -272,7 +296,7 @@ AssertionResult AssertPred4Helper(const char* pred_text,
                                              v1, \
                                              v2, \
                                              v3, \
-                                             v4), on_failure)
+                                             v4), on_failure, on_success)
 
 // 4-ary predicate assertion macros.
 #define EXPECT_PRED_FORMAT4(pred_format, v1, v2, v3, v4) \
@@ -306,9 +330,15 @@ AssertionResult AssertPred5Helper(const char* pred_text,
                                   const T3& v3,
                                   const T4& v4,
                                   const T5& v5) {
-  if (pred(v1, v2, v3, v4, v5)) return AssertionSuccess();
+  AssertionResult result = [&]{
+    if (pred(v1, v2, v3, v4, v5)) {
+      return AssertionSuccess();
+    }else {
+      return AssertionFailure();
+    }
+  }();
 
-  return AssertionFailure()
+  return std::move(result)
          << pred_text << "(" << e1 << ", " << e2 << ", " << e3 << ", " << e4
          << ", " << e5 << ") evaluates to false, where"
          << "\n"
@@ -327,7 +357,7 @@ AssertionResult AssertPred5Helper(const char* pred_text,
 
 // Internal macro for implementing {EXPECT|ASSERT}_PRED5.  Don't use
 // this in your code.
-#define GTEST_PRED5_(pred, v1, v2, v3, v4, v5, on_failure)\
+#define GTEST_PRED5_(pred, v1, v2, v3, v4, v5, on_failure, on_success)\
   GTEST_ASSERT_(::testing::AssertPred5Helper(#pred, \
                                              #v1, \
                                              #v2, \
@@ -339,7 +369,7 @@ AssertionResult AssertPred5Helper(const char* pred_text,
                                              v2, \
                                              v3, \
                                              v4, \
-                                             v5), on_failure)
+                                             v5), on_failure, on_success)
 
 // 5-ary predicate assertion macros.
 #define EXPECT_PRED_FORMAT5(pred_format, v1, v2, v3, v4, v5) \
