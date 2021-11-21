@@ -897,7 +897,6 @@ static AssertionResult HasOneFailure(const char* /* results_expr */,
   int last_failed = 0;
   for (int i = 0; i < results.size(); i++) {
     const auto& result = results.GetTestPartResult(i);
-    std::cout << result.type() << TestPartResult::kSuccess << " == " << type << std::endl;
     if (result.type() != TestPartResult::kSuccess){
       failures++;
       last_failed = i;
@@ -905,9 +904,9 @@ static AssertionResult HasOneFailure(const char* /* results_expr */,
   }
 
   Message msg;
-  if (failures != 1) {
+  if (failures != 1 && results.size() != 1) {
     msg << "Expected: " << expected << "\n"
-        << " Actual: " << failures << " failures";
+        << "  Actual: " << failures << " failures";
     for (int i = 0; i < results.size(); i++) {
       const auto& result = results.GetTestPartResult(i);
       if (result.type() != TestPartResult::kSuccess){
