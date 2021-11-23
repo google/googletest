@@ -1617,13 +1617,7 @@ AssertionResult DoubleNearPredFormat(const char* expr1,
                                      double val2,
                                      double abs_error) {
   const double diff = fabs(val1 - val2);
-  AssertionResult result = [&]{
-    if (diff <= abs_error) {
-      return AssertionSuccess();
-    }else{
-      return AssertionFailure();
-    }
-  }();
+  AssertionResult result = (diff <= abs_error) ? AssertionSuccess() : AssertionFailure();
 
   // Find the value which is closest to zero.
   const double min_abs = std::min(fabs(val1), fabs(val2));
@@ -1720,12 +1714,7 @@ AssertionResult CmpHelperSTREQ(const char* lhs_expression,
                                const char* rhs_expression,
                                const char* lhs,
                                const char* rhs) {
-  AssertionResult result = [&]{
-    if (String::CStringEquals(lhs, rhs)) {
-      return AssertionSuccess();
-    }
-    return AssertionFailure();
-  }();
+  AssertionResult result = (String::CStringEquals(lhs, rhs)) ? AssertionSuccess() : AssertionFailure();
 
   return std::move(result) << EqMessage(lhs_expression,
                    rhs_expression,
@@ -1739,12 +1728,7 @@ AssertionResult CmpHelperSTRCASEEQ(const char* lhs_expression,
                                    const char* rhs_expression,
                                    const char* lhs,
                                    const char* rhs) {
-  AssertionResult result = [&]{
-    if (String::CaseInsensitiveCStringEquals(lhs, rhs)) {
-      return AssertionSuccess();
-    }
-    return AssertionFailure();
-  }();
+  AssertionResult result = (String::CaseInsensitiveCStringEquals(lhs, rhs)) ? AssertionSuccess() : AssertionFailure();
 
   return std::move(result) << EqMessage(lhs_expression,
                    rhs_expression,
@@ -1758,13 +1742,8 @@ AssertionResult CmpHelperSTRNE(const char* s1_expression,
                                const char* s2_expression,
                                const char* s1,
                                const char* s2) {
-  AssertionResult result = [&]{
-    if (!String::CStringEquals(s1, s2)) {
-      return AssertionSuccess();
-    } else {
-      return AssertionFailure();
-    }
-  }();
+  AssertionResult result = (!String::CStringEquals(s1, s2)) ? AssertionSuccess() : AssertionFailure();
+
   return std::move(result) << "Expected: (" << s1_expression << ") != ("
                               << s2_expression << "), actual: \""
                               << s1 << "\" vs \"" << s2 << "\"";
@@ -1775,13 +1754,8 @@ AssertionResult CmpHelperSTRCASENE(const char* s1_expression,
                                    const char* s2_expression,
                                    const char* s1,
                                    const char* s2) {
-  AssertionResult result = [&]{
-    if (!String::CaseInsensitiveCStringEquals(s1, s2)) {
-      return AssertionSuccess();
-    } else {
-      return AssertionFailure();
-    }
-  }();
+  AssertionResult result = (!String::CaseInsensitiveCStringEquals(s1, s2)) ? AssertionSuccess() : AssertionFailure();
+
   return std::move(result) << "Expected: (" << s1_expression << ") != ("
         << s2_expression << ") (ignoring case), actual: \""
         << s1 << "\" vs \"" << s2 << "\"";
@@ -1825,13 +1799,8 @@ AssertionResult IsSubstringImpl(
     bool expected_to_be_substring,
     const char* needle_expr, const char* haystack_expr,
     const StringType& needle, const StringType& haystack) {
-  AssertionResult result = [&]{
-    if (IsSubstringPred(needle, haystack) == expected_to_be_substring){
-      return AssertionSuccess();
-    } else{
-      return AssertionFailure();
-    }
-  }();
+  AssertionResult result = (IsSubstringPred(needle, haystack) == expected_to_be_substring)? AssertionSuccess() : AssertionFailure();
+
   const bool is_wide_string = sizeof(needle[0]) > 1;
   const char* const begin_string_quote = is_wide_string ? "L\"" : "\"";
   return std::move(result)
@@ -1947,24 +1916,12 @@ Message HRESULTFailureHelper(const char* expr,
 }  // namespace
 
 AssertionResult IsHRESULTSuccess(const char* expr, long hr) {  // NOLINT
-  AssertionResult result = [&]{
-    if (SUCCEEDED(hr)) {
-      return AssertionSuccess();
-    }else{
-      return AssertionFailure();
-    }
-  }();
+  AssertionResult result = (SUCCEEDED(hr)) ? AssertionSuccess() : AssertionFailure();
   return std::move(result) << HRESULTFailureHelper(expr, "succeeds", hr);
 }
 
 AssertionResult IsHRESULTFailure(const char* expr, long hr) {  // NOLINT
-  AssertionResult result = [&]{
-    if (FAILED(hr)) {
-      return AssertionSuccess();
-    }else{
-      return AssertionFailure();
-    }
-  }();
+  AssertionResult result = (FAILED(hr)) ? AssertionSuccess() : AssertionFailure();
   return std::move(result) << HRESULTFailureHelper(expr, "fails", hr);
 }
 
@@ -2142,13 +2099,7 @@ AssertionResult CmpHelperSTRNE(const char* s1_expression,
                                const char* s2_expression,
                                const wchar_t* s1,
                                const wchar_t* s2) {
-  AssertionResult result = [&]{
-    if (!String::WideCStringEquals(s1, s2)) {
-      return AssertionSuccess();
-    }else{
-      return AssertionFailure();
-    }
-  }();
+  AssertionResult result = (!String::WideCStringEquals(s1, s2)) ? AssertionSuccess() : AssertionFailure();
 
   return std::move(result) << "Expected: (" << s1_expression << ") != ("
                             << s2_expression << "), actual: "

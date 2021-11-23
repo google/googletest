@@ -5763,6 +5763,7 @@ class ParseFlagsTest : public Test {
     GTEST_FLAG_SET(stack_trace_depth, kMaxStackTraceDepth);
     GTEST_FLAG_SET(stream_result_to, "");
     GTEST_FLAG_SET(throw_on_failure, false);
+    GTEST_FLAG_SET(output_succeeded, true);
   }
 
   // Asserts that two narrow or wide string arrays are equal.

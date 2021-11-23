@@ -1596,13 +1596,7 @@ class PredicateFormatterFromMatcher {
 
     // The expected path here is that the matcher should match (i.e. that most
     // tests pass) so optimize for this case.
-    AssertionResult result = [&]{
-      if (matcher.Matches(x)) {
-        return AssertionSuccess();
-      } else {
-        return AssertionFailure();
-      }
-    }();
+    AssertionResult result = matcher.Matches(x) ? AssertionSuccess() : AssertionFailure();
 
     ::std::stringstream ss;
     ss << "Value of: " << value_text << "\n"

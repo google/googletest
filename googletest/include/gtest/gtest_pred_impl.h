@@ -87,13 +87,7 @@ AssertionResult AssertPred1Helper(const char* pred_text,
                                   const char* e1,
                                   Pred pred,
                                   const T1& v1) {
-  AssertionResult result = [&]{
-    if (pred(v1)) {
-      return AssertionSuccess();
-    }else {
-      return AssertionFailure();
-    }
-  }();
+  AssertionResult result = (pred(v1)) ? AssertionSuccess() : AssertionFailure();
 
   return std::move(result)
          << pred_text << "(" << e1 << ") evaluates to false, where"
@@ -138,13 +132,7 @@ AssertionResult AssertPred2Helper(const char* pred_text,
                                   Pred pred,
                                   const T1& v1,
                                   const T2& v2) {
-  AssertionResult result = [&]{
-    if (pred(v1, v2)) {
-      return AssertionSuccess();
-    }else {
-      return AssertionFailure();
-    }
-  }();
+  AssertionResult result = (pred(v1, v2)) ? AssertionSuccess() : AssertionFailure();
 
   return std::move(result)
          << pred_text << "(" << e1 << ", " << e2
@@ -196,13 +184,7 @@ AssertionResult AssertPred3Helper(const char* pred_text,
                                   const T1& v1,
                                   const T2& v2,
                                   const T3& v3) {
-  AssertionResult result = [&]{
-    if (pred(v1, v2, v3)) {
-      return AssertionSuccess();
-    }else {
-      return AssertionFailure();
-    }
-  }();
+  AssertionResult result = (pred(v1, v2, v3)) ? AssertionSuccess() : AssertionFailure();
 
   return std::move(result)
          << pred_text << "(" << e1 << ", " << e2 << ", " << e3
@@ -260,13 +242,7 @@ AssertionResult AssertPred4Helper(const char* pred_text,
                                   const T2& v2,
                                   const T3& v3,
                                   const T4& v4) {
-  AssertionResult result = [&]{
-    if (pred(v1, v2, v3, v4)) {
-      return AssertionSuccess();
-    }else {
-      return AssertionFailure();
-    }
-  }();
+  AssertionResult result = (pred(v1, v2, v3, v4)) ? AssertionSuccess() : AssertionFailure();
 
   return std::move(result)
          << pred_text << "(" << e1 << ", " << e2 << ", " << e3 << ", " << e4
