@@ -1644,7 +1644,7 @@ AssertionResult DoubleNearPredFormat(const char* expr1,
            << ", thus making this EXPECT_NEAR check equivalent to "
               "EXPECT_EQUAL. Consider using EXPECT_DOUBLE_EQ instead.";
   }
-  return std::move(result)
+  return result
       << "The difference between " << expr1 << " and " << expr2
       << " is " << diff << ", which exceeds " << abs_error_expr << ", where\n"
       << expr1 << " evaluates to " << val1 << ",\n"
@@ -1685,7 +1685,7 @@ AssertionResult FloatingPointLE(const char* expr1,
   }();
 
 
-  return std::move(result)
+  return result
       << "Expected: (" << expr1 << ") <= (" << expr2 << ")\n"
       << "  Actual: " << StringStreamToString(&val1_ss) << " vs "
       << StringStreamToString(&val2_ss);
@@ -1716,7 +1716,7 @@ AssertionResult CmpHelperSTREQ(const char* lhs_expression,
                                const char* rhs) {
   AssertionResult result = (String::CStringEquals(lhs, rhs)) ? AssertionSuccess() : AssertionFailure();
 
-  return std::move(result) << EqMessage(lhs_expression,
+  return result << EqMessage(lhs_expression,
                    rhs_expression,
                    PrintToString(lhs),
                    PrintToString(rhs),
@@ -1730,7 +1730,7 @@ AssertionResult CmpHelperSTRCASEEQ(const char* lhs_expression,
                                    const char* rhs) {
   AssertionResult result = (String::CaseInsensitiveCStringEquals(lhs, rhs)) ? AssertionSuccess() : AssertionFailure();
 
-  return std::move(result) << EqMessage(lhs_expression,
+  return result << EqMessage(lhs_expression,
                    rhs_expression,
                    PrintToString(lhs),
                    PrintToString(rhs),
@@ -1744,7 +1744,7 @@ AssertionResult CmpHelperSTRNE(const char* s1_expression,
                                const char* s2) {
   AssertionResult result = (!String::CStringEquals(s1, s2)) ? AssertionSuccess() : AssertionFailure();
 
-  return std::move(result) << "Expected: (" << s1_expression << ") != ("
+  return result << "Expected: (" << s1_expression << ") != ("
                               << s2_expression << "), actual: \""
                               << s1 << "\" vs \"" << s2 << "\"";
 }
@@ -1756,7 +1756,7 @@ AssertionResult CmpHelperSTRCASENE(const char* s1_expression,
                                    const char* s2) {
   AssertionResult result = (!String::CaseInsensitiveCStringEquals(s1, s2)) ? AssertionSuccess() : AssertionFailure();
 
-  return std::move(result) << "Expected: (" << s1_expression << ") != ("
+  return result << "Expected: (" << s1_expression << ") != ("
         << s2_expression << ") (ignoring case), actual: \""
         << s1 << "\" vs \"" << s2 << "\"";
 }
@@ -1803,7 +1803,7 @@ AssertionResult IsSubstringImpl(
 
   const bool is_wide_string = sizeof(needle[0]) > 1;
   const char* const begin_string_quote = is_wide_string ? "L\"" : "\"";
-  return std::move(result)
+  return result
       << "Value of: " << needle_expr << "\n"
       << "  Actual: " << begin_string_quote << needle << "\"\n"
       << "Expected: " << (expected_to_be_substring ? "" : "not ")
@@ -1917,12 +1917,12 @@ Message HRESULTFailureHelper(const char* expr,
 
 AssertionResult IsHRESULTSuccess(const char* expr, long hr) {  // NOLINT
   AssertionResult result = (SUCCEEDED(hr)) ? AssertionSuccess() : AssertionFailure();
-  return std::move(result) << HRESULTFailureHelper(expr, "succeeds", hr);
+  return result << HRESULTFailureHelper(expr, "succeeds", hr);
 }
 
 AssertionResult IsHRESULTFailure(const char* expr, long hr) {  // NOLINT
   AssertionResult result = (FAILED(hr)) ? AssertionSuccess() : AssertionFailure();
-  return std::move(result) << HRESULTFailureHelper(expr, "fails", hr);
+  return result << HRESULTFailureHelper(expr, "fails", hr);
 }
 
 #endif  // GTEST_OS_WINDOWS
@@ -2101,7 +2101,7 @@ AssertionResult CmpHelperSTRNE(const char* s1_expression,
                                const wchar_t* s2) {
   AssertionResult result = (!String::WideCStringEquals(s1, s2)) ? AssertionSuccess() : AssertionFailure();
 
-  return std::move(result) << "Expected: (" << s1_expression << ") != ("
+  return result << "Expected: (" << s1_expression << ") != ("
                             << s2_expression << "), actual: "
                             << PrintToString(s1)
                             << " vs " << PrintToString(s2);

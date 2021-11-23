@@ -1633,7 +1633,7 @@ AssertionResult CmpHelper##op_name(const char* expr1, const char* expr2, \
                                    const T1& val1, const T2& val2) {\
   AssertionResult result = (val1 op val2) ? AssertionSuccess() : AssertionFailure();\
   result << CmpHelperOpMessage(expr1, expr2, val1, val2, #op);\
-  return std::move(result);\
+  return result;\
 }
 
 // INTERNAL IMPLEMENTATION - DO NOT USE IN A USER PROGRAM.

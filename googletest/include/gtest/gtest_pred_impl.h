@@ -89,7 +89,7 @@ AssertionResult AssertPred1Helper(const char* pred_text,
                                   const T1& v1) {
   AssertionResult result = (pred(v1)) ? AssertionSuccess() : AssertionFailure();
 
-  return std::move(result)
+  return result
          << pred_text << "(" << e1 << ") evaluates to false, where"
          << "\n"
          << e1 << " evaluates to " << ::testing::PrintToString(v1);
@@ -134,7 +134,7 @@ AssertionResult AssertPred2Helper(const char* pred_text,
                                   const T2& v2) {
   AssertionResult result = (pred(v1, v2)) ? AssertionSuccess() : AssertionFailure();
 
-  return std::move(result)
+  return result
          << pred_text << "(" << e1 << ", " << e2
          << ") evaluates to false, where"
          << "\n"
@@ -186,7 +186,7 @@ AssertionResult AssertPred3Helper(const char* pred_text,
                                   const T3& v3) {
   AssertionResult result = (pred(v1, v2, v3)) ? AssertionSuccess() : AssertionFailure();
 
-  return std::move(result)
+  return result
          << pred_text << "(" << e1 << ", " << e2 << ", " << e3
          << ") evaluates to false, where"
          << "\n"
@@ -244,7 +244,7 @@ AssertionResult AssertPred4Helper(const char* pred_text,
                                   const T4& v4) {
   AssertionResult result = (pred(v1, v2, v3, v4)) ? AssertionSuccess() : AssertionFailure();
 
-  return std::move(result)
+  return result
          << pred_text << "(" << e1 << ", " << e2 << ", " << e3 << ", " << e4
          << ") evaluates to false, where"
          << "\n"
@@ -314,7 +314,7 @@ AssertionResult AssertPred5Helper(const char* pred_text,
     }
   }();
 
-  return std::move(result)
+  return result
          << pred_text << "(" << e1 << ", " << e2 << ", " << e3 << ", " << e4
          << ", " << e5 << ") evaluates to false, where"
          << "\n"
