@@ -407,10 +407,10 @@ internal::CartesianProductHolder<Generator...> Combine(const Generator&... g) {
 }
 
 #define TEST_P(test_suite_name, test_name)                                     \
-  class GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)    /* NOLINT */                 \
+  class GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)    /* NOLINT */     \
       : public test_suite_name {                                               \
    public:                                                                     \
-    GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)() {}    /* NOLINT */                \
+    GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)() {}    /* NOLINT */    \
     void TestBody() override;                                                  \
                                                                                \
    private:                                                                    \
@@ -434,9 +434,9 @@ internal::CartesianProductHolder<Generator...> Combine(const Generator&... g) {
     GTEST_DISALLOW_COPY_AND_ASSIGN_(GTEST_TEST_CLASS_NAME_(test_suite_name,    \
                                                            test_name));        \
   };                                                                           \
-  /* NOLINTNEXTLINE */ \
+  /* NOLINTNEXTLINE */                                                         \
   int GTEST_TEST_CLASS_NAME_(test_suite_name,                                  \
-  /* NOLINTNEXTLINE */ \
+  /* NOLINTNEXTLINE */                                                         \
                              test_name)::gtest_registering_dummy_ =            \
       GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)::AddToRegistry();     \
   void GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)::TestBody()

@@ -1556,7 +1556,7 @@ class NeverThrown {
       ::testing::internal::MakeAndRegisterTestInfo(                           \
           #test_suite_name, #test_name, nullptr, nullptr,                     \
           /* NOLINTNEXTLINE */                                                \
-          ::testing::internal::CodeLocation(__FILE__, __LINE__), (parent_id), \          
+          ::testing::internal::CodeLocation(__FILE__, __LINE__), (parent_id), \
           ::testing::internal::SuiteApiResolver<                              \
               parent_class>::GetSetUpCaseOrSuite(__FILE__, __LINE__),         \
           ::testing::internal::SuiteApiResolver<                              \

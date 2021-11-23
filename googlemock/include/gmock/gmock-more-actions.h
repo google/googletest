@@ -457,7 +457,7 @@
                 typename args_type, GMOCK_ACTION_TEMPLATE_ARGS_NAMES_>         \
       /* NOLINTNEXTLINE */                                                     \
       return_type gmock_PerformImpl(GMOCK_ACTION_ARG_TYPES_AND_NAMES_) const;  \
-      GMOCK_INTERNAL_DEFN_##value_params /* NOLINT */                           \
+      GMOCK_INTERNAL_DEFN_##value_params /* NOLINT */                          \
     };                                                                         \
     GMOCK_PP_IF(GMOCK_PP_IS_EMPTY(GMOCK_INTERNAL_COUNT_##value_params),        \
                 , std::shared_ptr<const gmock_Impl> impl_;)                    \
