@@ -420,41 +420,61 @@ std::string FormatForComparisonFailureMessage(
 // We define UniversalPrinter as a class template (as opposed to a
 // function template), as we need to partially specialize it for
 // reference types, which cannot be done with function templates.
+// When PrintTo() is not specialized or overloaded for type T, it
+// prints the given value using the << operator if it has one;
+// otherwise prints the bytes in it
+//
+// A user can override the behavior of UniversalPrinter<T>::Print()
+// for a class type Foo by defining an overload of PrintTo() in the
+// namespace where Foo is defined.  We give the user this option as
+// sometimes defining a << operator for Foo is not desirable (e.g.
+// the coding style may prevent doing it, or there is already a <<
+// operator but it doesn't do what the user wants).
 template <typename T>
 class UniversalPrinter;
 
-// Prints the given value using the << operator if it has one;
-// otherwise prints the bytes in it.  This is what
-// UniversalPrinter<T>::Print() does when PrintTo() is not specialized
-// or overloaded for type T.
-//
-// A user can override this behavior for a class type Foo by defining
-// an overload of PrintTo() in the namespace where Foo is defined.  We
-// give the user this option as sometimes defining a << operator for
-// Foo is not desirable (e.g. the coding style may prevent doing it,
-// or there is already a << operator but it doesn't do what the user
-// wants).
+struct LowerPriorityTag {};
+struct HigherPriorityTag : LowerPriorityTag {};
+
+// This function is selected only when PrintTo(value, os) is a valid expression.
+// In the other cases, the fallback is used
 template <typename T>
-void PrintTo(const T& value, ::std::ostream* os) {
+auto PrintToDispatch(const T& value, ::std::ostream* os, HigherPriorityTag)
+    -> decltype((void)PrintTo(value, os)) {
+  // Thanks to Koenig look-up, if T is a class and has its own
+  // PrintTo() function defined in its namespace, that function will
+  // be visible here.  Since it is more specific than the generic ones
+  // in ::testing::internal, it will be picked by the compiler in the
+  // following statement - exactly what we want.
+  PrintTo(value, os);
+}
+
+template <typename T>
+void PrintToDispatch(const T& value, ::std::ostream* os, LowerPriorityTag) {
   internal::PrintWithFallback(value, os);
 }
 
-// The following list of PrintTo() overloads tells
+template <typename T>
+void PrintToImpl(const T& value, ::std::ostream* os) {
+  internal::PrintToDispatch(value, os, HigherPriorityTag());
+}
+
+// The following list of PrintToImpl() overloads tells
 // UniversalPrinter<T>::Print() how to print standard types (built-in
 // types, strings, plain arrays, and pointers).
 
 // Overloads for various char types.
-GTEST_API_ void PrintTo(unsigned char c, ::std::ostream* os);
-GTEST_API_ void PrintTo(signed char c, ::std::ostream* os);
-inline void PrintTo(char c, ::std::ostream* os) {
+GTEST_API_ void PrintToImpl(unsigned char c, ::std::ostream* os);
+GTEST_API_ void PrintToImpl(signed char c, ::std::ostream* os);
+inline void PrintToImpl(char c, ::std::ostream* os) {
   // When printing a plain char, we always treat it as unsigned.  This
   // way, the output won't be affected by whether the compiler thinks
   // char is signed or not.
-  PrintTo(static_cast<unsigned char>(c), os);
+  internal::PrintToImpl(static_cast<unsigned char>(c), os);
 }
 
 // Overloads for other simple built-in types.
-inline void PrintTo(bool x, ::std::ostream* os) {
+inline void PrintToImpl(bool x, ::std::ostream* os) {
   *os << (x ? "true" : "false");
 }
 
@@ -465,60 +485,60 @@ inline void PrintTo(bool x, ::std::ostream* os) {
 // as signed integer when wchar_t is implemented by the compiler
 // as a signed type and is printed as an unsigned integer when wchar_t
 // is implemented as an unsigned type.
-GTEST_API_ void PrintTo(wchar_t wc, ::std::ostream* os);
+GTEST_API_ void PrintToImpl(wchar_t wc, ::std::ostream* os);
 
-GTEST_API_ void PrintTo(char32_t c, ::std::ostream* os);
-inline void PrintTo(char16_t c, ::std::ostream* os) {
-  PrintTo(ImplicitCast_<char32_t>(c), os);
+GTEST_API_ void PrintToImpl(char32_t c, ::std::ostream* os);
+inline void PrintToImpl(char16_t c, ::std::ostream* os) {
+  internal::PrintToImpl(ImplicitCast_<char32_t>(c), os);
 }
 #ifdef __cpp_char8_t
-inline void PrintTo(char8_t c, ::std::ostream* os) {
-  PrintTo(ImplicitCast_<char32_t>(c), os);
+inline void PrintToImpl(char8_t c, ::std::ostream* os) {
+  internal::PrintToImpl(ImplicitCast_<char32_t>(c), os);
 }
 #endif
 
 // gcc/clang __{u,}int128_t
 #if defined(__SIZEOF_INT128__)
-GTEST_API_ void PrintTo(__uint128_t v, ::std::ostream* os);
-GTEST_API_ void PrintTo(__int128_t v, ::std::ostream* os);
+GTEST_API_ void PrintToImpl(__uint128_t v, ::std::ostream* os);
+GTEST_API_ void PrintToImpl(__int128_t v, ::std::ostream* os);
 #endif  // __SIZEOF_INT128__
 
 // Overloads for C strings.
-GTEST_API_ void PrintTo(const char* s, ::std::ostream* os);
-inline void PrintTo(char* s, ::std::ostream* os) {
-  PrintTo(ImplicitCast_<const char*>(s), os);
+GTEST_API_ void PrintToImpl(const char* s, ::std::ostream* os);
+inline void PrintToImpl(char* s, ::std::ostream* os) {
+  internal::PrintToImpl(ImplicitCast_<const char*>(s), os);
 }
 
 // signed/unsigned char is often used for representing binary data, so
 // we print pointers to it as void* to be safe.
-inline void PrintTo(const signed char* s, ::std::ostream* os) {
-  PrintTo(ImplicitCast_<const void*>(s), os);
+inline void PrintToImpl(const signed char* s, ::std::ostream* os) {
+  internal::PrintToImpl(ImplicitCast_<const void*>(s), os);
 }
-inline void PrintTo(signed char* s, ::std::ostream* os) {
-  PrintTo(ImplicitCast_<const void*>(s), os);
+inline void PrintToImpl(signed char* s, ::std::ostream* os) {
+  internal::PrintToImpl(ImplicitCast_<const void*>(s), os);
 }
-inline void PrintTo(const unsigned char* s, ::std::ostream* os) {
-  PrintTo(ImplicitCast_<const void*>(s), os);
+inline void PrintToImpl(const unsigned char* s, ::std::ostream* os) {
+  internal::PrintToImpl(ImplicitCast_<const void*>(s), os);
 }
-inline void PrintTo(unsigned char* s, ::std::ostream* os) {
-  PrintTo(ImplicitCast_<const void*>(s), os);
+inline void PrintToImpl(unsigned char* s, ::std::ostream* os) {
+  internal::PrintToImpl(ImplicitCast_<const void*>(s), os);
 }
 #ifdef __cpp_char8_t
 // Overloads for u8 strings.
-GTEST_API_ void PrintTo(const char8_t* s, ::std::ostream* os);
-inline void PrintTo(char8_t* s, ::std::ostream* os) {
-  PrintTo(ImplicitCast_<const char8_t*>(s), os);
+GTEST_API_ void PrintToImpl(const char8_t* s, ::std::ostream* os);
+inline void PrintToImpl(char8_t* s, ::std::ostream* os) {
+  internal::PrintToImpl(ImplicitCast_<const char8_t*>(s), os);
 }
 #endif
 // Overloads for u16 strings.
-GTEST_API_ void PrintTo(const char16_t* s, ::std::ostream* os);
-inline void PrintTo(char16_t* s, ::std::ostream* os) {
-  PrintTo(ImplicitCast_<const char16_t*>(s), os);
+GTEST_API_ void PrintToImpl(const char16_t* s, ::std::ostream* os);
+inline void PrintToImpl(char16_t* s, ::std::ostream* os) {
+  internal::PrintToImpl(ImplicitCast_<const char16_t*>(s), os);
 }
 // Overloads for u32 strings.
-GTEST_API_ void PrintTo(const char32_t* s, ::std::ostream* os);
-inline void PrintTo(char32_t* s, ::std::ostream* os) {
-  PrintTo(ImplicitCast_<const char32_t*>(s), os);
+GTEST_API_ void PrintToImpl(const char32_t* s, ::std::ostream* os);
+inline void PrintToImpl(char32_t* s, ::std::ostream* os) {
+  internal::PrintToImpl(ImplicitCast_<const char32_t*>(s), os);
 }
 
 // MSVC can be configured to define wchar_t as a typedef of unsigned
@@ -528,9 +548,9 @@ inline void PrintTo(char32_t* s, ::std::ostream* os) {
 // possibly causing invalid memory accesses.
 #if !defined(_MSC_VER) || defined(_NATIVE_WCHAR_T_DEFINED)
 // Overloads for wide C strings
-GTEST_API_ void PrintTo(const wchar_t* s, ::std::ostream* os);
-inline void PrintTo(wchar_t* s, ::std::ostream* os) {
-  PrintTo(ImplicitCast_<const wchar_t*>(s), os);
+GTEST_API_ void PrintToImpl(const wchar_t* s, ::std::ostream* os);
+inline void PrintToImpl(wchar_t* s, ::std::ostream* os) {
+  internal::PrintToImpl(ImplicitCast_<const wchar_t*>(s), os);
 }
 #endif
 
@@ -549,56 +569,58 @@ void PrintRawArrayTo(const T a[], size_t count, ::std::ostream* os) {
 }
 
 // Overloads for ::std::string.
-GTEST_API_ void PrintStringTo(const ::std::string&s, ::std::ostream* os);
-inline void PrintTo(const ::std::string& s, ::std::ostream* os) {
+GTEST_API_ void PrintStringTo(const ::std::string& s, ::std::ostream* os);
+inline void PrintToImpl(const ::std::string& s, ::std::ostream* os) {
   PrintStringTo(s, os);
 }
 
 // Overloads for ::std::u8string
 #ifdef __cpp_char8_t
 GTEST_API_ void PrintU8StringTo(const ::std::u8string& s, ::std::ostream* os);
-inline void PrintTo(const ::std::u8string& s, ::std::ostream* os) {
+inline void PrintToImpl(const ::std::u8string& s, ::std::ostream* os) {
   PrintU8StringTo(s, os);
 }
 #endif
 
 // Overloads for ::std::u16string
 GTEST_API_ void PrintU16StringTo(const ::std::u16string& s, ::std::ostream* os);
-inline void PrintTo(const ::std::u16string& s, ::std::ostream* os) {
+inline void PrintToImpl(const ::std::u16string& s, ::std::ostream* os) {
   PrintU16StringTo(s, os);
 }
 
 // Overloads for ::std::u32string
 GTEST_API_ void PrintU32StringTo(const ::std::u32string& s, ::std::ostream* os);
-inline void PrintTo(const ::std::u32string& s, ::std::ostream* os) {
+inline void PrintToImpl(const ::std::u32string& s, ::std::ostream* os) {
   PrintU32StringTo(s, os);
 }
 
 // Overloads for ::std::wstring.
 #if GTEST_HAS_STD_WSTRING
-GTEST_API_ void PrintWideStringTo(const ::std::wstring&s, ::std::ostream* os);
-inline void PrintTo(const ::std::wstring& s, ::std::ostream* os) {
+GTEST_API_ void PrintWideStringTo(const ::std::wstring& s, ::std::ostream* os);
+inline void PrintToImpl(const ::std::wstring& s, ::std::ostream* os) {
   PrintWideStringTo(s, os);
 }
 #endif  // GTEST_HAS_STD_WSTRING
 
 #if GTEST_INTERNAL_HAS_STRING_VIEW
 // Overload for internal::StringView.
-inline void PrintTo(internal::StringView sp, ::std::ostream* os) {
-  PrintTo(::std::string(sp), os);
+inline void PrintToImpl(internal::StringView sp, ::std::ostream* os) {
+  internal::PrintToImpl(::std::string(sp), os);
 }
 #endif  // GTEST_INTERNAL_HAS_STRING_VIEW
 
-inline void PrintTo(std::nullptr_t, ::std::ostream* os) { *os << "(nullptr)"; }
+inline void PrintToImpl(std::nullptr_t, ::std::ostream* os) {
+  *os << "(nullptr)";
+}
 
 #if GTEST_HAS_RTTI
-inline void PrintTo(const std::type_info& info, std::ostream* os) {
+inline void PrintToImpl(const std::type_info& info, std::ostream* os) {
   *os << internal::GetTypeName(info);
 }
 #endif  // GTEST_HAS_RTTI
 
 template <typename T>
-void PrintTo(std::reference_wrapper<T> ref, ::std::ostream* os) {
+void PrintToImpl(std::reference_wrapper<T> ref, ::std::ostream* os) {
   UniversalPrinter<T&>::Print(ref.get(), os);
 }
 
@@ -630,12 +652,12 @@ void PrintSmartPointer(const Ptr& ptr, std::ostream* os, int) {
 }
 
 template <typename T, typename D>
-void PrintTo(const std::unique_ptr<T, D>& ptr, std::ostream* os) {
+void PrintToImpl(const std::unique_ptr<T, D>& ptr, std::ostream* os) {
   (PrintSmartPointer<T>)(ptr, os, 0);
 }
 
 template <typename T>
-void PrintTo(const std::shared_ptr<T>& ptr, std::ostream* os) {
+void PrintToImpl(const std::shared_ptr<T>& ptr, std::ostream* os) {
   (PrintSmartPointer<T>)(ptr, os, 0);
 }
 
@@ -659,7 +681,7 @@ void PrintTupleTo(const T& t, std::integral_constant<size_t, I>,
 }
 
 template <typename... Types>
-void PrintTo(const ::std::tuple<Types...>& t, ::std::ostream* os) {
+void PrintToImpl(const ::std::tuple<Types...>& t, ::std::ostream* os) {
   *os << "(";
   PrintTupleTo(t, std::integral_constant<size_t, sizeof...(Types)>(), os);
   *os << ")";
@@ -667,7 +689,7 @@ void PrintTo(const ::std::tuple<Types...>& t, ::std::ostream* os) {
 
 // Overload for std::pair.
 template <typename T1, typename T2>
-void PrintTo(const ::std::pair<T1, T2>& value, ::std::ostream* os) {
+void PrintToImpl(const ::std::pair<T1, T2>& value, ::std::ostream* os) {
   *os << '(';
   // We cannot use UniversalPrint(value.first, os) here, as T1 may be
   // a reference type.  The same for printing value.second.
@@ -678,7 +700,7 @@ void PrintTo(const ::std::pair<T1, T2>& value, ::std::ostream* os) {
 }
 
 // Implements printing a non-reference type T by letting the compiler
-// pick the right overload of PrintTo() for T.
+// pick the right overload of PrintToImpl() for T.
 template <typename T>
 class UniversalPrinter {
  public:
@@ -686,19 +708,10 @@ class UniversalPrinter {
   // disable the warning.
   GTEST_DISABLE_MSC_WARNINGS_PUSH_(4180)
 
-  // Note: we deliberately don't call this PrintTo(), as that name
-  // conflicts with ::testing::internal::PrintTo in the body of the
-  // function.
   static void Print(const T& value, ::std::ostream* os) {
-    // By default, ::testing::internal::PrintTo() is used for printing
+    // By default, ::testing::internal::PrintToImpl() is used for printing
     // the value.
-    //
-    // Thanks to Koenig look-up, if T is a class and has its own
-    // PrintTo() function defined in its namespace, that function will
-    // be visible here.  Since it is more specific than the generic ones
-    // in ::testing::internal, it will be picked by the compiler in the
-    // following statement - exactly what we want.
-    PrintTo(value, os);
+    internal::PrintToImpl(value, os);
   }
 
   GTEST_DISABLE_MSC_WARNINGS_POP_()

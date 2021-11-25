@@ -291,22 +291,26 @@ void PrintCharAndCodeTo(Char c, ostream* os) {
   *os << ")";
 }
 
-void PrintTo(unsigned char c, ::std::ostream* os) { PrintCharAndCodeTo(c, os); }
-void PrintTo(signed char c, ::std::ostream* os) { PrintCharAndCodeTo(c, os); }
+void PrintToImpl(unsigned char c, ::std::ostream* os) {
+  PrintCharAndCodeTo(c, os);
+}
+void PrintToImpl(signed char c, ::std::ostream* os) {
+  PrintCharAndCodeTo(c, os);
+}
 
 // Prints a wchar_t as a symbol if it is printable or as its internal
 // code otherwise and also as its code.  L'\0' is printed as "L'\\0'".
-void PrintTo(wchar_t wc, ostream* os) { PrintCharAndCodeTo(wc, os); }
+void PrintToImpl(wchar_t wc, ostream* os) { PrintCharAndCodeTo(wc, os); }
 
 // TODO(dcheng): Consider making this delegate to PrintCharAndCodeTo() as well.
-void PrintTo(char32_t c, ::std::ostream* os) {
+void PrintToImpl(char32_t c, ::std::ostream* os) {
   *os << std::hex << "U+" << std::uppercase << std::setfill('0') << std::setw(4)
       << static_cast<uint32_t>(c);
 }
 
 // gcc/clang __{u,}int128_t
 #if defined(__SIZEOF_INT128__)
-void PrintTo(__uint128_t v, ::std::ostream* os) {
+void PrintToImpl(__uint128_t v, ::std::ostream* os) {
   if (v == 0) {
     *os << "0";
     return;
@@ -339,13 +343,13 @@ void PrintTo(__uint128_t v, ::std::ostream* os) {
   }
   *os << p;
 }
-void PrintTo(__int128_t v, ::std::ostream* os) {
+void PrintToImpl(__int128_t v, ::std::ostream* os) {
   __uint128_t uv = static_cast<__uint128_t>(v);
   if (v < 0) {
     *os << "-";
     uv = -uv;
   }
-  PrintTo(uv, os);
+  internal::PrintToImpl(uv, os);
 }
 #endif  // __SIZEOF_INT128__
 
@@ -457,15 +461,15 @@ void PrintCStringTo(const Char* s, ostream* os) {
 
 }  // anonymous namespace
 
-void PrintTo(const char* s, ostream* os) { PrintCStringTo(s, os); }
+void PrintToImpl(const char* s, ostream* os) { PrintCStringTo(s, os); }
 
 #ifdef __cpp_char8_t
-void PrintTo(const char8_t* s, ostream* os) { PrintCStringTo(s, os); }
+void PrintToImpl(const char8_t* s, ostream* os) { PrintCStringTo(s, os); }
 #endif
 
-void PrintTo(const char16_t* s, ostream* os) { PrintCStringTo(s, os); }
+void PrintToImpl(const char16_t* s, ostream* os) { PrintCStringTo(s, os); }
 
-void PrintTo(const char32_t* s, ostream* os) { PrintCStringTo(s, os); }
+void PrintToImpl(const char32_t* s, ostream* os) { PrintCStringTo(s, os); }
 
 // MSVC compiler can be configured to define whar_t as a typedef
 // of unsigned short. Defining an overload for const wchar_t* in that case
@@ -475,7 +479,7 @@ void PrintTo(const char32_t* s, ostream* os) { PrintCStringTo(s, os); }
 // wchar_t is implemented as a native type.
 #if !defined(_MSC_VER) || defined(_NATIVE_WCHAR_T_DEFINED)
 // Prints the given wide C string to the ostream.
-void PrintTo(const wchar_t* s, ostream* os) { PrintCStringTo(s, os); }
+void PrintToImpl(const wchar_t* s, ostream* os) { PrintCStringTo(s, os); }
 #endif  // wchar_t is native
 
 namespace {

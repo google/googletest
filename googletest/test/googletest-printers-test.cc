@@ -85,6 +85,15 @@ void PrintTo(EnumWithPrintTo e, std::ostream* os) {
   *os << (e == kEWPT1 ? "kEWPT1" : "invalid");
 }
 
+struct StructWithSFINAETemplatePrintToInGlobal {};
+
+template <typename T,
+          typename = typename ::std::enable_if<::std::is_same<
+              T, StructWithSFINAETemplatePrintToInGlobal>::value>::type>
+void PrintTo(const T& value, ::std::ostream* os) {
+  *os << "StructWithSFINAETemplatePrintToInGlobal";
+}
+
 // A class implicitly convertible to BiggestInt.
 class BiggestIntConvertible {
  public:
@@ -171,6 +180,15 @@ class PrintableViaPrintToTemplate {
 template <typename T>
 void PrintTo(const PrintableViaPrintToTemplate<T>& x, ::std::ostream* os) {
   *os << "PrintableViaPrintToTemplate: " << x.value();
+}
+
+struct StructWithSFINAETemplatePrintToInFoo {};
+
+template <typename T,
+          typename = typename ::std::enable_if<::std::is_same<
+              T, StructWithSFINAETemplatePrintToInFoo>::value>::type>
+void PrintTo(const T& value, ::std::ostream* os) {
+  *os << "StructWithSFINAETemplatePrintToInFoo";
 }
 
 // A user-defined streamable class template in a user namespace.
@@ -1247,6 +1265,26 @@ TEST(PrintStdTupleTest, VariousSizes) {
             Print(t10));
 }
 
+TEST(PrintStdTupleTest, VariousQualifiers) {
+  ::std::string s0 = "a";
+  ::std::string s1 = "b";
+  ::std::tuple<std::string, const std::string> t0(s0, s1);
+  EXPECT_EQ("(\"a\", \"b\")", Print(t0));
+
+  ::std::string s2 = "a";
+  ::std::string s3 = "b";
+  ::std::tuple<std::string&, const std::string&> t1(s2, s3);
+  EXPECT_EQ(
+      "(@" + PrintPointer(&s2) + " \"a\", @" + PrintPointer(&s3) + " \"b\")",
+      Print(t1));
+
+  ::std::string s4 = "a";
+  ::std::string s5 = "b";
+  ::std::tuple<std::string&&, const std::string&&> t2(
+      static_cast<::std::string&&>(s4), static_cast<const ::std::string&&>(s5));
+  EXPECT_EQ("(\"a\", \"b\")", Print(t2));
+}
+
 // Nested tuples.
 TEST(PrintStdTupleTest, NestedTuple) {
   ::std::tuple< ::std::tuple<int, bool>, char> nested(
@@ -1274,6 +1312,17 @@ TEST(PrintReferenceWrapper, Unprintable) {
       "@" + PrintPointer(&up) +
           " 16-byte object <EF-12 00-00 34-AB 00-00 00-00 00-00 00-00 00-00>",
       Print(std::cref(up)));
+}
+
+// Test printing user-defined types with a templated PrintTo
+TEST(PrintStructWithSFINAETemplatePrintTo, InGlobalNamespace) {
+  EXPECT_EQ("StructWithSFINAETemplatePrintToInGlobal",
+            Print(StructWithSFINAETemplatePrintToInGlobal()));
+}
+
+TEST(PrintStructWithSFINAETemplatePrintTo, InUserNamespace) {
+  EXPECT_EQ("StructWithSFINAETemplatePrintToInFoo",
+            Print(foo::StructWithSFINAETemplatePrintToInFoo()));
 }
 
 // Tests printing user-defined unprintable types.
