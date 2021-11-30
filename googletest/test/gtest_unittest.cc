@@ -450,6 +450,12 @@ class FormatEpochTimeInMillisAsIso8601Test : public Test {
     tzset();
     GTEST_DISABLE_MSC_WARNINGS_POP_()
 #else
+#if GTEST_OS_LINUX_ANDROID && __ANDROID_API__ < 21
+    // Work around KitKat bug in tzset by setting "UTC" before setting "UTC+00".
+    // See https://github.com/android/ndk/issues/1604.
+    setenv("TZ", "UTC", 1);
+    tzset();
+#endif
     if (time_zone) {
       setenv(("TZ"), time_zone, 1);
     } else {
