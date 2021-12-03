@@ -390,6 +390,10 @@ class GTEST_API_ UnitTestOptions {
   // This function is useful as an __except condition.
   static int GTestShouldProcessSEH(DWORD exception_code);
 #endif  // GTEST_OS_WINDOWS
+
+  // Returns true if "name" matches the ':' separated list of glob-style
+  // filters in "filter".
+  static bool MatchesFilter(const std::string& name, const char* filter);
 };
 
 // Returns the current application's name, removing directory path if that

@@ -797,6 +797,11 @@ class PositiveAndNegativeUnitTestFilter {
 };
 }  // namespace
 
+bool UnitTestOptions::MatchesFilter(const std::string& name_str,
+                                    const char* filter) {
+  return UnitTestFilter{filter}.MatchesName(name_str);
+}
+
 // Returns true if and only if the user-specified filter matches the test
 // suite name and the test name.
 bool UnitTestOptions::FilterMatchesTest(const std::string& test_suite_name,
