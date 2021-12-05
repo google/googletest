@@ -85,6 +85,15 @@ void PrintTo(EnumWithPrintTo e, std::ostream* os) {
   *os << (e == kEWPT1 ? "kEWPT1" : "invalid");
 }
 
+struct StructWithSFINAETemplatePrintToInGlobal {};
+
+template <typename T,
+          typename = typename std::enable_if<std::is_same<
+              T, StructWithSFINAETemplatePrintToInGlobal>::value>::type>
+void PrintTo(const T& obj, std::ostream* os) {
+  *os << "StructWithSFINAETemplatePrintToInGlobal";
+}
+
 // A class implicitly convertible to BiggestInt.
 class BiggestIntConvertible {
  public:
@@ -171,6 +180,15 @@ class PrintableViaPrintToTemplate {
 template <typename T>
 void PrintTo(const PrintableViaPrintToTemplate<T>& x, ::std::ostream* os) {
   *os << "PrintableViaPrintToTemplate: " << x.value();
+}
+
+struct StructWithSFINAETemplatePrintToInFoo {};
+
+template <typename T,
+          typename = typename std::enable_if<std::is_same<
+              T, StructWithSFINAETemplatePrintToInFoo>::value>::type>
+void PrintTo(const T& obj, std::ostream* os) {
+  *os << "StructWithSFINAETemplatePrintToInFoo";
 }
 
 // A user-defined streamable class template in a user namespace.
@@ -1290,6 +1308,16 @@ TEST(PrintReferenceWrapper, Unprintable) {
       "@" + PrintPointer(&up) +
           " 16-byte object <EF-12 00-00 34-AB 00-00 00-00 00-00 00-00 00-00>",
       Print(std::cref(up)));
+}
+
+TEST(PrintPrintableTypeWithSfinaePrintTo, InGlobalNamespace) {
+  EXPECT_EQ("StructWithSFINAETemplatePrintToInGlobal",
+            Print(StructWithSFINAETemplatePrintToInGlobal()));
+}
+
+TEST(PrintPrintableTypeWithSfinaePrintTo, InFooNamespace) {
+  EXPECT_EQ("StructWithSFINAETemplatePrintToInFoo",
+            Print(StructWithSFINAETemplatePrintToInFoo()));
 }
 
 // Tests printing user-defined unprintable types.
