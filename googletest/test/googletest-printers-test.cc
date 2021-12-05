@@ -1317,7 +1317,7 @@ TEST(PrintPrintableTypeWithSfinaePrintTo, InGlobalNamespace) {
 
 TEST(PrintPrintableTypeWithSfinaePrintTo, InFooNamespace) {
   EXPECT_EQ("StructWithSFINAETemplatePrintToInFoo",
-            Print(StructWithSFINAETemplatePrintToInFoo()));
+            Print(foo::StructWithSFINAETemplatePrintToInFoo()));
 }
 
 // Tests printing user-defined unprintable types.
