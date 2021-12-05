@@ -1247,6 +1247,22 @@ TEST(PrintStdTupleTest, VariousSizes) {
             Print(t10));
 }
 
+// Tuple with various qualifiers
+TEST(PrintStdTupleTest, VariousQualifiers) {
+  ::std::tuple<int, const int> t0{1, 2};
+  EXPECT_EQ("(1, 2)", Print(t0));
+  int i1 = 3;
+  int i2 = 4;
+  ::std::tuple<int&, const int&> t1{i1, i2};
+  EXPECT_EQ("(@" + PrintPointer(&i1) + " 3, @" + PrintPointer(&i2) + " 4)",
+            Print(t1));
+  int i3 = 5;
+  int i4 = 6;
+  ::std::tuple<int&&, const int&&> t2{static_cast<int&&>(i3),
+                                      static_cast<const int&&>(i4)};
+  EXPECT_EQ("(5, 6)", Print(t2));
+}
+
 // Nested tuples.
 TEST(PrintStdTupleTest, NestedTuple) {
   ::std::tuple< ::std::tuple<int, bool>, char> nested(
