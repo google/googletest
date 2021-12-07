@@ -76,6 +76,13 @@ template <typename Pointer>
 inline const typename Pointer::element_type* GetRawPointer(const Pointer& p) {
   return p.get();
 }
+// This overload version is for std::reference_wrapper, which does not work with
+// the overload above, as it does not have an `element_type`.
+template <typename Element>
+inline const Element* GetRawPointer(const std::reference_wrapper<Element>& r) {
+  return &r.get();
+}
+
 // This overloaded version is for the raw pointer case.
 template <typename Element>
 inline Element* GetRawPointer(Element* p) { return p; }

@@ -140,6 +140,12 @@ TEST(GetRawPointerTest, WorksForRawPointers) {
   EXPECT_EQ(&n, GetRawPointer(&n));
 }
 
+TEST(GetRawPointerTest, WorksForStdReferenceWrapper) {
+  int n = 1;
+  EXPECT_EQ(&n, GetRawPointer(std::ref(n)));
+  EXPECT_EQ(&n, GetRawPointer(std::cref(n)));
+}
+
 // Tests KindOf<T>.
 
 class Base {};
