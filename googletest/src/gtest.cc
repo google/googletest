@@ -5849,9 +5849,7 @@ bool UnitTestImpl::RunAllTests() {
     return true;
   }
 
-  random_seed_ = GTEST_FLAG_GET(shuffle)
-                     ? GetRandomSeedFromFlag(GTEST_FLAG_GET(random_seed))
-                     : 0;
+  random_seed_ = GetRandomSeedFromFlag(GTEST_FLAG_GET(random_seed));
 
   // True if and only if at least one test has failed.
   bool failed = false;
