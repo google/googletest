@@ -7799,3 +7799,35 @@ TEST(RegisterTest, WasRegistered) {
 
   FAIL() << "Didn't find the test!";
 }
+
+// Test that the pattern globbing algorithm is linear. If not, this test should
+// time out.
+TEST(PatternGlobbingTest, MatchesFilterLinearRuntime) {
+  std::string name(100, 'a');  // Construct the string (a^100)b
+  name.push_back('b');
+
+  std::string pattern;  // Construct the string ((a*)^100)b
+  for (int i = 0; i < 100; ++i) {
+    pattern.append("a*");
+  }
+  pattern.push_back('b');
+
+  EXPECT_TRUE(
+      testing::internal::UnitTestOptions::MatchesFilter(name, pattern.c_str()));
+}
+
+TEST(PatternGlobbingTest, MatchesFilterWithMultiplePatterns) {
+  const std::string name = "aaaa";
+  EXPECT_TRUE(testing::internal::UnitTestOptions::MatchesFilter(name, "a*"));
+  EXPECT_TRUE(testing::internal::UnitTestOptions::MatchesFilter(name, "a*:"));
+  EXPECT_FALSE(testing::internal::UnitTestOptions::MatchesFilter(name, "ab"));
+  EXPECT_FALSE(testing::internal::UnitTestOptions::MatchesFilter(name, "ab:"));
+  EXPECT_TRUE(testing::internal::UnitTestOptions::MatchesFilter(name, "ab:a*"));
+}
+
+TEST(PatternGlobbingTest, MatchesFilterEdgeCases) {
+  EXPECT_FALSE(testing::internal::UnitTestOptions::MatchesFilter("", "*a"));
+  EXPECT_TRUE(testing::internal::UnitTestOptions::MatchesFilter("", "*"));
+  EXPECT_FALSE(testing::internal::UnitTestOptions::MatchesFilter("a", ""));
+  EXPECT_TRUE(testing::internal::UnitTestOptions::MatchesFilter("", ""));
+}
