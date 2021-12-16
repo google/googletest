@@ -95,6 +95,8 @@
 // being defined as many user-defined container types don't have
 // value_type.
 
+// IWYU pragma: private, include "gtest/gtest.h"
+
 #ifndef GOOGLETEST_INCLUDE_GTEST_GTEST_PRINTERS_H_
 #define GOOGLETEST_INCLUDE_GTEST_GTEST_PRINTERS_H_
 

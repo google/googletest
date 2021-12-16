@@ -33,6 +33,7 @@
 // This header file defines the public API for death tests.  It is
 // #included by gtest.h so a user doesn't need to include this
 // directly.
+// IWYU pragma: private, include "gtest/gtest.h"
 
 #ifndef GOOGLETEST_INCLUDE_GTEST_GTEST_DEATH_TEST_H_
 #define GOOGLETEST_INCLUDE_GTEST_GTEST_DEATH_TEST_H_

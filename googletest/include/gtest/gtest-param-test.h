@@ -29,6 +29,8 @@
 //
 // Macros and functions for implementing parameterized tests
 // in Google C++ Testing and Mocking Framework (Google Test)
+// IWYU pragma: private, include "gtest/gtest.h"
+
 #ifndef GOOGLETEST_INCLUDE_GTEST_GTEST_PARAM_TEST_H_
 #define GOOGLETEST_INCLUDE_GTEST_GTEST_PARAM_TEST_H_
 

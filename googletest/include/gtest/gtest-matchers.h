@@ -31,6 +31,7 @@
 //
 // This file implements just enough of the matcher interface to allow
 // EXPECT_DEATH and friends to accept a matcher argument.
+// IWYU pragma: private, include "gtest/gtest.h"
 
 #ifndef GOOGLETEST_INCLUDE_GTEST_GTEST_MATCHERS_H_
 #define GOOGLETEST_INCLUDE_GTEST_GTEST_MATCHERS_H_

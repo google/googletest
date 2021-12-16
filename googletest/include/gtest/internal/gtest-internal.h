@@ -32,6 +32,8 @@
 // This header file declares functions and macros used internally by
 // Google Test.  They are subject to change without notice.
 
+// IWYU pragma: private, include "gtest/gtest.h"
+
 #ifndef GOOGLETEST_INCLUDE_GTEST_INTERNAL_GTEST_INTERNAL_H_
 #define GOOGLETEST_INCLUDE_GTEST_INTERNAL_GTEST_INTERNAL_H_
 

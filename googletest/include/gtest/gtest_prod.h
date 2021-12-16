@@ -30,6 +30,8 @@
 //
 // Google C++ Testing and Mocking Framework definitions useful in production code.
 
+// IWYU pragma: private, include "gtest/gtest.h"
+
 #ifndef GOOGLETEST_INCLUDE_GTEST_GTEST_PROD_H_
 #define GOOGLETEST_INCLUDE_GTEST_GTEST_PROD_H_
 

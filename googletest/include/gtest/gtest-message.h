@@ -41,6 +41,7 @@
 // Such code is NOT meant to be used by a user directly, and is subject
 // to CHANGE WITHOUT NOTICE.  Therefore DO NOT DEPEND ON IT in a user
 // program!
+// IWYU pragma: private, include "gtest/gtest.h"
 
 #ifndef GOOGLETEST_INCLUDE_GTEST_GTEST_MESSAGE_H_
 #define GOOGLETEST_INCLUDE_GTEST_GTEST_MESSAGE_H_
