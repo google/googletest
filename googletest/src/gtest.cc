@@ -50,6 +50,7 @@
 #include <limits>
 #include <list>
 #include <map>
+#include <numeric>
 #include <ostream>  // NOLINT
 #include <sstream>
 #include <vector>
@@ -724,26 +725,26 @@ static bool PatternMatchesString(const std::string& name_str,
 }
 
 namespace {
+
 class UnitTestFilter {
  public:
   UnitTestFilter() = default;
 
   // Constructs a filter form a string of patterns separated by `:`.
   explicit UnitTestFilter(const std::string& filter) {
-    if (filter.empty()) return;
-
+    // By design "" filter matches "" string.
     SplitString(filter, ':', &patterns_);
   }
 
   // Returns true if and only if name matches at least one of the patterns in
   // the filter.
   bool MatchesName(const std::string& name) const {
-    const auto pattern_matches_name = [&name](const std::string& pattern) {
-      return PatternMatchesString(name, pattern.c_str(),
-                                  pattern.c_str() + pattern.size());
-    };
     return std::any_of(patterns_.begin(), patterns_.end(),
-                       pattern_matches_name);
+                       [&name](const std::string& pattern) {
+                         return PatternMatchesString(
+                             name, pattern.c_str(),
+                             pattern.c_str() + pattern.size());
+                       });
   }
 
  private:
@@ -766,10 +767,18 @@ class PositiveAndNegativeUnitTestFilter {
     if (positive_and_negative_filters.size() > 1) {
       positive_filter_ = UnitTestFilter{
           positive_filter.size() ? positive_filter : kUniversalFilter};
-      negative_filter_ = UnitTestFilter{positive_and_negative_filters.back()};
+
+      // TODO: Fail on multiple '-' characters
+      // For the moment to preserve old behavior we concatenate the rest of the
+      // string parts with `-` as separator to generate the negative filter.
+      negative_filter_ = UnitTestFilter{std::accumulate(
+          positive_and_negative_filters.begin() + 2,
+          positive_and_negative_filters.end(), positive_and_negative_filters[1],
+          [](const auto& lhs, const auto& rhs) { return lhs + '-' + rhs; })};
     } else {
-      // In case positive filter is empty
-      // we do not use kUniversalFilter by design
+      // In case we don't have a negative filter and positive filter is ""
+      // we do not use kUniversalFilter by design as opposed to when we have a
+      // negative filter.
       positive_filter_ = UnitTestFilter{positive_filter};
     }
   }
@@ -779,9 +788,7 @@ class PositiveAndNegativeUnitTestFilter {
   // and does not match the negative filter.
   bool MatchesTest(const std::string& test_suite_name,
                    const std::string& test_name) const {
-    const std::string& full_name = test_suite_name + "." + test_name.c_str();
-
-    return MatchesName(full_name);
+    return MatchesName(test_suite_name + "." + test_name);
   }
 
   // Returns true if and only if name matches the positive filter and does not
