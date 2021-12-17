@@ -766,7 +766,7 @@ class PositiveAndNegativeUnitTestFilter {
 
     if (positive_and_negative_filters.size() > 1) {
       positive_filter_ = UnitTestFilter{
-          positive_filter.size() ? positive_filter : kUniversalFilter};
+          positive_filter.empty() ? kUniversalFilter : positive_filter};
 
       // TODO: Fail on multiple '-' characters
       // For the moment to preserve old behavior we concatenate the rest of the
@@ -774,7 +774,7 @@ class PositiveAndNegativeUnitTestFilter {
       negative_filter_ = UnitTestFilter{std::accumulate(
           positive_and_negative_filters.begin() + 2,
           positive_and_negative_filters.end(), positive_and_negative_filters[1],
-          [](const auto& lhs, const auto& rhs) { return lhs + '-' + rhs; })};
+          [](const std::string& lhs, const std::string& rhs) { return lhs + '-' + rhs; })};
     } else {
       // In case we don't have a negative filter and positive filter is ""
       // we do not use kUniversalFilter by design as opposed to when we have a
