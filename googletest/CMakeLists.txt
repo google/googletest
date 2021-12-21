@@ -138,6 +138,9 @@ if (DEFINED CMAKE_VERSION AND NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.11")
     "$<BUILD_INTERFACE:${gtest_build_include_dirs}>"
     "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
 endif()
+if(CMAKE_SYSTEM_NAME MATCHES "QNX")
+  target_link_libraries(gtest PUBLIC regex)
+endif()
 target_link_libraries(gtest_main PUBLIC gtest)
 
 ########################################################################
