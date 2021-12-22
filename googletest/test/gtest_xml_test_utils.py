@@ -31,7 +31,7 @@
 
 import re
 from xml.dom import minidom, Node
-import gtest_test_utils
+from googletest.test import gtest_test_utils
 
 GTEST_DEFAULT_OUTPUT_FILE = 'test_detail.xml'
 

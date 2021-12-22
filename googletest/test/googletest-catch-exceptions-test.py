@@ -35,7 +35,7 @@ googletest-catch-exceptions-ex-test_ (programs written with
 Google Test) and verifies their output.
 """
 
-import gtest_test_utils
+from googletest.test import gtest_test_utils
 
 # Constants.
 FLAG_PREFIX = '--gtest_'

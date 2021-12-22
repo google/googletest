@@ -36,7 +36,7 @@ googletest-global-environment-unittest_ (a program written with Google Test).
 """
 
 import re
-import gtest_test_utils
+from googletest.test import gtest_test_utils
 
 
 def RunAndReturnOutput(args=None):

@@ -32,7 +32,7 @@
 """Verifies that Google Test correctly parses environment variables."""
 
 import os
-import gtest_test_utils
+from googletest.test import gtest_test_utils
 
 
 IS_WINDOWS = os.name == 'nt'
