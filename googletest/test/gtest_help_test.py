@@ -39,7 +39,7 @@ SYNOPSIS
 
 import os
 import re
-import gtest_test_utils
+from googletest.test import gtest_test_utils
 
 
 IS_LINUX = os.name == 'posix' and os.uname()[0] == 'Linux'

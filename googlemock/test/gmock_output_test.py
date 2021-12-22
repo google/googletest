@@ -43,7 +43,7 @@ from io import open    # pylint: disable=redefined-builtin, g-importing-member
 import os
 import re
 import sys
-import gmock_test_utils
+from googlemock.test import gmock_test_utils
 
 
 # The flag for generating the golden file

@@ -31,7 +31,7 @@
 
 """Verifies that SetUpTestSuite and TearDownTestSuite errors are noticed."""
 
-import gtest_test_utils
+from googletest.test import gtest_test_utils
 
 COMMAND = gtest_test_utils.GetTestExecutablePath(
     'googletest-setuptestsuite-test_')

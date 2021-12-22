@@ -33,8 +33,8 @@
 
 import os
 from xml.dom import minidom, Node
-import gtest_test_utils
-import gtest_xml_test_utils
+from googletest.test import gtest_test_utils
+from googletest.test import gtest_xml_test_utils
 
 GTEST_OUTPUT_SUBDIR = "xml_outfiles"
 GTEST_OUTPUT_1_TEST = "gtest_xml_outfile1_test_"
