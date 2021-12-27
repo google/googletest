@@ -44,6 +44,7 @@
 #include <cstring>
 #include <ostream>  // NOLINT
 #include <string>
+#include <vector>
 
 #include "gmock/gmock.h"
 #include "gmock/internal/gmock-port.h"
@@ -54,21 +55,22 @@ namespace internal {
 
 // Joins a vector of strings as if they are fields of a tuple; returns
 // the joined string.
-GTEST_API_ std::string JoinAsTuple(const Strings& fields) {
-  switch (fields.size()) {
-    case 0:
-      return "";
-    case 1:
-      return fields[0];
-    default:
-      std::string result = "(" + fields[0];
-      for (size_t i = 1; i < fields.size(); i++) {
-        result += ", ";
-        result += fields[i];
-      }
-      result += ")";
-      return result;
+GTEST_API_ std::string JoinAsKeyValueTuple(
+    const std::vector<const char*>& names, const Strings& values) {
+  GTEST_CHECK_(names.size() == values.size());
+  if (values.empty()) {
+    return "";
   }
+  const auto build_one = [&](const size_t i) {
+    return std::string(names[i]) + ": " + values[i];
+  };
+  std::string result = "(" + build_one(0);
+  for (size_t i = 1; i < values.size(); i++) {
+    result += ", ";
+    result += build_one(i);
+  }
+  result += ")";
+  return result;
 }
 
 // Converts an identifier name to a space-separated list of lower-case

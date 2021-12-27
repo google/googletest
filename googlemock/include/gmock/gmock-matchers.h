@@ -3864,9 +3864,9 @@ BoundSecondMatcher<Tuple2Matcher, Second> MatcherBindSecond(
 // 'negation' is false; otherwise returns the description of the
 // negation of the matcher.  'param_values' contains a list of strings
 // that are the print-out of the matcher's parameters.
-GTEST_API_ std::string FormatMatcherDescription(bool negation,
-                                                const char* matcher_name,
-                                                const Strings& param_values);
+GTEST_API_ std::string FormatMatcherDescription(
+    bool negation, const char* matcher_name,
+    const std::vector<const char*>& param_names, const Strings& param_values);
 
 // Implements a matcher that checks the value of a optional<> type variable.
 template <typename ValueMatcher>
@@ -5449,7 +5449,7 @@ PolymorphicMatcher<internal::ExceptionMatcherImpl<Err>> ThrowsMessage(
           return gmock_description;                                            \
         }                                                                      \
         return ::testing::internal::FormatMatcherDescription(negation, #name,  \
-                                                             {});              \
+                                                             {}, {});          \
       }                                                                        \
     };                                                                         \
   };                                                                           \
@@ -5461,33 +5461,41 @@ PolymorphicMatcher<internal::ExceptionMatcherImpl<Err>> ThrowsMessage(
       const
 
 #define MATCHER_P(name, p0, description) \
-  GMOCK_INTERNAL_MATCHER(name, name##MatcherP, description, (p0))
-#define MATCHER_P2(name, p0, p1, description) \
-  GMOCK_INTERNAL_MATCHER(name, name##MatcherP2, description, (p0, p1))
-#define MATCHER_P3(name, p0, p1, p2, description) \
-  GMOCK_INTERNAL_MATCHER(name, name##MatcherP3, description, (p0, p1, p2))
-#define MATCHER_P4(name, p0, p1, p2, p3, description) \
-  GMOCK_INTERNAL_MATCHER(name, name##MatcherP4, description, (p0, p1, p2, p3))
+  GMOCK_INTERNAL_MATCHER(name, name##MatcherP, description, (#p0), (p0))
+#define MATCHER_P2(name, p0, p1, description)                            \
+  GMOCK_INTERNAL_MATCHER(name, name##MatcherP2, description, (#p0, #p1), \
+                         (p0, p1))
+#define MATCHER_P3(name, p0, p1, p2, description)                             \
+  GMOCK_INTERNAL_MATCHER(name, name##MatcherP3, description, (#p0, #p1, #p2), \
+                         (p0, p1, p2))
+#define MATCHER_P4(name, p0, p1, p2, p3, description)        \
+  GMOCK_INTERNAL_MATCHER(name, name##MatcherP4, description, \
+                         (#p0, #p1, #p2, #p3), (p0, p1, p2, p3))
 #define MATCHER_P5(name, p0, p1, p2, p3, p4, description)    \
   GMOCK_INTERNAL_MATCHER(name, name##MatcherP5, description, \
-                         (p0, p1, p2, p3, p4))
+                         (#p0, #p1, #p2, #p3, #p4), (p0, p1, p2, p3, p4))
 #define MATCHER_P6(name, p0, p1, p2, p3, p4, p5, description) \
   GMOCK_INTERNAL_MATCHER(name, name##MatcherP6, description,  \
+                         (#p0, #p1, #p2, #p3, #p4, #p5),      \
                          (p0, p1, p2, p3, p4, p5))
 #define MATCHER_P7(name, p0, p1, p2, p3, p4, p5, p6, description) \
   GMOCK_INTERNAL_MATCHER(name, name##MatcherP7, description,      \
+                         (#p0, #p1, #p2, #p3, #p4, #p5, #p6),     \
                          (p0, p1, p2, p3, p4, p5, p6))
 #define MATCHER_P8(name, p0, p1, p2, p3, p4, p5, p6, p7, description) \
   GMOCK_INTERNAL_MATCHER(name, name##MatcherP8, description,          \
+                         (#p0, #p1, #p2, #p3, #p4, #p5, #p6, #p7),    \
                          (p0, p1, p2, p3, p4, p5, p6, p7))
 #define MATCHER_P9(name, p0, p1, p2, p3, p4, p5, p6, p7, p8, description) \
   GMOCK_INTERNAL_MATCHER(name, name##MatcherP9, description,              \
+                         (#p0, #p1, #p2, #p3, #p4, #p5, #p6, #p7, #p8),   \
                          (p0, p1, p2, p3, p4, p5, p6, p7, p8))
 #define MATCHER_P10(name, p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, description) \
   GMOCK_INTERNAL_MATCHER(name, name##MatcherP10, description,                  \
+                         (#p0, #p1, #p2, #p3, #p4, #p5, #p6, #p7, #p8, #p9),   \
                          (p0, p1, p2, p3, p4, p5, p6, p7, p8, p9))
 
-#define GMOCK_INTERNAL_MATCHER(name, full_name, description, args)             \
+#define GMOCK_INTERNAL_MATCHER(name, full_name, description, arg_names, args)  \
   template <GMOCK_INTERNAL_MATCHER_TEMPLATE_PARAMS(args)>                      \
   class full_name : public ::testing::internal::MatcherBaseImpl<               \
                         full_name<GMOCK_INTERNAL_MATCHER_TYPE_PARAMS(args)>> { \
@@ -5516,7 +5524,7 @@ PolymorphicMatcher<internal::ExceptionMatcherImpl<Err>> ThrowsMessage(
           return gmock_description;                                            \
         }                                                                      \
         return ::testing::internal::FormatMatcherDescription(                  \
-            negation, #name,                                                   \
+            negation, #name, {GMOCK_PP_REMOVE_PARENS(arg_names)},              \
             ::testing::internal::UniversalTersePrintTupleFieldsToStrings(      \
                 ::std::tuple<GMOCK_INTERNAL_MATCHER_TYPE_PARAMS(args)>(        \
                     GMOCK_INTERNAL_MATCHER_MEMBERS_USAGE(args))));             \

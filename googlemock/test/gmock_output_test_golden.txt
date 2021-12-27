@@ -291,7 +291,7 @@ Stack trace:
 [ RUN      ] GMockOutputTest.PrintsMatcher
 FILE:#: Failure
 Value of: (std::pair<int, bool>(42, true))
-Expected: is pair (is >= 48, true)
+Expected: is pair (first: is >= 48, second: true)
   Actual: (42, true) (of type std::pair<int, bool>)
 [  FAILED  ] GMockOutputTest.PrintsMatcher
 [  FAILED  ] GMockOutputTest.UnexpectedCall

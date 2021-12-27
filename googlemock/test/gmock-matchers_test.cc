@@ -6439,19 +6439,16 @@ TEST(IsReadableTypeNameTest, ReturnsFalseForLongFunctionTypeNames) {
 
 TEST(FormatMatcherDescriptionTest, WorksForEmptyDescription) {
   EXPECT_EQ("is even",
-            FormatMatcherDescription(false, "IsEven", Strings()));
+            FormatMatcherDescription(false, "IsEven", {}, Strings()));
   EXPECT_EQ("not (is even)",
-            FormatMatcherDescription(true, "IsEven", Strings()));
+            FormatMatcherDescription(true, "IsEven", {}, Strings()));
 
-  const char* params[] = {"5"};
-  EXPECT_EQ("equals 5",
-            FormatMatcherDescription(false, "Equals",
-                                     Strings(params, params + 1)));
+  EXPECT_EQ("equals (a: 5)",
+            FormatMatcherDescription(false, "Equals", {"a"}, {"5"}));
 
-  const char* params2[] = {"5", "8"};
-  EXPECT_EQ("is in range (5, 8)",
-            FormatMatcherDescription(false, "IsInRange",
-                                     Strings(params2, params2 + 2)));
+  EXPECT_EQ(
+      "is in range (a: 5, b: 8)",
+      FormatMatcherDescription(false, "IsInRange", {"a", "b"}, {"5", "8"}));
 }
 
 // Tests PolymorphicMatcher::mutable_impl().
@@ -7810,8 +7807,8 @@ TEST(MatcherPMacroTest, Works) {
   EXPECT_TRUE(m.Matches(36));
   EXPECT_FALSE(m.Matches(5));
 
-  EXPECT_EQ("is greater than 32 and 5", Describe(m));
-  EXPECT_EQ("not (is greater than 32 and 5)", DescribeNegation(m));
+  EXPECT_EQ("is greater than 32 and (n: 5)", Describe(m));
+  EXPECT_EQ("not (is greater than 32 and (n: 5))", DescribeNegation(m));
   EXPECT_EQ("", Explain(m, 36));
   EXPECT_EQ("", Explain(m, 5));
 }
@@ -7822,8 +7819,8 @@ MATCHER_P(_is_Greater_Than32and_, n, "") { return arg > 32 && arg > n; }
 TEST(MatcherPMacroTest, GeneratesCorrectDescription) {
   const Matcher<int> m = _is_Greater_Than32and_(5);
 
-  EXPECT_EQ("is greater than 32 and 5", Describe(m));
-  EXPECT_EQ("not (is greater than 32 and 5)", DescribeNegation(m));
+  EXPECT_EQ("is greater than 32 and (n: 5)", Describe(m));
+  EXPECT_EQ("not (is greater than 32 and (n: 5))", DescribeNegation(m));
   EXPECT_EQ("", Explain(m, 36));
   EXPECT_EQ("", Explain(m, 5));
 }
@@ -7856,7 +7853,8 @@ TEST(MatcherPMacroTest, WorksWhenExplicitlyInstantiatedWithReference) {
   // likely it will just annoy the user.  If the address is
   // interesting, the user should consider passing the parameter by
   // pointer instead.
-  EXPECT_EQ("references uncopyable 1-byte object <31>", Describe(m));
+  EXPECT_EQ("references uncopyable (variable: 1-byte object <31>)",
+            Describe(m));
 }
 
 // Tests that the body of MATCHER_Pn() can reference the parameter
@@ -7907,8 +7905,10 @@ TEST(MatcherPnMacroTest,
   // likely they will just annoy the user.  If the addresses are
   // interesting, the user should consider passing the parameters by
   // pointers instead.
-  EXPECT_EQ("references any of (1-byte object <31>, 1-byte object <32>)",
-            Describe(m));
+  EXPECT_EQ(
+      "references any of (variable1: 1-byte object <31>, variable2: 1-byte "
+      "object <32>)",
+      Describe(m));
 }
 
 // Tests that a simple MATCHER_P2() definition works.
@@ -7920,8 +7920,9 @@ TEST(MatcherPnMacroTest, Works) {
   EXPECT_TRUE(m.Matches(36L));
   EXPECT_FALSE(m.Matches(15L));
 
-  EXPECT_EQ("is not in closed range (10, 20)", Describe(m));
-  EXPECT_EQ("not (is not in closed range (10, 20))", DescribeNegation(m));
+  EXPECT_EQ("is not in closed range (low: 10, hi: 20)", Describe(m));
+  EXPECT_EQ("not (is not in closed range (low: 10, hi: 20))",
+            DescribeNegation(m));
   EXPECT_EQ("", Explain(m, 36L));
   EXPECT_EQ("", Explain(m, 15L));
 }
