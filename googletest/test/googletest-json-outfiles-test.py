@@ -32,8 +32,8 @@
 
 import json
 import os
-import gtest_json_test_utils
-import gtest_test_utils
+from googletest.test import gtest_json_test_utils
+from googletest.test import gtest_test_utils
 
 GTEST_OUTPUT_SUBDIR = 'json_outfiles'
 GTEST_OUTPUT_1_TEST = 'gtest_xml_outfile1_test_'

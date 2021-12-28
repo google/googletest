@@ -31,7 +31,7 @@
 
 """Tests that leaked mock objects can be caught be Google Mock."""
 
-import gmock_test_utils
+from googlemock.test import gmock_test_utils
 
 PROGRAM_PATH = gmock_test_utils.GetTestExecutablePath('gmock_leak_test_')
 TEST_WITH_EXPECT_CALL = [PROGRAM_PATH, '--gtest_filter=*ExpectCall*']

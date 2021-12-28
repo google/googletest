@@ -47,7 +47,7 @@ try:
 except ImportError:
   pass
 import sys
-import gtest_test_utils
+from googletest.test import gtest_test_utils
 
 # Constants.
 

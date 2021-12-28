@@ -304,6 +304,8 @@ function(py_test name)
         COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/${name}.py
           --build_dir=${CMAKE_CURRENT_BINARY_DIR}/\${CTEST_CONFIGURATION_TYPE} ${ARGN})
     endif()
+    # Make the Python import path consistent between Bazel and CMake.
+    set_tests_properties(${name} PROPERTIES ENVIRONMENT PYTHONPATH=${CMAKE_SOURCE_DIR})
   endif(PYTHONINTERP_FOUND)
 endfunction()
 
