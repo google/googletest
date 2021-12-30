@@ -26,6 +26,8 @@ option(
   "Build gtest with internal symbols hidden in shared libraries."
   OFF)
 
+option(gtest_enable_pic "Build with -fPIC flag." OFF)
+
 # Defines pre_project_set_up_hermetic_build() and set_up_hermetic_build().
 include(cmake/hermetic_build.cmake OPTIONAL)
 
@@ -72,7 +74,8 @@ else()
     gtest_build_tests
     gtest_build_samples
     gtest_disable_pthreads
-    gtest_hide_internal_symbols)
+    gtest_hide_internal_symbols
+    gtest_enable_pic)
 
 endif()
 
@@ -138,6 +141,12 @@ if (DEFINED CMAKE_VERSION AND NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.11")
     "$<BUILD_INTERFACE:${gtest_build_include_dirs}>"
     "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
 endif()
+
+if (gtest_enable_pic)
+  set_target_properties(gtest PROPERTIES POSITION_INDEPENDENT_CODE ON)
+  set_target_properties(gtest_main PROPERTIES POSITION_INDEPENDENT_CODE ON)
+endif()
+
 target_link_libraries(gtest_main PUBLIC gtest)
 
 ########################################################################
