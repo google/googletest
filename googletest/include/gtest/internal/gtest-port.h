@@ -1909,7 +1909,7 @@ inline bool IsUpper(char ch) {
 inline bool IsXDigit(char ch) {
   return isxdigit(static_cast<unsigned char>(ch)) != 0;
 }
-#ifdef __cpp_char8_t
+#ifdef __cpp_lib_char8_t
 inline bool IsXDigit(char8_t ch) {
   return isxdigit(static_cast<unsigned char>(ch)) != 0;
 }

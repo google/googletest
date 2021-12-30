@@ -383,7 +383,7 @@ GTEST_IMPL_FORMAT_C_STRING_AS_POINTER_(const char32_t);
 
 GTEST_IMPL_FORMAT_C_STRING_AS_STRING_(char, ::std::string);
 GTEST_IMPL_FORMAT_C_STRING_AS_STRING_(const char, ::std::string);
-#ifdef __cpp_char8_t
+#ifdef __cpp_lib_char8_t
 GTEST_IMPL_FORMAT_C_STRING_AS_STRING_(char8_t, ::std::u8string);
 GTEST_IMPL_FORMAT_C_STRING_AS_STRING_(const char8_t, ::std::u8string);
 #endif
@@ -471,7 +471,7 @@ GTEST_API_ void PrintTo(char32_t c, ::std::ostream* os);
 inline void PrintTo(char16_t c, ::std::ostream* os) {
   PrintTo(ImplicitCast_<char32_t>(c), os);
 }
-#ifdef __cpp_char8_t
+#ifdef __cpp_lib_char8_t
 inline void PrintTo(char8_t c, ::std::ostream* os) {
   PrintTo(ImplicitCast_<char32_t>(c), os);
 }
@@ -503,7 +503,7 @@ inline void PrintTo(const unsigned char* s, ::std::ostream* os) {
 inline void PrintTo(unsigned char* s, ::std::ostream* os) {
   PrintTo(ImplicitCast_<const void*>(s), os);
 }
-#ifdef __cpp_char8_t
+#ifdef __cpp_lib_char8_t
 // Overloads for u8 strings.
 GTEST_API_ void PrintTo(const char8_t* s, ::std::ostream* os);
 inline void PrintTo(char8_t* s, ::std::ostream* os) {
@@ -555,7 +555,7 @@ inline void PrintTo(const ::std::string& s, ::std::ostream* os) {
 }
 
 // Overloads for ::std::u8string
-#ifdef __cpp_char8_t
+#ifdef __cpp_lib_char8_t
 GTEST_API_ void PrintU8StringTo(const ::std::u8string& s, ::std::ostream* os);
 inline void PrintTo(const ::std::u8string& s, ::std::ostream* os) {
   PrintU8StringTo(s, os);
@@ -823,7 +823,7 @@ void UniversalPrintArray(const T* begin, size_t len, ::std::ostream* os) {
 GTEST_API_ void UniversalPrintArray(
     const char* begin, size_t len, ::std::ostream* os);
 
-#ifdef __cpp_char8_t
+#ifdef __cpp_lib_char8_t
 // This overload prints a (const) char8_t array compactly.
 GTEST_API_ void UniversalPrintArray(const char8_t* begin, size_t len,
                                     ::std::ostream* os);
@@ -912,7 +912,7 @@ template <>
 class UniversalTersePrinter<char*> : public UniversalTersePrinter<const char*> {
 };
 
-#ifdef __cpp_char8_t
+#ifdef __cpp_lib_char8_t
 template <>
 class UniversalTersePrinter<const char8_t*> {
  public:
