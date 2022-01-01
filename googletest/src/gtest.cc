@@ -4079,8 +4079,9 @@ std::string XmlUnitTestResultPrinter::EscapeXml(
           m << '"';
         break;
       default:
-        if (IsValidXmlCharacter(ch)) {
-          if (is_attribute && IsNormalizableWhitespace(ch))
+        if (IsValidXmlCharacter(static_cast<unsigned char>(ch))) {
+          if (is_attribute && IsNormalizableWhitespace(
+                                            static_cast<unsigned char>(ch)))
             m << "&#x" << String::FormatByte(static_cast<unsigned char>(ch))
               << ";";
           else
@@ -4101,7 +4102,7 @@ std::string XmlUnitTestResultPrinter::RemoveInvalidXmlCharacters(
   std::string output;
   output.reserve(str.size());
   for (std::string::const_iterator it = str.begin(); it != str.end(); ++it)
-    if (IsValidXmlCharacter(*it))
+    if (IsValidXmlCharacter(static_cast<unsigned char>(*it)))
       output.push_back(*it);
 
   return output;
