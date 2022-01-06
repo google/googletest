@@ -729,7 +729,7 @@ class UnitTestFilter {
  public:
   UnitTestFilter() = default;
 
-  // Constructs a filter form a string of patterns separated by `:`.
+  // Constructs a filter from a string of patterns separated by `:`.
   explicit UnitTestFilter(const std::string& filter) {
     // By design "" filter matches "" string.
     SplitString(filter, ':', &patterns_);
