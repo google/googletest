@@ -1462,8 +1462,6 @@ class ConditionalMatcher {
   bool condition_;
   MatcherTrue matcher_true_;
   MatcherFalse matcher_false_;
-
-  GTEST_DISALLOW_ASSIGN_(ConditionalMatcher);
 };
 
 // Wrapper for implementation of Any/AllOfArray().
