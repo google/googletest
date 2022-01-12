@@ -328,7 +328,7 @@ You may still want to use `SetUp()/TearDown()` in the following cases:
 
 *   C++ does not allow virtual function calls in constructors and destructors.
     You can call a method declared as virtual, but it will not use dynamic
-    dispatch, it will use the definition from the class the constructor of which
+    dispatch. It will use the definition from the class the constructor of which
     is currently executing. This is because calling a virtual method before the
     derived class constructor has a chance to run is very dangerous - the
     virtual method might operate on uninitialized data. Therefore, if you need
