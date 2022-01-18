@@ -27,7 +27,6 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
 // Google Mock - a framework for writing C++ mock classes.
 //
 // The ACTION* family of macros can be used in a namespace scope to
@@ -124,6 +123,9 @@
 //
 // To learn more about using these macros, please search for 'ACTION' on
 // https://github.com/google/googletest/blob/master/docs/gmock_cook_book.md
+
+// IWYU pragma: private, include "gmock/gmock.h"
+// IWYU pragma: friend gmock/.*
 
 #ifndef GOOGLEMOCK_INCLUDE_GMOCK_GMOCK_ACTIONS_H_
 #define GOOGLEMOCK_INCLUDE_GMOCK_GMOCK_ACTIONS_H_
