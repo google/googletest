@@ -1,5 +1,11 @@
 # GoogleTest
 
+[![ci](https://github.com/google/googletest/actions/workflows/gtest-ci.yml/badge.svg)](https://github.com/google/googletest/actions/workflows/gtest-ci.yml)
+[![cpp11](https://img.shields.io/badge/c%2B%2B-11-green.svg)](https://en.cppreference.com/w/cpp/11)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/google/googletest)
+[![License](https://img.shields.io/badge/License-BSD_3--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
+
+
 ### Announcements
 
 #### Live at Head
