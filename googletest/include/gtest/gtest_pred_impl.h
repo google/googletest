@@ -39,7 +39,9 @@
 #ifndef GOOGLETEST_INCLUDE_GTEST_GTEST_PRED_IMPL_H_
 #define GOOGLETEST_INCLUDE_GTEST_GTEST_PRED_IMPL_H_
 
-#include "gtest/gtest.h"
+#include "gtest/gtest-assertion-result.h"
+#include "gtest/internal/gtest-internal.h"
+#include "gtest/internal/gtest-port.h"
 
 namespace testing {
 

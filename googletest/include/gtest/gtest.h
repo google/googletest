@@ -56,6 +56,7 @@
 #include <type_traits>
 #include <vector>
 
+#include "gtest/gtest-assertion-result.h"
 #include "gtest/gtest-death-test.h"
 #include "gtest/gtest-matchers.h"
 #include "gtest/gtest-message.h"
@@ -63,6 +64,7 @@
 #include "gtest/gtest-printers.h"
 #include "gtest/gtest-test-part.h"
 #include "gtest/gtest-typed-test.h"
+#include "gtest/gtest_pred_impl.h"
 #include "gtest/gtest_prod.h"
 #include "gtest/internal/gtest-internal.h"
 #include "gtest/internal/gtest-string.h"
@@ -202,193 +204,6 @@ using TestCase = TestSuite;
 #endif
 class TestInfo;
 class UnitTest;
-
-// A class for indicating whether an assertion was successful.  When
-// the assertion wasn't successful, the AssertionResult object
-// remembers a non-empty message that describes how it failed.
-//
-// To create an instance of this class, use one of the factory functions
-// (AssertionSuccess() and AssertionFailure()).
-//
-// This class is useful for two purposes:
-//   1. Defining predicate functions to be used with Boolean test assertions
-//      EXPECT_TRUE/EXPECT_FALSE and their ASSERT_ counterparts
-//   2. Defining predicate-format functions to be
-//      used with predicate assertions (ASSERT_PRED_FORMAT*, etc).
-//
-// For example, if you define IsEven predicate:
-//
-//   testing::AssertionResult IsEven(int n) {
-//     if ((n % 2) == 0)
-//       return testing::AssertionSuccess();
-//     else
-//       return testing::AssertionFailure() << n << " is odd";
-//   }
-//
-// Then the failed expectation EXPECT_TRUE(IsEven(Fib(5)))
-// will print the message
-//
-//   Value of: IsEven(Fib(5))
-//     Actual: false (5 is odd)
-//   Expected: true
-//
-// instead of a more opaque
-//
-//   Value of: IsEven(Fib(5))
-//     Actual: false
-//   Expected: true
-//
-// in case IsEven is a simple Boolean predicate.
-//
-// If you expect your predicate to be reused and want to support informative
-// messages in EXPECT_FALSE and ASSERT_FALSE (negative assertions show up
-// about half as often as positive ones in our tests), supply messages for
-// both success and failure cases:
-//
-//   testing::AssertionResult IsEven(int n) {
-//     if ((n % 2) == 0)
-//       return testing::AssertionSuccess() << n << " is even";
-//     else
-//       return testing::AssertionFailure() << n << " is odd";
-//   }
-//
-// Then a statement EXPECT_FALSE(IsEven(Fib(6))) will print
-//
-//   Value of: IsEven(Fib(6))
-//     Actual: true (8 is even)
-//   Expected: false
-//
-// NB: Predicates that support negative Boolean assertions have reduced
-// performance in positive ones so be careful not to use them in tests
-// that have lots (tens of thousands) of positive Boolean assertions.
-//
-// To use this class with EXPECT_PRED_FORMAT assertions such as:
-//
-//   // Verifies that Foo() returns an even number.
-//   EXPECT_PRED_FORMAT1(IsEven, Foo());
-//
-// you need to define:
-//
-//   testing::AssertionResult IsEven(const char* expr, int n) {
-//     if ((n % 2) == 0)
-//       return testing::AssertionSuccess();
-//     else
-//       return testing::AssertionFailure()
-//         << "Expected: " << expr << " is even\n  Actual: it's " << n;
-//   }
-//
-// If Foo() returns 5, you will see the following message:
-//
-//   Expected: Foo() is even
-//     Actual: it's 5
-//
-class GTEST_API_ AssertionResult {
- public:
-  // Copy constructor.
-  // Used in EXPECT_TRUE/FALSE(assertion_result).
-  AssertionResult(const AssertionResult& other);
-
-// C4800 is a level 3 warning in Visual Studio 2015 and earlier.
-// This warning is not emitted in Visual Studio 2017.
-// This warning is off by default starting in Visual Studio 2019 but can be
-// enabled with command-line options.
-#if defined(_MSC_VER) && (_MSC_VER < 1910 || _MSC_VER >= 1920)
-  GTEST_DISABLE_MSC_WARNINGS_PUSH_(4800 /* forcing value to bool */)
-#endif
-
-  // Used in the EXPECT_TRUE/FALSE(bool_expression).
-  //
-  // T must be contextually convertible to bool.
-  //
-  // The second parameter prevents this overload from being considered if
-  // the argument is implicitly convertible to AssertionResult. In that case
-  // we want AssertionResult's copy constructor to be used.
-  template <typename T>
-  explicit AssertionResult(
-      const T& success,
-      typename std::enable_if<
-          !std::is_convertible<T, AssertionResult>::value>::type*
-      /*enabler*/
-      = nullptr)
-      : success_(success) {}
-
-#if defined(_MSC_VER) && (_MSC_VER < 1910 || _MSC_VER >= 1920)
-  GTEST_DISABLE_MSC_WARNINGS_POP_()
-#endif
-
-  // Assignment operator.
-  AssertionResult& operator=(AssertionResult other) {
-    swap(other);
-    return *this;
-  }
-
-  // Returns true if and only if the assertion succeeded.
-  operator bool() const { return success_; }  // NOLINT
-
-  // Returns the assertion's negation. Used with EXPECT/ASSERT_FALSE.
-  AssertionResult operator!() const;
-
-  // Returns the text streamed into this AssertionResult. Test assertions
-  // use it when they fail (i.e., the predicate's outcome doesn't match the
-  // assertion's expectation). When nothing has been streamed into the
-  // object, returns an empty string.
-  const char* message() const {
-    return message_.get() != nullptr ? message_->c_str() : "";
-  }
-  // Deprecated; please use message() instead.
-  const char* failure_message() const { return message(); }
-
-  // Streams a custom failure message into this object.
-  template <typename T> AssertionResult& operator<<(const T& value) {
-    AppendMessage(Message() << value);
-    return *this;
-  }
-
-  // Allows streaming basic output manipulators such as endl or flush into
-  // this object.
-  AssertionResult& operator<<(
-      ::std::ostream& (*basic_manipulator)(::std::ostream& stream)) {
-    AppendMessage(Message() << basic_manipulator);
-    return *this;
-  }
-
- private:
-  // Appends the contents of message to message_.
-  void AppendMessage(const Message& a_message) {
-    if (message_.get() == nullptr) message_.reset(new ::std::string);
-    message_->append(a_message.GetString().c_str());
-  }
-
-  // Swap the contents of this AssertionResult with other.
-  void swap(AssertionResult& other);
-
-  // Stores result of the assertion predicate.
-  bool success_;
-  // Stores the message describing the condition in case the expectation
-  // construct is not satisfied with the predicate's outcome.
-  // Referenced via a pointer to avoid taking too much stack frame space
-  // with test assertions.
-  std::unique_ptr< ::std::string> message_;
-};
-
-// Makes a successful assertion result.
-GTEST_API_ AssertionResult AssertionSuccess();
-
-// Makes a failed assertion result.
-GTEST_API_ AssertionResult AssertionFailure();
-
-// Makes a failed assertion result with the given failure message.
-// Deprecated; use AssertionFailure() << msg.
-GTEST_API_ AssertionResult AssertionFailure(const Message& msg);
-
-}  // namespace testing
-
-// Includes the auto-generated header that implements a family of generic
-// predicate assertion macros. This include comes late because it relies on
-// APIs declared above.
-#include "gtest/gtest_pred_impl.h"
-
-namespace testing {
 
 // The abstract class that all tests inherit from.
 //
