@@ -31,8 +31,6 @@
 // The Google C++ Testing and Mocking Framework (Google Test)
 
 #include "gtest/gtest.h"
-#include "gtest/internal/custom/gtest.h"
-#include "gtest/gtest-spi.h"
 
 #include <ctype.h>
 #include <stdarg.h>
@@ -53,6 +51,10 @@
 #include <ostream>  // NOLINT
 #include <sstream>
 #include <vector>
+
+#include "gtest/gtest-assertion-result.h"
+#include "gtest/gtest-spi.h"
+#include "gtest/internal/custom/gtest.h"
 
 #if GTEST_OS_LINUX
 
@@ -1205,44 +1207,6 @@ Message& Message::operator <<(const ::std::wstring& wstr) {
 // Each '\0' character in the buffer is replaced with "\\0".
 std::string Message::GetString() const {
   return internal::StringStreamToString(ss_.get());
-}
-
-// AssertionResult constructors.
-// Used in EXPECT_TRUE/FALSE(assertion_result).
-AssertionResult::AssertionResult(const AssertionResult& other)
-    : success_(other.success_),
-      message_(other.message_.get() != nullptr
-                   ? new ::std::string(*other.message_)
-                   : static_cast< ::std::string*>(nullptr)) {}
-
-// Swaps two AssertionResults.
-void AssertionResult::swap(AssertionResult& other) {
-  using std::swap;
-  swap(success_, other.success_);
-  swap(message_, other.message_);
-}
-
-// Returns the assertion's negation. Used with EXPECT/ASSERT_FALSE.
-AssertionResult AssertionResult::operator!() const {
-  AssertionResult negation(!success_);
-  if (message_.get() != nullptr) negation << *message_;
-  return negation;
-}
-
-// Makes a successful assertion result.
-AssertionResult AssertionSuccess() {
-  return AssertionResult(true);
-}
-
-// Makes a failed assertion result.
-AssertionResult AssertionFailure() {
-  return AssertionResult(false);
-}
-
-// Makes a failed assertion result with the given failure message.
-// Deprecated; use AssertionFailure() << message.
-AssertionResult AssertionFailure(const Message& message) {
-  return AssertionFailure() << message;
 }
 
 namespace internal {
