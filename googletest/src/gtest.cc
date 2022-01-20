@@ -2576,6 +2576,10 @@ template <class T, typename Result>
 Result HandleSehExceptionsInMethodIfSupported(
     T* object, Result (T::*method)(), const char* location) {
 #if GTEST_HAS_SEH
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wlanguage-extension-token"
+#endif
   __try {
     return (object->*method)();
   } __except (internal::UnitTestOptions::GTestShouldProcessSEH(  // NOLINT
@@ -2590,6 +2594,9 @@ Result HandleSehExceptionsInMethodIfSupported(
     delete exception_message;
     return static_cast<Result>(0);
   }
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 #else
   (void)location;
   return (object->*method)();
