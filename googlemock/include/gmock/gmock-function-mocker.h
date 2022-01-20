@@ -31,6 +31,9 @@
 //
 // This file implements MOCK_METHOD.
 
+// IWYU pragma: private, include "gmock/gmock.h"
+// IWYU pragma: friend gmock/.*
+
 #ifndef GOOGLEMOCK_INCLUDE_GMOCK_INTERNAL_GMOCK_FUNCTION_MOCKER_H_  // NOLINT
 #define GOOGLEMOCK_INCLUDE_GMOCK_INTERNAL_GMOCK_FUNCTION_MOCKER_H_  // NOLINT
 
