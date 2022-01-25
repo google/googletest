@@ -317,7 +317,7 @@ GTEST_DEFINE_int32_(
 GTEST_DEFINE_bool_(
     recreate_environments_when_repeating,
     testing::internal::BoolFromGTestEnv("recreate_environments_when_repeating",
-                                        true),
+                                        false),
     "Controls whether global test environments are recreated for each repeat "
     "of the tests. If set to false the global test environments are only set "
     "up once, for the first iteration, and only torn down once, for the last. "
