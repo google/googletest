@@ -142,6 +142,7 @@ void TestRepeatUnspecified() {
 // Tests the behavior of Google Test when --gtest_repeat has the given value.
 void TestRepeat(int repeat) {
   GTEST_FLAG_SET(repeat, repeat);
+  GTEST_FLAG_SET(recreate_environments_when_repeating, true);
 
   ResetCounts();
   GTEST_CHECK_INT_EQ_(repeat > 0 ? 1 : 0, RUN_ALL_TESTS());
@@ -152,6 +153,7 @@ void TestRepeat(int repeat) {
 // set of tests.
 void TestRepeatWithEmptyFilter(int repeat) {
   GTEST_FLAG_SET(repeat, repeat);
+  GTEST_FLAG_SET(recreate_environments_when_repeating, true);
   GTEST_FLAG_SET(filter, "None");
 
   ResetCounts();
@@ -163,6 +165,7 @@ void TestRepeatWithEmptyFilter(int repeat) {
 // successful tests.
 void TestRepeatWithFilterForSuccessfulTests(int repeat) {
   GTEST_FLAG_SET(repeat, repeat);
+  GTEST_FLAG_SET(recreate_environments_when_repeating, true);
   GTEST_FLAG_SET(filter, "*-*ShouldFail");
 
   ResetCounts();
@@ -179,6 +182,7 @@ void TestRepeatWithFilterForSuccessfulTests(int repeat) {
 // failed tests.
 void TestRepeatWithFilterForFailedTests(int repeat) {
   GTEST_FLAG_SET(repeat, repeat);
+  GTEST_FLAG_SET(recreate_environments_when_repeating, true);
   GTEST_FLAG_SET(filter, "*ShouldFail");
 
   ResetCounts();
