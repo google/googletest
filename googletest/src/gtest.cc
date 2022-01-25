@@ -6516,7 +6516,6 @@ static const char kColorEncodedHelpMessage[] =
 "      TEST(Foo, Bar) is \"Foo.Bar\".\n"
 "  @G--" GTEST_FLAG_PREFIX_ "filter=@YPOSTIVE_PATTERNS"
     "[@G-@YNEGATIVE_PATTERNS]@D\n"
-<<<<<<< HEAD
 "      Run only the tests whose name matches one of the positive patterns but\n"
 "      none of the negative patterns. '?' matches any single character; '*'\n"
 "      matches any substring; ':' separates two patterns.\n"
@@ -6543,49 +6542,6 @@ static const char kColorEncodedHelpMessage[] =
     GTEST_PATH_SEP_ "@Y|@G:@YFILE_PATH]@D\n"
 "      Generate a JSON or XML report in the given directory or with the given\n"
 "      file name. @YFILE_PATH@D defaults to @Gtest_detail.xml@D.\n"
-=======
-    "      Run only the tests whose name matches one of the positive patterns "
-    "but\n"
-    "      none of the negative patterns. '?' matches any single character; "
-    "'*'\n"
-    "      matches any substring; ':' separates two patterns.\n"
-    "  @G--" GTEST_FLAG_PREFIX_
-    "also_run_disabled_tests@D\n"
-    "      Run all disabled tests too.\n"
-    "\n"
-    "Test Execution:\n"
-    "  @G--" GTEST_FLAG_PREFIX_
-    "repeat=@Y[COUNT]@D\n"
-    "      Run the tests repeatedly; use a negative count to repeat forever.\n"
-    "  @G--" GTEST_FLAG_PREFIX_
-    "shuffle@D\n"
-    "      Randomize tests' orders on every iteration.\n"
-    "  @G--" GTEST_FLAG_PREFIX_
-    "random_seed=@Y[NUMBER]@D\n"
-    "      Random number seed to use for shuffling test orders (between 1 and\n"
-    "      99999, or 0 to use a seed based on the current time).\n"
-    "  @G--" GTEST_FLAG_PREFIX_
-    "recreate_environments_when_repeating@D\n"
-    "      Sets up and tears down the global test environment on each repeat\n"
-    "      of the test.\n"
-    "\n"
-    "Test Output:\n"
-    "  @G--" GTEST_FLAG_PREFIX_
-    "color=@Y(@Gyes@Y|@Gno@Y|@Gauto@Y)@D\n"
-    "      Enable/disable colored output. The default is @Gauto@D.\n"
-    "  @G--" GTEST_FLAG_PREFIX_
-    "brief=1@D\n"
-    "      Only print test failures.\n"
-    "  @G--" GTEST_FLAG_PREFIX_
-    "print_time=0@D\n"
-    "      Don't print the elapsed time of each test.\n"
-    "  @G--" GTEST_FLAG_PREFIX_
-    "output=@Y(@Gjson@Y|@Gxml@Y)[@G:@YDIRECTORY_PATH@G" GTEST_PATH_SEP_
-    "@Y|@G:@YFILE_PATH]@D\n"
-    "      Generate a JSON or XML report in the given directory or with the "
-    "given\n"
-    "      file name. @YFILE_PATH@D defaults to @Gtest_detail.xml@D.\n"
->>>>>>> 4cfd1498 (Googletest export)
 # if GTEST_CAN_STREAM_RESULTS_
 "  @G--" GTEST_FLAG_PREFIX_ "stream_result_to=@YHOST@G:@YPORT@D\n"
 "      Stream test results to the given server.\n"
@@ -6618,7 +6574,6 @@ static const char kColorEncodedHelpMessage[] =
     "@G<" GTEST_DEV_EMAIL_ ">@D.\n";
 
 static bool ParseGoogleTestFlag(const char* const arg) {
-<<<<<<< HEAD
   return ParseBoolFlag(arg, kAlsoRunDisabledTestsFlag,
                        &GTEST_FLAG(also_run_disabled_tests)) ||
          ParseBoolFlag(arg, kBreakOnFailureFlag,
@@ -6648,39 +6603,6 @@ static bool ParseGoogleTestFlag(const char* const arg) {
          ParseStringFlag(arg, kStreamResultToFlag,
                          &GTEST_FLAG(stream_result_to)) ||
          ParseBoolFlag(arg, kThrowOnFailureFlag, &GTEST_FLAG(throw_on_failure));
-=======
-#define GTEST_INTERNAL_PARSE_FLAG(flag_name)  \
-  do {                                        \
-    auto value = GTEST_FLAG_GET(flag_name);   \
-    if (ParseFlag(arg, #flag_name, &value)) { \
-      GTEST_FLAG_SET(flag_name, value);       \
-      return true;                            \
-    }                                         \
-  } while (false)
-
-  GTEST_INTERNAL_PARSE_FLAG(also_run_disabled_tests);
-  GTEST_INTERNAL_PARSE_FLAG(break_on_failure);
-  GTEST_INTERNAL_PARSE_FLAG(catch_exceptions);
-  GTEST_INTERNAL_PARSE_FLAG(color);
-  GTEST_INTERNAL_PARSE_FLAG(death_test_style);
-  GTEST_INTERNAL_PARSE_FLAG(death_test_use_fork);
-  GTEST_INTERNAL_PARSE_FLAG(fail_fast);
-  GTEST_INTERNAL_PARSE_FLAG(filter);
-  GTEST_INTERNAL_PARSE_FLAG(internal_run_death_test);
-  GTEST_INTERNAL_PARSE_FLAG(list_tests);
-  GTEST_INTERNAL_PARSE_FLAG(output);
-  GTEST_INTERNAL_PARSE_FLAG(brief);
-  GTEST_INTERNAL_PARSE_FLAG(print_time);
-  GTEST_INTERNAL_PARSE_FLAG(print_utf8);
-  GTEST_INTERNAL_PARSE_FLAG(random_seed);
-  GTEST_INTERNAL_PARSE_FLAG(repeat);
-  GTEST_INTERNAL_PARSE_FLAG(recreate_environments_when_repeating);
-  GTEST_INTERNAL_PARSE_FLAG(shuffle);
-  GTEST_INTERNAL_PARSE_FLAG(stack_trace_depth);
-  GTEST_INTERNAL_PARSE_FLAG(stream_result_to);
-  GTEST_INTERNAL_PARSE_FLAG(throw_on_failure);
-  return false;
->>>>>>> 977cffc4 (Googletest export)
 }
 
 #if GTEST_USE_OWN_FLAGFILE_FLAG_
