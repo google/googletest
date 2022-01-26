@@ -1079,9 +1079,9 @@ struct ReturnNewAction {
 template <size_t k>
 struct ReturnArgAction {
   template <typename... Args>
-  auto operator()(const Args&... args) const ->
-      typename std::tuple_element<k, std::tuple<Args...>>::type {
-    return std::get<k>(std::tie(args...));
+  auto operator()(Args&&... args) const -> decltype(std::get<k>(
+      std::forward_as_tuple(std::forward<Args>(args)...))) {
+    return std::get<k>(std::forward_as_tuple(std::forward<Args>(args)...));
   }
 };
 
