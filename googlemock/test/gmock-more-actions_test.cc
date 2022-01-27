@@ -462,6 +462,12 @@ TEST(ReturnArgActionTest, WorksForMultiArgStringArg2) {
   EXPECT_EQ("seven", a.Perform(std::make_tuple(5, 6, std::string("seven"), 8)));
 }
 
+TEST(ReturnArgActionTest, WorksForNonConstRefArg0) {
+  const Action<std::string&(std::string&)> a = ReturnArg<0>();
+  std::string s = "12345";
+  EXPECT_EQ(&s, &a.Perform(std::forward_as_tuple(s)));
+}
+
 TEST(SaveArgActionTest, WorksForSameType) {
   int result = 0;
   const Action<void(int n)> a1 = SaveArg<0>(&result);
