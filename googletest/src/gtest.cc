@@ -50,6 +50,7 @@
 #include <map>
 #include <ostream>  // NOLINT
 #include <sstream>
+#include <unordered_set>
 #include <vector>
 
 #include "gtest/gtest-assertion-result.h"
@@ -725,6 +726,11 @@ static bool PatternMatchesString(const std::string& name_str,
   return true;
 }
 
+static bool IsGlobPattern(const std::string& pattern) {
+  return std::any_of(pattern.begin(), pattern.end(),
+                     [](const char c) { return c == '?' || c == '*'; });
+}
+
 namespace {
 
 class UnitTestFilter {
@@ -734,13 +740,19 @@ class UnitTestFilter {
   // Constructs a filter from a string of patterns separated by `:`.
   explicit UnitTestFilter(const std::string& filter) {
     // By design "" filter matches "" string.
-    SplitString(filter, ':', &patterns_);
+    SplitString(filter, ':', &glob_patterns_);
+    const auto exact_match_pattern_begin = std::partition(
+        glob_patterns_.begin(), glob_patterns_.end(), &IsGlobPattern);
+    exact_match_patterns_.insert(exact_match_pattern_begin,
+                                 glob_patterns_.end());
+    glob_patterns_.erase(exact_match_pattern_begin, glob_patterns_.end());
   }
 
   // Returns true if and only if name matches at least one of the patterns in
   // the filter.
   bool MatchesName(const std::string& name) const {
-    return std::any_of(patterns_.begin(), patterns_.end(),
+    return exact_match_patterns_.count(name) ||
+           std::any_of(glob_patterns_.begin(), glob_patterns_.end(),
                        [&name](const std::string& pattern) {
                          return PatternMatchesString(
                              name, pattern.c_str(),
@@ -749,7 +761,8 @@ class UnitTestFilter {
   }
 
  private:
-  std::vector<std::string> patterns_;
+  std::vector<std::string> glob_patterns_;
+  std::unordered_set<std::string> exact_match_patterns_;
 };
 
 class PositiveAndNegativeUnitTestFilter {
