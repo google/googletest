@@ -789,6 +789,20 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 # define GTEST_NO_INLINE_
 #endif
 
+#if defined(__clang__)
+// Nested ifs to avoid triggering MSVC warning.
+#if __has_attribute(disable_tail_calls)
+// Ask the compiler not to perform tail call optimization inside
+// the marked function.
+#define GTEST_NO_TAIL_CALL_ __attribute__((disable_tail_calls))
+#endif
+#elif __GNUC__
+#define GTEST_NO_TAIL_CALL_ \
+  __attribute__((optimize("no-optimize-sibling-calls")))
+#else
+#define GTEST_NO_TAIL_CALL_
+#endif
+
 // _LIBCPP_VERSION is defined by the libc++ library from the LLVM project.
 #if !defined(GTEST_HAS_CXXABI_H_)
 # if defined(__GLIBCXX__) || (defined(_LIBCPP_VERSION) && !defined(_MSC_VER))
