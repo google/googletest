@@ -726,12 +726,12 @@ static bool PatternMatchesString(const std::string& name_str,
   return true;
 }
 
-static bool IsGlobPattern(const std::string& pattern) {
+namespace {
+
+bool IsGlobPattern(const std::string& pattern) {
   return std::any_of(pattern.begin(), pattern.end(),
                      [](const char c) { return c == '?' || c == '*'; });
 }
-
-namespace {
 
 class UnitTestFilter {
  public:
@@ -740,12 +740,14 @@ class UnitTestFilter {
   // Constructs a filter from a string of patterns separated by `:`.
   explicit UnitTestFilter(const std::string& filter) {
     // By design "" filter matches "" string.
-    SplitString(filter, ':', &glob_patterns_);
-    const auto exact_match_pattern_begin = std::partition(
-        glob_patterns_.begin(), glob_patterns_.end(), &IsGlobPattern);
-    exact_match_patterns_.insert(exact_match_pattern_begin,
-                                 glob_patterns_.end());
-    glob_patterns_.erase(exact_match_pattern_begin, glob_patterns_.end());
+    std::vector<std::string> all_patterns;
+    SplitString(filter, ':', &all_patterns);
+    const auto exact_match_patterns_begin = std::partition(
+        all_patterns.begin(), all_patterns.end(), &IsGlobPattern);
+
+    glob_patterns_.reserve(exact_match_patterns_begin - all_patterns.begin());
+    std::move(all_patterns.begin(), exact_match_patterns_begin, std::inserter(glob_patterns_, glob_patterns_.begin()));
+    std::move(exact_match_patterns_begin, all_patterns.end(), std::inserter(exact_match_patterns_, exact_match_patterns_.begin()));
   }
 
   // Returns true if and only if name matches at least one of the patterns in
