@@ -194,6 +194,7 @@ messages, you can use:
 | Matcher          | Description                                       |
 | :--------------- | :------------------------------------------------ |
 | `ResultOf(f, m)` | `f(argument)` matches matcher `m`, where `f` is a function or functor. |
+| `ResultOf(result_description, f, m)` | The same as the two-parameter version, but provides a better error message.
 
 ## Pointer Matchers
 
