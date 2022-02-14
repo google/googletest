@@ -45,6 +45,7 @@
 #include <cmath>
 #include <cstdint>
 #include <iomanip>
+#include <iterator>
 #include <limits>
 #include <list>
 #include <map>
@@ -745,7 +746,8 @@ class UnitTestFilter {
     const auto exact_match_patterns_begin = std::partition(
         all_patterns.begin(), all_patterns.end(), &IsGlobPattern);
 
-    glob_patterns_.reserve(exact_match_patterns_begin - all_patterns.begin());
+    glob_patterns_.reserve(static_cast<size_t>(
+        std::distance(all_patterns.begin(), exact_match_patterns_begin)));
     std::move(all_patterns.begin(), exact_match_patterns_begin,
               std::inserter(glob_patterns_, glob_patterns_.begin()));
     std::move(
