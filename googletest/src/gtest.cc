@@ -745,7 +745,9 @@ class UnitTestFilter {
     const auto exact_match_patterns_begin = std::partition(
         all_patterns.begin(), all_patterns.end(), &IsGlobPattern);
 
-    glob_patterns_.reserve(exact_match_patterns_begin - all_patterns.begin());
+    num_glob_patterns = static_cast<size_t>(
+        exact_match_patterns_begin - all_patterns.begin());
+    glob_patterns_.reserve(num_glob_patterns);
     std::move(all_patterns.begin(), exact_match_patterns_begin,
               std::inserter(glob_patterns_, glob_patterns_.begin()));
     std::move(
