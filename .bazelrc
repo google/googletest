@@ -1,0 +1,26 @@
+build:asan --strip=never
+build:asan --copt -fsanitize=address
+build:asan --copt -DADDRESS_SANITIZER
+build:asan --copt -O2
+build:asan --copt -g
+build:asan --copt -fno-omit-frame-pointer
+build:asan --copt -fno-sanitize-recover=all
+build:asan --linkopt -fsanitize=address
+
+build:ubsan --strip=never
+build:ubsan --copt -fsanitize=undefined
+build:ubsan --copt -DUNDEFINED_BEHAVIOR_SANITIZER
+build:ubsan --copt -O2
+build:ubsan --copt -g
+build:ubsan --copt -fno-omit-frame-pointer
+build:ubsan --copt -fno-sanitize-recover=all
+build:ubsan --linkopt -fsanitize=undefined
+
+build:tsan --strip=never
+build:tsan --copt -fsanitize=thread
+build:tsan --copt -DTHREAD_SANITIZER
+build:tsan --copt -O2
+build:tsan --copt -g
+build:tsan --copt -fno-omit-frame-pointer
+build:tsan --copt -fno-sanitize-recover=all
+build:tsan --linkopt -fsanitize=thread

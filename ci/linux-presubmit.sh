@@ -31,7 +31,7 @@
 
 set -euox pipefail
 
-readonly LINUX_LATEST_CONTAINER="gcr.io/google.com/absl-177019/linux_hybrid-latest:20220113"
+readonly LINUX_LATEST_CONTAINER="gcr.io/google.com/absl-177019/linux_hybrid-latest:20220217"
 readonly LINUX_GCC_FLOOR_CONTAINER="gcr.io/google.com/absl-177019/linux_gcc-floor:20210617"
 
 if [[ -z ${GTEST_ROOT:-} ]]; then
