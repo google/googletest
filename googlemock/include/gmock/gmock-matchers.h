@@ -2206,13 +2206,21 @@ template <typename Callable, typename InnerMatcher>
 class ResultOfMatcher {
  public:
   ResultOfMatcher(Callable callable, InnerMatcher matcher)
-      : callable_(std::move(callable)), matcher_(std::move(matcher)) {
+      : ResultOfMatcher(/*result_description=*/"", std::move(callable),
+                        std::move(matcher)) {}
+
+  ResultOfMatcher(const std::string& result_description, Callable callable,
+                  InnerMatcher matcher)
+      : result_description_(result_description),
+        callable_(std::move(callable)),
+        matcher_(std::move(matcher)) {
     CallableTraits<Callable>::CheckIsValid(callable_);
   }
 
   template <typename T>
   operator Matcher<T>() const {
-    return Matcher<T>(new Impl<const T&>(callable_, matcher_));
+    return Matcher<T>(
+        new Impl<const T&>(result_description_, callable_, matcher_));
   }
 
  private:
@@ -2225,16 +2233,27 @@ class ResultOfMatcher {
 
    public:
     template <typename M>
-    Impl(const CallableStorageType& callable, const M& matcher)
-        : callable_(callable), matcher_(MatcherCast<ResultType>(matcher)) {}
+    Impl(const std::string& result_description,
+         const CallableStorageType& callable, const M& matcher)
+        : result_description_(result_description),
+          callable_(callable),
+          matcher_(MatcherCast<ResultType>(matcher)) {}
 
     void DescribeTo(::std::ostream* os) const override {
-      *os << "is mapped by the given callable to a value that ";
+      if (result_description_.empty()) {
+        *os << "is mapped by the given callable to a value that ";
+      } else {
+        *os << "whose " << result_description_ << " ";
+      }
       matcher_.DescribeTo(os);
     }
 
     void DescribeNegationTo(::std::ostream* os) const override {
-      *os << "is mapped by the given callable to a value that ";
+      if (result_description_.empty()) {
+        *os << "is mapped by the given callable to a value that ";
+      } else {
+        *os << "whose " << result_description_ << " ";
+      }
       matcher_.DescribeNegationTo(os);
     }
 
@@ -2250,6 +2269,7 @@ class ResultOfMatcher {
     }
 
    private:
+    const std::string result_description_;
     // Functors often define operator() as non-const method even though
     // they are actually stateless. But we need to use them even when
     // 'this' is a const pointer. It's the user's responsibility not to
@@ -2259,6 +2279,7 @@ class ResultOfMatcher {
     const Matcher<ResultType> matcher_;
   };  // class Impl
 
+  const std::string result_description_;
   const CallableStorageType callable_;
   const InnerMatcher matcher_;
 };
@@ -4420,6 +4441,16 @@ internal::ResultOfMatcher<Callable, InnerMatcher> ResultOf(
     Callable callable, InnerMatcher matcher) {
   return internal::ResultOfMatcher<Callable, InnerMatcher>(std::move(callable),
                                                            std::move(matcher));
+}
+
+// Same as ResultOf() above, but also takes a description of the `callable`
+// result to provide better error messages.
+template <typename Callable, typename InnerMatcher>
+internal::ResultOfMatcher<Callable, InnerMatcher> ResultOf(
+    const std::string& result_description, Callable callable,
+    InnerMatcher matcher) {
+  return internal::ResultOfMatcher<Callable, InnerMatcher>(
+      result_description, std::move(callable), std::move(matcher));
 }
 
 // String matchers.

@@ -4643,6 +4643,16 @@ TEST(ResultOfTest, CanDescribeItself) {
             "isn't equal to \"foo\"", DescribeNegation(matcher));
 }
 
+// Tests that ResultOf() can describe itself when provided a result description.
+TEST(ResultOfTest, CanDescribeItselfWithResultDescription) {
+  Matcher<int> matcher =
+      ResultOf("string conversion", &IntToStringFunction, StrEq("foo"));
+
+  EXPECT_EQ("whose string conversion is equal to \"foo\"", Describe(matcher));
+  EXPECT_EQ("whose string conversion isn't equal to \"foo\"",
+            DescribeNegation(matcher));
+}
+
 // Tests that ResultOf() can explain the match result.
 int IntFunction(int input) { return input == 42 ? 80 : 90; }
 
