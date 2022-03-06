@@ -24,8 +24,7 @@ jobs:
 
     - name: AddressSanitizer
       run: 
-        bazel test -c dbg --config=asan \
-                   --test_output=errors //...
+        bazel test -c dbg --config=asan --test_output=errors //...
 
   MacOs:
     runs-on: macos-latest
