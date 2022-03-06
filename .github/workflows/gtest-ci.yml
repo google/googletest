@@ -6,10 +6,6 @@ on:
   pull_request:
     branches: [ master ]
 
-env:
-  CC: clang
-  CXX: clang++
-
 jobs:
   Linux:
     runs-on: ubuntu-latest
@@ -22,13 +18,13 @@ jobs:
     - name: Tests
       run: bazel test --test_output=errors //...
 
-    - name: AddressSanitizer
+    - name: Tests with Address Sanitizer
       run: bazel test -c dbg --config=asan --test_output=errors //...
 
-    - name: UndefinedBehaviorSanitizer
+    - name: Tests with Undefined Behavior Sanitizer
       run: bazel test -c dbg --config=ubsan --test_output=errors //...
 
-    - name: ThreadSanitizer
+    - name: Tests with Thread Sanitizer
       run: bazel test -c dbg --config=tsan --test_output=errors //...
 
   MacOs:
@@ -42,6 +38,14 @@ jobs:
     - name: Tests
       run: bazel test --test_output=errors //...
 
+    - name: Tests with Address Sanitizer
+      run: bazel test -c dbg --config=asan --test_output=errors //...
+
+    - name: Tests with Undefined Behavior Sanitizer
+      run: bazel test -c dbg --config=ubsan --test_output=errors //...
+
+    - name: Tests with Thread Sanitizer
+      run: bazel test -c dbg --config=tsan --test_output=errors //...
 
   Windows:
     runs-on: windows-latest
@@ -53,3 +57,12 @@ jobs:
 
     - name: Tests
       run: bazel test --test_output=errors //...
+
+    - name: Tests with Address Sanitizer
+      run: bazel test -c dbg --config=asan --test_output=errors //...
+
+    - name: Tests with Undefined Behavior Sanitizer
+      run: bazel test -c dbg --config=ubsan --test_output=errors //...
+
+    - name: Tests with Thread Sanitizer
+      run: bazel test -c dbg --config=tsan --test_output=errors //...
