@@ -157,8 +157,11 @@ that can be used in the predicate assertion macro
 example:
 
 ```c++
-EXPECT_PRED_FORMAT2(testing::FloatLE, val1, val2);
-EXPECT_PRED_FORMAT2(testing::DoubleLE, val1, val2);
+using ::testing::FloatLE;
+using ::testing::DoubleLE;
+...
+EXPECT_PRED_FORMAT2(FloatLE, val1, val2);
+EXPECT_PRED_FORMAT2(DoubleLE, val1, val2);
 ```
 
 The above code verifies that `val1` is less than, or approximately equal to,
@@ -1594,6 +1597,7 @@ void RegisterMyTests(const std::vector<int>& values) {
 }
 ...
 int main(int argc, char** argv) {
+  testing::InitGoogleTest(&argc, argv);
   std::vector<int> values_to_test = LoadValuesFromConfig();
   RegisterMyTests(values_to_test);
   ...

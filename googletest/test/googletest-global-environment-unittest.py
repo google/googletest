@@ -36,7 +36,7 @@ googletest-global-environment-unittest_ (a program written with Google Test).
 """
 
 import re
-import gtest_test_utils
+from googletest.test import gtest_test_utils
 
 
 def RunAndReturnOutput(args=None):
@@ -71,10 +71,13 @@ class GTestGlobalEnvironmentUnitTest(gtest_test_utils.TestCase):
   def testEnvironmentSetUpAndTornDownForEachRepeat(self):
     """Tests the behavior of test environments and gtest_repeat."""
 
-    txt = RunAndReturnOutput(['--gtest_repeat=2'])
+    # When --gtest_recreate_environments_when_repeating is true, the global test
+    # environment should be set up and torn down for each iteration.
+    txt = RunAndReturnOutput([
+        '--gtest_repeat=2',
+        '--gtest_recreate_environments_when_repeating=true',
+    ])
 
-    # By default, with gtest_repeat=2, the global test environment should be set
-    # up and torn down for each iteration.
     expected_pattern = ('(.|\n)*'
                         r'Repeating all tests \(iteration 1\)'
                         '(.|\n)*'
@@ -97,13 +100,12 @@ class GTestGlobalEnvironmentUnitTest(gtest_test_utils.TestCase):
   def testEnvironmentSetUpAndTornDownOnce(self):
     """Tests environment and --gtest_recreate_environments_when_repeating."""
 
+    # By default the environment should only be set up and torn down once, at
+    # the start and end of the test respectively.
     txt = RunAndReturnOutput([
-        '--gtest_repeat=2', '--gtest_recreate_environments_when_repeating=false'
+        '--gtest_repeat=2',
     ])
 
-    # When --gtest_recreate_environments_when_repeating is false, the test
-    # environment should only be set up and torn down once, at the start and
-    # end of the test respectively.
     expected_pattern = ('(.|\n)*'
                         r'Repeating all tests \(iteration 1\)'
                         '(.|\n)*'

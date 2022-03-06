@@ -377,12 +377,12 @@ class MemoryIsNotDeallocated
     old_crtdbg_flag_ = _CrtSetDbgFlag(_CRTDBG_REPORT_FLAG);
     // Set heap allocation block type to _IGNORE_BLOCK so that MS debug CRT
     // doesn't report mem leak if there's no matching deallocation.
-    _CrtSetDbgFlag(old_crtdbg_flag_ & ~_CRTDBG_ALLOC_MEM_DF);
+    (void)_CrtSetDbgFlag(old_crtdbg_flag_ & ~_CRTDBG_ALLOC_MEM_DF);
   }
 
   ~MemoryIsNotDeallocated() {
     // Restore the original _CRTDBG_ALLOC_MEM_DF flag
-    _CrtSetDbgFlag(old_crtdbg_flag_);
+    (void)_CrtSetDbgFlag(old_crtdbg_flag_);
   }
 
  private:
@@ -629,7 +629,8 @@ class ThreadLocalRegistryImpl {
         &ThreadLocalRegistryImpl::WatcherThreadFunc,
         reinterpret_cast<LPVOID>(new ThreadIdAndHandle(thread_id, thread)),
         CREATE_SUSPENDED, &watcher_thread_id);
-    GTEST_CHECK_(watcher_thread != nullptr);
+    GTEST_CHECK_(watcher_thread != nullptr)
+        << "CreateThread failed with error " << ::GetLastError() << ".";
     // Give the watcher thread the same priority as ours to avoid being
     // blocked by it.
     ::SetThreadPriority(watcher_thread,

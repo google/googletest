@@ -285,6 +285,7 @@ int main(int argc, char **argv) {
       << "AddGlobalTestEnvironment should not generate any events itself.";
 
   GTEST_FLAG_SET(repeat, 2);
+  GTEST_FLAG_SET(recreate_environments_when_repeating, true);
   int ret_val = RUN_ALL_TESTS();
 
 #ifndef GTEST_REMOVE_LEGACY_TEST_CASEAPI_

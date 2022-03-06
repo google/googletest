@@ -154,10 +154,6 @@ function(cxx_library_with_type name type cxx_flags)
   set_target_properties(${name}
     PROPERTIES
     COMPILE_FLAGS "${cxx_flags}")
-  # Generate debug library name with a postfix.
-  set_target_properties(${name}
-    PROPERTIES
-    DEBUG_POSTFIX "d")
   # Set the output directory for build artifacts
   set_target_properties(${name}
     PROPERTIES
@@ -304,6 +300,8 @@ function(py_test name)
         COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/${name}.py
           --build_dir=${CMAKE_CURRENT_BINARY_DIR}/\${CTEST_CONFIGURATION_TYPE} ${ARGN})
     endif()
+    # Make the Python import path consistent between Bazel and CMake.
+    set_tests_properties(${name} PROPERTIES ENVIRONMENT PYTHONPATH=${CMAKE_SOURCE_DIR})
   endif(PYTHONINTERP_FOUND)
 endfunction()
 

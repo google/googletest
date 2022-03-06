@@ -190,12 +190,12 @@ Some people put it in a `_test.cc`. This is fine when the interface being mocked
 `Foo` changes it, your test could break. (You can't really expect `Foo`'s
 maintainer to fix every test that uses `Foo`, can you?)
 
-So, the rule of thumb is: if you need to mock `Foo` and it's owned by others,
-define the mock class in `Foo`'s package (better, in a `testing` sub-package
-such that you can clearly separate production code and testing utilities), put
-it in a `.h` and a `cc_library`. Then everyone can reference them from their
-tests. If `Foo` ever changes, there is only one copy of `MockFoo` to change, and
-only tests that depend on the changed methods need to be fixed.
+Generally, you should not define mock classes you don't own. If you must mock
+such a class owned by others, define the mock class in `Foo`'s Bazel package
+(usually the same directory or a `testing` sub-directory), and put it in a `.h`
+and a `cc_library` with `testonly=True`. Then everyone can reference them from
+their tests. If `Foo` ever changes, there is only one copy of `MockFoo` to
+change, and only tests that depend on the changed methods need to be fixed.
 
 Another way to do it: you can introduce a thin layer `FooAdaptor` on top of
 `Foo` and code to this new interface. Since you own `FooAdaptor`, you can absorb

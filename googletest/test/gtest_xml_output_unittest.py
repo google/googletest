@@ -38,8 +38,8 @@ import re
 import sys
 from xml.dom import minidom, Node
 
-import gtest_test_utils
-import gtest_xml_test_utils
+from googletest.test import gtest_test_utils
+from googletest.test import gtest_xml_test_utils
 
 GTEST_FILTER_FLAG = '--gtest_filter'
 GTEST_LIST_TESTS_FLAG = '--gtest_list_tests'

@@ -623,7 +623,8 @@ class GTEST_API_ UnitTestImpl {
   // For example, if Foo() calls Bar(), which in turn calls
   // CurrentOsStackTraceExceptTop(1), Foo() will be included in the
   // trace but Bar() and CurrentOsStackTraceExceptTop() won't.
-  std::string CurrentOsStackTraceExceptTop(int skip_count) GTEST_NO_INLINE_;
+  std::string CurrentOsStackTraceExceptTop(int skip_count)
+      GTEST_NO_INLINE_ GTEST_NO_TAIL_CALL_;
 
   // Finds and returns a TestSuite with the given name.  If one doesn't
   // exist, creates one and returns it.
@@ -1148,15 +1149,15 @@ class StreamingListener : public EmptyTestEventListener {
 
   // Note that "event=TestCaseStart" is a wire format and has to remain
   // "case" for compatibility
-  void OnTestCaseStart(const TestCase& test_case) override {
-    SendLn(std::string("event=TestCaseStart&name=") + test_case.name());
+  void OnTestSuiteStart(const TestSuite& test_suite) override {
+    SendLn(std::string("event=TestCaseStart&name=") + test_suite.name());
   }
 
   // Note that "event=TestCaseEnd" is a wire format and has to remain
   // "case" for compatibility
-  void OnTestCaseEnd(const TestCase& test_case) override {
-    SendLn("event=TestCaseEnd&passed=" + FormatBool(test_case.Passed()) +
-           "&elapsed_time=" + StreamableToString(test_case.elapsed_time()) +
+  void OnTestSuiteEnd(const TestSuite& test_suite) override {
+    SendLn("event=TestCaseEnd&passed=" + FormatBool(test_suite.Passed()) +
+           "&elapsed_time=" + StreamableToString(test_suite.elapsed_time()) +
            "ms");
   }
 

@@ -131,12 +131,16 @@ set_target_properties(gtest_main PROPERTIES VERSION ${GOOGLETEST_VERSION})
 # to the targets for when we are part of a parent build (ie being pulled
 # in via add_subdirectory() rather than being a standalone build).
 if (DEFINED CMAKE_VERSION AND NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.11")
+  string(REPLACE ";" "$<SEMICOLON>" dirs "${gtest_build_include_dirs}")
   target_include_directories(gtest SYSTEM INTERFACE
-    "$<BUILD_INTERFACE:${gtest_build_include_dirs}>"
+    "$<BUILD_INTERFACE:${dirs}>"
     "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
   target_include_directories(gtest_main SYSTEM INTERFACE
-    "$<BUILD_INTERFACE:${gtest_build_include_dirs}>"
+    "$<BUILD_INTERFACE:${dirs}>"
     "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
+endif()
+if(CMAKE_SYSTEM_NAME MATCHES "QNX")
+  target_link_libraries(gtest PUBLIC regex)
 endif()
 target_link_libraries(gtest_main PUBLIC gtest)
 

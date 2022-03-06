@@ -369,8 +369,8 @@ Usually, if your action is for a particular function type, defining it using
 different types (e.g. if you are defining `Return(*value*)`),
 `MakePolymorphicAction()` is easiest. Sometimes you want precise control on what
 types of functions the action can be used in, and implementing `ActionInterface`
-is the way to go here. See the implementation of `Return()` in
-`testing/base/public/gmock-actions.h` for an example.
+is the way to go here. See the implementation of `Return()` in `gmock-actions.h`
+for an example.
 
 ### I use SetArgPointee() in WillOnce(), but gcc complains about "conflicting return type specified". What does it mean?
 

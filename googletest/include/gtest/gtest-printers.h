@@ -27,7 +27,6 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
 // Google Test - The Google C++ Testing and Mocking Framework
 //
 // This file implements a universal value printer that can print a
@@ -94,6 +93,10 @@
 // actual need for it.  Note that this fix cannot rely on value_type
 // being defined as many user-defined container types don't have
 // value_type.
+
+// IWYU pragma: private, include "gtest/gtest.h"
+// IWYU pragma: friend gtest/.*
+// IWYU pragma: friend gmock/.*
 
 #ifndef GOOGLETEST_INCLUDE_GTEST_GTEST_PRINTERS_H_
 #define GOOGLETEST_INCLUDE_GTEST_GTEST_PRINTERS_H_
@@ -590,6 +593,12 @@ inline void PrintTo(internal::StringView sp, ::std::ostream* os) {
 #endif  // GTEST_INTERNAL_HAS_STRING_VIEW
 
 inline void PrintTo(std::nullptr_t, ::std::ostream* os) { *os << "(nullptr)"; }
+
+#if GTEST_HAS_RTTI
+inline void PrintTo(const std::type_info& info, std::ostream* os) {
+  *os << internal::GetTypeName(info);
+}
+#endif  // GTEST_HAS_RTTI
 
 template <typename T>
 void PrintTo(std::reference_wrapper<T> ref, ::std::ostream* os) {

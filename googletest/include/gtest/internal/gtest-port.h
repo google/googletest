@@ -26,7 +26,7 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
+
 // Low-level types and utilities for porting Google Test to various
 // platforms.  All macros ending with _ and symbols defined in an
 // internal namespace are subject to change without notice.  Code
@@ -37,6 +37,10 @@
 // This file is fundamental to Google Test.  All other Google Test source
 // files are expected to #include this.  Therefore, it cannot #include
 // any other Google Test header.
+
+// IWYU pragma: private, include "gtest/gtest.h"
+// IWYU pragma: friend gtest/.*
+// IWYU pragma: friend gmock/.*
 
 #ifndef GOOGLETEST_INCLUDE_GTEST_INTERNAL_GTEST_PORT_H_
 #define GOOGLETEST_INCLUDE_GTEST_INTERNAL_GTEST_PORT_H_
@@ -188,9 +192,7 @@
 //   GTEST_AMBIGUOUS_ELSE_BLOCKER_ - for disabling a gcc warning.
 //   GTEST_ATTRIBUTE_UNUSED_  - declares that a class' instances or a
 //                              variable don't have to be used.
-//   GTEST_DISALLOW_ASSIGN_   - disables copy operator=.
 //   GTEST_DISALLOW_COPY_AND_ASSIGN_ - disables copy ctor and operator=.
-//   GTEST_DISALLOW_MOVE_ASSIGN_   - disables move operator=.
 //   GTEST_DISALLOW_MOVE_AND_ASSIGN_ - disables move ctor and operator=.
 //   GTEST_MUST_USE_RESULT_   - declares that a function's result must be used.
 //   GTEST_INTENTIONAL_CONST_COND_PUSH_ - start code section where MSVC C4127 is
@@ -686,28 +688,19 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 # define GTEST_ATTRIBUTE_PRINTF_(string_index, first_to_check)
 #endif
 
-
-// A macro to disallow copy operator=
-// This should be used in the private: declarations for a class.
-#define GTEST_DISALLOW_ASSIGN_(type) \
-  type& operator=(type const &) = delete
-
 // A macro to disallow copy constructor and operator=
 // This should be used in the private: declarations for a class.
+// NOLINT is for modernize-use-trailing-return-type in macro uses.
 #define GTEST_DISALLOW_COPY_AND_ASSIGN_(type) \
   type(type const&) = delete;                 \
-  type& operator=(type const&) = delete
-
-// A macro to disallow move operator=
-// This should be used in the private: declarations for a class.
-#define GTEST_DISALLOW_MOVE_ASSIGN_(type) \
-  type& operator=(type &&) noexcept = delete
+  type& operator=(type const&) = delete /* NOLINT */
 
 // A macro to disallow move constructor and operator=
 // This should be used in the private: declarations for a class.
+// NOLINT is for modernize-use-trailing-return-type in macro uses.
 #define GTEST_DISALLOW_MOVE_AND_ASSIGN_(type) \
   type(type&&) noexcept = delete;             \
-  type& operator=(type&&) noexcept = delete
+  type& operator=(type&&) noexcept = delete /* NOLINT */
 
 // Tell the compiler to warn about unused return values for functions declared
 // with this macro.  The macro should be used on function declarations
@@ -794,6 +787,20 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 # define GTEST_NO_INLINE_ __attribute__((noinline))
 #else
 # define GTEST_NO_INLINE_
+#endif
+
+#if defined(__clang__)
+// Nested ifs to avoid triggering MSVC warning.
+#if __has_attribute(disable_tail_calls)
+// Ask the compiler not to perform tail call optimization inside
+// the marked function.
+#define GTEST_NO_TAIL_CALL_ __attribute__((disable_tail_calls))
+#endif
+#elif __GNUC__
+#define GTEST_NO_TAIL_CALL_ \
+  __attribute__((optimize("no-optimize-sibling-calls")))
+#else
+#define GTEST_NO_TAIL_CALL_
 #endif
 
 // _LIBCPP_VERSION is defined by the libc++ library from the LLVM project.

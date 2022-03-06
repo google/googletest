@@ -39,12 +39,13 @@ SYNOPSIS
 
 import os
 import re
-import gtest_test_utils
+from googletest.test import gtest_test_utils
 
 
 IS_LINUX = os.name == 'posix' and os.uname()[0] == 'Linux'
 IS_GNUHURD = os.name == 'posix' and os.uname()[0] == 'GNU'
 IS_GNUKFREEBSD = os.name == 'posix' and os.uname()[0] == 'GNU/kFreeBSD'
+IS_OPENBSD = os.name == 'posix' and os.uname()[0] == 'OpenBSD'
 IS_WINDOWS = os.name == 'nt'
 
 PROGRAM_PATH = gtest_test_utils.GetTestExecutablePath('gtest_help_test_')
@@ -113,7 +114,7 @@ class GTestHelpTest(gtest_test_utils.TestCase):
     self.assertEquals(0, exit_code)
     self.assert_(HELP_REGEX.search(output), output)
 
-    if IS_LINUX or IS_GNUHURD or IS_GNUKFREEBSD:
+    if IS_LINUX or IS_GNUHURD or IS_GNUKFREEBSD or IS_OPENBSD:
       self.assert_(STREAM_RESULT_TO_FLAG in output, output)
     else:
       self.assert_(STREAM_RESULT_TO_FLAG not in output, output)

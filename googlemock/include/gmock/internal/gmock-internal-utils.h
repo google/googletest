@@ -27,20 +27,25 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
 // Google Mock - a framework for writing C++ mock classes.
 //
 // This file defines some utilities useful for implementing Google
 // Mock.  They are subject to change without notice, so please DO NOT
 // USE THEM IN USER CODE.
 
+// IWYU pragma: private, include "gmock/gmock.h"
+// IWYU pragma: friend gmock/.*
+
 #ifndef GOOGLEMOCK_INCLUDE_GMOCK_INTERNAL_GMOCK_INTERNAL_UTILS_H_
 #define GOOGLEMOCK_INCLUDE_GMOCK_INTERNAL_GMOCK_INTERNAL_UTILS_H_
 
 #include <stdio.h>
+
 #include <ostream>  // NOLINT
 #include <string>
 #include <type_traits>
+#include <vector>
+
 #include "gmock/internal/gmock-port.h"
 #include "gtest/gtest.h"
 
@@ -61,7 +66,8 @@ namespace internal {
 
 // Joins a vector of strings as if they are fields of a tuple; returns
 // the joined string.
-GTEST_API_ std::string JoinAsTuple(const Strings& fields);
+GTEST_API_ std::string JoinAsKeyValueTuple(
+    const std::vector<const char*>& names, const Strings& values);
 
 // Converts an identifier name to a space-separated list of lower-case
 // words.  Each maximum substring of the form [A-Za-z][a-z]*|\d+ is
@@ -76,6 +82,13 @@ template <typename Pointer>
 inline const typename Pointer::element_type* GetRawPointer(const Pointer& p) {
   return p.get();
 }
+// This overload version is for std::reference_wrapper, which does not work with
+// the overload above, as it does not have an `element_type`.
+template <typename Element>
+inline const Element* GetRawPointer(const std::reference_wrapper<Element>& r) {
+  return &r.get();
+}
+
 // This overloaded version is for the raw pointer case.
 template <typename Element>
 inline Element* GetRawPointer(Element* p) { return p; }
