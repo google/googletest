@@ -1611,6 +1611,9 @@ template <typename F, typename Impl>
   };                                                                          \
   template <GMOCK_ACTION_TYPENAME_PARAMS_(params)>                            \
   inline full_name<GMOCK_ACTION_TYPE_PARAMS_(params)> name(                   \
+      GMOCK_ACTION_TYPE_GVALUE_PARAMS_(params))  GTEST_MUST_USE_RESULT_;      \
+  template <GMOCK_ACTION_TYPENAME_PARAMS_(params)>                            \
+  inline full_name<GMOCK_ACTION_TYPE_PARAMS_(params)> name(                   \
       GMOCK_ACTION_TYPE_GVALUE_PARAMS_(params)) {                             \
     return full_name<GMOCK_ACTION_TYPE_PARAMS_(params)>(                      \
         GMOCK_ACTION_GVALUE_PARAMS_(params));                                 \
