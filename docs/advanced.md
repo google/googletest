@@ -839,7 +839,7 @@ will output XML like this:
 
 ```xml
   ...
-    <testcase name="MinAndMaxWidgets" status="run" time="0.006" classname="WidgetUsageTest" MaximumWidgets="12" MinimumWidgets="9" />
+    <testcase name="MinAndMaxWidgets" file="test.cpp" line="1" status="run" time="0.006" classname="WidgetUsageTest" MaximumWidgets="12" MinimumWidgets="9" />
   ...
 ```
 
@@ -2082,15 +2082,15 @@ could generate this report:
 <?xml version="1.0" encoding="UTF-8"?>
 <testsuites tests="3" failures="1" errors="0" time="0.035" timestamp="2011-10-31T18:52:42" name="AllTests">
   <testsuite name="MathTest" tests="2" failures="1" errors="0" time="0.015">
-    <testcase name="Addition" status="run" time="0.007" classname="">
+    <testcase name="Addition" file="test.cpp" line="1" status="run" time="0.007" classname="">
       <failure message="Value of: add(1, 1)&#x0A;  Actual: 3&#x0A;Expected: 2" type="">...</failure>
       <failure message="Value of: add(1, -1)&#x0A;  Actual: 1&#x0A;Expected: 0" type="">...</failure>
     </testcase>
-    <testcase name="Subtraction" status="run" time="0.005" classname="">
+    <testcase name="Subtraction" file="test.cpp" line="2" status="run" time="0.005" classname="">
     </testcase>
   </testsuite>
   <testsuite name="LogicTest" tests="1" failures="0" errors="0" time="0.005">
-    <testcase name="NonContradiction" status="run" time="0.005" classname="">
+    <testcase name="NonContradiction" file="test.cpp" line="3" status="run" time="0.005" classname="">
     </testcase>
   </testsuite>
 </testsuites>
@@ -2107,6 +2107,8 @@ Things to note:
 
 *   The `timestamp` attribute records the local date and time of the test
     execution.
+
+*   The `file` and `line` attributes record the source file location, where the test was defined.
 
 *   Each `<failure>` element corresponds to a single failed googletest
     assertion.
@@ -2147,6 +2149,8 @@ The report format conforms to the following JSON Schema:
       "type": "object",
       "properties": {
         "name": { "type": "string" },
+        "file": { "type": "string" },
+        "line": { "type": "integer" },
         "status": {
           "type": "string",
           "enum": ["RUN", "NOTRUN"]
@@ -2224,6 +2228,8 @@ message TestCase {
 
 message TestInfo {
   string name = 1;
+  string file = 6;
+  int32 line = 7;
   enum Status {
     RUN = 0;
     NOTRUN = 1;
@@ -2267,6 +2273,8 @@ could generate this report:
       "testsuite": [
         {
           "name": "Addition",
+          "file": "test.cpp",
+          "line": 1,
           "status": "RUN",
           "time": "0.007s",
           "classname": "",
@@ -2283,6 +2291,8 @@ could generate this report:
         },
         {
           "name": "Subtraction",
+          "file": "test.cpp",
+          "line": 2,
           "status": "RUN",
           "time": "0.005s",
           "classname": ""
@@ -2298,6 +2308,8 @@ could generate this report:
       "testsuite": [
         {
           "name": "NonContradiction",
+          "file": "test.cpp",
+          "line": 3,
           "status": "RUN",
           "time": "0.005s",
           "classname": ""
