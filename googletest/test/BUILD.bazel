@@ -575,6 +575,10 @@ py_test(
         "no_test_msvc2017",
     ],
     deps = [":gtest_test_utils"],
+    tags = [
+        "no_test_msvc2015",
+        "no_test_msvc2017",
+    ],
 )
 
 py_test(
@@ -587,4 +591,8 @@ py_test(
         "no_test_msvc2017",
     ],
     deps = [":gtest_test_utils"],
+    tags = [
+        "no_test_msvc2015",
+        "no_test_msvc2017",
+    ],
 )

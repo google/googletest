@@ -108,6 +108,10 @@ py_test(
         "no_test_msvc2017",
     ],
     deps = [":gmock_test_utils"],
+    tags = [
+        "no_test_msvc2015",
+        "no_test_msvc2017",
+    ],
 )
 
 cc_test(
