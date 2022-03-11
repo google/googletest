@@ -20,6 +20,10 @@ instructions for how to sign and return it. Once we receive it, we'll be able to
 accept your pull requests.
 
 ## Are you a Googler?
+<<<<<<< HEAD
+If you are a Googler, you can either create an internal change or work on GitHub directly.
+=======
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 
 If you are a Googler, please make an attempt to submit an internal change rather
 than a GitHub Pull Request. If you are not able to submit an internal change a
@@ -36,8 +40,12 @@ PR is acceptable as an alternative.
     This ensures that work isn't being duplicated and communicating your plan
     early also generally leads to better patches.
 4.  If your proposed change is accepted, and you haven't already done so, sign a
+<<<<<<< HEAD
+    Contributor License Agreement ([see details above](#contributor-license-agreements)).
+=======
     Contributor License Agreement
     ([see details above](#contributor-license-agreements)).
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 5.  Fork the desired repo, develop and test your code changes.
 6.  Ensure that your code adheres to the existing style in the sample to which
     you are contributing.
@@ -99,8 +107,13 @@ This section discusses how to make your own changes to the Google Test project.
 ### Testing Google Test and Google Mock Themselves
 
 To make sure your changes work as intended and don't break existing
+<<<<<<< HEAD
+functionality, you'll want to compile and run Google Test and GoogleMock's
+own tests. For that you can use CMake:
+=======
 functionality, you'll want to compile and run Google Test and GoogleMock's own
 tests. For that you can use CMake:
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 
     mkdir mybuild
     cd mybuild
@@ -119,8 +132,13 @@ explicitly where your Python executable can be found:
 
     cmake -DPYTHON_EXECUTABLE=path/to/python ...
 
+<<<<<<< HEAD
+Next, you can build Google Test and / or Google Mock and all desired tests.
+On \*nix, this is usually done by
+=======
 Next, you can build Google Test and / or Google Mock and all desired tests. On
 \*nix, this is usually done by
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 
     make
 

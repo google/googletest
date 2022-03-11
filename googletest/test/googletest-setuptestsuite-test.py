@@ -1,7 +1,16 @@
 #!/usr/bin/env python
 #
+<<<<<<< HEAD
+<<<<<<< HEAD:googletest/test/googletest-setuptestsuite-test.py
 # Copyright 2019, Google Inc.
 # All rights reserved.
+=======
+# Copyright 2019 Google LLC.  All Rights Reserved.
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f:googletest/test/gtest_skip_environment_check_output_test.py
+=======
+# Copyright 2019, Google Inc.
+# All rights reserved.
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
@@ -28,7 +37,13 @@
 # THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+<<<<<<< HEAD
+"""Tests Google Test's gtest skip in environment setup  behavior.
 
+<<<<<<< HEAD:googletest/test/googletest-setuptestsuite-test.py
+=======
+
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 """Verifies that SetUpTestSuite and TearDownTestSuite errors are noticed."""
 
 from googletest.test import gtest_test_utils
@@ -49,6 +64,31 @@ class GTestSetUpTestSuiteTest(gtest_test_utils.TestCase):
         '\n'
         ' 2 FAILED TEST SUITES\n',
         p.output)
+<<<<<<< HEAD
+=======
+This script invokes gtest_skip_in_environment_setup_test_ and verifies its
+output.
+"""
+
+from googletest.test import gtest_test_utils
+
+# Path to the gtest_skip_in_environment_setup_test binary
+EXE_PATH = gtest_test_utils.GetTestExecutablePath(
+    'gtest_skip_in_environment_setup_test')
+
+OUTPUT = gtest_test_utils.Subprocess([EXE_PATH]).output
+
+
+# Test.
+class SkipEntireEnvironmentTest(gtest_test_utils.TestCase):
+
+  def testSkipEntireEnvironmentTest(self):
+    self.assertIn('Skipping the entire environment', OUTPUT)
+    self.assertNotIn('FAILED', OUTPUT)
+
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f:googletest/test/gtest_skip_environment_check_output_test.py
+=======
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 
 if __name__ == '__main__':
   gtest_test_utils.Main()

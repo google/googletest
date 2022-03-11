@@ -742,8 +742,13 @@ DeathTest::TestRole WindowsDeathTest::AssumeRole() {
 
   // WindowsDeathTest uses an anonymous pipe to communicate results of
   // a death test.
+<<<<<<< HEAD
+  SECURITY_ATTRIBUTES handles_are_inheritable = {
+    sizeof(SECURITY_ATTRIBUTES), nullptr, TRUE };
+=======
   SECURITY_ATTRIBUTES handles_are_inheritable = {sizeof(SECURITY_ATTRIBUTES),
                                                  nullptr, TRUE};
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
   HANDLE read_handle, write_handle;
   GTEST_DEATH_TEST_CHECK_(
       ::CreatePipe(&read_handle, &write_handle, &handles_are_inheritable,
@@ -754,8 +759,13 @@ DeathTest::TestRole WindowsDeathTest::AssumeRole() {
   write_handle_.Reset(write_handle);
   event_handle_.Reset(::CreateEvent(
       &handles_are_inheritable,
+<<<<<<< HEAD
+      TRUE,    // The event will automatically reset to non-signaled state.
+      FALSE,   // The initial state is non-signalled.
+=======
       TRUE,       // The event will automatically reset to non-signaled state.
       FALSE,      // The initial state is non-signalled.
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
       nullptr));  // The even is unnamed.
   GTEST_DEATH_TEST_CHECK_(event_handle_.Get() != nullptr);
   const std::string filter_flag = std::string("--") + GTEST_FLAG_PREFIX_ +
@@ -773,9 +783,16 @@ DeathTest::TestRole WindowsDeathTest::AssumeRole() {
       StreamableToString(reinterpret_cast<size_t>(event_handle_.Get()));
 
   char executable_path[_MAX_PATH + 1];  // NOLINT
+<<<<<<< HEAD
+  GTEST_DEATH_TEST_CHECK_(
+      _MAX_PATH + 1 != ::GetModuleFileNameA(nullptr,
+                                            executable_path,
+                                            _MAX_PATH));
+=======
   GTEST_DEATH_TEST_CHECK_(_MAX_PATH + 1 != ::GetModuleFileNameA(nullptr,
                                                                 executable_path,
                                                                 _MAX_PATH));
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 
   std::string command_line =
       std::string(::GetCommandLineA()) + " " + filter_flag + " \"" +
@@ -796,6 +813,19 @@ DeathTest::TestRole WindowsDeathTest::AssumeRole() {
   startup_info.hStdError = ::GetStdHandle(STD_ERROR_HANDLE);
 
   PROCESS_INFORMATION process_info;
+<<<<<<< HEAD
+  GTEST_DEATH_TEST_CHECK_(::CreateProcessA(
+      executable_path,
+      const_cast<char*>(command_line.c_str()),
+      nullptr,   // Retuned process handle is not inheritable.
+      nullptr,   // Retuned thread handle is not inheritable.
+      TRUE,      // Child inherits all inheritable handles (for write_handle_).
+      0x0,       // Default creation flags.
+      nullptr,   // Inherit the parent's environment.
+      UnitTest::GetInstance()->original_working_dir(),
+      &startup_info,
+      &process_info) != FALSE);
+=======
   GTEST_DEATH_TEST_CHECK_(
       ::CreateProcessA(
           executable_path, const_cast<char*>(command_line.c_str()),
@@ -806,6 +836,7 @@ DeathTest::TestRole WindowsDeathTest::AssumeRole() {
           nullptr,  // Inherit the parent's environment.
           UnitTest::GetInstance()->original_working_dir(), &startup_info,
           &process_info) != FALSE);
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
   child_handle_.Reset(process_info.hProcess);
   ::CloseHandle(process_info.hThread);
   set_spawned(true);
@@ -843,7 +874,13 @@ class FuchsiaDeathTest : public DeathTestImpl {
 // Utility class for accumulating command-line arguments.
 class Arguments {
  public:
+<<<<<<< HEAD
+  Arguments() {
+    args_.push_back(nullptr);
+  }
+=======
   Arguments() { args_.push_back(nullptr); }
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 
   ~Arguments() {
     for (std::vector<char*>::iterator i = args_.begin(); i != args_.end();
@@ -890,6 +927,7 @@ int FuchsiaDeathTest::Wait() {
   zx_status_t status_zx;
   zx::port port;
   status_zx = zx::port::create(0, &port);
+<<<<<<< HEAD
   GTEST_DEATH_TEST_CHECK_(status_zx == ZX_OK);
 
   // Register to wait for the child process to terminate.
@@ -902,6 +940,20 @@ int FuchsiaDeathTest::Wait() {
       port, kSocketKey, ZX_SOCKET_READABLE | ZX_SOCKET_PEER_CLOSED, 0);
   GTEST_DEATH_TEST_CHECK_(status_zx == ZX_OK);
 
+=======
+  GTEST_DEATH_TEST_CHECK_(status_zx == ZX_OK);
+
+  // Register to wait for the child process to terminate.
+  status_zx = child_process_.wait_async(
+      port, kProcessKey, ZX_PROCESS_TERMINATED, 0);
+  GTEST_DEATH_TEST_CHECK_(status_zx == ZX_OK);
+
+  // Register to wait for the socket to be readable or closed.
+  status_zx = stderr_socket_.wait_async(
+      port, kSocketKey, ZX_SOCKET_READABLE | ZX_SOCKET_PEER_CLOSED, 0);
+  GTEST_DEATH_TEST_CHECK_(status_zx == ZX_OK);
+
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
   // Register to wait for an exception.
   status_zx = exception_channel_.wait_async(
       port, kExceptionKey, ZX_CHANNEL_READABLE, 0);
@@ -1334,7 +1386,11 @@ static pid_t ExecDeathTestSpawnChild(char* const* argv, int close_fd) {
                                         fd_flags | FD_CLOEXEC));
   struct inheritance inherit = {0};
   // spawn is a system call.
+<<<<<<< HEAD
+  child_pid = spawn(args.argv[0], 0, nullptr, &inherit, args.argv, GetEnviron());
+=======
   child_pid = spawn(args.argv[0], 0, nullptr, &inherit, args.argv, environ);
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
   // Restores the current working directory.
   GTEST_DEATH_TEST_CHECK_(fchdir(cwd_fd) != -1);
   GTEST_DEATH_TEST_CHECK_SYSCALL_(close(cwd_fd));
@@ -1358,7 +1414,11 @@ static pid_t ExecDeathTestSpawnChild(char* const* argv, int close_fd) {
 
   if (!use_fork) {
     static const bool stack_grows_down = StackGrowsDown();
+<<<<<<< HEAD
+    const size_t stack_size = static_cast<size_t>(getpagesize());
+=======
     const auto stack_size = static_cast<size_t>(getpagesize() * 2);
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
     // MMAP_ANONYMOUS is not defined on Mac, so we use MAP_ANON instead.
     void* const stack = mmap(nullptr, stack_size, PROT_READ | PROT_WRITE,
                              MAP_ANON | MAP_PRIVATE, -1, 0);

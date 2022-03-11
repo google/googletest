@@ -41,9 +41,64 @@ googletest gives you three different options to solve this problem:
 
 If you already have a function or functor that returns `bool` (or a type that
 can be implicitly converted to `bool`), you can use it in a *predicate
+<<<<<<< HEAD:docs/advanced.md
+assertion* to get the function arguments printed for free:
+
+| Fatal assertion                   | Nonfatal assertion                | Verifies                    |
+| --------------------------------- | --------------------------------- | --------------------------- |
+| `ASSERT_PRED1(pred1, val1)`       | `EXPECT_PRED1(pred1, val1)`       | `pred1(val1)` is true       |
+| `ASSERT_PRED2(pred2, val1, val2)` | `EXPECT_PRED2(pred2, val1, val2)` | `pred2(val1, val2)` is true |
+| `...`                             | `...`                             | `...`                       |
+
+In the above, `predn` is an `n`-ary predicate function or functor, where `val1`,
+`val2`, ..., and `valn` are its arguments. The assertion succeeds if the
+predicate returns `true` when applied to the given arguments, and fails
+otherwise. When the assertion fails, it prints the value of each argument. In
+either case, the arguments are evaluated exactly once.
+
+Here's an example. Given
+
+```c++
+// Returns true if m and n have no common divisors except 1.
+bool MutuallyPrime(int m, int n) { ... }
+
+const int a = 3;
+const int b = 4;
+const int c = 10;
+```
+
+the assertion
+
+```c++
+  EXPECT_PRED2(MutuallyPrime, a, b);
+```
+
+will succeed, while the assertion
+
+```c++
+  EXPECT_PRED2(MutuallyPrime, b, c);
+```
+
+will fail with the message
+
+```none
+MutuallyPrime(b, c) is false, where
+b is 4
+c is 10
+```
+
+{: .callout .note}
+> NOTE:
+>
+> 1.  If you see a compiler error "no matching function to call" when using
+>     `ASSERT_PRED*` or `EXPECT_PRED*`, please see
+>     [this](faq.md#the-compiler-complains-no-matching-function-to-call-when-i-use-assert_pred-how-do-i-fix-it)
+>     for how to resolve it.
+=======
 assertion* to get the function arguments printed for free. See
 [`EXPECT_PRED*`](reference/assertions.md#EXPECT_PRED) in the Assertions
 Reference for details.
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f:googletest/docs/advanced.md
 
 #### Using a Function That Returns an AssertionResult
 
@@ -145,8 +200,39 @@ Assertions Reference for details.
 
 ### Floating-Point Comparison
 
+<<<<<<< HEAD:docs/advanced.md
+Comparing floating-point numbers is tricky. Due to round-off errors, it is very
+unlikely that two floating-points will match exactly. Therefore, `ASSERT_EQ` 's
+naive comparison usually doesn't work. And since floating-points can have a wide
+value range, no single fixed error bound works. It's better to compare by a
+fixed relative error bound, except for values close to 0 due to the loss of
+precision there.
+
+In general, for floating-point comparison to make sense, the user needs to
+carefully choose the error bound. If they don't want or care to, comparing in
+terms of Units in the Last Place (ULPs) is a good default, and googletest
+provides assertions to do this. Full details about ULPs are quite long; if you
+want to learn more, see
+[here](https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/).
+
+#### Floating-Point Macros
+
+| Fatal assertion                 | Nonfatal assertion              | Verifies                                 |
+| ------------------------------- | ------------------------------- | ---------------------------------------- |
+| `ASSERT_FLOAT_EQ(val1, val2);`  | `EXPECT_FLOAT_EQ(val1, val2);`  | the two `float` values are almost equal  |
+| `ASSERT_DOUBLE_EQ(val1, val2);` | `EXPECT_DOUBLE_EQ(val1, val2);` | the two `double` values are almost equal |
+
+By "almost equal" we mean the values are within 4 ULP's from each other.
+
+The following assertions allow you to choose the acceptable error bound:
+
+| Fatal assertion                       | Nonfatal assertion                    | Verifies                                                                         |
+| ------------------------------------- | ------------------------------------- | -------------------------------------------------------------------------------- |
+| `ASSERT_NEAR(val1, val2, abs_error);` | `EXPECT_NEAR(val1, val2, abs_error);` | the difference between `val1` and `val2` doesn't exceed the given absolute error |
+=======
 See [Floating-Point Comparison](reference/assertions.md#floating-point) in the
 Assertions Reference.
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f:googletest/docs/advanced.md
 
 #### Floating-Point Predicate-Format Functions
 
@@ -155,6 +241,7 @@ avoid an explosion of new macros, we provide them as predicate-format functions
 that can be used in the predicate assertion macro
 [`EXPECT_PRED_FORMAT2`](reference/assertions.md#EXPECT_PRED_FORMAT), for
 example:
+<<<<<<< HEAD:docs/advanced.md
 
 ```c++
 using ::testing::FloatLE;
@@ -169,9 +256,48 @@ The above code verifies that `val1` is less than, or approximately equal to,
 
 ### Asserting Using gMock Matchers
 
+gMock comes with a library of *matchers* for validating arguments passed to mock
+objects. A gMock matcher is basically a predicate that knows how to describe
+itself. It can be used in these assertion macros:
+
+| Fatal assertion                | Nonfatal assertion             | Verifies              |
+| ------------------------------ | ------------------------------ | --------------------- |
+| `ASSERT_THAT(value, matcher);` | `EXPECT_THAT(value, matcher);` | value matches matcher |
+
+For example, `StartsWith(prefix)` is a matcher that matches a string starting
+with `prefix`, and you can write:
+=======
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f:googletest/docs/advanced.md
+
+```c++
+using ::testing::FloatLE;
+using ::testing::DoubleLE;
+...
+EXPECT_PRED_FORMAT2(FloatLE, val1, val2);
+EXPECT_PRED_FORMAT2(DoubleLE, val1, val2);
+```
+
+<<<<<<< HEAD:docs/advanced.md
+See
+[Using Matchers in googletest Assertions](gmock_cook_book.md#using-matchers-in-googletest-assertions)
+in the gMock Cookbook for more details. For a list of built-in matchers, see the
+[Matchers Reference](reference/matchers.md). You can also write your own
+matchers—see [Writing New Matchers Quickly](gmock_cook_book.md#NewMatchers).
+
+gMock is bundled with googletest, so you don't need to add any build dependency
+in order to take advantage of this. Just include `"gmock/gmock.h"`
+and you're ready to go.
+
+=======
+The above code verifies that `val1` is less than, or approximately equal to,
+`val2`.
+
+### Asserting Using gMock Matchers
+
 See [`EXPECT_THAT`](reference/assertions.md#EXPECT_THAT) in the Assertions
 Reference.
 
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f:googletest/docs/advanced.md
 ### More String Assertions
 
 (Please read the [previous](#asserting-using-gmock-matchers) section first if
@@ -276,12 +402,21 @@ partially-destructed state! You almost certainly want to `abort` or use
 
 Related to the assertions `SUCCEED()` and `FAIL()`, you can prevent further test
 execution at runtime with the `GTEST_SKIP()` macro. This is useful when you need
+<<<<<<< HEAD:docs/advanced.md
+to check for preconditions of the system under test during runtime and skip tests
+in a meaningful way.
+
+`GTEST_SKIP()` can be used in individual test cases or in the `SetUp()` methods of
+classes derived from either `::testing::Environment` or `::testing::Test`. For
+example:
+=======
 to check for preconditions of the system under test during runtime and skip
 tests in a meaningful way.
 
 `GTEST_SKIP()` can be used in individual test cases or in the `SetUp()` methods
 of classes derived from either `::testing::Environment` or `::testing::Test`.
 For example:
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f:googletest/docs/advanced.md
 
 ```c++
 TEST(SkipTest, DoesSkip) {
@@ -1074,9 +1209,25 @@ functions for generating test parameters—see details at
 [`INSTANTIATE_TEST_SUITE_P`](reference/testing.md#INSTANTIATE_TEST_SUITE_P) in
 the Testing Reference.
 
+<<<<<<< HEAD:docs/advanced.md
+| Parameter Generator                                                                       | Behavior                                                                                                          |
+| ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `Range(begin, end [, step])`                                                              | Yields values `{begin, begin+step, begin+step+step, ...}`. The values do not include `end`. `step` defaults to 1. |
+| `Values(v1, v2, ..., vN)`                                                                 | Yields values `{v1, v2, ..., vN}`.                                                                                |
+| `ValuesIn(container)` and                                                                 | Yields values from a C-style array, an                                                                            |
+| : `ValuesIn(begin,end)`        : STL-style container, or an iterator range `[begin, end)` |
+| `Bool()`                                                                                  | Yields sequence `{false, true}`.                                                                                  |
+| `Combine(g1, g2, ..., gN)`                                                                | Yields all combinations (Cartesian product) as std\:\:tuples of the values generated by the `N` generators.       |
+
+For more details, see the comments at the definitions of these functions.
+
+The following statement will instantiate tests from the `FooTest` test suite
+each with parameter values `"meeny"`, `"miny"`, and `"moe"`.
+=======
 For example, the following statement will instantiate tests from the `FooTest`
 test suite each with parameter values `"meeny"`, `"miny"`, and `"moe"` using the
 [`Values`](reference/testing.md#param-generators) parameter generator:
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f:googletest/docs/advanced.md
 
 ```c++
 INSTANTIATE_TEST_SUITE_P(MeenyMinyMoe,
@@ -1122,6 +1273,28 @@ The tests from the instantiation above will have these names:
 *   `Pets/FooTest.DoesBlah/1` for `"dog"`
 *   `Pets/FooTest.HasBlahBlah/0` for `"cat"`
 *   `Pets/FooTest.HasBlahBlah/1` for `"dog"`
+<<<<<<< HEAD:docs/advanced.md
+
+Please note that `INSTANTIATE_TEST_SUITE_P` will instantiate *all* tests in the
+given test suite, whether their definitions come before or *after* the
+`INSTANTIATE_TEST_SUITE_P` statement.
+
+Additionally, by default, every `TEST_P` without a corresponding
+`INSTANTIATE_TEST_SUITE_P` causes a failing test in test suite
+`GoogleTestVerification`. If you have a test suite where that omission is not an
+error, for example it is in a library that may be linked in for other reasons or
+where the list of test cases is dynamic and may be empty, then this check can be
+suppressed by tagging the test suite:
+
+```c++
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(FooTest);
+```
+
+You can see [sample7_unittest.cc] and [sample8_unittest.cc] for more examples.
+
+[sample7_unittest.cc]: ../samples/sample7_unittest.cc "Parameterized Test example"
+[sample8_unittest.cc]: ../samples/sample8_unittest.cc "Parameterized Test example with multiple parameters"
+=======
 
 Please note that `INSTANTIATE_TEST_SUITE_P` will instantiate *all* tests in the
 given test suite, whether their definitions come before or *after* the
@@ -1142,6 +1315,7 @@ You can see [sample7_unittest.cc] and [sample8_unittest.cc] for more examples.
 
 [sample7_unittest.cc]: https://github.com/google/googletest/blob/master/googletest/samples/sample7_unittest.cc "Parameterized Test example"
 [sample8_unittest.cc]: https://github.com/google/googletest/blob/master/googletest/samples/sample8_unittest.cc "Parameterized Test example with multiple parameters"
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f:googletest/docs/advanced.md
 
 ### Creating Value-Parameterized Abstract Tests
 
@@ -1292,7 +1466,11 @@ TYPED_TEST(FooTest, HasPropertyA) { ... }
 
 You can see [sample6_unittest.cc] for a complete example.
 
+<<<<<<< HEAD:docs/advanced.md
+[sample6_unittest.cc]: ../samples/sample6_unittest.cc "Typed Test example"
+=======
 [sample6_unittest.cc]: https://github.com/google/googletest/blob/master/googletest/samples/sample6_unittest.cc "Typed Test example"
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f:googletest/docs/advanced.md
 
 ## Type-Parameterized Tests
 
@@ -1550,6 +1728,36 @@ TestInfo* RegisterTest(const char* test_suite_name, const char* test_name,
                        const char* type_param, const char* value_param,
                        const char* file, int line, Factory factory);
 ```
+<<<<<<< HEAD:docs/advanced.md
+
+The `factory` argument is a factory callable (move-constructible) object or
+function pointer that creates a new instance of the Test object. It handles
+ownership to the caller. The signature of the callable is `Fixture*()`, where
+`Fixture` is the test fixture class for the test. All tests registered with the
+same `test_suite_name` must return the same fixture type. This is checked at
+runtime.
+
+The framework will infer the fixture class from the factory and will call the
+`SetUpTestCase` and `TearDownTestCase` for it.
+
+Must be called before `RUN_ALL_TESTS()` is invoked, otherwise behavior is
+undefined.
+
+Use case example:
+
+```c++
+class MyFixture : public testing::Test {
+ public:
+  // All of these optional, just like in regular macro usage.
+  static void SetUpTestSuite() { ... }
+  static void TearDownTestSuite() { ... }
+  void SetUp() override { ... }
+  void TearDown() override { ... }
+};
+
+class MyTest : public MyFixture {
+ public:
+=======
 
 The `factory` argument is a factory callable (move-constructible) object or
 function pointer that creates a new instance of the Test object. It handles
@@ -1578,6 +1786,7 @@ class MyFixture : public testing::Test {
 
 class MyTest : public MyFixture {
  public:
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f:googletest/docs/advanced.md
   explicit MyTest(int data) : data_(data) {}
   void TestBody() override { ... }
 
@@ -1727,7 +1936,11 @@ You can do so by adding one line:
 Now, sit back and enjoy a completely different output from your tests. For more
 details, see [sample9_unittest.cc].
 
+<<<<<<< HEAD:docs/advanced.md
+[sample9_unittest.cc]: ../samples/sample9_unittest.cc "Event listener example"
+=======
 [sample9_unittest.cc]: https://github.com/google/googletest/blob/master/googletest/samples/sample9_unittest.cc "Event listener example"
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f:googletest/docs/advanced.md
 
 You may append more than one listener to the list. When an `On*Start()` or
 `OnTestPartResult()` event is fired, the listeners will receive it in the order
@@ -1754,7 +1967,11 @@ by the former.
 
 See [sample10_unittest.cc] for an example of a failure-raising listener.
 
+<<<<<<< HEAD:docs/advanced.md
+[sample10_unittest.cc]: ../samples/sample10_unittest.cc "Failure-raising listener example"
+=======
 [sample10_unittest.cc]: https://github.com/google/googletest/blob/master/googletest/samples/sample10_unittest.cc "Failure-raising listener example"
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f:googletest/docs/advanced.md
 
 ## Running Test Programs: Advanced Options
 
@@ -2033,7 +2250,11 @@ environment variable to `0`.
 
 googletest can emit a detailed XML report to a file in addition to its normal
 textual output. The report contains the duration of each test, and thus can help
+<<<<<<< HEAD:docs/advanced.md
+you identify slow tests. 
+=======
 you identify slow tests.
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f:googletest/docs/advanced.md
 
 To generate the XML report, set the `GTEST_OUTPUT` environment variable or the
 `--gtest_output` flag to the string `"xml:path_to_output_file"`, which will

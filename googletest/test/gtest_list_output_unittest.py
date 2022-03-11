@@ -60,16 +60,26 @@ EXPECTED_XML = """<\?xml version="1.0" encoding="UTF-8"\?>
     <testcase name="Test8" type_param="int" file=".*gtest_list_output_unittest_.cc" line="61" />
   </testsuite>
   <testsuite name="TypedTest/1" tests="2">
+<<<<<<< HEAD
+    <testcase name="Test7" type_param="long" file=".*gtest_list_output_unittest_.cc" line="60" />
+    <testcase name="Test8" type_param="long" file=".*gtest_list_output_unittest_.cc" line="61" />
+=======
     <testcase name="Test7" type_param="bool" file=".*gtest_list_output_unittest_.cc" line="60" />
     <testcase name="Test8" type_param="bool" file=".*gtest_list_output_unittest_.cc" line="61" />
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
   </testsuite>
   <testsuite name="Single/TypeParameterizedTestSuite/0" tests="2">
     <testcase name="Test9" type_param="int" file=".*gtest_list_output_unittest_.cc" line="66" />
     <testcase name="Test10" type_param="int" file=".*gtest_list_output_unittest_.cc" line="67" />
   </testsuite>
   <testsuite name="Single/TypeParameterizedTestSuite/1" tests="2">
+<<<<<<< HEAD
+    <testcase name="Test9" type_param="long" file=".*gtest_list_output_unittest_.cc" line="68" />
+    <testcase name="Test10" type_param="long" file=".*gtest_list_output_unittest_.cc" line="69" />
+=======
     <testcase name="Test9" type_param="bool" file=".*gtest_list_output_unittest_.cc" line="66" />
     <testcase name="Test10" type_param="bool" file=".*gtest_list_output_unittest_.cc" line="67" />
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
   </testsuite>
   <testsuite name="ValueParam/ValueParamTest" tests="4">
     <testcase name="Test5/0" value_param="33" file=".*gtest_list_output_unittest_.cc" line="52" />
@@ -140,13 +150,21 @@ EXPECTED_JSON = """{
       "testsuite": \[
         {
           "name": "Test7",
+<<<<<<< HEAD
+          "type_param": "long",
+=======
           "type_param": "bool",
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
           "file": ".*gtest_list_output_unittest_.cc",
           "line": 60
         },
         {
           "name": "Test8",
+<<<<<<< HEAD
+          "type_param": "long",
+=======
           "type_param": "bool",
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
           "file": ".*gtest_list_output_unittest_.cc",
           "line": 61
         }
@@ -176,13 +194,21 @@ EXPECTED_JSON = """{
       "testsuite": \[
         {
           "name": "Test9",
+<<<<<<< HEAD
+          "type_param": "long",
+=======
           "type_param": "bool",
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
           "file": ".*gtest_list_output_unittest_.cc",
           "line": 66
         },
         {
           "name": "Test10",
+<<<<<<< HEAD
+          "type_param": "long",
+=======
           "type_param": "bool",
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
           "file": ".*gtest_list_output_unittest_.cc",
           "line": 67
         }

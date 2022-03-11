@@ -33,6 +33,22 @@
 #include "gtest/gtest.h"
 
 #if GTEST_OS_ESP8266 || GTEST_OS_ESP32
+<<<<<<< HEAD
+# if GTEST_OS_ESP8266
+extern "C" {
+# endif
+void setup() {
+  int argc = 0;
+  char** argv = nullptr;
+   // Since Google Mock depends on Google Test, InitGoogleMock() is
+  // also responsible for initializing Google Test.  Therefore there's
+  // no need for calling testing::InitGoogleTest() separately.
+  testing::InitGoogleMock(&argc, argv);
+}
+void loop() {
+  RUN_ALL_TESTS();
+}
+=======
 #if GTEST_OS_ESP8266
 extern "C" {
 #endif
@@ -47,6 +63,7 @@ void loop() { RUN_ALL_TESTS(); }
 }
 #endif
 
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 #else
 
 // MS C++ compiler/linker has a bug on Windows (not on Windows CE), which

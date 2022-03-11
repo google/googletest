@@ -403,6 +403,15 @@ class GTEST_API_ Mock {
   static bool VerifyAndClear(void* mock_obj)
       GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex);
 
+<<<<<<< HEAD
+  // Returns wether the mock was created as a naggy mock (default)
+  static bool IsNaggy(void* mock_obj)
+      GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex);
+  // Returns wether the mock was created as a nice mock
+  static bool IsNice(void* mock_obj)
+      GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex);
+  // Returns wether the mock was created as a strict mock
+=======
   // Returns whether the mock was created as a naggy mock (default)
   static bool IsNaggy(void* mock_obj)
       GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex);
@@ -410,6 +419,7 @@ class GTEST_API_ Mock {
   static bool IsNice(void* mock_obj)
       GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex);
   // Returns whether the mock was created as a strict mock
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
   static bool IsStrict(void* mock_obj)
       GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex);
 
@@ -1188,10 +1198,16 @@ class TypedExpectation : public ExpectationBase {
       Log(kWarning, ss.str(), 1);
     }
 
+<<<<<<< HEAD
+    return count <= action_count ?
+        *static_cast<const Action<F>*>(untyped_actions_[static_cast<size_t>(count - 1)]) :
+        repeated_action();
+=======
     return count <= action_count
                ? *static_cast<const Action<F>*>(
                      untyped_actions_[static_cast<size_t>(count - 1)])
                : repeated_action();
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
   }
 
   // Given the arguments of a mock function call, if the call will
@@ -1819,7 +1835,12 @@ class MockFunction<R(Args...)> {
     return mock_.With(std::move(m)...);
   }
 
+<<<<<<< HEAD
+  MockSpec<R(Args...)> gmock_Call(const WithoutMatchers&,
+                                  R (*)(Args...)) {
+=======
   MockSpec<R(Args...)> gmock_Call(const WithoutMatchers&, R (*)(Args...)) {
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
     return this->gmock_Call(::testing::A<Args>()...);
   }
 
@@ -1924,7 +1945,10 @@ using SignatureOfT = typename SignatureOf<F>::type;
 template <typename F>
 class MockFunction : public internal::MockFunction<internal::SignatureOfT<F>> {
   using Base = internal::MockFunction<internal::SignatureOfT<F>>;
+<<<<<<< HEAD
+=======
 
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
  public:
   using Base::Base;
 };
@@ -2024,9 +2048,14 @@ GTEST_DISABLE_MSC_WARNINGS_POP_()  //  4251
 // second argument is an internal type derived from the method signature. The
 // failure to disambiguate two overloads of this method in the ON_CALL statement
 // is how we block callers from setting expectations on overloaded methods.
+<<<<<<< HEAD
+#define GMOCK_ON_CALL_IMPL_(mock_expr, Setter, call)                          \
+  ((mock_expr).gmock_##call)(::testing::internal::GetWithoutMatchers(), nullptr) \
+=======
 #define GMOCK_ON_CALL_IMPL_(mock_expr, Setter, call)                    \
   ((mock_expr).gmock_##call)(::testing::internal::GetWithoutMatchers(), \
                              nullptr)                                   \
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
       .Setter(__FILE__, __LINE__, #mock_expr, #call)
 
 #define ON_CALL(obj, call) \

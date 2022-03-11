@@ -1,4 +1,12 @@
+<<<<<<< HEAD
+<<<<<<< HEAD:googletest/test/gtest_skip_in_environment_setup_test.cc
+// Copyright 2019, Google Inc.
+=======
+// Copyright 2005, Google Inc.
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f:googletest/test/googletest-global-environment-unittest_.cc
+=======
 // Copyright 2019, Google LLC.
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -11,7 +19,11 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
+<<<<<<< HEAD
+//     * Neither the name of Google Inc. nor the names of its
+=======
 //     * Neither the name of Google LLC. nor the names of its
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 // contributors may be used to endorse or promote products derived from
 // this software without specific prior written permission.
 //
@@ -26,6 +38,35 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+<<<<<<< HEAD
+
+// Unit test for Google Test global test environments.
+//
+<<<<<<< HEAD:googletest/test/gtest_skip_in_environment_setup_test.cc
+// This test verifies that skipping in the environment results in the
+// testcases being skipped.
+//
+// This is a reproduction case for
+// https://github.com/google/googletest/issues/2189 .
+
+#include <iostream>
+#include <gtest/gtest.h>
+
+class SetupEnvironment : public testing::Environment {
+public:
+  void SetUp() override {
+    GTEST_SKIP() << "Skipping the entire environment";
+  }
+};
+
+TEST(Test, AlwaysPasses) {
+  EXPECT_EQ(true, true);
+}
+
+TEST(Test, AlwaysFails) {
+  EXPECT_EQ(true, false);
+}
+=======
 //
 // This test verifies that skipping in the environment results in the
 // testcases being skipped.
@@ -39,11 +80,44 @@ class SetupEnvironment : public testing::Environment {
 };
 
 TEST(Test, AlwaysFails) { EXPECT_EQ(true, false); }
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
 
   testing::AddGlobalTestEnvironment(new SetupEnvironment());
 
+<<<<<<< HEAD
+  return (RUN_ALL_TESTS());
+=======
+// The program will be invoked from a Python unit test.  Don't run it
+// directly.
+
+#include "gtest/gtest.h"
+
+namespace {
+
+// An environment that always fails in its SetUp method.
+class FailingEnvironment final : public ::testing::Environment {
+ public:
+  void SetUp() override { FAIL() << "Canned environment setup error"; }
+};
+
+// Register the environment.
+auto* const g_environment_ =
+    ::testing::AddGlobalTestEnvironment(new FailingEnvironment);
+
+// A test that doesn't actually run.
+TEST(SomeTest, DoesFoo) { FAIL() << "Unexpected call"; }
+
+}  // namespace
+
+int main(int argc, char** argv) {
+  ::testing::InitGoogleTest(&argc, argv);
+
   return RUN_ALL_TESTS();
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f:googletest/test/googletest-global-environment-unittest_.cc
+=======
+  return RUN_ALL_TESTS();
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 }

@@ -33,10 +33,16 @@ This script invokes gtest_skip_in_environment_setup_test_ and verifies its
 output.
 """
 
+<<<<<<< HEAD
+import gtest_test_utils
+import re
+
+=======
 import re
 
 from googletest.test import gtest_test_utils
 
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 # Path to the gtest_skip_in_environment_setup_test binary
 EXE_PATH = gtest_test_utils.GetTestExecutablePath('gtest_skip_test')
 
@@ -49,9 +55,18 @@ class SkipEntireEnvironmentTest(gtest_test_utils.TestCase):
   def testSkipEntireEnvironmentTest(self):
     self.assertIn('Skipped\nskipping single test\n', OUTPUT)
     skip_fixture = 'Skipped\nskipping all tests for this fixture\n'
+<<<<<<< HEAD
+    self.assertTrue(
+      re.search(
+        skip_fixture + '.*' + skip_fixture, OUTPUT, flags=re.DOTALL
+      ) is not None, 
+      repr(OUTPUT)
+    )
+=======
     self.assertIsNotNone(
         re.search(skip_fixture + '.*' + skip_fixture, OUTPUT, flags=re.DOTALL),
         repr(OUTPUT))
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
     self.assertNotIn('FAILED', OUTPUT)
 
 

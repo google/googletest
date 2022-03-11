@@ -427,7 +427,11 @@ internal::CartesianProductHolder<Generator...> Combine(const Generator&... g) {
               GTEST_STRINGIFY_(test_suite_name), GTEST_STRINGIFY_(test_name),  \
               new ::testing::internal::TestMetaFactory<GTEST_TEST_CLASS_NAME_( \
                   test_suite_name, test_name)>(),                              \
+<<<<<<< HEAD
+                  ::testing::internal::CodeLocation(__FILE__, __LINE__));      \
+=======
               ::testing::internal::CodeLocation(__FILE__, __LINE__));          \
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
       return 0;                                                                \
     }                                                                          \
     static int gtest_registering_dummy_ GTEST_ATTRIBUTE_UNUSED_;               \
@@ -439,11 +443,18 @@ internal::CartesianProductHolder<Generator...> Combine(const Generator&... g) {
       GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)::AddToRegistry();     \
   void GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)::TestBody()
 
+<<<<<<< HEAD
+// The last argument to INSTANTIATE_TEST_SUITE_P allows the user to specify generator
+// and an optional function or functor that generates custom test name suffixes
+// based on the test parameters. Such a function or functor should accept one argument of
+// type testing::TestParamInfo<class ParamType>, and return std::string.
+=======
 // The last argument to INSTANTIATE_TEST_SUITE_P allows the user to specify
 // generator and an optional function or functor that generates custom test name
 // suffixes based on the test parameters. Such a function or functor should
 // accept one argument of type testing::TestParamInfo<class ParamType>, and
 // return std::string.
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 //
 // testing::PrintToStringParamName is a builtin test suffix generator that
 // returns the value of testing::PrintToString(GetParam()).
@@ -452,6 +463,17 @@ internal::CartesianProductHolder<Generator...> Combine(const Generator&... g) {
 // alphanumeric characters or underscore. Because PrintToString adds quotes
 // to std::string and C strings, it won't work for these types.
 
+<<<<<<< HEAD
+#define INSTANTIATE_TEST_SUITE_P(prefix, test_suite_name, ...)                \
+  static ::testing::internal::ParamGenerator<test_suite_name::ParamType>      \
+      gtest_##prefix##test_suite_name##_EvalGenerator_() {                    \
+    return VA_GETFIRST(__VA_ARGS__);                                          \
+  }                                                                           \
+  static ::std::string gtest_##prefix##test_suite_name##_EvalGenerateName_(   \
+      const ::testing::TestParamInfo<test_suite_name::ParamType>& info) {     \
+    return ::testing::internal::CreateParamGenerator<                         \
+        test_suite_name::ParamType>(VA_GETREST(__VA_ARGS__, 0))(info);        \
+=======
 #define GTEST_EXPAND_(arg) arg
 #define GTEST_GET_FIRST_(first, ...) first
 #define GTEST_GET_SECOND_(first, second, ...) second
@@ -476,6 +498,7 @@ internal::CartesianProductHolder<Generator...> Combine(const Generator&... g) {
         __VA_ARGS__,                                                          \
         ::testing::internal::DefaultParamName<test_suite_name::ParamType>,    \
         DUMMY_PARAM_))))(info);                                               \
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
   }                                                                           \
   static int gtest_##prefix##test_suite_name##_dummy_                         \
       GTEST_ATTRIBUTE_UNUSED_ =                                               \

@@ -120,6 +120,19 @@ using internal::FunctionMocker;
 #define GMOCK_INTERNAL_MOCK_METHOD_ARG_3(_Ret, _MethodName, _Args) \
   GMOCK_INTERNAL_MOCK_METHOD_ARG_4(_Ret, _MethodName, _Args, ())
 
+<<<<<<< HEAD
+#define GMOCK_INTERNAL_MOCK_METHOD_ARG_4(_Ret, _MethodName, _Args, _Spec)     \
+  GMOCK_INTERNAL_ASSERT_PARENTHESIS(_Args);                                   \
+  GMOCK_INTERNAL_ASSERT_PARENTHESIS(_Spec);                                   \
+  GMOCK_INTERNAL_ASSERT_VALID_SIGNATURE(                                      \
+      GMOCK_PP_NARG0 _Args, GMOCK_INTERNAL_SIGNATURE(_Ret, _Args));           \
+  GMOCK_INTERNAL_ASSERT_VALID_SPEC(_Spec)                                     \
+  GMOCK_INTERNAL_MOCK_METHOD_IMPL(                                            \
+      GMOCK_PP_NARG0 _Args, _MethodName, GMOCK_INTERNAL_HAS_CONST(_Spec),     \
+      GMOCK_INTERNAL_HAS_OVERRIDE(_Spec), GMOCK_INTERNAL_HAS_FINAL(_Spec),    \
+      GMOCK_INTERNAL_GET_NOEXCEPT_SPEC(_Spec),                                \
+      GMOCK_INTERNAL_GET_CALLTYPE(_Spec),                                     \
+=======
 #define GMOCK_INTERNAL_MOCK_METHOD_ARG_4(_Ret, _MethodName, _Args, _Spec)  \
   GMOCK_INTERNAL_ASSERT_PARENTHESIS(_Args);                                \
   GMOCK_INTERNAL_ASSERT_PARENTHESIS(_Spec);                                \
@@ -132,6 +145,7 @@ using internal::FunctionMocker;
       GMOCK_INTERNAL_GET_NOEXCEPT_SPEC(_Spec),                             \
       GMOCK_INTERNAL_GET_CALLTYPE_SPEC(_Spec),                             \
       GMOCK_INTERNAL_GET_REF_SPEC(_Spec),                                  \
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
       (GMOCK_INTERNAL_SIGNATURE(_Ret, _Args)))
 
 #define GMOCK_INTERNAL_MOCK_METHOD_ARG_5(...) \
@@ -177,8 +191,15 @@ using internal::FunctionMocker;
       _Signature)>::Result                                                     \
   GMOCK_INTERNAL_EXPAND(_CallType)                                             \
       _MethodName(GMOCK_PP_REPEAT(GMOCK_INTERNAL_PARAMETER, _Signature, _N))   \
+<<<<<<< HEAD
+          GMOCK_PP_IF(_Constness, const, )                                     \
+          _NoexceptSpec                                                        \
+          GMOCK_PP_IF(_Override, override, )                                   \
+          GMOCK_PP_IF(_Final, final, ) {                                       \
+=======
           GMOCK_PP_IF(_Constness, const, ) _RefSpec _NoexceptSpec              \
           GMOCK_PP_IF(_Override, override, ) GMOCK_PP_IF(_Final, final, ) {    \
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
     GMOCK_MOCKER_(_N, _Constness, _MethodName)                                 \
         .SetOwnerAndName(this, #_MethodName);                                  \
     return GMOCK_MOCKER_(_N, _Constness, _MethodName)                          \
@@ -194,10 +215,18 @@ using internal::FunctionMocker;
   ::testing::MockSpec<GMOCK_PP_REMOVE_PARENS(_Signature)> gmock_##_MethodName( \
       const ::testing::internal::WithoutMatchers&,                             \
       GMOCK_PP_IF(_Constness, const, )::testing::internal::Function<           \
+<<<<<<< HEAD
+          GMOCK_PP_REMOVE_PARENS(_Signature)>*)                                \
+      const _NoexceptSpec {                                                    \
+    return GMOCK_PP_CAT(::testing::internal::AdjustConstness_,                 \
+                        GMOCK_PP_IF(_Constness, const, ))(this)                \
+        ->gmock_##_MethodName(GMOCK_PP_REPEAT(                                 \
+=======
           GMOCK_PP_REMOVE_PARENS(_Signature)>*) const _RefSpec _NoexceptSpec { \
     return ::testing::internal::ThisRefAdjuster<GMOCK_PP_IF(                   \
         _Constness, const, ) int _RefSpec>::Adjust(*this)                      \
         .gmock_##_MethodName(GMOCK_PP_REPEAT(                                  \
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
             GMOCK_INTERNAL_A_MATCHER_ARGUMENT, _Signature, _N));               \
   }                                                                            \
   mutable ::testing::FunctionMocker<GMOCK_PP_REMOVE_PARENS(_Signature)>        \
@@ -219,6 +248,23 @@ using internal::FunctionMocker;
 #define GMOCK_INTERNAL_GET_NOEXCEPT_SPEC(_Tuple) \
   GMOCK_PP_FOR_EACH(GMOCK_INTERNAL_NOEXCEPT_SPEC_IF_NOEXCEPT, ~, _Tuple)
 
+<<<<<<< HEAD
+#define GMOCK_INTERNAL_NOEXCEPT_SPEC_IF_NOEXCEPT(_i, _, _elem) \
+  GMOCK_PP_IF(                                                 \
+    GMOCK_PP_HAS_COMMA(GMOCK_INTERNAL_DETECT_NOEXCEPT(_i, _, _elem)), _elem, )
+#define GMOCK_INTERNAL_GET_CALLTYPE(_Tuple) \
+  GMOCK_PP_FOR_EACH(GMOCK_INTERNAL_GET_CALLTYPE_IMPL, ~, _Tuple)
+
+#define GMOCK_INTERNAL_ASSERT_VALID_SPEC_ELEMENT(_i, _, _elem)            \
+  static_assert(                                                          \
+      (GMOCK_PP_HAS_COMMA(GMOCK_INTERNAL_DETECT_CONST(_i, _, _elem)) +    \
+       GMOCK_PP_HAS_COMMA(GMOCK_INTERNAL_DETECT_OVERRIDE(_i, _, _elem)) + \
+       GMOCK_PP_HAS_COMMA(GMOCK_INTERNAL_DETECT_FINAL(_i, _, _elem)) +    \
+       GMOCK_PP_HAS_COMMA(GMOCK_INTERNAL_DETECT_NOEXCEPT(_i, _, _elem)) + \
+       GMOCK_PP_HAS_COMMA(GMOCK_INTERNAL_DETECT_REF(_i, _, _elem)) +      \
+       GMOCK_INTERNAL_IS_CALLTYPE(_elem)) == 1,                           \
+      GMOCK_PP_STRINGIZE(                                                 \
+=======
 #define GMOCK_INTERNAL_NOEXCEPT_SPEC_IF_NOEXCEPT(_i, _, _elem)          \
   GMOCK_PP_IF(                                                          \
       GMOCK_PP_HAS_COMMA(GMOCK_INTERNAL_DETECT_NOEXCEPT(_i, _, _elem)), \
@@ -256,6 +302,7 @@ using internal::FunctionMocker;
        GMOCK_PP_HAS_COMMA(GMOCK_INTERNAL_DETECT_REF(_i, _, _elem)) +           \
        GMOCK_PP_HAS_COMMA(GMOCK_INTERNAL_DETECT_CALLTYPE(_i, _, _elem))) == 1, \
       GMOCK_PP_STRINGIZE(                                                      \
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
           _elem) " cannot be recognized as a valid specification modifier.");
 #endif  // GMOCK_INTERNAL_STRICT_SPEC_ASSERT
 

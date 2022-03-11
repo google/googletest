@@ -104,6 +104,9 @@
 #elif defined __QNX__
 # define GTEST_OS_QNX 1
 #elif defined(__HAIKU__)
+<<<<<<< HEAD
+# define GTEST_OS_HAIKU 1
+=======
 #define GTEST_OS_HAIKU 1
 #elif defined ESP8266
 #define GTEST_OS_ESP8266 1
@@ -111,6 +114,7 @@
 #define GTEST_OS_ESP32 1
 #elif defined(__XTENSA__)
 #define GTEST_OS_XTENSA 1
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 #endif  // __CYGWIN__
 
 #endif  // GOOGLETEST_INCLUDE_GTEST_INTERNAL_GTEST_PORT_ARCH_H_

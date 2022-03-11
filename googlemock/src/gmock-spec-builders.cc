@@ -34,6 +34,7 @@
 // EXPECT_CALL).
 
 #include "gmock/gmock-spec-builders.h"
+#include "gtest/internal/gtest-port.h"
 
 #include <stdlib.h>
 
@@ -73,8 +74,12 @@ GTEST_API_ void LogWithLocation(testing::internal::LogSeverity severity,
                                 const char* file, int line,
                                 const std::string& message) {
   ::std::ostringstream s;
+<<<<<<< HEAD
+  s << internal::FormatFileLocation(file, line) << " " << message << ::std::endl;
+=======
   s << internal::FormatFileLocation(file, line) << " " << message
     << ::std::endl;
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
   Log(severity, s.str(), 0);
 }
 

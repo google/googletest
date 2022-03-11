@@ -85,10 +85,10 @@ void PrintTo(EnumWithPrintTo e, std::ostream* os) {
   *os << (e == kEWPT1 ? "kEWPT1" : "invalid");
 }
 
-// A class implicitly convertible to BiggestInt.
-class BiggestIntConvertible {
+// A class implicitly convertible to std::intmax_t.
+class IntMaxConvertible {
  public:
-  operator ::testing::internal::BiggestInt() const { return 42; }
+  constexpr operator std::intmax_t() const { return 42; }
 };
 
 // A parent class with two child classes. The parent and one of the kids have
@@ -319,10 +319,10 @@ TEST(PrintEnumTest, EnumWithPrintTo) {
   EXPECT_EQ("invalid", Print(static_cast<EnumWithPrintTo>(0)));
 }
 
-// Tests printing a class implicitly convertible to BiggestInt.
+// Tests printing a class implicitly convertible to std::intmax_t.
 
-TEST(PrintClassTest, BiggestIntConvertible) {
-  EXPECT_EQ("42", Print(BiggestIntConvertible()));
+TEST(PrintClassTest, IntMaxConvertible) {
+  EXPECT_EQ("42", Print(IntMaxConvertible()));
 }
 
 // Tests printing various char types.
@@ -723,7 +723,7 @@ TEST(PrintPointerTest, NonMemberFunctionPointer) {
   // this limitation.
   EXPECT_EQ(
       PrintPointer(reinterpret_cast<const void*>(
-          reinterpret_cast<internal::BiggestInt>(&MyFunction))),
+          reinterpret_cast<std::intptr_t>(&MyFunction))),
       Print(&MyFunction));
   int (*p)(bool) = NULL;  // NOLINT
   EXPECT_EQ("NULL", Print(p));
@@ -1395,7 +1395,7 @@ TEST(PrintReferenceTest, HandlesFunctionPointer) {
   // pointers to objects, and some compilers (e.g. GCC 3.4) enforce
   // this limitation.
   const std::string fp_string = PrintPointer(reinterpret_cast<const void*>(
-      reinterpret_cast<internal::BiggestInt>(fp)));
+      reinterpret_cast<std::intptr_t>(fp)));
   EXPECT_EQ("@" + fp_pointer_string + " " + fp_string,
             PrintByRef(fp));
 }
@@ -1640,6 +1640,40 @@ TEST(PrintToStringTest, WorksForCharArrayWithEmbeddedNul) {
                           "\n    As Text: \"From ä — ẑ\"");
 }
 
+#if GTEST_HAS_RTTI
+TEST(PrintToStringTest, IncludesNameWithTypeInfoAndTypeIndex) {
+  // The following lambda tests that both the printed string for the specified
+  // `typeid`, and the one for its `std::type_index` contain the string returned
+  // by its `name()` member function.
+  const auto TestTypeId = [](const ::std::type_info& id) {
+    const auto name = id.name();
+    const auto contains_name = [name](const ::std::string& str) {
+      return str.find(name) != ::std::string::npos;
+    };
+    EXPECT_TRUE(contains_name(PrintToString(id)));
+    EXPECT_TRUE(contains_name(PrintToString(::std::type_index{id})));
+  };
+
+  TestTypeId(typeid(void));
+  TestTypeId(typeid(int));
+  TestTypeId(typeid(const volatile int*));
+
+  struct Base {
+    virtual ~Base() = default;
+  };
+  struct Derived : Base {};
+
+  TestTypeId(typeid(Base));
+  TestTypeId(typeid(Derived));
+
+  Derived derived;
+  Base& base = derived;
+
+  TestTypeId(typeid(base));
+  TestTypeId(typeid(derived));
+}
+#endif  // GTEST_HAS_RTTI
+
 TEST(IsValidUTF8Test, IllFormedUTF8) {
   // The following test strings are ill-formed UTF-8 and are printed
   // as hex only (or ASCII, in case of ASCII bytes) because IsValidUTF8() is
@@ -1875,13 +1909,33 @@ class PrintAnyTest : public ::testing::Test {
 #if GTEST_HAS_RTTI
     return internal::GetTypeName<T>();
 #else
+<<<<<<< HEAD
+    return "the element type";
+=======
     return "<unknown_type>";
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 #endif  // GTEST_HAS_RTTI
   }
 };
 
 TEST_F(PrintAnyTest, Empty) {
   internal::Any any;
+<<<<<<< HEAD
+  EXPECT_EQ("'any' type with no value", PrintToString(any));
+}
+
+TEST_F(PrintAnyTest, NonEmpty) {
+  internal::Any any;
+  constexpr int val1 = 10;
+  const std::string val2 = "content";
+
+  any = val1;
+  EXPECT_EQ("'any' type with value of type " + ExpectedTypeName<int>(),
+            PrintToString(any));
+
+  any = val2;
+  EXPECT_EQ("'any' type with value of type " + ExpectedTypeName<std::string>(),
+=======
   EXPECT_EQ("no value", PrintToString(any));
 }
 
@@ -1895,6 +1949,7 @@ TEST_F(PrintAnyTest, NonEmpty) {
 
   any = val2;
   EXPECT_EQ("value of type " + ExpectedTypeName<std::string>(),
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
             PrintToString(any));
 }
 #endif  // GTEST_INTERNAL_HAS_ANY
@@ -1918,6 +1973,17 @@ struct NonPrintable {
 
 TEST(PrintOneofTest, Basic) {
   using Type = internal::Variant<int, StreamableInGlobal, NonPrintable>;
+<<<<<<< HEAD
+  EXPECT_EQ("('int(0)' with value 7)", PrintToString(Type(7)));
+  EXPECT_EQ("('StreamableInGlobal(1)' with value StreamableInGlobal)",
+            PrintToString(Type(StreamableInGlobal{})));
+  EXPECT_EQ(
+      "('testing::gtest_printers_test::NonPrintable(2)' with value 1-byte object "
+      "<11>)",
+      PrintToString(Type(NonPrintable{})));
+}
+#endif  // GTEST_HAS_ABSL
+=======
   EXPECT_EQ("('int(index = 0)' with value 7)", PrintToString(Type(7)));
   EXPECT_EQ("('StreamableInGlobal(index = 1)' with value StreamableInGlobal)",
             PrintToString(Type(StreamableInGlobal{})));
@@ -1987,5 +2053,6 @@ TEST(string_ref, compare) {
 
 }  // namespace
 
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 }  // namespace gtest_printers_test
 }  // namespace testing

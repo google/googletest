@@ -48,6 +48,10 @@ TEST(Counter, Increment) {
   EXPECT_EQ(2, c.Increment());
 
   EXPECT_EQ(3, c.Decrement());
+<<<<<<< HEAD
+
+=======
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 }
 
 }  // namespace

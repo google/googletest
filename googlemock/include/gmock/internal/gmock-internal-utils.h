@@ -291,6 +291,19 @@ class WithoutMatchers {
 // Internal use only: access the singleton instance of WithoutMatchers.
 GTEST_API_ WithoutMatchers GetWithoutMatchers();
 
+<<<<<<< HEAD
+// Type traits.
+
+// is_reference<T>::value is non-zero if T is a reference type.
+template <typename T> struct is_reference : public false_type {};
+template <typename T> struct is_reference<T&> : public true_type {};
+
+// remove_reference<T>::type removes the reference from type T, if any.
+template <typename T> struct remove_reference { typedef T type; };  // NOLINT
+template <typename T> struct remove_reference<T&> { typedef T type; }; // NOLINT
+
+=======
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 // Disable MSVC warnings for infinite recursion, since in this case the
 // recursion is unreachable.
 #ifdef _MSC_VER

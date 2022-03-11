@@ -380,12 +380,57 @@ std::string DefaultParamName(const TestParamInfo<ParamType>& info) {
   return name_stream.GetString();
 }
 
+<<<<<<< HEAD
+// INTERNAL IMPLEMENTATION - DO NOT USE IN USER CODE.
+//
+// Parameterized test name overload helpers, which help the
+// INSTANTIATE_TEST_SUITE_P macro choose between the default parameterized
+// test name generator and user param name generator.
+template <class ParamType, class ParamNameGenFunctor>
+ParamNameGenFunctor GetParamNameGen(ParamNameGenFunctor func) {
+  return func;
+}
+
+template <class ParamType>
+struct ParamNameGenFunc {
+  typedef std::string Type(const TestParamInfo<ParamType>&);
+};
+
+template <class ParamType>
+typename ParamNameGenFunc<ParamType>::Type *GetParamNameGen() {
+  return DefaultParamName;
+=======
 template <typename T = int>
 void TestNotEmpty() {
   static_assert(sizeof(T) == 0, "Empty arguments are not allowed.");
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 }
 template <typename T = int>
 void TestNotEmpty(const T&) {}
+
+// INTERNAL IMPLEMENTATION - DO NOT USE IN USER CODE.
+//
+// Macroses allow to address an issue with zero element variadic macro
+
+#define EXPAND(X) X
+#define VA__GETFIRST(X, ...) X
+#define VA_GETFIRST(...) EXPAND(VA__GETFIRST(__VA_ARGS__, 0))
+#define VA_GETREST(X, ...) __VA_ARGS__
+
+// INTERNAL IMPLEMENTATION - DO NOT USE IN USER CODE.
+//
+// Function is intended to swallow 0 as last argument and call GetParamNameGen
+
+template <class ParamType>
+auto CreateParamGenerator(int) -> decltype(GetParamNameGen<ParamType>()) {
+  return GetParamNameGen<ParamType>();
+}
+
+template <class ParamType, class Arg>
+auto CreateParamGenerator(Arg&& arg, int) -> decltype(
+    GetParamNameGen<ParamType>(std::forward<Arg>(arg))) {
+  return GetParamNameGen<ParamType>(std::forward<Arg>(arg));
+}
 
 // INTERNAL IMPLEMENTATION - DO NOT USE IN USER CODE.
 //
@@ -521,10 +566,16 @@ class ParameterizedTestSuiteInfo : public ParameterizedTestSuiteInfoBase {
   // parameter index. For the test SequenceA/FooTest.DoBar/1 FooTest is
   // test suite base name and DoBar is test base name.
   void AddTestPattern(const char* test_suite_name, const char* test_base_name,
+<<<<<<< HEAD
+                      TestMetaFactoryBase<ParamType>* meta_factory, CodeLocation code_location) {
+    tests_.push_back(std::shared_ptr<TestInfo>(
+        new TestInfo(test_suite_name, test_base_name, meta_factory, code_location)));
+=======
                       TestMetaFactoryBase<ParamType>* meta_factory,
                       CodeLocation code_location) {
     tests_.push_back(std::shared_ptr<TestInfo>(new TestInfo(
         test_suite_name, test_base_name, meta_factory, code_location)));
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
   }
   // INSTANTIATE_TEST_SUITE_P macro uses AddGenerator() to record information
   // about a generator.
@@ -584,10 +635,17 @@ class ParameterizedTestSuiteInfo : public ParameterizedTestSuiteInfoBase {
 
           test_param_names.insert(param_name);
 
+<<<<<<< HEAD
+	  if (!test_info->test_base_name.empty()) {
+	    test_name_stream << test_info->test_base_name << "/";
+	  }
+	  test_name_stream << param_name;
+=======
           if (!test_info->test_base_name.empty()) {
             test_name_stream << test_info->test_base_name << "/";
           }
           test_name_stream << param_name;
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
           MakeAndRegisterTestInfo(
               test_suite_name.c_str(), test_name_stream.GetString().c_str(),
               nullptr,  // No type parameter.
@@ -612,8 +670,12 @@ class ParameterizedTestSuiteInfo : public ParameterizedTestSuiteInfoBase {
   // with TEST_P macro.
   struct TestInfo {
     TestInfo(const char* a_test_suite_base_name, const char* a_test_base_name,
+<<<<<<< HEAD
+             TestMetaFactoryBase<ParamType>* a_test_meta_factory, CodeLocation a_code_location)
+=======
              TestMetaFactoryBase<ParamType>* a_test_meta_factory,
              CodeLocation a_code_location)
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
         : test_suite_base_name(a_test_suite_base_name),
           test_base_name(a_test_base_name),
           test_meta_factory(a_test_meta_factory),
@@ -798,6 +860,7 @@ class ValueArray {
   operator ParamGenerator<T>() const {  // NOLINT
     return ValuesIn(MakeVector<T>(MakeIndexSequence<sizeof...(Ts)>()));
   }
+<<<<<<< HEAD
 
  private:
   template <typename T, size_t... I>
@@ -830,6 +893,40 @@ class CartesianProductGenerator
   }
 
  private:
+=======
+
+ private:
+  template <typename T, size_t... I>
+  std::vector<T> MakeVector(IndexSequence<I...>) const {
+    return std::vector<T>{static_cast<T>(v_.template Get<I>())...};
+  }
+
+  FlatTuple<Ts...> v_;
+};
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+
+template <typename... T>
+class CartesianProductGenerator
+    : public ParamGeneratorInterface<::std::tuple<T...>> {
+ public:
+  typedef ::std::tuple<T...> ParamType;
+
+  CartesianProductGenerator(const std::tuple<ParamGenerator<T>...>& g)
+      : generators_(g) {}
+  ~CartesianProductGenerator() override {}
+
+  ParamIteratorInterface<ParamType>* Begin() const override {
+    return new Iterator(this, generators_, false);
+  }
+  ParamIteratorInterface<ParamType>* End() const override {
+    return new Iterator(this, generators_, true);
+  }
+
+ private:
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
   template <class I>
   class IteratorImpl;
   template <size_t... I>
@@ -864,6 +961,7 @@ class CartesianProductGenerator
     }
 
     const ParamType* Current() const override { return current_value_.get(); }
+<<<<<<< HEAD
 
     bool Equals(const ParamIteratorInterface<ParamType>& other) const override {
       // Having the same base generator guarantees that the other
@@ -925,6 +1023,69 @@ class CartesianProductGenerator
 
   using Iterator = IteratorImpl<typename MakeIndexSequence<sizeof...(T)>::type>;
 
+=======
+
+    bool Equals(const ParamIteratorInterface<ParamType>& other) const override {
+      // Having the same base generator guarantees that the other
+      // iterator is of the same type and we can downcast.
+      GTEST_CHECK_(BaseGenerator() == other.BaseGenerator())
+          << "The program attempted to compare iterators "
+          << "from different generators." << std::endl;
+      const IteratorImpl* typed_other =
+          CheckedDowncastToActualType<const IteratorImpl>(&other);
+
+      // We must report iterators equal if they both point beyond their
+      // respective ranges. That can happen in a variety of fashions,
+      // so we have to consult AtEnd().
+      if (AtEnd() && typed_other->AtEnd()) return true;
+
+      bool same = true;
+      bool dummy[] = {
+          (same = same && std::get<I>(current_) ==
+                              std::get<I>(typed_other->current_))...};
+      (void)dummy;
+      return same;
+    }
+
+   private:
+    template <size_t ThisI>
+    void AdvanceIfEnd() {
+      if (std::get<ThisI>(current_) != std::get<ThisI>(end_)) return;
+
+      bool last = ThisI == 0;
+      if (last) {
+        // We are done. Nothing else to propagate.
+        return;
+      }
+
+      constexpr size_t NextI = ThisI - (ThisI != 0);
+      std::get<ThisI>(current_) = std::get<ThisI>(begin_);
+      ++std::get<NextI>(current_);
+      AdvanceIfEnd<NextI>();
+    }
+
+    void ComputeCurrentValue() {
+      if (!AtEnd())
+        current_value_ = std::make_shared<ParamType>(*std::get<I>(current_)...);
+    }
+    bool AtEnd() const {
+      bool at_end = false;
+      bool dummy[] = {
+          (at_end = at_end || std::get<I>(current_) == std::get<I>(end_))...};
+      (void)dummy;
+      return at_end;
+    }
+
+    const ParamGeneratorInterface<ParamType>* const base_;
+    std::tuple<typename ParamGenerator<T>::iterator...> begin_;
+    std::tuple<typename ParamGenerator<T>::iterator...> end_;
+    std::tuple<typename ParamGenerator<T>::iterator...> current_;
+    std::shared_ptr<ParamType> current_value_;
+  };
+
+  using Iterator = IteratorImpl<typename MakeIndexSequence<sizeof...(T)>::type>;
+
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
   std::tuple<ParamGenerator<T>...> generators_;
 };
 

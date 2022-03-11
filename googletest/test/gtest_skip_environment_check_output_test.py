@@ -1,6 +1,11 @@
 #!/usr/bin/env python
 #
+<<<<<<< HEAD:googletest/test/googletest-setuptestsuite-test.py
+# Copyright 2019, Google Inc.
+# All rights reserved.
+=======
 # Copyright 2019 Google LLC.  All Rights Reserved.
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f:googletest/test/gtest_skip_environment_check_output_test.py
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
@@ -29,6 +34,28 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """Tests Google Test's gtest skip in environment setup  behavior.
 
+<<<<<<< HEAD:googletest/test/googletest-setuptestsuite-test.py
+"""Verifies that SetUpTestSuite and TearDownTestSuite errors are noticed."""
+
+from googletest.test import gtest_test_utils
+
+COMMAND = gtest_test_utils.GetTestExecutablePath(
+    'googletest-setuptestsuite-test_')
+
+
+class GTestSetUpTestSuiteTest(gtest_test_utils.TestCase):
+
+  def testSetupErrorAndTearDownError(self):
+    p = gtest_test_utils.Subprocess(COMMAND)
+    self.assertNotEqual(p.exit_code, 0, msg=p.output)
+
+    self.assertIn(
+        '[  FAILED  ] SetupFailTest: SetUpTestSuite or TearDownTestSuite\n'
+        '[  FAILED  ] TearDownFailTest: SetUpTestSuite or TearDownTestSuite\n'
+        '\n'
+        ' 2 FAILED TEST SUITES\n',
+        p.output)
+=======
 This script invokes gtest_skip_in_environment_setup_test_ and verifies its
 output.
 """
@@ -49,6 +76,7 @@ class SkipEntireEnvironmentTest(gtest_test_utils.TestCase):
     self.assertIn('Skipping the entire environment', OUTPUT)
     self.assertNotIn('FAILED', OUTPUT)
 
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f:googletest/test/gtest_skip_environment_check_output_test.py
 
 if __name__ == '__main__':
   gtest_test_utils.Main()

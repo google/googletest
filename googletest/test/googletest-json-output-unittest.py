@@ -184,6 +184,15 @@ EXPECTED_NON_EMPTY = {
             u'timestamp': u'*',
             u'classname': u'SkippedTest'
         }, {
+<<<<<<< HEAD
+            u'name': u'SkippedAfterFailure',
+            u'status': u'RUN',
+            u'result': u'COMPLETED',
+            u'time': u'*',
+            u'timestamp': u'*',
+            u'classname': u'SkippedTest',
+				u'failures': [{
+=======
             u'name':
                 u'SkippedAfterFailure',
             u'status':
@@ -197,6 +206,7 @@ EXPECTED_NON_EMPTY = {
             u'classname':
                 u'SkippedTest',
             u'failures': [{
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
                 u'failure': u'gtest_xml_output_unittest_.cc:*\n'
                             u'Expected equality of these values:\n'
                             u'  1\n  2' + STACK_TRACE_TEMPLATE,
@@ -359,6 +369,7 @@ EXPECTED_NON_EMPTY = {
             u'name': u'IntValuedProperty',
             u'status': u'RUN',
             u'result': u'COMPLETED',
+<<<<<<< HEAD
             u'time': u'*',
             u'timestamp': u'*',
             u'classname': u'PropertyRecordingTest',
@@ -375,10 +386,56 @@ EXPECTED_NON_EMPTY = {
             u'key_3': u'3'
         }, {
             u'name': u'TwoValuesForOneKeyUsesLastValue',
+=======
+            u'time': u'*',
+            u'timestamp': u'*',
+            u'classname': u'PropertyRecordingTest',
+            u'key_int': u'1'
+        }, {
+            u'name': u'ThreeProperties',
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
             u'status': u'RUN',
             u'result': u'COMPLETED',
             u'time': u'*',
             u'timestamp': u'*',
+            u'classname': u'PropertyRecordingTest',
+<<<<<<< HEAD
+            u'key_1': u'2'
+        }]
+    }, {
+        u'name':
+            u'NoFixtureTest',
+        u'tests':
+            3,
+        u'failures':
+            0,
+        u'disabled':
+            0,
+        u'errors':
+            0,
+        u'time':
+            u'*',
+        u'timestamp':
+            u'*',
+        u'testsuite': [{
+            u'name': u'RecordProperty',
+=======
+            u'key_1': u'1',
+            u'key_2': u'2',
+            u'key_3': u'3'
+        }, {
+            u'name': u'TwoValuesForOneKeyUsesLastValue',
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
+            u'status': u'RUN',
+            u'result': u'COMPLETED',
+            u'time': u'*',
+            u'timestamp': u'*',
+<<<<<<< HEAD
+            u'classname': u'NoFixtureTest',
+            u'key': u'1'
+        }, {
+            u'name': u'ExternalUtilityThatCallsRecordIntValuedProperty',
+=======
             u'classname': u'PropertyRecordingTest',
             u'key_1': u'2'
         }]
@@ -399,27 +456,27 @@ EXPECTED_NON_EMPTY = {
             u'*',
         u'testsuite': [{
             u'name': u'RecordProperty',
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
             u'status': u'RUN',
             u'result': u'COMPLETED',
             u'time': u'*',
             u'timestamp': u'*',
             u'classname': u'NoFixtureTest',
-            u'key': u'1'
-        }, {
-            u'name': u'ExternalUtilityThatCallsRecordIntValuedProperty',
-            u'status': u'RUN',
-            u'result': u'COMPLETED',
-            u'time': u'*',
-            u'timestamp': u'*',
-            u'classname': u'NoFixtureTest',
+<<<<<<< HEAD
             u'key_for_utility_int': u'1'
         }, {
             u'name': u'ExternalUtilityThatCallsRecordStringValuedProperty',
+=======
+            u'key': u'1'
+        }, {
+            u'name': u'ExternalUtilityThatCallsRecordIntValuedProperty',
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
             u'status': u'RUN',
             u'result': u'COMPLETED',
             u'time': u'*',
             u'timestamp': u'*',
             u'classname': u'NoFixtureTest',
+<<<<<<< HEAD
             u'key_for_utility_string': u'1'
         }]
     }, {
@@ -440,15 +497,29 @@ EXPECTED_NON_EMPTY = {
         u'testsuite': [{
             u'name': u'HasTypeParamAttribute',
             u'type_param': u'int',
+=======
+            u'key_for_utility_int': u'1'
+        }, {
+            u'name': u'ExternalUtilityThatCallsRecordStringValuedProperty',
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
             u'status': u'RUN',
             u'result': u'COMPLETED',
             u'time': u'*',
             u'timestamp': u'*',
+<<<<<<< HEAD
             u'classname': u'TypedTest/0'
         }]
     }, {
         u'name':
             u'TypedTest/1',
+=======
+            u'classname': u'NoFixtureTest',
+            u'key_for_utility_string': u'1'
+        }]
+    }, {
+        u'name':
+            u'TypedTest/0',
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
         u'tests':
             1,
         u'failures':
@@ -463,16 +534,28 @@ EXPECTED_NON_EMPTY = {
             u'*',
         u'testsuite': [{
             u'name': u'HasTypeParamAttribute',
+<<<<<<< HEAD
             u'type_param': u'long',
+=======
+            u'type_param': u'int',
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
             u'status': u'RUN',
             u'result': u'COMPLETED',
             u'time': u'*',
             u'timestamp': u'*',
+<<<<<<< HEAD
             u'classname': u'TypedTest/1'
         }]
     }, {
         u'name':
             u'Single/TypeParameterizedTestSuite/0',
+=======
+            u'classname': u'TypedTest/0'
+        }]
+    }, {
+        u'name':
+            u'TypedTest/1',
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
         u'tests':
             1,
         u'failures':
@@ -487,11 +570,60 @@ EXPECTED_NON_EMPTY = {
             u'*',
         u'testsuite': [{
             u'name': u'HasTypeParamAttribute',
+<<<<<<< HEAD
             u'type_param': u'int',
+=======
+            u'type_param': u'long',
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
             u'status': u'RUN',
             u'result': u'COMPLETED',
             u'time': u'*',
             u'timestamp': u'*',
+<<<<<<< HEAD
+            u'classname': u'Single/TypeParameterizedTestSuite/0'
+        }]
+    }, {
+        u'name':
+            u'Single/TypeParameterizedTestSuite/1',
+=======
+            u'classname': u'TypedTest/1'
+        }]
+    }, {
+        u'name':
+            u'Single/TypeParameterizedTestSuite/0',
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
+        u'tests':
+            1,
+        u'failures':
+            0,
+        u'disabled':
+            0,
+        u'errors':
+            0,
+        u'time':
+            u'*',
+        u'timestamp':
+            u'*',
+        u'testsuite': [{
+            u'name': u'HasTypeParamAttribute',
+<<<<<<< HEAD
+            u'type_param': u'long',
+=======
+            u'type_param': u'int',
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
+            u'status': u'RUN',
+            u'result': u'COMPLETED',
+            u'time': u'*',
+            u'timestamp': u'*',
+<<<<<<< HEAD
+            u'classname': u'Single/TypeParameterizedTestSuite/1'
+        }]
+    }, {
+        u'name':
+            u'Single/ValueParamTest',
+        u'tests':
+            4,
+=======
             u'classname': u'Single/TypeParameterizedTestSuite/0'
         }]
     }, {
@@ -499,6 +631,7 @@ EXPECTED_NON_EMPTY = {
             u'Single/TypeParameterizedTestSuite/1',
         u'tests':
             1,
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
         u'failures':
             0,
         u'disabled':
@@ -510,12 +643,23 @@ EXPECTED_NON_EMPTY = {
         u'timestamp':
             u'*',
         u'testsuite': [{
+<<<<<<< HEAD
+            u'name': u'HasValueParamAttribute/0',
+            u'value_param': u'33',
+=======
             u'name': u'HasTypeParamAttribute',
             u'type_param': u'long',
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
             u'status': u'RUN',
             u'result': u'COMPLETED',
             u'time': u'*',
             u'timestamp': u'*',
+<<<<<<< HEAD
+            u'classname': u'Single/ValueParamTest'
+        }, {
+            u'name': u'HasValueParamAttribute/1',
+            u'value_param': u'42',
+=======
             u'classname': u'Single/TypeParameterizedTestSuite/1'
         }]
     }, {
@@ -536,27 +680,40 @@ EXPECTED_NON_EMPTY = {
         u'testsuite': [{
             u'name': u'HasValueParamAttribute/0',
             u'value_param': u'33',
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
             u'status': u'RUN',
             u'result': u'COMPLETED',
             u'time': u'*',
             u'timestamp': u'*',
             u'classname': u'Single/ValueParamTest'
         }, {
-            u'name': u'HasValueParamAttribute/1',
-            u'value_param': u'42',
-            u'status': u'RUN',
-            u'result': u'COMPLETED',
-            u'time': u'*',
-            u'timestamp': u'*',
-            u'classname': u'Single/ValueParamTest'
-        }, {
+<<<<<<< HEAD
             u'name': u'AnotherTestThatHasValueParamAttribute/0',
             u'value_param': u'33',
+=======
+            u'name': u'HasValueParamAttribute/1',
+            u'value_param': u'42',
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
             u'status': u'RUN',
             u'result': u'COMPLETED',
             u'time': u'*',
             u'timestamp': u'*',
             u'classname': u'Single/ValueParamTest'
+        }, {
+<<<<<<< HEAD
+            u'name': u'AnotherTestThatHasValueParamAttribute/1',
+            u'value_param': u'42',
+=======
+            u'name': u'AnotherTestThatHasValueParamAttribute/0',
+            u'value_param': u'33',
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
+            u'status': u'RUN',
+            u'result': u'COMPLETED',
+            u'time': u'*',
+            u'timestamp': u'*',
+            u'classname': u'Single/ValueParamTest'
+<<<<<<< HEAD
+=======
         }, {
             u'name': u'AnotherTestThatHasValueParamAttribute/1',
             u'value_param': u'42',
@@ -565,6 +722,7 @@ EXPECTED_NON_EMPTY = {
             u'time': u'*',
             u'timestamp': u'*',
             u'classname': u'Single/ValueParamTest'
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
         }]
     }]
 }

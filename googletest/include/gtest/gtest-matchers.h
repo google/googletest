@@ -292,9 +292,17 @@ class MatcherBase : private MatcherDescriberInterface {
 
   // Constructs a matcher from its implementation.
   template <typename U>
+<<<<<<< HEAD
+  explicit MatcherBase(
+      const MatcherInterface<U>* impl,
+      typename internal::EnableIf<!std::is_same<U, const U&>::value>::type* =
+          nullptr)
+      : impl_(new internal::MatcherInterfaceAdapter<U>(impl)) {}
+=======
   explicit MatcherBase(const MatcherInterface<U>* impl) {
     Init(impl);
   }
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 
   template <typename M, typename = typename std::remove_reference<
                             M>::type::is_gtest_matcher>
@@ -494,7 +502,11 @@ class Matcher : public internal::MatcherBase<T> {
   template <typename U>
   explicit Matcher(
       const MatcherInterface<U>* impl,
+<<<<<<< HEAD
+      typename internal::EnableIf<!std::is_same<U, const U&>::value>::type* =
+=======
       typename std::enable_if<!std::is_same<U, const U&>::value>::type* =
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
           nullptr)
       : internal::MatcherBase<T>(impl) {}
 

@@ -29,8 +29,6 @@
 
 // The Google C++ Testing and Mocking Framework (Google Test)
 //
-<<<<<<< HEAD
-=======
 <<<<<<< HEAD:googletest/test/googletest-overload-addressof-operator-test.cc
 // This file tests EXPECT_EQ works when used with type that has overloaded &
 // operator.
@@ -95,7 +93,6 @@ TEST(string_ref, compare) {
   EXPECT_EQ(*ptr, "john");
 }
 =======
->>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 // This file defines the AssertionResult type.
 
 #include "gtest/gtest-assertion-result.h"
@@ -146,7 +143,4 @@ AssertionResult AssertionFailure(const Message& message) {
 }
 
 }  // namespace testing
-<<<<<<< HEAD
-=======
 >>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f:googletest/src/gtest-assertion-result.cc
->>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f

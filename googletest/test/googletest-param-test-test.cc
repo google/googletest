@@ -490,12 +490,20 @@ TEST(CombineTest, CombineWithMaxNumberOfParameters) {
 class NonDefaultConstructAssignString {
  public:
   NonDefaultConstructAssignString(const std::string& s) : str_(s) {}
+<<<<<<< HEAD
+  NonDefaultConstructAssignString(const NonDefaultConstructAssignString&) =
+      default;
+
+  NonDefaultConstructAssignString() = delete;
+  void operator=(const NonDefaultConstructAssignString&) = delete;
+=======
   NonDefaultConstructAssignString() = delete;
   NonDefaultConstructAssignString(const NonDefaultConstructAssignString&) =
       default;
   NonDefaultConstructAssignString& operator=(
       const NonDefaultConstructAssignString&) = delete;
   ~NonDefaultConstructAssignString() = default;
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 
   const std::string& str() const { return str_; }
 
@@ -884,10 +892,13 @@ TEST_P(CustomFunctionNamingTest, CustomTestNames) {}
 INSTANTIATE_TEST_SUITE_P(CustomParamNameFunction, CustomFunctionNamingTest,
                          Values(std::string("FunctionName")),
                          CustomParamNameFunction);
+<<<<<<< HEAD
+=======
 
 INSTANTIATE_TEST_SUITE_P(CustomParamNameFunctionP, CustomFunctionNamingTest,
                          Values(std::string("FunctionNameP")),
                          &CustomParamNameFunction);
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 
 // Test custom naming with a lambda
 
@@ -914,7 +925,10 @@ TEST(CustomNamingTest, CheckNameRegistry) {
   }
   EXPECT_EQ(1u, test_names.count("CustomTestNames/FunctorName"));
   EXPECT_EQ(1u, test_names.count("CustomTestNames/FunctionName"));
+<<<<<<< HEAD
+=======
   EXPECT_EQ(1u, test_names.count("CustomTestNames/FunctionNameP"));
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
   EXPECT_EQ(1u, test_names.count("CustomTestNames/LambdaName"));
 }
 

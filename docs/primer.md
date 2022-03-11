@@ -56,6 +56,22 @@ _[Test Suite][istqb test suite]_ for this.
 
 The related term _Test_, as it is used in googletest, corresponds to the term
 _[Test Case][istqb test case]_ of ISTQB and others.
+<<<<<<< HEAD:docs/primer.md
+
+The term _Test_ is commonly of broad enough sense, including ISTQB's definition
+of _Test Case_, so it's not much of a problem here. But the term _Test Case_ as
+was used in Google Test is of contradictory sense and thus confusing.
+
+googletest recently started replacing the term _Test Case_ by _Test Suite_. The
+preferred API is TestSuite*. The older TestCase* API is being slowly deprecated
+and refactored away
+
+So please be aware of the different definitions of the terms:
+
+Meaning                                                                              | googletest Term         | [ISTQB](http://www.istqb.org/) Term
+:----------------------------------------------------------------------------------- | :---------------------- | :----------------------------------
+Exercise a particular program path with specific input values and verify the results | [TEST()](#simple-tests) | [Test Case][istqb test case]
+=======
 
 The term _Test_ is commonly of broad enough sense, including ISTQB's definition
 of _Test Case_, so it's not much of a problem here. But the term _Test Case_ as
@@ -72,6 +88,7 @@ Meaning                                                                         
 :----------------------------------------------------------------------------------- | :---------------------- | :----------------------------------
 Exercise a particular program path with specific input values and verify the results | [TEST()](#simple-tests) | [Test Case][istqb test case]
 
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f:googletest/docs/primer.md
 
 [istqb test case]: http://glossary.istqb.org/en/search/test%20case
 [istqb test suite]: http://glossary.istqb.org/en/search/test%20suite
@@ -125,7 +142,7 @@ verify value equality:
 ```c++
 ASSERT_EQ(x.size(), y.size()) << "Vectors x and y are of unequal length";
 
-for (int i = 0; i < x.size(); ++i) {
+for (int i = 0; i < std::min(x.size(), y.size()); ++i) {
   EXPECT_EQ(x[i], y[i]) << "Vectors x and y differ at index " << i;
 }
 ```
@@ -135,12 +152,117 @@ macro--in particular, C strings and `string` objects. If a wide string
 (`wchar_t*`, `TCHAR*` in `UNICODE` mode on Windows, or `std::wstring`) is
 streamed to an assertion, it will be translated to UTF-8 when printed.
 
+<<<<<<< HEAD:docs/primer.md
+### Basic Assertions
+
+These assertions do basic true/false condition testing.
+
+Fatal assertion            | Nonfatal assertion         | Verifies
+-------------------------- | -------------------------- | --------------------
+`ASSERT_TRUE(condition);`  | `EXPECT_TRUE(condition);`  | `condition` is true
+`ASSERT_FALSE(condition);` | `EXPECT_FALSE(condition);` | `condition` is false
+
+Remember, when they fail, `ASSERT_*` yields a fatal failure and returns from the
+current function, while `EXPECT_*` yields a nonfatal failure, allowing the
+function to continue running. In either case, an assertion failure means its
+containing test fails.
+
+**Availability**: Linux, Windows, Mac.
+
+### Binary Comparison
+
+This section describes assertions that compare two values.
+
+Fatal assertion          | Nonfatal assertion       | Verifies
+------------------------ | ------------------------ | --------------
+`ASSERT_EQ(val1, val2);` | `EXPECT_EQ(val1, val2);` | `val1 == val2`
+`ASSERT_NE(val1, val2);` | `EXPECT_NE(val1, val2);` | `val1 != val2`
+`ASSERT_LT(val1, val2);` | `EXPECT_LT(val1, val2);` | `val1 < val2`
+`ASSERT_LE(val1, val2);` | `EXPECT_LE(val1, val2);` | `val1 <= val2`
+`ASSERT_GT(val1, val2);` | `EXPECT_GT(val1, val2);` | `val1 > val2`
+`ASSERT_GE(val1, val2);` | `EXPECT_GE(val1, val2);` | `val1 >= val2`
+
+Value arguments must be comparable by the assertion's comparison operator or
+you'll get a compiler error. We used to require the arguments to support the
+`<<` operator for streaming to an `ostream`, but this is no longer necessary. If
+`<<` is supported, it will be called to print the arguments when the assertion
+fails; otherwise googletest will attempt to print them in the best way it can.
+For more details and how to customize the printing of the arguments, see the
+[documentation](./advanced.md#teaching-googletest-how-to-print-your-values).
+
+These assertions can work with a user-defined type, but only if you define the
+corresponding comparison operator (e.g., `==` or `<`). Since this is discouraged
+by the Google
+[C++ Style Guide](https://google.github.io/styleguide/cppguide.html#Operator_Overloading),
+you may need to use `ASSERT_TRUE()` or `EXPECT_TRUE()` to assert the equality of
+two objects of a user-defined type.
+
+However, when possible, `ASSERT_EQ(actual, expected)` is preferred to
+`ASSERT_TRUE(actual == expected)`, since it tells you `actual` and `expected`'s
+values on failure.
+
+Arguments are always evaluated exactly once. Therefore, it's OK for the
+arguments to have side effects. However, as with any ordinary C/C++ function,
+the arguments' evaluation order is undefined (i.e., the compiler is free to
+choose any order), and your code should not depend on any particular argument
+evaluation order.
+
+`ASSERT_EQ()` does pointer equality on pointers. If used on two C strings, it
+tests if they are in the same memory location, not if they have the same value.
+Therefore, if you want to compare C strings (e.g. `const char*`) by value, use
+`ASSERT_STREQ()`, which will be described later on. In particular, to assert
+that a C string is `NULL`, use `ASSERT_STREQ(c_string, NULL)`. Consider using
+`ASSERT_EQ(c_string, nullptr)` if c++11 is supported. To compare two `string`
+objects, you should use `ASSERT_EQ`.
+
+When doing pointer comparisons use `*_EQ(ptr, nullptr)` and `*_NE(ptr, nullptr)`
+instead of `*_EQ(ptr, NULL)` and `*_NE(ptr, NULL)`. This is because `nullptr` is
+typed, while `NULL` is not. See the [FAQ](faq.md) for more details.
+
+If you're working with floating point numbers, you may want to use the floating
+point variations of some of these macros in order to avoid problems caused by
+rounding. See [Advanced googletest Topics](advanced.md) for details.
+
+Macros in this section work with both narrow and wide string objects (`string`
+and `wstring`).
+
+**Availability**: Linux, Windows, Mac.
+
+**Historical note**: Before February 2016 `*_EQ` had a convention of calling it
+as `ASSERT_EQ(expected, actual)`, so lots of existing code uses this order. Now
+`*_EQ` treats both parameters in the same way.
+
+### String Comparison
+
+The assertions in this group compare two **C strings**. If you want to compare
+two `string` objects, use `EXPECT_EQ`, `EXPECT_NE`, and etc instead.
+
+| Fatal assertion                | Nonfatal assertion             | Verifies                                                 |
+| --------------------------     | ------------------------------ | -------------------------------------------------------- |
+| `ASSERT_STREQ(str1,str2);`     | `EXPECT_STREQ(str1,str2);`     | the two C strings have the same content   		     |
+| `ASSERT_STRNE(str1,str2);`     | `EXPECT_STRNE(str1,str2);`     | the two C strings have different contents 		     |
+| `ASSERT_STRCASEEQ(str1,str2);` | `EXPECT_STRCASEEQ(str1,str2);` | the two C strings have the same content, ignoring case   |
+| `ASSERT_STRCASENE(str1,str2);` | `EXPECT_STRCASENE(str1,str2);` | the two C strings have different contents, ignoring case |
+
+Note that "CASE" in an assertion name means that case is ignored. A `NULL`
+pointer and an empty string are considered *different*.
+
+`*STREQ*` and `*STRNE*` also accept wide C strings (`wchar_t*`). If a comparison
+of two wide strings fails, their values will be printed as UTF-8 narrow strings.
+
+**Availability**: Linux, Windows, Mac.
+
+**See also**: For more string comparison tricks (substring, prefix, suffix, and
+regular expression matching, for example), see [this](advanced.md) in the
+Advanced googletest Guide.
+=======
 GoogleTest provides a collection of assertions for verifying the behavior of
 your code in various ways. You can check Boolean conditions, compare values
 based on relational operators, verify string values, floating-point values, and
 much more. There are even assertions that enable you to verify more complex
 states by providing custom predicates. For the complete list of assertions
 provided by GoogleTest, see the [Assertions Reference](reference/assertions.md).
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f:googletest/docs/primer.md
 
 ## Simple Tests
 
@@ -162,9 +284,15 @@ TEST(TestSuiteName, TestName) {
 
 `TEST()` arguments go from general to specific. The *first* argument is the name
 of the test suite, and the *second* argument is the test's name within the test
+<<<<<<< HEAD:docs/primer.md
+suite. Both names must be valid C++ identifiers, and they should not contain
+underscore (`_`). A test's *full name* consists of its containing test suite and
+its individual name. Tests from different test suites can have the same
+=======
 suite. Both names must be valid C++ identifiers, and they should not contain any
 underscores (`_`). A test's *full name* consists of its containing test suite
 and its individual name. Tests from different test suites can have the same
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f:googletest/docs/primer.md
 individual name.
 
 For example, let's take a simple integer function:
