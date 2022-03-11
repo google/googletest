@@ -57,6 +57,7 @@ More information about building GoogleTest can be found at
 
 GoogleTest requires a codebase and compiler compliant with the C++11 standard or
 newer.
+<<<<<<< HEAD
 
 The GoogleTest code is officially supported on the following platforms.
 Operating systems or tools not listed below are community-supported. For
@@ -116,10 +117,31 @@ UI is written in C#.
 listener for GoogleTest that implements the
 [TAP protocol](https://en.wikipedia.org/wiki/Test_Anything_Protocol) for test
 result output. If your test runner understands TAP, you may find it useful.
+=======
 
-[gtest-parallel](https://github.com/google/gtest-parallel) is a test runner that
-runs tests from your binary in parallel to provide significant speed-up.
+The GoogleTest code is officially supported on the following platforms.
+Operating systems or tools not listed below are community-supported. For
+community-supported platforms, patches that do not complicate the code may be
+considered.
 
+If you notice any problems on your platform, please file an issue on the
+[GoogleTest GitHub Issue Tracker](https://github.com/google/googletest/issues).
+Pull requests containing fixes are welcome!
+
+### Operating Systems
+
+*   Linux
+*   macOS
+*   Windows
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
+
+### Compilers
+
+*   gcc 5.0+
+*   clang 5.0+
+*   MSVC 2015+
+
+<<<<<<< HEAD
 [GoogleTest Adapter](https://marketplace.visualstudio.com/items?itemName=DavidSchuldenfrei.gtest-adapter)
 is a VS Code extension allowing to view GoogleTest in a tree view, and
 run/debug your tests.
@@ -150,8 +172,61 @@ package:
     CMake is community-supported.
 
 *   A C++11-standard-compliant compiler
+=======
+**macOS users:** Xcode 9.3+ provides clang 5.0+.
 
-## Contributing change
+### Build Systems
+
+*   [Bazel](https://bazel.build/)
+*   [CMake](https://cmake.org/)
+
+**Note:** Bazel is the build system used by the team internally and in tests.
+CMake is supported on a best-effort basis and by the community.
+
+## Who Is Using GoogleTest?
+
+In addition to many internal projects at Google, GoogleTest is also used by the
+following notable projects:
+
+*   The [Chromium projects](http://www.chromium.org/) (behind the Chrome browser
+    and Chrome OS).
+*   The [LLVM](http://llvm.org/) compiler.
+*   [Protocol Buffers](https://github.com/google/protobuf), Google's data
+    interchange format.
+*   The [OpenCV](http://opencv.org/) computer vision library.
+
+## Related Open Source Projects
+
+[GTest Runner](https://github.com/nholthaus/gtest-runner) is a Qt5 based
+automated test-runner and Graphical User Interface with powerful features for
+Windows and Linux platforms.
+
+[GoogleTest UI](https://github.com/ospector/gtest-gbar) is a test runner that
+runs your test binary, allows you to track its progress via a progress bar, and
+displays a list of test failures. Clicking on one shows failure text. GoogleTest
+UI is written in C#.
+
+[GTest TAP Listener](https://github.com/kinow/gtest-tap-listener) is an event
+listener for GoogleTest that implements the
+[TAP protocol](https://en.wikipedia.org/wiki/Test_Anything_Protocol) for test
+result output. If your test runner understands TAP, you may find it useful.
+
+[gtest-parallel](https://github.com/google/gtest-parallel) is a test runner that
+runs tests from your binary in parallel to provide significant speed-up.
+
+[GoogleTest Adapter](https://marketplace.visualstudio.com/items?itemName=DavidSchuldenfrei.gtest-adapter)
+is a VS Code extension allowing to view GoogleTest in a tree view, and run/debug
+your tests.
+
+[C++ TestMate](https://github.com/matepek/vscode-catch2-test-adapter) is a VS
+Code extension allowing to view GoogleTest in a tree view, and run/debug your
+tests.
+
+[Cornichon](https://pypi.org/project/cornichon/) is a small Gherkin DSL parser
+that generates stub code for GoogleTest.
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
+
+## Contributing Changes
 
 Please read
 [`CONTRIBUTING.md`](https://github.com/google/googletest/blob/master/CONTRIBUTING.md)

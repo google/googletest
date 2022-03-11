@@ -84,10 +84,18 @@ macro(config_compiler_and_linker)
     # Ensure MSVC treats source files as UTF-8 encoded.
     set(cxx_base_flags "${cxx_base_flags} -utf-8")
   elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+<<<<<<< HEAD
     set(cxx_base_flags "-Wall -Wshadow -Werror -Wno-error=sign-conversion -frtti")
     set(cxx_exception_flags "-fexceptions")
     set(cxx_no_exception_flags "-fno-exceptions")
     set(cxx_strict_flags "-Wno-format-y2k -W -Wpointer-arith -Wreturn-type -Wcast-qual -Wwrite-strings -Wswitch -Wunused-parameter -Wcast-align -Wchar-subscripts -Winline -Wredundant-decls")
+=======
+    set(cxx_base_flags "-Wall -Wshadow -Wconversion")
+    set(cxx_exception_flags "-fexceptions")
+    set(cxx_no_exception_flags "-fno-exceptions")
+    set(cxx_strict_flags "-W -Wpointer-arith -Wreturn-type -Wcast-qual -Wwrite-strings -Wswitch -Wunused-parameter -Wcast-align -Wchar-subscripts -Winline -Wredundant-decls")
+    set(cxx_no_rtti_flags "-fno-rtti")
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
   elseif (CMAKE_COMPILER_IS_GNUCXX)
     set(cxx_base_flags "-Wall -Wshadow")
     if(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 7.0.0)

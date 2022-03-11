@@ -100,6 +100,7 @@ INSTANTIATE_TEST_SUITE_P(PrintingFailingParams,
 // the test name without any prior /
 class EmptyBasenameParamInst : public testing::TestWithParam<int> {};
 
+<<<<<<< HEAD
 TEST_P(EmptyBasenameParamInst, Passes) {
   EXPECT_EQ(1, GetParam());
 }
@@ -107,6 +108,11 @@ TEST_P(EmptyBasenameParamInst, Passes) {
 INSTANTIATE_TEST_SUITE_P(,
 			 EmptyBasenameParamInst,
                          testing::Values(1));
+=======
+TEST_P(EmptyBasenameParamInst, Passes) { EXPECT_EQ(1, GetParam()); }
+
+INSTANTIATE_TEST_SUITE_P(, EmptyBasenameParamInst, testing::Values(1));
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 
 static const char kGoldenString[] = "\"Line\0 1\"\nLine 2";
 
@@ -736,11 +742,19 @@ INSTANTIATE_TEST_SUITE_P(PrintingStrings,
                          ParamTest,
                          testing::Values(std::string("a")),
                          ParamNameFunc);
+<<<<<<< HEAD
 
 // The case where a suite has INSTANTIATE_TEST_SUITE_P but not TEST_P.
 using NoTests = ParamTest;
 INSTANTIATE_TEST_SUITE_P(ThisIsOdd, NoTests, ::testing::Values("Hello"));
 
+=======
+
+// The case where a suite has INSTANTIATE_TEST_SUITE_P but not TEST_P.
+using NoTests = ParamTest;
+INSTANTIATE_TEST_SUITE_P(ThisIsOdd, NoTests, ::testing::Values("Hello"));
+
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 // fails under kErrorOnUninstantiatedParameterizedTest=true
 class DetectNotInstantiatedTest : public testing::TestWithParam<int> {};
 TEST_P(DetectNotInstantiatedTest, Used) { }
@@ -815,10 +829,17 @@ class TypedTestPNames {
     }
   }
 };
+<<<<<<< HEAD
 
 INSTANTIATE_TYPED_TEST_SUITE_P(UnsignedCustomName, TypedTestP, UnsignedTypes,
                               TypedTestPNames);
 
+=======
+
+INSTANTIATE_TYPED_TEST_SUITE_P(UnsignedCustomName, TypedTestP, UnsignedTypes,
+                              TypedTestPNames);
+
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 template <typename T>
 class DetectNotInstantiatedTypesTest : public testing::Test {};
 TYPED_TEST_SUITE_P(DetectNotInstantiatedTypesTest);

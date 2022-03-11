@@ -501,6 +501,7 @@ TEST(LogTest, OnlyWarningsArePrintedWhenVerbosityIsInvalid) {
   TestLogWithSeverity("invalid", kWarning, true);
 }
 
+<<<<<<< HEAD
 #endif  // GTEST_HAS_STREAM_REDIRECTION
 
 TEST(TypeTraitsTest, true_type) {
@@ -527,6 +528,8 @@ TEST(TypeTraitsTest, remove_reference) {
 
 #if GTEST_HAS_STREAM_REDIRECTION
 
+=======
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 // Verifies that Log() behaves correctly for the given verbosity level
 // and log severity.
 std::string GrabOutput(void(*logger)(), const char* verbosity) {

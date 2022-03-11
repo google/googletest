@@ -1,4 +1,12 @@
+<<<<<<< HEAD
 // Copyright 2005, Google Inc.
+=======
+<<<<<<< HEAD:googletest/test/gtest_skip_in_environment_setup_test.cc
+// Copyright 2019, Google Inc.
+=======
+// Copyright 2005, Google Inc.
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f:googletest/test/googletest-global-environment-unittest_.cc
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -29,6 +37,41 @@
 
 // Unit test for Google Test global test environments.
 //
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD:googletest/test/gtest_skip_in_environment_setup_test.cc
+// This test verifies that skipping in the environment results in the
+// testcases being skipped.
+//
+// This is a reproduction case for
+// https://github.com/google/googletest/issues/2189 .
+
+#include <iostream>
+#include <gtest/gtest.h>
+
+class SetupEnvironment : public testing::Environment {
+public:
+  void SetUp() override {
+    GTEST_SKIP() << "Skipping the entire environment";
+  }
+};
+
+TEST(Test, AlwaysPasses) {
+  EXPECT_EQ(true, true);
+}
+
+TEST(Test, AlwaysFails) {
+  EXPECT_EQ(true, false);
+}
+
+int main(int argc, char **argv) {
+  testing::InitGoogleTest(&argc, argv);
+
+  testing::AddGlobalTestEnvironment(new SetupEnvironment());
+
+  return (RUN_ALL_TESTS());
+=======
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 // The program will be invoked from a Python unit test.  Don't run it
 // directly.
 
@@ -55,4 +98,8 @@ int main(int argc, char** argv) {
   ::testing::InitGoogleTest(&argc, argv);
 
   return RUN_ALL_TESTS();
+<<<<<<< HEAD
+=======
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f:googletest/test/googletest-global-environment-unittest_.cc
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 }

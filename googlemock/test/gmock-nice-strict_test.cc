@@ -189,7 +189,11 @@ TEST(RawMockTest, InfoForUninterestingCall) {
 
 TEST(RawMockTest, IsNaggy_IsNice_IsStrict) {
   MockFoo raw_foo;
+<<<<<<< HEAD
   EXPECT_TRUE (Mock::IsNaggy(&raw_foo));
+=======
+  EXPECT_TRUE(Mock::IsNaggy(&raw_foo));
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
   EXPECT_FALSE(Mock::IsNice(&raw_foo));
   EXPECT_FALSE(Mock::IsStrict(&raw_foo));
 }
@@ -317,7 +321,11 @@ TEST(NiceMockTest, IsNiceInDestructor) {
 TEST(NiceMockTest, IsNaggy_IsNice_IsStrict) {
   NiceMock<MockFoo> nice_foo;
   EXPECT_FALSE(Mock::IsNaggy(&nice_foo));
+<<<<<<< HEAD
   EXPECT_TRUE (Mock::IsNice(&nice_foo));
+=======
+  EXPECT_TRUE(Mock::IsNice(&nice_foo));
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
   EXPECT_FALSE(Mock::IsStrict(&nice_foo));
 }
 
@@ -435,7 +443,11 @@ TEST(NaggyMockTest, IsNaggyInDestructor) {
 
 TEST(NaggyMockTest, IsNaggy_IsNice_IsStrict) {
   NaggyMock<MockFoo> naggy_foo;
+<<<<<<< HEAD
   EXPECT_TRUE (Mock::IsNaggy(&naggy_foo));
+=======
+  EXPECT_TRUE(Mock::IsNaggy(&naggy_foo));
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
   EXPECT_FALSE(Mock::IsNice(&naggy_foo));
   EXPECT_FALSE(Mock::IsStrict(&naggy_foo));
 }
@@ -531,7 +543,11 @@ TEST(StrictMockTest, IsNaggy_IsNice_IsStrict) {
   StrictMock<MockFoo> strict_foo;
   EXPECT_FALSE(Mock::IsNaggy(&strict_foo));
   EXPECT_FALSE(Mock::IsNice(&strict_foo));
+<<<<<<< HEAD
   EXPECT_TRUE (Mock::IsStrict(&strict_foo));
+=======
+  EXPECT_TRUE(Mock::IsStrict(&strict_foo));
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 }
 
 }  // namespace gmock_nice_strict_test

@@ -1909,13 +1909,18 @@ class PrintAnyTest : public ::testing::Test {
 #if GTEST_HAS_RTTI
     return internal::GetTypeName<T>();
 #else
+<<<<<<< HEAD
     return "the element type";
+=======
+    return "<unknown_type>";
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 #endif  // GTEST_HAS_RTTI
   }
 };
 
 TEST_F(PrintAnyTest, Empty) {
   internal::Any any;
+<<<<<<< HEAD
   EXPECT_EQ("'any' type with no value", PrintToString(any));
 }
 
@@ -1930,6 +1935,21 @@ TEST_F(PrintAnyTest, NonEmpty) {
 
   any = val2;
   EXPECT_EQ("'any' type with value of type " + ExpectedTypeName<std::string>(),
+=======
+  EXPECT_EQ("no value", PrintToString(any));
+}
+
+TEST_F(PrintAnyTest, NonEmpty) {
+  internal::Any any;
+  constexpr int val1 = 10;
+  const std::string val2 = "content";
+
+  any = val1;
+  EXPECT_EQ("value of type " + ExpectedTypeName<int>(), PrintToString(any));
+
+  any = val2;
+  EXPECT_EQ("value of type " + ExpectedTypeName<std::string>(),
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
             PrintToString(any));
 }
 #endif  // GTEST_INTERNAL_HAS_ANY
@@ -1953,6 +1973,7 @@ struct NonPrintable {
 
 TEST(PrintOneofTest, Basic) {
   using Type = internal::Variant<int, StreamableInGlobal, NonPrintable>;
+<<<<<<< HEAD
   EXPECT_EQ("('int(0)' with value 7)", PrintToString(Type(7)));
   EXPECT_EQ("('StreamableInGlobal(1)' with value StreamableInGlobal)",
             PrintToString(Type(StreamableInGlobal{})));
@@ -1962,5 +1983,76 @@ TEST(PrintOneofTest, Basic) {
       PrintToString(Type(NonPrintable{})));
 }
 #endif  // GTEST_HAS_ABSL
+=======
+  EXPECT_EQ("('int(index = 0)' with value 7)", PrintToString(Type(7)));
+  EXPECT_EQ("('StreamableInGlobal(index = 1)' with value StreamableInGlobal)",
+            PrintToString(Type(StreamableInGlobal{})));
+  EXPECT_EQ(
+      "('testing::gtest_printers_test::NonPrintable(index = 2)' with value "
+      "1-byte object <11>)",
+      PrintToString(Type(NonPrintable{})));
+}
+#endif  // GTEST_INTERNAL_HAS_VARIANT
+namespace {
+class string_ref;
+
+/**
+ * This is a synthetic pointer to a fixed size string.
+ */
+class string_ptr {
+ public:
+  string_ptr(const char* data, size_t size) : data_(data), size_(size) {}
+
+  string_ptr& operator++() noexcept {
+    data_ += size_;
+    return *this;
+  }
+
+  string_ref operator*() const noexcept;
+
+ private:
+  const char* data_;
+  size_t size_;
+};
+
+/**
+ * This is a synthetic reference of a fixed size string.
+ */
+class string_ref {
+ public:
+  string_ref(const char* data, size_t size) : data_(data), size_(size) {}
+
+  string_ptr operator&() const noexcept { return {data_, size_}; }  // NOLINT
+
+  bool operator==(const char* s) const noexcept {
+    if (size_ > 0 && data_[size_ - 1] != 0) {
+      return std::string(data_, size_) == std::string(s);
+    } else {
+      return std::string(data_) == std::string(s);
+    }
+  }
+
+ private:
+  const char* data_;
+  size_t size_;
+};
+
+string_ref string_ptr::operator*() const noexcept { return {data_, size_}; }
+
+TEST(string_ref, compare) {
+  const char* s = "alex\0davidjohn\0";
+  string_ptr ptr(s, 5);
+  EXPECT_EQ(*ptr, "alex");
+  EXPECT_TRUE(*ptr == "alex");
+  ++ptr;
+  EXPECT_EQ(*ptr, "david");
+  EXPECT_TRUE(*ptr == "david");
+  ++ptr;
+  EXPECT_EQ(*ptr, "john");
+}
+
+}  // namespace
+
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 }  // namespace gtest_printers_test
 }  // namespace testing

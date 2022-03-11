@@ -450,6 +450,7 @@ class ThreadWithParamSupport : public ThreadWithParamBase {
     ThreadMainParam* param = new ThreadMainParam(runnable, thread_can_start);
     DWORD thread_id;
     HANDLE thread_handle = ::CreateThread(
+<<<<<<< HEAD
         nullptr,    // Default security.
         0,          // Default stack size.
         &ThreadWithParamSupport::ThreadMain,
@@ -458,6 +459,16 @@ class ThreadWithParamSupport : public ThreadWithParamBase {
         &thread_id);  // Need a valid pointer for the call to work under Win98.
     GTEST_CHECK_(thread_handle != nullptr) << "CreateThread failed with error "
                                            << ::GetLastError() << ".";
+=======
+        nullptr,  // Default security.
+        0,        // Default stack size.
+        &ThreadWithParamSupport::ThreadMain,
+        param,        // Parameter to ThreadMainStatic
+        0x0,          // Default creation flags.
+        &thread_id);  // Need a valid pointer for the call to work under Win98.
+    GTEST_CHECK_(thread_handle != nullptr)
+        << "CreateThread failed with error " << ::GetLastError() << ".";
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
     if (thread_handle == nullptr) {
       delete param;
     }
@@ -624,6 +635,7 @@ class ThreadLocalRegistryImpl {
     // to work correctly under Win98.
     DWORD watcher_thread_id;
     HANDLE watcher_thread = ::CreateThread(
+<<<<<<< HEAD
         nullptr,   // Default security.
         0,         // Default stack size
         &ThreadLocalRegistryImpl::WatcherThreadFunc,
@@ -631,6 +643,15 @@ class ThreadLocalRegistryImpl {
         CREATE_SUSPENDED,
         &watcher_thread_id);
     GTEST_CHECK_(watcher_thread != nullptr);
+=======
+        nullptr,  // Default security.
+        0,        // Default stack size
+        &ThreadLocalRegistryImpl::WatcherThreadFunc,
+        reinterpret_cast<LPVOID>(new ThreadIdAndHandle(thread_id, thread)),
+        CREATE_SUSPENDED, &watcher_thread_id);
+    GTEST_CHECK_(watcher_thread != nullptr)
+        << "CreateThread failed with error " << ::GetLastError() << ".";
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
     // Give the watcher thread the same priority as ours to avoid being
     // blocked by it.
     ::SetThreadPriority(watcher_thread,
@@ -929,8 +950,12 @@ bool MatchRegexAtHead(const char* regex, const char* str) {
 // exponential with respect to the regex length + the string length,
 // but usually it's must faster (often close to linear).
 bool MatchRegexAnywhere(const char* regex, const char* str) {
+<<<<<<< HEAD
   if (regex == nullptr || str == nullptr)
     return false;
+=======
+  if (regex == nullptr || str == nullptr) return false;
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 
   if (*regex == '^')
     return MatchRegexAtHead(regex + 1, str);
@@ -1349,8 +1374,13 @@ bool BoolFromGTestEnv(const char* flag, bool default_value) {
 #else
   const std::string env_var = FlagToEnvVar(flag);
   const char* const string_value = posix::GetEnv(env_var.c_str());
+<<<<<<< HEAD
   return string_value == nullptr ?
       default_value : strcmp(string_value, "0") != 0;
+=======
+  return string_value == nullptr ? default_value
+                                 : strcmp(string_value, "0") != 0;
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 #endif  // defined(GTEST_GET_BOOL_FROM_ENV_)
 }
 

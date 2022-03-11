@@ -267,7 +267,11 @@ If necessary, you can continue to derive test fixtures from a derived fixture.
 googletest has no limit on how deep the hierarchy can be.
 
 For a complete example using derived test fixtures, see
+<<<<<<< HEAD:docs/faq.md
 [sample5_unittest.cc](../samples/sample5_unittest.cc).
+=======
+[sample5_unittest.cc](https://github.com/google/googletest/blob/master/googletest/samples/sample5_unittest.cc).
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f:googletest/docs/faq.md
 
 ## My compiler complains "void value not ignored as it ought to be." What does this mean?
 

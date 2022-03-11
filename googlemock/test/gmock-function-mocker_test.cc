@@ -44,6 +44,10 @@
 #include <map>
 #include <string>
 #include <type_traits>
+<<<<<<< HEAD
+=======
+
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -844,6 +848,7 @@ TEST(MockMethodMockFunctionTest, AsStdFunctionWithReferenceParameter) {
   EXPECT_EQ(-1, call(foo.AsStdFunction(), i));
 }
 
+<<<<<<< HEAD
 
 namespace {
 
@@ -869,17 +874,46 @@ using MockMethodMockFunctionSignatureTypes = Types<
 TYPED_TEST_SUITE(MockMethodMockFunctionSignatureTest, MockMethodMockFunctionSignatureTypes);
 
 TYPED_TEST(MockMethodMockFunctionSignatureTest, IsMockFunctionTemplateArgumentDeducedForRawSignature) {
+=======
+namespace {
+
+template <typename Expected, typename F>
+static constexpr bool IsMockFunctionTemplateArgumentDeducedTo(
+    const internal::MockFunction<F>&) {
+  return std::is_same<F, Expected>::value;
+}
+
+}  // namespace
+
+template <typename F>
+class MockMethodMockFunctionSignatureTest : public Test {};
+
+using MockMethodMockFunctionSignatureTypes =
+    Types<void(), int(), void(int), int(int), int(bool, int),
+          int(bool, char, int, int, int, int, int, char, int, bool)>;
+TYPED_TEST_SUITE(MockMethodMockFunctionSignatureTest,
+                 MockMethodMockFunctionSignatureTypes);
+
+TYPED_TEST(MockMethodMockFunctionSignatureTest,
+           IsMockFunctionTemplateArgumentDeducedForRawSignature) {
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
   using Argument = TypeParam;
   MockFunction<Argument> foo;
   EXPECT_TRUE(IsMockFunctionTemplateArgumentDeducedTo<TypeParam>(foo));
 }
 
+<<<<<<< HEAD
 TYPED_TEST(MockMethodMockFunctionSignatureTest, IsMockFunctionTemplateArgumentDeducedForStdFunction) {
+=======
+TYPED_TEST(MockMethodMockFunctionSignatureTest,
+           IsMockFunctionTemplateArgumentDeducedForStdFunction) {
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
   using Argument = std::function<TypeParam>;
   MockFunction<Argument> foo;
   EXPECT_TRUE(IsMockFunctionTemplateArgumentDeducedTo<TypeParam>(foo));
 }
 
+<<<<<<< HEAD
 TYPED_TEST(MockMethodMockFunctionSignatureTest, IsMockFunctionCallMethodSignatureTheSameForRawSignatureAndStdFunction) {
   using ForRawSignature = decltype(&MockFunction<TypeParam>::Call);
   using ForStdFunction = decltype(&MockFunction<std::function<TypeParam>>::Call);
@@ -889,6 +923,34 @@ TYPED_TEST(MockMethodMockFunctionSignatureTest, IsMockFunctionCallMethodSignatur
 TYPED_TEST(MockMethodMockFunctionSignatureTest, IsMockFunctionAsStdFunctionMethodSignatureTheSameForRawSignatureAndStdFunction) {
   using ForRawSignature = decltype(&MockFunction<TypeParam>::AsStdFunction);
   using ForStdFunction = decltype(&MockFunction<std::function<TypeParam>>::AsStdFunction);
+=======
+TYPED_TEST(
+    MockMethodMockFunctionSignatureTest,
+    IsMockFunctionCallMethodSignatureTheSameForRawSignatureAndStdFunction) {
+  using ForRawSignature = decltype(&MockFunction<TypeParam>::Call);
+  using ForStdFunction =
+      decltype(&MockFunction<std::function<TypeParam>>::Call);
+  EXPECT_TRUE((std::is_same<ForRawSignature, ForStdFunction>::value));
+}
+
+template <typename F>
+struct AlternateCallable {
+};
+
+TYPED_TEST(MockMethodMockFunctionSignatureTest,
+           IsMockFunctionTemplateArgumentDeducedForAlternateCallable) {
+  using Argument = AlternateCallable<TypeParam>;
+  MockFunction<Argument> foo;
+  EXPECT_TRUE(IsMockFunctionTemplateArgumentDeducedTo<TypeParam>(foo));
+}
+
+TYPED_TEST(
+    MockMethodMockFunctionSignatureTest,
+    IsMockFunctionCallMethodSignatureTheSameForAlternateCallable) {
+  using ForRawSignature = decltype(&MockFunction<TypeParam>::Call);
+  using ForStdFunction =
+      decltype(&MockFunction<std::function<TypeParam>>::Call);
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
   EXPECT_TRUE((std::is_same<ForRawSignature, ForStdFunction>::value));
 }
 
@@ -952,7 +1014,11 @@ struct MockMethodNoexceptSpecifier {
   MOCK_METHOD(void, func6, (), (noexcept(noexcept(DoesntThrow())), const));
   MOCK_METHOD(void, func7, (), (const, noexcept(noexcept(DoesntThrow()))));
   // Put commas in the noexcept expression
+<<<<<<< HEAD
   MOCK_METHOD(void, func8, (), (noexcept(noexcept(hasTwoParams(1,2))), const));
+=======
+  MOCK_METHOD(void, func8, (), (noexcept(noexcept(hasTwoParams(1, 2))), const));
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 };
 
 TEST(MockMethodMockFunctionTest, NoexceptSpecifierPreserved) {
@@ -963,7 +1029,12 @@ TEST(MockMethodMockFunctionTest, NoexceptSpecifierPreserved) {
   EXPECT_TRUE(noexcept(std::declval<MockMethodNoexceptSpecifier>().func5()));
   EXPECT_TRUE(noexcept(std::declval<MockMethodNoexceptSpecifier>().func6()));
   EXPECT_TRUE(noexcept(std::declval<MockMethodNoexceptSpecifier>().func7()));
+<<<<<<< HEAD
   EXPECT_EQ(noexcept(std::declval<MockMethodNoexceptSpecifier>().func8()), noexcept(hasTwoParams(1,2)));
+=======
+  EXPECT_EQ(noexcept(std::declval<MockMethodNoexceptSpecifier>().func8()),
+            noexcept(hasTwoParams(1, 2)));
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 }
 
 }  // namespace gmock_function_mocker_test

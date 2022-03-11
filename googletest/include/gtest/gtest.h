@@ -773,6 +773,7 @@ class GTEST_API_ TestSuite {
 
   // Skips the execution of tests under this TestSuite
   void Skip();
+<<<<<<< HEAD
 
   // Runs SetUpTestSuite() for this TestSuite.  This wrapper is needed
   // for catching exceptions thrown from SetUpTestSuite().
@@ -782,6 +783,17 @@ class GTEST_API_ TestSuite {
     }
   }
 
+=======
+
+  // Runs SetUpTestSuite() for this TestSuite.  This wrapper is needed
+  // for catching exceptions thrown from SetUpTestSuite().
+  void RunSetUpTestSuite() {
+    if (set_up_tc_ != nullptr) {
+      (*set_up_tc_)();
+    }
+  }
+
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
   // Runs TearDownTestSuite() for this TestSuite.  This wrapper is
   // needed for catching exceptions thrown from TearDownTestSuite().
   void RunTearDownTestSuite() {
@@ -937,8 +949,13 @@ class TestEventListener {
   // Fired before the test starts.
   virtual void OnTestStart(const TestInfo& test_info) = 0;
 
+<<<<<<< HEAD
   // Fired when skipping a test
   virtual void OnTestSkipped(const TestInfo& test_info) = 0;
+=======
+  // Fired when a test is disabled
+  virtual void OnTestDisabled(const TestInfo& /*test_info*/) {}
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 
   // Fired after a failed assertion or a SUCCEED() invocation.
   // If you want to throw an exception from this function to skip to the next
@@ -989,7 +1006,11 @@ class EmptyTestEventListener : public TestEventListener {
 #endif  //  GTEST_REMOVE_LEGACY_TEST_CASEAPI_
 
   void OnTestStart(const TestInfo& /*test_info*/) override {}
+<<<<<<< HEAD
   void OnTestSkipped(const TestInfo& /*test_info*/) override {}
+=======
+  void OnTestDisabled(const TestInfo& /*test_info*/) override {}
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
   void OnTestPartResult(const TestPartResult& /*test_part_result*/) override {}
   void OnTestEnd(const TestInfo& /*test_info*/) override {}
   void OnTestSuiteEnd(const TestSuite& /*test_suite*/) override {}
@@ -1330,6 +1351,10 @@ GTEST_API_ void InitGoogleTest(int* argc, char** argv);
 // UNICODE mode.
 GTEST_API_ void InitGoogleTest(int* argc, wchar_t** argv);
 
+// This overloaded version can be used on Arduino/embedded platforms where
+// there is no argc/argv.
+GTEST_API_ void InitGoogleTest();
+
 namespace internal {
 
 // Separate the error generating code from the code path to reduce the stack
@@ -1366,6 +1391,7 @@ AssertionResult CmpHelperEQ(const char* lhs_expression,
   return CmpHelperEQFailure(lhs_expression, rhs_expression, lhs, rhs);
 }
 
+<<<<<<< HEAD
 // With this overloaded version, we allow anonymous enums to be used in
 // {ASSERT|EXPECT}_EQ as anonymous enums can be implicitly cast to integers.
 GTEST_API_ AssertionResult CmpHelperEQ(const char* lhs_expression,
@@ -1373,6 +1399,8 @@ GTEST_API_ AssertionResult CmpHelperEQ(const char* lhs_expression,
                                        std::intmax_t lhs,
                                        std::intmax_t rhs);
 
+=======
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 class EqHelper {
  public:
   // This templatized version is for the general case.
@@ -1395,8 +1423,13 @@ class EqHelper {
   // cannot merge the two, as it will make anonymous enums unhappy.
   static AssertionResult Compare(const char* lhs_expression,
                                  const char* rhs_expression,
+<<<<<<< HEAD
                                  std::intmax_t lhs,
                                  std::intmax_t rhs) {
+=======
+                                 BiggestInt lhs,
+                                 BiggestInt rhs) {
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
     return CmpHelperEQ(lhs_expression, rhs_expression, lhs, rhs);
   }
 
@@ -1428,10 +1461,13 @@ AssertionResult CmpHelperOpFailure(const char* expr1, const char* expr2,
 // ASSERT_?? and EXPECT_??.  It is here just to avoid copy-and-paste
 // of similar code.
 //
+<<<<<<< HEAD
 // For each templatized helper function, we also define an overloaded
 // version for std::intmax_t in order to reduce code bloat and allow
 // anonymous enums to be used with {ASSERT|EXPECT}_??.
 //
+=======
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 // INTERNAL IMPLEMENTATION - DO NOT USE IN A USER PROGRAM.
 
 #define GTEST_IMPL_CMP_HELPER_(op_name, op)\
@@ -1443,9 +1479,13 @@ AssertionResult CmpHelper##op_name(const char* expr1, const char* expr2, \
   } else {\
     return CmpHelperOpFailure(expr1, expr2, val1, val2, #op);\
   }\
+<<<<<<< HEAD
 }\
 GTEST_API_ AssertionResult CmpHelper##op_name(\
     const char* expr1, const char* expr2, std::intmax_t val1, std::intmax_t val2)
+=======
+}
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 
 // INTERNAL IMPLEMENTATION - DO NOT USE IN A USER PROGRAM.
 
@@ -2111,7 +2151,6 @@ class GTEST_API_ ScopedTrace {
   ::testing::ScopedTrace GTEST_CONCAT_TOKEN_(gtest_trace_, __LINE__)(\
     __FILE__, __LINE__, (message))
 
-
 // Compile-time assertion for type equality.
 // StaticAssertTypeEq<type1, type2>() compiles if and only if type1 and type2
 // are the same type.  The value it returns is not interesting.
@@ -2320,6 +2359,7 @@ inline int RUN_ALL_TESTS() {
   return ::testing::UnitTest::GetInstance()->Run();
 }
 
+<<<<<<< HEAD
 #ifdef ARDUINO
 inline void gtest_setup() {
   // Since Arduino doesn't have a command line, fake out the argc/argv arguments
@@ -2334,6 +2374,8 @@ inline void gtest_setup() {
 inline void gtest_loop() { RUN_ALL_TESTS(); }
 #endif
 
+=======
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 GTEST_DISABLE_MSC_WARNINGS_POP_()  //  4251
 
 #endif  // GOOGLETEST_INCLUDE_GTEST_GTEST_H_

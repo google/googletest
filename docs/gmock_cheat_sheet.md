@@ -170,6 +170,7 @@ See [`EXPECT_CALL`](reference/mocking.md#EXPECT_CALL) in the Mocking Reference.
 
 ## Matchers {#MatcherList}
 
+<<<<<<< HEAD
 A **matcher** matches a *single* argument. You can use it inside `ON_CALL()` or
 `EXPECT_CALL()`, or use it to validate a value directly using two macros:
 
@@ -451,6 +452,9 @@ which must be a permanent callback.
       return ExplainMatchResult(matcher, arg.nested().property(), result_listener);
     }
     ```
+=======
+See the [Matchers Reference](reference/matchers.md).
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 
 ## Actions {#ActionList}
 
@@ -510,8 +514,13 @@ class MockFunction<R(A1, ..., An)> {
 };
 ```
 
+<<<<<<< HEAD
 See this [recipe](gmock_cook_book.md#useful-mocks-created-using-gmock) for one
 application of it.
+=======
+See this [recipe](gmock_cook_book.md#UsingCheckPoints) for one application of
+it.
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 
 ## Flags
 

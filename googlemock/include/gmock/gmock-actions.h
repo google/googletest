@@ -1140,6 +1140,7 @@ struct DeleteArgAction {
     delete std::get<k>(std::tie(args...));
   }
 };
+<<<<<<< HEAD
 
 template <typename Ptr>
 struct ReturnPointeeAction {
@@ -1150,6 +1151,18 @@ struct ReturnPointeeAction {
   }
 };
 
+=======
+
+template <typename Ptr>
+struct ReturnPointeeAction {
+  Ptr pointer;
+  template <typename... Args>
+  auto operator()(const Args&...) const -> decltype(*pointer) {
+    return *pointer;
+  }
+};
+
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 #if GTEST_HAS_EXCEPTIONS
 template <typename T>
 struct ThrowAction {
@@ -1262,7 +1275,11 @@ inline internal::ReturnRefAction<R> ReturnRef(R& x) {  // NOLINT
 }
 
 // Prevent using ReturnRef on reference to temporary.
+<<<<<<< HEAD
 template <typename R>
+=======
+template <typename R, R* = nullptr>
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 internal::ReturnRefAction<R> ReturnRef(R&&) = delete;
 
 // Creates an action that returns the reference to a copy of the
@@ -1611,6 +1628,12 @@ template <typename F, typename Impl>
   };                                                                          \
   template <GMOCK_ACTION_TYPENAME_PARAMS_(params)>                            \
   inline full_name<GMOCK_ACTION_TYPE_PARAMS_(params)> name(                   \
+<<<<<<< HEAD
+=======
+      GMOCK_ACTION_TYPE_GVALUE_PARAMS_(params))  GTEST_MUST_USE_RESULT_;      \
+  template <GMOCK_ACTION_TYPENAME_PARAMS_(params)>                            \
+  inline full_name<GMOCK_ACTION_TYPE_PARAMS_(params)> name(                   \
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
       GMOCK_ACTION_TYPE_GVALUE_PARAMS_(params)) {                             \
     return full_name<GMOCK_ACTION_TYPE_PARAMS_(params)>(                      \
         GMOCK_ACTION_GVALUE_PARAMS_(params));                                 \

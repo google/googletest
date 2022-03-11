@@ -37,6 +37,7 @@
 // code once "gtest.h" has been #included.
 // Do not move it after other gtest #includes.
 TEST(CommandLineFlagsTest, CanBeAccessedInCodeOnceGTestHIsIncluded) {
+<<<<<<< HEAD
   bool dummy = testing::GTEST_FLAG(also_run_disabled_tests) ||
                testing::GTEST_FLAG(break_on_failure) ||
                testing::GTEST_FLAG(catch_exceptions) ||
@@ -54,6 +55,21 @@ TEST(CommandLineFlagsTest, CanBeAccessedInCodeOnceGTestHIsIncluded) {
                testing::GTEST_FLAG(stack_trace_depth) > 0 ||
                testing::GTEST_FLAG(stream_result_to) != "unknown" ||
                testing::GTEST_FLAG(throw_on_failure);
+=======
+  bool dummy =
+      GTEST_FLAG_GET(also_run_disabled_tests) ||
+      GTEST_FLAG_GET(break_on_failure) || GTEST_FLAG_GET(catch_exceptions) ||
+      GTEST_FLAG_GET(color) != "unknown" || GTEST_FLAG_GET(fail_fast) ||
+      GTEST_FLAG_GET(filter) != "unknown" || GTEST_FLAG_GET(list_tests) ||
+      GTEST_FLAG_GET(output) != "unknown" || GTEST_FLAG_GET(brief) ||
+      GTEST_FLAG_GET(print_time) || GTEST_FLAG_GET(random_seed) ||
+      GTEST_FLAG_GET(repeat) > 0 ||
+      GTEST_FLAG_GET(recreate_environments_when_repeating) ||
+      GTEST_FLAG_GET(show_internal_stack_frames) || GTEST_FLAG_GET(shuffle) ||
+      GTEST_FLAG_GET(stack_trace_depth) > 0 ||
+      GTEST_FLAG_GET(stream_result_to) != "unknown" ||
+      GTEST_FLAG_GET(throw_on_failure);
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
   EXPECT_TRUE(dummy || !dummy);  // Suppresses warning that dummy is unused.
 }
 
@@ -61,7 +77,11 @@ TEST(CommandLineFlagsTest, CanBeAccessedInCodeOnceGTestHIsIncluded) {
 #include <string.h>
 #include <time.h>
 
+<<<<<<< HEAD
 #include <limits>
+=======
+#include <cstdint>
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 #include <map>
 #include <ostream>
 #include <string>
@@ -201,17 +221,22 @@ using testing::Environment;
 using testing::FloatLE;
 using testing::IsNotSubstring;
 using testing::IsSubstring;
+using testing::kMaxStackTraceDepth;
 using testing::Message;
 using testing::ScopedFakeTestPartResultReporter;
 using testing::StaticAssertTypeEq;
 using testing::Test;
+<<<<<<< HEAD
 using testing::TestSuite;
+=======
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 using testing::TestEventListeners;
 using testing::TestInfo;
 using testing::TestPartResult;
 using testing::TestPartResultArray;
 using testing::TestProperty;
 using testing::TestResult;
+using testing::TestSuite;
 using testing::TimeInMillis;
 using testing::UnitTest;
 using testing::internal::AlwaysFalse;
@@ -227,7 +252,6 @@ using testing::internal::FloatingPoint;
 using testing::internal::ForEach;
 using testing::internal::FormatEpochTimeInMillisAsIso8601;
 using testing::internal::FormatTimeInMillisAsSeconds;
-using testing::internal::GTestFlagSaver;
 using testing::internal::GetCurrentOsStackTraceExceptTop;
 using testing::internal::GetElementOr;
 using testing::internal::GetNextRandomSeed;
@@ -236,11 +260,17 @@ using testing::internal::GetTestTypeId;
 using testing::internal::GetTimeInMillis;
 using testing::internal::GetTypeId;
 using testing::internal::GetUnitTestImpl;
+<<<<<<< HEAD
+=======
+using testing::internal::GTestFlagSaver;
+using testing::internal::HasDebugStringAndShortDebugString;
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 using testing::internal::Int32FromEnvOrDie;
-using testing::internal::IsAProtocolMessage;
 using testing::internal::IsContainer;
 using testing::internal::IsContainerTest;
 using testing::internal::IsNotContainer;
+using testing::internal::kMaxRandomSeed;
+using testing::internal::kTestTypeIdInGoogleTest;
 using testing::internal::NativeArray;
 using testing::internal::OsStackTraceGetter;
 using testing::internal::OsStackTraceGetterInterface;
@@ -262,9 +292,6 @@ using testing::internal::WideStringToUtf8;
 using testing::internal::edit_distance::CalculateOptimalEdits;
 using testing::internal::edit_distance::CreateUnifiedDiff;
 using testing::internal::edit_distance::EditType;
-using testing::internal::kMaxRandomSeed;
-using testing::internal::kTestTypeIdInGoogleTest;
-using testing::kMaxStackTraceDepth;
 
 #if GTEST_HAS_STREAM_REDIRECTION
 using testing::internal::CaptureStdout;
@@ -1006,7 +1033,12 @@ TEST_F(VectorShuffleTest, ShufflesStartOfVector) {
 
   ASSERT_PRED1(VectorIsNotCorrupt, vector_);
   EXPECT_PRED3(RangeIsShuffled, vector_, 0, kRangeSize);
+<<<<<<< HEAD
   EXPECT_PRED3(RangeIsUnshuffled, vector_, kRangeSize, static_cast<int>(kVectorSize));
+=======
+  EXPECT_PRED3(RangeIsUnshuffled, vector_, kRangeSize,
+               static_cast<int>(kVectorSize));
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 }
 
 TEST_F(VectorShuffleTest, ShufflesEndOfVector) {
@@ -1015,17 +1047,31 @@ TEST_F(VectorShuffleTest, ShufflesEndOfVector) {
 
   ASSERT_PRED1(VectorIsNotCorrupt, vector_);
   EXPECT_PRED3(RangeIsUnshuffled, vector_, 0, kRangeSize);
+<<<<<<< HEAD
   EXPECT_PRED3(RangeIsShuffled, vector_, kRangeSize, static_cast<int>(kVectorSize));
 }
 
 TEST_F(VectorShuffleTest, ShufflesMiddleOfVector) {
   int kRangeSize = static_cast<int>(kVectorSize)/3;
+=======
+  EXPECT_PRED3(RangeIsShuffled, vector_, kRangeSize,
+               static_cast<int>(kVectorSize));
+}
+
+TEST_F(VectorShuffleTest, ShufflesMiddleOfVector) {
+  const int kRangeSize = static_cast<int>(kVectorSize) / 3;
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
   ShuffleRange(&random_, kRangeSize, 2*kRangeSize, &vector_);
 
   ASSERT_PRED1(VectorIsNotCorrupt, vector_);
   EXPECT_PRED3(RangeIsUnshuffled, vector_, 0, kRangeSize);
   EXPECT_PRED3(RangeIsShuffled, vector_, kRangeSize, 2*kRangeSize);
+<<<<<<< HEAD
   EXPECT_PRED3(RangeIsUnshuffled, vector_, 2*kRangeSize, static_cast<int>(kVectorSize));
+=======
+  EXPECT_PRED3(RangeIsUnshuffled, vector_, 2 * kRangeSize,
+               static_cast<int>(kVectorSize));
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 }
 
 TEST_F(VectorShuffleTest, ShufflesRepeatably) {
@@ -4159,6 +4205,17 @@ TEST(ExpectThrowTest, DoesNotGenerateUnreachableCodeWarning) {
   EXPECT_NONFATAL_FAILURE(EXPECT_ANY_THROW(n++), "");
 }
 
+TEST(ExpectThrowTest, DoesNotGenerateDuplicateCatchClauseWarning) {
+  EXPECT_THROW(throw std::exception(), std::exception);
+}
+
+// The following code intentionally tests a suboptimal syntax.
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdangling-else"
+#pragma GCC diagnostic ignored "-Wempty-body"
+#pragma GCC diagnostic ignored "-Wpragmas"
+#endif
 TEST(AssertionSyntaxTest, ExceptionAssertionsBehavesLikeSingleStatement) {
   if (AlwaysFalse())
     EXPECT_THROW(ThrowNothing(), bool);
@@ -5544,6 +5601,9 @@ TEST_F(SetUpTestSuiteTest, TestSetupTestSuite2) {
 struct Flags {
   // Constructs a Flags struct where each flag has its default value.
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
   Flags()
       : also_run_disabled_tests(false),
         break_on_failure(false),
@@ -5553,6 +5613,10 @@ struct Flags {
         filter(""),
         list_tests(false),
         output(""),
+<<<<<<< HEAD
+=======
+        brief(false),
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
         print_time(true),
         random_seed(0),
         repeat(1),
@@ -5748,8 +5812,13 @@ class ParseFlagsTest : public Test {
 
   // Asserts that two narrow or wide string arrays are equal.
   template <typename CharType>
+<<<<<<< HEAD
   static void AssertStringArrayEq(int size1, CharType** array1,
                                   int size2, CharType** array2) {
+=======
+  static void AssertStringArrayEq(int size1, CharType** array1, int size2,
+                                  CharType** array2) {
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
     ASSERT_EQ(size1, size2) << " Array sizes different.";
 
     for (int i = 0; i != size1; i++) {
@@ -6337,6 +6406,7 @@ TEST_F(FlagfileTest, Empty) {
   std::string flagfile_flag =
       std::string("--" GTEST_FLAG_PREFIX_ "flagfile=") + flagfile_path.c_str();
 
+<<<<<<< HEAD
   const char* argv[] = {
     "foo.exe",
     flagfile_flag.c_str(),
@@ -6347,6 +6417,11 @@ TEST_F(FlagfileTest, Empty) {
     "foo.exe",
     nullptr
   };
+=======
+  const char* argv[] = {"foo.exe", flagfile_flag.c_str(), nullptr};
+
+  const char* argv2[] = {"foo.exe", nullptr};
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 
   GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags(), false);
 }
@@ -6358,6 +6433,7 @@ TEST_F(FlagfileTest, FilterNonEmpty) {
   std::string flagfile_flag =
       std::string("--" GTEST_FLAG_PREFIX_ "flagfile=") + flagfile_path.c_str();
 
+<<<<<<< HEAD
   const char* argv[] = {
     "foo.exe",
     flagfile_flag.c_str(),
@@ -6368,6 +6444,11 @@ TEST_F(FlagfileTest, FilterNonEmpty) {
     "foo.exe",
     nullptr
   };
+=======
+  const char* argv[] = {"foo.exe", flagfile_flag.c_str(), nullptr};
+
+  const char* argv2[] = {"foo.exe", nullptr};
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 
   GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::Filter("abc"), false);
 }
@@ -6381,6 +6462,7 @@ TEST_F(FlagfileTest, SeveralFlags) {
   std::string flagfile_flag =
       std::string("--" GTEST_FLAG_PREFIX_ "flagfile=") + flagfile_path.c_str();
 
+<<<<<<< HEAD
   const char* argv[] = {
     "foo.exe",
     flagfile_flag.c_str(),
@@ -6391,6 +6473,11 @@ TEST_F(FlagfileTest, SeveralFlags) {
     "foo.exe",
     nullptr
   };
+=======
+  const char* argv[] = {"foo.exe", flagfile_flag.c_str(), nullptr};
+
+  const char* argv2[] = {"foo.exe", nullptr};
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 
   Flags expected_flags;
   expected_flags.break_on_failure = true;
@@ -7258,6 +7345,7 @@ struct MissingDebugStringMethod {
 
 struct IncompleteType;
 
+<<<<<<< HEAD
 // Tests that IsAProtocolMessage<T>::value is a compile-time constant.
 TEST(IsAProtocolMessageTest, ValueIsCompileTimeConstant) {
   GTEST_COMPILE_ASSERT_(IsAProtocolMessage<HasDebugStringMethods>::value,
@@ -7291,6 +7379,50 @@ TEST(IsAProtocolMessageTest, ValueIsTrueWhenTypeIsAnOpenSourceProtocolMessage) {
 TEST(IsAProtocolMessageTest, ValueIsFalseWhenTypeIsNotAProtocolMessage) {
   EXPECT_FALSE(IsAProtocolMessage<int>::value);
   EXPECT_FALSE(IsAProtocolMessage<const ConversionHelperBase>::value);
+=======
+// Tests that HasDebugStringAndShortDebugString<T>::value is a compile-time
+// constant.
+TEST(HasDebugStringAndShortDebugStringTest, ValueIsCompileTimeConstant) {
+  GTEST_COMPILE_ASSERT_(
+      HasDebugStringAndShortDebugString<HasDebugStringMethods>::value,
+      const_true);
+  GTEST_COMPILE_ASSERT_(
+      HasDebugStringAndShortDebugString<InheritsDebugStringMethods>::value,
+      const_true);
+  GTEST_COMPILE_ASSERT_(HasDebugStringAndShortDebugString<
+                            const InheritsDebugStringMethods>::value,
+                        const_true);
+  GTEST_COMPILE_ASSERT_(
+      !HasDebugStringAndShortDebugString<WrongTypeDebugStringMethod>::value,
+      const_false);
+  GTEST_COMPILE_ASSERT_(
+      !HasDebugStringAndShortDebugString<NotConstDebugStringMethod>::value,
+      const_false);
+  GTEST_COMPILE_ASSERT_(
+      !HasDebugStringAndShortDebugString<MissingDebugStringMethod>::value,
+      const_false);
+  GTEST_COMPILE_ASSERT_(
+      !HasDebugStringAndShortDebugString<IncompleteType>::value, const_false);
+  GTEST_COMPILE_ASSERT_(!HasDebugStringAndShortDebugString<int>::value,
+                        const_false);
+}
+
+// Tests that HasDebugStringAndShortDebugString<T>::value is true when T has
+// needed methods.
+TEST(HasDebugStringAndShortDebugStringTest,
+     ValueIsTrueWhenTypeHasDebugStringAndShortDebugString) {
+  EXPECT_TRUE(
+      HasDebugStringAndShortDebugString<InheritsDebugStringMethods>::value);
+}
+
+// Tests that HasDebugStringAndShortDebugString<T>::value is false when T
+// doesn't have needed methods.
+TEST(HasDebugStringAndShortDebugStringTest,
+     ValueIsFalseWhenTypeIsNotAProtocolMessage) {
+  EXPECT_FALSE(HasDebugStringAndShortDebugString<int>::value);
+  EXPECT_FALSE(
+      HasDebugStringAndShortDebugString<const ConversionHelperBase>::value);
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 }
 
 // Tests GTEST_REMOVE_REFERENCE_AND_CONST_.

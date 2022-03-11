@@ -90,17 +90,24 @@
 // Complaining about the argument to GTEST_STRINGIFY_ being empty.
 // This is allowed by the spec.
 #define GTEST_STRINGIFY_HELPER_(name, ...) #name
+<<<<<<< HEAD
 #define GTEST_STRINGIFY_(...) GTEST_STRINGIFY_HELPER_(__VA_ARGS__,)
+=======
+#define GTEST_STRINGIFY_(...) GTEST_STRINGIFY_HELPER_(__VA_ARGS__, )
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 
 namespace proto2 {
 class MessageLite;
 }
+<<<<<<< HEAD
 
 namespace google {
 namespace protobuf {
 class MessageLite;
 }
 }
+=======
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 
 namespace testing {
 
@@ -895,6 +902,7 @@ class GTEST_API_ Random {
 // Turns const U&, U&, const U, and U all into U.
 #define GTEST_REMOVE_REFERENCE_AND_CONST_(T) \
   typename std::remove_const<typename std::remove_reference<T>::type>::type
+<<<<<<< HEAD
 
 // IsAProtocolMessage<T>::value is a compile-time bool constant that's
 // true if and only if T is type proto2::MessageLite or
@@ -906,6 +914,38 @@ struct IsAProtocolMessage
           std::is_convertible<const T*, const ::proto2::MessageLite*>::value ||
               std::is_convertible<
                   const T*, const ::google::protobuf::MessageLite*>::value> {};
+=======
+
+// HasDebugStringAndShortDebugString<T>::value is a compile-time bool constant
+// that's true if and only if T has methods DebugString() and ShortDebugString()
+// that return std::string.
+template <typename T>
+class HasDebugStringAndShortDebugString {
+ private:
+  template <typename C>
+  static auto CheckDebugString(C*) -> typename std::is_same<
+      std::string, decltype(std::declval<const C>().DebugString())>::type;
+  template <typename>
+  static std::false_type CheckDebugString(...);
+
+  template <typename C>
+  static auto CheckShortDebugString(C*) -> typename std::is_same<
+      std::string, decltype(std::declval<const C>().ShortDebugString())>::type;
+  template <typename>
+  static std::false_type CheckShortDebugString(...);
+
+  using HasDebugStringType = decltype(CheckDebugString<T>(nullptr));
+  using HasShortDebugStringType = decltype(CheckShortDebugString<T>(nullptr));
+
+ public:
+  static constexpr bool value =
+      HasDebugStringType::value && HasShortDebugStringType::value;
+};
+
+template <typename T>
+constexpr bool HasDebugStringAndShortDebugString<T>::value;
+
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 // When the compiler sees expression IsContainerTest<C>(0), if C is an
 // STL-style container class, the first overload of IsContainerTest
 // will be viable (since both C::iterator* and C::const_iterator* are
@@ -1159,6 +1199,7 @@ template <size_t... I, size_t sizeofT>
 struct DoubleSequence<false, IndexSequence<I...>, sizeofT> {
   using type = IndexSequence<I..., (sizeofT + I)...>;
 };
+<<<<<<< HEAD
 
 // Backport of std::make_index_sequence.
 // It uses O(ln(N)) instantiation depth.
@@ -1218,6 +1259,67 @@ struct FlatTupleElemBase<FlatTuple<T...>, I> {
   value_type value;
 };
 
+=======
+
+// Backport of std::make_index_sequence.
+// It uses O(ln(N)) instantiation depth.
+template <size_t N>
+struct MakeIndexSequenceImpl
+    : DoubleSequence<N % 2 == 1, typename MakeIndexSequenceImpl<N / 2>::type,
+                     N / 2>::type {};
+
+template <>
+struct MakeIndexSequenceImpl<0> : IndexSequence<> {};
+
+template <size_t N>
+using MakeIndexSequence = typename MakeIndexSequenceImpl<N>::type;
+
+template <typename... T>
+using IndexSequenceFor = typename MakeIndexSequence<sizeof...(T)>::type;
+
+template <size_t>
+struct Ignore {
+  Ignore(...);  // NOLINT
+};
+
+template <typename>
+struct ElemFromListImpl;
+template <size_t... I>
+struct ElemFromListImpl<IndexSequence<I...>> {
+  // We make Ignore a template to solve a problem with MSVC.
+  // A non-template Ignore would work fine with `decltype(Ignore(I))...`, but
+  // MSVC doesn't understand how to deal with that pack expansion.
+  // Use `0 * I` to have a single instantiation of Ignore.
+  template <typename R>
+  static R Apply(Ignore<0 * I>..., R (*)(), ...);
+};
+
+template <size_t N, typename... T>
+struct ElemFromList {
+  using type =
+      decltype(ElemFromListImpl<typename MakeIndexSequence<N>::type>::Apply(
+          static_cast<T (*)()>(nullptr)...));
+};
+
+struct FlatTupleConstructTag {};
+
+template <typename... T>
+class FlatTuple;
+
+template <typename Derived, size_t I>
+struct FlatTupleElemBase;
+
+template <typename... T, size_t I>
+struct FlatTupleElemBase<FlatTuple<T...>, I> {
+  using value_type = typename ElemFromList<I, T...>::type;
+  FlatTupleElemBase() = default;
+  template <typename Arg>
+  explicit FlatTupleElemBase(FlatTupleConstructTag, Arg&& t)
+      : value(std::forward<Arg>(t)) {}
+  value_type value;
+};
+
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 template <typename Derived, typename Idx>
 struct FlatTupleBase;
 
@@ -1265,9 +1367,14 @@ template <typename... T>
 class FlatTuple
     : private FlatTupleBase<FlatTuple<T...>,
                             typename MakeIndexSequence<sizeof...(T)>::type> {
+<<<<<<< HEAD
 
   using Indices = typename FlatTupleBase<FlatTuple<T...>,
                             typename MakeIndexSequence<sizeof...(T)>::type>::Indices;
+=======
+  using Indices = typename FlatTupleBase<
+      FlatTuple<T...>, typename MakeIndexSequence<sizeof...(T)>::type>::Indices;
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 
  public:
   FlatTuple() = default;
@@ -1354,6 +1461,7 @@ struct tuple_size<testing::internal::FlatTuple<Ts...>>
     statement;                                                    \
   } else                     /* NOLINT */                         \
     static_assert(true, "")  // User must have a semicolon after expansion.
+<<<<<<< HEAD
 
 #if GTEST_HAS_EXCEPTIONS
 
@@ -1425,6 +1533,97 @@ struct tuple_size<testing::internal::FlatTuple<Ts...>>
   }
 
 #else // GTEST_HAS_EXCEPTIONS
+=======
+
+#if GTEST_HAS_EXCEPTIONS
+
+namespace testing {
+namespace internal {
+
+class NeverThrown {
+ public:
+  const char* what() const noexcept {
+    return "this exception should never be thrown";
+  }
+};
+
+}  // namespace internal
+}  // namespace testing
+
+#if GTEST_HAS_RTTI
+
+#define GTEST_EXCEPTION_TYPE_(e) ::testing::internal::GetTypeName(typeid(e))
+
+#else  // GTEST_HAS_RTTI
+
+#define GTEST_EXCEPTION_TYPE_(e) \
+  std::string { "an std::exception-derived error" }
+
+#endif  // GTEST_HAS_RTTI
+
+#define GTEST_TEST_THROW_CATCH_STD_EXCEPTION_(statement, expected_exception)   \
+  catch (typename std::conditional<                                            \
+         std::is_same<typename std::remove_cv<typename std::remove_reference<  \
+                          expected_exception>::type>::type,                    \
+                      std::exception>::value,                                  \
+         const ::testing::internal::NeverThrown&, const std::exception&>::type \
+             e) {                                                              \
+    gtest_msg.value = "Expected: " #statement                                  \
+                      " throws an exception of type " #expected_exception      \
+                      ".\n  Actual: it throws ";                               \
+    gtest_msg.value += GTEST_EXCEPTION_TYPE_(e);                               \
+    gtest_msg.value += " with description \"";                                 \
+    gtest_msg.value += e.what();                                               \
+    gtest_msg.value += "\".";                                                  \
+    goto GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__);                \
+  }
+
+#else  // GTEST_HAS_EXCEPTIONS
+
+#define GTEST_TEST_THROW_CATCH_STD_EXCEPTION_(statement, expected_exception)
+
+#endif  // GTEST_HAS_EXCEPTIONS
+
+#define GTEST_TEST_THROW_(statement, expected_exception, fail)              \
+  GTEST_AMBIGUOUS_ELSE_BLOCKER_                                             \
+  if (::testing::internal::TrueWithString gtest_msg{}) {                    \
+    bool gtest_caught_expected = false;                                     \
+    try {                                                                   \
+      GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement);            \
+    } catch (expected_exception const&) {                                   \
+      gtest_caught_expected = true;                                         \
+    }                                                                       \
+    GTEST_TEST_THROW_CATCH_STD_EXCEPTION_(statement, expected_exception)    \
+    catch (...) {                                                           \
+      gtest_msg.value = "Expected: " #statement                             \
+                        " throws an exception of type " #expected_exception \
+                        ".\n  Actual: it throws a different type.";         \
+      goto GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__);           \
+    }                                                                       \
+    if (!gtest_caught_expected) {                                           \
+      gtest_msg.value = "Expected: " #statement                             \
+                        " throws an exception of type " #expected_exception \
+                        ".\n  Actual: it throws nothing.";                  \
+      goto GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__);           \
+    }                                                                       \
+  } else /*NOLINT*/                                                         \
+    GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__)                   \
+        : fail(gtest_msg.value.c_str())
+
+#if GTEST_HAS_EXCEPTIONS
+
+#define GTEST_TEST_NO_THROW_CATCH_STD_EXCEPTION_()                \
+  catch (std::exception const& e) {                               \
+    gtest_msg.value = "it throws ";                               \
+    gtest_msg.value += GTEST_EXCEPTION_TYPE_(e);                  \
+    gtest_msg.value += " with description \"";                    \
+    gtest_msg.value += e.what();                                  \
+    gtest_msg.value += "\".";                                     \
+    goto GTEST_CONCAT_TOKEN_(gtest_label_testnothrow_, __LINE__); \
+  }
+
+#else  // GTEST_HAS_EXCEPTIONS
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 
 #define GTEST_TEST_NO_THROW_CATCH_STD_EXCEPTION_()
 
@@ -1496,6 +1695,7 @@ struct tuple_size<testing::internal::FlatTuple<Ts...>>
   test_suite_name##_##test_name##_Test
 
 // Helper macro for defining tests.
+<<<<<<< HEAD
 #define GTEST_TEST_(test_case_name, test_name, parent_class, parent_id)\
 class GTEST_TEST_CLASS_NAME_(test_case_name, test_name) : public parent_class {\
  public:\
@@ -1519,3 +1719,39 @@ class GTEST_TEST_CLASS_NAME_(test_case_name, test_name) : public parent_class {\
             GTEST_TEST_CLASS_NAME_(test_case_name, test_name)>);\
 void GTEST_TEST_CLASS_NAME_(test_case_name, test_name)::TestBody()
 #endif  // GTEST_INCLUDE_GTEST_INTERNAL_GTEST_INTERNAL_H_
+=======
+#define GTEST_TEST_(test_suite_name, test_name, parent_class, parent_id)      \
+  static_assert(sizeof(GTEST_STRINGIFY_(test_suite_name)) > 1,                \
+                "test_suite_name must not be empty");                         \
+  static_assert(sizeof(GTEST_STRINGIFY_(test_name)) > 1,                      \
+                "test_name must not be empty");                               \
+  class GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)                    \
+      : public parent_class {                                                 \
+   public:                                                                    \
+    GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)() = default;           \
+    ~GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)() override = default; \
+    GTEST_DISALLOW_COPY_AND_ASSIGN_(GTEST_TEST_CLASS_NAME_(test_suite_name,   \
+                                                           test_name));       \
+    GTEST_DISALLOW_MOVE_AND_ASSIGN_(GTEST_TEST_CLASS_NAME_(test_suite_name,   \
+                                                           test_name));       \
+                                                                              \
+   private:                                                                   \
+    void TestBody() override;                                                 \
+    static ::testing::TestInfo* const test_info_ GTEST_ATTRIBUTE_UNUSED_;     \
+  };                                                                          \
+                                                                              \
+  ::testing::TestInfo* const GTEST_TEST_CLASS_NAME_(test_suite_name,          \
+                                                    test_name)::test_info_ =  \
+      ::testing::internal::MakeAndRegisterTestInfo(                           \
+          #test_suite_name, #test_name, nullptr, nullptr,                     \
+          ::testing::internal::CodeLocation(__FILE__, __LINE__), (parent_id), \
+          ::testing::internal::SuiteApiResolver<                              \
+              parent_class>::GetSetUpCaseOrSuite(__FILE__, __LINE__),         \
+          ::testing::internal::SuiteApiResolver<                              \
+              parent_class>::GetTearDownCaseOrSuite(__FILE__, __LINE__),      \
+          new ::testing::internal::TestFactoryImpl<GTEST_TEST_CLASS_NAME_(    \
+              test_suite_name, test_name)>);                                  \
+  void GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)::TestBody()
+
+#endif  // GOOGLETEST_INCLUDE_GTEST_INTERNAL_GTEST_INTERNAL_H_
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f

@@ -211,8 +211,13 @@ class Subprocess:
       following attributes:
         terminated_by_signal   True if and only if the child process has been
                                terminated by a signal.
+<<<<<<< HEAD
         signal                 Sygnal that terminated the child process.
         exited                 True if and only if the child process exited normally.
+=======
+        exited                 True if and only if the child process exited
+                               normally.
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
         exit_code              The code with which the child process exited.
         output                 Child process's stdout and stderr output
                                combined in a string.

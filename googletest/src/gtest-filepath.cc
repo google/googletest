@@ -92,8 +92,15 @@ static bool IsPathSeparator(char c) {
 
 // Returns the current working directory, or "" if unsuccessful.
 FilePath FilePath::GetCurrentDir() {
+<<<<<<< HEAD
 #if GTEST_OS_WINDOWS_MOBILE || GTEST_OS_WINDOWS_PHONE || GTEST_OS_WINDOWS_RT || ARDUINO
   // Windows CE and Arduino don't have a current directory, so we just return
+=======
+#if GTEST_OS_WINDOWS_MOBILE || GTEST_OS_WINDOWS_PHONE ||         \
+    GTEST_OS_WINDOWS_RT || GTEST_OS_ESP8266 || GTEST_OS_ESP32 || \
+    GTEST_OS_XTENSA
+  // These platforms do not have a current directory, so we just return
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
   // something reasonable.
   return FilePath(kCurrentDirectoryString);
 #elif GTEST_OS_WINDOWS
@@ -235,7 +242,11 @@ bool FilePath::DirectoryExists() const {
     result = true;
   }
 #else
+<<<<<<< HEAD
   posix::StatStruct file_stat = {};
+=======
+  posix::StatStruct file_stat{};
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
   result = posix::Stat(path.c_str(), &file_stat) == 0 &&
       posix::IsDir(file_stat);
 #endif  // GTEST_OS_WINDOWS_MOBILE
@@ -350,6 +361,7 @@ FilePath FilePath::RemoveTrailingPathSeparator() const {
 void FilePath::Normalize() {
   auto out = pathname_.begin();
 
+<<<<<<< HEAD
   for (const auto character : pathname_)
     if (!IsPathSeparator(character))
       normalized_pathname.push_back(character);
@@ -358,6 +370,17 @@ void FilePath::Normalize() {
       normalized_pathname.push_back(kPathSeparator);
     else
       continue;
+=======
+  for (const char character : pathname_) {
+    if (!IsPathSeparator(character)) {
+      *(out++) = character;
+    } else if (out == pathname_.begin() || *std::prev(out) != kPathSeparator) {
+      *(out++) = kPathSeparator;
+    } else {
+      continue;
+    }
+  }
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 
   pathname_.erase(out, pathname_.end());
 }

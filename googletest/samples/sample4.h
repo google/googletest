@@ -43,10 +43,16 @@ class Counter {
   // Returns the current counter value, and increments it.
   int Increment();
 
+<<<<<<< HEAD
 // Returns the current counter value, and decrements it.
   int Decrement();
 
 
+=======
+  // Returns the current counter value, and decrements it.
+  int Decrement();
+
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
   // Prints the current counter value to STDOUT.
   void Print() const;
 };

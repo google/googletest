@@ -72,8 +72,13 @@ pkg-config will also try to look in `PKG_CONFIG_PATH` to find `gtest_main.pc`.
 ### Using pkg-config in a cross-compilation setting
 
 Pkg-config can be used in a cross-compilation setting too. To do this, let's
+<<<<<<< HEAD
 assume the final prefix of the cross-compiled installation will be `/usr`,
 and your sysroot is `/home/MYUSER/sysroot`. Configure and install GTest using
+=======
+assume the final prefix of the cross-compiled installation will be `/usr`, and
+your sysroot is `/home/MYUSER/sysroot`. Configure and install GTest using
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 
 ```
 mkdir build && cmake -DCMAKE_INSTALL_PREFIX=/usr ..
@@ -93,9 +98,15 @@ export PKG_CONFIG_ALLOW_SYSTEM_CFLAGS=yes
 export PKG_CONFIG_ALLOW_SYSTEM_LIBS=yes
 ```
 
+<<<<<<< HEAD
 otherwise `pkg-config` will filter `-I` and `-L` flags against standard
 prefixes such as `/usr` (see https://bugs.freedesktop.org/show_bug.cgi?id=28264#c3
 for reasons why this stripping needs to occur usually).
+=======
+otherwise `pkg-config` will filter `-I` and `-L` flags against standard prefixes
+such as `/usr` (see https://bugs.freedesktop.org/show_bug.cgi?id=28264#c3 for
+reasons why this stripping needs to occur usually).
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 
 If you look at the generated pkg-config file, it will look something like
 
@@ -111,8 +122,13 @@ Libs: -L${libdir} -lgtest -lpthread
 Cflags: -I${includedir} -DGTEST_HAS_PTHREAD=1 -lpthread
 ```
 
+<<<<<<< HEAD
 Notice that the sysroot is not included in `libdir` and `includedir`! If you
 try to run `pkg-config` with the correct
+=======
+Notice that the sysroot is not included in `libdir` and `includedir`! If you try
+to run `pkg-config` with the correct
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 `PKG_CONFIG_LIBDIR=/home/MYUSER/sysroot/usr/lib64/pkgconfig` against this `.pc`
 file, you will get
 
@@ -123,10 +139,17 @@ $ pkg-config --libs gtest
 -L/usr/lib64 -lgtest -lpthread
 ```
 
+<<<<<<< HEAD
 which is obviously wrong and points to the `CBUILD` and not `CHOST` root.
 In order to use this in a cross-compilation setting, we need to tell
 pkg-config to inject the actual sysroot into `-I` and `-L` variables. Let us
 now tell pkg-config about the actual sysroot
+=======
+which is obviously wrong and points to the `CBUILD` and not `CHOST` root. In
+order to use this in a cross-compilation setting, we need to tell pkg-config to
+inject the actual sysroot into `-I` and `-L` variables. Let us now tell
+pkg-config about the actual sysroot
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 
 ```
 export PKG_CONFIG_DIR=
@@ -143,6 +166,12 @@ $ pkg-config --libs gtest
 -L/home/MYUSER/sysroot/usr/lib64 -lgtest -lpthread
 ```
 
+<<<<<<< HEAD
 which contains the correct sysroot now. For a more comprehensive guide to
 also including `${CHOST}` in build system calls, see the excellent tutorial
 by Diego Elio Pettenò: https://autotools.io/pkgconfig/cross-compiling.html
+=======
+which contains the correct sysroot now. For a more comprehensive guide to also
+including `${CHOST}` in build system calls, see the excellent tutorial by Diego
+Elio Pettenò: <https://autotools.io/pkgconfig/cross-compiling.html>
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f

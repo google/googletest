@@ -290,8 +290,13 @@ void ForEach(const Container& c, Functor functor) {
 // in range [0, v.size()).
 template <typename E>
 inline E GetElementOr(const std::vector<E>& v, int i, E default_value) {
+<<<<<<< HEAD
   return (i < 0 || i >= static_cast<int>(v.size())) ? default_value :
 	  v[static_cast<size_t>(i)];
+=======
+  return (i < 0 || i >= static_cast<int>(v.size())) ? default_value
+                                                    : v[static_cast<size_t>(i)];
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 }
 
 // Performs an in-place shuffle of a range of the vector's elements.
@@ -313,8 +318,14 @@ void ShuffleRange(internal::Random* random, int begin, int end,
   // http://en.wikipedia.org/wiki/Fisher-Yates_shuffle
   for (int range_width = end - begin; range_width >= 2; range_width--) {
     const int last_in_range = begin + range_width - 1;
+<<<<<<< HEAD
     const int selected = begin +
       static_cast<int>(random->Generate(static_cast<UInt32>(range_width)));
+=======
+    const int selected =
+        begin +
+        static_cast<int>(random->Generate(static_cast<uint32_t>(range_width)));
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
     std::swap((*v)[static_cast<size_t>(selected)],
               (*v)[static_cast<size_t>(last_in_range)]);
   }
@@ -671,7 +682,11 @@ class GTEST_API_ UnitTestImpl {
       GTEST_CHECK_(!original_working_dir_.IsEmpty())
           << "Failed to get the current working directory.";
     }
+<<<<<<< HEAD
 #endif
+=======
+#endif  // GTEST_HAS_DEATH_TEST
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 
     GetTestSuite(test_info->test_suite_name(), test_info->type_param(),
                  set_up_tc, tear_down_tc)
@@ -1081,7 +1096,11 @@ class StreamingListener : public EmptyTestEventListener {
       GTEST_CHECK_(sockfd_ != -1)
           << "Send() can be called only when there is a connection.";
 
+<<<<<<< HEAD
       const size_t len = static_cast<size_t>(message.length());
+=======
+      const auto len = static_cast<size_t>(message.length());
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
       if (write(sockfd_, message.c_str(), len) != static_cast<ssize_t>(len)) {
         GTEST_LOG_(WARNING)
             << "stream_result_to: failed to stream to "

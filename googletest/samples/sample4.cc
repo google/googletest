@@ -40,6 +40,7 @@ int Counter::Increment() {
 
 // Returns the current counter value, and decrements it.
 // counter can not be less than 0, return 0 in this case
+<<<<<<< HEAD
   int Counter::Decrement() {
     if (counter_==0){
       return counter_;
@@ -47,6 +48,15 @@ int Counter::Increment() {
     else
       return counter_--;
   }
+=======
+int Counter::Decrement() {
+  if (counter_ == 0) {
+    return counter_;
+  } else  {
+    return counter_--;
+  }
+}
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 
 // Prints the current counter value to STDOUT.
 void Counter::Print() const {

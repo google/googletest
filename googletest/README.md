@@ -8,7 +8,12 @@ depends on which build system you use, and is usually straightforward.
 
 ### Build with CMake
 
+<<<<<<< HEAD
 Google Test comes with a CMake build script ([CMakeLists.txt](https://github.com/google/googletest/blob/master/CMakeLists.txt))
+=======
+GoogleTest comes with a CMake build script
+([CMakeLists.txt](https://github.com/google/googletest/blob/master/CMakeLists.txt))
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 that can be used on a wide range of platforms ("C" stands for cross-platform.).
 If you don't have CMake installed already, you can download it for free from
 <http://www.cmake.org/>.
@@ -23,6 +28,7 @@ another project.
 When building GoogleTest as a standalone project, the typical workflow starts
 with
 
+<<<<<<< HEAD
     git clone https://github.com/google/googletest.git -b release-1.10.0
     cd googletest        # Main directory of the cloned repository.
     mkdir build          # Create a directory to hold the build output.
@@ -41,6 +47,31 @@ install GoogleTest if you are a system administrator.
 
     make
     sudo make install    # Install in /usr/local/ by default
+=======
+```
+git clone https://github.com/google/googletest.git -b release-1.11.0
+cd googletest        # Main directory of the cloned repository.
+mkdir build          # Create a directory to hold the build output.
+cd build
+cmake ..             # Generate native build scripts for GoogleTest.
+```
+
+The above command also includes GoogleMock by default. And so, if you want to
+build only GoogleTest, you should replace the last command with
+
+```
+cmake .. -DBUILD_GMOCK=OFF
+```
+
+If you are on a \*nix system, you should now see a Makefile in the current
+directory. Just type `make` to build GoogleTest. And then you can simply install
+GoogleTest if you are a system administrator.
+
+```
+make
+sudo make install    # Install in /usr/local/ by default
+```
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 
 If you use Windows and have Visual Studio installed, a `gtest.sln` file and
 several `.vcproj` files will be created. You can then build them using Visual
@@ -50,6 +81,7 @@ On Mac OS X with Xcode installed, a `.xcodeproj` file will be generated.
 
 #### Incorporating Into An Existing CMake Project
 
+<<<<<<< HEAD
 If you want to use GoogleTest in a project which already uses CMake,
 the easiest way is to get installed libraries and headers.
 
@@ -63,6 +95,21 @@ to the main build and adding it using CMake's `add_subdirectory()` command.
 This has the significant advantage that the same compiler and linker settings
 are used between GoogleTest and the rest of your project, so issues associated
 with using incompatible libraries (eg debug/release), etc. are avoided. This is
+=======
+If you want to use GoogleTest in a project which already uses CMake, the easiest
+way is to get installed libraries and headers.
+
+*   Import GoogleTest by using `find_package` (or `pkg_check_modules`). For
+    example, if `find_package(GTest CONFIG REQUIRED)` succeeds, you can use the
+    libraries as `GTest::gtest`, `GTest::gmock`.
+
+And a more robust and flexible approach is to build GoogleTest as part of that
+project directly. This is done by making the GoogleTest source code available to
+the main build and adding it using CMake's `add_subdirectory()` command. This
+has the significant advantage that the same compiler and linker settings are
+used between GoogleTest and the rest of your project, so issues associated with
+using incompatible libraries (eg debug/release), etc. are avoided. This is
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 particularly useful on Windows. Making GoogleTest's source code available to the
 main build can be done a few different ways:
 
@@ -76,16 +123,27 @@ main build can be done a few different ways:
     possible or appropriate. Git submodules, for example, have their own set of
     advantages and drawbacks.
 *   Use CMake to download GoogleTest as part of the build's configure step. This
+<<<<<<< HEAD
     is just a little more complex, but doesn't have the limitations of the other
     methods.
 
 The last of the above methods is implemented with a small piece of CMake so the
 code is pulled into the main build.
+=======
+    approach doesn't have the limitations of the other methods.
+
+The last of the above methods is implemented with a small piece of CMake code
+that downloads and pulls the GoogleTest code into the main build.
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 
 Just add to your `CMakeLists.txt`:
 
 ```cmake
+<<<<<<< HEAD
 include (FetchContent)
+=======
+include(FetchContent)
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 FetchContent_Declare(
   googletest
   # Specify the commit you depend on and update it regularly.

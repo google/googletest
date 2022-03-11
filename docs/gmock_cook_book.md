@@ -287,7 +287,12 @@ recipe for [mocking non-virtual methods](#MockingNonVirtualMethods).
 
 ### Old-Style `MOCK_METHODn` Macros
 
+<<<<<<< HEAD
 Before the generic `MOCK_METHOD` macro [was introduced in 2018](https://github.com/google/googletest/commit/c5f08bf91944ce1b19bcf414fa1760e69d20afc2),
+=======
+Before the generic `MOCK_METHOD` macro
+[was introduced in 2018](https://github.com/google/googletest/commit/c5f08bf91944ce1b19bcf414fa1760e69d20afc2),
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 mocks where created using a family of macros collectively called `MOCK_METHODn`.
 These macros are still supported, though migration to the new `MOCK_METHOD` is
 recommended.
@@ -1266,8 +1271,12 @@ the pointer itself, has a certain property? Well, you can use the `Pointee(m)`
 matcher.
 
 `Pointee(m)` matches a pointer if and only if `m` matches the value the pointer
+<<<<<<< HEAD
 points to.
 For example:
+=======
+points to. For example:
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 
 ```cpp
 using ::testing::Ge;

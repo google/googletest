@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 (**Note:** If you get compiler errors that you don't understand, be sure to consult [Google Mock Doctor](frequently_asked_questions.md#how-am-i-supposed-to-make-sense-of-these-horrible-template-errors).)
 
 # What Is Google C++ Mocking Framework? #
@@ -46,6 +47,111 @@ Using Google Mock is easy! Inside your C++ source file, just `#include` `"gtest/
 
 # A Case for Mock Turtles #
 Let's look at an example. Suppose you are developing a graphics program that relies on a LOGO-like API for drawing. How would you test that it does the right thing? Well, you can run it and compare the screen with a golden screen snapshot, but let's admit it: tests like this are expensive to run and fragile (What if you just upgraded to a shiny new graphics card that has better anti-aliasing? Suddenly you have to update all your golden images.). It would be too painful if all your tests are like this. Fortunately, you learned about Dependency Injection and know the right thing to do: instead of having your application talk to the drawing API directly, wrap the API in an interface (say, `Turtle`) and code to that interface:
+=======
+# gMock for Dummies
+
+## What Is gMock?
+
+When you write a prototype or test, often it's not feasible or wise to rely on
+real objects entirely. A **mock object** implements the same interface as a real
+object (so it can be used as one), but lets you specify at run time how it will
+be used and what it should do (which methods will be called? in which order? how
+many times? with what arguments? what will they return? etc).
+
+It is easy to confuse the term *fake objects* with mock objects. Fakes and mocks
+actually mean very different things in the Test-Driven Development (TDD)
+community:
+
+*   **Fake** objects have working implementations, but usually take some
+    shortcut (perhaps to make the operations less expensive), which makes them
+    not suitable for production. An in-memory file system would be an example of
+    a fake.
+*   **Mocks** are objects pre-programmed with *expectations*, which form a
+    specification of the calls they are expected to receive.
+
+If all this seems too abstract for you, don't worry - the most important thing
+to remember is that a mock allows you to check the *interaction* between itself
+and code that uses it. The difference between fakes and mocks shall become much
+clearer once you start to use mocks.
+
+**gMock** is a library (sometimes we also call it a "framework" to make it sound
+cool) for creating mock classes and using them. It does to C++ what
+jMock/EasyMock does to Java (well, more or less).
+
+When using gMock,
+
+1.  first, you use some simple macros to describe the interface you want to
+    mock, and they will expand to the implementation of your mock class;
+2.  next, you create some mock objects and specify its expectations and behavior
+    using an intuitive syntax;
+3.  then you exercise code that uses the mock objects. gMock will catch any
+    violation to the expectations as soon as it arises.
+
+## Why gMock?
+
+While mock objects help you remove unnecessary dependencies in tests and make
+them fast and reliable, using mocks manually in C++ is *hard*:
+
+*   Someone has to implement the mocks. The job is usually tedious and
+    error-prone. No wonder people go great distance to avoid it.
+*   The quality of those manually written mocks is a bit, uh, unpredictable. You
+    may see some really polished ones, but you may also see some that were
+    hacked up in a hurry and have all sorts of ad hoc restrictions.
+*   The knowledge you gained from using one mock doesn't transfer to the next
+    one.
+
+In contrast, Java and Python programmers have some fine mock frameworks (jMock,
+EasyMock, etc), which automate the creation of mocks. As a result, mocking is a
+proven effective technique and widely adopted practice in those communities.
+Having the right tool absolutely makes the difference.
+
+gMock was built to help C++ programmers. It was inspired by jMock and EasyMock,
+but designed with C++'s specifics in mind. It is your friend if any of the
+following problems is bothering you:
+
+*   You are stuck with a sub-optimal design and wish you had done more
+    prototyping before it was too late, but prototyping in C++ is by no means
+    "rapid".
+*   Your tests are slow as they depend on too many libraries or use expensive
+    resources (e.g. a database).
+*   Your tests are brittle as some resources they use are unreliable (e.g. the
+    network).
+*   You want to test how your code handles a failure (e.g. a file checksum
+    error), but it's not easy to cause one.
+*   You need to make sure that your module interacts with other modules in the
+    right way, but it's hard to observe the interaction; therefore you resort to
+    observing the side effects at the end of the action, but it's awkward at
+    best.
+*   You want to "mock out" your dependencies, except that they don't have mock
+    implementations yet; and, frankly, you aren't thrilled by some of those
+    hand-written mocks.
+
+We encourage you to use gMock as
+
+*   a *design* tool, for it lets you experiment with your interface design early
+    and often. More iterations lead to better designs!
+*   a *testing* tool to cut your tests' outbound dependencies and probe the
+    interaction between your module and its collaborators.
+
+## Getting Started
+
+gMock is bundled with googletest.
+
+## A Case for Mock Turtles
+
+Let's look at an example. Suppose you are developing a graphics program that
+relies on a [LOGO](http://en.wikipedia.org/wiki/Logo_programming_language)-like
+API for drawing. How would you test that it does the right thing? Well, you can
+run it and compare the screen with a golden screen snapshot, but let's admit it:
+tests like this are expensive to run and fragile (What if you just upgraded to a
+shiny new graphics card that has better anti-aliasing? Suddenly you have to
+update all your golden images.). It would be too painful if all your tests are
+like this. Fortunately, you learned about
+[Dependency Injection](http://en.wikipedia.org/wiki/Dependency_injection) and know the right thing
+to do: instead of having your application talk to the system API directly, wrap
+the API in an interface (say, `Turtle`) and code to that interface:
+
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 ```cpp
 class Turtle {
   ...
@@ -425,8 +531,13 @@ the *default* action for the function every time (unless, of course, you have a
 `WillRepeatedly()`.).
 
 What can we do inside `WillOnce()` besides `Return()`? You can return a
+<<<<<<< HEAD
 reference using `ReturnRef(`*`variable`*`)`, or invoke a pre-defined function, among
 [others](gmock_cook_book.md#using-actions).
+=======
+reference using `ReturnRef(`*`variable`*`)`, or invoke a pre-defined function,
+among [others](gmock_cook_book.md#using-actions).
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 
 **Important note:** The `EXPECT_CALL()` statement evaluates the action clause
 only once, even though the action may be performed many times. Therefore you

@@ -14,10 +14,15 @@ endif (POLICY CMP0077)
 project(googletest-distribution)
 set(GOOGLETEST_VERSION 1.11.0)
 
+<<<<<<< HEAD
 if (CMAKE_VERSION VERSION_GREATER "3.0.2")
   if(NOT CYGWIN AND NOT MSYS)
     set(CMAKE_CXX_EXTENSIONS OFF)
   endif()
+=======
+if(NOT CYGWIN AND NOT MSYS AND NOT ${CMAKE_SYSTEM_NAME} STREQUAL QNX)
+  set(CMAKE_CXX_EXTENSIONS OFF)
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 endif()
 
 enable_testing()

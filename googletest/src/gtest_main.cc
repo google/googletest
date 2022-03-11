@@ -31,6 +31,7 @@
 #include "gtest/gtest.h"
 
 #if GTEST_OS_ESP8266 || GTEST_OS_ESP32
+<<<<<<< HEAD
 # if GTEST_OS_ESP8266
 extern "C" {
 # endif
@@ -43,6 +44,21 @@ void setup() {
 void loop() {
   RUN_ALL_TESTS();
 }
+=======
+#if GTEST_OS_ESP8266
+extern "C" {
+#endif
+void setup() {
+  testing::InitGoogleTest();
+}
+
+void loop() { RUN_ALL_TESTS(); }
+
+#if GTEST_OS_ESP8266
+}
+#endif
+
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 #else
 
 GTEST_API_ int main(int argc, char **argv) {
@@ -50,6 +66,10 @@ GTEST_API_ int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
+<<<<<<< HEAD
 
 #endif
 
+=======
+#endif
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f

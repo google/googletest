@@ -110,12 +110,26 @@
 #include <type_traits>
 #include <utility>
 #include <vector>
+<<<<<<< HEAD
+
+#include "gtest/internal/gtest-internal.h"
+#include "gtest/internal/gtest-port.h"
+=======
 
 #include "gtest/internal/gtest-internal.h"
 #include "gtest/internal/gtest-port.h"
 
 namespace testing {
 
+// Definitions in the internal* namespaces are subject to change without notice.
+// DO NOT USE THEM IN USER CODE!
+namespace internal {
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
+
+template <typename T>
+void UniversalPrint(const T& value, ::std::ostream* os);
+
+<<<<<<< HEAD
 // Definitions in the internal* namespaces are subject to change without notice.
 // DO NOT USE THEM IN USER CODE!
 namespace internal {
@@ -134,17 +148,97 @@ enum TypeKind {
                              // absl::string_view or std::string_view
 #endif
   kOtherType  // anything else
+=======
+// Used to print an STL-style container when the user doesn't define
+// a PrintTo() for it.
+struct ContainerPrinter {
+  template <typename T,
+            typename = typename std::enable_if<
+                (sizeof(IsContainerTest<T>(0)) == sizeof(IsContainer)) &&
+                !IsRecursiveContainer<T>::value>::type>
+  static void PrintValue(const T& container, std::ostream* os) {
+    const size_t kMaxCount = 32;  // The maximum number of elements to print.
+    *os << '{';
+    size_t count = 0;
+    for (auto&& elem : container) {
+      if (count > 0) {
+        *os << ',';
+        if (count == kMaxCount) {  // Enough has been printed.
+          *os << " ...";
+          break;
+        }
+      }
+      *os << ' ';
+      // We cannot call PrintTo(elem, os) here as PrintTo() doesn't
+      // handle `elem` being a native array.
+      internal::UniversalPrint(elem, os);
+      ++count;
+    }
+
+    if (count > 0) {
+      *os << ' ';
+    }
+    *os << '}';
+  }
 };
 
-// TypeWithoutFormatter<T, kTypeKind>::PrintValue(value, os) is called
-// by the universal printer to print a value of type T when neither
-// operator<< nor PrintTo() is defined for T, where kTypeKind is the
-// "kind" of T as defined by enum TypeKind.
-template <typename T, TypeKind kTypeKind>
-class TypeWithoutFormatter {
- public:
-  // This default version is called when kTypeKind is kOtherType.
+// Used to print a pointer that is neither a char pointer nor a member
+// pointer, when the user doesn't define PrintTo() for it.  (A member
+// variable pointer or member function pointer doesn't really point to
+// a location in the address space.  Their representation is
+// implementation-defined.  Therefore they will be printed as raw
+// bytes.)
+struct FunctionPointerPrinter {
+  template <typename T, typename = typename std::enable_if<
+                            std::is_function<T>::value>::type>
+  static void PrintValue(T* p, ::std::ostream* os) {
+    if (p == nullptr) {
+      *os << "NULL";
+    } else {
+      // T is a function type, so '*os << p' doesn't do what we want
+      // (it just prints p as bool).  We want to print p as a const
+      // void*.
+      *os << reinterpret_cast<const void*>(p);
+    }
+  }
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
+};
+
+struct PointerPrinter {
+  template <typename T>
+  static void PrintValue(T* p, ::std::ostream* os) {
+    if (p == nullptr) {
+      *os << "NULL";
+    } else {
+      // T is not a function type.  We just call << to print p,
+      // relying on ADL to pick up user-defined << for their pointer
+      // types, if any.
+      *os << p;
+    }
+  }
+};
+
+namespace internal_stream_operator_without_lexical_name_lookup {
+
+// The presence of an operator<< here will terminate lexical scope lookup
+// straight away (even though it cannot be a match because of its argument
+// types). Thus, the two operator<< calls in StreamPrinter will find only ADL
+// candidates.
+struct LookupBlocker {};
+void operator<<(LookupBlocker, LookupBlocker);
+
+struct StreamPrinter {
+  template <typename T,
+            // Don't accept member pointers here. We'd print them via implicit
+            // conversion to bool, which isn't useful.
+            typename = typename std::enable_if<
+                !std::is_member_pointer<T>::value>::type,
+            // Only accept types for which we can find a streaming operator via
+            // ADL (possibly involving implicit conversions).
+            typename = decltype(std::declval<std::ostream&>()
+                                << std::declval<const T&>())>
   static void PrintValue(const T& value, ::std::ostream* os) {
+<<<<<<< HEAD
     PrintBytesInObjectTo(static_cast<const unsigned char*>(
                              reinterpret_cast<const void*>(
                                  std::addressof(value))), sizeof(value), os);
@@ -193,14 +287,30 @@ struct StreamPrinter {
 
 }  // namespace internal_stream_operator_without_lexical_name_lookup
 
+=======
+    // Call streaming operator found by ADL, possibly with implicit conversions
+    // of the arguments.
+    *os << value;
+  }
+};
+
+}  // namespace internal_stream_operator_without_lexical_name_lookup
+
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 struct ProtobufPrinter {
   // We print a protobuf using its ShortDebugString() when the string
   // doesn't exceed this many characters; otherwise we print it using
   // DebugString() for better readability.
   static const size_t kProtobufOneLinerMaxLength = 50;
 
+<<<<<<< HEAD
   template <typename T, typename = typename std::enable_if<
                             internal::IsAProtocolMessage<T>::value>::type>
+=======
+  template <typename T,
+            typename = typename std::enable_if<
+                internal::HasDebugStringAndShortDebugString<T>::value>::type>
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
   static void PrintValue(const T& value, ::std::ostream* os) {
     std::string pretty_str = value.ShortDebugString();
     if (pretty_str.length() > kProtobufOneLinerMaxLength) {
@@ -218,9 +328,14 @@ struct ConvertibleToIntegerPrinter {
   // case printing it as an integer is the desired behavior. In case
   // T is not an enum, printing it as an integer is the best we can do
   // given that it has no user-defined printer.
+<<<<<<< HEAD
   static void PrintValue(const T& value, ::std::ostream* os) {
     const std::intmax_t kBigInt = value;
     *os << kBigInt;
+=======
+  static void PrintValue(internal::BiggestInt value, ::std::ostream* os) {
+    *os << value;
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
   }
 };
 
@@ -229,6 +344,7 @@ struct ConvertibleToStringViewPrinter {
   static void PrintValue(internal::StringView value, ::std::ostream* os) {
     internal::UniversalPrint(value, os);
   }
+<<<<<<< HEAD
 #endif
 };
 
@@ -270,11 +386,15 @@ template <typename Char, typename CharTraits, typename T>
                                          const T&, internal::StringView>::value
                                          ? kConvertibleToStringView
                                          :
+=======
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 #endif
-                                         kOtherType)>::PrintValue(x, &os);
-  return os;
-}
+};
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 // Prints the given number of bytes in the given object to the given
 // ostream.
 GTEST_API_ void PrintBytesInObjectTo(const unsigned char* obj_bytes,
@@ -585,6 +705,7 @@ inline void PrintTo(const ::std::u8string& s, ::std::ostream* os) {
 GTEST_API_ void PrintU16StringTo(const ::std::u16string& s, ::std::ostream* os);
 inline void PrintTo(const ::std::u16string& s, ::std::ostream* os) {
   PrintU16StringTo(s, os);
+<<<<<<< HEAD
 }
 
 // Overloads for ::std::u32string
@@ -593,6 +714,16 @@ inline void PrintTo(const ::std::u32string& s, ::std::ostream* os) {
   PrintU32StringTo(s, os);
 }
 
+=======
+}
+
+// Overloads for ::std::u32string
+GTEST_API_ void PrintU32StringTo(const ::std::u32string& s, ::std::ostream* os);
+inline void PrintTo(const ::std::u32string& s, ::std::ostream* os) {
+  PrintU32StringTo(s, os);
+}
+
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 // Overloads for ::std::wstring.
 #if GTEST_HAS_STD_WSTRING
 GTEST_API_ void PrintWideStringTo(const ::std::wstring&s, ::std::ostream* os);
@@ -753,10 +884,18 @@ template <>
 class UniversalPrinter<Any> {
  public:
   static void Print(const Any& value, ::std::ostream* os) {
+<<<<<<< HEAD
     if (value.has_value())
       *os << "'any' type with value of type " << GetTypeName(value);
     else
       *os << "'any' type with no value";
+=======
+    if (value.has_value()) {
+      *os << "value of type " << GetTypeName(value);
+    } else {
+      *os << "no value";
+    }
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
   }
 
  private:
@@ -764,8 +903,13 @@ class UniversalPrinter<Any> {
 #if GTEST_HAS_RTTI
     return internal::GetTypeName(value.type());
 #else
+<<<<<<< HEAD
     static_cast<void>(value); // possibly unused
     return "the element type";
+=======
+    static_cast<void>(value);  // possibly unused
+    return "<unknown_type>";
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 #endif  // GTEST_HAS_RTTI
   }
 };
@@ -821,7 +965,12 @@ class UniversalPrinter<Variant<T...>> {
   struct Visitor {
     template <typename U>
     void operator()(const U& u) const {
+<<<<<<< HEAD
       *os << "'" << GetTypeName<U>() << "(" << index << ")' with value ";
+=======
+      *os << "'" << GetTypeName<U>() << "(index = " << index
+          << ")' with value ";
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
       UniversalPrint(u, os);
     }
     ::std::ostream* os;

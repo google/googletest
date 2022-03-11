@@ -56,6 +56,7 @@ _[Test Suite][istqb test suite]_ for this.
 
 The related term _Test_, as it is used in googletest, corresponds to the term
 _[Test Case][istqb test case]_ of ISTQB and others.
+<<<<<<< HEAD:docs/primer.md
 
 The term _Test_ is commonly of broad enough sense, including ISTQB's definition
 of _Test Case_, so it's not much of a problem here. But the term _Test Case_ as
@@ -70,6 +71,24 @@ So please be aware of the different definitions of the terms:
 Meaning                                                                              | googletest Term         | [ISTQB](http://www.istqb.org/) Term
 :----------------------------------------------------------------------------------- | :---------------------- | :----------------------------------
 Exercise a particular program path with specific input values and verify the results | [TEST()](#simple-tests) | [Test Case][istqb test case]
+=======
+
+The term _Test_ is commonly of broad enough sense, including ISTQB's definition
+of _Test Case_, so it's not much of a problem here. But the term _Test Case_ as
+was used in Google Test is of contradictory sense and thus confusing.
+
+googletest recently started replacing the term _Test Case_ with _Test Suite_.
+The preferred API is *TestSuite*. The older TestCase API is being slowly
+deprecated and refactored away.
+
+So please be aware of the different definitions of the terms:
+
+
+Meaning                                                                              | googletest Term         | [ISTQB](http://www.istqb.org/) Term
+:----------------------------------------------------------------------------------- | :---------------------- | :----------------------------------
+Exercise a particular program path with specific input values and verify the results | [TEST()](#simple-tests) | [Test Case][istqb test case]
+
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f:googletest/docs/primer.md
 
 [istqb test case]: http://glossary.istqb.org/en/search/test%20case
 [istqb test suite]: http://glossary.istqb.org/en/search/test%20suite
@@ -133,6 +152,7 @@ macro--in particular, C strings and `string` objects. If a wide string
 (`wchar_t*`, `TCHAR*` in `UNICODE` mode on Windows, or `std::wstring`) is
 streamed to an assertion, it will be translated to UTF-8 when printed.
 
+<<<<<<< HEAD:docs/primer.md
 ### Basic Assertions
 
 These assertions do basic true/false condition testing.
@@ -235,6 +255,14 @@ of two wide strings fails, their values will be printed as UTF-8 narrow strings.
 **See also**: For more string comparison tricks (substring, prefix, suffix, and
 regular expression matching, for example), see [this](advanced.md) in the
 Advanced googletest Guide.
+=======
+GoogleTest provides a collection of assertions for verifying the behavior of
+your code in various ways. You can check Boolean conditions, compare values
+based on relational operators, verify string values, floating-point values, and
+much more. There are even assertions that enable you to verify more complex
+states by providing custom predicates. For the complete list of assertions
+provided by GoogleTest, see the [Assertions Reference](reference/assertions.md).
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f:googletest/docs/primer.md
 
 ## Simple Tests
 
@@ -256,9 +284,15 @@ TEST(TestSuiteName, TestName) {
 
 `TEST()` arguments go from general to specific. The *first* argument is the name
 of the test suite, and the *second* argument is the test's name within the test
+<<<<<<< HEAD:docs/primer.md
 suite. Both names must be valid C++ identifiers, and they should not contain
 underscore (`_`). A test's *full name* consists of its containing test suite and
 its individual name. Tests from different test suites can have the same
+=======
+suite. Both names must be valid C++ identifiers, and they should not contain any
+underscores (`_`). A test's *full name* consists of its containing test suite
+and its individual name. Tests from different test suites can have the same
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f:googletest/docs/primer.md
 individual name.
 
 For example, let's take a simple integer function:

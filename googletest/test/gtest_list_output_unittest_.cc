@@ -53,9 +53,15 @@ TEST_P(ValueParamTest, Test5) {}
 TEST_P(ValueParamTest, Test6) {}
 INSTANTIATE_TEST_SUITE_P(ValueParam, ValueParamTest, ::testing::Values(33, 42));
 
+<<<<<<< HEAD
 #if GTEST_HAS_TYPED_TEST
 template <typename T> class TypedTest : public ::testing::Test {};
 typedef testing::Types<int, long> TypedTestTypes;
+=======
+template <typename T>
+class TypedTest : public ::testing::Test {};
+typedef testing::Types<int, bool> TypedTestTypes;
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 TYPED_TEST_SUITE(TypedTest, TypedTestTypes);
 TYPED_TEST(TypedTest, Test7) {}
 TYPED_TEST(TypedTest, Test8) {}
@@ -66,7 +72,11 @@ TYPED_TEST_SUITE_P(TypeParameterizedTestSuite);
 TYPED_TEST_P(TypeParameterizedTestSuite, Test9) {}
 TYPED_TEST_P(TypeParameterizedTestSuite, Test10) {}
 REGISTER_TYPED_TEST_SUITE_P(TypeParameterizedTestSuite, Test9, Test10);
+<<<<<<< HEAD
 typedef testing::Types<int, long> TypeParameterizedTestSuiteTypes;  // NOLINT
+=======
+typedef testing::Types<int, bool> TypeParameterizedTestSuiteTypes;  // NOLINT
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 INSTANTIATE_TYPED_TEST_SUITE_P(Single, TypeParameterizedTestSuite,
                                TypeParameterizedTestSuiteTypes);
 

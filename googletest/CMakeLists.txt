@@ -256,6 +256,9 @@ if (gtest_build_tests)
   cxx_executable(googletest-break-on-failure-unittest_ test gtest)
   py_test(googletest-break-on-failure-unittest)
 
+  py_test(gtest_skip_check_output_test)
+  py_test(gtest_skip_environment_check_output_test)
+
   # Visual Studio .NET 2003 does not support STL with exceptions disabled.
   if (NOT MSVC OR MSVC_VERSION GREATER 1310)  # 1310 is Visual Studio .NET 2003
     cxx_executable_with_flags(

@@ -29,6 +29,73 @@
 
 // The Google C++ Testing and Mocking Framework (Google Test)
 //
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD:googletest/test/googletest-overload-addressof-operator-test.cc
+// This file tests EXPECT_EQ works when used with type that has overloaded &
+// operator.
+
+#include <gtest/gtest.h>
+#include <string>
+
+class string_ref;
+
+/**
+ * This is a synthetic pointer to a fixed size string.
+ */
+class string_ptr {
+ public:
+  string_ptr(const char *data, size_t size) : data_(data), size_(size) {}
+
+  string_ptr &operator++() noexcept {
+    data_ += size_;
+    return *this;
+  }
+
+  string_ref operator*() const noexcept;
+
+ private:
+  const char *data_;
+  size_t size_;
+};
+
+/**
+ * This is a synthetic reference of a fixed size string.
+ */
+class string_ref {
+ public:
+  string_ref(const char *data, size_t size) : data_(data), size_(size) {}
+
+  string_ptr operator&() const noexcept { return {data_, size_}; }
+
+  bool operator==(const char *s) const noexcept {
+    if (size_ > 0 && data_[size_ - 1] != 0) {
+      return std::string(data_, size_) == std::string(s);
+    } else {
+      return std::string(data_) == std::string(s);
+    }
+  }
+
+ private:
+  const char *data_;
+  size_t size_;
+};
+
+string_ref string_ptr::operator*() const noexcept { return {data_, size_}; }
+
+TEST(string_ref, compare) {
+  const char *s = "alex\0davidjohn\0";
+  string_ptr ptr(s, 5);
+  EXPECT_EQ(*ptr, "alex");
+  EXPECT_TRUE(*ptr == "alex");
+  ++ptr;
+  EXPECT_EQ(*ptr, "david");
+  EXPECT_TRUE(*ptr == "david");
+  ++ptr;
+  EXPECT_EQ(*ptr, "john");
+}
+=======
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
 // This file defines the AssertionResult type.
 
 #include "gtest/gtest-assertion-result.h"
@@ -79,3 +146,7 @@ AssertionResult AssertionFailure(const Message& message) {
 }
 
 }  // namespace testing
+<<<<<<< HEAD
+=======
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f:googletest/src/gtest-assertion-result.cc
+>>>>>>> 70989cf3f67042c181ac8f206e7cb91c0b0ba60f
