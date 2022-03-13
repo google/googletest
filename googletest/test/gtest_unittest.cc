@@ -4290,25 +4290,29 @@ TEST(SuccessfulAssertionTest, SUCCEED) {
 // Tests that Google Test doesn't track successful EXPECT_*.
 TEST(SuccessfulAssertionTest, EXPECT) {
   EXPECT_TRUE(true);
-  EXPECT_EQ(0, GetUnitTestImpl()->current_test_result()->total_part_count());
+  EXPECT_EQ(1, GetUnitTestImpl()->current_test_result()->total_part_count());
+  EXPECT_TRUE(GetUnitTestImpl()->current_test_result()->GetTestPartResult(1).passed());
 }
 
 // Tests that Google Test doesn't track successful EXPECT_STR*.
 TEST(SuccessfulAssertionTest, EXPECT_STR) {
   EXPECT_STREQ("", "");
-  EXPECT_EQ(0, GetUnitTestImpl()->current_test_result()->total_part_count());
+  EXPECT_EQ(1, GetUnitTestImpl()->current_test_result()->total_part_count());
+  EXPECT_TRUE(GetUnitTestImpl()->current_test_result()->GetTestPartResult(1).passed());
 }
 
 // Tests that Google Test doesn't track successful ASSERT_*.
 TEST(SuccessfulAssertionTest, ASSERT) {
   ASSERT_TRUE(true);
-  EXPECT_EQ(0, GetUnitTestImpl()->current_test_result()->total_part_count());
+  EXPECT_EQ(1, GetUnitTestImpl()->current_test_result()->total_part_count());
+  EXPECT_TRUE(GetUnitTestImpl()->current_test_result()->GetTestPartResult(1).passed());
 }
 
 // Tests that Google Test doesn't track successful ASSERT_STR*.
 TEST(SuccessfulAssertionTest, ASSERT_STR) {
   ASSERT_STREQ("", "");
-  EXPECT_EQ(0, GetUnitTestImpl()->current_test_result()->total_part_count());
+  EXPECT_EQ(1, GetUnitTestImpl()->current_test_result()->total_part_count());
+  EXPECT_TRUE(GetUnitTestImpl()->current_test_result()->GetTestPartResult(1).passed());
 }
 
 }  // namespace testing
@@ -5367,8 +5371,9 @@ TEST_F(TestInfoTest, result) {
   // Initially, there is no TestPartResult for this test.
   ASSERT_EQ(0, GetTestResult(test_info)->total_part_count());
 
-  // After the previous assertion, there is still none.
-  ASSERT_EQ(0, GetTestResult(test_info)->total_part_count());
+  // After the previous assertion, there is one.
+  ASSERT_EQ(1, GetTestResult(test_info)->total_part_count());
+  ASSERT_TRUE(GetTestResult(test_info)->GetTestPartResult(0).passed());
 }
 
 #define VERIFY_CODE_LOCATION \
@@ -5713,6 +5718,14 @@ struct Flags {
     return flags;
   }
 
+  // Creates a Flags struct where the gtest_output_succeeded flag has the given
+  // value.
+  static Flags OutputSucceed(bool output_succeeded) {
+    Flags flags;
+    flags.output_succeeded = output_succeeded;
+    return flags;
+  }
+
   // These fields store the flag values.
   bool also_run_disabled_tests;
   bool break_on_failure;
@@ -5731,6 +5744,7 @@ struct Flags {
   int32_t stack_trace_depth;
   const char* stream_result_to;
   bool throw_on_failure;
+  bool output_succeeded;
 };
 
 // Fixture for testing ParseGoogleTestFlagsOnly().
@@ -5755,6 +5769,7 @@ class ParseFlagsTest : public Test {
     GTEST_FLAG_SET(stack_trace_depth, kMaxStackTraceDepth);
     GTEST_FLAG_SET(stream_result_to, "");
     GTEST_FLAG_SET(throw_on_failure, false);
+    GTEST_FLAG_SET(output_succeeded, true);
   }
 
   // Asserts that two narrow or wide string arrays are equal.

@@ -7245,7 +7245,7 @@ TEST_F(PredicateFormatterFromMatcherTest, ShortCircuitOnSuccess) {
   AssertionResult result = RunPredicateFormatter(kInitialSuccess);
   EXPECT_TRUE(result);  // Implicit cast to bool.
   std::string expect;
-  EXPECT_EQ(expect, result.message());
+  EXPECT_NE(expect, result.message());
 }
 
 TEST_F(PredicateFormatterFromMatcherTest, NoShortCircuitOnFailure) {

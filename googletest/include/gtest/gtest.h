@@ -157,6 +157,9 @@ GTEST_DECLARE_string_(stream_result_to);
 GTEST_DECLARE_string_(flagfile);
 #endif  // GTEST_USE_OWN_FLAGFILE_FLAG_
 
+// This flags control whether Google Test prints succeeded assertions.
+GTEST_DECLARE_bool_(output_succeeded);
+
 namespace testing {
 
 // Silence C4100 (unreferenced formal parameter) and 4805
@@ -1350,6 +1353,16 @@ AssertionResult CmpHelperEQFailure(const char* lhs_expression,
                    false);
 }
 
+template <typename T1, typename T2>
+AssertionResult CmpHelperEQSuccess(const char* lhs_expression,
+                                   const char* rhs_expression,
+                                   const T1& lhs, const T2& rhs) {
+  return AssertionSuccess() << EqMessage(lhs_expression,
+                   rhs_expression,
+                   FormatForComparisonFailureMessage(lhs, rhs),
+                   FormatForComparisonFailureMessage(rhs, lhs),
+                   false);
+}
 // This block of code defines operator==/!=
 // to block lexical scope lookup.
 // It prevents using invalid operator==/!= defined at namespace scope.
@@ -1364,7 +1377,7 @@ AssertionResult CmpHelperEQ(const char* lhs_expression,
                             const T1& lhs,
                             const T2& rhs) {
   if (lhs == rhs) {
-    return AssertionSuccess();
+    return CmpHelperEQSuccess(lhs_expression, rhs_expression, lhs, rhs);
   }
 
   return CmpHelperEQFailure(lhs_expression, rhs_expression, lhs, rhs);
@@ -1413,10 +1426,10 @@ class EqHelper {
 // frame size of CmpHelperOP. This helps reduce the overhead of some sanitizers
 // when calling EXPECT_OP in a tight loop.
 template <typename T1, typename T2>
-AssertionResult CmpHelperOpFailure(const char* expr1, const char* expr2,
+Message CmpHelperOpMessage(const char* expr1, const char* expr2,
                                    const T1& val1, const T2& val2,
                                    const char* op) {
-  return AssertionFailure()
+  return Message()
          << "Expected: (" << expr1 << ") " << op << " (" << expr2
          << "), actual: " << FormatForComparisonFailureMessage(val1, val2)
          << " vs " << FormatForComparisonFailureMessage(val2, val1);
@@ -1432,11 +1445,9 @@ AssertionResult CmpHelperOpFailure(const char* expr1, const char* expr2,
 template <typename T1, typename T2>\
 AssertionResult CmpHelper##op_name(const char* expr1, const char* expr2, \
                                    const T1& val1, const T2& val2) {\
-  if (val1 op val2) {\
-    return AssertionSuccess();\
-  } else {\
-    return CmpHelperOpFailure(expr1, expr2, val1, val2, #op);\
-  }\
+  AssertionResult result = (val1 op val2) ? AssertionSuccess() : AssertionFailure();\
+  result << CmpHelperOpMessage(expr1, expr2, val1, val2, #op);\
+  return result;\
 }
 
 // INTERNAL IMPLEMENTATION - DO NOT USE IN A USER PROGRAM.
@@ -1768,33 +1779,33 @@ class TestWithParam : public Test, public WithParamInterface<T> {
 //         Tests that the statement throws an exception.
 
 #define EXPECT_THROW(statement, expected_exception) \
-  GTEST_TEST_THROW_(statement, expected_exception, GTEST_NONFATAL_FAILURE_)
+  GTEST_TEST_THROW_(statement, expected_exception, GTEST_NONFATAL_FAILURE_, GTEST_SUCCESS_)
 #define EXPECT_NO_THROW(statement) \
-  GTEST_TEST_NO_THROW_(statement, GTEST_NONFATAL_FAILURE_)
+  GTEST_TEST_NO_THROW_(statement, GTEST_NONFATAL_FAILURE_, GTEST_SUCCESS_)
 #define EXPECT_ANY_THROW(statement) \
-  GTEST_TEST_ANY_THROW_(statement, GTEST_NONFATAL_FAILURE_)
+  GTEST_TEST_ANY_THROW_(statement, GTEST_NONFATAL_FAILURE_, GTEST_SUCCESS_)
 #define ASSERT_THROW(statement, expected_exception) \
-  GTEST_TEST_THROW_(statement, expected_exception, GTEST_FATAL_FAILURE_)
+  GTEST_TEST_THROW_(statement, expected_exception, GTEST_FATAL_FAILURE_, GTEST_SUCCESS_)
 #define ASSERT_NO_THROW(statement) \
-  GTEST_TEST_NO_THROW_(statement, GTEST_FATAL_FAILURE_)
+  GTEST_TEST_NO_THROW_(statement, GTEST_FATAL_FAILURE_, GTEST_SUCCESS_)
 #define ASSERT_ANY_THROW(statement) \
-  GTEST_TEST_ANY_THROW_(statement, GTEST_FATAL_FAILURE_)
+  GTEST_TEST_ANY_THROW_(statement, GTEST_FATAL_FAILURE_, GTEST_SUCCESS_)
 
 // Boolean assertions. Condition can be either a Boolean expression or an
 // AssertionResult. For more information on how to use AssertionResult with
 // these macros see comments on that class.
 #define GTEST_EXPECT_TRUE(condition) \
   GTEST_TEST_BOOLEAN_(condition, #condition, false, true, \
-                      GTEST_NONFATAL_FAILURE_)
+                      GTEST_NONFATAL_FAILURE_, GTEST_SUCCESS_)
 #define GTEST_EXPECT_FALSE(condition) \
   GTEST_TEST_BOOLEAN_(!(condition), #condition, true, false, \
-                      GTEST_NONFATAL_FAILURE_)
+                      GTEST_NONFATAL_FAILURE_, GTEST_SUCCESS_)
 #define GTEST_ASSERT_TRUE(condition) \
   GTEST_TEST_BOOLEAN_(condition, #condition, false, true, \
-                      GTEST_FATAL_FAILURE_)
+                      GTEST_FATAL_FAILURE_, GTEST_SUCCESS_)
 #define GTEST_ASSERT_FALSE(condition) \
   GTEST_TEST_BOOLEAN_(!(condition), #condition, true, false, \
-                      GTEST_FATAL_FAILURE_)
+                      GTEST_FATAL_FAILURE_, GTEST_SUCCESS_)
 
 // Define these macros to 1 to omit the definition of the corresponding
 // EXPECT or ASSERT, which clashes with some users' own code.
@@ -2035,9 +2046,9 @@ GTEST_API_ AssertionResult DoubleLE(const char* expr1, const char* expr2,
 //   ASSERT_NO_FATAL_FAILURE(Process()) << "Process() failed";
 //
 #define ASSERT_NO_FATAL_FAILURE(statement) \
-    GTEST_TEST_NO_FATAL_FAILURE_(statement, GTEST_FATAL_FAILURE_)
+    GTEST_TEST_NO_FATAL_FAILURE_(statement, GTEST_FATAL_FAILURE_, GTEST_SUCCESS_)
 #define EXPECT_NO_FATAL_FAILURE(statement) \
-    GTEST_TEST_NO_FATAL_FAILURE_(statement, GTEST_NONFATAL_FAILURE_)
+    GTEST_TEST_NO_FATAL_FAILURE_(statement, GTEST_NONFATAL_FAILURE_, GTEST_SUCCESS_)
 
 // Causes a trace (including the given source file path and line number,
 // and the given message) to be included in every test failure message generated

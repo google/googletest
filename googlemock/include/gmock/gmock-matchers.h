@@ -1587,9 +1587,7 @@ class PredicateFormatterFromMatcher {
 
     // The expected path here is that the matcher should match (i.e. that most
     // tests pass) so optimize for this case.
-    if (matcher.Matches(x)) {
-      return AssertionSuccess();
-    }
+    AssertionResult result = matcher.Matches(x) ? AssertionSuccess() : AssertionFailure();
 
     ::std::stringstream ss;
     ss << "Value of: " << value_text << "\n"
@@ -1597,13 +1595,15 @@ class PredicateFormatterFromMatcher {
     matcher.DescribeTo(&ss);
 
     // Rerun the matcher to "PrintAndExplain" the failure.
-    StringMatchResultListener listener;
-    if (MatchPrintAndExplain(x, matcher, &listener)) {
-      ss << "\n  The matcher failed on the initial attempt; but passed when "
-            "rerun to generate the explanation.";
+    if (!result){
+      StringMatchResultListener listener;
+      if (MatchPrintAndExplain(x, matcher, &listener)) {
+        ss << "\n  The matcher failed on the initial attempt; but passed when "
+              "rerun to generate the explanation.";
+      }
+      ss << "\n  Actual: " << listener.str();
     }
-    ss << "\n  Actual: " << listener.str();
-    return AssertionFailure() << ss.str();
+    return std::move(result) << ss.str();
   }
 
  private:

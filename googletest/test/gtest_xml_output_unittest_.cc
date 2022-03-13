@@ -85,7 +85,7 @@ TEST_F(SkippedTest, SkippedAfterFailure) {
 
 TEST(MixedResultTest, Succeeds) {
   EXPECT_EQ(1, 1);
-  ASSERT_EQ(1, 1);
+  ASSERT_EQ(2, 2);
 }
 
 TEST(MixedResultTest, Fails) {

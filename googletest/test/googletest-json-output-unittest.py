@@ -128,7 +128,7 @@ EXPECTED_NON_EMPTY = {
                 u'failure': u'gtest_xml_output_unittest_.cc:*\n'
                             u'Expected equality of these values:\n'
                             u'  1\n  2' + STACK_TRACE_TEMPLATE,
-                u'type': u''
+                u'type': u'failure'
             }]
         }]
     }, {
@@ -200,7 +200,7 @@ EXPECTED_NON_EMPTY = {
                 u'failure': u'gtest_xml_output_unittest_.cc:*\n'
                             u'Expected equality of these values:\n'
                             u'  1\n  2' + STACK_TRACE_TEMPLATE,
-                u'type': u''
+                u'type': u'failure'
             }]
         }]
     }, {
@@ -242,12 +242,12 @@ EXPECTED_NON_EMPTY = {
                 u'failure': u'gtest_xml_output_unittest_.cc:*\n'
                             u'Expected equality of these values:\n'
                             u'  1\n  2' + STACK_TRACE_TEMPLATE,
-                u'type': u''
+                u'type': u'failure'
             }, {
                 u'failure': u'gtest_xml_output_unittest_.cc:*\n'
                             u'Expected equality of these values:\n'
                             u'  2\n  3' + STACK_TRACE_TEMPLATE,
-                u'type': u''
+                u'type': u'failure'
             }]
         }, {
             u'name': u'DISABLED_test',
@@ -290,7 +290,7 @@ EXPECTED_NON_EMPTY = {
                             u'Failed\nXML output: <?xml encoding="utf-8">'
                             u'<top><![CDATA[cdata text]]></top>' +
                             STACK_TRACE_TEMPLATE,
-                u'type': u''
+                u'type': u'failure'
             }]
         }]
     }, {
@@ -325,7 +325,7 @@ EXPECTED_NON_EMPTY = {
                 u'failure': u'gtest_xml_output_unittest_.cc:*\n'
                             u'Failed\nInvalid characters in brackets'
                             u' [\x01\x02]' + STACK_TRACE_TEMPLATE,
-                u'type': u''
+                u'type': u'failure'
             }]
         }]
     }, {
@@ -661,7 +661,7 @@ EXPECTED_NO_TEST = {
                 u'failure': u'gtest_no_test_unittest.cc:*\n'
                             u'Expected equality of these values:\n'
                             u'  1\n  2' + STACK_TRACE_TEMPLATE,
-                u'type': u'',
+                u'type': u'failure',
             }]
         }]
     }],
@@ -695,6 +695,7 @@ class GTestJsonOutputUnitTest(gtest_test_utils.TestCase):
     Runs a test program that generates an JSON output for a binary with no
     tests, and tests that the JSON output is expected.
     """
+    self.maxDiff=None
 
     self._TestJsonOutput('gtest_no_test_unittest', EXPECTED_NO_TEST, 0)
 

@@ -192,7 +192,7 @@ GTEST_API_ std::string DiffStrings(const std::string& left,
                                    size_t* total_line_count);
 
 // Constructs and returns the message for an equality assertion
-// (e.g. ASSERT_EQ, EXPECT_STREQ, etc) failure.
+// (e.g. ASSERT_EQ, EXPECT_STREQ, etc).
 //
 // The first four parameters are the expressions used in the assertion
 // and their values, as strings.  For example, for ASSERT_EQ(foo, bar)
@@ -206,6 +206,16 @@ GTEST_API_ std::string DiffStrings(const std::string& left,
 // The ignoring_case parameter is true if and only if the assertion is a
 // *_STRCASEEQ*.  When it's true, the string " (ignoring case)" will
 // be inserted into the message.
+GTEST_API_ Message EqMessage(const char* lhs_expression,
+                          const char* rhs_expression,
+                          const std::string& lhs_value,
+                          const std::string& rhs_value,
+                          bool ignoring_case) ;
+
+// Constructs and returns the message for an equality assertion
+// (e.g. ASSERT_EQ, EXPECT_STREQ, etc) failure.
+//
+// See EqMessage for details.
 GTEST_API_ AssertionResult EqFailure(const char* expected_expression,
                                      const char* actual_expression,
                                      const std::string& expected_value,
@@ -1416,7 +1426,7 @@ class NeverThrown {
 
 #endif  // GTEST_HAS_EXCEPTIONS
 
-#define GTEST_TEST_THROW_(statement, expected_exception, fail)              \
+#define GTEST_TEST_THROW_(statement, expected_exception, fail, succeed)     \
   GTEST_AMBIGUOUS_ELSE_BLOCKER_                                             \
   if (::testing::internal::TrueWithString gtest_msg{}) {                    \
     bool gtest_caught_expected = false;                                     \
@@ -1424,6 +1434,8 @@ class NeverThrown {
       GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement);            \
     } catch (expected_exception const&) {                                   \
       gtest_caught_expected = true;                                         \
+      gtest_msg.value = "Expected: " #statement                             \
+                        " throws an exception of type " #expected_exception;\
     }                                                                       \
     GTEST_TEST_THROW_CATCH_STD_EXCEPTION_(statement, expected_exception)    \
     catch (...) {                                                           \
@@ -1437,6 +1449,8 @@ class NeverThrown {
                         " throws an exception of type " #expected_exception \
                         ".\n  Actual: it throws nothing.";                  \
       goto GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__);           \
+    } else {                                                                \
+      succeed(gtest_msg.value.c_str());                                     \
     }                                                                       \
   } else /*NOLINT*/                                                         \
     GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__)                   \
@@ -1460,7 +1474,7 @@ class NeverThrown {
 
 #endif  // GTEST_HAS_EXCEPTIONS
 
-#define GTEST_TEST_NO_THROW_(statement, fail) \
+#define GTEST_TEST_NO_THROW_(statement, fail, succeed) \
   GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
   if (::testing::internal::TrueWithString gtest_msg{}) { \
     try { \
@@ -1476,7 +1490,7 @@ class NeverThrown {
       fail(("Expected: " #statement " doesn't throw an exception.\n" \
             "  Actual: " + gtest_msg.value).c_str())
 
-#define GTEST_TEST_ANY_THROW_(statement, fail) \
+#define GTEST_TEST_ANY_THROW_(statement, fail, succeed) \
   GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
   if (::testing::internal::AlwaysTrue()) { \
     bool gtest_caught_any = false; \
@@ -1488,7 +1502,9 @@ class NeverThrown {
     } \
     if (!gtest_caught_any) { \
       goto GTEST_CONCAT_TOKEN_(gtest_label_testanythrow_, __LINE__); \
-    } \
+    } else {\
+      succeed("Expected: " #statement " throws an exception."); \
+    }\
   } else \
     GTEST_CONCAT_TOKEN_(gtest_label_testanythrow_, __LINE__): \
       fail("Expected: " #statement " throws an exception.\n" \
@@ -1498,23 +1514,27 @@ class NeverThrown {
 // Implements Boolean test assertions such as EXPECT_TRUE. expression can be
 // either a boolean expression or an AssertionResult. text is a textual
 // representation of expression as it was passed into the EXPECT_TRUE.
-#define GTEST_TEST_BOOLEAN_(expression, text, actual, expected, fail) \
+#define GTEST_TEST_BOOLEAN_(expression, text, actual, expected, fail, succeed) \
   GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
   if (const ::testing::AssertionResult gtest_ar_ = \
       ::testing::AssertionResult(expression)) \
-    ; \
+    succeed(::testing::internal::GetBoolAssertionFailureMessage(\
+        gtest_ar_, text, #actual, #expected).c_str()); \
   else \
     fail(::testing::internal::GetBoolAssertionFailureMessage(\
         gtest_ar_, text, #actual, #expected).c_str())
 
-#define GTEST_TEST_NO_FATAL_FAILURE_(statement, fail) \
+#define GTEST_TEST_NO_FATAL_FAILURE_(statement, fail, succeed) \
   GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
   if (::testing::internal::AlwaysTrue()) { \
     ::testing::internal::HasNewFatalFailureHelper gtest_fatal_failure_checker; \
     GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement); \
     if (gtest_fatal_failure_checker.has_new_fatal_failure()) { \
       goto GTEST_CONCAT_TOKEN_(gtest_label_testnofatal_, __LINE__); \
-    } \
+    } else {\
+      succeed("Expected: " #statement " doesn't generate new fatal " \
+           "failures in the current thread."); \
+    }\
   } else \
     GTEST_CONCAT_TOKEN_(gtest_label_testnofatal_, __LINE__): \
       fail("Expected: " #statement " doesn't generate new fatal " \
