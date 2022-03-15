@@ -4286,10 +4286,11 @@ void XmlUnitTestResultPrinter::OutputXmlTestInfo(::std::ostream* stream,
     OutputXmlAttribute(stream, kTestsuite, "type_param",
                        test_info.type_param());
   }
+
+  OutputXmlAttribute(stream, kTestsuite, "file", test_info.file());
+  OutputXmlAttribute(stream, kTestsuite, "line",
+                     StreamableToString(test_info.line()));
   if (GTEST_FLAG_GET(list_tests)) {
-    OutputXmlAttribute(stream, kTestsuite, "file", test_info.file());
-    OutputXmlAttribute(stream, kTestsuite, "line",
-                       StreamableToString(test_info.line()));
     *stream << " />\n";
     return;
   }
@@ -4744,11 +4745,14 @@ void JsonUnitTestResultPrinter::OutputJsonTestInfo(::std::ostream* stream,
     OutputJsonKey(stream, kTestsuite, "type_param", test_info.type_param(),
                   kIndent);
   }
+
+  OutputJsonKey(stream, kTestsuite, "file", test_info.file(), kIndent);
+  OutputJsonKey(stream, kTestsuite, "line", test_info.line(), kIndent, false);
   if (GTEST_FLAG_GET(list_tests)) {
-    OutputJsonKey(stream, kTestsuite, "file", test_info.file(), kIndent);
-    OutputJsonKey(stream, kTestsuite, "line", test_info.line(), kIndent, false);
     *stream << "\n" << Indent(8) << "}";
     return;
+  } else {
+    *stream << ",\n";
   }
 
   OutputJsonKey(stream, kTestsuite, "status",

@@ -518,8 +518,8 @@ Logs a property for the current test, test suite, or entire invocation of the
 test program. Only the last value for a given key is logged.
 
 The key must be a valid XML attribute name, and cannot conflict with the ones
-already used by GoogleTest (`name`, `status`, `time`, `classname`, `type_param`,
-and `value_param`).
+already used by GoogleTest (`name`, `file`, `line`, `status`, `time`,
+`classname`, `type_param`, and `value_param`).
 
 `RecordProperty` is `public static` so it can be called from utility functions
 that are not members of the test fixture.
