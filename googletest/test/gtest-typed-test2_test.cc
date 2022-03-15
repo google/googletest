@@ -27,11 +27,10 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
 #include <vector>
 
-#include "test/gtest-typed-test_test.h"
 #include "gtest/gtest.h"
+#include "test/gtest-typed-test_test.h"
 
 // Tests that the same type-parameterized test case can be
 // instantiated in different translation units linked together.

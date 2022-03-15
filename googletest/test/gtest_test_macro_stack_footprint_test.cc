@@ -39,42 +39,42 @@
 
 // This macro defines 10 dummy tests.
 #define TEN_TESTS_(test_case_name) \
-  TEST(test_case_name, T0) {} \
-  TEST(test_case_name, T1) {} \
-  TEST(test_case_name, T2) {} \
-  TEST(test_case_name, T3) {} \
-  TEST(test_case_name, T4) {} \
-  TEST(test_case_name, T5) {} \
-  TEST(test_case_name, T6) {} \
-  TEST(test_case_name, T7) {} \
-  TEST(test_case_name, T8) {} \
+  TEST(test_case_name, T0) {}      \
+  TEST(test_case_name, T1) {}      \
+  TEST(test_case_name, T2) {}      \
+  TEST(test_case_name, T3) {}      \
+  TEST(test_case_name, T4) {}      \
+  TEST(test_case_name, T5) {}      \
+  TEST(test_case_name, T6) {}      \
+  TEST(test_case_name, T7) {}      \
+  TEST(test_case_name, T8) {}      \
   TEST(test_case_name, T9) {}
 
 // This macro defines 100 dummy tests.
 #define HUNDRED_TESTS_(test_case_name_prefix) \
-  TEN_TESTS_(test_case_name_prefix ## 0) \
-  TEN_TESTS_(test_case_name_prefix ## 1) \
-  TEN_TESTS_(test_case_name_prefix ## 2) \
-  TEN_TESTS_(test_case_name_prefix ## 3) \
-  TEN_TESTS_(test_case_name_prefix ## 4) \
-  TEN_TESTS_(test_case_name_prefix ## 5) \
-  TEN_TESTS_(test_case_name_prefix ## 6) \
-  TEN_TESTS_(test_case_name_prefix ## 7) \
-  TEN_TESTS_(test_case_name_prefix ## 8) \
-  TEN_TESTS_(test_case_name_prefix ## 9)
+  TEN_TESTS_(test_case_name_prefix##0)        \
+  TEN_TESTS_(test_case_name_prefix##1)        \
+  TEN_TESTS_(test_case_name_prefix##2)        \
+  TEN_TESTS_(test_case_name_prefix##3)        \
+  TEN_TESTS_(test_case_name_prefix##4)        \
+  TEN_TESTS_(test_case_name_prefix##5)        \
+  TEN_TESTS_(test_case_name_prefix##6)        \
+  TEN_TESTS_(test_case_name_prefix##7)        \
+  TEN_TESTS_(test_case_name_prefix##8)        \
+  TEN_TESTS_(test_case_name_prefix##9)
 
 // This macro defines 1000 dummy tests.
 #define THOUSAND_TESTS_(test_case_name_prefix) \
-  HUNDRED_TESTS_(test_case_name_prefix ## 0) \
-  HUNDRED_TESTS_(test_case_name_prefix ## 1) \
-  HUNDRED_TESTS_(test_case_name_prefix ## 2) \
-  HUNDRED_TESTS_(test_case_name_prefix ## 3) \
-  HUNDRED_TESTS_(test_case_name_prefix ## 4) \
-  HUNDRED_TESTS_(test_case_name_prefix ## 5) \
-  HUNDRED_TESTS_(test_case_name_prefix ## 6) \
-  HUNDRED_TESTS_(test_case_name_prefix ## 7) \
-  HUNDRED_TESTS_(test_case_name_prefix ## 8) \
-  HUNDRED_TESTS_(test_case_name_prefix ## 9)
+  HUNDRED_TESTS_(test_case_name_prefix##0)     \
+  HUNDRED_TESTS_(test_case_name_prefix##1)     \
+  HUNDRED_TESTS_(test_case_name_prefix##2)     \
+  HUNDRED_TESTS_(test_case_name_prefix##3)     \
+  HUNDRED_TESTS_(test_case_name_prefix##4)     \
+  HUNDRED_TESTS_(test_case_name_prefix##5)     \
+  HUNDRED_TESTS_(test_case_name_prefix##6)     \
+  HUNDRED_TESTS_(test_case_name_prefix##7)     \
+  HUNDRED_TESTS_(test_case_name_prefix##8)     \
+  HUNDRED_TESTS_(test_case_name_prefix##9)
 
 // Ensures that we can define 1000 TEST()s in the same translation
 // unit.

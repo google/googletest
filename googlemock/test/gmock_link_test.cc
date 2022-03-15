@@ -27,7 +27,6 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
 // Google Mock - a framework for writing C++ mock classes.
 //
 // This file is for verifying that various Google Mock constructs do not

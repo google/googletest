@@ -34,7 +34,6 @@
 
 #include <string.h>
 
-
 // A simple string class.
 class MyString {
  private:

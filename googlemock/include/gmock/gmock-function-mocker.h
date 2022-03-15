@@ -201,7 +201,7 @@ using internal::FunctionMocker;
             GMOCK_INTERNAL_A_MATCHER_ARGUMENT, _Signature, _N));               \
   }                                                                            \
   mutable ::testing::FunctionMocker<GMOCK_PP_REMOVE_PARENS(_Signature)>        \
-      GMOCK_MOCKER_(_N, _Constness, _MethodName)
+  GMOCK_MOCKER_(_N, _Constness, _MethodName)
 
 #define GMOCK_INTERNAL_EXPAND(...) __VA_ARGS__
 

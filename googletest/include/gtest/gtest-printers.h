@@ -258,12 +258,10 @@ struct ConvertibleToStringViewPrinter {
 #endif
 };
 
-
 // Prints the given number of bytes in the given object to the given
 // ostream.
 GTEST_API_ void PrintBytesInObjectTo(const unsigned char* obj_bytes,
-                                     size_t count,
-                                     ::std::ostream* os);
+                                     size_t count, ::std::ostream* os);
 struct RawBytesPrinter {
   // SFINAE on `sizeof` to make sure we have a complete type.
   template <typename T, size_t = sizeof(T)>
@@ -376,12 +374,12 @@ GTEST_IMPL_FORMAT_C_STRING_AS_POINTER_(const char32_t);
 // to point to a NUL-terminated string, and thus can print it as a string.
 
 #define GTEST_IMPL_FORMAT_C_STRING_AS_STRING_(CharType, OtherStringType) \
-  template <>                                                           \
-  class FormatForComparison<CharType*, OtherStringType> {               \
-   public:                                                              \
-    static ::std::string Format(CharType* value) {                      \
-      return ::testing::PrintToString(value);                           \
-    }                                                                   \
+  template <>                                                            \
+  class FormatForComparison<CharType*, OtherStringType> {                \
+   public:                                                               \
+    static ::std::string Format(CharType* value) {                       \
+      return ::testing::PrintToString(value);                            \
+    }                                                                    \
   }
 
 GTEST_IMPL_FORMAT_C_STRING_AS_STRING_(char, ::std::string);
@@ -411,8 +409,8 @@ GTEST_IMPL_FORMAT_C_STRING_AS_STRING_(const wchar_t, ::std::wstring);
 //
 // INTERNAL IMPLEMENTATION - DO NOT USE IN A USER PROGRAM.
 template <typename T1, typename T2>
-std::string FormatForComparisonFailureMessage(
-    const T1& value, const T2& /* other_operand */) {
+std::string FormatForComparisonFailureMessage(const T1& value,
+                                              const T2& /* other_operand */) {
   return FormatForComparison<T1, T2>::Format(value);
 }
 
@@ -552,7 +550,7 @@ void PrintRawArrayTo(const T a[], size_t count, ::std::ostream* os) {
 }
 
 // Overloads for ::std::string.
-GTEST_API_ void PrintStringTo(const ::std::string&s, ::std::ostream* os);
+GTEST_API_ void PrintStringTo(const ::std::string& s, ::std::ostream* os);
 inline void PrintTo(const ::std::string& s, ::std::ostream* os) {
   PrintStringTo(s, os);
 }
@@ -579,7 +577,7 @@ inline void PrintTo(const ::std::u32string& s, ::std::ostream* os) {
 
 // Overloads for ::std::wstring.
 #if GTEST_HAS_STD_WSTRING
-GTEST_API_ void PrintWideStringTo(const ::std::wstring&s, ::std::ostream* os);
+GTEST_API_ void PrintWideStringTo(const ::std::wstring& s, ::std::ostream* os);
 inline void PrintTo(const ::std::wstring& s, ::std::ostream* os) {
   PrintWideStringTo(s, os);
 }
@@ -823,8 +821,8 @@ void UniversalPrintArray(const T* begin, size_t len, ::std::ostream* os) {
   }
 }
 // This overload prints a (const) char array compactly.
-GTEST_API_ void UniversalPrintArray(
-    const char* begin, size_t len, ::std::ostream* os);
+GTEST_API_ void UniversalPrintArray(const char* begin, size_t len,
+                                    ::std::ostream* os);
 
 #ifdef __cpp_char8_t
 // This overload prints a (const) char8_t array compactly.
@@ -841,8 +839,8 @@ GTEST_API_ void UniversalPrintArray(const char32_t* begin, size_t len,
                                     ::std::ostream* os);
 
 // This overload prints a (const) wchar_t array compactly.
-GTEST_API_ void UniversalPrintArray(
-    const wchar_t* begin, size_t len, ::std::ostream* os);
+GTEST_API_ void UniversalPrintArray(const wchar_t* begin, size_t len,
+                                    ::std::ostream* os);
 
 // Implements printing an array type T[N].
 template <typename T, size_t N>
@@ -1001,10 +999,10 @@ void UniversalPrint(const T& value, ::std::ostream* os) {
   UniversalPrinter<T1>::Print(value, os);
 }
 
-typedef ::std::vector< ::std::string> Strings;
+typedef ::std::vector<::std::string> Strings;
 
-  // Tersely prints the first N fields of a tuple to a string vector,
-  // one element for each field.
+// Tersely prints the first N fields of a tuple to a string vector,
+// one element for each field.
 template <typename Tuple>
 void TersePrintPrefixToStrings(const Tuple&, std::integral_constant<size_t, 0>,
                                Strings*) {}

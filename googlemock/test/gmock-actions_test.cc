@@ -27,32 +27,33 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
 // Google Mock - a framework for writing C++ mock classes.
 //
 // This file tests the built-in actions.
 
 // Silence C4100 (unreferenced formal parameter) for MSVC
 #ifdef _MSC_VER
-#  pragma warning(push)
-#  pragma warning(disable:4100)
+#pragma warning(push)
+#pragma warning(disable : 4100)
 #if _MSC_VER == 1900
 // and silence C4800 (C4800: 'int *const ': forcing value
 // to bool 'true' or 'false') for MSVC 15
-#  pragma warning(disable:4800)
+#pragma warning(disable : 4800)
 #endif
 #endif
 
 #include "gmock/gmock-actions.h"
+
 #include <algorithm>
 #include <iterator>
 #include <memory>
 #include <string>
 #include <type_traits>
+
 #include "gmock/gmock.h"
 #include "gmock/internal/gmock-port.h"
-#include "gtest/gtest.h"
 #include "gtest/gtest-spi.h"
+#include "gtest/gtest.h"
 
 namespace {
 
@@ -114,17 +115,17 @@ TEST(BuiltInDefaultValueTest, IsZeroForNumericTypes) {
 #endif
 #endif
   EXPECT_EQ(0U, BuiltInDefaultValue<unsigned short>::Get());  // NOLINT
-  EXPECT_EQ(0, BuiltInDefaultValue<signed short>::Get());  // NOLINT
-  EXPECT_EQ(0, BuiltInDefaultValue<short>::Get());  // NOLINT
+  EXPECT_EQ(0, BuiltInDefaultValue<signed short>::Get());     // NOLINT
+  EXPECT_EQ(0, BuiltInDefaultValue<short>::Get());            // NOLINT
   EXPECT_EQ(0U, BuiltInDefaultValue<unsigned int>::Get());
   EXPECT_EQ(0, BuiltInDefaultValue<signed int>::Get());
   EXPECT_EQ(0, BuiltInDefaultValue<int>::Get());
-  EXPECT_EQ(0U, BuiltInDefaultValue<unsigned long>::Get());  // NOLINT
-  EXPECT_EQ(0, BuiltInDefaultValue<signed long>::Get());  // NOLINT
-  EXPECT_EQ(0, BuiltInDefaultValue<long>::Get());  // NOLINT
+  EXPECT_EQ(0U, BuiltInDefaultValue<unsigned long>::Get());       // NOLINT
+  EXPECT_EQ(0, BuiltInDefaultValue<signed long>::Get());          // NOLINT
+  EXPECT_EQ(0, BuiltInDefaultValue<long>::Get());                 // NOLINT
   EXPECT_EQ(0U, BuiltInDefaultValue<unsigned long long>::Get());  // NOLINT
-  EXPECT_EQ(0, BuiltInDefaultValue<signed long long>::Get());  // NOLINT
-  EXPECT_EQ(0, BuiltInDefaultValue<long long>::Get());  // NOLINT
+  EXPECT_EQ(0, BuiltInDefaultValue<signed long long>::Get());     // NOLINT
+  EXPECT_EQ(0, BuiltInDefaultValue<long long>::Get());            // NOLINT
   EXPECT_EQ(0, BuiltInDefaultValue<float>::Get());
   EXPECT_EQ(0, BuiltInDefaultValue<double>::Get());
 }
@@ -139,17 +140,17 @@ TEST(BuiltInDefaultValueTest, ExistsForNumericTypes) {
   EXPECT_TRUE(BuiltInDefaultValue<wchar_t>::Exists());
 #endif
   EXPECT_TRUE(BuiltInDefaultValue<unsigned short>::Exists());  // NOLINT
-  EXPECT_TRUE(BuiltInDefaultValue<signed short>::Exists());  // NOLINT
-  EXPECT_TRUE(BuiltInDefaultValue<short>::Exists());  // NOLINT
+  EXPECT_TRUE(BuiltInDefaultValue<signed short>::Exists());    // NOLINT
+  EXPECT_TRUE(BuiltInDefaultValue<short>::Exists());           // NOLINT
   EXPECT_TRUE(BuiltInDefaultValue<unsigned int>::Exists());
   EXPECT_TRUE(BuiltInDefaultValue<signed int>::Exists());
   EXPECT_TRUE(BuiltInDefaultValue<int>::Exists());
-  EXPECT_TRUE(BuiltInDefaultValue<unsigned long>::Exists());  // NOLINT
-  EXPECT_TRUE(BuiltInDefaultValue<signed long>::Exists());  // NOLINT
-  EXPECT_TRUE(BuiltInDefaultValue<long>::Exists());  // NOLINT
+  EXPECT_TRUE(BuiltInDefaultValue<unsigned long>::Exists());       // NOLINT
+  EXPECT_TRUE(BuiltInDefaultValue<signed long>::Exists());         // NOLINT
+  EXPECT_TRUE(BuiltInDefaultValue<long>::Exists());                // NOLINT
   EXPECT_TRUE(BuiltInDefaultValue<unsigned long long>::Exists());  // NOLINT
-  EXPECT_TRUE(BuiltInDefaultValue<signed long long>::Exists());  // NOLINT
-  EXPECT_TRUE(BuiltInDefaultValue<long long>::Exists());  // NOLINT
+  EXPECT_TRUE(BuiltInDefaultValue<signed long long>::Exists());    // NOLINT
+  EXPECT_TRUE(BuiltInDefaultValue<long long>::Exists());           // NOLINT
   EXPECT_TRUE(BuiltInDefaultValue<float>::Exists());
   EXPECT_TRUE(BuiltInDefaultValue<double>::Exists());
 }
@@ -167,13 +168,13 @@ TEST(BuiltInDefaultValueTest, BoolExists) {
 // Tests that BuiltInDefaultValue<T>::Get() returns "" when T is a
 // string type.
 TEST(BuiltInDefaultValueTest, IsEmptyStringForString) {
-  EXPECT_EQ("", BuiltInDefaultValue< ::std::string>::Get());
+  EXPECT_EQ("", BuiltInDefaultValue<::std::string>::Get());
 }
 
 // Tests that BuiltInDefaultValue<T>::Exists() returns true when T is a
 // string type.
 TEST(BuiltInDefaultValueTest, ExistsForString) {
-  EXPECT_TRUE(BuiltInDefaultValue< ::std::string>::Exists());
+  EXPECT_TRUE(BuiltInDefaultValue<::std::string>::Exists());
 }
 
 // Tests that BuiltInDefaultValue<const T>::Get() returns the same
@@ -208,7 +209,6 @@ class MyNonDefaultConstructible {
   int value_;
 };
 
-
 TEST(BuiltInDefaultValueTest, ExistsForDefaultConstructibleType) {
   EXPECT_TRUE(BuiltInDefaultValue<MyDefaultConstructible>::Exists());
 }
@@ -217,25 +217,19 @@ TEST(BuiltInDefaultValueTest, IsDefaultConstructedForDefaultConstructibleType) {
   EXPECT_EQ(42, BuiltInDefaultValue<MyDefaultConstructible>::Get().value());
 }
 
-
 TEST(BuiltInDefaultValueTest, DoesNotExistForNonDefaultConstructibleType) {
   EXPECT_FALSE(BuiltInDefaultValue<MyNonDefaultConstructible>::Exists());
 }
 
 // Tests that BuiltInDefaultValue<T&>::Get() aborts the program.
 TEST(BuiltInDefaultValueDeathTest, IsUndefinedForReferences) {
-  EXPECT_DEATH_IF_SUPPORTED({
-    BuiltInDefaultValue<int&>::Get();
-  }, "");
-  EXPECT_DEATH_IF_SUPPORTED({
-    BuiltInDefaultValue<const char&>::Get();
-  }, "");
+  EXPECT_DEATH_IF_SUPPORTED({ BuiltInDefaultValue<int&>::Get(); }, "");
+  EXPECT_DEATH_IF_SUPPORTED({ BuiltInDefaultValue<const char&>::Get(); }, "");
 }
 
 TEST(BuiltInDefaultValueDeathTest, IsUndefinedForNonDefaultConstructibleType) {
-  EXPECT_DEATH_IF_SUPPORTED({
-    BuiltInDefaultValue<MyNonDefaultConstructible>::Get();
-  }, "");
+  EXPECT_DEATH_IF_SUPPORTED(
+      { BuiltInDefaultValue<MyNonDefaultConstructible>::Get(); }, "");
 }
 
 // Tests that DefaultValue<T>::IsSet() is false initially.
@@ -281,26 +275,22 @@ TEST(DefaultValueDeathTest, GetReturnsBuiltInDefaultValueWhenUnset) {
 
   EXPECT_EQ(0, DefaultValue<int>::Get());
 
-  EXPECT_DEATH_IF_SUPPORTED({
-    DefaultValue<MyNonDefaultConstructible>::Get();
-  }, "");
+  EXPECT_DEATH_IF_SUPPORTED({ DefaultValue<MyNonDefaultConstructible>::Get(); },
+                            "");
 }
 
 TEST(DefaultValueTest, GetWorksForMoveOnlyIfSet) {
   EXPECT_TRUE(DefaultValue<std::unique_ptr<int>>::Exists());
   EXPECT_TRUE(DefaultValue<std::unique_ptr<int>>::Get() == nullptr);
-  DefaultValue<std::unique_ptr<int>>::SetFactory([] {
-    return std::unique_ptr<int>(new int(42));
-  });
+  DefaultValue<std::unique_ptr<int>>::SetFactory(
+      [] { return std::unique_ptr<int>(new int(42)); });
   EXPECT_TRUE(DefaultValue<std::unique_ptr<int>>::Exists());
   std::unique_ptr<int> i = DefaultValue<std::unique_ptr<int>>::Get();
   EXPECT_EQ(42, *i);
 }
 
 // Tests that DefaultValue<void>::Get() returns void.
-TEST(DefaultValueTest, GetWorksForVoid) {
-  return DefaultValue<void>::Get();
-}
+TEST(DefaultValueTest, GetWorksForVoid) { return DefaultValue<void>::Get(); }
 
 // Tests using DefaultValue with a reference type.
 
@@ -348,12 +338,9 @@ TEST(DefaultValueOfReferenceDeathTest, GetReturnsBuiltInDefaultValueWhenUnset) {
   EXPECT_FALSE(DefaultValue<int&>::IsSet());
   EXPECT_FALSE(DefaultValue<MyNonDefaultConstructible&>::IsSet());
 
-  EXPECT_DEATH_IF_SUPPORTED({
-    DefaultValue<int&>::Get();
-  }, "");
-  EXPECT_DEATH_IF_SUPPORTED({
-    DefaultValue<MyNonDefaultConstructible>::Get();
-  }, "");
+  EXPECT_DEATH_IF_SUPPORTED({ DefaultValue<int&>::Get(); }, "");
+  EXPECT_DEATH_IF_SUPPORTED({ DefaultValue<MyNonDefaultConstructible>::Get(); },
+                            "");
 }
 
 // Tests that ActionInterface can be implemented by defining the
@@ -433,7 +420,7 @@ class IsNotZero : public ActionInterface<bool(int)> {  // NOLINT
 };
 
 TEST(ActionTest, CanBeConvertedToOtherActionType) {
-  const Action<bool(int)> a1(new IsNotZero);  // NOLINT
+  const Action<bool(int)> a1(new IsNotZero);           // NOLINT
   const Action<int(char)> a2 = Action<int(char)>(a1);  // NOLINT
   EXPECT_EQ(1, a2.Perform(std::make_tuple('a')));
   EXPECT_EQ(0, a2.Perform(std::make_tuple('\0')));
@@ -528,7 +515,7 @@ TEST(ReturnTest, AcceptsStringLiteral) {
 // Test struct which wraps a vector of integers. Used in
 // 'SupportsWrapperReturnType' test.
 struct IntegerVectorWrapper {
-  std::vector<int> * v;
+  std::vector<int>* v;
   IntegerVectorWrapper(std::vector<int>& _v) : v(&_v) {}  // NOLINT
 };
 
@@ -648,7 +635,9 @@ TEST(ReturnRefTest, IsCovariant) {
 }
 
 template <typename T, typename = decltype(ReturnRef(std::declval<T&&>()))>
-bool CanCallReturnRef(T&&) { return true; }
+bool CanCallReturnRef(T&&) {
+  return true;
+}
 bool CanCallReturnRef(Unused) { return false; }
 
 // Tests that ReturnRef(v) is working with non-temporaries (T&)
@@ -668,7 +657,7 @@ TEST(ReturnRefTest, WorksForNonTemporary) {
 
 // Tests that ReturnRef(v) is not working with temporaries (T&&)
 TEST(ReturnRefTest, DoesNotWorkForTemporary) {
-  auto scalar_value = []()  -> int { return 123; };
+  auto scalar_value = []() -> int { return 123; };
   EXPECT_FALSE(CanCallReturnRef(scalar_value()));
 
   auto non_scalar_value = []() -> std::string { return "ABC"; };
@@ -754,8 +743,7 @@ class MockClass {
 // return type by default.
 TEST(DoDefaultTest, ReturnsBuiltInDefaultValueByDefault) {
   MockClass mock;
-  EXPECT_CALL(mock, IntFunc(_))
-      .WillOnce(DoDefault());
+  EXPECT_CALL(mock, IntFunc(_)).WillOnce(DoDefault());
   EXPECT_EQ(0, mock.IntFunc(true));
 }
 
@@ -763,14 +751,11 @@ TEST(DoDefaultTest, ReturnsBuiltInDefaultValueByDefault) {
 // the process when there is no built-in default value for the return type.
 TEST(DoDefaultDeathTest, DiesForUnknowType) {
   MockClass mock;
-  EXPECT_CALL(mock, Foo())
-      .WillRepeatedly(DoDefault());
+  EXPECT_CALL(mock, Foo()).WillRepeatedly(DoDefault());
 #if GTEST_HAS_EXCEPTIONS
   EXPECT_ANY_THROW(mock.Foo());
 #else
-  EXPECT_DEATH_IF_SUPPORTED({
-    mock.Foo();
-  }, "");
+  EXPECT_DEATH_IF_SUPPORTED({ mock.Foo(); }, "");
 #endif
 }
 
@@ -782,16 +767,13 @@ void VoidFunc(bool /* flag */) {}
 TEST(DoDefaultDeathTest, DiesIfUsedInCompositeAction) {
   MockClass mock;
   EXPECT_CALL(mock, IntFunc(_))
-      .WillRepeatedly(DoAll(Invoke(VoidFunc),
-                            DoDefault()));
+      .WillRepeatedly(DoAll(Invoke(VoidFunc), DoDefault()));
 
   // Ideally we should verify the error message as well.  Sadly,
   // EXPECT_DEATH() can only capture stderr, while Google Mock's
   // errors are printed on stdout.  Therefore we have to settle for
   // not verifying the message.
-  EXPECT_DEATH_IF_SUPPORTED({
-    mock.IntFunc(true);
-  }, "");
+  EXPECT_DEATH_IF_SUPPORTED({ mock.IntFunc(true); }, "");
 }
 
 // Tests that DoDefault() returns the default value set by
@@ -799,8 +781,7 @@ TEST(DoDefaultDeathTest, DiesIfUsedInCompositeAction) {
 TEST(DoDefaultTest, ReturnsUserSpecifiedPerTypeDefaultValueWhenThereIsOne) {
   DefaultValue<int>::Set(1);
   MockClass mock;
-  EXPECT_CALL(mock, IntFunc(_))
-      .WillOnce(DoDefault());
+  EXPECT_CALL(mock, IntFunc(_)).WillOnce(DoDefault());
   EXPECT_EQ(1, mock.IntFunc(false));
   DefaultValue<int>::Clear();
 }
@@ -808,20 +789,19 @@ TEST(DoDefaultTest, ReturnsUserSpecifiedPerTypeDefaultValueWhenThereIsOne) {
 // Tests that DoDefault() does the action specified by ON_CALL().
 TEST(DoDefaultTest, DoesWhatOnCallSpecifies) {
   MockClass mock;
-  ON_CALL(mock, IntFunc(_))
-      .WillByDefault(Return(2));
-  EXPECT_CALL(mock, IntFunc(_))
-      .WillOnce(DoDefault());
+  ON_CALL(mock, IntFunc(_)).WillByDefault(Return(2));
+  EXPECT_CALL(mock, IntFunc(_)).WillOnce(DoDefault());
   EXPECT_EQ(2, mock.IntFunc(false));
 }
 
 // Tests that using DoDefault() in ON_CALL() leads to a run-time failure.
 TEST(DoDefaultTest, CannotBeUsedInOnCall) {
   MockClass mock;
-  EXPECT_NONFATAL_FAILURE({  // NOLINT
-    ON_CALL(mock, IntFunc(_))
-      .WillByDefault(DoDefault());
-  }, "DoDefault() cannot be used in ON_CALL()");
+  EXPECT_NONFATAL_FAILURE(
+      {  // NOLINT
+        ON_CALL(mock, IntFunc(_)).WillByDefault(DoDefault());
+      },
+      "DoDefault() cannot be used in ON_CALL()");
 }
 
 // Tests that SetArgPointee<N>(v) sets the variable pointed to by
@@ -868,7 +848,7 @@ TEST(SetArgPointeeTest, AcceptsWideStringLiteral) {
   a.Perform(std::make_tuple(&ptr));
   EXPECT_STREQ(L"world", ptr);
 
-# if GTEST_HAS_STD_WSTRING
+#if GTEST_HAS_STD_WSTRING
 
   typedef void MyStringFunction(std::wstring*);
   Action<MyStringFunction> a2 = SetArgPointee<0>(L"world");
@@ -876,7 +856,7 @@ TEST(SetArgPointeeTest, AcceptsWideStringLiteral) {
   a2.Perform(std::make_tuple(&str));
   EXPECT_EQ(L"world", str);
 
-# endif
+#endif
 }
 
 // Tests that SetArgPointee<N>() accepts a char pointer.
@@ -907,7 +887,7 @@ TEST(SetArgPointeeTest, AcceptsWideCharPointer) {
   a.Perform(std::make_tuple(true, &ptr));
   EXPECT_EQ(hi, ptr);
 
-# if GTEST_HAS_STD_WSTRING
+#if GTEST_HAS_STD_WSTRING
 
   typedef void MyStringFunction(bool, std::wstring*);
   wchar_t world_array[] = L"world";
@@ -916,7 +896,7 @@ TEST(SetArgPointeeTest, AcceptsWideCharPointer) {
   std::wstring str;
   a2.Perform(std::make_tuple(true, &str));
   EXPECT_EQ(world_array, str);
-# endif
+#endif
 }
 
 // Tests that SetArgumentPointee<N>(v) sets the variable pointed to by
@@ -1079,7 +1059,6 @@ TEST(AssignTest, CompatibleTypes) {
   EXPECT_DOUBLE_EQ(5, x);
 }
 
-
 // Tests using WithArgs and with an action that takes 1 argument.
 TEST(WithArgsTest, OneArg) {
   Action<bool(double x, int n)> a = WithArgs<1>(Invoke(Unary));  // NOLINT
@@ -1235,7 +1214,7 @@ TEST(ByRefTest, IsCopyable) {
 TEST(ByRefTest, ConstValue) {
   const int n = 0;
   // int& ref = ByRef(n);  // This shouldn't compile - we have a
-                           // negative compilation test to catch it.
+  // negative compilation test to catch it.
   const int& const_ref = ByRef(n);
   EXPECT_EQ(&n, &const_ref);
 }
@@ -1260,7 +1239,7 @@ TEST(ByRefTest, ExplicitType) {
   EXPECT_EQ(&n, &r1);
 
   // ByRef<char>(n);  // This shouldn't compile - we have a negative
-                      // compilation test to catch it.
+  // compilation test to catch it.
 
   Derived d;
   Derived& r2 = ByRef<Derived>(d);
@@ -1375,9 +1354,10 @@ TEST(MockMethodTest, CanReturnMoveOnlyValue_DoAllReturn) {
   MockClass mock;
   std::unique_ptr<int> i(new int(19));
   EXPECT_CALL(mock_function, Call());
-  EXPECT_CALL(mock, MakeUnique()).WillOnce(DoAll(
-      InvokeWithoutArgs(&mock_function, &testing::MockFunction<void()>::Call),
-      Return(ByMove(std::move(i)))));
+  EXPECT_CALL(mock, MakeUnique())
+      .WillOnce(DoAll(InvokeWithoutArgs(&mock_function,
+                                        &testing::MockFunction<void()>::Call),
+                      Return(ByMove(std::move(i)))));
 
   std::unique_ptr<int> result1 = mock.MakeUnique();
   EXPECT_EQ(19, *result1);
@@ -1387,9 +1367,8 @@ TEST(MockMethodTest, CanReturnMoveOnlyValue_Invoke) {
   MockClass mock;
 
   // Check default value
-  DefaultValue<std::unique_ptr<int>>::SetFactory([] {
-    return std::unique_ptr<int>(new int(42));
-  });
+  DefaultValue<std::unique_ptr<int>>::SetFactory(
+      [] { return std::unique_ptr<int>(new int(42)); });
   EXPECT_EQ(42, *mock.MakeUnique());
 
   EXPECT_CALL(mock, MakeUnique()).WillRepeatedly(Invoke(UniquePtrSource));
@@ -1449,7 +1428,6 @@ TEST(MockMethodTest, CanTakeMoveOnlyValue) {
   EXPECT_EQ(42, *saved);
 }
 
-
 // Tests for std::function based action.
 
 int Add(int val, int& ref, int* ptr) {  // NOLINT
@@ -1463,7 +1441,9 @@ int Deref(std::unique_ptr<int> ptr) { return *ptr; }
 
 struct Double {
   template <typename T>
-  T operator()(T t) { return 2 * t; }
+  T operator()(T t) {
+    return 2 * t;
+  }
 };
 
 std::unique_ptr<int> UniqueInt(int i) {
@@ -1532,8 +1512,9 @@ TEST(FunctorActionTest, TypeConversion) {
 
 TEST(FunctorActionTest, UnusedArguments) {
   // Verify that users can ignore uninteresting arguments.
-  Action<int(int, double y, double z)> a =
-      [](int i, Unused, Unused) { return 2 * i; };
+  Action<int(int, double y, double z)> a = [](int i, Unused, Unused) {
+    return 2 * i;
+  };
   std::tuple<int, double, double> dummy = std::make_tuple(3, 7.3, 9.44);
   EXPECT_EQ(6, a.Perform(dummy));
 }
@@ -1552,9 +1533,7 @@ TEST(MoveOnlyArgumentsTest, ReturningActions) {
   EXPECT_EQ(x, 3);
 }
 
-ACTION(ReturnArity) {
-  return std::tuple_size<args_type>::value;
-}
+ACTION(ReturnArity) { return std::tuple_size<args_type>::value; }
 
 TEST(ActionMacro, LargeArity) {
   EXPECT_EQ(
@@ -1577,7 +1556,6 @@ TEST(ActionMacro, LargeArity) {
 
 #ifdef _MSC_VER
 #if _MSC_VER == 1900
-#  pragma warning(pop)
+#pragma warning(pop)
 #endif
 #endif
-

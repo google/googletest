@@ -27,7 +27,6 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
 // Google Mock - a framework for writing C++ mock classes.
 //
 // This program is for verifying that a leaked mock object can be

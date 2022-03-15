@@ -27,7 +27,6 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
 // Google Mock - a framework for writing C++ mock classes.
 //
 // This file tests the internal utilities.
@@ -58,7 +57,7 @@
 #undef GTEST_IMPLEMENTATION_
 
 #if GTEST_OS_CYGWIN
-# include <sys/types.h>  // For ssize_t. NOLINT
+#include <sys/types.h>  // For ssize_t. NOLINT
 #endif
 
 namespace proto2 {
@@ -155,19 +154,19 @@ TEST(KindOfTest, Bool) {
 }
 
 TEST(KindOfTest, Integer) {
-  EXPECT_EQ(kInteger, GMOCK_KIND_OF_(char));  // NOLINT
-  EXPECT_EQ(kInteger, GMOCK_KIND_OF_(signed char));  // NOLINT
-  EXPECT_EQ(kInteger, GMOCK_KIND_OF_(unsigned char));  // NOLINT
-  EXPECT_EQ(kInteger, GMOCK_KIND_OF_(short));  // NOLINT
-  EXPECT_EQ(kInteger, GMOCK_KIND_OF_(unsigned short));  // NOLINT
-  EXPECT_EQ(kInteger, GMOCK_KIND_OF_(int));  // NOLINT
-  EXPECT_EQ(kInteger, GMOCK_KIND_OF_(unsigned int));  // NOLINT
-  EXPECT_EQ(kInteger, GMOCK_KIND_OF_(long));  // NOLINT
-  EXPECT_EQ(kInteger, GMOCK_KIND_OF_(unsigned long));  // NOLINT
-  EXPECT_EQ(kInteger, GMOCK_KIND_OF_(long long));  // NOLINT
+  EXPECT_EQ(kInteger, GMOCK_KIND_OF_(char));                // NOLINT
+  EXPECT_EQ(kInteger, GMOCK_KIND_OF_(signed char));         // NOLINT
+  EXPECT_EQ(kInteger, GMOCK_KIND_OF_(unsigned char));       // NOLINT
+  EXPECT_EQ(kInteger, GMOCK_KIND_OF_(short));               // NOLINT
+  EXPECT_EQ(kInteger, GMOCK_KIND_OF_(unsigned short));      // NOLINT
+  EXPECT_EQ(kInteger, GMOCK_KIND_OF_(int));                 // NOLINT
+  EXPECT_EQ(kInteger, GMOCK_KIND_OF_(unsigned int));        // NOLINT
+  EXPECT_EQ(kInteger, GMOCK_KIND_OF_(long));                // NOLINT
+  EXPECT_EQ(kInteger, GMOCK_KIND_OF_(unsigned long));       // NOLINT
+  EXPECT_EQ(kInteger, GMOCK_KIND_OF_(long long));           // NOLINT
   EXPECT_EQ(kInteger, GMOCK_KIND_OF_(unsigned long long));  // NOLINT
-  EXPECT_EQ(kInteger, GMOCK_KIND_OF_(wchar_t));  // NOLINT
-  EXPECT_EQ(kInteger, GMOCK_KIND_OF_(size_t));  // NOLINT
+  EXPECT_EQ(kInteger, GMOCK_KIND_OF_(wchar_t));             // NOLINT
+  EXPECT_EQ(kInteger, GMOCK_KIND_OF_(size_t));              // NOLINT
 #if GTEST_OS_LINUX || GTEST_OS_MAC || GTEST_OS_CYGWIN
   // ssize_t is not defined on Windows and possibly some other OSes.
   EXPECT_EQ(kInteger, GMOCK_KIND_OF_(ssize_t));  // NOLINT
@@ -175,15 +174,15 @@ TEST(KindOfTest, Integer) {
 }
 
 TEST(KindOfTest, FloatingPoint) {
-  EXPECT_EQ(kFloatingPoint, GMOCK_KIND_OF_(float));  // NOLINT
-  EXPECT_EQ(kFloatingPoint, GMOCK_KIND_OF_(double));  // NOLINT
+  EXPECT_EQ(kFloatingPoint, GMOCK_KIND_OF_(float));        // NOLINT
+  EXPECT_EQ(kFloatingPoint, GMOCK_KIND_OF_(double));       // NOLINT
   EXPECT_EQ(kFloatingPoint, GMOCK_KIND_OF_(long double));  // NOLINT
 }
 
 TEST(KindOfTest, Other) {
-  EXPECT_EQ(kOther, GMOCK_KIND_OF_(void*));  // NOLINT
+  EXPECT_EQ(kOther, GMOCK_KIND_OF_(void*));   // NOLINT
   EXPECT_EQ(kOther, GMOCK_KIND_OF_(char**));  // NOLINT
-  EXPECT_EQ(kOther, GMOCK_KIND_OF_(Base));  // NOLINT
+  EXPECT_EQ(kOther, GMOCK_KIND_OF_(Base));    // NOLINT
 }
 
 // Tests LosslessArithmeticConvertible<T, U>.
@@ -214,26 +213,26 @@ TEST(LosslessArithmeticConvertibleTest, IntegerToInteger) {
   EXPECT_TRUE((LosslessArithmeticConvertible<unsigned char, int>::value));
 
   // Unsigned => larger unsigned is fine.
-  EXPECT_TRUE((LosslessArithmeticConvertible<
-               unsigned short, uint64_t>::value));  // NOLINT
+  EXPECT_TRUE((LosslessArithmeticConvertible<unsigned short,
+                                             uint64_t>::value));  // NOLINT
 
   // Signed => unsigned is not fine.
-  EXPECT_FALSE((LosslessArithmeticConvertible<
-                short, uint64_t>::value));  // NOLINT
-  EXPECT_FALSE((LosslessArithmeticConvertible<
-      signed char, unsigned int>::value));  // NOLINT
+  EXPECT_FALSE(
+      (LosslessArithmeticConvertible<short, uint64_t>::value));  // NOLINT
+  EXPECT_FALSE((LosslessArithmeticConvertible<signed char,
+                                              unsigned int>::value));  // NOLINT
 
   // Same size and same signedness: fine too.
-  EXPECT_TRUE((LosslessArithmeticConvertible<
-               unsigned char, unsigned char>::value));
+  EXPECT_TRUE(
+      (LosslessArithmeticConvertible<unsigned char, unsigned char>::value));
   EXPECT_TRUE((LosslessArithmeticConvertible<int, int>::value));
   EXPECT_TRUE((LosslessArithmeticConvertible<wchar_t, wchar_t>::value));
-  EXPECT_TRUE((LosslessArithmeticConvertible<
-               unsigned long, unsigned long>::value));  // NOLINT
+  EXPECT_TRUE((LosslessArithmeticConvertible<unsigned long,
+                                             unsigned long>::value));  // NOLINT
 
   // Same size, different signedness: not fine.
-  EXPECT_FALSE((LosslessArithmeticConvertible<
-                unsigned char, signed char>::value));
+  EXPECT_FALSE(
+      (LosslessArithmeticConvertible<unsigned char, signed char>::value));
   EXPECT_FALSE((LosslessArithmeticConvertible<int, unsigned int>::value));
   EXPECT_FALSE((LosslessArithmeticConvertible<uint64_t, int64_t>::value));
 
@@ -248,8 +247,8 @@ TEST(LosslessArithmeticConvertibleTest, IntegerToFloatingPoint) {
   // the format of the latter is implementation-defined.
   EXPECT_FALSE((LosslessArithmeticConvertible<char, float>::value));
   EXPECT_FALSE((LosslessArithmeticConvertible<int, double>::value));
-  EXPECT_FALSE((LosslessArithmeticConvertible<
-                short, long double>::value));  // NOLINT
+  EXPECT_FALSE(
+      (LosslessArithmeticConvertible<short, long double>::value));  // NOLINT
 }
 
 TEST(LosslessArithmeticConvertibleTest, FloatingPointToBool) {
@@ -277,7 +276,7 @@ TEST(LosslessArithmeticConvertibleTest, FloatingPointToFloatingPoint) {
   EXPECT_FALSE((LosslessArithmeticConvertible<double, float>::value));
   GTEST_INTENTIONAL_CONST_COND_PUSH_()
   if (sizeof(double) == sizeof(long double)) {  // NOLINT
-  GTEST_INTENTIONAL_CONST_COND_POP_()
+    GTEST_INTENTIONAL_CONST_COND_POP_()
     // In some implementations (e.g. MSVC), double and long double
     // have the same size.
     EXPECT_TRUE((LosslessArithmeticConvertible<long double, double>::value));
@@ -296,7 +295,7 @@ TEST(TupleMatchesTest, WorksForSize0) {
 }
 
 TEST(TupleMatchesTest, WorksForSize1) {
-  std::tuple<Matcher<int> > matchers(Eq(1));
+  std::tuple<Matcher<int>> matchers(Eq(1));
   std::tuple<int> values1(1), values2(2);
 
   EXPECT_TRUE(TupleMatches(matchers, values1));
@@ -304,7 +303,7 @@ TEST(TupleMatchesTest, WorksForSize1) {
 }
 
 TEST(TupleMatchesTest, WorksForSize2) {
-  std::tuple<Matcher<int>, Matcher<char> > matchers(Eq(1), Eq('a'));
+  std::tuple<Matcher<int>, Matcher<char>> matchers(Eq(1), Eq('a'));
   std::tuple<int, char> values1(1, 'a'), values2(1, 'b'), values3(2, 'a'),
       values4(2, 'b');
 
@@ -317,7 +316,7 @@ TEST(TupleMatchesTest, WorksForSize2) {
 TEST(TupleMatchesTest, WorksForSize5) {
   std::tuple<Matcher<int>, Matcher<char>, Matcher<bool>,
              Matcher<long>,  // NOLINT
-             Matcher<std::string> >
+             Matcher<std::string>>
       matchers(Eq(1), Eq('a'), Eq(true), Eq(2L), Eq("hi"));
   std::tuple<int, char, bool, long, std::string>  // NOLINT
       values1(1, 'a', true, 2L, "hi"), values2(1, 'a', true, 2L, "hello"),
@@ -336,13 +335,10 @@ TEST(AssertTest, SucceedsOnTrue) {
 
 // Tests that Assert(false, ...) generates a fatal failure.
 TEST(AssertTest, FailsFatallyOnFalse) {
-  EXPECT_DEATH_IF_SUPPORTED({
-    Assert(false, __FILE__, __LINE__, "This should fail.");
-  }, "");
+  EXPECT_DEATH_IF_SUPPORTED(
+      { Assert(false, __FILE__, __LINE__, "This should fail."); }, "");
 
-  EXPECT_DEATH_IF_SUPPORTED({
-    Assert(false, __FILE__, __LINE__);
-  }, "");
+  EXPECT_DEATH_IF_SUPPORTED({ Assert(false, __FILE__, __LINE__); }, "");
 }
 
 // Tests that Expect(true, ...) succeeds.
@@ -353,13 +349,17 @@ TEST(ExpectTest, SucceedsOnTrue) {
 
 // Tests that Expect(false, ...) generates a non-fatal failure.
 TEST(ExpectTest, FailsNonfatallyOnFalse) {
-  EXPECT_NONFATAL_FAILURE({  // NOLINT
-    Expect(false, __FILE__, __LINE__, "This should fail.");
-  }, "This should fail");
+  EXPECT_NONFATAL_FAILURE(
+      {  // NOLINT
+        Expect(false, __FILE__, __LINE__, "This should fail.");
+      },
+      "This should fail");
 
-  EXPECT_NONFATAL_FAILURE({  // NOLINT
-    Expect(false, __FILE__, __LINE__);
-  }, "Expectation failed");
+  EXPECT_NONFATAL_FAILURE(
+      {  // NOLINT
+        Expect(false, __FILE__, __LINE__);
+      },
+      "Expectation failed");
 }
 
 // Tests LogIsVisible().
@@ -404,11 +404,11 @@ void TestLogWithSeverity(const std::string& verbosity, LogSeverity severity,
   CaptureStdout();
   Log(severity, "Test log.\n", 0);
   if (should_print) {
-    EXPECT_THAT(GetCapturedStdout().c_str(),
-                ContainsRegex(
-                    severity == kWarning ?
-                    "^\nGMOCK WARNING:\nTest log\\.\nStack trace:\n" :
-                    "^\nTest log\\.\nStack trace:\n"));
+    EXPECT_THAT(
+        GetCapturedStdout().c_str(),
+        ContainsRegex(severity == kWarning
+                          ? "^\nGMOCK WARNING:\nTest log\\.\nStack trace:\n"
+                          : "^\nTest log\\.\nStack trace:\n"));
   } else {
     EXPECT_STREQ("", GetCapturedStdout().c_str());
   }
@@ -455,13 +455,13 @@ TEST(LogTest, NoSkippingStackFrameInOptMode) {
   EXPECT_THAT(log, HasSubstr(expected_message));
   int skip_count = atoi(log.substr(expected_message.size()).c_str());
 
-# if defined(NDEBUG)
+#if defined(NDEBUG)
   // In opt mode, no stack frame should be skipped.
   const int expected_skip_count = 0;
-# else
+#else
   // In dbg mode, the stack frames should be skipped.
   const int expected_skip_count = 100;
-# endif
+#endif
 
   // Note that each inner implementation layer will +1 the number to remove
   // itself from the trace. This means that the value is a little higher than
@@ -503,7 +503,7 @@ TEST(LogTest, OnlyWarningsArePrintedWhenVerbosityIsInvalid) {
 
 // Verifies that Log() behaves correctly for the given verbosity level
 // and log severity.
-std::string GrabOutput(void(*logger)(), const char* verbosity) {
+std::string GrabOutput(void (*logger)(), const char* verbosity) {
   const std::string saved_flag = GMOCK_FLAG_GET(verbose);
   GMOCK_FLAG_SET(verbose, verbosity);
   CaptureStdout();
@@ -538,7 +538,7 @@ TEST(ExpectCallTest, DoesNotLogWhenVerbosityIsWarning) {
 
 // Verifies that EXPECT_CALL doesn't log
 // if the --gmock_verbose flag is set to "error".
-TEST(ExpectCallTest,  DoesNotLogWhenVerbosityIsError) {
+TEST(ExpectCallTest, DoesNotLogWhenVerbosityIsError) {
   EXPECT_STREQ("", GrabOutput(ExpectCallLogger, kErrorVerbosity).c_str());
 }
 
@@ -582,9 +582,9 @@ TEST(OnCallTest, LogsAnythingArgument) {
 
 TEST(StlContainerViewTest, WorksForStlContainer) {
   StaticAssertTypeEq<std::vector<int>,
-      StlContainerView<std::vector<int> >::type>();
+                     StlContainerView<std::vector<int>>::type>();
   StaticAssertTypeEq<const std::vector<double>&,
-      StlContainerView<std::vector<double> >::const_reference>();
+                     StlContainerView<std::vector<double>>::const_reference>();
 
   typedef std::vector<char> Chars;
   Chars v1;
@@ -597,17 +597,16 @@ TEST(StlContainerViewTest, WorksForStlContainer) {
 }
 
 TEST(StlContainerViewTest, WorksForStaticNativeArray) {
-  StaticAssertTypeEq<NativeArray<int>,
-      StlContainerView<int[3]>::type>();
+  StaticAssertTypeEq<NativeArray<int>, StlContainerView<int[3]>::type>();
   StaticAssertTypeEq<NativeArray<double>,
-      StlContainerView<const double[4]>::type>();
+                     StlContainerView<const double[4]>::type>();
   StaticAssertTypeEq<NativeArray<char[3]>,
-      StlContainerView<const char[2][3]>::type>();
+                     StlContainerView<const char[2][3]>::type>();
 
   StaticAssertTypeEq<const NativeArray<int>,
-      StlContainerView<int[2]>::const_reference>();
+                     StlContainerView<int[2]>::const_reference>();
 
-  int a1[3] = { 0, 1, 2 };
+  int a1[3] = {0, 1, 2};
   NativeArray<int> a2 = StlContainerView<int[3]>::ConstReference(a1);
   EXPECT_EQ(3U, a2.size());
   EXPECT_EQ(a1, a2.begin());
@@ -625,24 +624,24 @@ TEST(StlContainerViewTest, WorksForStaticNativeArray) {
 
 TEST(StlContainerViewTest, WorksForDynamicNativeArray) {
   StaticAssertTypeEq<NativeArray<int>,
-                     StlContainerView<std::tuple<const int*, size_t> >::type>();
+                     StlContainerView<std::tuple<const int*, size_t>>::type>();
   StaticAssertTypeEq<
       NativeArray<double>,
-      StlContainerView<std::tuple<std::shared_ptr<double>, int> >::type>();
+      StlContainerView<std::tuple<std::shared_ptr<double>, int>>::type>();
 
   StaticAssertTypeEq<
       const NativeArray<int>,
-      StlContainerView<std::tuple<const int*, int> >::const_reference>();
+      StlContainerView<std::tuple<const int*, int>>::const_reference>();
 
-  int a1[3] = { 0, 1, 2 };
+  int a1[3] = {0, 1, 2};
   const int* const p1 = a1;
   NativeArray<int> a2 =
-      StlContainerView<std::tuple<const int*, int> >::ConstReference(
+      StlContainerView<std::tuple<const int*, int>>::ConstReference(
           std::make_tuple(p1, 3));
   EXPECT_EQ(3U, a2.size());
   EXPECT_EQ(a1, a2.begin());
 
-  const NativeArray<int> a3 = StlContainerView<std::tuple<int*, size_t> >::Copy(
+  const NativeArray<int> a3 = StlContainerView<std::tuple<int*, size_t>>::Copy(
       std::make_tuple(static_cast<int*>(a1), 3));
   ASSERT_EQ(3U, a3.size());
   EXPECT_EQ(0, a3.begin()[0]);
