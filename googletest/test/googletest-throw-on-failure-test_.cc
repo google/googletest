@@ -27,18 +27,18 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
 // Tests Google Test's throw-on-failure mode with exceptions disabled.
 //
 // This program must be compiled with exceptions disabled.  It will be
 // invoked by googletest-throw-on-failure-test.py, and is expected to exit
 // with non-zero in the throw-on-failure mode or 0 otherwise.
 
-#include "gtest/gtest.h"
+#include <stdio.h>   // for fflush, fprintf, NULL, etc.
+#include <stdlib.h>  // for exit
 
-#include <stdio.h>                      // for fflush, fprintf, NULL, etc.
-#include <stdlib.h>                     // for exit
-#include <exception>                    // for set_terminate
+#include <exception>  // for set_terminate
+
+#include "gtest/gtest.h"
 
 // This terminate handler aborts the program using exit() rather than abort().
 // This avoids showing pop-ups on Windows systems and core dumps on Unix-like

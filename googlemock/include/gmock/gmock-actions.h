@@ -131,7 +131,7 @@
 #define GOOGLEMOCK_INCLUDE_GMOCK_GMOCK_ACTIONS_H_
 
 #ifndef _WIN32_WCE
-# include <errno.h>
+#include <errno.h>
 #endif
 
 #include <algorithm>
@@ -147,8 +147,8 @@
 #include "gmock/internal/gmock-pp.h"
 
 #ifdef _MSC_VER
-# pragma warning(push)
-# pragma warning(disable:4100)
+#pragma warning(push)
+#pragma warning(disable : 4100)
 #endif
 
 namespace testing {
@@ -196,9 +196,7 @@ class BuiltInDefaultValue {
  public:
   // This function returns true if and only if type T has a built-in default
   // value.
-  static bool Exists() {
-    return ::std::is_default_constructible<T>::value;
-  }
+  static bool Exists() { return ::std::is_default_constructible<T>::value; }
 
   static T Get() {
     return BuiltInDefaultValueGetter<
@@ -227,11 +225,11 @@ class BuiltInDefaultValue<T*> {
 // The following specializations define the default values for
 // specific types we care about.
 #define GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE_(type, value) \
-  template <> \
-  class BuiltInDefaultValue<type> { \
-   public: \
-    static bool Exists() { return true; } \
-    static type Get() { return value; } \
+  template <>                                                     \
+  class BuiltInDefaultValue<type> {                               \
+   public:                                                        \
+    static bool Exists() { return true; }                         \
+    static type Get() { return value; }                           \
   }
 
 GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE_(void, );  // NOLINT
@@ -255,10 +253,10 @@ GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE_(unsigned short, 0U);  // NOLINT
 GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE_(signed short, 0);     // NOLINT
 GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE_(unsigned int, 0U);
 GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE_(signed int, 0);
-GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE_(unsigned long, 0UL);  // NOLINT
-GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE_(signed long, 0L);     // NOLINT
+GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE_(unsigned long, 0UL);     // NOLINT
+GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE_(signed long, 0L);        // NOLINT
 GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE_(unsigned long long, 0);  // NOLINT
-GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE_(signed long long, 0);  // NOLINT
+GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE_(signed long long, 0);    // NOLINT
 GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE_(float, 0);
 GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE_(double, 0);
 
@@ -839,7 +837,7 @@ class ReturnRoundRobinAction {
 
   template <typename... Args>
   T operator()(Args&&...) const {
-     return state_->Next();
+    return state_->Next();
   }
 
  private:
@@ -862,7 +860,9 @@ class DoDefaultAction {
   // This template type conversion operator allows DoDefault() to be
   // used in any function.
   template <typename F>
-  operator Action<F>() const { return Action<F>(); }  // NOLINT
+  operator Action<F>() const {
+    return Action<F>();
+  }  // NOLINT
 };
 
 // Implements the Assign action to set a given pointer referent to a
@@ -890,8 +890,7 @@ template <typename T>
 class SetErrnoAndReturnAction {
  public:
   SetErrnoAndReturnAction(int errno_value, T result)
-      : errno_(errno_value),
-        result_(result) {}
+      : errno_(errno_value), result_(result) {}
   template <typename Result, typename ArgumentTuple>
   Result Perform(const ArgumentTuple& /* args */) const {
     errno = errno_;
@@ -1002,8 +1001,8 @@ class IgnoreResultAction {
    private:
     // Type OriginalFunction is the same as F except that its return
     // type is IgnoredValue.
-    typedef typename internal::Function<F>::MakeResultIgnoredValue
-        OriginalFunction;
+    typedef
+        typename internal::Function<F>::MakeResultIgnoredValue OriginalFunction;
 
     const Action<OriginalFunction> action_;
   };
@@ -1020,12 +1019,12 @@ struct WithArgsAction {
   template <typename R, typename... Args>
   operator Action<R(Args...)>() const {  // NOLINT
     using TupleType = std::tuple<Args...>;
-    Action<R(typename std::tuple_element<I, TupleType>::type...)>
-        converted(action);
+    Action<R(typename std::tuple_element<I, TupleType>::type...)> converted(
+        action);
 
     return [converted](Args... args) -> R {
       return converted.Perform(std::forward_as_tuple(
-        std::get<I>(std::forward_as_tuple(std::forward<Args>(args)...))...));
+          std::get<I>(std::forward_as_tuple(std::forward<Args>(args)...))...));
     };
   }
 };
@@ -1212,8 +1211,8 @@ internal::DoAllAction<typename std::decay<Action>::type...> DoAll(
 // multiple arguments.  For convenience, we also provide
 // WithArgs<k>(an_action) (defined below) as a synonym.
 template <size_t k, typename InnerAction>
-internal::WithArgsAction<typename std::decay<InnerAction>::type, k>
-WithArg(InnerAction&& action) {
+internal::WithArgsAction<typename std::decay<InnerAction>::type, k> WithArg(
+    InnerAction&& action) {
   return {std::forward<InnerAction>(action)};
 }
 
@@ -1232,8 +1231,8 @@ WithArgs(InnerAction&& action) {
 // argument.  In other words, it adapts an action accepting no
 // argument to one that accepts (and ignores) arguments.
 template <typename InnerAction>
-internal::WithArgsAction<typename std::decay<InnerAction>::type>
-WithoutArgs(InnerAction&& action) {
+internal::WithArgsAction<typename std::decay<InnerAction>::type> WithoutArgs(
+    InnerAction&& action) {
   return {std::forward<InnerAction>(action)};
 }
 
@@ -1319,7 +1318,7 @@ internal::SetArgumentPointeeAction<N, T> SetArgumentPointee(T value) {
 
 // Creates an action that sets a pointer referent to a given value.
 template <typename T1, typename T2>
-PolymorphicAction<internal::AssignAction<T1, T2> > Assign(T1* ptr, T2 val) {
+PolymorphicAction<internal::AssignAction<T1, T2>> Assign(T1* ptr, T2 val) {
   return MakePolymorphicAction(internal::AssignAction<T1, T2>(ptr, val));
 }
 
@@ -1327,8 +1326,8 @@ PolymorphicAction<internal::AssignAction<T1, T2> > Assign(T1* ptr, T2 val) {
 
 // Creates an action that sets errno and returns the appropriate error.
 template <typename T>
-PolymorphicAction<internal::SetErrnoAndReturnAction<T> >
-SetErrnoAndReturn(int errval, T result) {
+PolymorphicAction<internal::SetErrnoAndReturnAction<T>> SetErrnoAndReturn(
+    int errval, T result) {
   return MakePolymorphicAction(
       internal::SetErrnoAndReturnAction<T>(errval, result));
 }
@@ -1482,7 +1481,8 @@ struct ExcessiveArg {};
 
 // Builds an implementation of an Action<> for some particular signature, using
 // a class defined by an ACTION* macro.
-template <typename F, typename Impl> struct ActionImpl;
+template <typename F, typename Impl>
+struct ActionImpl;
 
 template <typename Impl>
 struct ImplBase {
@@ -1502,7 +1502,7 @@ struct ActionImpl<R(Args...), Impl> : ImplBase<Impl>::type {
   using args_type = std::tuple<Args...>;
 
   ActionImpl() = default;  // Only defined if appropriate for Base.
-  explicit ActionImpl(std::shared_ptr<Impl> impl) : Base{std::move(impl)} { }
+  explicit ActionImpl(std::shared_ptr<Impl> impl) : Base{std::move(impl)} {}
 
   R operator()(Args&&... arg) const {
     static constexpr size_t kMaxArgs =
@@ -1521,12 +1521,14 @@ struct ActionImpl<R(Args...), Impl> : ImplBase<Impl>::type {
     // args_type get passed, followed by a dummy of unspecified type for the
     // remainder up to 10 explicit args.
     static constexpr ExcessiveArg kExcessArg{};
-    return static_cast<const Impl&>(*this).template gmock_PerformImpl<
-        /*function_type=*/function_type, /*return_type=*/R,
-        /*args_type=*/args_type,
-        /*argN_type=*/typename std::tuple_element<arg_id, args_type>::type...>(
-        /*args=*/args, std::get<arg_id>(args)...,
-        ((void)excess_id, kExcessArg)...);
+    return static_cast<const Impl&>(*this)
+        .template gmock_PerformImpl<
+            /*function_type=*/function_type, /*return_type=*/R,
+            /*args_type=*/args_type,
+            /*argN_type=*/
+            typename std::tuple_element<arg_id, args_type>::type...>(
+            /*args=*/args, std::get<arg_id>(args)...,
+            ((void)excess_id, kExcessArg)...);
   }
 };
 
@@ -1545,7 +1547,7 @@ template <typename F, typename Impl>
 
 #define GMOCK_INTERNAL_ARG_UNUSED(i, data, el) \
   , const arg##i##_type& arg##i GTEST_ATTRIBUTE_UNUSED_
-#define GMOCK_ACTION_ARG_TYPES_AND_NAMES_UNUSED_           \
+#define GMOCK_ACTION_ARG_TYPES_AND_NAMES_UNUSED_                 \
   const args_type& args GTEST_ATTRIBUTE_UNUSED_ GMOCK_PP_REPEAT( \
       GMOCK_INTERNAL_ARG_UNUSED, , 10)
 
@@ -1584,45 +1586,47 @@ template <typename F, typename Impl>
 #define GMOCK_ACTION_FIELD_PARAMS_(params) \
   GMOCK_PP_FOR_EACH(GMOCK_INTERNAL_FIELD_PARAM, , params)
 
-#define GMOCK_INTERNAL_ACTION(name, full_name, params)                        \
-  template <GMOCK_ACTION_TYPENAME_PARAMS_(params)>                            \
-  class full_name {                                                           \
-   public:                                                                    \
-    explicit full_name(GMOCK_ACTION_TYPE_GVALUE_PARAMS_(params))              \
-        : impl_(std::make_shared<gmock_Impl>(                                 \
-                GMOCK_ACTION_GVALUE_PARAMS_(params))) { }                     \
-    full_name(const full_name&) = default;                                    \
-    full_name(full_name&&) noexcept = default;                                \
-    template <typename F>                                                     \
-    operator ::testing::Action<F>() const {                                   \
-      return ::testing::internal::MakeAction<F>(impl_);                       \
-    }                                                                         \
-   private:                                                                   \
-    class gmock_Impl {                                                        \
-     public:                                                                  \
-      explicit gmock_Impl(GMOCK_ACTION_TYPE_GVALUE_PARAMS_(params))           \
-          : GMOCK_ACTION_INIT_PARAMS_(params) {}                              \
-      template <typename function_type, typename return_type,                 \
-                typename args_type, GMOCK_ACTION_TEMPLATE_ARGS_NAMES_>        \
-      return_type gmock_PerformImpl(GMOCK_ACTION_ARG_TYPES_AND_NAMES_) const; \
-      GMOCK_ACTION_FIELD_PARAMS_(params)                                      \
-    };                                                                        \
-    std::shared_ptr<const gmock_Impl> impl_;                                  \
-  };                                                                          \
-  template <GMOCK_ACTION_TYPENAME_PARAMS_(params)>                            \
-  inline full_name<GMOCK_ACTION_TYPE_PARAMS_(params)> name(                   \
-      GMOCK_ACTION_TYPE_GVALUE_PARAMS_(params))  GTEST_MUST_USE_RESULT_;      \
-  template <GMOCK_ACTION_TYPENAME_PARAMS_(params)>                            \
-  inline full_name<GMOCK_ACTION_TYPE_PARAMS_(params)> name(                   \
-      GMOCK_ACTION_TYPE_GVALUE_PARAMS_(params)) {                             \
-    return full_name<GMOCK_ACTION_TYPE_PARAMS_(params)>(                      \
-        GMOCK_ACTION_GVALUE_PARAMS_(params));                                 \
-  }                                                                           \
-  template <GMOCK_ACTION_TYPENAME_PARAMS_(params)>                            \
-  template <typename function_type, typename return_type, typename args_type, \
-            GMOCK_ACTION_TEMPLATE_ARGS_NAMES_>                                \
-  return_type full_name<GMOCK_ACTION_TYPE_PARAMS_(params)>::gmock_Impl::      \
-  gmock_PerformImpl(GMOCK_ACTION_ARG_TYPES_AND_NAMES_UNUSED_) const
+#define GMOCK_INTERNAL_ACTION(name, full_name, params)                         \
+  template <GMOCK_ACTION_TYPENAME_PARAMS_(params)>                             \
+  class full_name {                                                            \
+   public:                                                                     \
+    explicit full_name(GMOCK_ACTION_TYPE_GVALUE_PARAMS_(params))               \
+        : impl_(std::make_shared<gmock_Impl>(                                  \
+              GMOCK_ACTION_GVALUE_PARAMS_(params))) {}                         \
+    full_name(const full_name&) = default;                                     \
+    full_name(full_name&&) noexcept = default;                                 \
+    template <typename F>                                                      \
+    operator ::testing::Action<F>() const {                                    \
+      return ::testing::internal::MakeAction<F>(impl_);                        \
+    }                                                                          \
+                                                                               \
+   private:                                                                    \
+    class gmock_Impl {                                                         \
+     public:                                                                   \
+      explicit gmock_Impl(GMOCK_ACTION_TYPE_GVALUE_PARAMS_(params))            \
+          : GMOCK_ACTION_INIT_PARAMS_(params) {}                               \
+      template <typename function_type, typename return_type,                  \
+                typename args_type, GMOCK_ACTION_TEMPLATE_ARGS_NAMES_>         \
+      return_type gmock_PerformImpl(GMOCK_ACTION_ARG_TYPES_AND_NAMES_) const;  \
+      GMOCK_ACTION_FIELD_PARAMS_(params)                                       \
+    };                                                                         \
+    std::shared_ptr<const gmock_Impl> impl_;                                   \
+  };                                                                           \
+  template <GMOCK_ACTION_TYPENAME_PARAMS_(params)>                             \
+  inline full_name<GMOCK_ACTION_TYPE_PARAMS_(params)> name(                    \
+      GMOCK_ACTION_TYPE_GVALUE_PARAMS_(params)) GTEST_MUST_USE_RESULT_;        \
+  template <GMOCK_ACTION_TYPENAME_PARAMS_(params)>                             \
+  inline full_name<GMOCK_ACTION_TYPE_PARAMS_(params)> name(                    \
+      GMOCK_ACTION_TYPE_GVALUE_PARAMS_(params)) {                              \
+    return full_name<GMOCK_ACTION_TYPE_PARAMS_(params)>(                       \
+        GMOCK_ACTION_GVALUE_PARAMS_(params));                                  \
+  }                                                                            \
+  template <GMOCK_ACTION_TYPENAME_PARAMS_(params)>                             \
+  template <typename function_type, typename return_type, typename args_type,  \
+            GMOCK_ACTION_TEMPLATE_ARGS_NAMES_>                                 \
+  return_type                                                                  \
+  full_name<GMOCK_ACTION_TYPE_PARAMS_(params)>::gmock_Impl::gmock_PerformImpl( \
+      GMOCK_ACTION_ARG_TYPES_AND_NAMES_UNUSED_) const
 
 }  // namespace internal
 
@@ -1630,12 +1634,13 @@ template <typename F, typename Impl>
 #define ACTION(name)                                                          \
   class name##Action {                                                        \
    public:                                                                    \
-   explicit name##Action() noexcept {}                                        \
-   name##Action(const name##Action&) noexcept {}                              \
+    explicit name##Action() noexcept {}                                       \
+    name##Action(const name##Action&) noexcept {}                             \
     template <typename F>                                                     \
     operator ::testing::Action<F>() const {                                   \
       return ::testing::internal::MakeAction<F, gmock_Impl>();                \
     }                                                                         \
+                                                                              \
    private:                                                                   \
     class gmock_Impl {                                                        \
      public:                                                                  \
@@ -1684,7 +1689,7 @@ template <typename F, typename Impl>
 }  // namespace testing
 
 #ifdef _MSC_VER
-# pragma warning(pop)
+#pragma warning(pop)
 #endif
 
 #endif  // GOOGLEMOCK_INCLUDE_GMOCK_GMOCK_ACTIONS_H_

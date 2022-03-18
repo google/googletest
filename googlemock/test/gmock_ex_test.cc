@@ -27,7 +27,6 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
 // Tests Google Mock's functionality that depends on exceptions.
 
 #include "gmock/gmock.h"
@@ -74,7 +73,6 @@ TEST(DefaultValueTest, ThrowsRuntimeErrorWhenNoDefaultValue) {
     EXPECT_THAT(ex.what(), HasSubstr("has no default value"));
   }
 }
-
 
 }  // unnamed namespace
 #endif

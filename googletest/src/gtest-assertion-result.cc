@@ -33,8 +33,8 @@
 
 #include "gtest/gtest-assertion-result.h"
 
-#include <utility>
 #include <string>
+#include <utility>
 
 #include "gtest/gtest-message.h"
 
@@ -63,14 +63,10 @@ AssertionResult AssertionResult::operator!() const {
 }
 
 // Makes a successful assertion result.
-AssertionResult AssertionSuccess() {
-  return AssertionResult(true);
-}
+AssertionResult AssertionSuccess() { return AssertionResult(true); }
 
 // Makes a failed assertion result.
-AssertionResult AssertionFailure() {
-  return AssertionResult(false);
-}
+AssertionResult AssertionFailure() { return AssertionResult(false); }
 
 // Makes a failed assertion result with the given failure message.
 // Deprecated; use AssertionFailure() << message.

@@ -27,8 +27,8 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
 #include <iostream>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -56,7 +56,7 @@ void loop() { RUN_ALL_TESTS(); }
 // https://web.archive.org/web/20170912203238/connect.microsoft.com/VisualStudio/feedback/details/394464/wmain-link-error-in-the-static-library
 // // NOLINT
 #if GTEST_OS_WINDOWS_MOBILE
-# include <tchar.h>  // NOLINT
+#include <tchar.h>  // NOLINT
 
 GTEST_API_ int _tmain(int argc, TCHAR** argv) {
 #else
