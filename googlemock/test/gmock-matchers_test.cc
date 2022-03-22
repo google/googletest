@@ -7606,7 +7606,7 @@ TEST(ElementsAreArrayTest, CanBeCreatedWithIteratorRange) {
 }
 
 // Since ElementsAre() and ElementsAreArray() share much of the
-// implementation, we only do a sanity test for native arrays here.
+// implementation, we only do a test for native arrays here.
 TEST(ElementsAreArrayTest, WorksWithNativeArray) {
   ::std::string a[] = {"hi", "ho"};
   ::std::string b[] = {"hi", "ho"};

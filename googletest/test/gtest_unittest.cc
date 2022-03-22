@@ -7059,7 +7059,7 @@ TEST(EventListenerTest, RemovingDefaultXmlGeneratorWorks) {
   delete listener;
 }
 
-// Sanity tests to ensure that the alternative, verbose spellings of
+// Tests to ensure that the alternative, verbose spellings of
 // some of the macros work.  We don't test them thoroughly as that
 // would be quite involved.  Since their implementations are
 // straightforward, and they are rarely used, we'll just rely on the

@@ -1019,7 +1019,7 @@ int main(int argc, char** argv) {
   // this program with the golden file.
 
   // It's hard to test InitGoogleTest() directly, as it has many
-  // global side effects.  The following line serves as a sanity test
+  // global side effects.  The following line serves as a test
   // for it.
   testing::InitGoogleTest(&argc, argv);
   bool internal_skip_environment_and_ad_hoc_tests =
