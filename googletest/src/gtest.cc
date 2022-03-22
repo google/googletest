@@ -2821,7 +2821,7 @@ void UnitTestImpl::RegisterParameterizedTests() {
 void TestInfo::Run() {
   TestEventListener* repeater = UnitTest::GetInstance()->listeners().repeater();
   if (!should_run_) {
-    if (is_disabled_) repeater->OnTestDisabled(*this);
+    if (is_disabled_ && matches_filter_) repeater->OnTestDisabled(*this);
     return;
   }
 
