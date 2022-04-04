@@ -240,8 +240,6 @@
 //   BiggestInt     - the biggest signed integer type.
 //
 // Command-line utilities:
-//   GTEST_DECLARE_*()  - declares a flag.
-//   GTEST_DEFINE_*()   - defines a flag.
 //   GetInjectableArgvs() - returns the command line as a vector of strings.
 //
 // Environment variable utilities:
@@ -286,6 +284,12 @@
 
 #include "gtest/internal/custom/gtest-port.h"
 #include "gtest/internal/gtest-port-arch.h"
+
+#if GTEST_HAS_ABSL
+#include "absl/flags/declare.h"
+#include "absl/flags/flag.h"
+#include "absl/flags/reflection.h"
+#endif
 
 #if !defined(GTEST_DEV_EMAIL_)
 #define GTEST_DEV_EMAIL_ "googletestframework@@googlegroups.com"
@@ -2157,32 +2161,37 @@ using TimeInMillis = int64_t;  // Represents time in milliseconds.
 
 // Macro for referencing flags.
 #if !defined(GTEST_FLAG)
+#define GTEST_FLAG_NAME_(name) gtest_##name
 #define GTEST_FLAG(name) FLAGS_gtest_##name
 #endif  // !defined(GTEST_FLAG)
 
-#if !defined(GTEST_USE_OWN_FLAGFILE_FLAG_)
-#define GTEST_USE_OWN_FLAGFILE_FLAG_ 1
-#endif  // !defined(GTEST_USE_OWN_FLAGFILE_FLAG_)
+// Pick a command line flags implementation.
+#if GTEST_HAS_ABSL
 
-#if !defined(GTEST_DECLARE_bool_)
-#define GTEST_FLAG_SAVER_ ::testing::internal::GTestFlagSaver
+// Macros for defining flags.
+#define GTEST_DEFINE_bool_(name, default_val, doc) \
+  ABSL_FLAG(bool, GTEST_FLAG_NAME_(name), default_val, doc)
+#define GTEST_DEFINE_int32_(name, default_val, doc) \
+  ABSL_FLAG(int32_t, GTEST_FLAG_NAME_(name), default_val, doc)
+#define GTEST_DEFINE_string_(name, default_val, doc) \
+  ABSL_FLAG(std::string, GTEST_FLAG_NAME_(name), default_val, doc)
 
 // Macros for declaring flags.
-#define GTEST_DECLARE_bool_(name)          \
-  namespace testing {                      \
-  GTEST_API_ extern bool GTEST_FLAG(name); \
-  }                                        \
-  static_assert(true, "no-op to require trailing semicolon")
-#define GTEST_DECLARE_int32_(name)                 \
-  namespace testing {                              \
-  GTEST_API_ extern std::int32_t GTEST_FLAG(name); \
-  }                                                \
-  static_assert(true, "no-op to require trailing semicolon")
-#define GTEST_DECLARE_string_(name)                 \
-  namespace testing {                               \
-  GTEST_API_ extern ::std::string GTEST_FLAG(name); \
-  }                                                 \
-  static_assert(true, "no-op to require trailing semicolon")
+#define GTEST_DECLARE_bool_(name) \
+  ABSL_DECLARE_FLAG(bool, GTEST_FLAG_NAME_(name))
+#define GTEST_DECLARE_int32_(name) \
+  ABSL_DECLARE_FLAG(int32_t, GTEST_FLAG_NAME_(name))
+#define GTEST_DECLARE_string_(name) \
+  ABSL_DECLARE_FLAG(std::string, GTEST_FLAG_NAME_(name))
+
+#define GTEST_FLAG_SAVER_ ::absl::FlagSaver
+
+#define GTEST_FLAG_GET(name) ::absl::GetFlag(GTEST_FLAG(name))
+#define GTEST_FLAG_SET(name, value) \
+  (void)(::absl::SetFlag(&GTEST_FLAG(name), value))
+#define GTEST_USE_OWN_FLAGFILE_FLAG_ 0
+
+#else  // GTEST_HAS_ABSL
 
 // Macros for defining flags.
 #define GTEST_DEFINE_bool_(name, default_val, doc)  \
@@ -2201,12 +2210,30 @@ using TimeInMillis = int64_t;  // Represents time in milliseconds.
   }                                                          \
   static_assert(true, "no-op to require trailing semicolon")
 
-#endif  // !defined(GTEST_DECLARE_bool_)
+// Macros for declaring flags.
+#define GTEST_DECLARE_bool_(name)          \
+  namespace testing {                      \
+  GTEST_API_ extern bool GTEST_FLAG(name); \
+  }                                        \
+  static_assert(true, "no-op to require trailing semicolon")
+#define GTEST_DECLARE_int32_(name)                 \
+  namespace testing {                              \
+  GTEST_API_ extern std::int32_t GTEST_FLAG(name); \
+  }                                                \
+  static_assert(true, "no-op to require trailing semicolon")
+#define GTEST_DECLARE_string_(name)                 \
+  namespace testing {                               \
+  GTEST_API_ extern ::std::string GTEST_FLAG(name); \
+  }                                                 \
+  static_assert(true, "no-op to require trailing semicolon")
 
-#if !defined(GTEST_FLAG_GET)
+#define GTEST_FLAG_SAVER_ ::testing::internal::GTestFlagSaver
+
 #define GTEST_FLAG_GET(name) ::testing::GTEST_FLAG(name)
 #define GTEST_FLAG_SET(name, value) (void)(::testing::GTEST_FLAG(name) = value)
-#endif  // !defined(GTEST_FLAG_GET)
+#define GTEST_USE_OWN_FLAGFILE_FLAG_ 1
+
+#endif  // GTEST_HAS_ABSL
 
 // Thread annotations
 #if !defined(GTEST_EXCLUSIVE_LOCK_REQUIRED_)
@@ -2362,8 +2389,7 @@ template <typename... T>
 using Variant = ::std::variant<T...>;
 }  // namespace internal
 }  // namespace testing
-   // The case where absl is configured NOT to alias std::variant is not
-   // supported.
+// The case where absl is configured NOT to alias std::variant is not supported.
 #endif  // __has_include(<variant>) && __cplusplus >= 201703L
 #endif  // __has_include
 #endif  // GTEST_HAS_ABSL

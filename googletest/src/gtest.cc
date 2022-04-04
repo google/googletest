@@ -136,7 +136,10 @@
 #include "absl/debugging/failure_signal_handler.h"
 #include "absl/debugging/stacktrace.h"
 #include "absl/debugging/symbolize.h"
+#include "absl/flags/parse.h"
+#include "absl/flags/usage.h"
 #include "absl/strings/str_cat.h"
+#include "absl/strings/str_replace.h"
 #endif  // GTEST_HAS_ABSL
 
 namespace testing {
@@ -6590,9 +6593,7 @@ void ParseGoogleTestFlagsOnlyImpl(int* argc, CharType** argv) {
       LoadFlagsFromFile(flagfile_value);
       remove_flag = true;
 #endif  // GTEST_USE_OWN_FLAGFILE_FLAG_
-    } else if (arg_string == "--help" || arg_string == "-h" ||
-               arg_string == "-?" || arg_string == "/?" ||
-               HasGoogleTestFlagPrefix(arg)) {
+    } else if (arg_string == "--help" || HasGoogleTestFlagPrefix(arg)) {
       // Both help flag and unrecognized Google Test flags (excluding
       // internal ones) trigger help display.
       g_help_flag = true;
@@ -6627,7 +6628,27 @@ void ParseGoogleTestFlagsOnlyImpl(int* argc, CharType** argv) {
 // Parses the command line for Google Test flags, without initializing
 // other parts of Google Test.
 void ParseGoogleTestFlagsOnly(int* argc, char** argv) {
+#if GTEST_HAS_ABSL
+  if (*argc > 0) {
+    // absl::ParseCommandLine() requires *argc > 0.
+    auto positional_args = absl::flags_internal::ParseCommandLineImpl(
+        *argc, argv, absl::flags_internal::ArgvListAction::kRemoveParsedArgs,
+        absl::flags_internal::UsageFlagsAction::kHandleUsage,
+        absl::flags_internal::OnUndefinedFlag::kReportUndefined);
+    // Any command-line positional arguments not part of any command-line flag
+    // (or arguments to a flag) are copied back out to argv, with the program
+    // invocation name at position 0, and argc is resized. This includes
+    // positional arguments after the flag-terminating delimiter '--'.
+    // See https://abseil.io/docs/cpp/guides/flags.
+    std::copy(positional_args.begin(), positional_args.end(), argv);
+    if (static_cast<int>(positional_args.size()) < *argc) {
+      argv[positional_args.size()] = nullptr;
+      *argc = static_cast<int>(positional_args.size());
+    }
+  }
+#else
   ParseGoogleTestFlagsOnlyImpl(argc, argv);
+#endif
 
   // Fix the value of *_NSGetArgc() on macOS, but if and only if
   // *_NSGetArgv() == argv
@@ -6662,6 +6683,12 @@ void InitGoogleTestImpl(int* argc, CharType** argv) {
 
 #if GTEST_HAS_ABSL
   absl::InitializeSymbolizer(g_argvs[0].c_str());
+
+  // When using the Abseil Flags library, set the program usage message to the
+  // help message, but remove the color-encoding from the message first.
+  absl::SetProgramUsageMessage(absl::StrReplaceAll(
+      kColorEncodedHelpMessage,
+      {{"@D", ""}, {"@R", ""}, {"@G", ""}, {"@Y", ""}, {"@@", "@"}}));
 #endif  // GTEST_HAS_ABSL
 
   ParseGoogleTestFlagsOnly(argc, argv);
