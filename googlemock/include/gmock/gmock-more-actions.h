@@ -600,7 +600,8 @@ auto InvokeArgument(F f, Args... args) -> decltype(f(args...)) {
 
 template <std::size_t index, typename... Params>
 struct InvokeArgumentAction {
-  template <typename... Args>
+  template <typename... Args,
+            typename = typename std::enable_if<(index < sizeof...(Args))>::type>
   auto operator()(Args&&... args) const -> decltype(internal::InvokeArgument(
       std::get<index>(std::forward_as_tuple(std::forward<Args>(args)...)),
       std::declval<const Params&>()...)) {
