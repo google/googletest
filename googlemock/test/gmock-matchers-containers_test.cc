@@ -949,6 +949,17 @@ TEST(ResultOfTest, CanExplainMatchResult) {
             Explain(matcher, 36));
 }
 
+TEST(ResultOfTest, CanExplainMatchResultWithResultDescription) {
+  Matcher<int> matcher = ResultOf("magic int conversion", &IntFunction, Ge(85));
+  EXPECT_EQ("whose magic int conversion is 90" + OfType("int"),
+            Explain(matcher, 36));
+
+  matcher = ResultOf("magic int conversion", &IntFunction, GreaterThan(85));
+  EXPECT_EQ("whose magic int conversion is 90" + OfType("int") +
+                ", which is 5 more than 85",
+            Explain(matcher, 36));
+}
+
 // Tests that ResultOf(f, ...) compiles and works as expected when f(x)
 // returns a non-reference.
 TEST(ResultOfTest, WorksForNonReferenceResults) {
