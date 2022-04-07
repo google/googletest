@@ -297,6 +297,11 @@ GTEST_API_ WithoutMatchers GetWithoutMatchers();
 #pragma warning(disable : 4717)
 #endif
 
+#if __GNUC__ >= 12
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Winfinite-recursion"
+#endif
+
 // Invalid<T>() is usable as an expression of type T, but will terminate
 // the program with an assertion failure if actually run.  This is useful
 // when a value of type T is needed for compilation, but the statement
@@ -310,6 +315,10 @@ inline T Invalid() {
   // about missing return statements.
   return Invalid<T>();
 }
+
+#if __GNUC__ >= 12
+#pragma GCC diagnostic pop
+#endif
 
 #ifdef _MSC_VER
 #pragma warning(pop)
