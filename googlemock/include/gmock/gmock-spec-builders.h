@@ -992,14 +992,16 @@ class TypedExpectation : public ExpectationBase {
     return After(s1, s2, s3, s4).After(s5);
   }
 
-  // Implements the .WillOnce() clause.
-  TypedExpectation& WillOnce(const Action<F>& action) {
+  // Implements the .WillOnce() clause for copyable actions.
+  TypedExpectation& WillOnce(OnceAction<F> once_action) {
     ExpectSpecProperty(last_clause_ <= kWillOnce,
                        ".WillOnce() cannot appear after "
                        ".WillRepeatedly() or .RetiresOnSaturation().");
     last_clause_ = kWillOnce;
 
-    untyped_actions_.push_back(new Action<F>(action));
+    untyped_actions_.push_back(
+        new Action<F>(std::move(once_action).ReleaseAction()));
+
     if (!cardinality_specified()) {
       set_cardinality(Exactly(static_cast<int>(untyped_actions_.size())));
     }

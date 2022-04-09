@@ -262,9 +262,65 @@ GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE_(double, 0);
 
 #undef GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE_
 
-// Simple two-arg form of std::disjunction.
-template <typename P, typename Q>
-using disjunction = typename ::std::conditional<P::value, P, Q>::type;
+// Partial implementations of metaprogramming types from the standard library
+// not available in C++11.
+
+template <typename P>
+struct negation
+    // NOLINTNEXTLINE
+    : std::integral_constant<bool, bool(!P::value)> {};
+
+// Base case: with zero predicates the answer is always true.
+template <typename...>
+struct conjunction : std::true_type {};
+
+// With a single predicate, the answer is that predicate.
+template <typename P1>
+struct conjunction<P1> : P1 {};
+
+// With multiple predicates the answer is the first predicate if that is false,
+// and we recurse otherwise.
+template <typename P1, typename... Ps>
+struct conjunction<P1, Ps...>
+    : std::conditional<bool(P1::value), conjunction<Ps...>, P1>::type {};
+
+template <typename...>
+struct disjunction : std::false_type {};
+
+template <typename P1>
+struct disjunction<P1> : P1 {};
+
+template <typename P1, typename... Ps>
+struct disjunction<P1, Ps...>
+    // NOLINTNEXTLINE
+    : std::conditional<!bool(P1::value), disjunction<Ps...>, P1>::type {};
+
+template <typename...>
+using void_t = void;
+
+// Like std::invoke_result_t from C++17, but works only for objects with call
+// operators (not e.g. member function pointers, which we don't need specific
+// support for in OnceAction because std::function deals with them).
+template <typename F, typename... Args>
+using call_result_t = decltype(std::declval<F>()(std::declval<Args>()...));
+
+template <typename Void, typename R, typename F, typename... Args>
+struct is_callable_r_impl : std::false_type {};
+
+// Specialize the struct for those template arguments where call_result_t is
+// well-formed. When it's not, the generic template above is chosen, resulting
+// in std::false_type.
+template <typename R, typename F, typename... Args>
+struct is_callable_r_impl<void_t<call_result_t<F, Args...>>, R, F, Args...>
+    : std::conditional<
+          std::is_same<R, void>::value,  //
+          std::true_type,                //
+          std::is_convertible<call_result_t<F, Args...>, R>>::type {};
+
+// Like std::is_invocable_r from C++17, but works only for objects with call
+// operators. See the note on call_result_t.
+template <typename R, typename F, typename... Args>
+using is_callable_r = is_callable_r_impl<void, R, F, Args...>;
 
 }  // namespace internal
 
@@ -595,6 +651,213 @@ inline PolymorphicAction<Impl> MakePolymorphicAction(const Impl& impl) {
 }
 
 namespace internal {
+
+template <typename F>
+class TypedExpectation;
+
+// Specialized for function types below.
+template <typename F>
+class OnceAction;
+
+// An action that can only be used once.
+//
+// This is what is accepted by WillOnce, which doesn't require the underlying
+// action to be copy-constructible (only move-constructible), and promises to
+// invoke it as an rvalue reference. This allows the action to work with
+// move-only types like std::move_only_function in a type-safe manner.
+//
+// For example:
+//
+//     // Assume we have some API that needs to accept a unique pointer to some
+//     // non-copyable object Foo.
+//     void AcceptUniquePointer(std::unique_ptr<Foo> foo);
+//
+//     // We can define an action that provides a Foo to that API. Because It
+//     // has to give away its unique pointer, it must not be called more than
+//     // once, so its call operator is &&-qualified.
+//     struct ProvideFoo {
+//       std::unique_ptr<Foo> foo;
+//
+//       void operator()() && {
+//         AcceptUniquePointer(std::move(Foo));
+//       }
+//     };
+//
+//     // This action can be used with WillOnce.
+//     EXPECT_CALL(mock, Call)
+//         .WillOnce(ProvideFoo{std::make_unique<Foo>(...)});
+//
+//     // But a call to WillRepeatedly will fail to compile. This is correct,
+//     // since the action cannot correctly be used repeatedly.
+//     EXPECT_CALL(mock, Call)
+//         .WillRepeatedly(ProvideFoo{std::make_unique<Foo>(...)});
+//
+// A less-contrived example would be an action that returns an arbitrary type,
+// whose &&-qualified call operator is capable of dealing with move-only types.
+template <typename Result, typename... Args>
+class OnceAction<Result(Args...)> final {
+ private:
+  // True iff we can use the given callable type (or lvalue reference) directly
+  // via ActionAdaptor.
+  template <typename Callable>
+  using IsDirectlyCompatible = internal::conjunction<
+      // It must be possible to capture the callable in ActionAdaptor.
+      std::is_constructible<typename std::decay<Callable>::type, Callable>,
+      // The callable must be compatible with our signature.
+      internal::is_callable_r<Result, typename std::decay<Callable>::type,
+                              Args...>>;
+
+  // True iff we can use the given callable type via ActionAdaptor once we
+  // ignore incoming arguments.
+  template <typename Callable>
+  using IsCompatibleAfterIgnoringArguments = internal::conjunction<
+      // It must be possible to capture the callable in a lambda.
+      std::is_constructible<typename std::decay<Callable>::type, Callable>,
+      // The callable must be invocable with zero arguments, returning something
+      // convertible to Result.
+      internal::is_callable_r<Result, typename std::decay<Callable>::type>>;
+
+ public:
+  // Construct from a callable that is directly compatible with our mocked
+  // signature: it accepts our function type's arguments and returns something
+  // convertible to our result type.
+  template <typename Callable,
+            typename std::enable_if<
+                internal::conjunction<
+                    // Teach clang on macOS that we're not talking about a
+                    // copy/move constructor here. Otherwise it gets confused
+                    // when checking the is_constructible requirement of our
+                    // traits above.
+                    internal::negation<std::is_same<
+                        OnceAction, typename std::decay<Callable>::type>>,
+                    IsDirectlyCompatible<Callable>>  //
+                ::value,
+                int>::type = 0>
+  OnceAction(Callable&& callable)  // NOLINT
+      : action_(ActionAdaptor<typename std::decay<Callable>::type>(
+            {}, std::forward<Callable>(callable))) {}
+
+  // As above, but for a callable that ignores the mocked function's arguments.
+  template <typename Callable,
+            typename std::enable_if<
+                internal::conjunction<
+                    // Teach clang on macOS that we're not talking about a
+                    // copy/move constructor here. Otherwise it gets confused
+                    // when checking the is_constructible requirement of our
+                    // traits above.
+                    internal::negation<std::is_same<
+                        OnceAction, typename std::decay<Callable>::type>>,
+                    // Exclude callables for which the overload above works.
+                    // We'd rather provide the arguments if possible.
+                    internal::negation<IsDirectlyCompatible<Callable>>,
+                    IsCompatibleAfterIgnoringArguments<Callable>>::value,
+                int>::type = 0>
+  OnceAction(Callable&& callable)  // NOLINT
+                                   // Call the constructor above with a callable
+                                   // that ignores the input arguments.
+      : OnceAction(IgnoreIncomingArguments<typename std::decay<Callable>::type>{
+            std::forward<Callable>(callable)}) {}
+
+  // A fallback constructor for anything that is convertible to Action, for use
+  // with legacy actions that uses older styles like implementing
+  // ActionInterface or a conversion operator to Action. Modern code should
+  // implement a call operator with appropriate restrictions.
+  template <typename T,
+            typename std::enable_if<
+                internal::conjunction<
+                    // Teach clang on macOS that we're not talking about a
+                    // copy/move constructor here. Otherwise it gets confused
+                    // when checking the is_constructible requirement of our
+                    // traits above.
+                    internal::negation<
+                        std::is_same<OnceAction, typename std::decay<T>::type>>,
+                    // Exclude the overloads above, which we want to take
+                    // precedence.
+                    internal::negation<IsDirectlyCompatible<T>>,
+                    internal::negation<IsCompatibleAfterIgnoringArguments<T>>,
+                    // It must be possible to turn the object into an action of
+                    // the appropriate type.
+                    std::is_convertible<T, Action<Result(Args...)>>  //
+                    >::value,
+                int>::type = 0>
+  OnceAction(T&& action) : action_(std::forward<T>(action)) {}  // NOLINT
+
+  // We are naturally copyable because we store only an Action, but semantically
+  // we should not be copyable.
+  OnceAction(const OnceAction&) = delete;
+  OnceAction& operator=(const OnceAction&) = delete;
+  OnceAction(OnceAction&&) = default;
+
+ private:
+  // Allow TypedExpectation::WillOnce to use our type-unsafe API below.
+  friend class TypedExpectation<Result(Args...)>;
+
+  // An adaptor that wraps a callable that is compatible with our signature and
+  // being invoked as an rvalue reference so that it can be used as an
+  // Action. This throws away type safety, but that's fine because this is only
+  // used by WillOnce, which we know calls at most once.
+  template <typename Callable>
+  class ActionAdaptor final {
+   public:
+    // A tag indicating that the (otherwise universal) constructor is accepting
+    // the callable itself, instead of e.g. stealing calls for the move
+    // constructor.
+    struct CallableTag final {};
+
+    template <typename F>
+    explicit ActionAdaptor(CallableTag, F&& callable)
+        : callable_(std::make_shared<Callable>(std::forward<F>(callable))) {}
+
+    // Rather than explicitly returning Result, we return whatever the wrapped
+    // callable returns. This allows for compatibility with existing uses like
+    // the following, when the mocked function returns void:
+    //
+    //     EXPECT_CALL(mock_fn_, Call)
+    //         .WillOnce([&] {
+    //            [...]
+    //            return 0;
+    //         });
+    //
+    // This works with Action since such a callable can be turned into
+    // std::function<void()>. If we use an explicit return type of Result here
+    // then it *doesn't* work with OnceAction, because we'll get a "void
+    // function should not return a value" error.
+    //
+    // We need not worry about incompatible result types because the SFINAE on
+    // OnceAction already checks this for us. std::is_invocable_r_v itself makes
+    // the same allowance for void result types.
+    template <typename... ArgRefs>
+    internal::call_result_t<Callable, ArgRefs...> operator()(
+        ArgRefs&&... args) const {
+      return std::move(*callable_)(std::forward<ArgRefs>(args)...);
+    }
+
+   private:
+    // We must put the callable on the heap so that we are copyable, which
+    // Action needs.
+    std::shared_ptr<Callable> callable_;
+  };
+
+  // An adaptor that makes a callable that accepts zero arguments callable with
+  // our mocked arguments.
+  template <typename Callable>
+  struct IgnoreIncomingArguments {
+    internal::call_result_t<Callable> operator()(Args&&...) {
+      return std::move(callable)();
+    }
+
+    Callable callable;
+  };
+
+  // Return an Action that calls the underlying callable in a type-safe manner.
+  // The action's Perform method must be called at most once.
+  //
+  // This is the transition from a type-safe API to a type-unsafe one, since
+  // "must be called at most once" is no longer reflecting in the type system.
+  Action<Result(Args...)> ReleaseAction() && { return std::move(action_); }
+
+  Action<Result(Args...)> action_;
+};
 
 // Helper struct to specialize ReturnAction to execute a move instead of a copy
 // on return. Useful for move-only types, but could be used on any type.
