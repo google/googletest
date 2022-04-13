@@ -305,10 +305,13 @@ GTEST_API_ WithoutMatchers GetWithoutMatchers();
 template <typename T>
 inline T Invalid() {
   Assert(false, "", -1, "Internal error: attempt to return invalid value");
-  // This statement is unreachable, and would never terminate even if it
-  // could be reached. It is provided only to placate compiler warnings
-  // about missing return statements.
+#if defined(__GNUC__) || defined(__clang__)
+  __builtin_unreachable();
+#elif defined(_MSC_VER)
+  __assume(0);
+#else
   return Invalid<T>();
+#endif
 }
 
 #ifdef _MSC_VER
