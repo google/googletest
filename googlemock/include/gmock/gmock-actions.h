@@ -1295,6 +1295,51 @@ struct WithArgsAction {
 template <typename... Actions>
 struct DoAllAction {
  private:
+  // The type of reference that should be provided to an initial action for a
+  // mocked function parameter of type T.
+  //
+  // There are two quirks here:
+  //
+  //  *  Unlike most forwarding functions, we pass scalars through by value.
+  //     This isn't strictly necessary because an lvalue reference would work
+  //     fine too and be consistent with other non-reference types, but it's
+  //     perhaps less surprising.
+  //
+  //     For example if the mocked function has signature void(int), then it
+  //     might seem surprising for the user's initial action to need to be
+  //     convertible to Action<void(const int&)>. This is perhaps less
+  //     surprising for a non-scalar type where there may be a performance
+  //     impact, or it might even be impossible, to pass by value.
+  //
+  //  *  More surprisingly, `const T&` is often not a const reference type.
+  //     By the reference collapsing rules in C++17 [dcl.ref]/6, if T refers to
+  //     U& or U&& for some non-scalar type U, then NonFinalType<T> is U&. In
+  //     other words, we may hand over a non-const reference.
+  //
+  //     So for example, given some non-scalar type Obj we have the following
+  //     mappings:
+  //
+  //            T               NonFinalType<T>
+  //         -------            ---------------
+  //         Obj                const Obj&
+  //         Obj&               Obj&
+  //         Obj&&              Obj&
+  //         const Obj          const Obj&
+  //         const Obj&         const Obj&
+  //         const Obj&&        const Obj&
+  //
+  //     In other words, the initial actions get a mutable view of an non-scalar
+  //     argument if and only if the mock function itself accepts a non-const
+  //     reference type. They are never given an rvalue reference to an
+  //     non-scalar type.
+  //
+  //     This situation makes sense if you imagine use with a matcher that is
+  //     designed to write through a reference. For example, if the caller wants
+  //     to fill in a reference argument and then return a canned value:
+  //
+  //         EXPECT_CALL(mock, Call)
+  //             .WillOnce(DoAll(SetArgReferee<0>(17), Return(19)));
+  //
   template <typename T>
   using NonFinalType =
       typename std::conditional<std::is_scalar<T>::value, T, const T&>::type;
