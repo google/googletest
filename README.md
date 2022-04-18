@@ -122,11 +122,11 @@ result output. If your test runner understands TAP, you may find it useful.
 runs tests from your binary in parallel to provide significant speed-up.
 
 [GoogleTest Adapter](https://marketplace.visualstudio.com/items?itemName=DavidSchuldenfrei.gtest-adapter)
-is a VS Code extension allowing to view GoogleTest in a tree view, and run/debug
+is a VS Code extension allowing to view GoogleTest in a tree view and run/debug
 your tests.
 
 [C++ TestMate](https://github.com/matepek/vscode-catch2-test-adapter) is a VS
-Code extension allowing to view GoogleTest in a tree view, and run/debug your
+Code extension allowing to view GoogleTest in a tree view and run/debug your
 tests.
 
 [Cornichon](https://pypi.org/project/cornichon/) is a small Gherkin DSL parser
