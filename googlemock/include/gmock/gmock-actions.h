@@ -915,9 +915,8 @@ class ReturnAction {
     // and put the typedef both here (for use in assert statement) and
     // in the Impl class. But both definitions must be the same.
     typedef typename Function<F>::Result Result;
-    GTEST_COMPILE_ASSERT_(
-        !std::is_reference<Result>::value,
-        use_ReturnRef_instead_of_Return_to_return_a_reference);
+    static_assert(!std::is_reference<Result>::value,
+                  "use ReturnRef instead of Return to return a reference");
     static_assert(!std::is_void<Result>::value,
                   "Can't use Return() on an action expected to return `void`.");
     return Action<F>(new Impl<R, F>(value_));
@@ -945,8 +944,8 @@ class ReturnAction {
     Result Perform(const ArgumentTuple&) override { return value_; }
 
    private:
-    GTEST_COMPILE_ASSERT_(!std::is_reference<Result>::value,
-                          Result_cannot_be_a_reference_type);
+    static_assert(!std::is_reference<Result>::value,
+                  "Result cannot be a reference type");
     // We save the value before casting just in case it is being cast to a
     // wrapper type.
     R value_before_cast_;
@@ -1020,8 +1019,8 @@ class ReturnRefAction {
     // Asserts that the function return type is a reference.  This
     // catches the user error of using ReturnRef(x) when Return(x)
     // should be used, and generates some helpful error message.
-    GTEST_COMPILE_ASSERT_(std::is_reference<Result>::value,
-                          use_Return_instead_of_ReturnRef_to_return_a_value);
+    static_assert(std::is_reference<Result>::value,
+                  "use Return instead of ReturnRef to return a value");
     return Action<F>(new Impl<F>(ref_));
   }
 
@@ -1062,9 +1061,8 @@ class ReturnRefOfCopyAction {
     // Asserts that the function return type is a reference.  This
     // catches the user error of using ReturnRefOfCopy(x) when Return(x)
     // should be used, and generates some helpful error message.
-    GTEST_COMPILE_ASSERT_(
-        std::is_reference<Result>::value,
-        use_Return_instead_of_ReturnRefOfCopy_to_return_a_value);
+    static_assert(std::is_reference<Result>::value,
+                  "use Return instead of ReturnRefOfCopy to return a value");
     return Action<F>(new Impl<F>(value_));
   }
 

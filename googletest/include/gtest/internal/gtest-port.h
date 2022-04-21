@@ -878,17 +878,6 @@ namespace internal {
 // Secret object, which is what we want.
 class Secret;
 
-// The GTEST_COMPILE_ASSERT_ is a legacy macro used to verify that a compile
-// time expression is true (in new code, use static_assert instead). For
-// example, you could use it to verify the size of a static array:
-//
-//   GTEST_COMPILE_ASSERT_(GTEST_ARRAY_SIZE_(names) == NUM_NAMES,
-//                         names_incorrect_size);
-//
-// The second argument to the macro must be a valid C++ identifier. If the
-// expression is false, compiler will issue an error containing this identifier.
-#define GTEST_COMPILE_ASSERT_(expr, msg) static_assert(expr, #msg)
-
 // A helper for suppressing warnings on constant condition.  It just
 // returns 'condition'.
 GTEST_API_ bool IsTrue(bool condition);

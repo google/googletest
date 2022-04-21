@@ -533,19 +533,18 @@ inline Matcher<T> SafeMatcherCast(const Matcher<U>& matcher) {
                 "T must be implicitly convertible to U");
   // Enforce that we are not converting a non-reference type T to a reference
   // type U.
-  GTEST_COMPILE_ASSERT_(
-      std::is_reference<T>::value || !std::is_reference<U>::value,
-      cannot_convert_non_reference_arg_to_reference);
+  static_assert(std::is_reference<T>::value || !std::is_reference<U>::value,
+                "cannot convert non reference arg to reference");
   // In case both T and U are arithmetic types, enforce that the
   // conversion is not lossy.
   typedef GTEST_REMOVE_REFERENCE_AND_CONST_(T) RawT;
   typedef GTEST_REMOVE_REFERENCE_AND_CONST_(U) RawU;
   constexpr bool kTIsOther = GMOCK_KIND_OF_(RawT) == internal::kOther;
   constexpr bool kUIsOther = GMOCK_KIND_OF_(RawU) == internal::kOther;
-  GTEST_COMPILE_ASSERT_(
+  static_assert(
       kTIsOther || kUIsOther ||
           (internal::LosslessArithmeticConvertible<RawT, RawU>::value),
-      conversion_of_arithmetic_types_must_be_lossless);
+      "conversion of arithmetic types must be lossless");
   return MatcherCast<T>(matcher);
 }
 
@@ -678,9 +677,9 @@ bool TupleMatches(const MatcherTuple& matcher_tuple,
                   const ValueTuple& value_tuple) {
   // Makes sure that matcher_tuple and value_tuple have the same
   // number of fields.
-  GTEST_COMPILE_ASSERT_(std::tuple_size<MatcherTuple>::value ==
-                            std::tuple_size<ValueTuple>::value,
-                        matcher_and_value_have_different_numbers_of_fields);
+  static_assert(std::tuple_size<MatcherTuple>::value ==
+                    std::tuple_size<ValueTuple>::value,
+                "matcher and value have different numbers of fields");
   return TuplePrefix<std::tuple_size<ValueTuple>::value>::Matches(matcher_tuple,
                                                                   value_tuple);
 }
@@ -2570,9 +2569,9 @@ class WhenSortedByMatcher {
 // container and the RHS container respectively.
 template <typename TupleMatcher, typename RhsContainer>
 class PointwiseMatcher {
-  GTEST_COMPILE_ASSERT_(
+  static_assert(
       !IsHashTable<GTEST_REMOVE_REFERENCE_AND_CONST_(RhsContainer)>::value,
-      use_UnorderedPointwise_with_hash_tables);
+      "use UnorderedPointwise with hash tables");
 
  public:
   typedef internal::StlContainerView<RhsContainer> RhsView;
@@ -2591,9 +2590,9 @@ class PointwiseMatcher {
 
   template <typename LhsContainer>
   operator Matcher<LhsContainer>() const {
-    GTEST_COMPILE_ASSERT_(
+    static_assert(
         !IsHashTable<GTEST_REMOVE_REFERENCE_AND_CONST_(LhsContainer)>::value,
-        use_UnorderedPointwise_with_hash_tables);
+        "use UnorderedPointwise with hash tables");
 
     return Matcher<LhsContainer>(
         new Impl<const LhsContainer&>(tuple_matcher_, rhs_));
@@ -3725,10 +3724,10 @@ class ElementsAreMatcher {
 
   template <typename Container>
   operator Matcher<Container>() const {
-    GTEST_COMPILE_ASSERT_(
+    static_assert(
         !IsHashTable<GTEST_REMOVE_REFERENCE_AND_CONST_(Container)>::value ||
             ::std::tuple_size<MatcherTuple>::value < 2,
-        use_UnorderedElementsAre_with_hash_tables);
+        "use UnorderedElementsAre with hash tables");
 
     typedef GTEST_REMOVE_REFERENCE_AND_CONST_(Container) RawContainer;
     typedef typename internal::StlContainerView<RawContainer>::type View;
@@ -3776,9 +3775,9 @@ class ElementsAreArrayMatcher {
 
   template <typename Container>
   operator Matcher<Container>() const {
-    GTEST_COMPILE_ASSERT_(
+    static_assert(
         !IsHashTable<GTEST_REMOVE_REFERENCE_AND_CONST_(Container)>::value,
-        use_UnorderedElementsAreArray_with_hash_tables);
+        "use UnorderedElementsAreArray with hash tables");
 
     return Matcher<Container>(new ElementsAreMatcherImpl<const Container&>(
         matchers_.begin(), matchers_.end()));

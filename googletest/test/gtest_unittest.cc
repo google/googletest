@@ -7173,28 +7173,26 @@ struct IncompleteType;
 // Tests that HasDebugStringAndShortDebugString<T>::value is a compile-time
 // constant.
 TEST(HasDebugStringAndShortDebugStringTest, ValueIsCompileTimeConstant) {
-  GTEST_COMPILE_ASSERT_(
-      HasDebugStringAndShortDebugString<HasDebugStringMethods>::value,
-      const_true);
-  GTEST_COMPILE_ASSERT_(
+  static_assert(HasDebugStringAndShortDebugString<HasDebugStringMethods>::value,
+                "const_true");
+  static_assert(
       HasDebugStringAndShortDebugString<InheritsDebugStringMethods>::value,
-      const_true);
-  GTEST_COMPILE_ASSERT_(HasDebugStringAndShortDebugString<
-                            const InheritsDebugStringMethods>::value,
-                        const_true);
-  GTEST_COMPILE_ASSERT_(
+      "const_true");
+  static_assert(HasDebugStringAndShortDebugString<
+                    const InheritsDebugStringMethods>::value,
+                "const_true");
+  static_assert(
       !HasDebugStringAndShortDebugString<WrongTypeDebugStringMethod>::value,
-      const_false);
-  GTEST_COMPILE_ASSERT_(
+      "const_false");
+  static_assert(
       !HasDebugStringAndShortDebugString<NotConstDebugStringMethod>::value,
-      const_false);
-  GTEST_COMPILE_ASSERT_(
+      "const_false");
+  static_assert(
       !HasDebugStringAndShortDebugString<MissingDebugStringMethod>::value,
-      const_false);
-  GTEST_COMPILE_ASSERT_(
-      !HasDebugStringAndShortDebugString<IncompleteType>::value, const_false);
-  GTEST_COMPILE_ASSERT_(!HasDebugStringAndShortDebugString<int>::value,
-                        const_false);
+      "const_false");
+  static_assert(!HasDebugStringAndShortDebugString<IncompleteType>::value,
+                "const_false");
+  static_assert(!HasDebugStringAndShortDebugString<int>::value, "const_false");
 }
 
 // Tests that HasDebugStringAndShortDebugString<T>::value is true when T has
