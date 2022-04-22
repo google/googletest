@@ -579,7 +579,8 @@ class Base {
   Base() {}
 
  private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(Base);
+  Base(const Base&) = delete;
+  Base& operator=(const Base&) = delete;
 };
 
 class Derived : public Base {

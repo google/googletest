@@ -677,7 +677,8 @@ class GTEST_API_ InSequence {
  private:
   bool sequence_created_;
 
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(InSequence);  // NOLINT
+  InSequence(const InSequence&) = delete;
+  InSequence& operator=(const InSequence&) = delete;
 } GTEST_ATTRIBUTE_UNUSED_;
 
 namespace internal {
@@ -1219,7 +1220,8 @@ class TypedExpectation : public ExpectationBase {
   Matcher<const ArgumentTuple&> extra_matcher_;
   Action<F> repeated_action_;
 
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(TypedExpectation);
+  TypedExpectation(const TypedExpectation&) = delete;
+  TypedExpectation& operator=(const TypedExpectation&) = delete;
 };  // class TypedExpectation
 
 // A MockSpec object is used by ON_CALL() or EXPECT_CALL() for
@@ -1392,7 +1394,8 @@ class ActionResultHolder : public UntypedActionResultHolderBase {
 
   Wrapper result_;
 
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(ActionResultHolder);
+  ActionResultHolder(const ActionResultHolder&) = delete;
+  ActionResultHolder& operator=(const ActionResultHolder&) = delete;
 };
 
 // Specialization for T = void.
@@ -1425,7 +1428,8 @@ class ActionResultHolder<void> : public UntypedActionResultHolderBase {
 
  private:
   ActionResultHolder() {}
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(ActionResultHolder);
+  ActionResultHolder(const ActionResultHolder&) = delete;
+  ActionResultHolder& operator=(const ActionResultHolder&) = delete;
 };
 
 template <typename F>

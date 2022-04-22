@@ -86,7 +86,8 @@ class BetweenCardinalityImpl : public CardinalityInterface {
   const int min_;
   const int max_;
 
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(BetweenCardinalityImpl);
+  BetweenCardinalityImpl(const BetweenCardinalityImpl&) = delete;
+  BetweenCardinalityImpl& operator=(const BetweenCardinalityImpl&) = delete;
 };
 
 // Formats "n times" in a human-friendly way.

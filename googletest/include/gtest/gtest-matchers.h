@@ -102,7 +102,8 @@ class MatchResultListener {
  private:
   ::std::ostream* const stream_;
 
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(MatchResultListener);
+  MatchResultListener(const MatchResultListener&) = delete;
+  MatchResultListener& operator=(const MatchResultListener&) = delete;
 };
 
 inline MatchResultListener::~MatchResultListener() {}
@@ -220,7 +221,8 @@ class DummyMatchResultListener : public MatchResultListener {
   DummyMatchResultListener() : MatchResultListener(nullptr) {}
 
  private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(DummyMatchResultListener);
+  DummyMatchResultListener(const DummyMatchResultListener&) = delete;
+  DummyMatchResultListener& operator=(const DummyMatchResultListener&) = delete;
 };
 
 // A match result listener that forwards the explanation to a given
@@ -232,7 +234,9 @@ class StreamMatchResultListener : public MatchResultListener {
       : MatchResultListener(os) {}
 
  private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(StreamMatchResultListener);
+  StreamMatchResultListener(const StreamMatchResultListener&) = delete;
+  StreamMatchResultListener& operator=(const StreamMatchResultListener&) =
+      delete;
 };
 
 struct SharedPayloadBase {

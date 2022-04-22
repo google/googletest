@@ -6884,7 +6884,8 @@ class SequenceTestingListener : public EmptyTestEventListener {
   std::vector<std::string>* vector_;
   const char* const id_;
 
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(SequenceTestingListener);
+  SequenceTestingListener(const SequenceTestingListener&) = delete;
+  SequenceTestingListener& operator=(const SequenceTestingListener&) = delete;
 };
 
 TEST(EventListenerTest, AppendKeepsOrder) {

@@ -406,7 +406,8 @@ class ParameterizedTestFactory : public TestFactoryBase {
  private:
   const ParamType parameter_;
 
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(ParameterizedTestFactory);
+  ParameterizedTestFactory(const ParameterizedTestFactory&) = delete;
+  ParameterizedTestFactory& operator=(const ParameterizedTestFactory&) = delete;
 };
 
 // INTERNAL IMPLEMENTATION - DO NOT USE IN USER CODE.
@@ -442,7 +443,8 @@ class TestMetaFactory
   }
 
  private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(TestMetaFactory);
+  TestMetaFactory(const TestMetaFactory&) = delete;
+  TestMetaFactory& operator=(const TestMetaFactory&) = delete;
 };
 
 // INTERNAL IMPLEMENTATION - DO NOT USE IN USER CODE.
@@ -473,7 +475,10 @@ class ParameterizedTestSuiteInfoBase {
   ParameterizedTestSuiteInfoBase() {}
 
  private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(ParameterizedTestSuiteInfoBase);
+  ParameterizedTestSuiteInfoBase(const ParameterizedTestSuiteInfoBase&) =
+      delete;
+  ParameterizedTestSuiteInfoBase& operator=(
+      const ParameterizedTestSuiteInfoBase&) = delete;
 };
 
 // INTERNAL IMPLEMENTATION - DO NOT USE IN USER CODE.
@@ -664,7 +669,9 @@ class ParameterizedTestSuiteInfo : public ParameterizedTestSuiteInfoBase {
   TestInfoContainer tests_;
   InstantiationContainer instantiations_;
 
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(ParameterizedTestSuiteInfo);
+  ParameterizedTestSuiteInfo(const ParameterizedTestSuiteInfo&) = delete;
+  ParameterizedTestSuiteInfo& operator=(const ParameterizedTestSuiteInfo&) =
+      delete;
 };  // class ParameterizedTestSuiteInfo
 
 //  Legacy API is deprecated but still available
@@ -739,7 +746,10 @@ class ParameterizedTestSuiteRegistry {
 
   TestSuiteInfoContainer test_suite_infos_;
 
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(ParameterizedTestSuiteRegistry);
+  ParameterizedTestSuiteRegistry(const ParameterizedTestSuiteRegistry&) =
+      delete;
+  ParameterizedTestSuiteRegistry& operator=(
+      const ParameterizedTestSuiteRegistry&) = delete;
 };
 
 // Keep track of what type-parameterized test suite are defined and

@@ -54,7 +54,8 @@ class MockFoo {
   MOCK_METHOD0(Bar, int());  // NOLINT
 
  private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(MockFoo);
+  MockFoo(const MockFoo&) = delete;
+  MockFoo& operator=(const MockFoo&) = delete;
 };
 
 // Tests that Cardinality objects can be default constructed.

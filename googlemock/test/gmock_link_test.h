@@ -221,7 +221,8 @@ class Mock : public Interface {
   MOCK_METHOD1(VoidFromVector, void(const std::vector<int>& v));
 
  private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(Mock);
+  Mock(const Mock&) = delete;
+  Mock& operator=(const Mock&) = delete;
 };
 
 class InvokeHelper {

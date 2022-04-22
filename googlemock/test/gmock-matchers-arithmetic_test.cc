@@ -955,7 +955,8 @@ class AllArgsHelper {
   MOCK_METHOD2(Helper, int(char x, int y));
 
  private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(AllArgsHelper);
+  AllArgsHelper(const AllArgsHelper&) = delete;
+  AllArgsHelper& operator=(const AllArgsHelper&) = delete;
 };
 
 TEST(AllArgsTest, WorksInWithClause) {
@@ -982,7 +983,8 @@ class OptionalMatchersHelper {
   MOCK_METHOD2(Overloaded, int(char x, int y));
 
  private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(OptionalMatchersHelper);
+  OptionalMatchersHelper(const OptionalMatchersHelper&) = delete;
+  OptionalMatchersHelper& operator=(const OptionalMatchersHelper&) = delete;
 };
 
 TEST(AllArgsTest, WorksWithoutMatchers) {

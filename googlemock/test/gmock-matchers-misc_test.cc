@@ -106,7 +106,8 @@ class NotCopyable {
  private:
   int value_;
 
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(NotCopyable);
+  NotCopyable(const NotCopyable&) = delete;
+  NotCopyable& operator=(const NotCopyable&) = delete;
 };
 
 TEST(ByRefTest, AllowsNotCopyableConstValueInMatchers) {

@@ -1186,7 +1186,8 @@ class DestructorCall {
 #endif
   static std::vector<DestructorCall*>* const list_;
 
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(DestructorCall);
+  DestructorCall(const DestructorCall&) = delete;
+  DestructorCall& operator=(const DestructorCall&) = delete;
 };
 
 std::vector<DestructorCall*>* const DestructorCall::list_ =

@@ -3800,7 +3800,8 @@ class TestEventRepeater : public TestEventListener {
   // The list of listeners that receive events.
   std::vector<TestEventListener*> listeners_;
 
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(TestEventRepeater);
+  TestEventRepeater(const TestEventRepeater&) = delete;
+  TestEventRepeater& operator=(const TestEventRepeater&) = delete;
 };
 
 TestEventRepeater::~TestEventRepeater() {
@@ -3978,7 +3979,8 @@ class XmlUnitTestResultPrinter : public EmptyTestEventListener {
   // The output file.
   const std::string output_file_;
 
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(XmlUnitTestResultPrinter);
+  XmlUnitTestResultPrinter(const XmlUnitTestResultPrinter&) = delete;
+  XmlUnitTestResultPrinter& operator=(const XmlUnitTestResultPrinter&) = delete;
 };
 
 // Creates a new XmlUnitTestResultPrinter.
@@ -4491,7 +4493,9 @@ class JsonUnitTestResultPrinter : public EmptyTestEventListener {
   // The output file.
   const std::string output_file_;
 
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(JsonUnitTestResultPrinter);
+  JsonUnitTestResultPrinter(const JsonUnitTestResultPrinter&) = delete;
+  JsonUnitTestResultPrinter& operator=(const JsonUnitTestResultPrinter&) =
+      delete;
 };
 
 // Creates a new JsonUnitTestResultPrinter.
@@ -5041,7 +5045,8 @@ class ScopedPrematureExitFile {
  private:
   const std::string premature_exit_filepath_;
 
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(ScopedPrematureExitFile);
+  ScopedPrematureExitFile(const ScopedPrematureExitFile&) = delete;
+  ScopedPrematureExitFile& operator=(const ScopedPrematureExitFile&) = delete;
 };
 
 }  // namespace internal

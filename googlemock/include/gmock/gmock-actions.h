@@ -393,7 +393,8 @@ class DefaultValue {
 
    private:
     const T value_;
-    GTEST_DISALLOW_COPY_AND_ASSIGN_(FixedValueProducer);
+    FixedValueProducer(const FixedValueProducer&) = delete;
+    FixedValueProducer& operator=(const FixedValueProducer&) = delete;
   };
 
   class FactoryValueProducer : public ValueProducer {
@@ -404,7 +405,8 @@ class DefaultValue {
 
    private:
     const FactoryFunction factory_;
-    GTEST_DISALLOW_COPY_AND_ASSIGN_(FactoryValueProducer);
+    FactoryValueProducer(const FactoryValueProducer&) = delete;
+    FactoryValueProducer& operator=(const FactoryValueProducer&) = delete;
   };
 
   static ValueProducer* producer_;
@@ -478,7 +480,8 @@ class ActionInterface {
   virtual Result Perform(const ArgumentTuple& args) = 0;
 
  private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(ActionInterface);
+  ActionInterface(const ActionInterface&) = delete;
+  ActionInterface& operator=(const ActionInterface&) = delete;
 };
 
 // An Action<F> is a copyable and IMMUTABLE (except by assignment)
@@ -951,7 +954,8 @@ class ReturnAction {
     R value_before_cast_;
     Result value_;
 
-    GTEST_DISALLOW_COPY_AND_ASSIGN_(Impl);
+    Impl(const Impl&) = delete;
+    Impl& operator=(const Impl&) = delete;
   };
 
   // Partially specialize for ByMoveWrapper. This version of ReturnAction will

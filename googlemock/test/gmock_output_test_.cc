@@ -62,7 +62,8 @@ class MockFoo {
   MOCK_METHOD2(Bar3, void(int x, int y));
 
  private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(MockFoo);
+  MockFoo(const MockFoo&) = delete;
+  MockFoo& operator=(const MockFoo&) = delete;
 };
 
 class GMockOutputTest : public testing::Test {

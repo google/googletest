@@ -342,7 +342,8 @@ class Uncopyable {
 
  private:
   int value_;
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(Uncopyable);
+  Uncopyable(const Uncopyable&) = delete;
+  Uncopyable& operator=(const Uncopyable&) = delete;
 };
 
 // Returns true if and only if x.value() is positive.
@@ -2764,7 +2765,10 @@ class NativeArrayPassedAsPointerAndSize {
   MOCK_METHOD(void, Helper, (int* array, int size));
 
  private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(NativeArrayPassedAsPointerAndSize);
+  NativeArrayPassedAsPointerAndSize(const NativeArrayPassedAsPointerAndSize&) =
+      delete;
+  NativeArrayPassedAsPointerAndSize& operator=(
+      const NativeArrayPassedAsPointerAndSize&) = delete;
 };
 
 TEST(ElementsAreTest, WorksWithNativeArrayPassedAsPointerAndSize) {

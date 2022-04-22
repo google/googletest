@@ -150,7 +150,8 @@ class MockA {
   MOCK_METHOD2(ReturnInt, int(int x, int y));
 
  private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(MockA);
+  MockA(const MockA&) = delete;
+  MockA& operator=(const MockA&) = delete;
 };
 
 class MockB {
@@ -161,7 +162,8 @@ class MockB {
   MOCK_METHOD1(DoB, int(int n));   // NOLINT
 
  private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(MockB);
+  MockB(const MockB&) = delete;
+  MockB& operator=(const MockB&) = delete;
 };
 
 class ReferenceHoldingMock {
@@ -171,7 +173,8 @@ class ReferenceHoldingMock {
   MOCK_METHOD1(AcceptReference, void(std::shared_ptr<MockA>*));
 
  private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(ReferenceHoldingMock);
+  ReferenceHoldingMock(const ReferenceHoldingMock&) = delete;
+  ReferenceHoldingMock& operator=(const ReferenceHoldingMock&) = delete;
 };
 
 // Tests that EXPECT_CALL and ON_CALL compile in a presence of macro
@@ -193,7 +196,8 @@ class MockCC : public CC {
   MOCK_METHOD0(Method, int());
 
  private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(MockCC);
+  MockCC(const MockCC&) = delete;
+  MockCC& operator=(const MockCC&) = delete;
 };
 
 // Tests that a method with expanded name compiles.
@@ -1894,7 +1898,8 @@ class MockC {
   MOCK_METHOD0(NonVoidMethod, int());  // NOLINT
 
  private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(MockC);
+  MockC(const MockC&) = delete;
+  MockC& operator=(const MockC&) = delete;
 };
 
 class VerboseFlagPreservingFixture : public testing::Test {
@@ -1909,7 +1914,9 @@ class VerboseFlagPreservingFixture : public testing::Test {
  private:
   const std::string saved_verbose_flag_;
 
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(VerboseFlagPreservingFixture);
+  VerboseFlagPreservingFixture(const VerboseFlagPreservingFixture&) = delete;
+  VerboseFlagPreservingFixture& operator=(const VerboseFlagPreservingFixture&) =
+      delete;
 };
 
 #if GTEST_HAS_STREAM_REDIRECTION
@@ -2129,7 +2136,8 @@ class LogTestHelper {
   MOCK_METHOD1(Foo, PrintMeNot(PrintMeNot));
 
  private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(LogTestHelper);
+  LogTestHelper(const LogTestHelper&) = delete;
+  LogTestHelper& operator=(const LogTestHelper&) = delete;
 };
 
 class GMockLogTest : public VerboseFlagPreservingFixture {

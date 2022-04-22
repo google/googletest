@@ -169,7 +169,8 @@ class GTEST_INTERNAL_EMPTY_BASE_CLASS NiceMock
   }
 
  private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(NiceMock);
+  NiceMock(const NiceMock&) = delete;
+  NiceMock& operator=(const NiceMock&) = delete;
 };
 
 template <class MockClass>
@@ -210,7 +211,8 @@ class GTEST_INTERNAL_EMPTY_BASE_CLASS NaggyMock
   }
 
  private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(NaggyMock);
+  NaggyMock(const NaggyMock&) = delete;
+  NaggyMock& operator=(const NaggyMock&) = delete;
 };
 
 template <class MockClass>
@@ -251,7 +253,8 @@ class GTEST_INTERNAL_EMPTY_BASE_CLASS StrictMock
   }
 
  private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(StrictMock);
+  StrictMock(const StrictMock&) = delete;
+  StrictMock& operator=(const StrictMock&) = delete;
 };
 
 #undef GTEST_INTERNAL_EMPTY_BASE_CLASS

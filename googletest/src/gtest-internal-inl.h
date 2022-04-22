@@ -424,7 +424,9 @@ class OsStackTraceGetterInterface {
   static const char* const kElidedFramesMarker;
 
  private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(OsStackTraceGetterInterface);
+  OsStackTraceGetterInterface(const OsStackTraceGetterInterface&) = delete;
+  OsStackTraceGetterInterface& operator=(const OsStackTraceGetterInterface&) =
+      delete;
 };
 
 // A working implementation of the OsStackTraceGetterInterface interface.
@@ -446,7 +448,8 @@ class OsStackTraceGetter : public OsStackTraceGetterInterface {
   void* caller_frame_ = nullptr;
 #endif  // GTEST_HAS_ABSL
 
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(OsStackTraceGetter);
+  OsStackTraceGetter(const OsStackTraceGetter&) = delete;
+  OsStackTraceGetter& operator=(const OsStackTraceGetter&) = delete;
 };
 
 // Information about a Google Test trace point.
@@ -469,7 +472,10 @@ class DefaultGlobalTestPartResultReporter
  private:
   UnitTestImpl* const unit_test_;
 
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(DefaultGlobalTestPartResultReporter);
+  DefaultGlobalTestPartResultReporter(
+      const DefaultGlobalTestPartResultReporter&) = delete;
+  DefaultGlobalTestPartResultReporter& operator=(
+      const DefaultGlobalTestPartResultReporter&) = delete;
 };
 
 // This is the default per thread test part result reporter used in
@@ -485,7 +491,10 @@ class DefaultPerThreadTestPartResultReporter
  private:
   UnitTestImpl* const unit_test_;
 
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(DefaultPerThreadTestPartResultReporter);
+  DefaultPerThreadTestPartResultReporter(
+      const DefaultPerThreadTestPartResultReporter&) = delete;
+  DefaultPerThreadTestPartResultReporter& operator=(
+      const DefaultPerThreadTestPartResultReporter&) = delete;
 };
 
 // The private implementation of the UnitTest class.  We don't protect
@@ -942,7 +951,8 @@ class GTEST_API_ UnitTestImpl {
   // starts.
   bool catch_exceptions_;
 
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(UnitTestImpl);
+  UnitTestImpl(const UnitTestImpl&) = delete;
+  UnitTestImpl& operator=(const UnitTestImpl&) = delete;
 };  // class UnitTestImpl
 
 // Convenience function for accessing the global UnitTest
@@ -1101,7 +1111,8 @@ class StreamingListener : public EmptyTestEventListener {
     const std::string host_name_;
     const std::string port_num_;
 
-    GTEST_DISALLOW_COPY_AND_ASSIGN_(SocketWriter);
+    SocketWriter(const SocketWriter&) = delete;
+    SocketWriter& operator=(const SocketWriter&) = delete;
   };  // class SocketWriter
 
   // Escapes '=', '&', '%', and '\n' characters in str as "%xx".
@@ -1187,7 +1198,8 @@ class StreamingListener : public EmptyTestEventListener {
 
   const std::unique_ptr<AbstractSocketWriter> socket_writer_;
 
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(StreamingListener);
+  StreamingListener(const StreamingListener&) = delete;
+  StreamingListener& operator=(const StreamingListener&) = delete;
 };  // class StreamingListener
 
 #endif  // GTEST_CAN_STREAM_RESULTS_

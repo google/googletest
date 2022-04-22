@@ -598,7 +598,9 @@ class TestGenerationEnvironment : public ::testing::Environment {
   int tear_down_count_;
   int test_body_count_;
 
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(TestGenerationEnvironment);
+  TestGenerationEnvironment(const TestGenerationEnvironment&) = delete;
+  TestGenerationEnvironment& operator=(const TestGenerationEnvironment&) =
+      delete;
 };
 
 const int test_generation_params[] = {36, 42, 72};
@@ -663,7 +665,8 @@ class TestGenerationTest : public TestWithParam<int> {
   static vector<int> collected_parameters_;
 
  private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(TestGenerationTest);
+  TestGenerationTest(const TestGenerationTest&) = delete;
+  TestGenerationTest& operator=(const TestGenerationTest&) = delete;
 };
 vector<int> TestGenerationTest::collected_parameters_;
 

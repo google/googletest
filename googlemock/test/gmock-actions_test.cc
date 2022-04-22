@@ -869,7 +869,8 @@ class MockClass {
                int(const std::unique_ptr<int>&, std::unique_ptr<int>));
 
  private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(MockClass);
+  MockClass(const MockClass&) = delete;
+  MockClass& operator=(const MockClass&) = delete;
 };
 
 // Tests that DoDefault() returns the built-in default value for the
