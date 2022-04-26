@@ -31,10 +31,12 @@
 //
 // This file tests the built-in actions.
 
-// Silence C4100 (unreferenced formal parameter) for MSVC
+// Silence C4100 (unreferenced formal parameter) and C4503 (decorated name
+// length exceeded) for MSVC.
 #ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable : 4100)
+#pragma warning(disable : 4503)
 #if _MSC_VER == 1900
 // and silence C4800 (C4800: 'int *const ': forcing value
 // to bool 'true' or 'false') for MSVC 15
@@ -1193,6 +1195,21 @@ TEST(AssignTest, CompatibleTypes) {
   EXPECT_DOUBLE_EQ(5, x);
 }
 
+// DoAll should support &&-qualified actions when used with WillOnce.
+TEST(DoAll, SupportsRefQualifiedActions) {
+  struct InitialAction {
+    void operator()(const int arg) && { EXPECT_EQ(17, arg); }
+  };
+
+  struct FinalAction {
+    int operator()() && { return 19; }
+  };
+
+  MockFunction<int(int)> mock;
+  EXPECT_CALL(mock, Call).WillOnce(DoAll(InitialAction{}, FinalAction{}));
+  EXPECT_EQ(19, mock.AsStdFunction()(17));
+}
+
 // DoAll should never provide rvalue references to the initial actions. If the
 // mock action itself accepts an rvalue reference or a non-scalar object by
 // value then the final action should receive an rvalue reference, but initial
@@ -1273,6 +1290,62 @@ TEST(DoAll, ProvidesLvalueReferencesToInitialActions) {
 
     mock.AsStdFunction()(Obj{});
     mock.AsStdFunction()(Obj{});
+  }
+
+  // &&-qualified initial actions should also be allowed with WillOnce.
+  {
+    struct InitialAction {
+      void operator()(Obj&) && {}
+    };
+
+    MockFunction<void(Obj&)> mock;
+    EXPECT_CALL(mock, Call)
+        .WillOnce(DoAll(InitialAction{}, InitialAction{}, [](Obj&) {}));
+
+    Obj obj;
+    mock.AsStdFunction()(obj);
+  }
+
+  {
+    struct InitialAction {
+      void operator()(Obj&) && {}
+    };
+
+    MockFunction<void(Obj &&)> mock;
+    EXPECT_CALL(mock, Call)
+        .WillOnce(DoAll(InitialAction{}, InitialAction{}, [](Obj&&) {}));
+
+    mock.AsStdFunction()(Obj{});
+  }
+}
+
+// DoAll should support being used with type-erased Action objects, both through
+// WillOnce and WillRepeatedly.
+TEST(DoAll, SupportsTypeErasedActions) {
+  // With only type-erased actions.
+  const Action<void()> initial_action = [] {};
+  const Action<int()> final_action = [] { return 17; };
+
+  MockFunction<int()> mock;
+  EXPECT_CALL(mock, Call)
+      .WillOnce(DoAll(initial_action, initial_action, final_action))
+      .WillRepeatedly(DoAll(initial_action, initial_action, final_action));
+
+  EXPECT_EQ(17, mock.AsStdFunction()());
+
+  // With &&-qualified and move-only final action.
+  {
+    struct FinalAction {
+      FinalAction() = default;
+      FinalAction(FinalAction&&) = default;
+
+      int operator()() && { return 17; }
+    };
+
+    EXPECT_CALL(mock, Call)
+        .WillOnce(DoAll(initial_action, initial_action, FinalAction{}));
+
+    EXPECT_EQ(17, mock.AsStdFunction()());
   }
 }
 
@@ -1793,6 +1866,31 @@ TEST(MockMethodTest, ActionSwallowsAllArguments) {
   EXPECT_EQ(17, mock.AsStdFunction()(0));
 }
 
+struct ActionWithTemplatedConversionOperators {
+  template <typename... Args>
+  operator internal::OnceAction<int(Args...)>() && {  // NOLINT
+    return [] { return 17; };
+  }
+
+  template <typename... Args>
+  operator Action<int(Args...)>() const {  // NOLINT
+    return [] { return 19; };
+  }
+};
+
+// It should be fine to hand both WillOnce and WillRepeatedly a function that
+// defines templated conversion operators to OnceAction and Action. WillOnce
+// should prefer the OnceAction version.
+TEST(MockMethodTest, ActionHasTemplatedConversionOperators) {
+  MockFunction<int()> mock;
+  EXPECT_CALL(mock, Call)
+      .WillOnce(ActionWithTemplatedConversionOperators{})
+      .WillRepeatedly(ActionWithTemplatedConversionOperators{});
+
+  EXPECT_EQ(17, mock.AsStdFunction()());
+  EXPECT_EQ(19, mock.AsStdFunction()());
+}
+
 // Tests for std::function based action.
 
 int Add(int val, int& ref, int* ptr) {  // NOLINT
@@ -1919,9 +2017,3 @@ TEST(ActionMacro, LargeArity) {
 
 }  // namespace
 }  // namespace testing
-
-#ifdef _MSC_VER
-#if _MSC_VER == 1900
-#pragma warning(pop)
-#endif
-#endif

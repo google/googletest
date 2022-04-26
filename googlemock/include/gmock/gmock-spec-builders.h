@@ -878,9 +878,15 @@ class GTEST_API_ ExpectationBase {
   mutable Mutex mutex_;                // Protects action_count_checked_.
 };                                     // class ExpectationBase
 
-// Implements an expectation for the given function type.
 template <typename F>
-class TypedExpectation : public ExpectationBase {
+class TypedExpectation;
+
+// Implements an expectation for the given function type.
+template <typename R, typename... Args>
+class TypedExpectation<R(Args...)> : public ExpectationBase {
+ private:
+  using F = R(Args...);
+
  public:
   typedef typename Function<F>::ArgumentTuple ArgumentTuple;
   typedef typename Function<F>::ArgumentMatcherTuple ArgumentMatcherTuple;
@@ -993,15 +999,30 @@ class TypedExpectation : public ExpectationBase {
     return After(s1, s2, s3, s4).After(s5);
   }
 
-  // Implements the .WillOnce() clause for copyable actions.
+  // Preferred, type-safe overload: consume anything that can be directly
+  // converted to a OnceAction, except for Action<F> objects themselves.
   TypedExpectation& WillOnce(OnceAction<F> once_action) {
+    // Call the overload below, smuggling the OnceAction as a copyable callable.
+    // We know this is safe because a WillOnce action will not be called more
+    // than once.
+    return WillOnce(Action<F>(ActionAdaptor{
+        std::make_shared<OnceAction<F>>(std::move(once_action)),
+    }));
+  }
+
+  // Fallback overload: accept Action<F> objects and those actions that define
+  // `operator Action<F>` but not `operator OnceAction<F>`.
+  //
+  // This is templated in order to cause the overload above to be preferred
+  // when the input is convertible to either type.
+  template <int&... ExplicitArgumentBarrier, typename = void>
+  TypedExpectation& WillOnce(Action<F> action) {
     ExpectSpecProperty(last_clause_ <= kWillOnce,
                        ".WillOnce() cannot appear after "
                        ".WillRepeatedly() or .RetiresOnSaturation().");
     last_clause_ = kWillOnce;
 
-    untyped_actions_.push_back(
-        new Action<F>(std::move(once_action).ReleaseAction()));
+    untyped_actions_.push_back(new Action<F>(std::move(action)));
 
     if (!cardinality_specified()) {
       set_cardinality(Exactly(static_cast<int>(untyped_actions_.size())));
@@ -1073,6 +1094,16 @@ class TypedExpectation : public ExpectationBase {
  private:
   template <typename Function>
   friend class FunctionMocker;
+
+  // An adaptor that turns a OneAction<F> into something compatible with
+  // Action<F>. Must be called at most once.
+  struct ActionAdaptor {
+    std::shared_ptr<OnceAction<R(Args...)>> once_action;
+
+    R operator()(Args&&... args) const {
+      return std::move(*once_action).Call(std::forward<Args>(args)...);
+    }
+  };
 
   // Returns an Expectation object that references and co-owns this
   // expectation.
