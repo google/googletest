@@ -1279,17 +1279,60 @@ class IgnoreResultAction {
 
 template <typename InnerAction, size_t... I>
 struct WithArgsAction {
-  InnerAction action;
+  InnerAction inner_action;
 
-  // The inner action could be anything convertible to Action<X>.
-  // We use the conversion operator to detect the signature of the inner Action.
+  // The signature of the function as seen by the inner action, given an out
+  // action with the given result and argument types.
   template <typename R, typename... Args>
-  operator Action<R(Args...)>() const {  // NOLINT
-    using TupleType = std::tuple<Args...>;
-    Action<R(typename std::tuple_element<I, TupleType>::type...)> converted(
-        action);
+  using InnerSignature =
+      R(typename std::tuple_element<I, std::tuple<Args...>>::type...);
 
-    return [converted](Args... args) -> R {
+  // Rather than a call operator, we must define conversion operators to
+  // particular action types. This is necessary for embedded actions like
+  // DoDefault(), which rely on an action conversion operators rather than
+  // providing a call operator because even with a particular set of arguments
+  // they don't have a fixed return type.
+
+  template <typename R, typename... Args,
+            typename std::enable_if<
+                std::is_convertible<
+                    InnerAction,
+                    // Unfortunately we can't use the InnerSignature alias here;
+                    // MSVC complains about the I parameter pack not being
+                    // expanded (error C3520) despite it being expanded in the
+                    // type alias.
+                    OnceAction<R(typename std::tuple_element<
+                                 I, std::tuple<Args...>>::type...)>>::value,
+                int>::type = 0>
+  operator OnceAction<R(Args...)>() && {  // NOLINT
+    struct OA {
+      OnceAction<InnerSignature<R, Args...>> inner_action;
+
+      R operator()(Args&&... args) && {
+        return std::move(inner_action)
+            .Call(std::get<I>(
+                std::forward_as_tuple(std::forward<Args>(args)...))...);
+      }
+    };
+
+    return OA{std::move(inner_action)};
+  }
+
+  template <typename R, typename... Args,
+            typename std::enable_if<
+                std::is_convertible<
+                    const InnerAction&,
+                    // Unfortunately we can't use the InnerSignature alias here;
+                    // MSVC complains about the I parameter pack not being
+                    // expanded (error C3520) despite it being expanded in the
+                    // type alias.
+                    Action<R(typename std::tuple_element<
+                             I, std::tuple<Args...>>::type...)>>::value,
+                int>::type = 0>
+  operator Action<R(Args...)>() const {  // NOLINT
+    Action<InnerSignature<R, Args...>> converted(inner_action);
+
+    return [converted](Args&&... args) -> R {
       return converted.Perform(std::forward_as_tuple(
           std::get<I>(std::forward_as_tuple(std::forward<Args>(args)...))...));
     };

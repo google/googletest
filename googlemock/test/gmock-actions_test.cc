@@ -1444,8 +1444,29 @@ TEST(WithArgsTest, ReturnReference) {
 
 TEST(WithArgsTest, InnerActionWithConversion) {
   Action<Derived*()> inner = [] { return nullptr; };
-  Action<Base*(double)> a = testing::WithoutArgs(inner);
-  EXPECT_EQ(nullptr, a.Perform(std::make_tuple(1.1)));
+
+  MockFunction<Base*(double)> mock;
+  EXPECT_CALL(mock, Call)
+      .WillOnce(WithoutArgs(inner))
+      .WillRepeatedly(WithoutArgs(inner));
+
+  EXPECT_EQ(nullptr, mock.AsStdFunction()(1.1));
+  EXPECT_EQ(nullptr, mock.AsStdFunction()(1.1));
+}
+
+// It should be possible to use an &&-qualified inner action as long as the
+// whole shebang is used as an rvalue with WillOnce.
+TEST(WithArgsTest, RefQualifiedInnerAction) {
+  struct SomeAction {
+    int operator()(const int arg) && {
+      EXPECT_EQ(17, arg);
+      return 19;
+    }
+  };
+
+  MockFunction<int(int, int)> mock;
+  EXPECT_CALL(mock, Call).WillOnce(WithArg<1>(SomeAction{}));
+  EXPECT_EQ(19, mock.AsStdFunction()(0, 17));
 }
 
 #if !GTEST_OS_WINDOWS_MOBILE
