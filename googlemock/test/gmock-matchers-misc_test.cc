@@ -637,7 +637,9 @@ TEST(FormatMatcherDescriptionTest, WorksForEmptyDescription) {
       FormatMatcherDescription(false, "IsInRange", {"a", "b"}, {"5", "8"}));
 }
 
-TEST(MatcherTupleTest, ExplainsMatchFailure) {
+INSTANTIATE_GTEST_MATCHER_TEST_P(MatcherTupleTest);
+
+TEST_P(MatcherTupleTestP, ExplainsMatchFailure) {
   stringstream ss1;
   ExplainMatchFailureTupleTo(
       std::make_tuple(Matcher<char>(Eq('a')), GreaterThan(5)),
@@ -1378,6 +1380,8 @@ TEST(MatcherPnMacroTest, CanUseMatcherTypedParameterInValue) {
 
 // Tests Contains().Times().
 
+INSTANTIATE_GTEST_MATCHER_TEST_P(ContainsTimes);
+
 TEST(ContainsTimes, ListMatchesWhenElementQuantityMatches) {
   list<int> some_list;
   some_list.push_back(3);
@@ -1397,7 +1401,7 @@ TEST(ContainsTimes, ListMatchesWhenElementQuantityMatches) {
   EXPECT_THAT(list<int>{}, Not(Contains(_)));
 }
 
-TEST(ContainsTimes, ExplainsMatchResultCorrectly) {
+TEST_P(ContainsTimesP, ExplainsMatchResultCorrectly) {
   const int a[2] = {1, 2};
   Matcher<const int(&)[2]> m = Contains(2).Times(3);
   EXPECT_EQ(
@@ -1502,6 +1506,8 @@ TEST(AllOfArrayTest, Matchers) {
   EXPECT_THAT(1, AllOfArray({Ge(0), Ge(1)}));
 }
 
+INSTANTIATE_GTEST_MATCHER_TEST_P(AnyOfArrayTest);
+
 TEST(AnyOfArrayTest, BasicForms) {
   // Iterator
   std::vector<int> v0{};
@@ -1554,7 +1560,7 @@ TEST(AnyOfArrayTest, Matchers) {
   EXPECT_THAT(1, Not(AllOfArray({Lt(0), Lt(1)})));
 }
 
-TEST(AnyOfArrayTest, ExplainsMatchResultCorrectly) {
+TEST_P(AnyOfArrayTestP, ExplainsMatchResultCorrectly) {
   // AnyOfArray and AllOfArry use the same underlying template-template,
   // thus it is sufficient to test one here.
   const std::vector<int> v0{};

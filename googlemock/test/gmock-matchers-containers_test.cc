@@ -65,6 +65,8 @@ TEST(ContainsTest, WorksWithMoveOnly) {
   helper.Call(MakeUniquePtrs({1, 2}));
 }
 
+INSTANTIATE_GTEST_MATCHER_TEST_P(ElementsAreTest);
+
 // Tests the variadic version of the ElementsAreMatcher
 TEST(ElementsAreTest, HugeMatcher) {
   vector<int> test_vector{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
@@ -280,6 +282,8 @@ class ConstPropagatingPtr {
   T* val_;
 };
 
+INSTANTIATE_GTEST_MATCHER_TEST_P(PointeeTest);
+
 TEST(PointeeTest, WorksWithConstPropagatingPointers) {
   const Matcher<ConstPropagatingPtr<int>> m = Pointee(Lt(5));
   int three = 3;
@@ -314,7 +318,7 @@ TEST(PointeeTest, CanDescribeSelf) {
   EXPECT_EQ("does not point to a value that is > 3", DescribeNegation(m));
 }
 
-TEST(PointeeTest, CanExplainMatchResult) {
+TEST_P(PointeeTestP, CanExplainMatchResult) {
   const Matcher<const std::string*> m = Pointee(StartsWith("Hi"));
 
   EXPECT_EQ("", Explain(m, static_cast<const std::string*>(nullptr)));
@@ -369,6 +373,8 @@ struct AStruct {
 struct DerivedStruct : public AStruct {
   char ch;
 };
+
+INSTANTIATE_GTEST_MATCHER_TEST_P(FieldTest);
 
 // Tests that Field(&Foo::field, ...) works when field is non-const.
 TEST(FieldTest, WorksForNonConstField) {
@@ -476,7 +482,7 @@ TEST(FieldTest, CanDescribeSelfWithFieldName) {
 }
 
 // Tests that Field() can explain the match result.
-TEST(FieldTest, CanExplainMatchResult) {
+TEST_P(FieldTestP, CanExplainMatchResult) {
   Matcher<const AStruct&> m = Field(&AStruct::x, Ge(0));
 
   AStruct a;
@@ -489,7 +495,7 @@ TEST(FieldTest, CanExplainMatchResult) {
       Explain(m, a));
 }
 
-TEST(FieldTest, CanExplainMatchResultWithFieldName) {
+TEST_P(FieldTestP, CanExplainMatchResultWithFieldName) {
   Matcher<const AStruct&> m = Field("field_name", &AStruct::x, Ge(0));
 
   AStruct a;
@@ -501,6 +507,8 @@ TEST(FieldTest, CanExplainMatchResultWithFieldName) {
                 ", which is 1 more than 0",
             Explain(m, a));
 }
+
+INSTANTIATE_GTEST_MATCHER_TEST_P(FieldForPointerTest);
 
 // Tests that Field() works when the argument is a pointer to const.
 TEST(FieldForPointerTest, WorksForPointerToConst) {
@@ -568,7 +576,7 @@ TEST(FieldForPointerTest, CanDescribeSelfWithFieldName) {
 }
 
 // Tests that Field() can explain the result of matching a pointer.
-TEST(FieldForPointerTest, CanExplainMatchResult) {
+TEST_P(FieldForPointerTestP, CanExplainMatchResult) {
   Matcher<const AStruct*> m = Field(&AStruct::x, Ge(0));
 
   AStruct a;
@@ -583,7 +591,7 @@ TEST(FieldForPointerTest, CanExplainMatchResult) {
             Explain(m, &a));
 }
 
-TEST(FieldForPointerTest, CanExplainMatchResultWithFieldName) {
+TEST_P(FieldForPointerTestP, CanExplainMatchResultWithFieldName) {
   Matcher<const AStruct*> m = Field("field_name", &AStruct::x, Ge(0));
 
   AStruct a;
@@ -636,6 +644,8 @@ class DerivedClass : public AClass {
  private:
   int k_;
 };
+
+INSTANTIATE_GTEST_MATCHER_TEST_P(PropertyTest);
 
 // Tests that Property(&Foo::property, ...) works when property()
 // returns a non-reference.
@@ -763,7 +773,7 @@ TEST(PropertyTest, CanDescribeSelfWithPropertyName) {
 }
 
 // Tests that Property() can explain the match result.
-TEST(PropertyTest, CanExplainMatchResult) {
+TEST_P(PropertyTestP, CanExplainMatchResult) {
   Matcher<const AClass&> m = Property(&AClass::n, Ge(0));
 
   AClass a;
@@ -776,7 +786,7 @@ TEST(PropertyTest, CanExplainMatchResult) {
       Explain(m, a));
 }
 
-TEST(PropertyTest, CanExplainMatchResultWithPropertyName) {
+TEST_P(PropertyTestP, CanExplainMatchResultWithPropertyName) {
   Matcher<const AClass&> m = Property("fancy_name", &AClass::n, Ge(0));
 
   AClass a;
@@ -788,6 +798,8 @@ TEST(PropertyTest, CanExplainMatchResultWithPropertyName) {
                 ", which is 1 more than 0",
             Explain(m, a));
 }
+
+INSTANTIATE_GTEST_MATCHER_TEST_P(PropertyForPointerTest);
 
 // Tests that Property() works when the argument is a pointer to const.
 TEST(PropertyForPointerTest, WorksForPointerToConst) {
@@ -865,7 +877,7 @@ TEST(PropertyForPointerTest, CanDescribeSelfWithPropertyDescription) {
 }
 
 // Tests that Property() can explain the result of matching a pointer.
-TEST(PropertyForPointerTest, CanExplainMatchResult) {
+TEST_P(PropertyForPointerTestP, CanExplainMatchResult) {
   Matcher<const AClass*> m = Property(&AClass::n, Ge(0));
 
   AClass a;
@@ -881,7 +893,7 @@ TEST(PropertyForPointerTest, CanExplainMatchResult) {
             Explain(m, &a));
 }
 
-TEST(PropertyForPointerTest, CanExplainMatchResultWithPropertyName) {
+TEST_P(PropertyForPointerTestP, CanExplainMatchResultWithPropertyName) {
   Matcher<const AClass*> m = Property("fancy_name", &AClass::n, Ge(0));
 
   AClass a;
@@ -904,6 +916,8 @@ TEST(PropertyForPointerTest, CanExplainMatchResultWithPropertyName) {
 std::string IntToStringFunction(int input) {
   return input == 1 ? "foo" : "bar";
 }
+
+INSTANTIATE_GTEST_MATCHER_TEST_P(ResultOfTest);
 
 TEST(ResultOfTest, WorksForFunctionPointers) {
   Matcher<int> matcher = ResultOf(&IntToStringFunction, Eq(std::string("foo")));
@@ -939,7 +953,7 @@ TEST(ResultOfTest, CanDescribeItselfWithResultDescription) {
 // Tests that ResultOf() can explain the match result.
 int IntFunction(int input) { return input == 42 ? 80 : 90; }
 
-TEST(ResultOfTest, CanExplainMatchResult) {
+TEST_P(ResultOfTestP, CanExplainMatchResult) {
   Matcher<int> matcher = ResultOf(&IntFunction, Ge(85));
   EXPECT_EQ("which is mapped by the given callable to 90" + OfType("int"),
             Explain(matcher, 36));
@@ -950,7 +964,7 @@ TEST(ResultOfTest, CanExplainMatchResult) {
             Explain(matcher, 36));
 }
 
-TEST(ResultOfTest, CanExplainMatchResultWithResultDescription) {
+TEST_P(ResultOfTestP, CanExplainMatchResultWithResultDescription) {
   Matcher<int> matcher = ResultOf("magic int conversion", &IntFunction, Ge(85));
   EXPECT_EQ("whose magic int conversion is 90" + OfType("int"),
             Explain(matcher, 36));
@@ -1408,6 +1422,8 @@ TEST(StreamlikeTest, Iteration) {
   }
 }
 
+INSTANTIATE_GTEST_MATCHER_TEST_P(BeginEndDistanceIsTest);
+
 TEST(BeginEndDistanceIsTest, WorksWithForwardList) {
   std::forward_list<int> container;
   EXPECT_THAT(container, BeginEndDistanceIs(0));
@@ -1439,7 +1455,7 @@ TEST(BeginEndDistanceIsTest, WorksWithMoveOnly) {
   helper.Call(MakeUniquePtrs({1, 2}));
 }
 
-TEST(BeginEndDistanceIsTest, ExplainsResult) {
+TEST_P(BeginEndDistanceIsTestP, ExplainsResult) {
   Matcher<vector<int>> m1 = BeginEndDistanceIs(2);
   Matcher<vector<int>> m2 = BeginEndDistanceIs(Lt(2));
   Matcher<vector<int>> m3 = BeginEndDistanceIs(AnyOf(0, 3));
@@ -2103,7 +2119,9 @@ TEST_F(UnorderedElementsAreTest, DescribeNegation) {
 
 // Tests Each().
 
-TEST(EachTest, ExplainsMatchResultCorrectly) {
+INSTANTIATE_GTEST_MATCHER_TEST_P(EachTest);
+
+TEST_P(EachTestP, ExplainsMatchResultCorrectly) {
   set<int> a;  // empty
 
   Matcher<set<int>> m = Each(2);
@@ -2594,7 +2612,7 @@ TEST(ElementsAreTest, DoesNotExplainTrivialMatch) {
   EXPECT_EQ("", Explain(m, test_list));  // No need to explain anything.
 }
 
-TEST(ElementsAreTest, ExplainsNonTrivialMatch) {
+TEST_P(ElementsAreTestP, ExplainsNonTrivialMatch) {
   Matcher<const vector<int>&> m =
       ElementsAre(GreaterThan(1), 0, GreaterThan(2));
 
@@ -2617,7 +2635,7 @@ TEST(ElementsAreTest, CanExplainMismatchWrongSize) {
   EXPECT_EQ("which has 1 element", Explain(m, test_list));
 }
 
-TEST(ElementsAreTest, CanExplainMismatchRightSize) {
+TEST_P(ElementsAreTestP, CanExplainMismatchRightSize) {
   Matcher<const vector<int>&> m = ElementsAre(1, GreaterThan(5));
 
   vector<int> v;
@@ -2970,6 +2988,8 @@ TEST(ElementsAreArrayTest, SourceLifeSpan) {
 
 // Tests Contains().
 
+INSTANTIATE_GTEST_MATCHER_TEST_P(ContainsTest);
+
 TEST(ContainsTest, ListMatchesWhenElementIsInContainer) {
   list<int> some_list;
   some_list.push_back(3);
@@ -3023,7 +3043,7 @@ TEST(ContainsTest, SetDoesNotMatchWhenElementIsNotInContainer) {
   EXPECT_THAT(c_string_set, Not(Contains(std::string("goodbye"))));
 }
 
-TEST(ContainsTest, ExplainsMatchResultCorrectly) {
+TEST_P(ContainsTestP, ExplainsMatchResultCorrectly) {
   const int a[2] = {1, 2};
   Matcher<const int(&)[2]> m = Contains(2);
   EXPECT_EQ("whose element #1 matches", Explain(m, a));

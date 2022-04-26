@@ -429,6 +429,8 @@ void AllOfMatches(int num, const Matcher<int>& m) {
   EXPECT_TRUE(m.Matches(num + 1));
 }
 
+INSTANTIATE_GTEST_MATCHER_TEST_P(AllOfTest);
+
 // Tests that AllOf(m1, ..., mn) matches any value that matches all of
 // the given matchers.
 TEST(AllOfTest, MatchesWhenAllMatch) {
@@ -552,7 +554,7 @@ TEST(AllOfTest, AllOfMatcherSafelyCastsMonomorphicMatchers) {
   Matcher<int&> m5 = AllOf(greater_than_5, less_than_10, less_than_10);
 }
 
-TEST(AllOfTest, ExplainsResult) {
+TEST_P(AllOfTestP, ExplainsResult) {
   Matcher<int> m;
 
   // Successful match.  Both matchers need to explain.  The second
@@ -615,6 +617,8 @@ static void AnyOfStringMatches(int num, const Matcher<std::string>& m) {
   }
   EXPECT_FALSE(m.Matches(std::to_string(num + 1)));
 }
+
+INSTANTIATE_GTEST_MATCHER_TEST_P(AnyOfTest);
 
 // Tests that AnyOf(m1, ..., mn) matches any value that matches at
 // least one of the given matchers.
@@ -766,7 +770,7 @@ TEST(AnyOfTest, AnyOfMatcherSafelyCastsMonomorphicMatchers) {
   Matcher<int&> m5 = AnyOf(greater_than_5, less_than_10, less_than_10);
 }
 
-TEST(AnyOfTest, ExplainsResult) {
+TEST_P(AnyOfTestP, ExplainsResult) {
   Matcher<int> m;
 
   // Failed match.  Both matchers need to explain.  The second
