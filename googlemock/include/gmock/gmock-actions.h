@@ -935,15 +935,16 @@ class ReturnAction {
     typedef typename Function<F>::Result Result;
     typedef typename Function<F>::ArgumentTuple ArgumentTuple;
 
-    // The implicit cast is necessary when Result has more than one
-    // single-argument constructor (e.g. Result is std::vector<int>) and R
-    // has a type conversion operator template.  In that case, value_(value)
-    // won't compile as the compiler doesn't known which constructor of
-    // Result to call.  ImplicitCast_ forces the compiler to convert R to
-    // Result without considering explicit constructors, thus resolving the
-    // ambiguity. value_ is then initialized using its copy constructor.
     explicit Impl(const std::shared_ptr<R>& value)
         : value_before_cast_(*value),
+          // Make an implicit conversion to Result before initializing the
+          // Result object we store, avoiding calling any explicit constructor
+          // of Result from R.
+          //
+          // This simulates the language rules: a function with return type
+          // Result that does `return R()` requires R to be implicitly
+          // convertible to Result, and uses that path for the conversion, even
+          // if Result has an explicit constructor from R.
           value_(ImplicitCast_<Result>(value_before_cast_)) {}
 
     Result Perform(const ArgumentTuple&) override { return value_; }

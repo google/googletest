@@ -667,6 +667,37 @@ TEST(ReturnTest, SupportsWrapperReturnType) {
   EXPECT_THAT(result, ::testing::ElementsAre(0, 1, 2, 3, 4));
 }
 
+TEST(ReturnTest, PrefersConversionOperator) {
+  // Define types In and Out such that:
+  //
+  //  *  In is implicitly convertible to Out.
+  //  *  Out also has an explicit constructor from In.
+  //
+  struct In;
+  struct Out {
+    int x;
+
+    explicit Out(const int x) : x(x) {}
+    explicit Out(const In&) : x(0) {}
+  };
+
+  struct In {
+    operator Out() const { return Out{19}; }  // NOLINT
+  };
+
+  // Assumption check: the C++ language rules are such that a function that
+  // returns Out which uses In a return statement will use the implicit
+  // conversion path rather than the explicit constructor.
+  EXPECT_THAT([]() -> Out { return In(); }(), Field(&Out::x, 19));
+
+  // Return should work the same way: if the mock function's return type is Out
+  // and we feed Return an In value, then the Out should be created through the
+  // implicit conversion path rather than the explicit constructor.
+  MockFunction<Out()> mock;
+  EXPECT_CALL(mock, Call).WillOnce(Return(In()));
+  EXPECT_THAT(mock.AsStdFunction()(), Field(&Out::x, 19));
+}
+
 // Tests that Return(v) is covaraint.
 
 struct Base {
