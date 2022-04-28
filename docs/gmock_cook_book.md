@@ -1300,23 +1300,27 @@ What if you have a pointer to pointer? You guessed it - you can use nested
 `Pointee(Pointee(Lt(3)))` matches a pointer that points to a pointer that points
 to a number less than 3 (what a mouthful...).
 
-### Testing a Certain Property of an Object
+### Defining a Custom Matcher Class {#CustomMatcherClass}
 
-Sometimes you want to specify that an object argument has a certain property,
-but there is no existing matcher that does this. If you want good error
-messages, you should [define a matcher](#NewMatchers). If you want to do it
-quick and dirty, you could get away with writing an ordinary function.
+Most matchers can be simply defined using [the MATCHER* macros](#NewMatchers),
+which are terse and flexible, and produce good error messages. However, these
+macros are not very explicit about the interfaces they create and are not always
+suitable, especially for matchers that will be widely reused.
 
-Let's say you have a mock function that takes an object of type `Foo`, which has
-an `int bar()` method and an `int baz()` method, and you want to constrain that
-the argument's `bar()` value plus its `baz()` value is a given number. Here's
-how you can define a matcher to do it:
+For more advanced cases, you may need to define your own matcher class. A custom
+matcher allows you to test a specific invariant property of that object. Let's
+take a look at how to do so.
+
+Imagine you have a mock function that takes an object of type `Foo`, which has
+an `int bar()` method and an `int baz()` method. You want to constrain that the
+argument's `bar()` value plus its `baz()` value is a given number. (This is an
+invariant.) Here's how we can write and use a matcher class to do so:
 
 ```cpp
-using ::testing::Matcher;
-
 class BarPlusBazEqMatcher {
  public:
+  using is_gtest_matcher = void;
+
   explicit BarPlusBazEqMatcher(int expected_sum)
       : expected_sum_(expected_sum) {}
 
@@ -1325,23 +1329,24 @@ class BarPlusBazEqMatcher {
     return (foo.bar() + foo.baz()) == expected_sum_;
   }
 
-  void DescribeTo(std::ostream& os) const {
-    os << "bar() + baz() equals " << expected_sum_;
+  void DescribeTo(std::ostream* os) const {
+    *os << "bar() + baz() equals " << expected_sum_;
   }
 
-  void DescribeNegationTo(std::ostream& os) const {
-    os << "bar() + baz() does not equal " << expected_sum_;
+  void DescribeNegationTo(std::ostream* os) const {
+    *os << "bar() + baz() does not equal " << expected_sum_;
   }
  private:
   const int expected_sum_;
 };
 
-Matcher<const Foo&> BarPlusBazEq(int expected_sum) {
+::testing::Matcher<const Foo&> BarPlusBazEq(int expected_sum) {
   return BarPlusBazEqMatcher(expected_sum);
 }
 
 ...
-  EXPECT_CALL(..., DoThis(BarPlusBazEq(5)))...;
+  Foo foo;
+  EXPECT_CALL(foo, BarPlusBazEq(5))...;
 ```
 
 ### Matching Containers
