@@ -184,10 +184,13 @@ FilePath FilePath::MakeFileName(const FilePath& directory,
                                 const char* extension) {
   std::string file;
   if (number == 0) {
-    file = base_name.string() + "." + extension;
+    file = (base_name.IsEmpty() ? "unknown file"
+                               : base_name.string()) + "." + extension;
   } else {
     file =
-        base_name.string() + "_" + StreamableToString(number) + "." + extension;
+        (base_name.IsEmpty() ? "unknown file"
+                            : base_name.string()) + "_" +
+                            StreamableToString(number) + "." + extension;
   }
   return ConcatPaths(directory, FilePath(file));
 }
