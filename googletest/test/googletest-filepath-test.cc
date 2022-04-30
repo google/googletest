@@ -99,6 +99,10 @@ TEST(IsEmptyTest, ReturnsTrueForEmptyPath) {
   EXPECT_TRUE(FilePath(" ").IsEmpty());
 }
 
+TEST(IsEmptyTest, ReturnsTrueForNullBytes) {
+  EXPECT_TRUE(FilePath("\0").IsEmpty());
+}
+
 TEST(IsEmptyTest, ReturnsFalseForNonEmptyPath) {
   EXPECT_FALSE(FilePath("a").IsEmpty());
   EXPECT_FALSE(FilePath(".").IsEmpty());
