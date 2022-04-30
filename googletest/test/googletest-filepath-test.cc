@@ -96,6 +96,7 @@ TEST(GetCurrentDirTest, ReturnsCurrentDir) {
 
 TEST(IsEmptyTest, ReturnsTrueForEmptyPath) {
   EXPECT_TRUE(FilePath("").IsEmpty());
+  EXPECT_TRUE(FilePath(" ").IsEmpty());
 }
 
 TEST(IsEmptyTest, ReturnsFalseForNonEmptyPath) {

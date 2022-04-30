@@ -163,7 +163,16 @@ class GTEST_API_ String {
   // Formats a byte as "%02X".
   static std::string FormatByte(unsigned char value);
 
+  // Trims out leading and trailing whitespaces in the given string.
+  static void TrimString(std::string *str);
+
  private:
+  // Trims out leading whitespaces in the given string.
+  static void LTrimString(std::string *str);
+
+  // Trims out trailing whitespaces in the given string.
+  static void RTrimString(std::string *str);
+
   String();  // Not meant to be instantiated.
 };           // class String
 

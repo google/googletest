@@ -109,8 +109,12 @@ class GTEST_API_ FilePath {
                                          const FilePath& base_name,
                                          const char* extension);
 
-  // Returns true if and only if the path is "".
-  bool IsEmpty() const { return pathname_.empty(); }
+  // Returns true if the path is empty.
+  bool IsEmpty() const {
+    std::string s = pathname_;
+    String::TrimString(&s);
+    return s.empty();
+  }
 
   // If input name has a trailing separator character, removes it and returns
   // the name, otherwise return the name string unmodified.

@@ -53,6 +53,7 @@
 #include <sstream>
 #include <unordered_set>
 #include <vector>
+#include <cctype>
 
 #include "gtest/gtest-assertion-result.h"
 #include "gtest/gtest-spi.h"
@@ -2166,6 +2167,27 @@ std::string String::FormatByte(unsigned char value) {
   ss << std::setfill('0') << std::setw(2) << std::hex << std::uppercase
      << static_cast<unsigned int>(value);
   return ss.str();
+}
+
+// Trims out leading whitespaces in the given string.
+void String::LTrimString(std::string *str) {
+  str->erase(str->begin(), std::find_if(str->begin(), str->end(),
+  [](unsigned char c) {
+    return !std::isspace(c);
+  }));
+}
+
+// Trims out trailing whitespaces in the given string.
+void String::RTrimString(std::string *str) {
+  str->erase(std::find_if(str->rbegin(), str->rend(), [](unsigned char c) {
+    return !std::isspace(c);
+  }).base(), str->end());
+}
+
+// Trims out leading and trailing whitespaces in the given string.
+void String::TrimString(std::string *str) {
+  String::LTrimString(str);
+  String::RTrimString(str);
 }
 
 // Converts the buffer in a stringstream to an std::string, converting NUL
