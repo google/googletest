@@ -6482,7 +6482,8 @@ static const char kColorEncodedHelpMessage[] =
     "@Y|@G:@YFILE_PATH]@D\n"
     "      Generate a JSON or XML report in the given directory or with the "
     "given\n"
-    "      file name. @YFILE_PATH@D defaults to @Gtest_detail.xml@D.\n"
+    "      file name. @YFILE_PATH@D defaults to "
+    "@Gtest_detail.@Y(@Gxml@Y|@Gjson@Y)@D.\n"
 #if GTEST_CAN_STREAM_RESULTS_
     "  @G--" GTEST_FLAG_PREFIX_
     "stream_result_to=@YHOST@G:@YPORT@D\n"
