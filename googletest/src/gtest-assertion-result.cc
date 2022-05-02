@@ -62,12 +62,6 @@ AssertionResult AssertionResult::operator!() const {
   return negation;
 }
 
-// Makes a successful assertion result.
-AssertionResult AssertionSuccess() { return AssertionResult(true); }
-
-// Makes a failed assertion result.
-AssertionResult AssertionFailure() { return AssertionResult(false); }
-
 // Makes a failed assertion result with the given failure message.
 // Deprecated; use AssertionFailure() << message.
 AssertionResult AssertionFailure(const Message& message) {
