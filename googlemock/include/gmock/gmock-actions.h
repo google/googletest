@@ -900,12 +900,12 @@ struct ByMoveWrapper {
 // of gtl::Container() is passed into Return.
 //
 template <typename R>
-class ReturnAction {
+class ReturnAction final {
  public:
   // Constructs a ReturnAction object from the value to be returned.
   // 'value' is passed by value instead of by const reference in order
   // to allow Return("string literal") to compile.
-  explicit ReturnAction(R value) : value_(new R(std::move(value))) {}
+  explicit ReturnAction(R value) : value_(std::move(value)) {}
 
   // This template type conversion operator allows Return(x) to be
   // used in ANY function that returns x's type.
@@ -924,19 +924,19 @@ class ReturnAction {
                   "use ReturnRef instead of Return to return a reference");
     static_assert(!std::is_void<Result>::value,
                   "Can't use Return() on an action expected to return `void`.");
-    return Action<F>(new Impl<R, F>(value_));
+    return Action<F>(new Impl<F>(value_));
   }
 
  private:
   // Implements the Return(x) action for a particular function type F.
-  template <typename R_, typename F>
+  template <typename F>
   class Impl : public ActionInterface<F> {
    public:
     typedef typename Function<F>::Result Result;
     typedef typename Function<F>::ArgumentTuple ArgumentTuple;
 
-    explicit Impl(const std::shared_ptr<R>& value)
-        : value_before_cast_(*value),
+    explicit Impl(const R& value)
+        : value_before_cast_(value),
           // Make an implicit conversion to Result before initializing the
           // Result object we store, avoiding calling any explicit constructor
           // of Result from R.
@@ -961,30 +961,39 @@ class ReturnAction {
     Impl& operator=(const Impl&) = delete;
   };
 
-  // Partially specialize for ByMoveWrapper. This version of ReturnAction will
-  // move its contents instead.
-  template <typename R_, typename F>
-  class Impl<ByMoveWrapper<R_>, F> : public ActionInterface<F> {
-   public:
-    typedef typename Function<F>::Result Result;
-    typedef typename Function<F>::ArgumentTuple ArgumentTuple;
+  R value_;
+};
 
-    explicit Impl(const std::shared_ptr<R>& wrapper)
-        : performed_(false), wrapper_(wrapper) {}
+// A specialization of ReturnAction<R> when R is ByMoveWrapper<T> for some T.
+//
+// This version applies the type system-defeating hack of moving from T even in
+// the const call operator, checking at runtime that it isn't called more than
+// once, since the user has declared their intent to do so by using ByMove.
+template <typename T>
+class ReturnAction<ByMoveWrapper<T>> final {
+ public:
+  explicit ReturnAction(ByMoveWrapper<T> wrapper)
+      : state_(new State(std::move(wrapper.payload))) {}
 
-    Result Perform(const ArgumentTuple&) override {
-      GTEST_CHECK_(!performed_)
-          << "A ByMove() action should only be performed once.";
-      performed_ = true;
-      return std::move(wrapper_->payload);
-    }
+  T operator()() const {
+    GTEST_CHECK_(!state_->called)
+        << "A ByMove() action must be performed at most once.";
 
-   private:
-    bool performed_;
-    const std::shared_ptr<R> wrapper_;
+    state_->called = true;
+    return std::move(state_->value);
+  }
+
+ private:
+  // We store our state on the heap so that we are copyable as required by
+  // Action, despite the fact that we are stateful and T may not be copyable.
+  struct State {
+    explicit State(T&& value_in) : value(std::move(value_in)) {}
+
+    T value;
+    bool called = false;
   };
 
-  const std::shared_ptr<R> value_;
+  const std::shared_ptr<State> state_;
 };
 
 // Implements the ReturnNull() action.
