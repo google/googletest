@@ -322,9 +322,6 @@ struct is_callable_r_impl<void_t<call_result_t<F, Args...>>, R, F, Args...>
 template <typename R, typename F, typename... Args>
 using is_callable_r = is_callable_r_impl<void, R, F, Args...>;
 
-template <typename F>
-class TypedExpectation;
-
 // Specialized for function types below.
 template <typename F>
 class OnceAction;
@@ -441,9 +438,6 @@ class OnceAction<Result(Args...)> final {
   }
 
  private:
-  // Allow TypedExpectation::WillOnce to use our type-unsafe API below.
-  friend class TypedExpectation<Result(Args...)>;
-
   // An adaptor that wraps a callable that is compatible with our signature and
   // being invoked as an rvalue reference so that it can be used as an
   // StdFunctionAdaptor. This throws away type safety, but that's fine because
