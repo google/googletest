@@ -208,13 +208,13 @@ class GTEST_API_ AssertionResult {
   // Swap the contents of this AssertionResult with other.
   void swap(AssertionResult& other);
 
-  // Stores result of the assertion predicate.
-  bool success_;
   // Stores the message describing the condition in case the expectation
   // construct is not satisfied with the predicate's outcome.
   // Referenced via a pointer to avoid taking too much stack frame space
   // with test assertions.
   std::unique_ptr< ::std::string> message_;
+  // Stores result of the assertion predicate.
+  bool success_;
 };
 
 // Makes a successful assertion result.

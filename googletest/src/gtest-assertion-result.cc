@@ -43,16 +43,16 @@ namespace testing {
 // AssertionResult constructors.
 // Used in EXPECT_TRUE/FALSE(assertion_result).
 AssertionResult::AssertionResult(const AssertionResult& other)
-    : success_(other.success_),
-      message_(other.message_.get() != nullptr
+    : message_(other.message_.get() != nullptr
                    ? new ::std::string(*other.message_)
-                   : static_cast< ::std::string*>(nullptr)) {}
+                   : static_cast< ::std::string*>(nullptr)),
+      success_(other.success_) {}
 
 // Swaps two AssertionResults.
 void AssertionResult::swap(AssertionResult& other) {
   using std::swap;
-  swap(success_, other.success_);
   swap(message_, other.message_);
+  swap(success_, other.success_);
 }
 
 // Returns the assertion's negation. Used with EXPECT/ASSERT_FALSE.
