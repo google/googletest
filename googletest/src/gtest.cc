@@ -6775,7 +6775,7 @@ std::string TempDir() {
   }
 #else
   return "/tmp/";
-#endif  // GTEST_OS_WINDOWS_MOBILE
+#endif
 }
 
 // Class ScopedTrace
