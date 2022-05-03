@@ -5068,7 +5068,8 @@ inline bool ExplainMatchResult(M matcher, const T& value,
 //
 // MATCHER_P(XAndYThat, matcher,
 //           "X that " + DescribeMatcher<int>(matcher, negation) +
-//               " and Y that " + DescribeMatcher<double>(matcher, negation)) {
+//               (negation ? " or" : " and") + " Y that " +
+//               DescribeMatcher<double>(matcher, negation)) {
 //   return ExplainMatchResult(matcher, arg.x(), result_listener) &&
 //          ExplainMatchResult(matcher, arg.y(), result_listener);
 // }
