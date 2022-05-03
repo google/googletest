@@ -6766,7 +6766,7 @@ std::string TempDir() {
   } else {
     return temp_dir;
   }
-#elif GTEST_OS_LINUX
+#elif GTEST_OS_LINUX || GTEST_OS_MAC
   const char* temp_dir = internal::posix::GetEnv("TEST_TMPDIR");
   if (temp_dir == nullptr || temp_dir[0] == '\0') {
     return "/tmp/";
@@ -6775,7 +6775,7 @@ std::string TempDir() {
   }
 #else
   return "/tmp/";
-#endif  // GTEST_OS_WINDOWS_MOBILE
+#endif
 }
 
 // Class ScopedTrace
