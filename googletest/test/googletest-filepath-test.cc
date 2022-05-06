@@ -407,7 +407,7 @@ TEST(DirectoryTest, CurrentDirectoryExists) {
 }
 
 // "foo/bar" == foo//bar" == "foo///bar"
-TEST(NormalizeTest, MultipleConsecutiveSepaparatorsInMidstring) {
+TEST(NormalizeTest, MultipleConsecutiveSeparatorsInMidstring) {
   EXPECT_EQ("foo" GTEST_PATH_SEP_ "bar",
             FilePath("foo" GTEST_PATH_SEP_ "bar").string());
   EXPECT_EQ("foo" GTEST_PATH_SEP_ "bar",
@@ -419,7 +419,7 @@ TEST(NormalizeTest, MultipleConsecutiveSepaparatorsInMidstring) {
 }
 
 // "/bar" == //bar" == "///bar"
-TEST(NormalizeTest, MultipleConsecutiveSepaparatorsAtStringStart) {
+TEST(NormalizeTest, MultipleConsecutiveSeparatorsAtStringStart) {
   EXPECT_EQ(GTEST_PATH_SEP_ "bar", FilePath(GTEST_PATH_SEP_ "bar").string());
   EXPECT_EQ(GTEST_PATH_SEP_ "bar",
             FilePath(GTEST_PATH_SEP_ GTEST_PATH_SEP_ "bar").string());
@@ -429,7 +429,7 @@ TEST(NormalizeTest, MultipleConsecutiveSepaparatorsAtStringStart) {
 }
 
 // "foo/" == foo//" == "foo///"
-TEST(NormalizeTest, MultipleConsecutiveSepaparatorsAtStringEnd) {
+TEST(NormalizeTest, MultipleConsecutiveSeparatorsAtStringEnd) {
   EXPECT_EQ("foo" GTEST_PATH_SEP_, FilePath("foo" GTEST_PATH_SEP_).string());
   EXPECT_EQ("foo" GTEST_PATH_SEP_,
             FilePath("foo" GTEST_PATH_SEP_ GTEST_PATH_SEP_).string());
