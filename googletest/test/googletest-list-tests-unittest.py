@@ -108,6 +108,38 @@ FooTest\.
   Test3
 """)
 
+# The expected output when running googletest-list-tests-unittest_ with
+# --gtest_list_tests and --gtest_list_tests_verbosely.
+EXPECTED_OUTPUT_VERBOSE_RE = re.compile(r"""FooDeathTest.Test1
+Foo\.Bar1
+Foo\.Bar2
+Foo\.DISABLED_Bar3
+Abc\.Xyz
+Abc\.Def
+FooBar\.Baz
+FooTest\.Test1
+FooTest\.DISABLED_Test2
+FooTest\.Test3
+TypedTest/0\.TestA
+TypedTest/0\.TestB
+TypedTest/1\.TestA
+TypedTest/1\.TestB
+TypedTest/2\.TestA
+TypedTest/2\.TestB
+My/TypeParamTest/0\.TestA
+My/TypeParamTest/0\.TestB
+My/TypeParamTest/1\.TestA
+My/TypeParamTest/1\.TestB
+My/TypeParamTest/2\.TestA
+My/TypeParamTest/2\.TestB
+MyInstantiation/ValueParamTest\.TestA/0
+MyInstantiation/ValueParamTest\.TestA/1
+MyInstantiation/ValueParamTest\.TestA/2
+MyInstantiation/ValueParamTest\.TestB/0
+MyInstantiation/ValueParamTest\.TestB/1
+MyInstantiation/ValueParamTest\.TestB/2
+""")
+
 # Utilities.
 
 
@@ -199,6 +231,14 @@ class GTestListTestsUnitTest(gtest_test_utils.TestCase):
     self.RunAndVerify(flag_value='1',
                       expected_output_re=EXPECTED_OUTPUT_FILTER_FOO_RE,
                       other_flag='--gtest_filter=Foo*')
+
+  def testWithVerboseFlag(self):
+    """Tests that --gtest_list_tests takes into account the
+    --gtest_list_tests_verbosely flag."""
+
+    self.RunAndVerify(flag_value='1',
+                      expected_output_re=EXPECTED_OUTPUT_VERBOSE_RE,
+                      other_flag='--gtest_list_tests_verbosely')
 
 
 if __name__ == '__main__':
