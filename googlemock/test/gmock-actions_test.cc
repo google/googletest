@@ -1920,7 +1920,7 @@ TEST(MockMethodTest, ActionSwallowsAllArguments) {
 
 struct ActionWithTemplatedConversionOperators {
   template <typename... Args>
-  operator internal::OnceAction<int(Args...)>() && {  // NOLINT
+  operator OnceAction<int(Args...)>() && {  // NOLINT
     return [] { return 17; };
   }
 

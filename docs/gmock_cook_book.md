@@ -3812,22 +3812,19 @@ Cardinality EvenNumber() {
       .Times(EvenNumber());
 ```
 
-### Writing New Actions Quickly {#QuickNewActions}
+### Writing New Actions {#QuickNewActions}
 
 If the built-in actions don't work for you, you can easily define your own one.
-Just define a functor class with a (possibly templated) call operator, matching
-the signature of your action.
+All you need is a call operator with a signature compatible with the mocked
+function. So you can use a lambda:
 
-```cpp
-struct Increment {
-  template <typename T>
-  T operator()(T* arg) {
-    return ++(*arg);
-  }
-}
+```
+MockFunction<int(int)> mock;
+EXPECT_CALL(mock, Call).WillOnce([](const int input) { return input * 7; });
+EXPECT_EQ(14, mock.AsStdFunction()(2));
 ```
 
-The same approach works with stateful functors (or any callable, really):
+Or a struct with a call operator (even a templated one):
 
 ```
 struct MultiplyBy {
@@ -3835,11 +3832,53 @@ struct MultiplyBy {
   T operator()(T arg) { return arg * multiplier; }
 
   int multiplier;
-}
+};
 
 // Then use:
 // EXPECT_CALL(...).WillOnce(MultiplyBy{7});
 ```
+
+It's also fine for the callable to take no arguments, ignoring the arguments
+supplied to the mock function:
+
+```
+MockFunction<int(int)> mock;
+EXPECT_CALL(mock, Call).WillOnce([] { return 17; });
+EXPECT_EQ(17, mock.AsStdFunction()(0));
+```
+
+When used with `WillOnce`, the callable can assume it will be called at most
+once and is allowed to be a move-only type:
+
+```
+// An action that contains move-only types and has an &&-qualified operator,
+// demanding in the type system that it be called at most once. This can be
+// used with WillOnce, but the compiler will reject it if handed to
+// WillRepeatedly.
+struct MoveOnlyAction {
+  std::unique_ptr<int> move_only_state;
+  std::unique_ptr<int> operator()() && { return std::move(move_only_state); }
+};
+
+MockFunction<std::unique_ptr<int>()> mock;
+EXPECT_CALL(mock, Call).WillOnce(MoveOnlyAction{std::make_unique<int>(17)});
+EXPECT_THAT(mock.AsStdFunction()(), Pointee(Eq(17)));
+```
+
+More generally, to use with a mock function whose signature is `R(Args...)` the
+object can be anything convertible to `OnceAction<R(Args...)>` or
+`Action<R(Args...)`>. The difference between the two is that `OnceAction` has
+weaker requirements (`Action` requires a copy-constructible input that can be
+called repeatedly whereas `OnceAction` requires only move-constructible and
+supports `&&`-qualified call operators), but can be used only with `WillOnce`.
+`OnceAction` is typically relevant only when supporting move-only types or
+actions that want a type-system guarantee that they will be called at most once.
+
+Typically the `OnceAction` and `Action` templates need not be referenced
+directly in your actions: a struct or class with a call operator is sufficient,
+as in the examples above. But fancier polymorphic actions that need to know the
+specific return type of the mock function can define templated conversion
+operators to make that possible. See `gmock-actions.h` for examples.
 
 #### Legacy macro-based Actions
 

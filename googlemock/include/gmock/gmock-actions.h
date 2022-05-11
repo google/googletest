@@ -322,16 +322,18 @@ struct is_callable_r_impl<void_t<call_result_t<F, Args...>>, R, F, Args...>
 template <typename R, typename F, typename... Args>
 using is_callable_r = is_callable_r_impl<void, R, F, Args...>;
 
+}  // namespace internal
+
 // Specialized for function types below.
 template <typename F>
 class OnceAction;
 
 // An action that can only be used once.
 //
-// This is what is accepted by WillOnce, which doesn't require the underlying
-// action to be copy-constructible (only move-constructible), and promises to
-// invoke it as an rvalue reference. This allows the action to work with
-// move-only types like std::move_only_function in a type-safe manner.
+// This is accepted by WillOnce, which doesn't require the underlying action to
+// be copy-constructible (only move-constructible), and promises to invoke it as
+// an rvalue reference. This allows the action to work with move-only types like
+// std::move_only_function in a type-safe manner.
 //
 // For example:
 //
@@ -500,8 +502,6 @@ class OnceAction<Result(Args...)> final {
 
   std::function<Result(Args...)> function_;
 };
-
-}  // namespace internal
 
 // When an unexpected function call is encountered, Google Mock will
 // let it return a default value if the user has specified one for its
@@ -742,7 +742,7 @@ class Action<R(Args...)> {
 
   // An action can be used as a OnceAction, since it's obviously safe to call it
   // once.
-  operator internal::OnceAction<F>() const {  // NOLINT
+  operator OnceAction<F>() const {  // NOLINT
     // Return a OnceAction-compatible callable that calls Perform with the
     // arguments it is provided. We could instead just return fun_, but then
     // we'd need to handle the IsDoDefault() case separately.
