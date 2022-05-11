@@ -44,6 +44,7 @@
 #include <chrono>  // NOLINT
 #include <cmath>
 #include <cstdint>
+#include <initializer_list>
 #include <iomanip>
 #include <iterator>
 #include <limits>
@@ -6745,36 +6746,36 @@ void InitGoogleTest() {
 #endif  // defined(GTEST_CUSTOM_INIT_GOOGLE_TEST_FUNCTION_)
 }
 
+#if !defined(GTEST_CUSTOM_TEMPDIR_FUNCTION_)
+// Return value of first environment variable that is set and contains
+// a non-empty string. If there are none, return the "fallback" string.
+// Since we like the temporary directory to have a directory separator suffix,
+// add it if not provided in the environment variable value.
+static std::string GetTempDirFromEnv(
+    std::initializer_list<const char*> environment_variables,
+    const char* fallback, char separator) {
+  for (const char* variable_name : environment_variables) {
+    const char* value = internal::posix::GetEnv(variable_name);
+    if (value != nullptr && value[0] != '\0') {
+      if (value[strlen(value) - 1] != separator) {
+        return std::string(value).append(1, separator);
+      }
+      return value;
+    }
+  }
+  return fallback;
+}
+#endif
+
 std::string TempDir() {
 #if defined(GTEST_CUSTOM_TEMPDIR_FUNCTION_)
   return GTEST_CUSTOM_TEMPDIR_FUNCTION_();
-#elif GTEST_OS_WINDOWS_MOBILE
-  return "\\temp\\";
-#elif GTEST_OS_WINDOWS
-  const char* temp_dir = internal::posix::GetEnv("TEMP");
-  if (temp_dir == nullptr || temp_dir[0] == '\0') {
-    return "\\temp\\";
-  } else if (temp_dir[strlen(temp_dir) - 1] == '\\') {
-    return temp_dir;
-  } else {
-    return std::string(temp_dir) + "\\";
-  }
+#elif GTEST_OS_WINDOWS || GTEST_OS_WINDOWS_MOBILE
+  return GetTempDirFromEnv({"TEST_TMPDIR", "TEMP"}, "\\temp\\", '\\');
 #elif GTEST_OS_LINUX_ANDROID
-  const char* temp_dir = internal::posix::GetEnv("TEST_TMPDIR");
-  if (temp_dir == nullptr || temp_dir[0] == '\0') {
-    return "/data/local/tmp/";
-  } else {
-    return temp_dir;
-  }
-#elif GTEST_OS_LINUX || GTEST_OS_MAC
-  const char* temp_dir = internal::posix::GetEnv("TEST_TMPDIR");
-  if (temp_dir == nullptr || temp_dir[0] == '\0') {
-    return "/tmp/";
-  } else {
-    return temp_dir;
-  }
+  return GetTempDirFromEnv({"TEST_TMPDIR", "TMPDIR"}, "/data/local/tmp/", '/');
 #else
-  return "/tmp/";
+  return GetTempDirFromEnv({"TEST_TMPDIR", "TMPDIR"}, "/tmp/", '/');
 #endif
 }
 
