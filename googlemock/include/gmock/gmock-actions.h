@@ -866,93 +866,155 @@ struct ByMoveWrapper {
   T payload;
 };
 
-// Implements the polymorphic Return(x) action, which can be used in
-// any function that returns the type of x, regardless of the argument
-// types.
-//
-// Note: The value passed into Return must be converted into
-// Function<F>::Result when this action is cast to Action<F> rather than
-// when that action is performed. This is important in scenarios like
-//
-// MOCK_METHOD1(Method, T(U));
-// ...
-// {
-//   Foo foo;
-//   X x(&foo);
-//   EXPECT_CALL(mock, Method(_)).WillOnce(Return(x));
-// }
-//
-// In the example above the variable x holds reference to foo which leaves
-// scope and gets destroyed.  If copying X just copies a reference to foo,
-// that copy will be left with a hanging reference.  If conversion to T
-// makes a copy of foo, the above code is safe. To support that scenario, we
-// need to make sure that the type conversion happens inside the EXPECT_CALL
-// statement, and conversion of the result of Return to Action<T(U)> is a
-// good place for that.
-//
-// The real life example of the above scenario happens when an invocation
-// of gtl::Container() is passed into Return.
-//
+// The general implementation of Return(R). Specializations follow below.
 template <typename R>
 class ReturnAction final {
  public:
-  // Constructs a ReturnAction object from the value to be returned.
-  // 'value' is passed by value instead of by const reference in order
-  // to allow Return("string literal") to compile.
   explicit ReturnAction(R value) : value_(std::move(value)) {}
 
-  // This template type conversion operator allows Return(x) to be
-  // used in ANY function that returns x's type.
-  template <typename F>
-  operator Action<F>() const {  // NOLINT
-    // Assert statement belongs here because this is the best place to verify
-    // conditions on F. It produces the clearest error messages
-    // in most compilers.
-    // Impl really belongs in this scope as a local class but can't
-    // because MSVC produces duplicate symbols in different translation units
-    // in this case. Until MS fixes that bug we put Impl into the class scope
-    // and put the typedef both here (for use in assert statement) and
-    // in the Impl class. But both definitions must be the same.
-    typedef typename Function<F>::Result Result;
-    static_assert(!std::is_reference<Result>::value,
+  // Support conversion to function types with compatible return types. See the
+  // documentation on Return for the definition of compatible.
+  template <typename U, typename... Args>
+  operator Action<U(Args...)>() const {  // NOLINT
+    // Check our requirements on the return type.
+    static_assert(!std::is_reference<U>::value,
                   "use ReturnRef instead of Return to return a reference");
-    static_assert(!std::is_void<Result>::value,
+
+    static_assert(!std::is_void<U>::value,
                   "Can't use Return() on an action expected to return `void`.");
-    return Action<F>(new Impl<F>(value_));
+
+    return Impl<U>(value_);
   }
 
  private:
-  // Implements the Return(x) action for a particular function type F.
-  template <typename F>
-  class Impl : public ActionInterface<F> {
+  // Implements the Return(x) action for a mock function that returns type U.
+  template <typename U>
+  class Impl final {
    public:
-    typedef typename Function<F>::Result Result;
-    typedef typename Function<F>::ArgumentTuple ArgumentTuple;
+    explicit Impl(const R& input_value) : state_(new State(input_value)) {}
 
-    explicit Impl(const R& value)
-        : value_before_cast_(value),
-          // Make an implicit conversion to Result before initializing the
-          // Result object we store, avoiding calling any explicit constructor
-          // of Result from R.
-          //
-          // This simulates the language rules: a function with return type
-          // Result that does `return R()` requires R to be implicitly
-          // convertible to Result, and uses that path for the conversion, even
-          // if Result has an explicit constructor from R.
-          value_(ImplicitCast_<Result>(value_before_cast_)) {}
-
-    Result Perform(const ArgumentTuple&) override { return value_; }
+    U operator()() const { return state_->value; }
 
    private:
-    static_assert(!std::is_reference<Result>::value,
-                  "Result cannot be a reference type");
-    // We save the value before casting just in case it is being cast to a
-    // wrapper type.
-    R value_before_cast_;
-    Result value_;
+    // We put our state on the heap so that the compiler-generated copy/move
+    // constructors work correctly even when U is a reference-like type. This is
+    // necessary only because we eagerly create State::value (see the note on
+    // that symbol for details). If we instead had only the input value as a
+    // member then the default constructors would work fine.
+    //
+    // For example, when R is std::string and U is std::string_view, value is a
+    // reference to the string backed by input_value. The copy constructor would
+    // copy both, so that we wind up with a new input_value object (with the
+    // same contents) and a reference to the *old* input_value object rather
+    // than the new one.
+    struct State {
+      explicit State(const R& input_value_in)
+          : input_value(input_value_in),
+            // Make an implicit conversion to Result before initializing the U
+            // object we store, avoiding calling any explicit constructor of U
+            // from R.
+            //
+            // This simulates the language rules: a function with return type U
+            // that does `return R()` requires R to be implicitly convertible to
+            // U, and uses that path for the conversion, even U Result has an
+            // explicit constructor from R.
+            //
+            // We provide non-const access to input_value to the conversion
+            // code. It's not clear whether this makes semantic sense -- what
+            // would it mean for the conversion to modify the input value? This
+            // appears to be an accident of history:
+            //
+            // 1.  Before the first public commit the input value was simply an
+            //     object of type R embedded directly in the Impl object. The
+            //     result value wasn't yet eagerly created, and the Impl class's
+            //     Perform method was const, so the implicit conversion when it
+            //     returned the value was from const R&.
+            //
+            // 2.  Google changelist 6490411 changed ActionInterface::Perform to
+            //     be non-const, citing the fact that an action can have side
+            //     effects and be stateful. Impl::Perform was updated like all
+            //     other actions, probably without consideration of the fact
+            //     that side effects and statefulness don't make sense for
+            //     Return. From this point on the conversion had non-const
+            //     access to the input value.
+            //
+            value(ImplicitCast_<U>(input_value)) {}
 
-    Impl(const Impl&) = delete;
-    Impl& operator=(const Impl&) = delete;
+      // A copy of the value originally provided by the user. We retain this in
+      // addition to the value of the mock function's result type below in case
+      // the latter is a reference-like type. See the std::string_view example
+      // in the documentation on Return.
+      R input_value;
+
+      // The value we actually return, as the type returned by the mock function
+      // itself.
+      //
+      // We eagerly initialize this here, rather than lazily doing the implicit
+      // conversion automatically each time Perform is called, for historical
+      // reasons: in 2009-11, commit a070cbd91c (Google changelist 13540126)
+      // made the Action<U()> conversion operator eagerly convert the R value to
+      // U, but without keeping the R alive. This broke the use case discussed
+      // in the documentation for Return, making reference-like types such as
+      // std::string_view not safe to use as U where the input type R is a
+      // value-like type such as std::string.
+      //
+      // The example the commit gave was not very clear, nor was the issue
+      // thread (https://github.com/google/googlemock/issues/86), but it seems
+      // the worry was about reference-like input types R that flatten to a
+      // value-like type U when being implicitly converted. An example of this
+      // is std::vector<bool>::reference, which is often a proxy type with an
+      // reference to the underlying vector:
+      //
+      //     // Helper method: have the mock function return bools according
+      //     // to the supplied script.
+      //     void SetActions(MockFunction<bool(size_t)>& mock,
+      //                     const std::vector<bool>& script) {
+      //       for (size_t i = 0; i < script.size(); ++i) {
+      //         EXPECT_CALL(mock, Call(i)).WillOnce(Return(script[i]));
+      //       }
+      //     }
+      //
+      //     TEST(Foo, Bar) {
+      //       // Set actions using a temporary vector, whose operator[]
+      //       // returns proxy objects that references that will be
+      //       // dangling once the call to SetActions finishes and the
+      //       // vector is destroyed.
+      //       MockFunction<bool(size_t)> mock;
+      //       SetActions(mock, {false, true});
+      //
+      //       EXPECT_FALSE(mock.AsStdFunction()(0));
+      //       EXPECT_TRUE(mock.AsStdFunction()(1));
+      //     }
+      //
+      // This eager conversion helps with a simple case like this, but doesn't
+      // fully make these types work in general. For example the following still
+      // uses a dangling reference:
+      //
+      //     TEST(Foo, Baz) {
+      //       MockFunction<std::vector<std::string>()> mock;
+      //
+      //       // Return the same vector twice, and then the empty vector
+      //       // thereafter.
+      //       auto action = Return(std::initializer_list<std::string>{
+      //           "taco", "burrito",
+      //       });
+      //
+      //       EXPECT_CALL(mock, Call)
+      //           .WillOnce(action)
+      //           .WillOnce(action)
+      //           .WillRepeatedly(Return(std::vector<std::string>{}));
+      //
+      //       EXPECT_THAT(mock.AsStdFunction()(),
+      //                   ElementsAre("taco", "burrito"));
+      //       EXPECT_THAT(mock.AsStdFunction()(),
+      //                   ElementsAre("taco", "burrito"));
+      //       EXPECT_THAT(mock.AsStdFunction()(), IsEmpty());
+      //     }
+      //
+      U value;
+    };
+
+    const std::shared_ptr<State> state_;
   };
 
   R value_;
@@ -1693,9 +1755,29 @@ internal::WithArgsAction<typename std::decay<InnerAction>::type> WithoutArgs(
   return {std::forward<InnerAction>(action)};
 }
 
-// Creates an action that returns 'value'.  'value' is passed by value
-// instead of const reference - otherwise Return("string literal")
-// will trigger a compiler error about using array as initializer.
+// Creates an action that returns a value.
+//
+// R must be copy-constructible. The returned type can be used as an
+// Action<U(Args...)> for any type U where all of the following are true:
+//
+//  *  U is not void.
+//  *  U is not a reference type. (Use ReturnRef instead.)
+//  *  U is copy-constructible.
+//  *  R& is convertible to U.
+//
+// The Action<U(Args)...> object contains the R value from which the U return
+// value is constructed (a copy of the argument to Return). This means that the
+// R value will survive at least until the mock object's expectations are
+// cleared or the mock object is destroyed, meaning that U can be a
+// reference-like type such as std::string_view:
+//
+//     // The mock function returns a view of a copy of the string fed to
+//     // Return. The view is valid even after the action is performed.
+//     MockFunction<std::string_view()> mock;
+//     EXPECT_CALL(mock, Call).WillOnce(Return(std::string("taco")));
+//     const std::string_view result = mock.AsStdFunction()();
+//     EXPECT_EQ("taco", result);
+//
 template <typename R>
 internal::ReturnAction<R> Return(R value) {
   return internal::ReturnAction<R>(std::move(value));

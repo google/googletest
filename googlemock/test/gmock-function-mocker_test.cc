@@ -27,6 +27,12 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+// Silence C4503 (decorated name length exceeded) for MSVC.
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4503)
+#endif
+
 // Google Mock - a framework for writing C++ mock classes.
 //
 // This file tests the function mocker classes.

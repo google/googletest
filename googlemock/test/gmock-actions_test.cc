@@ -51,6 +51,7 @@
 #include <memory>
 #include <string>
 #include <type_traits>
+#include <vector>
 
 #include "gmock/gmock.h"
 #include "gmock/internal/gmock-port.h"
@@ -647,24 +648,34 @@ TEST(ReturnTest, AcceptsStringLiteral) {
   EXPECT_EQ("world", a2.Perform(std::make_tuple()));
 }
 
-// Test struct which wraps a vector of integers. Used in
-// 'SupportsWrapperReturnType' test.
-struct IntegerVectorWrapper {
-  std::vector<int>* v;
-  IntegerVectorWrapper(std::vector<int>& _v) : v(&_v) {}  // NOLINT
-};
+// Return(x) should work fine when the mock function's return type is a
+// reference-like wrapper for decltype(x), as when x is a std::string and the
+// mock function returns std::string_view.
+TEST(ReturnTest, SupportsReferenceLikeReturnType) {
+  // A reference wrapper for std::vector<int>, implicitly convertible from it.
+  struct Result {
+    std::vector<int>* v;
+    Result(std::vector<int>& v) : v(&v) {}  // NOLINT
+  };
 
-// Tests that Return() works when return type is a wrapper type.
-TEST(ReturnTest, SupportsWrapperReturnType) {
-  // Initialize vector of integers.
-  std::vector<int> v;
-  for (int i = 0; i < 5; ++i) v.push_back(i);
+  // Set up an action for a mock function that returns the reference wrapper
+  // type, initializing it with an actual vector.
+  //
+  // The returned wrapper should be initialized with a copy of that vector
+  // that's embedded within the action itself (which should stay alive as long
+  // as the mock object is alive), rather than e.g. a reference to the temporary
+  // we feed to Return. This should work fine both for WillOnce and
+  // WillRepeatedly.
+  MockFunction<Result()> mock;
+  EXPECT_CALL(mock, Call)
+      .WillOnce(Return(std::vector<int>{17, 19, 23}))
+      .WillRepeatedly(Return(std::vector<int>{29, 31, 37}));
 
-  // Return() called with 'v' as argument. The Action will return the same data
-  // as 'v' (copy) but it will be wrapped in an IntegerVectorWrapper.
-  Action<IntegerVectorWrapper()> a = Return(v);
-  const std::vector<int>& result = *(a.Perform(std::make_tuple()).v);
-  EXPECT_THAT(result, ::testing::ElementsAre(0, 1, 2, 3, 4));
+  EXPECT_THAT(mock.AsStdFunction()(),
+              Field(&Result::v, Pointee(ElementsAre(17, 19, 23))));
+
+  EXPECT_THAT(mock.AsStdFunction()(),
+              Field(&Result::v, Pointee(ElementsAre(29, 31, 37))));
 }
 
 TEST(ReturnTest, PrefersConversionOperator) {
