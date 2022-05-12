@@ -654,8 +654,8 @@ TEST(ReturnTest, AcceptsStringLiteral) {
 TEST(ReturnTest, SupportsReferenceLikeReturnType) {
   // A reference wrapper for std::vector<int>, implicitly convertible from it.
   struct Result {
-    std::vector<int>* v;
-    Result(std::vector<int>& v) : v(&v) {}  // NOLINT
+    const std::vector<int>* v;
+    Result(const std::vector<int>& v) : v(&v) {}  // NOLINT
   };
 
   // Set up an action for a mock function that returns the reference wrapper
@@ -709,6 +709,56 @@ TEST(ReturnTest, PrefersConversionOperator) {
   EXPECT_THAT(mock.AsStdFunction()(), Field(&Out::x, 19));
 }
 
+// Return(x) should not be usable with a mock function result type that's
+// implicitly convertible from decltype(x) but requires a non-const lvalue
+// reference to the input. It doesn't make sense for the conversion operator to
+// modify the input.
+TEST(ReturnTest, ConversionRequiresMutableLvalueReference) {
+  // Set up a type that is implicitly convertible from std::string&, but not
+  // std::string&& or `const std::string&`.
+  //
+  // Avoid asserting about conversion from std::string on MSVC, which seems to
+  // implement std::is_convertible incorrectly in this case.
+  struct S {
+    S(std::string&) {}  // NOLINT
+  };
+
+  static_assert(std::is_convertible<std::string&, S>::value, "");
+#ifndef _MSC_VER
+  static_assert(!std::is_convertible<std::string&&, S>::value, "");
+#endif
+  static_assert(!std::is_convertible<const std::string&, S>::value, "");
+
+  // It shouldn't be possible to use the result of Return(std::string) in a
+  // context where an S is needed.
+  using RA = decltype(Return(std::string()));
+
+  static_assert(!std::is_convertible<RA, Action<S()>>::value, "");
+  static_assert(!std::is_convertible<RA, OnceAction<S()>>::value, "");
+}
+
+// Return(x) should not be usable with a mock function result type that's
+// implicitly convertible from decltype(x) but requires an rvalue reference to
+// the input. We don't yet support handing over the value for consumption.
+TEST(ReturnTest, ConversionRequiresRvalueReference) {
+  // Set up a type that is implicitly convertible from std::string&& and
+  // `const std::string&&`, but not `const std::string&`.
+  struct S {
+    S(std::string&&) {}        // NOLINT
+    S(const std::string&&) {}  // NOLINT
+  };
+
+  static_assert(std::is_convertible<std::string, S>::value, "");
+  static_assert(!std::is_convertible<const std::string&, S>::value, "");
+
+  // It shouldn't be possible to use the result of Return(std::string) in a
+  // context where an S is needed.
+  using RA = decltype(Return(std::string()));
+
+  static_assert(!std::is_convertible<RA, Action<S()>>::value, "");
+  static_assert(!std::is_convertible<RA, OnceAction<S()>>::value, "");
+}
+
 // Tests that Return(v) is covaraint.
 
 struct Base {
@@ -758,19 +808,6 @@ TEST(ReturnTest, ConvertsArgumentWhenConverted) {
   action.Perform(std::tuple<>());
   EXPECT_FALSE(converted) << "Action must NOT convert its argument "
                           << "when performed.";
-}
-
-class DestinationType {};
-
-class SourceType {
- public:
-  // Note: a non-const typecast operator.
-  operator DestinationType() { return DestinationType(); }
-};
-
-TEST(ReturnTest, CanConvertArgumentUsingNonConstTypeCastOperator) {
-  SourceType s;
-  Action<DestinationType()> action(Return(s));
 }
 
 // Tests that ReturnNull() returns NULL in a pointer-returning function.

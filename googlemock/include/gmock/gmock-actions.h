@@ -322,6 +322,12 @@ struct is_callable_r_impl<void_t<call_result_t<F, Args...>>, R, F, Args...>
 template <typename R, typename F, typename... Args>
 using is_callable_r = is_callable_r_impl<void, R, F, Args...>;
 
+// Like std::as_const from C++17.
+template <typename T>
+typename std::add_const<T>::type& as_const(T& t) {
+  return t;
+}
+
 }  // namespace internal
 
 // Specialized for function types below.
@@ -872,17 +878,14 @@ class ReturnAction final {
  public:
   explicit ReturnAction(R value) : value_(std::move(value)) {}
 
-  // Support conversion to function types with compatible return types. See the
-  // documentation on Return for the definition of compatible.
-  template <typename U, typename... Args>
+  template <typename U, typename... Args,
+            typename = typename std::enable_if<conjunction<
+                // See the requirements documented on Return.
+                negation<std::is_same<void, U>>,   //
+                negation<std::is_reference<U>>,    //
+                std::is_convertible<const R&, U>,  //
+                std::is_copy_constructible<U>>::value>::type>
   operator Action<U(Args...)>() const {  // NOLINT
-    // Check our requirements on the return type.
-    static_assert(!std::is_reference<U>::value,
-                  "use ReturnRef instead of Return to return a reference");
-
-    static_assert(!std::is_void<U>::value,
-                  "Can't use Return() on an action expected to return `void`.");
-
     return Impl<U>(value_);
   }
 
@@ -918,27 +921,7 @@ class ReturnAction final {
             // that does `return R()` requires R to be implicitly convertible to
             // U, and uses that path for the conversion, even U Result has an
             // explicit constructor from R.
-            //
-            // We provide non-const access to input_value to the conversion
-            // code. It's not clear whether this makes semantic sense -- what
-            // would it mean for the conversion to modify the input value? This
-            // appears to be an accident of history:
-            //
-            // 1.  Before the first public commit the input value was simply an
-            //     object of type R embedded directly in the Impl object. The
-            //     result value wasn't yet eagerly created, and the Impl class's
-            //     Perform method was const, so the implicit conversion when it
-            //     returned the value was from const R&.
-            //
-            // 2.  Google changelist 6490411 changed ActionInterface::Perform to
-            //     be non-const, citing the fact that an action can have side
-            //     effects and be stateful. Impl::Perform was updated like all
-            //     other actions, probably without consideration of the fact
-            //     that side effects and statefulness don't make sense for
-            //     Return. From this point on the conversion had non-const
-            //     access to the input value.
-            //
-            value(ImplicitCast_<U>(input_value)) {}
+            value(ImplicitCast_<U>(internal::as_const(input_value))) {}
 
       // A copy of the value originally provided by the user. We retain this in
       // addition to the value of the mock function's result type below in case
@@ -1763,7 +1746,7 @@ internal::WithArgsAction<typename std::decay<InnerAction>::type> WithoutArgs(
 //  *  U is not void.
 //  *  U is not a reference type. (Use ReturnRef instead.)
 //  *  U is copy-constructible.
-//  *  R& is convertible to U.
+//  *  const R& is convertible to U.
 //
 // The Action<U(Args)...> object contains the R value from which the U return
 // value is constructed (a copy of the argument to Return). This means that the
