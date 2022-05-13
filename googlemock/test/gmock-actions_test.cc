@@ -47,6 +47,7 @@
 #include "gmock/gmock-actions.h"
 
 #include <algorithm>
+#include <functional>
 #include <iterator>
 #include <memory>
 #include <string>
@@ -709,6 +710,24 @@ TEST(ReturnTest, PrefersConversionOperator) {
   EXPECT_THAT(mock.AsStdFunction()(), Field(&Out::x, 19));
 }
 
+// It should be possible to use Return(R) with a mock function result type U
+// that is convertible from const R& but *not* R (such as
+// std::reference_wrapper). This should work for both WillOnce and
+// WillRepeatedly.
+TEST(ReturnTest, ConversionRequiresConstLvalueReference) {
+  using R = int;
+  using U = std::reference_wrapper<const int>;
+
+  static_assert(std::is_convertible<const R&, U>::value, "");
+  static_assert(!std::is_convertible<R, U>::value, "");
+
+  MockFunction<U()> mock;
+  EXPECT_CALL(mock, Call).WillOnce(Return(17)).WillRepeatedly(Return(19));
+
+  EXPECT_EQ(17, mock.AsStdFunction()());
+  EXPECT_EQ(19, mock.AsStdFunction()());
+}
+
 // Return(x) should not be usable with a mock function result type that's
 // implicitly convertible from decltype(x) but requires a non-const lvalue
 // reference to the input. It doesn't make sense for the conversion operator to
@@ -731,32 +750,33 @@ TEST(ReturnTest, ConversionRequiresMutableLvalueReference) {
 
   // It shouldn't be possible to use the result of Return(std::string) in a
   // context where an S is needed.
+  //
+  // Here too we disable the assertion for MSVC, since its incorrect
+  // implementation of is_convertible causes our SFINAE to be wrong.
   using RA = decltype(Return(std::string()));
 
   static_assert(!std::is_convertible<RA, Action<S()>>::value, "");
+#ifndef _MSC_VER
   static_assert(!std::is_convertible<RA, OnceAction<S()>>::value, "");
+#endif
 }
 
-// Return(x) should not be usable with a mock function result type that's
-// implicitly convertible from decltype(x) but requires an rvalue reference to
-// the input. We don't yet support handing over the value for consumption.
-TEST(ReturnTest, ConversionRequiresRvalueReference) {
-  // Set up a type that is implicitly convertible from std::string&& and
-  // `const std::string&&`, but not `const std::string&`.
-  struct S {
-    S(std::string&&) {}        // NOLINT
-    S(const std::string&&) {}  // NOLINT
-  };
+TEST(ReturnTest, MoveOnlyResultType) {
+  // Return should support move-only result types when used with WillOnce.
+  {
+    MockFunction<std::unique_ptr<int>()> mock;
+    EXPECT_CALL(mock, Call)
+        // NOLINTNEXTLINE
+        .WillOnce(Return(std::unique_ptr<int>(new int(17))));
 
-  static_assert(std::is_convertible<std::string, S>::value, "");
-  static_assert(!std::is_convertible<const std::string&, S>::value, "");
+    EXPECT_THAT(mock.AsStdFunction()(), Pointee(17));
+  }
 
-  // It shouldn't be possible to use the result of Return(std::string) in a
-  // context where an S is needed.
-  using RA = decltype(Return(std::string()));
-
-  static_assert(!std::is_convertible<RA, Action<S()>>::value, "");
-  static_assert(!std::is_convertible<RA, OnceAction<S()>>::value, "");
+  // The result of Return should not be convertible to Action (so it can't be
+  // used with WillRepeatedly).
+  static_assert(!std::is_convertible<decltype(Return(std::unique_ptr<int>())),
+                                     Action<std::unique_ptr<int>()>>::value,
+                "");
 }
 
 // Tests that Return(v) is covaraint.

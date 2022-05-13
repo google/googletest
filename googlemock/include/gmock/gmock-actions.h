@@ -881,6 +881,17 @@ class ReturnAction final {
   template <typename U, typename... Args,
             typename = typename std::enable_if<conjunction<
                 // See the requirements documented on Return.
+                negation<std::is_same<void, U>>,  //
+                negation<std::is_reference<U>>,   //
+                std::is_convertible<R, U>,        //
+                std::is_move_constructible<U>>::value>::type>
+  operator OnceAction<U(Args...)>() && {  // NOLINT
+    return Impl<U>(std::move(value_));
+  }
+
+  template <typename U, typename... Args,
+            typename = typename std::enable_if<conjunction<
+                // See the requirements documented on Return.
                 negation<std::is_same<void, U>>,   //
                 negation<std::is_reference<U>>,    //
                 std::is_convertible<const R&, U>,  //
@@ -894,9 +905,17 @@ class ReturnAction final {
   template <typename U>
   class Impl final {
    public:
+    // The constructor used when the return value is allowed to move from the
+    // input value (i.e. we are converting to OnceAction).
+    explicit Impl(R&& input_value)
+        : state_(new State(std::move(input_value))) {}
+
+    // The constructor used when the return value is not allowed to move from
+    // the input value (i.e. we are converting to Action).
     explicit Impl(const R& input_value) : state_(new State(input_value)) {}
 
-    U operator()() const { return state_->value; }
+    U operator()() && { return std::move(state_->value); }
+    U operator()() const& { return state_->value; }
 
    private:
     // We put our state on the heap so that the compiler-generated copy/move
@@ -922,6 +941,18 @@ class ReturnAction final {
             // U, and uses that path for the conversion, even U Result has an
             // explicit constructor from R.
             value(ImplicitCast_<U>(internal::as_const(input_value))) {}
+
+      // As above, but for the case where we're moving from the ReturnAction
+      // object because it's being used as a OnceAction.
+      explicit State(R&& input_value_in)
+          : input_value(std::move(input_value_in)),
+            // For the same reason as above we make an implicit conversion to U
+            // before initializing the value.
+            //
+            // Unlike above we provide the input value as an rvalue to the
+            // implicit conversion because this is a OnceAction: it's fine if it
+            // wants to consume the input value.
+            value(ImplicitCast_<U>(std::move(input_value))) {}
 
       // A copy of the value originally provided by the user. We retain this in
       // addition to the value of the mock function's result type below in case
@@ -1740,18 +1771,19 @@ internal::WithArgsAction<typename std::decay<InnerAction>::type> WithoutArgs(
 
 // Creates an action that returns a value.
 //
-// R must be copy-constructible. The returned type can be used as an
-// Action<U(Args...)> for any type U where all of the following are true:
+// The returned type can be used with a mock function returning a non-void,
+// non-reference type U as follows:
 //
-//  *  U is not void.
-//  *  U is not a reference type. (Use ReturnRef instead.)
-//  *  U is copy-constructible.
-//  *  const R& is convertible to U.
+//  *  If R is convertible to U and U is move-constructible, then the action can
+//     be used with WillOnce.
 //
-// The Action<U(Args)...> object contains the R value from which the U return
-// value is constructed (a copy of the argument to Return). This means that the
-// R value will survive at least until the mock object's expectations are
-// cleared or the mock object is destroyed, meaning that U can be a
+//  *  If const R& is convertible to U and U is copy-constructible, then the
+//     action can be used with both WillOnce and WillRepeatedly.
+//
+// The mock expectation contains the R value from which the U return value is
+// constructed (a move/copy of the argument to Return). This means that the R
+// value will survive at least until the mock object's expectations are cleared
+// or the mock object is destroyed, meaning that U can safely be a
 // reference-like type such as std::string_view:
 //
 //     // The mock function returns a view of a copy of the string fed to
@@ -1794,6 +1826,8 @@ inline internal::ReturnRefOfCopyAction<R> ReturnRefOfCopy(const R& x) {
   return internal::ReturnRefOfCopyAction<R>(x);
 }
 
+// DEPRECATED: use Return(x) directly with WillOnce.
+//
 // Modifies the parent action (a Return() action) to perform a move of the
 // argument instead of a copy.
 // Return(ByMove()) actions can only be executed once and will assert this
