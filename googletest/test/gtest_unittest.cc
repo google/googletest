@@ -272,6 +272,10 @@ using testing::internal::GetCapturedStdout;
 using testing::internal::ThreadWithParam;
 #endif
 
+#if GTEST_INTERNAL_HAS_STRING_VIEW
+using testing::internal::StringView;
+#endif
+
 class TestingVector : public std::vector<int> {};
 
 ::std::ostream& operator<<(::std::ostream& os, const TestingVector& vector) {
@@ -2525,6 +2529,17 @@ TEST(StringAssertionTest, ASSERT_STRCASENE) {
   ASSERT_STRCASENE("Hi", "");
   EXPECT_FATAL_FAILURE(ASSERT_STRCASENE("Hi", "hi"), "(ignoring case)");
 }
+
+#if GTEST_INTERNAL_HAS_STRING_VIEW
+// Tests correct mapping to the C-String functions
+TEST(StringAssertionTest, StringView) {
+  ASSERT_STREQ(StringView("hi"), StringView("hi"));
+  ASSERT_STREQ(StringView("hi"), "hi");
+  ASSERT_STRNE("hi", StringView("hi2"));
+  ASSERT_STRCASEEQ(StringView("hi"), "Hi");
+  ASSERT_STRCASENE("hi1", StringView("Hi2"));
+}
+#endif  // GTEST_INTERNAL_HAS_STRING_VIEW
 
 // Tests *_STREQ on wide strings.
 TEST(StringAssertionTest, STREQ_Wide) {

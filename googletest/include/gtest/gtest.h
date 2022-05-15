@@ -1487,6 +1487,36 @@ GTEST_API_ AssertionResult CmpHelperSTRNE(const char* s1_expression,
                                           const char* s2_expression,
                                           const wchar_t* s1, const wchar_t* s2);
 
+#if GTEST_INTERNAL_HAS_STRING_VIEW
+GTEST_ATTRIBUTE_UNUSED_ static inline AssertionResult CmpHelperSTREQ(
+    const char* s1_expression, const char* s2_expression,
+    const internal::StringView& s1, const internal::StringView& s2) {
+  return CmpHelperSTREQ(s1_expression, s2_expression, std::string(s1).c_str(),
+                        std::string(s2).c_str());
+}
+
+GTEST_ATTRIBUTE_UNUSED_ static inline AssertionResult CmpHelperSTRCASEEQ(
+    const char* s1_expression, const char* s2_expression,
+    const internal::StringView& s1, const internal::StringView& s2) {
+  return CmpHelperSTRCASEEQ(s1_expression, s2_expression,
+                            std::string(s1).c_str(), std::string(s2).c_str());
+}
+
+GTEST_ATTRIBUTE_UNUSED_ static inline AssertionResult CmpHelperSTRNE(
+    const char* s1_expression, const char* s2_expression,
+    const internal::StringView& s1, const internal::StringView& s2) {
+  return CmpHelperSTRNE(s1_expression, s2_expression, std::string(s1).c_str(),
+                        std::string(s2).c_str());
+}
+
+GTEST_ATTRIBUTE_UNUSED_ static inline AssertionResult CmpHelperSTRCASENE(
+    const char* s1_expression, const char* s2_expression,
+    const internal::StringView& s1, const internal::StringView& s2) {
+  return CmpHelperSTRCASENE(s1_expression, s2_expression,
+                            std::string(s1).c_str(), std::string(s2).c_str());
+}
+#endif  // GTEST_INTERNAL_HAS_STRING_VIEW
+
 }  // namespace internal
 
 // IsSubstring() and IsNotSubstring() are intended to be used as the
