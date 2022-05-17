@@ -234,7 +234,7 @@ bool Base64Unescape(const std::string& encoded, std::string* decoded) {
       return false;
     }
     if (bit_pos == 0) {
-      dst |= src_bin << 2;
+      dst |= static_cast<char>(src_bin << 2);
       bit_pos = 6;
     } else {
       dst |= static_cast<char>(src_bin >> (bit_pos - 2));
