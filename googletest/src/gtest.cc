@@ -5129,22 +5129,9 @@ void TestEventListeners::SuppressEventForwarding() {
 // Gets the singleton UnitTest object.  The first time this method is
 // called, a UnitTest object is constructed and returned.  Consecutive
 // calls will return the same object.
-//
-// We don't protect this under mutex_ as a user is not supposed to
-// call this before main() starts, from which point on the return
-// value will never change.
-UnitTest* UnitTest::GetInstance() {
-  // CodeGear C++Builder insists on a public destructor for the
-  // default implementation.  Use this implementation to keep good OO
-  // design with private destructor.
-
-#if defined(__BORLANDC__)
-  static UnitTest* const instance = new UnitTest;
+std::unique_ptr<UnitTest>& UnitTest::GetInstance() {
+  static std::unique_ptr<UnitTest> instance{ new UnitTest };
   return instance;
-#else
-  static UnitTest instance;
-  return &instance;
-#endif  // defined(__BORLANDC__)
 }
 
 // Gets the number of successful test suites.
@@ -6250,7 +6237,7 @@ void UnitTestImpl::UnshuffleTests() {
 // GetCurrentOsStackTraceExceptTop(..., 1), Foo() will be included in
 // the trace but Bar() and GetCurrentOsStackTraceExceptTop() won't.
 GTEST_NO_INLINE_ GTEST_NO_TAIL_CALL_ std::string
-GetCurrentOsStackTraceExceptTop(UnitTest* /*unit_test*/, int skip_count) {
+GetCurrentOsStackTraceExceptTop(int skip_count) {
   // We pass skip_count + 1 to skip this wrapper function in addition
   // to what the user really wants to skip.
   return GetUnitTestImpl()->CurrentOsStackTraceExceptTop(skip_count + 1);
