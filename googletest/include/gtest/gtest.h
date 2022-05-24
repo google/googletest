@@ -1517,6 +1517,22 @@ GTEST_ATTRIBUTE_UNUSED_ static inline AssertionResult CmpHelperSTRCASENE(
 }
 #endif  // GTEST_INTERNAL_HAS_STRING_VIEW
 
+#if __cpp_lib_string_view >= 201803L
+GTEST_ATTRIBUTE_UNUSED_ static inline AssertionResult CmpHelperSTREQ(
+    const char* s1_expression, const char* s2_expression,
+    const std::wstring_view& s1, const std::wstring_view& s2) {
+  return CmpHelperSTREQ(s1_expression, s2_expression, std::wstring(s1).c_str(),
+                        std::wstring(s2).c_str());
+}
+
+GTEST_ATTRIBUTE_UNUSED_ static inline AssertionResult CmpHelperSTRNE(
+    const char* s1_expression, const char* s2_expression,
+    const std::wstring_view& s1, const std::wstring_view& s2) {
+  return CmpHelperSTRNE(s1_expression, s2_expression, std::wstring(s1).c_str(),
+                        std::wstring(s2).c_str());
+}
+#endif
+
 }  // namespace internal
 
 // IsSubstring() and IsNotSubstring() are intended to be used as the

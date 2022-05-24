@@ -2597,6 +2597,16 @@ TEST(StringAssertionTest, STRNE_Wide) {
   ASSERT_STRNE(L"abc\x8119", L"abc\x8120") << "This shouldn't happen";
 }
 
+#if __cpp_lib_string_view >= 201803L
+// Tests correct mapping to the C-String functions
+TEST(StringAssertionTest, StringView_Wide) {
+  using std::wstring_view;
+  ASSERT_STREQ(wstring_view(L"hi"), wstring_view(L"hi"));
+  ASSERT_STREQ(wstring_view(L"hi"), L"hi");
+  ASSERT_STRNE(L"hi", wstring_view(L"hi2"));
+}
+#endif
+
 // Tests for ::testing::IsSubstring().
 
 // Tests that IsSubstring() returns the correct result when the input
