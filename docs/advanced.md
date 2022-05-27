@@ -1313,6 +1313,7 @@ First, define a fixture class template, as we did with typed tests:
 ```c++
 template <typename T>
 class FooTest : public testing::Test {
+  void DoSomethingInteresting();
   ...
 };
 ```
@@ -1330,6 +1331,9 @@ this as many times as you want:
 TYPED_TEST_P(FooTest, DoesBlah) {
   // Inside a test, refer to TypeParam to get the type parameter.
   TypeParam n = 0;
+
+  // You will need to use `this` explicitly to refer to fixture members.
+  this->DoSomethingInteresting()
   ...
 }
 
