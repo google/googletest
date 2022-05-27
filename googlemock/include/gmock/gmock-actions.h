@@ -298,6 +298,53 @@ struct disjunction<P1, Ps...>
 template <typename...>
 using void_t = void;
 
+// Detects whether an expression of type `From` can be implicitly converted to
+// `To` according to [conv]. In C++17, [conv]/3 defines this as follows:
+//
+//     An expression e can be implicitly converted to a type T if and only if
+//     the declaration T t=e; is well-formed, for some invented temporary
+//     variable t ([dcl.init]).
+//
+// [conv]/2 implies we can use function argument passing to detect whether this
+// initialization is valid.
+//
+// Note that this is distinct from is_convertible, which requires this be valid:
+//
+//     To test() {
+//       return declval<From>();
+//     }
+//
+// In particular, is_convertible doesn't give the correct answer when `To` and
+// `From` are the same non-moveable type since `declval<From>` will be an rvalue
+// reference, defeating the guaranteed copy elision that would otherwise make
+// this function work.
+//
+// REQUIRES: `From` is not cv void.
+template <typename From, typename To>
+struct is_implicitly_convertible {
+ private:
+  // A function that accepts a parameter of type T. This can be called with type
+  // U successfully only if U is implicitly convertible to T.
+  template <typename T>
+  static void Accept(T);
+
+  // A function that creates a value of type T.
+  template <typename T>
+  static T Make();
+
+  // An overload be selected when implicit conversion from T to To is possible.
+  template <typename T, typename = decltype(Accept<To>(Make<T>()))>
+  static std::true_type TestImplicitConversion(int);
+
+  // A fallback overload selected in all other cases.
+  template <typename T>
+  static std::false_type TestImplicitConversion(...);
+
+ public:
+  using type = decltype(TestImplicitConversion<From>(0));
+  static constexpr bool value = type::value;
+};
+
 // Like std::invoke_result_t from C++17, but works only for objects with call
 // operators (not e.g. member function pointers, which we don't need specific
 // support for in OnceAction because std::function deals with them).
@@ -313,9 +360,9 @@ struct is_callable_r_impl : std::false_type {};
 template <typename R, typename F, typename... Args>
 struct is_callable_r_impl<void_t<call_result_t<F, Args...>>, R, F, Args...>
     : std::conditional<
-          std::is_same<R, void>::value,  //
-          std::true_type,                //
-          std::is_convertible<call_result_t<F, Args...>, R>>::type {};
+          std::is_void<R>::value,  //
+          std::true_type,          //
+          is_implicitly_convertible<call_result_t<F, Args...>, R>>::type {};
 
 // Like std::is_invocable_r from C++17, but works only for objects with call
 // operators. See the note on call_result_t.
