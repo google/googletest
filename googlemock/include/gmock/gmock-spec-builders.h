@@ -1709,7 +1709,8 @@ class FunctionMocker<R(Args...)> final : public UntypedFunctionMockerBase {
                 internal::negation<can_print_result<T>>::value, int>::type = 0>
   R PerformActionAndPrintResult(const void* const untyped_action,
                                 ArgumentTuple&& args,
-                                const std::string& call_description) {
+                                const std::string& call_description,
+                                std::ostream& /* os */) {
     return PerformAction(untyped_action, std::move(args), call_description);
   }
 
