@@ -1956,68 +1956,96 @@ namespace posix {
 
 #if GTEST_OS_WINDOWS
 
+#define GTEST_STATSTRUCT_ 1
 typedef struct _stat StatStruct;
 
 #ifdef __BORLANDC__
-inline int DoIsATTY(int fd) { return isatty(fd); }
+#define GTEST_STRCASECMP_ 1
 inline int StrCaseCmp(const char* s1, const char* s2) {
   return stricmp(s1, s2);
 }
-inline char* StrDup(const char* src) { return strdup(src); }
 #else  // !__BORLANDC__
 #if GTEST_OS_WINDOWS_MOBILE
+#define GTEST_DOISATTY_ 1
 inline int DoIsATTY(int /* fd */) { return 0; }
 #else
+#define GTEST_DOISATTY_ 1
 inline int DoIsATTY(int fd) { return _isatty(fd); }
 #endif  // GTEST_OS_WINDOWS_MOBILE
+#define GTEST_STRCASECMP_ 1
 inline int StrCaseCmp(const char* s1, const char* s2) {
   return _stricmp(s1, s2);
 }
+#define GTEST_STRDUP_ 1
 inline char* StrDup(const char* src) { return _strdup(src); }
 #endif  // __BORLANDC__
 
 #if GTEST_OS_WINDOWS_MOBILE
-inline int FileNo(FILE* file) { return reinterpret_cast<int>(_fileno(file)); }
+#define GTEST_FILENO_ 1
+inline int FileNo(FILE* file) {
+  return reinterpret_cast<int>(_fileno(file));
+}
 // Stat(), RmDir(), and IsDir() are not needed on Windows CE at this
 // time and thus not defined there.
+#define GTEST_STAT_ 1
+#define GTEST_RMDIR_ 1
+#define GTEST_ISDIR_ 1
 #else
+#define GTEST_FILENO_ 1
 inline int FileNo(FILE* file) { return _fileno(file); }
+#define GTEST_STAT_ 1
 inline int Stat(const char* path, StatStruct* buf) { return _stat(path, buf); }
+#define GTEST_RMDIR_ 1
 inline int RmDir(const char* dir) { return _rmdir(dir); }
+#define GTEST_ISDIR_ 1
 inline bool IsDir(const StatStruct& st) { return (_S_IFDIR & st.st_mode) != 0; }
 #endif  // GTEST_OS_WINDOWS_MOBILE
 
 #elif GTEST_OS_ESP8266
+#define GTEST_STATSTRUCT_ 1
 typedef struct stat StatStruct;
 
-inline int FileNo(FILE* file) { return fileno(file); }
-inline int DoIsATTY(int fd) { return isatty(fd); }
+#define GTEST_STAT_ 1
 inline int Stat(const char* path, StatStruct* buf) {
   // stat function not implemented on ESP8266
   return 0;
 }
-inline int StrCaseCmp(const char* s1, const char* s2) {
-  return strcasecmp(s1, s2);
-}
-inline char* StrDup(const char* src) { return strdup(src); }
-inline int RmDir(const char* dir) { return rmdir(dir); }
-inline bool IsDir(const StatStruct& st) { return S_ISDIR(st.st_mode); }
-
-#else
-
-typedef struct stat StatStruct;
-
-inline int FileNo(FILE* file) { return fileno(file); }
-inline int DoIsATTY(int fd) { return isatty(fd); }
-inline int Stat(const char* path, StatStruct* buf) { return stat(path, buf); }
-inline int StrCaseCmp(const char* s1, const char* s2) {
-  return strcasecmp(s1, s2);
-}
-inline char* StrDup(const char* src) { return strdup(src); }
-inline int RmDir(const char* dir) { return rmdir(dir); }
-inline bool IsDir(const StatStruct& st) { return S_ISDIR(st.st_mode); }
-
 #endif  // GTEST_OS_WINDOWS
+
+#ifndef GTEST_FILENO_
+inline int FileNo(FILE* file) { return fileno(file); }
+#endif // GTEST_FILENO_
+
+#ifndef GTEST_STATSTRUCT_
+typedef struct stat StatStruct;
+#endif  // GTEST_STATSTRUCT_
+
+#ifndef GTEST_STAT_
+inline int Stat(const char* path, StatStruct* buf) { return stat(path, buf); }
+#endif // GTEST_STAT_
+
+#ifndef GTEST_STRDUP_
+inline char* StrDup(const char* src) { return strdup(src); }
+#endif // GTEST_STRDUP_
+
+#ifndef GTEST_RMDIR_
+inline int RmDir(const char* dir) { return rmdir(dir); }
+#endif // GTEST_RMDIR_
+
+#ifndef GTEST_ISDIR_
+inline bool IsDir(const StatStruct& st) { return S_ISDIR(st.st_mode); }
+#endif // GTEST_ISDIR_
+
+#ifndef GTEST_STRCASECMP_
+inline int StrCaseCmp(const char* s1, const char* s2) {
+  return strcasecmp(s1, s2);
+}
+#endif // GTEST_STRCASECMP_
+
+#ifndef GTEST_DOISATTY_
+inline int DoIsATTY(int fd) { return isatty(fd); }
+#endif  // GTEST_DOISATTY_
+
 
 inline int IsATTY(int fd) {
   // DoIsATTY might change errno (for example ENOTTY in case you redirect stdout
@@ -2034,14 +2062,32 @@ inline int IsATTY(int fd) {
 
 GTEST_DISABLE_MSC_DEPRECATED_PUSH_()
 
+#if GTEST_OS_WINDOWS_MOBILE || GTEST_OS_WINDOWS_PHONE || \
+    GTEST_OS_WINDOWS_RT || GTEST_OS_ESP8266 || GTEST_OS_XTENSA
 // ChDir(), FReopen(), FDOpen(), Read(), Write(), Close(), and
 // StrError() aren't needed on Windows CE at this time and thus not
 // defined there.
+#define GTEST_CHDIR_ 1
+#define GTEST_FREOPEN_ 1
+#define GTEST_FDOPEN_ 1
+#define GTEST_READ_ 1
+#define GTEST_WRITE_ 1
+#define GTEST_CLOSE_
+#define GTEST_STRERROR_ 1
 
-#if !GTEST_OS_WINDOWS_MOBILE && !GTEST_OS_WINDOWS_PHONE && \
-    !GTEST_OS_WINDOWS_RT && !GTEST_OS_ESP8266 && !GTEST_OS_XTENSA
-inline int ChDir(const char* dir) { return chdir(dir); }
+#define GTEST_GETENV_ 1
+inline const char* GetEnv(const char* name) {
+  // We are on an embedded platform, which has no environment variables.
+  static_cast<void>(name);  // To prevent 'unused argument' warning.
+  return nullptr;
+}
 #endif
+
+#ifndef GTEST_CHDIR_
+inline int ChDir(const char* dir) { return chdir(dir); }
+#endif // GTEST_CHDIR_
+
+#ifndef GTEST_FOPEN_
 inline FILE* FOpen(const char* path, const char* mode) {
 #if GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_MINGW
   struct wchar_codecvt : public std::codecvt<wchar_t, char, std::mbstate_t> {};
@@ -2053,30 +2099,45 @@ inline FILE* FOpen(const char* path, const char* mode) {
   return fopen(path, mode);
 #endif  // GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_MINGW
 }
-#if !GTEST_OS_WINDOWS_MOBILE
+#endif // GTEST_FOPEN_
+
+#ifndef GTEST_FREOPEN_
 inline FILE* FReopen(const char* path, const char* mode, FILE* stream) {
   return freopen(path, mode, stream);
 }
+#endif // GTEST_FREOPEN_
+
+#ifndef GTEST_FDOPEN_
 inline FILE* FDOpen(int fd, const char* mode) { return fdopen(fd, mode); }
-#endif
+#endif // GTEST_FDOPEN_
+
+#ifndef GTEST_FCLOSE_
 inline int FClose(FILE* fp) { return fclose(fp); }
-#if !GTEST_OS_WINDOWS_MOBILE
+#endif // GTEST_FCLOSE_
+
+#ifndef GTEST_READ_
 inline int Read(int fd, void* buf, unsigned int count) {
   return static_cast<int>(read(fd, buf, count));
 }
+#endif // GTEST_READ_
+
+#ifndef GTEST_WRITE_
 inline int Write(int fd, const void* buf, unsigned int count) {
   return static_cast<int>(write(fd, buf, count));
 }
+#endif // GTEST_WRITE_
+
+#ifndef GTEST_CLOSE_
 inline int Close(int fd) { return close(fd); }
+#endif // GTEST_CLOSE_
+
+#ifndef GTEST_STRERROR_
 inline const char* StrError(int errnum) { return strerror(errnum); }
-#endif
+#endif // GTEST_STRERROR_
+
+#ifndef GTEST_GETENV_
 inline const char* GetEnv(const char* name) {
-#if GTEST_OS_WINDOWS_MOBILE || GTEST_OS_WINDOWS_PHONE || \
-    GTEST_OS_WINDOWS_RT || GTEST_OS_ESP8266 || GTEST_OS_XTENSA
-  // We are on an embedded platform, which has no environment variables.
-  static_cast<void>(name);  // To prevent 'unused argument' warning.
-  return nullptr;
-#elif defined(__BORLANDC__) || defined(__SunOS_5_8) || defined(__SunOS_5_9)
+#if defined(__BORLANDC__) || defined(__SunOS_5_8) || defined(__SunOS_5_9)
   // Environment variables which we programmatically clear will be set to the
   // empty string rather than unset (NULL).  Handle that case.
   const char* const env = getenv(name);
@@ -2085,9 +2146,12 @@ inline const char* GetEnv(const char* name) {
   return getenv(name);
 #endif
 }
+#endif // GTEST_GETENV_
+
 
 GTEST_DISABLE_MSC_DEPRECATED_POP_()
 
+#ifndef GTEST_ABORT_
 #if GTEST_OS_WINDOWS_MOBILE
 // Windows CE has no C library. The abort() function is used in
 // several places in Google Test. This implementation provides a reasonable
@@ -2096,6 +2160,7 @@ GTEST_DISABLE_MSC_DEPRECATED_POP_()
 #else
 [[noreturn]] inline void Abort() { abort(); }
 #endif  // GTEST_OS_WINDOWS_MOBILE
+#endif // GTEST_ABORT_
 
 }  // namespace posix
 
