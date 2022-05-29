@@ -32,7 +32,7 @@
 #include "gtest/gtest.h"
 
 #if GTEST_OS_ESP8266 || GTEST_OS_ESP32
-// Aduino-like platforms: program entry points are setup/loop instead of main.
+// Arduino-like platforms: program entry points are setup/loop instead of main.
 
 #if GTEST_OS_ESP8266
 extern "C" {
