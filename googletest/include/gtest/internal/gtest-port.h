@@ -123,9 +123,9 @@
 //   GTEST_OS_HAIKU    - Haiku
 //   GTEST_OS_HPUX     - HP-UX
 //   GTEST_OS_LINUX    - Linux
-//     GTEST_OS_LINUX_ANDROID - Google Android
+//   GTEST_OS_LINUX_ANDROID - Google Android
 //   GTEST_OS_MAC      - Mac OS X
-//     GTEST_OS_IOS    - iOS
+//   GTEST_OS_IOS      - iOS
 //   GTEST_OS_NACL     - Google Native Client (NaCl)
 //   GTEST_OS_NETBSD   - NetBSD
 //   GTEST_OS_OPENBSD  - OpenBSD
@@ -133,11 +133,11 @@
 //   GTEST_OS_QNX      - QNX
 //   GTEST_OS_SOLARIS  - Sun Solaris
 //   GTEST_OS_WINDOWS  - Windows (Desktop, MinGW, or Mobile)
-//     GTEST_OS_WINDOWS_DESKTOP  - Windows Desktop
-//     GTEST_OS_WINDOWS_MINGW    - MinGW
-//     GTEST_OS_WINDOWS_MOBILE   - Windows Mobile
-//     GTEST_OS_WINDOWS_PHONE    - Windows Phone
-//     GTEST_OS_WINDOWS_RT       - Windows Store App/WinRT
+//   GTEST_OS_WINDOWS_DESKTOP  - Windows Desktop
+//   GTEST_OS_WINDOWS_MINGW    - MinGW
+//   GTEST_OS_WINDOWS_MOBILE   - Windows Mobile
+//   GTEST_OS_WINDOWS_PHONE    - Windows Phone
+//   GTEST_OS_WINDOWS_RT       - Windows Store App/WinRT
 //   GTEST_OS_ZOS      - z/OS
 //
 // Among the platforms, Cygwin, Linux, Mac OS X, and Windows have the
@@ -2404,5 +2404,36 @@ using Variant = ::std::variant<T...>;
 #endif  // __has_include(<variant>) && __cplusplus >= 201703L
 #endif  // __has_include
 #endif  // GTEST_HAS_ABSL
+
+
+
+
+#include <stdarg.h>
+namespace testing {
+namespace internal {
+
+#ifndef GTEST_VPRINTF_
+inline int gtest_vprintf(char const* const str, va_list args) {
+  return vprintf(str, args);
+}
+#endif  // GTEST_VPRINTF_
+
+#ifndef GTEST_PRINTF_
+GTEST_ATTRIBUTE_PRINTF_(1, 2)
+inline int gtest_printf(char const* const str, ...) {
+  va_list arg;
+  va_start(arg, str);
+  int result = gtest_vprintf(str, arg);
+  va_end(arg);
+  return result;
+}
+#endif  // #ifndef GTEST_PRINTF_
+
+#ifndef GTEST_FLUSH_STDOUT_
+inline int gtest_flush_stdout() { return fflush(stdout); }
+#endif  // GTEST_FLUSH_STDOUT_
+
+}  // namespace internal
+}  // namespace testing
 
 #endif  // GOOGLETEST_INCLUDE_GTEST_INTERNAL_GTEST_PORT_H_

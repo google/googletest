@@ -1293,8 +1293,8 @@ bool ParseInt32(const Message& src_text, const char* str, int32_t* value) {
     msg << "WARNING: " << src_text
         << " is expected to be a 32-bit integer, but actually"
         << " has value \"" << str << "\".\n";
-    printf("%s", msg.GetString().c_str());
-    fflush(stdout);
+    gtest_printf("%s", msg.GetString().c_str());
+    gtest_flush_stdout();
     return false;
   }
 
@@ -1310,8 +1310,8 @@ bool ParseInt32(const Message& src_text, const char* str, int32_t* value) {
     msg << "WARNING: " << src_text
         << " is expected to be a 32-bit integer, but actually"
         << " has value " << str << ", which overflows.\n";
-    printf("%s", msg.GetString().c_str());
-    fflush(stdout);
+    gtest_printf("%s", msg.GetString().c_str());
+    gtest_flush_stdout();
     return false;
   }
 
@@ -1351,9 +1351,9 @@ int32_t Int32FromGTestEnv(const char* flag, int32_t default_value) {
   int32_t result = default_value;
   if (!ParseInt32(Message() << "Environment variable " << env_var, string_value,
                   &result)) {
-    printf("The default value %s is used.\n",
+    gtest_printf("The default value %s is used.\n",
            (Message() << default_value).GetString().c_str());
-    fflush(stdout);
+    gtest_flush_stdout();
     return default_value;
   }
 
