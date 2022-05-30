@@ -1879,11 +1879,27 @@ GTEST_API_ size_t GetThreadCount();
 
 #if GTEST_OS_WINDOWS
 #define GTEST_PATH_SEP_ "\\"
-#define GTEST_HAS_ALT_PATH_SEP_ 1
+#define GTEST_PATH_SEPCHAR_ '\\'
+// On Windows, '\\' is the standard path separator, but many tools and the
+// Windows API also accept '/' as an alternate path separator. Unless otherwise
+// noted, a file path can contain either kind of path separators, or a mixture
+// of them.
+#define GTEST_PATH_SEP_ALT_ "/"
+#define GTEST_PATH_SEPCHAR_ALT_ '/'
+#if GTEST_OS_WINDOWS_MOBILE
+// Windows CE doesn't have a current directory. You should not use
+// the current directory in tests on Windows CE, but this at least
+// provides a reasonable fallback.
+#define GTEST_PATH_CWD_ "\\"
+#else
+#define GTEST_PATH_CWD_ ".\\"
+#endif  // GTEST_OS_WINDOWS_MOBILE
 #else
 #define GTEST_PATH_SEP_ "/"
-#define GTEST_HAS_ALT_PATH_SEP_ 0
+#define GTEST_PATH_SEPCHAR_ '/'
+#define GTEST_PATH_CWD_ "./"
 #endif  // GTEST_OS_WINDOWS
+
 
 // Utilities for char.
 
@@ -2404,5 +2420,46 @@ using Variant = ::std::variant<T...>;
 #endif  // __has_include(<variant>) && __cplusplus >= 201703L
 #endif  // __has_include
 #endif  // GTEST_HAS_ABSL
+
+#ifndef GTEST_PATH_MAX_
+#if GTEST_OS_WINDOWS
+#define GTEST_PATH_MAX_ _MAX_PATH
+#elif defined(PATH_MAX)
+#define GTEST_PATH_MAX_ PATH_MAX
+#elif defined(_XOPEN_PATH_MAX)
+#define GTEST_PATH_MAX_ _XOPEN_PATH_MAX
+#else
+#define GTEST_PATH_MAX_ _POSIX_PATH_MAX
+#endif  // GTEST_OS_WINDOWS
+#endif  // GTEST_PATH_MAX_
+
+#ifndef GTEST_INTERNAL_GETCWD_
+inline char* GetCwd(char* dstBuf, int sizeInBytes) {
+#if GTEST_OS_WINDOWS_MOBILE || GTEST_OS_WINDOWS_PHONE ||         \
+    GTEST_OS_WINDOWS_RT || GTEST_OS_ESP8266 || GTEST_OS_ESP32 || \
+    GTEST_OS_XTENSA
+  // These platforms do not have a current directory, so we just return
+  // something reasonable
+  strncpy_s(dstBuf, sizeInBytes, GTEST_PATH_CWD_, _TRUNCATE);
+  return dstBuf;
+#elif GTEST_OS_WINDOWS
+  return _getcwd(dstBuf, sizeInBytes);
+#else
+  char* result = getcwd(dstBuf, sizeInBytes);
+#if GTEST_OS_NACL
+  // getcwd will likely fail in NaCl due to the sandbox, so return something
+  // reasonable. The user may have provided a shim implementation for getcwd,
+  // however, so fallback only when failure is detected.
+  if (*result == nullptr) {
+    strncpy(dstBuf, GTEST_PATH_CWD_, sizeInBytes);
+    dstBuf[sizeInBytes] = '\0';
+    result = dstBuf;
+  }
+  return result;
+#endif  // GTEST_OS_NACL
+  return result;
+#endif  // GTEST_OS_WINDOWS_MOBILE
+}
+#endif  // GTEST_INTERNAL_GETCWD_
 
 #endif  // GOOGLETEST_INCLUDE_GTEST_INTERNAL_GTEST_PORT_H_

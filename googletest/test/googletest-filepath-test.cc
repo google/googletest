@@ -142,7 +142,7 @@ TEST(RemoveDirectoryNameTest, ShouldAlsoGiveFileName) {
                 .string());
 }
 
-#if GTEST_HAS_ALT_PATH_SEP_
+#ifdef GTEST_PATH_SEP_ALT_
 
 // Tests that RemoveDirectoryName() works with the alternate separator
 // on Windows.
@@ -206,7 +206,7 @@ TEST(RemoveFileNameTest, GivesRootDir) {
             FilePath(GTEST_PATH_SEP_ "afile").RemoveFileName().string());
 }
 
-#if GTEST_HAS_ALT_PATH_SEP_
+#ifdef GTEST_PATH_SEP_ALT_
 
 // Tests that RemoveFileName() works with the alternate separator on
 // Windows.
@@ -334,7 +334,7 @@ TEST(RemoveTrailingPathSeparatorTest, ShouldRemoveTrailingSeparator) {
   EXPECT_EQ(
       "foo",
       FilePath("foo" GTEST_PATH_SEP_).RemoveTrailingPathSeparator().string());
-#if GTEST_HAS_ALT_PATH_SEP_
+#ifdef GTEST_PATH_SEP_ALT_
   EXPECT_EQ("foo", FilePath("foo/").RemoveTrailingPathSeparator().string());
 #endif
 }
@@ -438,7 +438,7 @@ TEST(NormalizeTest, MultipleConsecutiveSeparatorsAtStringEnd) {
       FilePath("foo" GTEST_PATH_SEP_ GTEST_PATH_SEP_ GTEST_PATH_SEP_).string());
 }
 
-#if GTEST_HAS_ALT_PATH_SEP_
+#ifdef GTEST_PATH_SEP_ALT_
 
 // Tests that separators at the end of the string are normalized
 // regardless of their combination (e.g. "foo\" =="foo/\" ==
@@ -605,7 +605,7 @@ TEST(FilePathTest, RemoveExtensionWhenThereIsNoExtension) {
 TEST(FilePathTest, IsDirectory) {
   EXPECT_FALSE(FilePath("cola").IsDirectory());
   EXPECT_TRUE(FilePath("koala" GTEST_PATH_SEP_).IsDirectory());
-#if GTEST_HAS_ALT_PATH_SEP_
+#ifdef GTEST_PATH_SEP_ALT_
   EXPECT_TRUE(FilePath("koala/").IsDirectory());
 #endif
 }
