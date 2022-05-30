@@ -71,7 +71,9 @@
 #include <unistd.h>    // NOLINT
 
 #include <string>
-
+#if GTEST_OS_LINUX_ANDROID
+#include <android/log.h> // for __android_log_print
+#endif
 #elif GTEST_OS_ZOS
 #include <sys/time.h>  // NOLINT
 
@@ -3159,6 +3161,8 @@ static void PrintTestPartResult(const TestPartResult& test_part_result) {
   // want the same message printed twice.
   ::OutputDebugStringA(result.c_str());
   ::OutputDebugStringA("\n");
+#elif GTEST_OS_LINUX_ANDROID
+  __android_log_print(ANDROID_LOG_DEBUG, "GTEST", "%s", result.c_str());
 #endif
 }
 
