@@ -2434,30 +2434,21 @@ using Variant = ::std::variant<T...>;
 #endif  // GTEST_PATH_MAX_
 
 #ifndef GTEST_INTERNAL_GETCWD_
-inline char* GetCwd(char* dstBuf, int sizeInBytes) {
+inline std::string GetCwd() {
 #if GTEST_OS_WINDOWS_MOBILE || GTEST_OS_WINDOWS_PHONE ||         \
     GTEST_OS_WINDOWS_RT || GTEST_OS_ESP8266 || GTEST_OS_ESP32 || \
     GTEST_OS_XTENSA
   // These platforms do not have a current directory, so we just return
   // something reasonable
-  strncpy_s(dstBuf, sizeInBytes, GTEST_PATH_CWD_, _TRUNCATE);
-  return dstBuf;
+  return GTEST_PATH_CWD_;
 #elif GTEST_OS_WINDOWS
-  return _getcwd(dstBuf, sizeInBytes);
+  char cwd[GTEST_PATH_MAX_ + 1] = {'\0'};
+  char* result = _getcwd(cwd, sizeof(cwd));
+  return result == nullptr ? GTEST_PATH_CWD_ : result;
 #else
-  char* result = getcwd(dstBuf, sizeInBytes);
-#if GTEST_OS_NACL
-  // getcwd will likely fail in NaCl due to the sandbox, so return something
-  // reasonable. The user may have provided a shim implementation for getcwd,
-  // however, so fallback only when failure is detected.
-  if (*result == nullptr) {
-    strncpy(dstBuf, GTEST_PATH_CWD_, sizeInBytes);
-    dstBuf[sizeInBytes] = '\0';
-    result = dstBuf;
-  }
-  return result;
-#endif  // GTEST_OS_NACL
-  return result;
+  char cwd[GTEST_PATH_MAX_ + 1] = {'\0'};
+  char* result = getcwd(cwd, sizeof(cwd));
+  return result == nullptr ? GTEST_PATH_CWD_ : result;
 #endif  // GTEST_OS_WINDOWS_MOBILE
 }
 #endif  // GTEST_INTERNAL_GETCWD_

@@ -61,9 +61,7 @@ static bool IsPathSeparator(char c) {
 
 // Returns the current working directory, or "" if unsuccessful.
 FilePath FilePath::GetCurrentDir() {
-  char cwd[GTEST_PATH_MAX_ + 1] = {'\0'};
-  char* result = GetCwd(cwd, sizeof(cwd));
-  return FilePath(result == nullptr ? "" : cwd);
+  return FilePath(GetCwd());
 }
 
 // Returns a copy of the FilePath with the case-insensitive extension removed.
