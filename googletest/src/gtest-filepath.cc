@@ -33,18 +33,6 @@
 
 #include "gtest/gtest-message.h"
 #include "gtest/internal/gtest-port.h"
-
-#if GTEST_OS_WINDOWS_MOBILE
-#include <windows.h>
-#elif GTEST_OS_WINDOWS
-#include <direct.h>
-#include <io.h>
-#else
-#include <limits.h>
-
-#include <climits>  // Some Linux distributions define PATH_MAX here.
-#endif              // GTEST_OS_WINDOWS_MOBILE
-
 #include "gtest/internal/gtest-string.h"
 
 namespace testing {

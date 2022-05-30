@@ -266,6 +266,7 @@
 #include <cstdint>
 #include <iostream>
 #include <limits>
+#include <climits>
 #include <locale>
 #include <memory>
 #include <string>
@@ -350,6 +351,12 @@
 #include <direct.h>
 #include <io.h>
 #endif
+
+#if GTEST_OS_SYMBIAN
+// Symbian OpenC has PATH_MAX in sys/syslimits.h
+#include <sys/syslimits.h>
+#endif
+
 // In order to avoid having to include <windows.h>, use forward declaration
 #if GTEST_OS_WINDOWS_MINGW && !defined(__MINGW64_VERSION_MAJOR)
 // MinGW defined _CRITICAL_SECTION and _RTL_CRITICAL_SECTION as two
