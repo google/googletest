@@ -1698,10 +1698,6 @@ class FunctionMocker<R(Args...)> final : public UntypedFunctionMockerBase {
     return std::forward<R>(result);
   }
 
-  // Disable warnings about an unused parameter (due to SFINAE choosing an
-  // overload that doesn't use it).
-  GTEST_DISABLE_MSC_WARNINGS_PUSH_(4100);
-
   // An overload for when it's not possible to print the result. In this case we
   // simply perform the action.
   template <typename T = R,
@@ -1710,11 +1706,9 @@ class FunctionMocker<R(Args...)> final : public UntypedFunctionMockerBase {
   R PerformActionAndPrintResult(const void* const untyped_action,
                                 ArgumentTuple&& args,
                                 const std::string& call_description,
-                                std::ostream& os) {
+                                std::ostream&) {
     return PerformAction(untyped_action, std::move(args), call_description);
   }
-
-  GTEST_DISABLE_MSC_WARNINGS_POP_();
 
   // Returns the result of invoking this mock function with the given
   // arguments. This function can be safely called from multiple
