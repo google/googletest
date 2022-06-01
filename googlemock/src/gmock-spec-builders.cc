@@ -41,6 +41,7 @@
 #include <memory>
 #include <set>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "gmock/gmock.h"
@@ -534,46 +535,50 @@ MockObjectRegistry g_mock_object_registry;
 
 // Maps a mock object to the reaction Google Mock should have when an
 // uninteresting method is called.  Protected by g_gmock_mutex.
-std::map<const void*, internal::CallReaction> g_uninteresting_call_reaction;
+std::unordered_map<uintptr_t, internal::CallReaction>&
+UninterestingCallReactionMap() {
+  static auto* map = new std::unordered_map<uintptr_t, internal::CallReaction>;
+  return *map;
+}
 
 // Sets the reaction Google Mock should have when an uninteresting
 // method of the given mock object is called.
-void SetReactionOnUninterestingCalls(const void* mock_obj,
+void SetReactionOnUninterestingCalls(uintptr_t mock_obj,
                                      internal::CallReaction reaction)
     GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex) {
   internal::MutexLock l(&internal::g_gmock_mutex);
-  g_uninteresting_call_reaction[mock_obj] = reaction;
+  UninterestingCallReactionMap()[mock_obj] = reaction;
 }
 
 }  // namespace
 
 // Tells Google Mock to allow uninteresting calls on the given mock
 // object.
-void Mock::AllowUninterestingCalls(const void* mock_obj)
+void Mock::AllowUninterestingCalls(uintptr_t mock_obj)
     GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex) {
   SetReactionOnUninterestingCalls(mock_obj, internal::kAllow);
 }
 
 // Tells Google Mock to warn the user about uninteresting calls on the
 // given mock object.
-void Mock::WarnUninterestingCalls(const void* mock_obj)
+void Mock::WarnUninterestingCalls(uintptr_t mock_obj)
     GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex) {
   SetReactionOnUninterestingCalls(mock_obj, internal::kWarn);
 }
 
 // Tells Google Mock to fail uninteresting calls on the given mock
 // object.
-void Mock::FailUninterestingCalls(const void* mock_obj)
+void Mock::FailUninterestingCalls(uintptr_t mock_obj)
     GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex) {
   SetReactionOnUninterestingCalls(mock_obj, internal::kFail);
 }
 
 // Tells Google Mock the given mock object is being destroyed and its
 // entry in the call-reaction table should be removed.
-void Mock::UnregisterCallReaction(const void* mock_obj)
+void Mock::UnregisterCallReaction(uintptr_t mock_obj)
     GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex) {
   internal::MutexLock l(&internal::g_gmock_mutex);
-  g_uninteresting_call_reaction.erase(mock_obj);
+  UninterestingCallReactionMap().erase(static_cast<uintptr_t>(mock_obj));
 }
 
 // Returns the reaction Google Mock will have on uninteresting calls
@@ -581,10 +586,12 @@ void Mock::UnregisterCallReaction(const void* mock_obj)
 internal::CallReaction Mock::GetReactionOnUninterestingCalls(
     const void* mock_obj) GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex) {
   internal::MutexLock l(&internal::g_gmock_mutex);
-  return (g_uninteresting_call_reaction.count(mock_obj) == 0)
+  return (UninterestingCallReactionMap().count(
+              reinterpret_cast<uintptr_t>(mock_obj)) == 0)
              ? internal::intToCallReaction(
                    GMOCK_FLAG_GET(default_mock_behavior))
-             : g_uninteresting_call_reaction[mock_obj];
+             : UninterestingCallReactionMap()[reinterpret_cast<uintptr_t>(
+                   mock_obj)];
 }
 
 // Tells Google Mock to ignore mock_obj when checking for leaked mock
