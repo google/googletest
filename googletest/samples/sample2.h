@@ -29,11 +29,10 @@
 
 // A sample program demonstrating using Google C++ testing framework.
 
-#ifndef GTEST_SAMPLES_SAMPLE2_H_
-#define GTEST_SAMPLES_SAMPLE2_H_
+#ifndef GOOGLETEST_SAMPLES_SAMPLE2_H_
+#define GOOGLETEST_SAMPLES_SAMPLE2_H_
 
 #include <string.h>
-
 
 // A simple string class.
 class MyString {
@@ -77,5 +76,4 @@ class MyString {
   void Set(const char* c_string);
 };
 
-
-#endif  // GTEST_SAMPLES_SAMPLE2_H_
+#endif  // GOOGLETEST_SAMPLES_SAMPLE2_H_

@@ -27,14 +27,12 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
-
 // This provides interface PrimeTable that determines whether a number is a
 // prime and determines a next prime number. This interface is used
 // in Google Test samples demonstrating use of parameterized tests.
 
-#ifndef GTEST_SAMPLES_PRIME_TABLES_H_
-#define GTEST_SAMPLES_PRIME_TABLES_H_
+#ifndef GOOGLETEST_SAMPLES_PRIME_TABLES_H_
+#define GOOGLETEST_SAMPLES_PRIME_TABLES_H_
 
 #include <algorithm>
 
@@ -57,7 +55,7 @@ class OnTheFlyPrimeTable : public PrimeTable {
   bool IsPrime(int n) const override {
     if (n <= 1) return false;
 
-    for (int i = 2; i*i <= n; i++) {
+    for (int i = 2; i * i <= n; i++) {
       // n is divisible by an integer other than 1 and itself.
       if ((n % i) == 0) return false;
     }
@@ -66,11 +64,11 @@ class OnTheFlyPrimeTable : public PrimeTable {
   }
 
   int GetNextPrime(int p) const override {
-    for (int n = p + 1; n > 0; n++) {
+    if (p < 0) return -1;
+
+    for (int n = p + 1;; n++) {
       if (IsPrime(n)) return n;
     }
-
-    return -1;
   }
 };
 
@@ -104,13 +102,13 @@ class PreCalculatedPrimeTable : public PrimeTable {
 
     // Checks every candidate for prime number (we know that 2 is the only even
     // prime).
-    for (int i = 2; i*i <= max; i += i%2+1) {
+    for (int i = 2; i * i <= max; i += i % 2 + 1) {
       if (!is_prime_[i]) continue;
 
       // Marks all multiples of i (except i itself) as non-prime.
       // We are starting here from i-th multiplier, because all smaller
       // complex numbers were already marked.
-      for (int j = i*i; j <= max; j += i) {
+      for (int j = i * i; j <= max; j += i) {
         is_prime_[j] = false;
       }
     }
@@ -123,4 +121,4 @@ class PreCalculatedPrimeTable : public PrimeTable {
   void operator=(const PreCalculatedPrimeTable& rhs);
 };
 
-#endif  // GTEST_SAMPLES_PRIME_TABLES_H_
+#endif  // GOOGLETEST_SAMPLES_PRIME_TABLES_H_

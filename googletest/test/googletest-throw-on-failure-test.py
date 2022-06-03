@@ -36,7 +36,7 @@ Google Test) with different environments and command line flags.
 """
 
 import os
-import gtest_test_utils
+from googletest.test import gtest_test_utils
 
 
 # Constants.

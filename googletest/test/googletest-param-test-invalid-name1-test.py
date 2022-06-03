@@ -30,7 +30,7 @@
 
 """Verifies that Google Test warns the user when not initialized properly."""
 
-import gtest_test_utils
+from googletest.test import gtest_test_utils
 
 binary_name = 'googletest-param-test-invalid-name1-test_'
 COMMAND = gtest_test_utils.GetTestExecutablePath(binary_name)

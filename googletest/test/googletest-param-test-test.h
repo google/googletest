@@ -32,20 +32,18 @@
 // This header file provides classes and functions used internally
 // for testing Google Test itself.
 
-#ifndef GTEST_TEST_GTEST_PARAM_TEST_TEST_H_
-#define GTEST_TEST_GTEST_PARAM_TEST_TEST_H_
+#ifndef GOOGLETEST_TEST_GOOGLETEST_PARAM_TEST_TEST_H_
+#define GOOGLETEST_TEST_GOOGLETEST_PARAM_TEST_TEST_H_
 
 #include "gtest/gtest.h"
 
 // Test fixture for testing definition and instantiation of a test
 // in separate translation units.
-class ExternalInstantiationTest : public ::testing::TestWithParam<int> {
-};
+class ExternalInstantiationTest : public ::testing::TestWithParam<int> {};
 
 // Test fixture for testing instantiation of a test in multiple
 // translation units.
 class InstantiationInMultipleTranslationUnitsTest
-    : public ::testing::TestWithParam<int> {
-};
+    : public ::testing::TestWithParam<int> {};
 
-#endif  // GTEST_TEST_GTEST_PARAM_TEST_TEST_H_
+#endif  // GOOGLETEST_TEST_GOOGLETEST_PARAM_TEST_TEST_H_

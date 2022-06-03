@@ -67,7 +67,6 @@ namespace {
 class QueueTestSmpl3 : public testing::Test {
  protected:  // You should make the members protected s.t. they can be
              // accessed from sub-classes.
-
   // virtual void SetUp() will be called before each test is run.  You
   // should define it if you need to initialize the variables.
   // Otherwise, this can be skipped.
@@ -85,15 +84,13 @@ class QueueTestSmpl3 : public testing::Test {
   // }
 
   // A helper function that some test uses.
-  static int Double(int n) {
-    return 2*n;
-  }
+  static int Double(int n) { return 2 * n; }
 
   // A helper function for testing Queue::Map().
-  void MapTester(const Queue<int> * q) {
+  void MapTester(const Queue<int>* q) {
     // Creates a new queue, where each element is twice as big as the
     // corresponding one in q.
-    const Queue<int> * const new_q = q->Map(Double);
+    const Queue<int>* const new_q = q->Map(Double);
 
     // Verifies that the new queue has the same size as q.
     ASSERT_EQ(q->Size(), new_q->Size());
@@ -124,7 +121,7 @@ TEST_F(QueueTestSmpl3, DefaultConstructor) {
 
 // Tests Dequeue().
 TEST_F(QueueTestSmpl3, Dequeue) {
-  int * n = q0_.Dequeue();
+  int* n = q0_.Dequeue();
   EXPECT_TRUE(n == nullptr);
 
   n = q1_.Dequeue();

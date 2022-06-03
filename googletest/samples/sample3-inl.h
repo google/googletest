@@ -29,11 +29,10 @@
 
 // A sample program demonstrating using Google C++ testing framework.
 
-#ifndef GTEST_SAMPLES_SAMPLE3_INL_H_
-#define GTEST_SAMPLES_SAMPLE3_INL_H_
+#ifndef GOOGLETEST_SAMPLES_SAMPLE3_INL_H_
+#define GOOGLETEST_SAMPLES_SAMPLE3_INL_H_
 
 #include <stddef.h>
-
 
 // Queue is a simple queue implemented as a singled-linked list.
 //
@@ -62,7 +61,7 @@ class QueueNode {
       : element_(an_element), next_(nullptr) {}
 
   // We disable the default assignment operator and copy c'tor.
-  const QueueNode& operator = (const QueueNode&);
+  const QueueNode& operator=(const QueueNode&);
   QueueNode(const QueueNode&);
 
   E element_;
@@ -84,7 +83,7 @@ class Queue {
       // 1. Deletes every node.
       QueueNode<E>* node = head_;
       QueueNode<E>* next = node->next();
-      for (; ;) {
+      for (;;) {
         delete node;
         node = next;
         if (node == nullptr) break;
@@ -162,11 +161,11 @@ class Queue {
  private:
   QueueNode<E>* head_;  // The first node of the queue.
   QueueNode<E>* last_;  // The last node of the queue.
-  size_t size_;  // The number of elements in the queue.
+  size_t size_;         // The number of elements in the queue.
 
   // We disallow copying a queue.
   Queue(const Queue&);
-  const Queue& operator = (const Queue&);
+  const Queue& operator=(const Queue&);
 };
 
-#endif  // GTEST_SAMPLES_SAMPLE3_INL_H_
+#endif  // GOOGLETEST_SAMPLES_SAMPLE3_INL_H_

@@ -27,7 +27,6 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
 // Unit test for Google Test test filters.
 //
 // A user can specify which test(s) in a Google Test program to run via
@@ -43,87 +42,57 @@ namespace {
 
 // Test case FooTest.
 
-class FooTest : public testing::Test {
-};
+class FooTest : public testing::Test {};
 
-TEST_F(FooTest, Abc) {
-}
+TEST_F(FooTest, Abc) {}
 
-TEST_F(FooTest, Xyz) {
-  FAIL() << "Expected failure.";
-}
+TEST_F(FooTest, Xyz) { FAIL() << "Expected failure."; }
 
 // Test case BarTest.
 
-TEST(BarTest, TestOne) {
-}
+TEST(BarTest, TestOne) {}
 
-TEST(BarTest, TestTwo) {
-}
+TEST(BarTest, TestTwo) {}
 
-TEST(BarTest, TestThree) {
-}
+TEST(BarTest, TestThree) {}
 
-TEST(BarTest, DISABLED_TestFour) {
-  FAIL() << "Expected failure.";
-}
+TEST(BarTest, DISABLED_TestFour) { FAIL() << "Expected failure."; }
 
-TEST(BarTest, DISABLED_TestFive) {
-  FAIL() << "Expected failure.";
-}
+TEST(BarTest, DISABLED_TestFive) { FAIL() << "Expected failure."; }
 
 // Test case BazTest.
 
-TEST(BazTest, TestOne) {
-  FAIL() << "Expected failure.";
-}
+TEST(BazTest, TestOne) { FAIL() << "Expected failure."; }
 
-TEST(BazTest, TestA) {
-}
+TEST(BazTest, TestA) {}
 
-TEST(BazTest, TestB) {
-}
+TEST(BazTest, TestB) {}
 
-TEST(BazTest, DISABLED_TestC) {
-  FAIL() << "Expected failure.";
-}
+TEST(BazTest, DISABLED_TestC) { FAIL() << "Expected failure."; }
 
 // Test case HasDeathTest
 
-TEST(HasDeathTest, Test1) {
-  EXPECT_DEATH_IF_SUPPORTED(exit(1), ".*");
-}
+TEST(HasDeathTest, Test1) { EXPECT_DEATH_IF_SUPPORTED(exit(1), ".*"); }
 
 // We need at least two death tests to make sure that the all death tests
 // aren't on the first shard.
-TEST(HasDeathTest, Test2) {
-  EXPECT_DEATH_IF_SUPPORTED(exit(1), ".*");
-}
+TEST(HasDeathTest, Test2) { EXPECT_DEATH_IF_SUPPORTED(exit(1), ".*"); }
 
 // Test case FoobarTest
 
-TEST(DISABLED_FoobarTest, Test1) {
-  FAIL() << "Expected failure.";
-}
+TEST(DISABLED_FoobarTest, Test1) { FAIL() << "Expected failure."; }
 
-TEST(DISABLED_FoobarTest, DISABLED_Test2) {
-  FAIL() << "Expected failure.";
-}
+TEST(DISABLED_FoobarTest, DISABLED_Test2) { FAIL() << "Expected failure."; }
 
 // Test case FoobarbazTest
 
-TEST(DISABLED_FoobarbazTest, TestA) {
-  FAIL() << "Expected failure.";
-}
+TEST(DISABLED_FoobarbazTest, TestA) { FAIL() << "Expected failure."; }
 
-class ParamTest : public testing::TestWithParam<int> {
-};
+class ParamTest : public testing::TestWithParam<int> {};
 
-TEST_P(ParamTest, TestX) {
-}
+TEST_P(ParamTest, TestX) {}
 
-TEST_P(ParamTest, TestY) {
-}
+TEST_P(ParamTest, TestY) {}
 
 INSTANTIATE_TEST_SUITE_P(SeqP, ParamTest, testing::Values(1, 2));
 INSTANTIATE_TEST_SUITE_P(SeqQ, ParamTest, testing::Values(5, 6));

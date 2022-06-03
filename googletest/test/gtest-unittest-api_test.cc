@@ -32,10 +32,11 @@
 // This file contains tests verifying correctness of data provided via
 // UnitTest's public methods.
 
-#include "gtest/gtest.h"
-
 #include <string.h>  // For strcmp.
+
 #include <algorithm>
+
+#include "gtest/gtest.h"
 
 using ::testing::InitGoogleTest;
 
@@ -55,14 +56,13 @@ class UnitTestHelper {
   // name.  The caller is responsible for deleting the array.
   static TestSuite const** GetSortedTestSuites() {
     UnitTest& unit_test = *UnitTest::GetInstance();
-    auto const** const test_suites =
-        new const TestSuite*[unit_test.total_test_suite_count()];
+    auto const** const test_suites = new const TestSuite*[static_cast<size_t>(
+        unit_test.total_test_suite_count())];
 
     for (int i = 0; i < unit_test.total_test_suite_count(); ++i)
       test_suites[i] = unit_test.GetTestSuite(i);
 
-    std::sort(test_suites,
-              test_suites + unit_test.total_test_suite_count(),
+    std::sort(test_suites, test_suites + unit_test.total_test_suite_count(),
               LessByName<TestSuite>());
     return test_suites;
   }
@@ -73,8 +73,7 @@ class UnitTestHelper {
     UnitTest& unit_test = *UnitTest::GetInstance();
     for (int i = 0; i < unit_test.total_test_suite_count(); ++i) {
       const TestSuite* test_suite = unit_test.GetTestSuite(i);
-      if (0 == strcmp(test_suite->name(), name))
-        return test_suite;
+      if (0 == strcmp(test_suite->name(), name)) return test_suite;
     }
     return nullptr;
   }
@@ -83,8 +82,8 @@ class UnitTestHelper {
   // sorted by the test name.  The caller is responsible for deleting the
   // array.
   static TestInfo const** GetSortedTests(const TestSuite* test_suite) {
-    TestInfo const** const tests =
-        new const TestInfo*[test_suite->total_test_count()];
+    TestInfo const** const tests = new const TestInfo*[static_cast<size_t>(
+        test_suite->total_test_count())];
 
     for (int i = 0; i < test_suite->total_test_count(); ++i)
       tests[i] = test_suite->GetTestInfo(i);
@@ -95,17 +94,13 @@ class UnitTestHelper {
   }
 };
 
-#if GTEST_HAS_TYPED_TEST
-template <typename T> class TestSuiteWithCommentTest : public Test {};
+template <typename T>
+class TestSuiteWithCommentTest : public Test {};
 TYPED_TEST_SUITE(TestSuiteWithCommentTest, Types<int>);
 TYPED_TEST(TestSuiteWithCommentTest, Dummy) {}
 
 const int kTypedTestSuites = 1;
 const int kTypedTests = 1;
-#else
-const int kTypedTestSuites = 0;
-const int kTypedTests = 0;
-#endif  // GTEST_HAS_TYPED_TEST
 
 // We can only test the accessors that do not change value while tests run.
 // Since tests can be run in any order, the values the accessors that track
@@ -123,9 +118,7 @@ TEST(ApiTest, UnitTestImmutableAccessorsWork) {
 
   EXPECT_STREQ("ApiTest", test_suites[0]->name());
   EXPECT_STREQ("DISABLED_Test", test_suites[1]->name());
-#if GTEST_HAS_TYPED_TEST
   EXPECT_STREQ("TestSuiteWithCommentTest/0", test_suites[2]->name());
-#endif  // GTEST_HAS_TYPED_TEST
 
   delete[] test_suites;
 
@@ -183,7 +176,6 @@ TEST(ApiTest, TestSuiteImmutableAccessorsWork) {
   delete[] tests;
   tests = nullptr;
 
-#if GTEST_HAS_TYPED_TEST
   test_suite = UnitTestHelper::FindTestSuite("TestSuiteWithCommentTest/0");
   ASSERT_TRUE(test_suite != nullptr);
 
@@ -203,7 +195,6 @@ TEST(ApiTest, TestSuiteImmutableAccessorsWork) {
   EXPECT_TRUE(tests[0]->should_run());
 
   delete[] tests;
-#endif  // GTEST_HAS_TYPED_TEST
 }
 
 TEST(ApiTest, TestSuiteDisabledAccessorsWork) {
@@ -263,7 +254,6 @@ class FinalSuccessChecker : public Environment {
     EXPECT_EQ(0, test_suites[1]->successful_test_count());
     EXPECT_EQ(0, test_suites[1]->failed_test_count());
 
-#if GTEST_HAS_TYPED_TEST
     EXPECT_STREQ("TestSuiteWithCommentTest/0", test_suites[2]->name());
     EXPECT_STREQ(GetTypeName<Types<int>>().c_str(),
                  test_suites[2]->type_param());
@@ -274,7 +264,6 @@ class FinalSuccessChecker : public Environment {
     EXPECT_EQ(0, test_suites[2]->failed_test_count());
     EXPECT_TRUE(test_suites[2]->Passed());
     EXPECT_FALSE(test_suites[2]->Failed());
-#endif  // GTEST_HAS_TYPED_TEST
 
     const TestSuite* test_suite = UnitTestHelper::FindTestSuite("ApiTest");
     const TestInfo** tests = UnitTestHelper::GetSortedTests(test_suite);
@@ -311,7 +300,6 @@ class FinalSuccessChecker : public Environment {
 
     delete[] tests;
 
-#if GTEST_HAS_TYPED_TEST
     test_suite = UnitTestHelper::FindTestSuite("TestSuiteWithCommentTest/0");
     tests = UnitTestHelper::GetSortedTests(test_suite);
 
@@ -324,7 +312,6 @@ class FinalSuccessChecker : public Environment {
     EXPECT_EQ(0, tests[0]->result()->test_property_count());
 
     delete[] tests;
-#endif  // GTEST_HAS_TYPED_TEST
     delete[] test_suites;
   }
 };
@@ -332,7 +319,7 @@ class FinalSuccessChecker : public Environment {
 }  // namespace internal
 }  // namespace testing
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
   InitGoogleTest(&argc, argv);
 
   AddGlobalTestEnvironment(new testing::internal::FinalSuccessChecker());

@@ -32,8 +32,8 @@
 
 import json
 import os
-import gtest_json_test_utils
-import gtest_test_utils
+from googletest.test import gtest_json_test_utils
+from googletest.test import gtest_test_utils
 
 GTEST_OUTPUT_SUBDIR = 'json_outfiles'
 GTEST_OUTPUT_1_TEST = 'gtest_xml_outfile1_test_'
@@ -71,6 +71,8 @@ EXPECTED_1 = {
             u'*',
         u'testsuite': [{
             u'name': u'TestSomeProperties',
+            u'file': u'gtest_xml_outfile1_test_.cc',
+            u'line': 41,
             u'status': u'RUN',
             u'result': u'COMPLETED',
             u'time': u'*',
@@ -115,6 +117,8 @@ EXPECTED_2 = {
             u'*',
         u'testsuite': [{
             u'name': u'TestSomeProperties',
+            u'file': u'gtest_xml_outfile2_test_.cc',
+            u'line': 41,
             u'status': u'RUN',
             u'result': u'COMPLETED',
             u'timestamp': u'*',

@@ -21,14 +21,14 @@ accept your pull requests.
 
 ## Are you a Googler?
 
-If you are a Googler, please make an attempt to submit an internal change rather
-than a GitHub Pull Request. If you are not able to submit an internal change a
+If you are a Googler, please make an attempt to submit an internal contribution
+rather than a GitHub Pull Request. If you are not able to submit internally, a
 PR is acceptable as an alternative.
 
 ## Contributing A Patch
 
 1.  Submit an issue describing your proposed change to the
-    [issue tracker](https://github.com/google/googletest).
+    [issue tracker](https://github.com/google/googletest/issues).
 2.  Please don't mix more than one logical change per submittal, because it
     makes the history hard to follow. If you want to make a change that doesn't
     have a corresponding issue in the issue tracker, please create one.
@@ -36,7 +36,8 @@ PR is acceptable as an alternative.
     This ensures that work isn't being duplicated and communicating your plan
     early also generally leads to better patches.
 4.  If your proposed change is accepted, and you haven't already done so, sign a
-    Contributor License Agreement (see details above).
+    Contributor License Agreement
+    ([see details above](#contributor-license-agreements)).
 5.  Fork the desired repo, develop and test your code changes.
 6.  Ensure that your code adheres to the existing style in the sample to which
     you are contributing.
@@ -89,7 +90,7 @@ and their own tests from a git checkout, which has further requirements:
 
 *   [Python](https://www.python.org/) v2.3 or newer (for running some of the
     tests and re-generating certain source files from templates)
-*   [CMake](https://cmake.org/) v2.6.4 or newer
+*   [CMake](https://cmake.org/) v2.8.12 or newer
 
 ## Developing Google Test and Google Mock
 
@@ -128,15 +129,3 @@ To run the tests, do
     make test
 
 All tests should pass.
-
-### Regenerating Source Files
-
-Some of Google Test's source files are generated from templates (not in the C++
-sense) using a script. For example, the file
-*googlemock/include/gmock/gmock-generated-actions.h.pump* is used to generate
-*gmock-generated-actions.h* in the same directory.
-
-You don't need to worry about regenerating the source files unless you need to
-modify them. You would then modify the corresponding `.pump` files and run the
-'[pump.py](googlemock/scripts/pump.py)' generator script. See the
-[Pump Manual](googlemock/docs/pump_manual.md).

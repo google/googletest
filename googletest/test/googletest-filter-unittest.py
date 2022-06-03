@@ -47,7 +47,7 @@ try:
 except ImportError:
   pass
 import sys
-import gtest_test_utils
+from googletest.test import gtest_test_utils
 
 # Constants.
 
@@ -112,6 +112,9 @@ TEST_CASE_REGEX = re.compile(r'^\[\-+\] \d+ tests? from (\w+(/\w+)?)')
 
 # Regex for parsing test names from Google Test's output.
 TEST_REGEX = re.compile(r'^\[\s*RUN\s*\].*\.(\w+(/\w+)?)')
+
+# Regex for parsing disabled banner from Google Test's output
+DISABLED_BANNER_REGEX = re.compile(r'^\[\s*DISABLED\s*\] (.*)')
 
 # The command line flag to tell Google Test to output the list of tests it
 # will run.
@@ -204,6 +207,17 @@ def RunAndExtractTestList(args = None):
         test = match.group(1)
         tests_run.append(test_case + '.' + test)
   return (tests_run, p.exit_code)
+
+
+def RunAndExtractDisabledBannerList(args=None):
+  """Runs the test program and returns tests that printed a disabled banner."""
+  p = gtest_test_utils.Subprocess([COMMAND] + (args or []), env=environ)
+  banners_printed = []
+  for line in p.output.split('\n'):
+    match = DISABLED_BANNER_REGEX.match(line)
+    if match is not None:
+      banners_printed.append(match.group(1))
+  return banners_printed
 
 
 def InvokeWithModifiedEnv(extra_env, function, *args, **kwargs):
@@ -612,6 +626,23 @@ class GTestFilterUnitTest(gtest_test_utils.TestCase):
 
       self.assert_(os.path.exists(shard_status_file))
       os.remove(shard_status_file)
+
+  def testDisabledBanner(self):
+    """Tests that the disabled banner prints only tests that match filter."""
+    make_filter = lambda s: ['--%s=%s' % (FILTER_FLAG, s)]
+
+    banners = RunAndExtractDisabledBannerList(make_filter('*'))
+    self.AssertSetEqual(banners, [
+        'BarTest.DISABLED_TestFour', 'BarTest.DISABLED_TestFive',
+        'BazTest.DISABLED_TestC'
+    ])
+
+    banners = RunAndExtractDisabledBannerList(make_filter('Bar*'))
+    self.AssertSetEqual(
+        banners, ['BarTest.DISABLED_TestFour', 'BarTest.DISABLED_TestFive'])
+
+    banners = RunAndExtractDisabledBannerList(make_filter('*-Bar*'))
+    self.AssertSetEqual(banners, ['BazTest.DISABLED_TestC'])
 
   if SUPPORTS_DEATH_TESTS:
     def testShardingWorksWithDeathTests(self):

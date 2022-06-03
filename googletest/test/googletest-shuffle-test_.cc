@@ -27,7 +27,6 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
 // Verifies that test shuffling works.
 
 #include "gtest/gtest.h"
@@ -82,13 +81,13 @@ class TestNamePrinter : public EmptyTestEventListener {
   }
 
   void OnTestStart(const TestInfo& test_info) override {
-    printf("%s.%s\n", test_info.test_case_name(), test_info.name());
+    printf("%s.%s\n", test_info.test_suite_name(), test_info.name());
   }
 };
 
 }  // namespace
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
   InitGoogleTest(&argc, argv);
 
   // Replaces the default printer with TestNamePrinter, which prints

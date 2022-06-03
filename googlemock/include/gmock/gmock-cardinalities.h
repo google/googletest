@@ -27,21 +27,23 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
 // Google Mock - a framework for writing C++ mock classes.
 //
 // This file implements some commonly used cardinalities.  More
 // cardinalities can be defined by the user implementing the
 // CardinalityInterface interface if necessary.
 
-// GOOGLETEST_CM0002 DO NOT DELETE
+// IWYU pragma: private, include "gmock/gmock.h"
+// IWYU pragma: friend gmock/.*
 
-#ifndef GMOCK_INCLUDE_GMOCK_GMOCK_CARDINALITIES_H_
-#define GMOCK_INCLUDE_GMOCK_GMOCK_CARDINALITIES_H_
+#ifndef GOOGLEMOCK_INCLUDE_GMOCK_GMOCK_CARDINALITIES_H_
+#define GOOGLEMOCK_INCLUDE_GMOCK_GMOCK_CARDINALITIES_H_
 
 #include <limits.h>
+
 #include <memory>
 #include <ostream>  // NOLINT
+
 #include "gmock/internal/gmock-port.h"
 #include "gtest/gtest.h"
 
@@ -116,7 +118,7 @@ class GTEST_API_ Cardinality {
   // cardinality, i.e. exceed the maximum number of allowed calls.
   bool IsOverSaturatedByCallCount(int call_count) const {
     return impl_->IsSaturatedByCallCount(call_count) &&
-        !impl_->IsSatisfiedByCallCount(call_count);
+           !impl_->IsSatisfiedByCallCount(call_count);
   }
 
   // Describes self to an ostream
@@ -154,4 +156,4 @@ inline Cardinality MakeCardinality(const CardinalityInterface* c) {
 
 GTEST_DISABLE_MSC_WARNINGS_POP_()  //  4251
 
-#endif  // GMOCK_INCLUDE_GMOCK_GMOCK_CARDINALITIES_H_
+#endif  // GOOGLEMOCK_INCLUDE_GMOCK_GMOCK_CARDINALITIES_H_
