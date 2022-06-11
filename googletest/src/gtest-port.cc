@@ -90,17 +90,6 @@
 namespace testing {
 namespace internal {
 
-#if GTEST_HAS_STREAM_REDIRECTION
-#if defined(_MSC_VER) || defined(__BORLANDC__)
-// MSVC and C++Builder do not provide a definition of STDERR_FILENO.
-const int kStdOutFileno = 1;
-const int kStdErrFileno = 2;
-#else
-const int kStdOutFileno = STDOUT_FILENO;
-const int kStdErrFileno = STDERR_FILENO;
-#endif  // _MSC_VER
-#endif // GTEST_HAS_STREAM_REDIRECTION
-
 #if GTEST_OS_LINUX || GTEST_OS_GNU_HURD
 
 namespace {
@@ -1178,6 +1167,15 @@ static std::string GetCapturedStream(CapturedStream** captured_stream) {
 
   return content;
 }
+
+#if defined(_MSC_VER) || defined(__BORLANDC__)
+// MSVC and C++Builder do not provide a definition of STDERR_FILENO.
+const int kStdOutFileno = 1;
+const int kStdErrFileno = 2;
+#else
+const int kStdOutFileno = STDOUT_FILENO;
+const int kStdErrFileno = STDERR_FILENO;
+#endif  // _MSC_VER
 
 // Starts capturing stdout.
 void CaptureStdout() {
