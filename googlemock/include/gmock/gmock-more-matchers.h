@@ -47,13 +47,13 @@ namespace testing {
 // Silence C4100 (unreferenced formal
 // parameter) for MSVC
 #ifdef _MSC_VER
-# pragma warning(push)
-# pragma warning(disable:4100)
+#pragma warning(push)
+#pragma warning(disable : 4100)
 #if (_MSC_VER == 1900)
 // and silence C4800 (C4800: 'int *const ': forcing value
 // to bool 'true' or 'false') for MSVC 14
-# pragma warning(disable:4800)
-  #endif
+#pragma warning(disable : 4800)
+#endif
 #endif
 
 // Defines a matcher that matches an empty container. The container must
@@ -83,9 +83,8 @@ MATCHER(IsFalse, negation ? "is true" : "is false") {
 }
 
 #ifdef _MSC_VER
-# pragma warning(pop)
+#pragma warning(pop)
 #endif
-
 
 }  // namespace testing
 

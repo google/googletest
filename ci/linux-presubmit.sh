@@ -76,6 +76,7 @@ time docker run \
     /usr/local/bin/bazel test ... \
       --copt="-Wall" \
       --copt="-Werror" \
+      --copt="-Wuninitialized" \
       --copt="-Wno-error=pragmas" \
       --keep_going \
       --show_timestamps \
@@ -94,6 +95,7 @@ for std in ${STD}; do
       /usr/local/bin/bazel test ... \
         --copt="-Wall" \
         --copt="-Werror" \
+        --copt="-Wuninitialized" \
         --define="absl=${absl}" \
         --distdir="/bazel-distdir" \
         --keep_going \
@@ -116,6 +118,7 @@ for std in ${STD}; do
         --copt="--gcc-toolchain=/usr/local" \
         --copt="-Wall" \
         --copt="-Werror" \
+        --copt="-Wuninitialized" \
         --define="absl=${absl}" \
         --distdir="/bazel-distdir" \
         --keep_going \

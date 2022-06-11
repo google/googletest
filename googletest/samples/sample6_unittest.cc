@@ -27,13 +27,11 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
 // This sample shows how to test common properties of multiple
 // implementations of the same interface (aka interface tests).
 
 // The interface and its implementations are in this header.
 #include "prime_tables.h"
-
 #include "gtest/gtest.h"
 namespace {
 // First, we define some factory functions for creating instances of
@@ -151,8 +149,7 @@ using testing::Types;
 // the PrimeTableTest fixture defined earlier:
 
 template <class T>
-class PrimeTableTest2 : public PrimeTableTest<T> {
-};
+class PrimeTableTest2 : public PrimeTableTest<T> {};
 
 // Then, declare the test case.  The argument is the name of the test
 // fixture, and also the name of the test case (as usual).  The _P

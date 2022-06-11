@@ -8,7 +8,7 @@ Given
 
 ```cpp
 class Foo {
-  ...
+ public:
   virtual ~Foo();
   virtual int GetSize() const = 0;
   virtual string Describe(const char* name) = 0;
@@ -23,7 +23,7 @@ class Foo {
 #include "gmock/gmock.h"
 
 class MockFoo : public Foo {
-  ...
+ public:
   MOCK_METHOD(int, GetSize, (), (const, override));
   MOCK_METHOD(string, Describe, (const char* name), (override));
   MOCK_METHOD(string, Describe, (int type), (override));
@@ -58,7 +58,7 @@ To mock
 ```cpp
 template <typename Elem>
 class StackInterface {
-  ...
+ public:
   virtual ~StackInterface();
   virtual int GetSize() const = 0;
   virtual void Push(const Elem& x) = 0;
@@ -71,7 +71,7 @@ class StackInterface {
 ```cpp
 template <typename Elem>
 class MockStack : public StackInterface<Elem> {
-  ...
+ public:
   MOCK_METHOD(int, GetSize, (), (const, override));
   MOCK_METHOD(void, Push, (const Elem& x), (override));
 };

@@ -27,7 +27,6 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
 #include "gtest/gtest.h"
 
 // Tests that we don't have to define main() when we link to
@@ -35,8 +34,7 @@
 
 namespace {
 
-TEST(GTestMainTest, ShouldSucceed) {
-}
+TEST(GTestMainTest, ShouldSucceed) {}
 
 }  // namespace
 

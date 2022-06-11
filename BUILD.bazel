@@ -120,8 +120,14 @@ cc_library(
     linkopts = select({
         ":qnx": ["-lregex"],
         ":windows": [],
-        ":freebsd": ["-lm", "-pthread"],
-        ":openbsd": ["-lm", "-pthread"],
+        ":freebsd": [
+            "-lm",
+            "-pthread",
+        ],
+        ":openbsd": [
+            "-lm",
+            "-pthread",
+        ],
         "//conditions:default": ["-pthread"],
     }),
     deps = select({
@@ -129,10 +135,15 @@ cc_library(
             "@com_google_absl//absl/debugging:failure_signal_handler",
             "@com_google_absl//absl/debugging:stacktrace",
             "@com_google_absl//absl/debugging:symbolize",
+            "@com_google_absl//absl/flags:flag",
+            "@com_google_absl//absl/flags:parse",
+            "@com_google_absl//absl/flags:reflection",
+            "@com_google_absl//absl/flags:usage",
             "@com_google_absl//absl/strings",
             "@com_google_absl//absl/types:any",
             "@com_google_absl//absl/types:optional",
             "@com_google_absl//absl/types:variant",
+            "@com_googlesource_code_re2//:re2",
         ],
         "//conditions:default": [],
     }),

@@ -35,18 +35,18 @@
 //
 // This program will be invoked from a Python unit test.  Don't run it
 // directly.
+// clang-format off
 
 #include "gtest/gtest.h"
 
 using ::testing::InitGoogleTest;
+using ::testing::Test;
 using ::testing::TestEventListeners;
 using ::testing::TestWithParam;
 using ::testing::UnitTest;
-using ::testing::Test;
 using ::testing::Values;
 
-class SuccessfulTest : public Test {
-};
+class SuccessfulTest : public Test {};
 
 TEST_F(SuccessfulTest, Succeeds) {
   SUCCEED() << "This is a success.";
@@ -191,3 +191,5 @@ int main(int argc, char** argv) {
   testing::Test::RecordProperty("ad_hoc_property", "42");
   return RUN_ALL_TESTS();
 }
+
+// clang-format on

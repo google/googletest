@@ -27,23 +27,18 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
 #include "gtest/gtest.h"
 
 class SetupFailTest : public ::testing::Test {
  protected:
-  static void SetUpTestSuite() {
-    ASSERT_EQ("", "SET_UP_FAIL");
-  }
+  static void SetUpTestSuite() { ASSERT_EQ("", "SET_UP_FAIL"); }
 };
 
 TEST_F(SetupFailTest, NoopPassingTest) {}
 
 class TearDownFailTest : public ::testing::Test {
  protected:
-  static void TearDownTestSuite() {
-    ASSERT_EQ("", "TEAR_DOWN_FAIL");
-  }
+  static void TearDownTestSuite() { ASSERT_EQ("", "TEAR_DOWN_FAIL"); }
 };
 
 TEST_F(TearDownFailTest, NoopPassingTest) {}

@@ -39,6 +39,7 @@ SYNOPSIS
 
 import os
 import re
+import sys
 from googletest.test import gtest_test_utils
 
 
@@ -52,15 +53,14 @@ PROGRAM_PATH = gtest_test_utils.GetTestExecutablePath('gtest_help_test_')
 FLAG_PREFIX = '--gtest_'
 DEATH_TEST_STYLE_FLAG = FLAG_PREFIX + 'death_test_style'
 STREAM_RESULT_TO_FLAG = FLAG_PREFIX + 'stream_result_to'
-UNKNOWN_FLAG = FLAG_PREFIX + 'unknown_flag_for_testing'
+UNKNOWN_GTEST_PREFIXED_FLAG = FLAG_PREFIX + 'unknown_flag_for_testing'
 LIST_TESTS_FLAG = FLAG_PREFIX + 'list_tests'
-INCORRECT_FLAG_VARIANTS = [re.sub('^--', '-', LIST_TESTS_FLAG),
-                           re.sub('^--', '/', LIST_TESTS_FLAG),
-                           re.sub('_', '-', LIST_TESTS_FLAG)]
 INTERNAL_FLAG_FOR_TESTING = FLAG_PREFIX + 'internal_flag_for_testing'
 
 SUPPORTS_DEATH_TESTS = "DeathTest" in gtest_test_utils.Subprocess(
     [PROGRAM_PATH, LIST_TESTS_FLAG]).output
+
+HAS_ABSL_FLAGS = '--has_absl_flags' in sys.argv
 
 # The help message must match this regex.
 HELP_REGEX = re.compile(
@@ -111,18 +111,37 @@ class GTestHelpTest(gtest_test_utils.TestCase):
     """
 
     exit_code, output = RunWithFlag(flag)
-    self.assertEquals(0, exit_code)
-    self.assert_(HELP_REGEX.search(output), output)
+    if HAS_ABSL_FLAGS:
+      # The Abseil flags library prints the ProgramUsageMessage() with
+      # --help and returns 1.
+      self.assertEqual(1, exit_code)
+    else:
+      self.assertEqual(0, exit_code)
+
+    self.assertTrue(HELP_REGEX.search(output), output)
 
     if IS_LINUX or IS_GNUHURD or IS_GNUKFREEBSD or IS_OPENBSD:
-      self.assert_(STREAM_RESULT_TO_FLAG in output, output)
+      self.assertIn(STREAM_RESULT_TO_FLAG, output)
     else:
-      self.assert_(STREAM_RESULT_TO_FLAG not in output, output)
+      self.assertNotIn(STREAM_RESULT_TO_FLAG, output)
 
     if SUPPORTS_DEATH_TESTS and not IS_WINDOWS:
-      self.assert_(DEATH_TEST_STYLE_FLAG in output, output)
+      self.assertIn(DEATH_TEST_STYLE_FLAG, output)
     else:
-      self.assert_(DEATH_TEST_STYLE_FLAG not in output, output)
+      self.assertNotIn(DEATH_TEST_STYLE_FLAG, output)
+
+  def TestUnknownFlagWithAbseil(self, flag):
+    """Verifies correct behavior when an unknown flag is specified.
+
+    The right message must be printed and the tests must
+    skipped when the given flag is specified.
+
+    Args:
+      flag:  A flag to pass to the binary or None.
+    """
+    exit_code, output = RunWithFlag(flag)
+    self.assertEqual(1, exit_code)
+    self.assertIn('ERROR: Unknown command line flag', output)
 
   def TestNonHelpFlag(self, flag):
     """Verifies correct behavior when no help flag is specified.
@@ -135,27 +154,21 @@ class GTestHelpTest(gtest_test_utils.TestCase):
     """
 
     exit_code, output = RunWithFlag(flag)
-    self.assert_(exit_code != 0)
-    self.assert_(not HELP_REGEX.search(output), output)
+    self.assertNotEqual(exit_code, 0)
+    self.assertFalse(HELP_REGEX.search(output), output)
 
   def testPrintsHelpWithFullFlag(self):
     self.TestHelpFlag('--help')
 
-  def testPrintsHelpWithShortFlag(self):
-    self.TestHelpFlag('-h')
-
-  def testPrintsHelpWithQuestionFlag(self):
-    self.TestHelpFlag('-?')
-
-  def testPrintsHelpWithWindowsStyleQuestionFlag(self):
-    self.TestHelpFlag('/?')
-
   def testPrintsHelpWithUnrecognizedGoogleTestFlag(self):
-    self.TestHelpFlag(UNKNOWN_FLAG)
-
-  def testPrintsHelpWithIncorrectFlagStyle(self):
-    for incorrect_flag in INCORRECT_FLAG_VARIANTS:
-      self.TestHelpFlag(incorrect_flag)
+    # The behavior is slightly different when Abseil flags is
+    # used. Abseil flags rejects all unknown flags, while the builtin
+    # GTest flags implementation interprets an unknown flag with a
+    # '--gtest_' prefix as a request for help.
+    if HAS_ABSL_FLAGS:
+      self.TestUnknownFlagWithAbseil(UNKNOWN_GTEST_PREFIXED_FLAG)
+    else:
+      self.TestHelpFlag(UNKNOWN_GTEST_PREFIXED_FLAG)
 
   def testRunsTestsWithoutHelpFlag(self):
     """Verifies that when no help flag is specified, the tests are run
@@ -171,4 +184,6 @@ class GTestHelpTest(gtest_test_utils.TestCase):
 
 
 if __name__ == '__main__':
+  if '--has_absl_flags' in sys.argv:
+    sys.argv.remove('--has_absl_flags')
   gtest_test_utils.Main()

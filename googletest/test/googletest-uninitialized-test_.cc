@@ -27,7 +27,6 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
 #include "gtest/gtest.h"
 
 TEST(DummyTest, Dummy) {
@@ -37,6 +36,4 @@ TEST(DummyTest, Dummy) {
   // testing::InitGoogleTest() being called first.
 }
 
-int main() {
-  return RUN_ALL_TESTS();
-}
+int main() { return RUN_ALL_TESTS(); }
