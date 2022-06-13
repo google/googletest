@@ -392,8 +392,7 @@ Old macros and their new equivalents:
 If a mock method has no `EXPECT_CALL` spec but is called, we say that it's an
 "uninteresting call", and the default action (which can be specified using
 `ON_CALL()`) of the method will be taken. Currently, an uninteresting call will
-also by default cause gMock to print a warning. (In the future, we might remove
-this warning by default.)
+also by default cause gMock to print a warning.
 
 However, sometimes you may want to ignore these uninteresting calls, and
 sometimes you may want to treat them as errors. gMock lets you make the decision
