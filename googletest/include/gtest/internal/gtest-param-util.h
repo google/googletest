@@ -653,7 +653,7 @@ class ParameterizedTestSuiteInfo : public ParameterizedTestSuiteInfoBase {
   typedef ::std::vector<InstantiationInfo> InstantiationContainer;
   
   static bool IsValidParamName(const std::string& name) {
-    static constexpr validParamChars = "_-:/";
+  static constexpr validParamChars = "_-:/";
 
     // Check for empty string
     if (name.empty()) return false;
