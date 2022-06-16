@@ -4293,7 +4293,7 @@ particular type than to dump the bytes.
 ### Mock std::function {#MockFunction}
 
 `std::function` is a general function type introduced in C++11. It is a
-preferred way of passing callbacks to new interfaces. Functions are copiable,
+preferred way of passing callbacks to new interfaces. Functions are copyable,
 and are not usually passed around by pointer, which makes them tricky to mock.
 But fear not - `MockFunction` can help you with that.
 
@@ -4303,16 +4303,21 @@ But fear not - `MockFunction` can help you with that.
   R Call(T1, ..., Tn);
 ```
 
-It also has a `AsStdFunction()` method, which creates a `std::function` proxy
-forwarding to Call:
+It can be implicitly cast to a `std::function` proxy that forwards to Call:
+
+```cpp
+  operator std::function<R(Args...)>();
+```
+
+It also has an explicit `AsStdFunction()` method:
 
 ```cpp
   std::function<R(T1, ..., Tn)> AsStdFunction();
 ```
 
 To use `MockFunction`, first create `MockFunction` object and set up
-expectations on its `Call` method. Then pass proxy obtained from
-`AsStdFunction()` to the code you are testing. For example:
+expectations on its `Call` method. Then pass the object to the code
+you are testing. For example:
 
 ```cpp
 TEST(FooTest, RunsCallbackWithBarArgument) {
@@ -4320,10 +4325,12 @@ TEST(FooTest, RunsCallbackWithBarArgument) {
   MockFunction<int(string)> mock_function;
 
   // 2. Set expectations on Call() method.
-  EXPECT_CALL(mock_function, Call("bar")).WillOnce(Return(1));
+  EXPECT_CALL(mock_function, Call("bar")).WillOnce(Return(2));
 
   // 3. Exercise code that uses std::function.
   Foo(mock_function.AsStdFunction());
+  // or simply
+  Foo(mock_function);
   // Foo's signature can be either of:
   // void Foo(const std::function<int(string)>& fun);
   // void Foo(std::function<int(string)> fun);
@@ -4333,9 +4340,9 @@ TEST(FooTest, RunsCallbackWithBarArgument) {
 }
 ```
 
-Remember that function objects created with `AsStdFunction()` are just
-forwarders. If you create multiple of them, they will share the same set of
-expectations.
+Remember that function objects created implicitly or explicitly with
+`AsStdFunction()` are just forwarders. If you create multiples of them,
+they will share the same set of expectations.
 
 Although `std::function` supports unlimited number of arguments, `MockFunction`
 implementation is limited to ten. If you ever hit that limit... well, your

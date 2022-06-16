@@ -852,6 +852,25 @@ TEST(MockMethodMockFunctionTest, AsStdFunctionWithReferenceParameter) {
   EXPECT_EQ(-1, call(foo.AsStdFunction(), i));
 }
 
+TEST(MockMethodMockFunctionTest, ImplicitConversionToStdFunction) {
+  MockFunction<int(int)> foo;
+  auto call = [](const std::function<int(int)>& f, int i) { return f(i); };
+  EXPECT_CALL(foo, Call(1)).WillOnce(Return(-1));
+  EXPECT_CALL(foo, Call(2)).WillOnce(Return(-2));
+  EXPECT_EQ(-1, call(foo, 1));
+  EXPECT_EQ(-2, call(foo, 2));
+}
+
+TEST(MockMethodMockFunctionTest, ExplicitConversionToStdFunction) {
+  MockFunction<int(int)> foo;
+  auto call = [](const std::function<int(int)>& f, int i) { return f(i); };
+  EXPECT_CALL(foo, Call(1)).WillOnce(Return(-1));
+  EXPECT_CALL(foo, Call(2)).WillOnce(Return(-2));
+  const auto stdFuncFoo = static_cast<std::function<int(int)>>(foo);
+  EXPECT_EQ(-1, call(stdFuncFoo, 1));
+  EXPECT_EQ(-2, call(stdFuncFoo, 2));
+}
+
 namespace {
 
 template <typename Expected, typename F>

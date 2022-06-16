@@ -1851,6 +1851,10 @@ class MockFunction<R(Args...)> {
     };
   }
 
+  operator std::function<R(Args...)>() {
+    return AsStdFunction();
+  }
+
   // Implementation detail: the expansion of the MOCK_METHOD macro.
   R Call(Args... args) {
     mock_.SetOwnerAndName(this, "Call");
