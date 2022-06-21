@@ -32,7 +32,7 @@
 set -euox pipefail
 
 readonly LINUX_LATEST_CONTAINER="gcr.io/google.com/absl-177019/linux_hybrid-latest:20220217"
-readonly LINUX_GCC_FLOOR_CONTAINER="gcr.io/google.com/absl-177019/linux_gcc-floor:20210617"
+readonly LINUX_GCC_FLOOR_CONTAINER="gcr.io/google.com/absl-177019/linux_gcc-floor:20220621"
 
 if [[ -z ${GTEST_ROOT:-} ]]; then
   GTEST_ROOT="$(realpath $(dirname ${0})/..)"
@@ -78,6 +78,7 @@ time docker run \
       --copt="-Werror" \
       --copt="-Wuninitialized" \
       --copt="-Wno-error=pragmas" \
+      --distdir="/bazel-distdir" \
       --keep_going \
       --show_timestamps \
       --test_output=errors
