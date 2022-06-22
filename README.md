@@ -138,7 +138,7 @@ that generates stub code for GoogleTest.
 ## Contributing Changes
 
 Please read
-[`CONTRIBUTING.md`](https://github.com/google/googletest/blob/master/CONTRIBUTING.md)
+[`CONTRIBUTING.md`](https://github.com/google/googletest/blob/main/CONTRIBUTING.md)
 for details on how to contribute to this project.
 
 Happy testing!
