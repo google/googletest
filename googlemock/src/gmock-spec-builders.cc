@@ -68,8 +68,6 @@ namespace internal {
 // mockers, and all expectations.
 GTEST_API_ GTEST_DEFINE_STATIC_MUTEX_(g_gmock_mutex);
 
-CallReaction intToCallReaction(int mock_behavior);
-
 // Logs a message including file and line number information.
 GTEST_API_ void LogWithLocation(testing::internal::LogSeverity severity,
                                 const char* file, int line,
@@ -437,7 +435,7 @@ bool UntypedFunctionMockerBase::VerifyAndClearExpectationsLocked()
   return expectations_met;
 }
 
-CallReaction intToCallReaction(int mock_behavior) {
+static CallReaction intToCallReaction(int mock_behavior) {
   if (mock_behavior >= kAllow && mock_behavior <= kFail) {
     return static_cast<internal::CallReaction>(mock_behavior);
   }
