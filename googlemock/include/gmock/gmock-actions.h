@@ -122,7 +122,7 @@
 // MORE INFORMATION:
 //
 // To learn more about using these macros, please search for 'ACTION' on
-// https://github.com/google/googletest/blob/master/docs/gmock_cook_book.md
+// https://github.com/google/googletest/blob/main/docs/gmock_cook_book.md
 
 // IWYU pragma: private, include "gmock/gmock.h"
 // IWYU pragma: friend gmock/.*
