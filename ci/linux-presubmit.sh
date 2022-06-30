@@ -39,7 +39,7 @@ if [[ -z ${GTEST_ROOT:-} ]]; then
 fi
 
 if [[ -z ${STD:-} ]]; then
-  STD="c++11 c++14 c++17 c++20"
+  STD="c++14 c++17 c++20"
 fi
 
 # Test the CMake build
@@ -55,7 +55,7 @@ for cc in /usr/local/bin/gcc /opt/llvm/clang/bin/clang; do
       ${LINUX_LATEST_CONTAINER} \
       /bin/bash -c "
         cmake /src \
-          -DCMAKE_CXX_STANDARD=11 \
+          -DCMAKE_CXX_STANDARD=14 \
           -Dgtest_build_samples=ON \
           -Dgtest_build_tests=ON \
           -Dgmock_build_tests=ON \
