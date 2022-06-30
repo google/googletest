@@ -15,10 +15,13 @@ Our documentation is now live on GitHub Pages at
 https://google.github.io/googletest/. We recommend browsing the documentation on
 GitHub Pages rather than directly in the repository.
 
-#### Release 1.12.0
+#### Release 1.12.1
 
-[Release 1.12.0](https://github.com/google/googletest/releases/tag/release-1.12.0)
+[Release 1.12.1](https://github.com/google/googletest/releases/tag/release-1.12.1)
 is now available.
+
+The 1.12.x branch will be the last to support C++11. Future releases will
+require at least C++14.
 
 #### Coming Soon
 
@@ -56,7 +59,7 @@ More information about building GoogleTest can be found at
 
 ## Supported Platforms
 
-GoogleTest requires a codebase and compiler compliant with the C++11 standard or
+GoogleTest requires a codebase and compiler compliant with the C++14 standard or
 newer.
 
 The GoogleTest code is officially supported on the following platforms.
