@@ -185,14 +185,6 @@ GTEST_API_ std::string CreateUnifiedDiff(const std::vector<std::string>& left,
 
 }  // namespace edit_distance
 
-// Calculate the diff between 'left' and 'right' and return it in unified diff
-// format.
-// If not null, stores in 'total_line_count' the total number of lines found
-// in left + right.
-GTEST_API_ std::string DiffStrings(const std::string& left,
-                                   const std::string& right,
-                                   size_t* total_line_count);
-
 // Constructs and returns the message for an equality assertion
 // (e.g. ASSERT_EQ, EXPECT_STREQ, etc) failure.
 //

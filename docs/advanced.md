@@ -482,9 +482,11 @@ TEST_F(FooDeathTest, DoesThat) {
 
 ### Regular Expression Syntax
 
-On POSIX systems (e.g. Linux, Cygwin, and Mac), googletest uses the
+When built with Bazel and using Abseil, googletest uses the
+[RE2](https://github.com/google/re2/wiki/Syntax) syntax. Otherwise, for POSIX
+systems (Linux, Cygwin, Mac), googletest uses the
 [POSIX extended regular expression](http://www.opengroup.org/onlinepubs/009695399/basedefs/xbd_chap09.html#tag_09_04)
-syntax. To learn about this syntax, you may want to read this
+syntax. To learn about POSIX syntax, you may want to read this
 [Wikipedia entry](http://en.wikipedia.org/wiki/Regular_expression#POSIX_Extended_Regular_Expressions).
 
 On Windows, googletest uses its own simple regular expression implementation. It
@@ -1313,6 +1315,7 @@ First, define a fixture class template, as we did with typed tests:
 ```c++
 template <typename T>
 class FooTest : public testing::Test {
+  void DoSomethingInteresting();
   ...
 };
 ```
@@ -1330,6 +1333,9 @@ this as many times as you want:
 TYPED_TEST_P(FooTest, DoesBlah) {
   // Inside a test, refer to TypeParam to get the type parameter.
   TypeParam n = 0;
+
+  // You will need to use `this` explicitly to refer to fixture members.
+  this->DoSomethingInteresting()
   ...
 }
 

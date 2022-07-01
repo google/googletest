@@ -192,13 +192,15 @@ TEST(TypeTraits, IsInvocableRV) {
   };
 
   // The first overload is callable for const and non-const rvalues and lvalues.
-  // It can be used to obtain an int, void, or anything int is convertible too.
+  // It can be used to obtain an int, cv void, or anything int is convertible
+  // to.
   static_assert(internal::is_callable_r<int, C>::value, "");
   static_assert(internal::is_callable_r<int, C&>::value, "");
   static_assert(internal::is_callable_r<int, const C>::value, "");
   static_assert(internal::is_callable_r<int, const C&>::value, "");
 
   static_assert(internal::is_callable_r<void, C>::value, "");
+  static_assert(internal::is_callable_r<const volatile void, C>::value, "");
   static_assert(internal::is_callable_r<char, C>::value, "");
 
   // It's possible to provide an int. If it's given to an lvalue, the result is
@@ -216,6 +218,32 @@ TEST(TypeTraits, IsInvocableRV) {
   // It's not possible to provide other arguments.
   static_assert(!internal::is_callable_r<void, C, std::string>::value, "");
   static_assert(!internal::is_callable_r<void, C, int, int>::value, "");
+
+  // In C++17 and above, where it's guaranteed that functions can return
+  // non-moveable objects, everything should work fine for non-moveable rsult
+  // types too.
+#if defined(__cplusplus) && __cplusplus >= 201703L
+  {
+    struct NonMoveable {
+      NonMoveable() = default;
+      NonMoveable(NonMoveable&&) = delete;
+    };
+
+    static_assert(!std::is_move_constructible_v<NonMoveable>);
+
+    struct Callable {
+      NonMoveable operator()() { return NonMoveable(); }
+    };
+
+    static_assert(internal::is_callable_r<NonMoveable, Callable>::value);
+    static_assert(internal::is_callable_r<void, Callable>::value);
+    static_assert(
+        internal::is_callable_r<const volatile void, Callable>::value);
+
+    static_assert(!internal::is_callable_r<int, Callable>::value);
+    static_assert(!internal::is_callable_r<NonMoveable, Callable, int>::value);
+  }
+#endif  // C++17 and above
 
   // Nothing should choke when we try to call other arguments besides directly
   // callable objects, but they should not show up as callable.

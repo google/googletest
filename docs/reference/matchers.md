@@ -8,9 +8,13 @@ A **matcher** matches a *single* argument. You can use it inside `ON_CALL()` or
 | `EXPECT_THAT(actual_value, matcher)` | Asserts that `actual_value` matches `matcher`. |
 | `ASSERT_THAT(actual_value, matcher)` | The same as `EXPECT_THAT(actual_value, matcher)`, except that it generates a **fatal** failure. |
 
-{: .callout .note}
-**Note:** Although equality matching via `EXPECT_THAT(actual_value,
-expected_value)` is supported, prefer to make the comparison explicit via
+{: .callout .warning}
+**WARNING:** Equality matching via `EXPECT_THAT(actual_value, expected_value)`
+is supported, however note that implicit conversions can cause surprising
+results. For example, `EXPECT_THAT(some_bool, "some string")` will compile and
+may pass unintentionally.
+
+**BEST PRACTICE:** Prefer to make the comparison explicit via
 `EXPECT_THAT(actual_value, Eq(expected_value))` or `EXPECT_EQ(actual_value,
 expected_value)`.
 

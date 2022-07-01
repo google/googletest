@@ -37,6 +37,7 @@
 #include <ostream>  // NOLINT
 #include <sstream>
 #include <string>
+#include <type_traits>
 
 #include "gmock/gmock.h"
 #include "gmock/internal/gmock-port.h"
@@ -45,63 +46,19 @@
 #include "gtest/internal/gtest-port.h"
 
 namespace testing {
-namespace internal {
-
-// Helper class for testing the Expectation class template.
-class ExpectationTester {
- public:
-  // Sets the call count of the given expectation to the given number.
-  void SetCallCount(int n, ExpectationBase* exp) { exp->call_count_ = n; }
-};
-
-}  // namespace internal
-}  // namespace testing
-
 namespace {
 
-using testing::_;
-using testing::AnyNumber;
-using testing::AtLeast;
-using testing::AtMost;
-using testing::Between;
-using testing::Cardinality;
-using testing::CardinalityInterface;
-using testing::Const;
-using testing::ContainsRegex;
-using testing::DoAll;
-using testing::DoDefault;
-using testing::Eq;
-using testing::Expectation;
-using testing::ExpectationSet;
-using testing::Gt;
-using testing::IgnoreResult;
-using testing::InSequence;
-using testing::Invoke;
-using testing::InvokeWithoutArgs;
-using testing::IsNotSubstring;
-using testing::IsSubstring;
-using testing::Lt;
-using testing::Message;
-using testing::Mock;
-using testing::NaggyMock;
-using testing::Ne;
-using testing::Return;
-using testing::SaveArg;
-using testing::Sequence;
-using testing::SetArgPointee;
-using testing::internal::ExpectationTester;
-using testing::internal::FormatFileLocation;
-using testing::internal::kAllow;
-using testing::internal::kErrorVerbosity;
-using testing::internal::kFail;
-using testing::internal::kInfoVerbosity;
-using testing::internal::kWarn;
-using testing::internal::kWarningVerbosity;
+using ::testing::internal::FormatFileLocation;
+using ::testing::internal::kAllow;
+using ::testing::internal::kErrorVerbosity;
+using ::testing::internal::kFail;
+using ::testing::internal::kInfoVerbosity;
+using ::testing::internal::kWarn;
+using ::testing::internal::kWarningVerbosity;
 
 #if GTEST_HAS_STREAM_REDIRECTION
-using testing::HasSubstr;
-using testing::internal::CaptureStdout;
-using testing::internal::GetCapturedStdout;
+using ::testing::internal::CaptureStdout;
+using ::testing::internal::GetCapturedStdout;
 #endif
 
 class Incomplete;
@@ -845,6 +802,50 @@ TEST(ExpectCallTest, InfersCardinality1WhenThereIsWillRepeatedly) {
       },
       "to be called at least once");
 }
+
+#if defined(__cplusplus) && __cplusplus >= 201703L
+
+// It should be possible to return a non-moveable type from a mock action in
+// C++17 and above, where it's guaranteed that such a type can be initialized
+// from a prvalue returned from a function.
+TEST(ExpectCallTest, NonMoveableType) {
+  // Define a non-moveable result type.
+  struct Result {
+    explicit Result(int x_in) : x(x_in) {}
+    Result(Result&&) = delete;
+
+    int x;
+  };
+
+  static_assert(!std::is_move_constructible_v<Result>);
+  static_assert(!std::is_copy_constructible_v<Result>);
+
+  static_assert(!std::is_move_assignable_v<Result>);
+  static_assert(!std::is_copy_assignable_v<Result>);
+
+  // We should be able to use a callable that returns that result as both a
+  // OnceAction and an Action, whether the callable ignores arguments or not.
+  const auto return_17 = [] { return Result(17); };
+
+  static_cast<void>(OnceAction<Result()>{return_17});
+  static_cast<void>(Action<Result()>{return_17});
+
+  static_cast<void>(OnceAction<Result(int)>{return_17});
+  static_cast<void>(Action<Result(int)>{return_17});
+
+  // It should be possible to return the result end to end through an
+  // EXPECT_CALL statement, with both WillOnce and WillRepeatedly.
+  MockFunction<Result()> mock;
+  EXPECT_CALL(mock, Call)   //
+      .WillOnce(return_17)  //
+      .WillRepeatedly(return_17);
+
+  EXPECT_EQ(17, mock.AsStdFunction()().x);
+  EXPECT_EQ(17, mock.AsStdFunction()().x);
+  EXPECT_EQ(17, mock.AsStdFunction()().x);
+}
+
+#endif  // C++17 and above
 
 // Tests that the n-th action is taken for the n-th matching
 // invocation.
@@ -2596,6 +2597,7 @@ TEST(ParameterlessExpectationsTest,
 }
 
 }  // namespace
+}  // namespace testing
 
 // Allows the user to define their own main and then invoke gmock_main
 // from it. This might be necessary on some platforms which require

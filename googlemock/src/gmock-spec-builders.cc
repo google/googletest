@@ -41,6 +41,7 @@
 #include <memory>
 #include <set>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "gmock/gmock.h"
@@ -369,136 +370,6 @@ const char* UntypedFunctionMockerBase::Name() const
   return name;
 }
 
-// Calculates the result of invoking this mock function with the given
-// arguments, prints it, and returns it.  The caller is responsible
-// for deleting the result.
-UntypedActionResultHolderBase* UntypedFunctionMockerBase::UntypedInvokeWith(
-    void* const untyped_args) GTEST_LOCK_EXCLUDED_(g_gmock_mutex) {
-  // See the definition of untyped_expectations_ for why access to it
-  // is unprotected here.
-  if (untyped_expectations_.size() == 0) {
-    // No expectation is set on this mock method - we have an
-    // uninteresting call.
-
-    // We must get Google Mock's reaction on uninteresting calls
-    // made on this mock object BEFORE performing the action,
-    // because the action may DELETE the mock object and make the
-    // following expression meaningless.
-    const CallReaction reaction =
-        Mock::GetReactionOnUninterestingCalls(MockObject());
-
-    // True if and only if we need to print this call's arguments and return
-    // value.  This definition must be kept in sync with
-    // the behavior of ReportUninterestingCall().
-    const bool need_to_report_uninteresting_call =
-        // If the user allows this uninteresting call, we print it
-        // only when they want informational messages.
-        reaction == kAllow ? LogIsVisible(kInfo) :
-                           // If the user wants this to be a warning, we print
-                           // it only when they want to see warnings.
-            reaction == kWarn
-            ? LogIsVisible(kWarning)
-            :
-            // Otherwise, the user wants this to be an error, and we
-            // should always print detailed information in the error.
-            true;
-
-    if (!need_to_report_uninteresting_call) {
-      // Perform the action without printing the call information.
-      return this->UntypedPerformDefaultAction(
-          untyped_args, "Function call: " + std::string(Name()));
-    }
-
-    // Warns about the uninteresting call.
-    ::std::stringstream ss;
-    this->UntypedDescribeUninterestingCall(untyped_args, &ss);
-
-    // Calculates the function result.
-    UntypedActionResultHolderBase* const result =
-        this->UntypedPerformDefaultAction(untyped_args, ss.str());
-
-    // Prints the function result.
-    if (result != nullptr) result->PrintAsActionResult(&ss);
-
-    ReportUninterestingCall(reaction, ss.str());
-    return result;
-  }
-
-  bool is_excessive = false;
-  ::std::stringstream ss;
-  ::std::stringstream why;
-  ::std::stringstream loc;
-  const void* untyped_action = nullptr;
-
-  // The UntypedFindMatchingExpectation() function acquires and
-  // releases g_gmock_mutex.
-
-  const ExpectationBase* const untyped_expectation =
-      this->UntypedFindMatchingExpectation(untyped_args, &untyped_action,
-                                           &is_excessive, &ss, &why);
-  const bool found = untyped_expectation != nullptr;
-
-  // True if and only if we need to print the call's arguments
-  // and return value.
-  // This definition must be kept in sync with the uses of Expect()
-  // and Log() in this function.
-  const bool need_to_report_call =
-      !found || is_excessive || LogIsVisible(kInfo);
-  if (!need_to_report_call) {
-    // Perform the action without printing the call information.
-    return untyped_action == nullptr
-               ? this->UntypedPerformDefaultAction(untyped_args, "")
-               : this->UntypedPerformAction(untyped_action, untyped_args);
-  }
-
-  ss << "    Function call: " << Name();
-  this->UntypedPrintArgs(untyped_args, &ss);
-
-  // In case the action deletes a piece of the expectation, we
-  // generate the message beforehand.
-  if (found && !is_excessive) {
-    untyped_expectation->DescribeLocationTo(&loc);
-  }
-
-  UntypedActionResultHolderBase* result = nullptr;
-
-  auto perform_action = [&] {
-    return untyped_action == nullptr
-               ? this->UntypedPerformDefaultAction(untyped_args, ss.str())
-               : this->UntypedPerformAction(untyped_action, untyped_args);
-  };
-  auto handle_failures = [&] {
-    ss << "\n" << why.str();
-
-    if (!found) {
-      // No expectation matches this call - reports a failure.
-      Expect(false, nullptr, -1, ss.str());
-    } else if (is_excessive) {
-      // We had an upper-bound violation and the failure message is in ss.
-      Expect(false, untyped_expectation->file(), untyped_expectation->line(),
-             ss.str());
-    } else {
-      // We had an expected call and the matching expectation is
-      // described in ss.
-      Log(kInfo, loc.str() + ss.str(), 2);
-    }
-  };
-#if GTEST_HAS_EXCEPTIONS
-  try {
-    result = perform_action();
-  } catch (...) {
-    handle_failures();
-    throw;
-  }
-#else
-  result = perform_action();
-#endif
-
-  if (result != nullptr) result->PrintAsActionResult(&ss);
-  handle_failures();
-  return result;
-}
-
 // Returns an Expectation object that references and co-owns exp,
 // which must be an expectation on this mock function.
 Expectation UntypedFunctionMockerBase::GetHandleOf(ExpectationBase* exp) {
@@ -564,7 +435,7 @@ bool UntypedFunctionMockerBase::VerifyAndClearExpectationsLocked()
   return expectations_met;
 }
 
-CallReaction intToCallReaction(int mock_behavior) {
+static CallReaction intToCallReaction(int mock_behavior) {
   if (mock_behavior >= kAllow && mock_behavior <= kFail) {
     return static_cast<internal::CallReaction>(mock_behavior);
   }
@@ -664,46 +535,50 @@ MockObjectRegistry g_mock_object_registry;
 
 // Maps a mock object to the reaction Google Mock should have when an
 // uninteresting method is called.  Protected by g_gmock_mutex.
-std::map<const void*, internal::CallReaction> g_uninteresting_call_reaction;
+std::unordered_map<uintptr_t, internal::CallReaction>&
+UninterestingCallReactionMap() {
+  static auto* map = new std::unordered_map<uintptr_t, internal::CallReaction>;
+  return *map;
+}
 
 // Sets the reaction Google Mock should have when an uninteresting
 // method of the given mock object is called.
-void SetReactionOnUninterestingCalls(const void* mock_obj,
+void SetReactionOnUninterestingCalls(uintptr_t mock_obj,
                                      internal::CallReaction reaction)
     GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex) {
   internal::MutexLock l(&internal::g_gmock_mutex);
-  g_uninteresting_call_reaction[mock_obj] = reaction;
+  UninterestingCallReactionMap()[mock_obj] = reaction;
 }
 
 }  // namespace
 
 // Tells Google Mock to allow uninteresting calls on the given mock
 // object.
-void Mock::AllowUninterestingCalls(const void* mock_obj)
+void Mock::AllowUninterestingCalls(uintptr_t mock_obj)
     GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex) {
   SetReactionOnUninterestingCalls(mock_obj, internal::kAllow);
 }
 
 // Tells Google Mock to warn the user about uninteresting calls on the
 // given mock object.
-void Mock::WarnUninterestingCalls(const void* mock_obj)
+void Mock::WarnUninterestingCalls(uintptr_t mock_obj)
     GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex) {
   SetReactionOnUninterestingCalls(mock_obj, internal::kWarn);
 }
 
 // Tells Google Mock to fail uninteresting calls on the given mock
 // object.
-void Mock::FailUninterestingCalls(const void* mock_obj)
+void Mock::FailUninterestingCalls(uintptr_t mock_obj)
     GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex) {
   SetReactionOnUninterestingCalls(mock_obj, internal::kFail);
 }
 
 // Tells Google Mock the given mock object is being destroyed and its
 // entry in the call-reaction table should be removed.
-void Mock::UnregisterCallReaction(const void* mock_obj)
+void Mock::UnregisterCallReaction(uintptr_t mock_obj)
     GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex) {
   internal::MutexLock l(&internal::g_gmock_mutex);
-  g_uninteresting_call_reaction.erase(mock_obj);
+  UninterestingCallReactionMap().erase(static_cast<uintptr_t>(mock_obj));
 }
 
 // Returns the reaction Google Mock will have on uninteresting calls
@@ -711,10 +586,12 @@ void Mock::UnregisterCallReaction(const void* mock_obj)
 internal::CallReaction Mock::GetReactionOnUninterestingCalls(
     const void* mock_obj) GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex) {
   internal::MutexLock l(&internal::g_gmock_mutex);
-  return (g_uninteresting_call_reaction.count(mock_obj) == 0)
+  return (UninterestingCallReactionMap().count(
+              reinterpret_cast<uintptr_t>(mock_obj)) == 0)
              ? internal::intToCallReaction(
                    GMOCK_FLAG_GET(default_mock_behavior))
-             : g_uninteresting_call_reaction[mock_obj];
+             : UninterestingCallReactionMap()[reinterpret_cast<uintptr_t>(
+                   mock_obj)];
 }
 
 // Tells Google Mock to ignore mock_obj when checking for leaked mock

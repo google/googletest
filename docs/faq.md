@@ -1,9 +1,9 @@
-# Googletest FAQ
+# GoogleTest FAQ
 
 ## Why should test suite names and test names not contain underscore?
 
 {: .callout .note}
-Note: Googletest reserves underscore (`_`) for special purpose keywords, such as
+Note: GoogleTest reserves underscore (`_`) for special purpose keywords, such as
 [the `DISABLED_` prefix](advanced.md#temporarily-disabling-tests), in addition
 to the following rationale.
 
@@ -50,15 +50,15 @@ Now, the two `TEST`s will both generate the same class
 
 So for simplicity, we just ask the users to avoid `_` in `TestSuiteName` and
 `TestName`. The rule is more constraining than necessary, but it's simple and
-easy to remember. It also gives googletest some wiggle room in case its
+easy to remember. It also gives GoogleTest some wiggle room in case its
 implementation needs to change in the future.
 
 If you violate the rule, there may not be immediate consequences, but your test
 may (just may) break with a new compiler (or a new version of the compiler you
-are using) or with a new version of googletest. Therefore it's best to follow
+are using) or with a new version of GoogleTest. Therefore it's best to follow
 the rule.
 
-## Why does googletest support `EXPECT_EQ(NULL, ptr)` and `ASSERT_EQ(NULL, ptr)` but not `EXPECT_NE(NULL, ptr)` and `ASSERT_NE(NULL, ptr)`?
+## Why does GoogleTest support `EXPECT_EQ(NULL, ptr)` and `ASSERT_EQ(NULL, ptr)` but not `EXPECT_NE(NULL, ptr)` and `ASSERT_NE(NULL, ptr)`?
 
 First of all, you can use `nullptr` with each of these macros, e.g.
 `EXPECT_EQ(ptr, nullptr)`, `EXPECT_NE(ptr, nullptr)`, `ASSERT_EQ(ptr, nullptr)`,
@@ -68,7 +68,7 @@ because `nullptr` does not have the type problems that `NULL` does.
 Due to some peculiarity of C++, it requires some non-trivial template meta
 programming tricks to support using `NULL` as an argument of the `EXPECT_XX()`
 and `ASSERT_XX()` macros. Therefore we only do it where it's most needed
-(otherwise we make the implementation of googletest harder to maintain and more
+(otherwise we make the implementation of GoogleTest harder to maintain and more
 error-prone than necessary).
 
 Historically, the `EXPECT_EQ()` macro took the *expected* value as its first
@@ -162,7 +162,7 @@ methods, the parent process will think the calls have never occurred. Therefore,
 you may want to move your `EXPECT_CALL` statements inside the `EXPECT_DEATH`
 macro.
 
-## EXPECT_EQ(htonl(blah), blah_blah) generates weird compiler errors in opt mode. Is this a googletest bug?
+## EXPECT_EQ(htonl(blah), blah_blah) generates weird compiler errors in opt mode. Is this a GoogleTest bug?
 
 Actually, the bug is in `htonl()`.
 
@@ -199,7 +199,7 @@ const int Foo::kBar;  // No initializer here.
 ```
 
 Otherwise your code is **invalid C++**, and may break in unexpected ways. In
-particular, using it in googletest comparison assertions (`EXPECT_EQ`, etc) will
+particular, using it in GoogleTest comparison assertions (`EXPECT_EQ`, etc) will
 generate an "undefined reference" linker error. The fact that "it used to work"
 doesn't mean it's valid. It just means that you were lucky. :-)
 
@@ -225,7 +225,7 @@ cases may want to use the same or slightly different fixtures. For example, you
 may want to make sure that all of a GUI library's test suites don't leak
 important system resources like fonts and brushes.
 
-In googletest, you share a fixture among test suites by putting the shared logic
+In GoogleTest, you share a fixture among test suites by putting the shared logic
 in a base test fixture, then deriving from that base a separate fixture for each
 test suite that wants to use this common logic. You then use `TEST_F()` to write
 tests using each derived fixture.
@@ -264,7 +264,7 @@ TEST_F(FooTest, Baz) { ... }
 ```
 
 If necessary, you can continue to derive test fixtures from a derived fixture.
-googletest has no limit on how deep the hierarchy can be.
+GoogleTest has no limit on how deep the hierarchy can be.
 
 For a complete example using derived test fixtures, see
 [sample5_unittest.cc](https://github.com/google/googletest/blob/master/googletest/samples/sample5_unittest.cc).
@@ -278,7 +278,7 @@ disabled by our build system. Please see more details
 
 ## My death test hangs (or seg-faults). How do I fix it?
 
-In googletest, death tests are run in a child process and the way they work is
+In GoogleTest, death tests are run in a child process and the way they work is
 delicate. To write death tests you really need to understand how they work—see
 the details at [Death Assertions](reference/assertions.md#death) in the
 Assertions Reference.
@@ -305,8 +305,8 @@ bullet - sorry!
 
 ## Should I use the constructor/destructor of the test fixture or SetUp()/TearDown()? {#CtorVsSetUp}
 
-The first thing to remember is that googletest does **not** reuse the same test
-fixture object across multiple tests. For each `TEST_F`, googletest will create
+The first thing to remember is that GoogleTest does **not** reuse the same test
+fixture object across multiple tests. For each `TEST_F`, GoogleTest will create
 a **fresh** test fixture object, immediately call `SetUp()`, run the test body,
 call `TearDown()`, and then delete the test fixture object.
 
@@ -345,11 +345,11 @@ You may still want to use `SetUp()/TearDown()` in the following cases:
     that many standard libraries (like STL) may throw when exceptions are
     enabled in the compiler. Therefore you should prefer `TearDown()` if you
     want to write portable tests that work with or without exceptions.
-*   The googletest team is considering making the assertion macros throw on
+*   The GoogleTest team is considering making the assertion macros throw on
     platforms where exceptions are enabled (e.g. Windows, Mac OS, and Linux
     client-side), which will eliminate the need for the user to propagate
     failures from a subroutine to its caller. Therefore, you shouldn't use
-    googletest assertions in a destructor if your code could run on such a
+    GoogleTest assertions in a destructor if your code could run on such a
     platform.
 
 ## The compiler complains "no matching function to call" when I use ASSERT_PRED*. How do I fix it?
@@ -375,7 +375,7 @@ they write
 This is **wrong and dangerous**. The testing services needs to see the return
 value of `RUN_ALL_TESTS()` in order to determine if a test has passed. If your
 `main()` function ignores it, your test will be considered successful even if it
-has a googletest assertion failure. Very bad.
+has a GoogleTest assertion failure. Very bad.
 
 We have decided to fix this (thanks to Michael Chastain for the idea). Now, your
 code will no longer be able to ignore `RUN_ALL_TESTS()` when compiled with
@@ -440,14 +440,14 @@ TEST_F(BarTest, Abc) { ... }
 TEST_F(BarTest, Def) { ... }
 ```
 
-## googletest output is buried in a whole bunch of LOG messages. What do I do?
+## GoogleTest output is buried in a whole bunch of LOG messages. What do I do?
 
-The googletest output is meant to be a concise and human-friendly report. If
-your test generates textual output itself, it will mix with the googletest
+The GoogleTest output is meant to be a concise and human-friendly report. If
+your test generates textual output itself, it will mix with the GoogleTest
 output, making it hard to read. However, there is an easy solution to this
 problem.
 
-Since `LOG` messages go to stderr, we decided to let googletest output go to
+Since `LOG` messages go to stderr, we decided to let GoogleTest output go to
 stdout. This way, you can easily separate the two using redirection. For
 example:
 
@@ -520,7 +520,7 @@ TEST(MyDeathTest, CompoundStatement) {
 
 ## I have a fixture class `FooTest`, but `TEST_F(FooTest, Bar)` gives me error ``"no matching function for call to `FooTest::FooTest()'"``. Why?
 
-Googletest needs to be able to create objects of your test fixture class, so it
+GoogleTest needs to be able to create objects of your test fixture class, so it
 must have a default constructor. Normally the compiler will define one for you.
 However, there are cases where you have to define your own:
 
@@ -545,11 +545,11 @@ The new NPTL thread library doesn't suffer from this problem, as it doesn't
 create a manager thread. However, if you don't control which machine your test
 runs on, you shouldn't depend on this.
 
-## Why does googletest require the entire test suite, instead of individual tests, to be named *DeathTest when it uses ASSERT_DEATH?
+## Why does GoogleTest require the entire test suite, instead of individual tests, to be named *DeathTest when it uses ASSERT_DEATH?
 
-googletest does not interleave tests from different test suites. That is, it
+GoogleTest does not interleave tests from different test suites. That is, it
 runs all tests in one test suite first, and then runs all tests in the next test
-suite, and so on. googletest does this because it needs to set up a test suite
+suite, and so on. GoogleTest does this because it needs to set up a test suite
 before the first test in it is run, and tear it down afterwards. Splitting up
 the test case would require multiple set-up and tear-down processes, which is
 inefficient and makes the semantics unclean.
@@ -588,11 +588,11 @@ TEST_F(FooDeathTest, Uvw) { ... EXPECT_DEATH(...) ... }
 TEST_F(FooDeathTest, Xyz) { ... ASSERT_DEATH(...) ... }
 ```
 
-## googletest prints the LOG messages in a death test's child process only when the test fails. How can I see the LOG messages when the death test succeeds?
+## GoogleTest prints the LOG messages in a death test's child process only when the test fails. How can I see the LOG messages when the death test succeeds?
 
 Printing the LOG messages generated by the statement inside `EXPECT_DEATH()`
 makes it harder to search for real problems in the parent's log. Therefore,
-googletest only prints them when the death test has failed.
+GoogleTest only prints them when the death test has failed.
 
 If you really need to see such LOG messages, a workaround is to temporarily
 break the death test (e.g. by changing the regex pattern it is expected to
@@ -611,7 +611,7 @@ needs to be defined in the *same* name space. See
 
 ## How do I suppress the memory leak messages on Windows?
 
-Since the statically initialized googletest singleton requires allocations on
+Since the statically initialized GoogleTest singleton requires allocations on
 the heap, the Visual C++ memory leak detector will report memory leaks at the
 end of the program run. The easiest way to avoid this is to use the
 `_CrtMemCheckpoint` and `_CrtMemDumpAllObjectsSince` calls to not report any
@@ -625,7 +625,7 @@ things accordingly, you are leaking test-only logic into production code and
 there is no easy way to ensure that the test-only code paths aren't run by
 mistake in production. Such cleverness also leads to
 [Heisenbugs](https://en.wikipedia.org/wiki/Heisenbug). Therefore we strongly
-advise against the practice, and googletest doesn't provide a way to do it.
+advise against the practice, and GoogleTest doesn't provide a way to do it.
 
 In general, the recommended way to cause the code to behave differently under
 test is [Dependency Injection](http://en.wikipedia.org/wiki/Dependency_injection). You can inject
@@ -672,7 +672,7 @@ TEST(CoolTest, DoSomething) {
 ```
 
 However, the following code is **not allowed** and will produce a runtime error
-from googletest because the test methods are using different test fixture
+from GoogleTest because the test methods are using different test fixture
 classes with the same test suite name.
 
 ```c++
