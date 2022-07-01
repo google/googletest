@@ -466,7 +466,7 @@ TEST(DefaultValueOfReferenceTest, IsInitiallyUnset) {
   EXPECT_FALSE(DefaultValue<MyNonDefaultConstructible&>::IsSet());
 }
 
-// Tests that DefaultValue<T&>::Exists is false initiallly.
+// Tests that DefaultValue<T&>::Exists is false initially.
 TEST(DefaultValueOfReferenceTest, IsInitiallyNotExisting) {
   EXPECT_FALSE(DefaultValue<int&>::Exists());
   EXPECT_FALSE(DefaultValue<MyDefaultConstructible&>::Exists());
@@ -807,7 +807,7 @@ TEST(ReturnTest, MoveOnlyResultType) {
                 "");
 }
 
-// Tests that Return(v) is covaraint.
+// Tests that Return(v) is covariant.
 
 struct Base {
   bool operator==(const Base&) { return true; }
