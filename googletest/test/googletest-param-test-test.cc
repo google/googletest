@@ -821,7 +821,7 @@ TEST_F(PREFIX_WITH_MACRO(NamingTestNonParametrized),
 TEST(MacroNameing, LookupNames) {
   std::set<std::string> know_suite_names, know_test_names;
 
-  auto ins = testing::UnitTest::GetInstance();
+  const auto& ins = testing::UnitTest::GetInstance();
   int ts = 0;
   while (const testing::TestSuite* suite = ins->GetTestSuite(ts++)) {
     know_suite_names.insert(suite->name());
@@ -897,7 +897,7 @@ INSTANTIATE_TEST_SUITE_P(CustomParamNameLambda, CustomLambdaNamingTest,
                          });
 
 TEST(CustomNamingTest, CheckNameRegistry) {
-  ::testing::UnitTest* unit_test = ::testing::UnitTest::GetInstance();
+  const auto& unit_test = ::testing::UnitTest::GetInstance();
   std::set<std::string> test_names;
   for (int suite_num = 0; suite_num < unit_test->total_test_suite_count();
        ++suite_num) {
