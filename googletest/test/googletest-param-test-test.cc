@@ -897,7 +897,7 @@ INSTANTIATE_TEST_SUITE_P(CustomParamNameLambda, CustomLambdaNamingTest,
                          });
 
 TEST(CustomNamingTest, CheckNameRegistry) {
-  ::testing::UnitTest* unit_test = ::testing::UnitTest::GetInstance().get();
+  auto unit_test = ::testing::UnitTest::GetInstance().get();
   std::set<std::string> test_names;
   for (int suite_num = 0; suite_num < unit_test->total_test_suite_count();
        ++suite_num) {
