@@ -189,7 +189,7 @@ function(cxx_library_with_type name type cxx_flags)
   endif()
 
   if (NOT "${CMAKE_VERSION}" VERSION_LESS "3.8")
-    target_compile_features(${name} PUBLIC cxx_std_11)
+    target_compile_features(${name} PUBLIC cxx_std_14)
   endif()
 endfunction()
 
