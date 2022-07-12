@@ -7703,7 +7703,7 @@ auto* dynamic_test = testing::RegisterTest(
     __LINE__, []() -> DynamicUnitTestFixture* { return new DynamicTest; });
 
 TEST(RegisterTest, WasRegistered) {
-  auto* unittest = testing::UnitTest::GetInstance();
+  const auto& unittest = testing::UnitTest::GetInstance();
   for (int i = 0; i < unittest->total_test_suite_count(); ++i) {
     auto* tests = unittest->GetTestSuite(i);
     if (tests->name() != std::string("DynamicUnitTestFixture")) continue;
