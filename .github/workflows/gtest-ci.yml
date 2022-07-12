@@ -4,6 +4,9 @@ on:
   push:
   pull_request:
 
+env:
+  BAZEL_CXXOPTS: -std=c++14
+
 jobs:
   Linux:
     runs-on: ubuntu-latest

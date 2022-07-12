@@ -57,6 +57,7 @@
 #include <string.h>
 
 #include <cstdint>
+#include <functional>
 #include <iomanip>
 #include <limits>
 #include <map>
@@ -631,7 +632,7 @@ class GTEST_API_ TypedTestSuitePState {
                                         const char* registered_tests);
 
  private:
-  typedef ::std::map<std::string, CodeLocation> RegisteredTestsMap;
+  typedef ::std::map<std::string, CodeLocation, std::less<>> RegisteredTestsMap;
 
   bool registered_;
   RegisteredTestsMap registered_tests_;
