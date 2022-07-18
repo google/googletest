@@ -1561,7 +1561,7 @@ TEST(AnyOfArrayTest, Matchers) {
 }
 
 TEST_P(AnyOfArrayTestP, ExplainsMatchResultCorrectly) {
-  // AnyOfArray and AllOfArry use the same underlying template-template,
+  // AnyOfArray and AllOfArray use the same underlying template-template,
   // thus it is sufficient to test one here.
   const std::vector<int> v0{};
   const std::vector<int> v1{1};

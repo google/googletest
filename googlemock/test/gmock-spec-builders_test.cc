@@ -1064,7 +1064,7 @@ TEST(UnexpectedCallTest, UnmatchedArguments) {
 
 // Tests that Google Mock explains that an expectation with
 // unsatisfied pre-requisites doesn't match the call.
-TEST(UnexpectedCallTest, UnsatisifiedPrerequisites) {
+TEST(UnexpectedCallTest, UnsatisfiedPrerequisites) {
   Sequence s1, s2;
   MockB b;
   EXPECT_CALL(b, DoB(1)).InSequence(s1);
