@@ -244,6 +244,12 @@ function(cxx_executable name dir libs)
     ${name} "${cxx_default}" "${libs}" "${dir}/${name}.cc" ${ARGN})
 endfunction()
 
+# CMP0094 policy enables finding a Python executable in the LOCATION order, as
+# specified by the PATH environment variable.
+if (POLICY CMP0094)
+  cmake_policy(SET CMP0094 NEW)
+endif()
+
 # Sets PYTHONINTERP_FOUND and PYTHON_EXECUTABLE.
 if ("${CMAKE_VERSION}" VERSION_LESS "3.12.0")
   find_package(PythonInterp)
