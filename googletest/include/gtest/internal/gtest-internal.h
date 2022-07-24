@@ -632,7 +632,7 @@ class GTEST_API_ TypedTestSuitePState {
                                         const char* registered_tests);
 
  private:
-  typedef ::std::map<std::string, CodeLocation, std::less<>> RegisteredTestsMap;
+  typedef ::std::map<std::string, CodeLocation> RegisteredTestsMap;
 
   bool registered_;
   RegisteredTestsMap registered_tests_;
