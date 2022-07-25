@@ -10,7 +10,7 @@ this tutorial as a starting point. If your project uses Bazel, see the
 To complete this tutorial, you'll need:
 
 *   A compatible operating system (e.g. Linux, macOS, Windows).
-*   A compatible C++ compiler that supports at least C++11.
+*   A compatible C++ compiler that supports at least C++14.
 *   [CMake](https://cmake.org/) and a compatible build tool for building the
     project.
     *   Compatible build tools include
@@ -52,13 +52,14 @@ To do this, in your project directory (`my_project`), create a file named
 cmake_minimum_required(VERSION 3.14)
 project(my_project)
 
-# GoogleTest requires at least C++11
-set(CMAKE_CXX_STANDARD 11)
+# GoogleTest requires at least C++14
+set(CMAKE_CXX_STANDARD 14)
 
 include(FetchContent)
 FetchContent_Declare(
   googletest
-  URL https://github.com/google/googletest/archive/609281088cfefc76f9d0ce82e1ff6c30cc3591e5.zip
+  GIT_REPOSITORY https://github.com/google/googletest.git
+  GIT_TAG release-1.12.1
 )
 # For Windows: Prevent overriding the parent project's compiler/linker settings
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
@@ -108,7 +109,7 @@ add_executable(
 )
 target_link_libraries(
   hello_test
-  gtest_main
+  GTest::gtest_main
 )
 
 include(GoogleTest)

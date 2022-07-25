@@ -181,7 +181,7 @@ GTEST_API_ void Log(LogSeverity severity, const std::string& message,
     }
     std::cout << "Stack trace:\n"
               << ::testing::internal::GetCurrentOsStackTraceExceptTop(
-                     ::testing::UnitTest::GetInstance(), actual_to_skip);
+                     actual_to_skip);
   }
   std::cout << ::std::flush;
 }

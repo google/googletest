@@ -372,6 +372,8 @@ GTEST_DEFINE_string_(
 namespace testing {
 namespace internal {
 
+const uint32_t Random::kMaxRange;
+
 // Generates a random number from [0, range), using a Linear
 // Congruential Generator (LCG).  Crashes if 'range' is 0 or greater
 // than kMaxRange.
@@ -1008,14 +1010,14 @@ void DefaultPerThreadTestPartResultReporter::ReportTestPartResult(
 TestPartResultReporterInterface*
 UnitTestImpl::GetGlobalTestPartResultReporter() {
   internal::MutexLock lock(&global_test_part_result_reporter_mutex_);
-  return global_test_part_result_repoter_;
+  return global_test_part_result_reporter_;
 }
 
 // Sets the global test part result reporter.
 void UnitTestImpl::SetGlobalTestPartResultReporter(
     TestPartResultReporterInterface* reporter) {
   internal::MutexLock lock(&global_test_part_result_reporter_mutex_);
-  global_test_part_result_repoter_ = reporter;
+  global_test_part_result_reporter_ = reporter;
 }
 
 // Returns the test part result reporter for the current thread.
@@ -3280,14 +3282,9 @@ static void ColoredPrintf(GTestColor color, const char* fmt, ...) {
   va_list args;
   va_start(args, fmt);
 
-#if GTEST_OS_WINDOWS_MOBILE || GTEST_OS_ZOS || GTEST_OS_IOS || \
-    GTEST_OS_WINDOWS_PHONE || GTEST_OS_WINDOWS_RT || defined(ESP_PLATFORM)
-  const bool use_color = AlwaysFalse();
-#else
   static const bool in_color_mode =
       ShouldUseColor(posix::IsATTY(posix::FileNo(stdout)) != 0);
   const bool use_color = in_color_mode && (color != GTestColor::kDefault);
-#endif  // GTEST_OS_WINDOWS_MOBILE || GTEST_OS_ZOS
 
   if (!use_color) {
     vprintf(fmt, args);
@@ -5535,7 +5532,7 @@ UnitTestImpl::UnitTestImpl(UnitTest* parent)
       GTEST_DISABLE_MSC_WARNINGS_PUSH_(4355 /* using this in initializer */)
           default_global_test_part_result_reporter_(this),
       default_per_thread_test_part_result_reporter_(this),
-      GTEST_DISABLE_MSC_WARNINGS_POP_() global_test_part_result_repoter_(
+      GTEST_DISABLE_MSC_WARNINGS_POP_() global_test_part_result_reporter_(
           &default_global_test_part_result_reporter_),
       per_thread_test_part_result_reporter_(
           &default_per_thread_test_part_result_reporter_),
@@ -6264,7 +6261,7 @@ void UnitTestImpl::UnshuffleTests() {
 // GetCurrentOsStackTraceExceptTop(..., 1), Foo() will be included in
 // the trace but Bar() and GetCurrentOsStackTraceExceptTop() won't.
 GTEST_NO_INLINE_ GTEST_NO_TAIL_CALL_ std::string
-GetCurrentOsStackTraceExceptTop(UnitTest* /*unit_test*/, int skip_count) {
+GetCurrentOsStackTraceExceptTop(int skip_count) {
   // We pass skip_count + 1 to skip this wrapper function in addition
   // to what the user really wants to skip.
   return GetUnitTestImpl()->CurrentOsStackTraceExceptTop(skip_count + 1);

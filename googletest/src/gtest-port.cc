@@ -90,15 +90,6 @@
 namespace testing {
 namespace internal {
 
-#if defined(_MSC_VER) || defined(__BORLANDC__)
-// MSVC and C++Builder do not provide a definition of STDERR_FILENO.
-const int kStdOutFileno = 1;
-const int kStdErrFileno = 2;
-#else
-const int kStdOutFileno = STDOUT_FILENO;
-const int kStdErrFileno = STDERR_FILENO;
-#endif  // _MSC_VER
-
 #if GTEST_OS_LINUX || GTEST_OS_GNU_HURD
 
 namespace {
@@ -1176,6 +1167,15 @@ static std::string GetCapturedStream(CapturedStream** captured_stream) {
 
   return content;
 }
+
+#if defined(_MSC_VER) || defined(__BORLANDC__)
+// MSVC and C++Builder do not provide a definition of STDERR_FILENO.
+const int kStdOutFileno = 1;
+const int kStdErrFileno = 2;
+#else
+const int kStdOutFileno = STDOUT_FILENO;
+const int kStdErrFileno = STDERR_FILENO;
+#endif  // defined(_MSC_VER) || defined(__BORLANDC__)
 
 // Starts capturing stdout.
 void CaptureStdout() {
