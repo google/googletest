@@ -3240,6 +3240,11 @@ auto UnpackStructImpl(const T& t, MakeIndexSequence<17>, char) {
   const auto& [a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q] = t;
   return std::tie(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q);
 }
+template <typename T>
+auto UnpackStructImpl(const T& t, MakeIndexSequence<18>, char) {
+  const auto& [a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r] = t;
+  return std::tie(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r);
+}
 #endif  // defined(__cpp_structured_bindings)
 
 template <size_t I, typename T>
@@ -3306,8 +3311,8 @@ class FieldsAreMatcherImpl<Struct, IndexSequence<I...>>
     std::vector<StringMatchResultListener> inner_listener(sizeof...(I));
 
     VariadicExpand(
-        {failed_pos == ~size_t{} && !std::get<I>(matchers_).MatchAndExplain(
-                                        std::get<I>(tuple), &inner_listener[I])
+        {failed_pos == ~size_t{}&& !std::get<I>(matchers_).MatchAndExplain(
+                           std::get<I>(tuple), &inner_listener[I])
              ? failed_pos = I
              : 0 ...});
     if (failed_pos != ~size_t{}) {
