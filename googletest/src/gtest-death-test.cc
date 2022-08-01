@@ -249,7 +249,7 @@ static std::string DeathTestThreadWarning(size_t thread_count) {
     msg << "detected " << thread_count << " threads.";
   }
   msg << " See "
-         "https://github.com/google/googletest/blob/master/docs/"
+         "https://github.com/google/googletest/blob/main/docs/"
          "advanced.md#death-tests-and-threads"
       << " for more explanation and suggested solutions, especially if"
       << " this is the last message you see before your test times out.";
