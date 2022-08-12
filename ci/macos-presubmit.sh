@@ -68,6 +68,7 @@ for absl in 0 1; do
     --copt="-Werror" \
     --cxxopt="-std=c++14" \
     --define="absl=${absl}" \
+    --features=external_include_paths \
     --keep_going \
     --show_timestamps \
     --test_output=errors

@@ -80,6 +80,7 @@ time docker run \
       --copt="-Wuninitialized" \
       --copt="-Wno-error=pragmas" \
       --distdir="/bazel-distdir" \
+      --features=external_include_paths \
       --keep_going \
       --show_timestamps \
       --test_output=errors
@@ -100,6 +101,7 @@ for std in ${STD}; do
         --copt="-Wuninitialized" \
         --define="absl=${absl}" \
         --distdir="/bazel-distdir" \
+        --features=external_include_paths \
         --keep_going \
         --show_timestamps \
         --test_output=errors
@@ -123,6 +125,7 @@ for std in ${STD}; do
         --copt="-Wuninitialized" \
         --define="absl=${absl}" \
         --distdir="/bazel-distdir" \
+        --features=external_include_paths \
         --keep_going \
         --linkopt="--gcc-toolchain=/usr/local" \
         --show_timestamps \
