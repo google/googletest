@@ -17,7 +17,7 @@ jobs:
         fetch-depth: 0
 
     - name: Tests
-      run: bazel test --test_output=errors //...
+      run: bazel test --cxxopt=-std=c++14 --features=external_include_paths --test_output=errors ...
 
   MacOs:
     runs-on: macos-latest
@@ -28,7 +28,7 @@ jobs:
         fetch-depth: 0
 
     - name: Tests
-      run: bazel test --test_output=errors //...
+      run:  bazel test --cxxopt=-std=c++14 --features=external_include_paths --test_output=errors ...
 
 
   Windows:
@@ -40,4 +40,4 @@ jobs:
         fetch-depth: 0
 
     - name: Tests
-      run: bazel test --test_output=errors //...
+      run: bazel test --cxxopt=-std=c++14 --features=external_include_paths --test_output=errors ...
