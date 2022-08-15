@@ -93,6 +93,11 @@ macro(config_compiler_and_linker)
     set(cxx_no_rtti_flags "-fno-rtti")
   elseif (CMAKE_COMPILER_IS_GNUCXX)
     set(cxx_base_flags "-Wall -Wshadow")
+    # Up until version 6.1.0, GCC's default C++ mode is C++98. After GCC 6.1.0,
+    # C++14 is the default mode. We require at least C++11.
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 6.1.0)
+      set(cxx_base_flags "--std=c++14")
+    endif()
     if(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 7.0.0)
       set(cxx_base_flags "${cxx_base_flags} -Wno-error=dangling-else")
     endif()
