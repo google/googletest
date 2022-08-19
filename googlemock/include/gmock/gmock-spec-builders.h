@@ -985,7 +985,7 @@ class TypedExpectation<R(Args...)> : public ExpectationBase {
     return WillOnce(Action<F>(ActionAdaptor{
         std::make_shared<OnceAction<F>>(std::move(once_action)),
     }));
-  }
+  }  // NOLINT
 
   // Fallback overload: accept Action<F> objects and those actions that define
   // `operator Action<F>` but not `operator OnceAction<F>`.
