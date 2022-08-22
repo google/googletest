@@ -1720,6 +1720,11 @@ TEST(FieldsAreTest, StructuredBindings) {
   };
   EXPECT_THAT(MyVarType18{},
               FieldsAre(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+  struct MyVarType19 {
+    int a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s;
+  };
+  EXPECT_THAT(MyVarType19{}, FieldsAre(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                       0, 0, 0, 0, 0));
 }
 #endif
 
