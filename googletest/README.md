@@ -9,7 +9,7 @@ depends on which build system you use, and is usually straightforward.
 ### Build with CMake
 
 GoogleTest comes with a CMake build script
-([CMakeLists.txt](https://github.com/google/googletest/blob/master/CMakeLists.txt))
+([CMakeLists.txt](https://github.com/google/googletest/blob/main/CMakeLists.txt))
 that can be used on a wide range of platforms ("C" stands for cross-platform.).
 If you don't have CMake installed already, you can download it for free from
 <http://www.cmake.org/>.
@@ -140,7 +140,7 @@ command line. Generally, these macros are named like `GTEST_XYZ` and you define
 them to either 1 or 0 to enable or disable a certain feature.
 
 We list the most frequently used macros below. For a complete list, see file
-[include/gtest/internal/gtest-port.h](https://github.com/google/googletest/blob/master/googletest/include/gtest/internal/gtest-port.h).
+[include/gtest/internal/gtest-port.h](https://github.com/google/googletest/blob/main/googletest/include/gtest/internal/gtest-port.h).
 
 ### Multi-threaded Tests
 
