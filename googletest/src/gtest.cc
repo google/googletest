@@ -88,13 +88,23 @@
 
 #elif defined(GTEST_OS_WINDOWS_MOBILE)  // We are on Windows CE.
 
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
 #include <windows.h>  // NOLINT
-#undef min
 
 #elif defined(GTEST_OS_WINDOWS)  // We are on Windows proper.
 
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
 #include <windows.h>  // NOLINT
-#undef min
 
 #ifdef _MSC_VER
 #include <crtdbg.h>  // NOLINT
@@ -123,10 +133,16 @@
 #endif
 
 #if GTEST_CAN_STREAM_RESULTS_
+#if GTEST_OS_WINDOWS
+#include <WinSock2.h>    // NOLINT
+#include <ws2tcpip.h>    // NOLINT
+#pragma comment(lib, "Ws2_32.lib")
+#else
 #include <arpa/inet.h>   // NOLINT
 #include <netdb.h>       // NOLINT
 #include <sys/socket.h>  // NOLINT
 #include <sys/types.h>   // NOLINT
+#endif
 #endif
 
 #include "src/gtest-internal-inl.h"
@@ -4940,6 +4956,21 @@ void StreamingListener::SocketWriter::MakeConnection() {
   GTEST_CHECK_(sockfd_ == -1)
       << "MakeConnection() can't be called when there is already a connection.";
 
+#if GTEST_OS_WINDOWS
+  WSADATA winsockVersion{};
+  int startupError{ WSAStartup(MAKEWORD(2, 2), &winsockVersion) };
+
+  if (startupError)
+  {
+      return;
+  }
+
+  if (LOBYTE(winsockVersion.wVersion) != 2 || HIBYTE(winsockVersion.wVersion) != 2)
+  {
+      return;
+  }
+#endif
+
   addrinfo hints;
   memset(&hints, 0, sizeof(hints));
   hints.ai_family = AF_UNSPEC;  // To allow both IPv4 and IPv6 addresses.
@@ -4960,6 +4991,15 @@ void StreamingListener::SocketWriter::MakeConnection() {
        cur_addr = cur_addr->ai_next) {
     sockfd_ = socket(cur_addr->ai_family, cur_addr->ai_socktype,
                      cur_addr->ai_protocol);
+#if GTEST_OS_WINDOWS
+    if (sockfd_ != INVALID_SOCKET) {
+      // Connect the client socket to the server socket.
+      if (connect(sockfd_, cur_addr->ai_addr, static_cast<int>(cur_addr->ai_addrlen)) == -1) {
+        closesocket(sockfd_);
+        sockfd_ = INVALID_SOCKET;
+      }
+    }
+#else
     if (sockfd_ != -1) {
       // Connect the client socket to the server socket.
       if (connect(sockfd_, cur_addr->ai_addr, cur_addr->ai_addrlen) == -1) {
@@ -4967,6 +5007,7 @@ void StreamingListener::SocketWriter::MakeConnection() {
         sockfd_ = -1;
       }
     }
+#endif
   }
 
   freeaddrinfo(servinfo);  // all done with this structure

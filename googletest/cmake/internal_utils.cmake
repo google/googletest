@@ -75,7 +75,7 @@ macro(config_compiler_and_linker)
     # TODO(vladl@google.com): Add -RTCs and -RTCu to debug builds.
     set(cxx_base_flags "-GS -W4 -WX -wd4251 -wd4275 -nologo -J")
     set(cxx_base_flags "${cxx_base_flags} -D_UNICODE -DUNICODE -DWIN32 -D_WIN32")
-    set(cxx_base_flags "${cxx_base_flags} -DSTRICT -DWIN32_LEAN_AND_MEAN")
+    set(cxx_base_flags "${cxx_base_flags} -DSTRICT -DWIN32_LEAN_AND_MEAN -DNOMINMAX")
     set(cxx_exception_flags "-EHsc -D_HAS_EXCEPTIONS=1")
     set(cxx_no_exception_flags "-EHs-c- -D_HAS_EXCEPTIONS=0")
     set(cxx_no_rtti_flags "-GR-")

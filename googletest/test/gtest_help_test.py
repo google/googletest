@@ -144,7 +144,7 @@ class GTestHelpTest(gtest_test_utils.TestCase):
 
     self.assertTrue(HELP_REGEX.search(output), output)
 
-    if IS_DARWIN or IS_LINUX or IS_GNUHURD or is_bsd_based_os():
+    if IS_DARWIN or IS_LINUX or IS_GNUHURD or is_bsd_based_os() or IS_WINDOWS:
       self.assertIn(STREAM_RESULT_TO_FLAG, output)
     else:
       self.assertNotIn(STREAM_RESULT_TO_FLAG, output)
