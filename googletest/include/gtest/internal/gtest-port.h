@@ -780,7 +780,7 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 
 // _LIBCPP_VERSION is defined by the libc++ library from the LLVM project.
 #if !defined(GTEST_HAS_CXXABI_H_)
-#if defined(__GLIBCXX__) || (defined(_LIBCPP_VERSION) && !defined(_MSC_VER))
+#if !defined(__NuttX__) && (defined(__GLIBCXX__) || (defined(_LIBCPP_VERSION) && !defined(_MSC_VER)))
 #define GTEST_HAS_CXXABI_H_ 1
 #else
 #define GTEST_HAS_CXXABI_H_ 0
