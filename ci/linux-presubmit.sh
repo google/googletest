@@ -72,7 +72,6 @@ time docker run \
   --workdir="/src" \
   --rm \
   --env="CC=/usr/local/bin/gcc" \
-  --env="BAZEL_CXXOPTS=-std=c++14" \
   ${LINUX_GCC_FLOOR_CONTAINER} \
     /usr/local/bin/bazel test ... \
       --copt="-Wall" \
