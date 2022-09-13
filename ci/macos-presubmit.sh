@@ -66,6 +66,7 @@ for absl in 0 1; do
   ${BAZEL_BIN} test ... \
     --copt="-Wall" \
     --copt="-Werror" \
+    --cxxopt="-std=c++14" \
     --define="absl=${absl}" \
     --features=external_include_paths \
     --keep_going \
