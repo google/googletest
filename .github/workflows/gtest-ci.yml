@@ -4,6 +4,9 @@ on:
   push:
   pull_request:
 
+env:
+  BAZEL_CXXOPTS: -std=c++14
+
 jobs:
   Linux:
     runs-on: ubuntu-latest
@@ -14,7 +17,7 @@ jobs:
         fetch-depth: 0
 
     - name: Tests
-      run: bazel test --features=external_include_paths --test_output=errors ...
+      run: bazel test --cxxopt=-std=c++14 --features=external_include_paths --test_output=errors ...
 
   MacOs:
     runs-on: macos-latest
@@ -25,7 +28,7 @@ jobs:
         fetch-depth: 0
 
     - name: Tests
-      run:  bazel test --features=external_include_paths --test_output=errors ...
+      run:  bazel test --cxxopt=-std=c++14 --features=external_include_paths --test_output=errors ...
 
 
   Windows:
@@ -37,4 +40,4 @@ jobs:
         fetch-depth: 0
 
     - name: Tests
-      run: bazel test --features=external_include_paths --test_output=errors ...
+      run: bazel test --cxxopt=-std=c++14 --features=external_include_paths --test_output=errors ...
