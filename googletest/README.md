@@ -131,6 +131,29 @@ is not feasible, for example in a C project using GoogleTest for validation,
 then it can be specified by adding it to the options for cmake via the
 `DCMAKE_CXX_FLAGS` option.
 
+### Build with vcpkg
+
+vcpkg is a package manager that supports all platforms, you can use vcpkg to
+build and use googletest.
+
+#### Build googletest
+
+You can use the following steps to build googletest:
+```bash
+git clone https://github.com/microsoft/vcpkg.git
+./bootstrap-vcpkg.bat # for powershell
+./bootstrap-vcpkg.sh # for bash
+./vcpkg install gtest
+```
+
+#### Incorporating Into An Existing CMake Project
+
+You can easily use the following commands to use googletest in your custom
+project and follow the output prompts:
+```
+./vcpkg integrate install
+```
+
 ### Tweaking GoogleTest
 
 GoogleTest can be used in diverse environments. The default configuration may
