@@ -33,87 +33,23 @@
 
 #include "gtest/gtest-message.h"
 #include "gtest/internal/gtest-port.h"
-
-#if GTEST_OS_WINDOWS_MOBILE
-#include <windows.h>
-#elif GTEST_OS_WINDOWS
-#include <direct.h>
-#include <io.h>
-#else
-#include <limits.h>
-
-#include <climits>  // Some Linux distributions define PATH_MAX here.
-#endif              // GTEST_OS_WINDOWS_MOBILE
-
 #include "gtest/internal/gtest-string.h"
-
-#if GTEST_OS_WINDOWS
-#define GTEST_PATH_MAX_ _MAX_PATH
-#elif defined(PATH_MAX)
-#define GTEST_PATH_MAX_ PATH_MAX
-#elif defined(_XOPEN_PATH_MAX)
-#define GTEST_PATH_MAX_ _XOPEN_PATH_MAX
-#else
-#define GTEST_PATH_MAX_ _POSIX_PATH_MAX
-#endif  // GTEST_OS_WINDOWS
 
 namespace testing {
 namespace internal {
 
-#if GTEST_OS_WINDOWS
-// On Windows, '\\' is the standard path separator, but many tools and the
-// Windows API also accept '/' as an alternate path separator. Unless otherwise
-// noted, a file path can contain either kind of path separators, or a mixture
-// of them.
-const char kPathSeparator = '\\';
-const char kAlternatePathSeparator = '/';
-const char kAlternatePathSeparatorString[] = "/";
-#if GTEST_OS_WINDOWS_MOBILE
-// Windows CE doesn't have a current directory. You should not use
-// the current directory in tests on Windows CE, but this at least
-// provides a reasonable fallback.
-const char kCurrentDirectoryString[] = "\\";
-// Windows CE doesn't define INVALID_FILE_ATTRIBUTES
-const DWORD kInvalidFileAttributes = 0xffffffff;
-#else
-const char kCurrentDirectoryString[] = ".\\";
-#endif  // GTEST_OS_WINDOWS_MOBILE
-#else
-const char kPathSeparator = '/';
-const char kCurrentDirectoryString[] = "./";
-#endif  // GTEST_OS_WINDOWS
-
 // Returns whether the given character is a valid path separator.
 static bool IsPathSeparator(char c) {
-#if GTEST_HAS_ALT_PATH_SEP_
-  return (c == kPathSeparator) || (c == kAlternatePathSeparator);
+#ifdef GTEST_PATH_SEP_ALT_
+  return (c == GTEST_PATH_SEPCHAR_) || (c == GTEST_PATH_SEPCHAR_ALT_);
 #else
-  return c == kPathSeparator;
+  return c == GTEST_PATH_SEPCHAR_;
 #endif
 }
 
 // Returns the current working directory, or "" if unsuccessful.
 FilePath FilePath::GetCurrentDir() {
-#if GTEST_OS_WINDOWS_MOBILE || GTEST_OS_WINDOWS_PHONE ||         \
-    GTEST_OS_WINDOWS_RT || GTEST_OS_ESP8266 || GTEST_OS_ESP32 || \
-    GTEST_OS_XTENSA
-  // These platforms do not have a current directory, so we just return
-  // something reasonable.
-  return FilePath(kCurrentDirectoryString);
-#elif GTEST_OS_WINDOWS
-  char cwd[GTEST_PATH_MAX_ + 1] = {'\0'};
-  return FilePath(_getcwd(cwd, sizeof(cwd)) == nullptr ? "" : cwd);
-#else
-  char cwd[GTEST_PATH_MAX_ + 1] = {'\0'};
-  char* result = getcwd(cwd, sizeof(cwd));
-#if GTEST_OS_NACL
-  // getcwd will likely fail in NaCl due to the sandbox, so return something
-  // reasonable. The user may have provided a shim implementation for getcwd,
-  // however, so fallback only when failure is detected.
-  return FilePath(result == nullptr ? kCurrentDirectoryString : cwd);
-#endif  // GTEST_OS_NACL
-  return FilePath(result == nullptr ? "" : cwd);
-#endif  // GTEST_OS_WINDOWS_MOBILE
+  return FilePath(GetCwd());
 }
 
 // Returns a copy of the FilePath with the case-insensitive extension removed.
@@ -133,9 +69,9 @@ FilePath FilePath::RemoveExtension(const char* extension) const {
 // the FilePath. On Windows, for example, both '/' and '\' are valid path
 // separators. Returns NULL if no path separator was found.
 const char* FilePath::FindLastPathSeparator() const {
-  const char* const last_sep = strrchr(c_str(), kPathSeparator);
-#if GTEST_HAS_ALT_PATH_SEP_
-  const char* const last_alt_sep = strrchr(c_str(), kAlternatePathSeparator);
+  const char* const last_sep = strrchr(c_str(), GTEST_PATH_SEPCHAR_);
+#ifdef GTEST_PATH_SEP_ALT_
+  const char* const last_alt_sep = strrchr(c_str(), GTEST_PATH_SEPCHAR_ALT_);
   // Comparing two pointers of which only one is NULL is undefined.
   if (last_alt_sep != nullptr &&
       (last_sep == nullptr || last_alt_sep > last_sep)) {
@@ -168,7 +104,7 @@ FilePath FilePath::RemoveFileName() const {
   if (last_sep) {
     dir = std::string(c_str(), static_cast<size_t>(last_sep + 1 - c_str()));
   } else {
-    dir = kCurrentDirectoryString;
+    dir = GTEST_PATH_CWD_;
   }
   return FilePath(dir);
 }
@@ -198,7 +134,7 @@ FilePath FilePath::ConcatPaths(const FilePath& directory,
                                const FilePath& relative_path) {
   if (directory.IsEmpty()) return relative_path;
   const FilePath dir(directory.RemoveTrailingPathSeparator());
-  return FilePath(dir.string() + kPathSeparator + relative_path.string());
+  return FilePath(dir.string() + GTEST_PATH_SEPCHAR_ + relative_path.string());
 }
 
 // Returns true if pathname describes something findable in the file-system,
@@ -208,6 +144,8 @@ bool FilePath::FileOrDirectoryExists() const {
   LPCWSTR unicode = String::AnsiToUtf16(pathname_.c_str());
   const DWORD attributes = GetFileAttributes(unicode);
   delete[] unicode;
+  // Windows CE doesn't define INVALID_FILE_ATTRIBUTES
+  const DWORD kInvalidFileAttributes = 0xffffffff;
   return attributes != kInvalidFileAttributes;
 #else
   posix::StatStruct file_stat{};
@@ -232,6 +170,8 @@ bool FilePath::DirectoryExists() const {
   LPCWSTR unicode = String::AnsiToUtf16(path.c_str());
   const DWORD attributes = GetFileAttributes(unicode);
   delete[] unicode;
+  // Windows CE doesn't define INVALID_FILE_ATTRIBUTES
+  const DWORD kInvalidFileAttributes = 0xffffffff;
   if ((attributes != kInvalidFileAttributes) &&
       (attributes & FILE_ATTRIBUTE_DIRECTORY)) {
     result = true;
@@ -353,8 +293,8 @@ void FilePath::Normalize() {
   for (const char character : pathname_) {
     if (!IsPathSeparator(character)) {
       *(out++) = character;
-    } else if (out == pathname_.begin() || *std::prev(out) != kPathSeparator) {
-      *(out++) = kPathSeparator;
+    } else if (out == pathname_.begin() || *std::prev(out) != GTEST_PATH_SEPCHAR_) {
+      *(out++) = GTEST_PATH_SEPCHAR_;
     } else {
       continue;
     }
