@@ -2713,7 +2713,8 @@ TestInfo::TestInfo(const std::string& a_test_suite_name,
                    internal::TypeId fixture_class_id,
                    internal::TestFactoryBase* factory)
     : test_suite_name_(a_test_suite_name),
-      name_(a_name),
+      // begin()/end() is MSVC 17.3.3 ASAN crash workaround (GitHub issue #3997)
+      name_(a_name.begin(), a_name.end()),
       type_param_(a_type_param ? new std::string(a_type_param) : nullptr),
       value_param_(a_value_param ? new std::string(a_value_param) : nullptr),
       location_(a_code_location),
