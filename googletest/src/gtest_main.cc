@@ -32,9 +32,12 @@
 #include "gtest/gtest.h"
 
 #if GTEST_OS_ESP8266 || GTEST_OS_ESP32
+// Arduino-like platforms: program entry points are setup/loop instead of main.
+
 #if GTEST_OS_ESP8266
 extern "C" {
 #endif
+
 void setup() { testing::InitGoogleTest(); }
 
 void loop() { RUN_ALL_TESTS(); }
@@ -43,7 +46,16 @@ void loop() { RUN_ALL_TESTS(); }
 }
 #endif
 
+#elif GTEST_OS_QURT
+// QuRT: program entry point is main, but argc/argv are unusable.
+
+GTEST_API_ int main() {
+  printf("Running main() from %s\n", __FILE__);
+  testing::InitGoogleTest();
+  return RUN_ALL_TESTS();
+}
 #else
+// Normal platforms: program entry point is main, argc/argv are initialized.
 
 GTEST_API_ int main(int argc, char **argv) {
   printf("Running main() from %s\n", __FILE__);
