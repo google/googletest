@@ -542,10 +542,10 @@ MockObjectRegistry g_mock_object_registry;
 
 // Maps a mock object to the reaction Google Mock should have when an
 // uninteresting method is called.  Protected by g_gmock_mutex.
+std::unordered_map<uintptr_t, internal::CallReaction> g_uninteresting_call_reaction;
 std::unordered_map<uintptr_t, internal::CallReaction>&
 UninterestingCallReactionMap() {
-  static auto* map = new std::unordered_map<uintptr_t, internal::CallReaction>;
-  return *map;
+  return g_uninteresting_call_reaction;
 }
 
 // Sets the reaction Google Mock should have when an uninteresting
