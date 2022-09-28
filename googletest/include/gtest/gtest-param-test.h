@@ -409,7 +409,7 @@ internal::CartesianProductHolder<Generator...> Combine(const Generator&... g) {
 
 #define TEST_P(test_suite_name, test_name)                                     \
   class GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)                     \
-      : public ::testing::internal::UserTestSuite<test_suite_name> {           \
+      : public test_suite_name {                                               \
    public:                                                                     \
     GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)() {}                    \
     void TestBody() override;                                                  \
@@ -429,6 +429,11 @@ internal::CartesianProductHolder<Generator...> Combine(const Generator&... g) {
       return 0;                                                                \
     }                                                                          \
     static int gtest_registering_dummy_ GTEST_ATTRIBUTE_UNUSED_;               \
+    GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)                         \
+    (const GTEST_TEST_CLASS_NAME_(test_suite_name, test_name) &) = delete;     \
+    GTEST_TEST_CLASS_NAME_(test_suite_name, test_name) & operator=(            \
+        const GTEST_TEST_CLASS_NAME_(test_suite_name,                          \
+                                     test_name) &) = delete; /* NOLINT */      \
   };                                                                           \
   int GTEST_TEST_CLASS_NAME_(test_suite_name,                                  \
                              test_name)::gtest_registering_dummy_ =            \
