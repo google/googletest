@@ -190,6 +190,21 @@ void ReportFailureInUnknownLocation(TestPartResult::Type result_type,
                                     const std::string& message);
 std::set<std::string>* GetIgnoredParameterizedTestSuites();
 
+// Mix-in class for user tests.
+// This allows us to add/delete members to/from test suites without having to
+// modify the test macros themselves.
+// This makes the code easier to read and maintain, as well making it easier
+// for users to suppress any warnings originating from these members, as the
+// members are now declared in an external header instead of in user code.
+template <class TestClass>
+class UserTestSuite : public TestClass {
+ public:
+  UserTestSuite() = default;
+  UserTestSuite(const UserTestSuite &) = delete;
+  UserTestSuite &operator=(const UserTestSuite &) = delete;
+  virtual ~UserTestSuite() = default;
+};
+
 }  // namespace internal
 
 // The friend relationship of some of these classes is cyclic.
