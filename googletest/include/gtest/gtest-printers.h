@@ -284,7 +284,7 @@ struct RawBytesPrinter {
   }
 };
 
-struct FallbackPrinter {
+struct IncompleteTypePrinter {
   template <typename T>
   static void PrintValue(const T&, ::std::ostream* os) {
     *os << "(incomplete type)";
@@ -317,7 +317,7 @@ void PrintWithFallback(const T& value, ::std::ostream* os) {
       T, void, ContainerPrinter, FunctionPointerPrinter, PointerPrinter,
       internal_stream_operator_without_lexical_name_lookup::StreamPrinter,
       ProtobufPrinter, ConvertibleToIntegerPrinter, ScopedEnumPrinter,
-      ConvertibleToStringViewPrinter, RawBytesPrinter, FallbackPrinter>::type;
+      ConvertibleToStringViewPrinter, RawBytesPrinter, IncompleteTypePrinter>::type;
   Printer::PrintValue(value, os);
 }
 
