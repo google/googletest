@@ -291,6 +291,14 @@ struct IncompleteTypePrinter {
   }
 };
 
+struct CustomFallbackPrinter {
+  // Used as a last fallback if the user defined GTEST_FALLBACK_PRINTER.
+  template <typename T>
+  static void PrintValue(const T& t, ::std::ostream* os) {
+    GTEST_FALLBACK_PRINTER(t, os);
+  }
+};
+
 // Try every printer in order and return the first one that works.
 template <typename T, typename E, typename Printer, typename... Printers>
 struct FindFirstPrinter : FindFirstPrinter<T, E, Printers...> {};
@@ -317,7 +325,13 @@ void PrintWithFallback(const T& value, ::std::ostream* os) {
       T, void, ContainerPrinter, FunctionPointerPrinter, PointerPrinter,
       internal_stream_operator_without_lexical_name_lookup::StreamPrinter,
       ProtobufPrinter, ConvertibleToIntegerPrinter, ScopedEnumPrinter,
-      ConvertibleToStringViewPrinter, RawBytesPrinter, IncompleteTypePrinter>::type;
+      ConvertibleToStringViewPrinter,
+#ifdef GTEST_FALLBACK_PRINTER
+      CustomFallbackPrinter
+#else
+      RawBytesPrinter, IncompleteTypePrinter
+#endif
+      >::type;
   Printer::PrintValue(value, os);
 }
 
