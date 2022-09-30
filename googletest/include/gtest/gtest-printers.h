@@ -250,6 +250,16 @@ struct ConvertibleToIntegerPrinter {
   }
 };
 
+struct ScopedEnumPrinter {
+  // Print scoped enums. These are not implicitly convertible to int, so they
+  // are not covered by ConvertibleToIntegerPrinter above.
+  template <typename T,
+            typename = typename std::enable_if<std::is_enum<T>::value>::type>
+  static void PrintValue(T value, ::std::ostream* os) {
+    *os << static_cast<internal::BiggestInt>(value);
+  }
+};
+
 struct ConvertibleToStringViewPrinter {
 #if GTEST_INTERNAL_HAS_STRING_VIEW
   static void PrintValue(internal::StringView value, ::std::ostream* os) {
@@ -306,7 +316,7 @@ void PrintWithFallback(const T& value, ::std::ostream* os) {
   using Printer = typename FindFirstPrinter<
       T, void, ContainerPrinter, FunctionPointerPrinter, PointerPrinter,
       internal_stream_operator_without_lexical_name_lookup::StreamPrinter,
-      ProtobufPrinter, ConvertibleToIntegerPrinter,
+      ProtobufPrinter, ConvertibleToIntegerPrinter, ScopedEnumPrinter,
       ConvertibleToStringViewPrinter, RawBytesPrinter, FallbackPrinter>::type;
   Printer::PrintValue(value, os);
 }

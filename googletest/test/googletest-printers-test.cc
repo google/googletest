@@ -74,6 +74,23 @@ void PrintTo(EnumWithPrintTo e, std::ostream* os) {
   *os << (e == kEWPT1 ? "kEWPT1" : "invalid");
 }
 
+// A scoped enum type.
+enum class ScopedEnum { kSE1 = -1, kSE2 = 1 };
+
+// A scoped enum with a << operator.
+enum class ScopedEnumWithStreaming { kSEWS1 = 10 };
+
+std::ostream& operator<<(std::ostream& os, ScopedEnumWithStreaming e) {
+  return os << (e == ScopedEnumWithStreaming::kSEWS1 ? "kSEWS1" : "invalid");
+}
+
+// A scoped enum with a PrintTo() function.
+enum class ScopedEnumWithPrintTo { kSEWPT1 = 1 };
+
+void PrintTo(ScopedEnumWithPrintTo e, std::ostream* os) {
+  *os << (e == ScopedEnumWithPrintTo::kSEWPT1 ? "kSEWPT1" : "invalid");
+}
+
 // A class implicitly convertible to BiggestInt.
 class BiggestIntConvertible {
  public:
@@ -308,6 +325,21 @@ TEST(PrintEnumTest, EnumWithStreaming) {
 TEST(PrintEnumTest, EnumWithPrintTo) {
   EXPECT_EQ("kEWPT1", Print(kEWPT1));
   EXPECT_EQ("invalid", Print(static_cast<EnumWithPrintTo>(0)));
+}
+
+TEST(PrintEnumTest, ScopedEnum) {
+  EXPECT_EQ("-1", Print(ScopedEnum::kSE1));
+  EXPECT_EQ("1", Print(ScopedEnum::kSE2));
+}
+
+TEST(PrintEnumTest, ScopedEnumWithStreaming) {
+  EXPECT_EQ("kSEWS1", Print(ScopedEnumWithStreaming::kSEWS1));
+  EXPECT_EQ("invalid", Print(static_cast<ScopedEnumWithStreaming>(0)));
+}
+
+TEST(PrintEnumTest, ScopedEnumWithPrintTo) {
+  EXPECT_EQ("kSEWPT1", Print(ScopedEnumWithPrintTo::kSEWPT1));
+  EXPECT_EQ("invalid", Print(static_cast<ScopedEnumWithPrintTo>(0)));
 }
 
 // Tests printing a class implicitly convertible to BiggestInt.
