@@ -157,7 +157,7 @@ class GMockOutputTest(gmock_test_utils.TestCase):
   def testOutput(self):
     (output, leaky_tests) = GetNormalizedCommandOutputAndLeakyTests(COMMAND)
     golden_file = open(GOLDEN_PATH, 'rb')
-    golden = golden_file.read().decode('utf-8')
+    golden = ToUnixLineEnding(golden_file.read().decode('utf-8'))
     golden_file.close()
     # On Windows the repository might have been checked out with \r\n line
     # endings, so normalize it here.
