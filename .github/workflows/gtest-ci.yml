@@ -12,18 +12,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         fetch-depth: 0
 
     - name: Tests
       run: bazel test --cxxopt=-std=c++14 --features=external_include_paths --test_output=errors ...
 
-  MacOs:
+  macOS:
     runs-on: macos-latest
     steps:
 
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         fetch-depth: 0
 
@@ -35,7 +35,7 @@ jobs:
     runs-on: windows-latest
     steps:
 
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         fetch-depth: 0
 
