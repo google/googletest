@@ -165,6 +165,10 @@ namespace testing {
 #pragma warning(push)
 #pragma warning(disable : 4805)
 #pragma warning(disable : 4100)
+#pragma warning(disable : 26814)
+#pragma warning(disable : 26440)
+#pragma warning(disable : 26429)
+#pragma warning(disable : 26432)
 #endif
 
 // The upper limit for valid stack trace depths.
