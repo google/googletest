@@ -1,0 +1,20 @@
+name: cpp-linter
+
+on: pull_request
+
+jobs:
+  cpp-linter:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: cpp-linter/cpp-linter-action@v2.2.0
+        id: linter
+        with:
+          style: file # load .clang-format config file.
+          tidy-checks: '-*' # disable clang-tidy check.
+
+      - name: Fail fast?!
+        if: steps.linter.outputs.checks-failed > 0
+        run: echo "Some files failed the linting checks!"
+        # for actual deployment
+        # run: exit 1
