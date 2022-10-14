@@ -891,6 +891,13 @@ class UniversalTersePrinter<T&> {
     UniversalPrint(value, os);
   }
 };
+template <typename T>
+class UniversalTersePrinter<std::reference_wrapper<T>> {
+ public:
+  static void Print(std::reference_wrapper<T> value, ::std::ostream* os) {
+    UniversalTersePrinter<T>::Print(value.get(), os);
+  }
+};
 template <typename T, size_t N>
 class UniversalTersePrinter<T[N]> {
  public:
