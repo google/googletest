@@ -21,8 +21,9 @@ endif (POLICY CMP0054)
 # This must be a macro(), as inside a function string() can only
 # update variables in the function scope.
 macro(fix_default_compiler_settings_)
-  if (MSVC)
-    # For MSVC, CMake sets certain flags to defaults we want to override.
+  if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC|Clang")
+    # For MSVC and Clang, CMake sets certain flags to defaults we want to
+    # override.
     # This replacement code is taken from sample in the CMake Wiki at
     # https://gitlab.kitware.com/cmake/community/wikis/FAQ#dynamic-replace.
     foreach (flag_var
@@ -39,6 +40,10 @@ macro(fix_default_compiler_settings_)
         # on CRT DLLs being available. CMake always defaults to using shared
         # CRT libraries, so we override that default here.
         string(REPLACE "/MD" "-MT" ${flag_var} "${${flag_var}}")
+
+        # When using Ninja with Clang, static builds pass -D_DLL on Windows.
+        # This is incorrect and should not happen, so we fix that here.
+        string(REPLACE "-D_DLL" "" ${flag_var} "${${flag_var}}")
       endif()
 
       # We prefer more strict warning checking for building Google Test.
@@ -162,7 +167,8 @@ function(cxx_library_with_type name type cxx_flags)
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
     ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
-    PDB_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+    PDB_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+    COMPILE_PDB_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
   # make PDBs match library name
   get_target_property(pdb_debug_postfix ${name} DEBUG_POSTFIX)
   set_target_properties(${name}
@@ -243,6 +249,12 @@ function(cxx_executable name dir libs)
   cxx_executable_with_flags(
     ${name} "${cxx_default}" "${libs}" "${dir}/${name}.cc" ${ARGN})
 endfunction()
+
+# CMP0094 policy enables finding a Python executable in the LOCATION order, as
+# specified by the PATH environment variable.
+if (POLICY CMP0094)
+  cmake_policy(SET CMP0094 NEW)
+endif()
 
 # Sets PYTHONINTERP_FOUND and PYTHON_EXECUTABLE.
 if ("${CMAKE_VERSION}" VERSION_LESS "3.12.0")

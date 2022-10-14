@@ -34,8 +34,8 @@
 // IWYU pragma: private, include "gmock/gmock.h"
 // IWYU pragma: friend gmock/.*
 
-#ifndef GOOGLEMOCK_INCLUDE_GMOCK_INTERNAL_GMOCK_FUNCTION_MOCKER_H_  // NOLINT
-#define GOOGLEMOCK_INCLUDE_GMOCK_INTERNAL_GMOCK_FUNCTION_MOCKER_H_  // NOLINT
+#ifndef GOOGLEMOCK_INCLUDE_GMOCK_GMOCK_FUNCTION_MOCKER_H_
+#define GOOGLEMOCK_INCLUDE_GMOCK_GMOCK_FUNCTION_MOCKER_H_
 
 #include <type_traits>  // IWYU pragma: keep
 #include <utility>      // IWYU pragma: keep
@@ -511,4 +511,4 @@ using internal::FunctionMocker;
 #define GMOCK_MOCKER_(arity, constness, Method) \
   GTEST_CONCAT_TOKEN_(gmock##constness##arity##_##Method##_, __LINE__)
 
-#endif  // GOOGLEMOCK_INCLUDE_GMOCK_INTERNAL_GMOCK_FUNCTION_MOCKER_H_
+#endif  // GOOGLEMOCK_INCLUDE_GMOCK_GMOCK_FUNCTION_MOCKER_H_

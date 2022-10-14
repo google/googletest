@@ -249,7 +249,7 @@ static std::string DeathTestThreadWarning(size_t thread_count) {
     msg << "detected " << thread_count << " threads.";
   }
   msg << " See "
-         "https://github.com/google/googletest/blob/master/docs/"
+         "https://github.com/google/googletest/blob/main/docs/"
          "advanced.md#death-tests-and-threads"
       << " for more explanation and suggested solutions, especially if"
       << " this is the last message you see before your test times out.";
@@ -284,7 +284,7 @@ enum DeathTestOutcome { IN_PROGRESS, DIED, LIVED, RETURNED, THREW };
 // message is propagated back to the parent process.  Otherwise, the
 // message is simply printed to stderr.  In either case, the program
 // then exits with status 1.
-static void DeathTestAbort(const std::string& message) {
+[[noreturn]] static void DeathTestAbort(const std::string& message) {
   // On a POSIX system, this function may be called from a threadsafe-style
   // death test child process, which operates on a very small stack.  Use
   // the heap for any additional non-minuscule memory requirements.

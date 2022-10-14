@@ -1064,7 +1064,7 @@ TEST(UnexpectedCallTest, UnmatchedArguments) {
 
 // Tests that Google Mock explains that an expectation with
 // unsatisfied pre-requisites doesn't match the call.
-TEST(UnexpectedCallTest, UnsatisifiedPrerequisites) {
+TEST(UnexpectedCallTest, UnsatisfiedPrerequisites) {
   Sequence s1, s2;
   MockB b;
   EXPECT_CALL(b, DoB(1)).InSequence(s1);
@@ -2059,7 +2059,7 @@ class GMockVerboseFlagTest : public VerboseFlagPreservingFixture {
         "call should not happen.  Do not suppress it by blindly adding "
         "an EXPECT_CALL() if you don't mean to enforce the call.  "
         "See "
-        "https://github.com/google/googletest/blob/master/docs/"
+        "https://github.com/google/googletest/blob/main/docs/"
         "gmock_cook_book.md#"
         "knowing-when-to-expect for details.";
 
