@@ -101,7 +101,6 @@ functions that generate the test parameters, all defined in the `::testing`
 namespace:
 
 <span id="param-generators"></span>
-
 | Parameter Generator | Behavior                                             |
 | ------------------- | ---------------------------------------------------- |
 | `Range(begin, end [, step])` | Yields values `{begin, begin+step, begin+step+step, ...}`. The values do not include `end`. `step` defaults to 1. |
