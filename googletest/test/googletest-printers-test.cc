@@ -37,6 +37,7 @@
 #include <cstring>
 #include <deque>
 #include <forward_list>
+#include <functional>
 #include <limits>
 #include <list>
 #include <map>
@@ -191,6 +192,11 @@ OutputStream& operator<<(OutputStream& os,
                          const TemplatedStreamableInFoo& /*ts*/) {
   os << "TemplatedStreamableInFoo";
   return os;
+}
+
+struct StreamableInLocal {};
+void operator<<(::std::ostream& os, const StreamableInLocal& /* x */) {
+  os << "StreamableInLocal";
 }
 
 // A user-defined streamable but recursively-defined container type in
@@ -1602,6 +1608,23 @@ TEST(PrintToStringTest, ContainsNonLatin) {
   EXPECT_PRINT_TO_STRING_(non_ascii_str,
                           "\"From \\xC3\\xA4 \\xE2\\x80\\x94 \\xE1\\xBA\\x91\""
                           "\n    As Text: \"From ä — ẑ\"");
+}
+
+TEST(PrintToStringTest, PrintStreamableInLocal) {
+  EXPECT_STREQ("StreamableInLocal",
+               PrintToString(foo::StreamableInLocal()).c_str());
+}
+
+TEST(PrintToStringTest, PrintReferenceToStreamableInLocal) {
+  foo::StreamableInLocal s;
+  std::reference_wrapper<foo::StreamableInLocal> r(s);
+  EXPECT_STREQ("StreamableInLocal", PrintToString(r).c_str());
+}
+
+TEST(PrintToStringTest, PrintReferenceToStreamableInGlobal) {
+  StreamableInGlobal s;
+  std::reference_wrapper<StreamableInGlobal> r(s);
+  EXPECT_STREQ("StreamableInGlobal", PrintToString(r).c_str());
 }
 
 TEST(IsValidUTF8Test, IllFormedUTF8) {
