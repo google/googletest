@@ -658,6 +658,16 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 #define GTEST_HAVE_ATTRIBUTE_(x) 0
 #endif
 
+// GTEST_HAVE_FEATURE_
+//
+// A function-like feature checking macro that is a wrapper around
+// `__has_feature`.
+#ifdef __has_feature
+#define GTEST_HAVE_FEATURE_(x) __has_feature(x)
+#else
+#define GTEST_HAVE_FEATURE_(x) 0
+#endif
+
 // Use this annotation at the end of a struct/class definition to
 // prevent the compiler from optimizing away instances that are never
 // used.  This is useful when all interesting logic happens inside the
@@ -812,7 +822,8 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 #endif
 
 // A function level attribute to disable HWAddressSanitizer instrumentation.
-#if GTEST_HAVE_ATTRIBUTE_(no_sanitize)
+#if GTEST_HAVE_FEATURE_(hwaddress_sanitizer) && \
+    GTEST_HAVE_ATTRIBUTE_(no_sanitize)
 #define GTEST_ATTRIBUTE_NO_SANITIZE_HWADDRESS_ \
   __attribute__((no_sanitize("hwaddress")))
 #else
