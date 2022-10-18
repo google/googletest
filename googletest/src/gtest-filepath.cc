@@ -145,6 +145,45 @@ const char* FilePath::FindLastPathSeparator() const {
   return last_sep;
 }
 
+size_t FilePath::CalculateRootLength() const {
+  const auto &path = pathname_;
+  auto s = path.begin();
+  auto end = path.end();
+#if GTEST_OS_WINDOWS
+  if (end - s >= 2 && s[1] == ':' &&
+      (end - s == 2 || IsPathSeparator(s[2])) &&
+      (('A' <= s[0] && s[0] <= 'Z') || ('a' <= s[0] && s[0] <= 'z'))) {
+    // A typical absolute path like "C:\Windows" or "D:"
+    s += 2;
+    if (s != end) {
+      ++s;
+    }
+  } else if (end - s >= 3 && IsPathSeparator(*s) && IsPathSeparator(*(s + 1))
+             && !IsPathSeparator(*(s + 2))) {
+    // Move past the "\\" prefix in a UNC path like "\\Server\Share\Folder"
+    s += 2;
+    // Skip 2 components and their following separators ("Server\" and "Share\")
+    for (int i = 0; i < 2; ++i) {
+      while (s != end) {
+        bool stop = IsPathSeparator(*s);
+        ++s;
+        if (stop) {
+          break;
+        }
+      }
+    }
+  } else if (s != end && IsPathSeparator(*s)) {
+    // A drive-rooted path like "\Windows"
+    ++s;
+  }
+#else
+  if (s != end && IsPathSeparator(*s)) {
+    ++s;
+  }
+#endif
+  return static_cast<size_t>(s - path.begin());
+}
+
 // Returns a copy of the FilePath with the directory part removed.
 // Example: FilePath("path/to/file").RemoveDirectoryName() returns
 // FilePath("file"). If there is no directory part ("just_a_file"), it returns
@@ -246,26 +285,16 @@ bool FilePath::DirectoryExists() const {
 }
 
 // Returns true if pathname describes a root directory. (Windows has one
-// root directory per disk drive.)
+// root directory per disk drive. UNC share roots are also included.)
 bool FilePath::IsRootDirectory() const {
-#if GTEST_OS_WINDOWS
-  return pathname_.length() == 3 && IsAbsolutePath();
-#else
-  return pathname_.length() == 1 && IsPathSeparator(pathname_.c_str()[0]);
-#endif
+  size_t root_length = CalculateRootLength();
+  return root_length > 0 && root_length == pathname_.size() &&
+         IsPathSeparator(pathname_[root_length - 1]);
 }
 
 // Returns true if pathname describes an absolute path.
 bool FilePath::IsAbsolutePath() const {
-  const char* const name = pathname_.c_str();
-#if GTEST_OS_WINDOWS
-  return pathname_.length() >= 3 &&
-         ((name[0] >= 'a' && name[0] <= 'z') ||
-          (name[0] >= 'A' && name[0] <= 'Z')) &&
-         name[1] == ':' && IsPathSeparator(name[2]);
-#else
-  return IsPathSeparator(name[0]);
-#endif
+  return CalculateRootLength() > 0;
 }
 
 // Returns a pathname for a file that does not currently exist. The pathname
@@ -347,17 +376,27 @@ FilePath FilePath::RemoveTrailingPathSeparator() const {
 // Removes any redundant separators that might be in the pathname.
 // For example, "bar///foo" becomes "bar/foo". Does not eliminate other
 // redundancies that might be in a pathname involving "." or "..".
+// Note that "\\Host\Share" does not contain a redundancy on Windows!
 void FilePath::Normalize() {
   auto out = pathname_.begin();
 
-  for (const char character : pathname_) {
+  auto i = pathname_.cbegin();
+#if GTEST_OS_WINDOWS
+  // UNC paths are treated specially
+  if (pathname_.end() - i >= 3 && IsPathSeparator(*i) &&
+      IsPathSeparator(*(i + 1)) && !IsPathSeparator(*(i + 2))) {
+    *(out++) = kPathSeparator;
+    *(out++) = kPathSeparator;
+  }
+#endif
+  while (i != pathname_.end()) {
+    const char character = *i;
     if (!IsPathSeparator(character)) {
       *(out++) = character;
     } else if (out == pathname_.begin() || *std::prev(out) != kPathSeparator) {
       *(out++) = kPathSeparator;
-    } else {
-      continue;
     }
+    ++i;
   }
 
   pathname_.erase(out, pathname_.end());
