@@ -772,6 +772,10 @@ class GTEST_API_ ExpectationBase {
     retired_ = true;
   }
 
+  void SetName(std::string name) { name_ = std::move(name); }
+
+  const std::string& GetName() const { return name_; }
+
   // Returns true if and only if this expectation is satisfied.
   bool IsSatisfied() const GTEST_EXCLUSIVE_LOCK_REQUIRED_(g_gmock_mutex) {
     g_gmock_mutex.AssertHeld();
@@ -831,6 +835,7 @@ class GTEST_API_ ExpectationBase {
   const char* file_;               // The file that contains the expectation.
   int line_;                       // The line number of the expectation.
   const std::string source_text_;  // The EXPECT_CALL(...) source text.
+  std::string name_;
   // True if and only if the cardinality is specified explicitly.
   bool cardinality_specified_;
   Cardinality cardinality_;  // The cardinality of the expectation.
@@ -906,6 +911,11 @@ class TypedExpectation<R(Args...)> : public ExpectationBase {
 
     extra_matcher_ = m;
     extra_matcher_specified_ = true;
+    return *this;
+  }
+
+  TypedExpectation& Name(std::string name) {
+    SetName(std::move(name));
     return *this;
   }
 
@@ -1199,10 +1209,15 @@ class TypedExpectation<R(Args...)> : public ExpectationBase {
                                          ::std::ostream* why)
       GTEST_EXCLUSIVE_LOCK_REQUIRED_(g_gmock_mutex) {
     g_gmock_mutex.AssertHeld();
+    const ::std::string& expectation_name = GetName();
     if (IsSaturated()) {
       // We have an excessive call.
       IncrementCallCount();
-      *what << "Mock function called more times than expected - ";
+      *what << "Mock function ";
+      if (!expectation_name.empty()) {
+        *what << "with name \"" << expectation_name << "\" ";
+      }
+      *what << "called more times than expected - ";
       mocker->DescribeDefaultActionTo(args, what);
       DescribeCallCountTo(why);
 
@@ -1217,7 +1232,11 @@ class TypedExpectation<R(Args...)> : public ExpectationBase {
     }
 
     // Must be done after IncrementCount()!
-    *what << "Mock function call matches " << source_text() << "...\n";
+    *what << "Mock function ";
+    if (!expectation_name.empty()) {
+      *what << "with name \"" << expectation_name << "\" ";
+    }
+    *what << "call matches " << source_text() << "...\n";
     return &(GetCurrentAction(mocker, args));
   }
 
