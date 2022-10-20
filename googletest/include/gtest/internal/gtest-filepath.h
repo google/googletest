@@ -199,6 +199,16 @@ class GTEST_API_ FilePath {
   // separators. Returns NULL if no path separator was found.
   const char* FindLastPathSeparator() const;
 
+  // Returns the length of the path root, including the directory separator at
+  // the end of the prefix. Returns zero by definition if the path is relative.
+  // Examples:
+  // - [Windows] "..\Sibling" => 0
+  // - [Windows] "\Windows" => 1
+  // - [Windows] "C:/Windows\Notepad.exe" => 3
+  // - [Windows] "\\Host\Share\C$/Windows" => 13
+  // - [UNIX] "/bin" => 1
+  size_t CalculateRootLength() const;
+
   std::string pathname_;
 };  // class FilePath
 

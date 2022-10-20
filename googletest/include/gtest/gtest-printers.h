@@ -384,7 +384,7 @@ GTEST_IMPL_FORMAT_C_STRING_AS_POINTER_(const char32_t);
 
 GTEST_IMPL_FORMAT_C_STRING_AS_STRING_(char, ::std::string);
 GTEST_IMPL_FORMAT_C_STRING_AS_STRING_(const char, ::std::string);
-#ifdef __cpp_char8_t
+#ifdef __cpp_lib_char8_t
 GTEST_IMPL_FORMAT_C_STRING_AS_STRING_(char8_t, ::std::u8string);
 GTEST_IMPL_FORMAT_C_STRING_AS_STRING_(const char8_t, ::std::u8string);
 #endif
@@ -556,7 +556,7 @@ inline void PrintTo(const ::std::string& s, ::std::ostream* os) {
 }
 
 // Overloads for ::std::u8string
-#ifdef __cpp_char8_t
+#ifdef __cpp_lib_char8_t
 GTEST_API_ void PrintU8StringTo(const ::std::u8string& s, ::std::ostream* os);
 inline void PrintTo(const ::std::u8string& s, ::std::ostream* os) {
   PrintU8StringTo(s, os);
@@ -889,6 +889,13 @@ class UniversalTersePrinter<T&> {
  public:
   static void Print(const T& value, ::std::ostream* os) {
     UniversalPrint(value, os);
+  }
+};
+template <typename T>
+class UniversalTersePrinter<std::reference_wrapper<T>> {
+ public:
+  static void Print(std::reference_wrapper<T> value, ::std::ostream* os) {
+    UniversalTersePrinter<T>::Print(value.get(), os);
   }
 };
 template <typename T, size_t N>

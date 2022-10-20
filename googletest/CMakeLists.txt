@@ -125,6 +125,22 @@ include_directories(${gtest_build_include_dirs})
 # aggressive about warnings.
 cxx_library(gtest "${cxx_strict}" src/gtest-all.cc)
 set_target_properties(gtest PROPERTIES VERSION ${GOOGLETEST_VERSION})
+if(GTEST_HAS_ABSL)
+  target_compile_definitions(gtest PUBLIC GTEST_HAS_ABSL=1)
+  target_link_libraries(gtest PUBLIC
+    absl::failure_signal_handler
+    absl::stacktrace
+    absl::symbolize
+    absl::flags_parse
+    absl::flags_reflection
+    absl::flags_usage
+    absl::strings
+    absl::any
+    absl::optional
+    absl::variant
+    re2::re2
+  )
+endif()
 cxx_library(gtest_main "${cxx_strict}" src/gtest_main.cc)
 set_target_properties(gtest_main PROPERTIES VERSION ${GOOGLETEST_VERSION})
 # If the CMake version supports it, attach header directory information

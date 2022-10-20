@@ -190,6 +190,17 @@ void ReportFailureInUnknownLocation(TestPartResult::Type result_type,
                                     const std::string& message);
 std::set<std::string>* GetIgnoredParameterizedTestSuites();
 
+// A base class that prevents subclasses from being copyable.
+// We do this instead of using '= delete' so as to avoid triggering warnings
+// inside user code regarding any of our declarations.
+class GTestNonCopyable {
+ public:
+  GTestNonCopyable() = default;
+  GTestNonCopyable(const GTestNonCopyable &) = delete;
+  GTestNonCopyable &operator=(const GTestNonCopyable &) = delete;
+  ~GTestNonCopyable() = default;
+};
+
 }  // namespace internal
 
 // The friend relationship of some of these classes is cyclic.
@@ -1625,7 +1636,7 @@ class GTEST_API_ AssertHelper {
 // the GetParam() method.
 //
 // Use it with one of the parameter generator defining functions, like Range(),
-// Values(), ValuesIn(), Bool(), and Combine().
+// Values(), ValuesIn(), Bool(), Combine(), and ConvertGenerator<T>().
 //
 // class FooTest : public ::testing::TestWithParam<int> {
 //  protected:

@@ -290,13 +290,6 @@ class WithoutMatchers {
 // Internal use only: access the singleton instance of WithoutMatchers.
 GTEST_API_ WithoutMatchers GetWithoutMatchers();
 
-// Disable MSVC warnings for infinite recursion, since in this case the
-// recursion is unreachable.
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4717)
-#endif
-
 // Invalid<T>() is usable as an expression of type T, but will terminate
 // the program with an assertion failure if actually run.  This is useful
 // when a value of type T is needed for compilation, but the statement
@@ -313,10 +306,6 @@ inline T Invalid() {
   return Invalid<T>();
 #endif
 }
-
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
 
 // Given a raw type (i.e. having no top-level reference or const
 // modifier) RawContainer that's either an STL-style container or a
@@ -463,6 +452,13 @@ struct Function<R(Args...)> {
 
 template <typename R, typename... Args>
 constexpr size_t Function<R(Args...)>::ArgumentCount;
+
+// Workaround for MSVC error C2039: 'type': is not a member of 'std'
+// when std::tuple_element is used.
+// See: https://github.com/google/googletest/issues/3931
+// Can be replaced with std::tuple_element_t in C++14.
+template <size_t I, typename T>
+using TupleElement = typename std::tuple_element<I, T>::type;
 
 bool Base64Unescape(const std::string& encoded, std::string* decoded);
 

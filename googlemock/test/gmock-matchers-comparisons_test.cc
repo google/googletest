@@ -39,6 +39,8 @@
 #pragma warning(disable : 4100)
 #endif
 
+#include <vector>
+
 #include "test/gmock-matchers_test.h"
 
 namespace testing {
@@ -983,6 +985,30 @@ TEST(ComparisonBaseTest, WorksWithMoveOnly) {
   helper.Call(MoveOnly(1));
 }
 
+TEST(IsEmptyTest, MatchesContainer) {
+  const Matcher<std::vector<int>> m = IsEmpty();
+  std::vector<int> a = {};
+  std::vector<int> b = {1};
+  EXPECT_TRUE(m.Matches(a));
+  EXPECT_FALSE(m.Matches(b));
+}
+
+TEST(IsEmptyTest, MatchesStdString) {
+  const Matcher<std::string> m = IsEmpty();
+  std::string a = "z";
+  std::string b = "";
+  EXPECT_FALSE(m.Matches(a));
+  EXPECT_TRUE(m.Matches(b));
+}
+
+TEST(IsEmptyTest, MatchesCString) {
+  const Matcher<const char*> m = IsEmpty();
+  const char a[] = "";
+  const char b[] = "x";
+  EXPECT_TRUE(m.Matches(a));
+  EXPECT_FALSE(m.Matches(b));
+}
+
 // Tests that IsNull() matches any NULL pointer of any type.
 TEST(IsNullTest, MatchesNullPointer) {
   Matcher<int*> m1 = IsNull();
@@ -1684,6 +1710,21 @@ TEST(FieldsAreTest, StructuredBindings) {
   };
   EXPECT_THAT(MyVarType16{},
               FieldsAre(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+  struct MyVarType17 {
+    int a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q;
+  };
+  EXPECT_THAT(MyVarType17{},
+              FieldsAre(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+  struct MyVarType18 {
+    int a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r;
+  };
+  EXPECT_THAT(MyVarType18{},
+              FieldsAre(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+  struct MyVarType19 {
+    int a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s;
+  };
+  EXPECT_THAT(MyVarType19{}, FieldsAre(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                       0, 0, 0, 0, 0));
 }
 #endif
 

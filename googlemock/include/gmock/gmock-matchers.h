@@ -240,7 +240,7 @@
 //
 // To learn more about using these macros, please search for 'MATCHER'
 // on
-// https://github.com/google/googletest/blob/master/docs/gmock_cook_book.md
+// https://github.com/google/googletest/blob/main/docs/gmock_cook_book.md
 //
 // This file also implements some commonly used argument matchers.  More
 // matchers can be defined by the user implementing the
@@ -3240,6 +3240,16 @@ auto UnpackStructImpl(const T& t, MakeIndexSequence<17>, char) {
   const auto& [a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q] = t;
   return std::tie(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q);
 }
+template <typename T>
+auto UnpackStructImpl(const T& t, MakeIndexSequence<18>, char) {
+  const auto& [a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r] = t;
+  return std::tie(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r);
+}
+template <typename T>
+auto UnpackStructImpl(const T& t, MakeIndexSequence<19>, char) {
+  const auto& [a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s] = t;
+  return std::tie(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s);
+}
 #endif  // defined(__cpp_structured_bindings)
 
 template <size_t I, typename T>
@@ -3306,8 +3316,8 @@ class FieldsAreMatcherImpl<Struct, IndexSequence<I...>>
     std::vector<StringMatchResultListener> inner_listener(sizeof...(I));
 
     VariadicExpand(
-        {failed_pos == ~size_t{} && !std::get<I>(matchers_).MatchAndExplain(
-                                        std::get<I>(tuple), &inner_listener[I])
+        {failed_pos == ~size_t{}&& !std::get<I>(matchers_).MatchAndExplain(
+                           std::get<I>(tuple), &inner_listener[I])
              ? failed_pos = I
              : 0 ...});
     if (failed_pos != ~size_t{}) {
