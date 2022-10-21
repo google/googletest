@@ -1213,9 +1213,9 @@ class TypedExpectation<R(Args...)> : public ExpectationBase {
     if (IsSaturated()) {
       // We have an excessive call.
       IncrementCallCount();
-      *what << "Mock function called more times than expected ";
+      *what << "Mock function called more times than expected";
       if (!expectation_name.empty()) {
-        *what << "for \"" << expectation_name << "\" ";
+        *what << " for \"" << expectation_name << "\"";
       }
       *what << " - ";
       mocker->DescribeDefaultActionTo(args, what);
