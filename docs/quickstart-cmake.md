@@ -58,8 +58,7 @@ set(CMAKE_CXX_STANDARD 14)
 include(FetchContent)
 FetchContent_Declare(
   googletest
-  GIT_REPOSITORY https://github.com/google/googletest.git
-  GIT_TAG release-1.12.1
+  URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
 )
 # For Windows: Prevent overriding the parent project's compiler/linker settings
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
@@ -67,7 +66,7 @@ FetchContent_MakeAvailable(googletest)
 ```
 
 The above configuration declares a dependency on GoogleTest which is downloaded
-from GitHub. In the above example, `609281088cfefc76f9d0ce82e1ff6c30cc3591e5` is
+from GitHub. In the above example, `03597a01ee50ed33e9dfd640b249b4be3799d395` is
 the Git commit hash of the GoogleTest version to use; we recommend updating the
 hash often to point to the latest version.
 
