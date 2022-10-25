@@ -739,11 +739,12 @@ TEST(ExpectCallTest, CatchesTooFewCalls) {
   EXPECT_NONFATAL_FAILURE(
       {  // NOLINT
         MockB b;
-        EXPECT_CALL(b, DoB(5)).Times(AtLeast(2));
+        EXPECT_CALL(b, DoB(5)).Description("DoB Method").Times(AtLeast(2));
 
         b.DoB(5);
       },
-      "Actual function call count doesn't match EXPECT_CALL(b, DoB(5))...\n"
+      "Actual function \"DoB Method\" call count "
+      "doesn't match EXPECT_CALL(b, DoB(5))...\n"
       "         Expected: to be called at least twice\n"
       "           Actual: called once - unsatisfied and active");
 }
@@ -1148,10 +1149,11 @@ TEST(ExcessiveCallTest, DoesDefaultAction) {
   // When there is no ON_CALL(), the default value for the return type
   // should be returned.
   MockB b;
-  EXPECT_CALL(b, DoB(0)).Times(0);
+  EXPECT_CALL(b, DoB(0)).Description("DoB Method").Times(0);
   int n = -1;
-  EXPECT_NONFATAL_FAILURE(n = b.DoB(0),
-                          "Mock function called more times than expected");
+  EXPECT_NONFATAL_FAILURE(
+      n = b.DoB(0),
+      "Mock function \"DoB Method\" called more times than expected");
   EXPECT_EQ(0, n);
 }
 
@@ -1159,10 +1161,11 @@ TEST(ExcessiveCallTest, DoesDefaultAction) {
 // the failure message contains the argument values.
 TEST(ExcessiveCallTest, GeneratesFailureForVoidFunction) {
   MockA a;
-  EXPECT_CALL(a, DoA(_)).Times(0);
+  EXPECT_CALL(a, DoA(_)).Description("DoA Method").Times(0);
   EXPECT_NONFATAL_FAILURE(
       a.DoA(9),
-      "Mock function called more times than expected - returning directly.\n"
+      "Mock function \"DoA Method\" called more times than expected - "
+      "returning directly.\n"
       "    Function call: DoA(9)\n"
       "         Expected: to be never called\n"
       "           Actual: called once - over-saturated and active");
