@@ -13,15 +13,15 @@ body {
   background: $black;
   color: $text-white;
   flex-shrink: 0;
-  height: 100vh;
+  height: 90vh;
   overflow: auto;
   position: sticky;
-  top: 0;
+  top: 1;
   width: $sidebar-width;
 }
 
 .sidebar h1 {
-  font-size: 1.5em;
+  font-size: 2em;
 }
 
 .sidebar h2 {
