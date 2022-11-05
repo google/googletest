@@ -407,7 +407,7 @@ internal::CartesianProductHolder<Generator...> Combine(const Generator&... g) {
   return internal::CartesianProductHolder<Generator...>(g...);
 }
 
-// ConvertGenerator() wraps a parameter generator in order to cast each prduced
+// ConvertGenerator() wraps a parameter generator in order to cast each produced
 // value through a known type before supplying it to the test suite
 //
 // Synopsis:
