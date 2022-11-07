@@ -39,5 +39,7 @@ class PropertyTwo : public testing::Test {
 };
 
 TEST_F(PropertyTwo, TestSomeProperties) {
-  RecordProperty("TestSomeProperty", 2);
+  // Validate we can write an unsigned size_t as a property
+  size_t prop_two = 2;
+  RecordProperty("TestSomeProperty", prop_two);
 }
