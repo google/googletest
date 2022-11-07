@@ -50,6 +50,7 @@
 #define GOOGLETEST_INCLUDE_GTEST_GTEST_H_
 
 #include <cstddef>
+#include <cstdint>
 #include <limits>
 #include <memory>
 #include <ostream>
@@ -296,7 +297,7 @@ class GTEST_API_ Test {
   // SetUp/TearDown method of Environment objects registered with Google
   // Test) will be output as attributes of the <testsuites> element.
   static void RecordProperty(const std::string& key, const std::string& value);
-  static void RecordProperty(const std::string& key, int value);
+  static void RecordProperty(const std::string& key, int64_t value);
 
  protected:
   // Creates a Test object.
