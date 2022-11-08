@@ -656,7 +656,7 @@ class GTEST_API_ InSequence {
 
   InSequence(const InSequence&) = delete;
   InSequence& operator=(const InSequence&) = delete;
-} GTEST_ATTRIBUTE_UNUSED_;
+};
 
 namespace internal {
 
