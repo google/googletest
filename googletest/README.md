@@ -186,7 +186,7 @@ to the compiler flags.
 Note: while the above steps aren't technically necessary today when using some
 compilers (e.g. GCC), they may become necessary in the future, if we decide to
 improve the speed of loading the library (see
-<http://gcc.gnu.org/wiki/Visibility> for details). Therefore you are recommended
+<https://gcc.gnu.org/wiki/Visibility> for details). Therefore you are recommended
 to always add the above flags when using GoogleTest as a shared library.
 Otherwise a future release of GoogleTest may break your build script.
 
