@@ -3252,15 +3252,16 @@ bool ShouldUseColor(bool stdout_is_tty) {
 #else
     // On non-Windows platforms, we rely on the TERM variable.
     const char* const term = posix::GetEnv("TERM");
-    const bool term_supports_color = term != nullptr && (
-        String::CStringEquals(term, "xterm") ||
-        String::CStringEquals(term, "xterm-color") ||
-        String::CStringEquals(term, "screen") ||
-        String::CStringEquals(term, "tmux") ||
-        String::CStringEquals(term, "rxvt-unicode") ||
-        String::CStringEquals(term, "linux") ||
-        String::CStringEquals(term, "cygwin") ||
-        String::EndsWithCaseInsensitive(term, "-256color"));
+    const bool term_supports_color =
+        term != nullptr && (String::CStringEquals(term, "xterm") ||
+                            String::CStringEquals(term, "xterm-color") ||
+                            String::CStringEquals(term, "xterm-kitty") ||
+                            String::CStringEquals(term, "screen") ||
+                            String::CStringEquals(term, "tmux") ||
+                            String::CStringEquals(term, "rxvt-unicode") ||
+                            String::CStringEquals(term, "linux") ||
+                            String::CStringEquals(term, "cygwin") ||
+                            String::EndsWithCaseInsensitive(term, "-256color"));
     return stdout_is_tty && term_supports_color;
 #endif  // GTEST_OS_WINDOWS
   }
