@@ -2075,9 +2075,7 @@ class GTEST_API_ ScopedTrace {
 
   ScopedTrace(const ScopedTrace&) = delete;
   ScopedTrace& operator=(const ScopedTrace&) = delete;
-} GTEST_ATTRIBUTE_UNUSED_;  // A ScopedTrace object does its job in its
-                            // c'tor and d'tor.  Therefore it doesn't
-                            // need to be used otherwise.
+};
 
 // Causes a trace (including the source file path, the current line
 // number, and the given message) to be included in every test failure

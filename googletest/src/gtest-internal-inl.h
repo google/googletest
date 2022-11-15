@@ -212,7 +212,7 @@ class GTestFlagSaver {
   int32_t stack_trace_depth_;
   std::string stream_result_to_;
   bool throw_on_failure_;
-} GTEST_ATTRIBUTE_UNUSED_;
+};
 
 // Converts a Unicode code point to a narrow string in UTF-8 encoding.
 // code_point parameter is of type UInt32 because wchar_t may not be
