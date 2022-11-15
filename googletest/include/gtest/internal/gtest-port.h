@@ -668,17 +668,11 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 #define GTEST_HAVE_FEATURE_(x) 0
 #endif
 
-// Use this annotation at the end of a struct/class definition to
-// prevent the compiler from optimizing away instances that are never
-// used.  This is useful when all interesting logic happens inside the
-// c'tor and / or d'tor.  Example:
-//
-//   struct Foo {
-//     Foo() { ... }
-//   } GTEST_ATTRIBUTE_UNUSED_;
-//
-// Also use it after a variable or parameter declaration to tell the
+// Use this annotation after a variable or parameter declaration to tell the
 // compiler the variable/parameter does not have to be used.
+// Example:
+//
+//   GTEST_ATTRIBUTE_UNUSED_ int foo = bar();
 #if GTEST_HAVE_ATTRIBUTE_(unused)
 #define GTEST_ATTRIBUTE_UNUSED_ __attribute__((unused))
 #else
