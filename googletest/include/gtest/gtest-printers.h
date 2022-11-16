@@ -484,6 +484,81 @@ GTEST_API_ void PrintTo(__uint128_t v, ::std::ostream* os);
 GTEST_API_ void PrintTo(__int128_t v, ::std::ostream* os);
 #endif  // __SIZEOF_INT128__
 
+// The default resolution used to print floating-point values uses only
+// 6 digits, which can be confusing if a test compares two values whose
+// difference lies in the 7th digit.  So we'd like to print out numbers
+// in full precision.
+// However if the value is something simple like 1.1, full will print a
+// long string like 1.100000001 due to floating-point numbers not using
+// a base of 10.  This routiune returns an appropriate resolution for a
+// given floating-point number, that is, 6 if it will be accurate, or a
+// max_digits10 value (full precision) if it won't,  for values between
+// 0.0001 and one million.
+// It does this by computing what those digits would be (by multiplying
+// by an appropriate power of 10), then dividing by that power again to
+// see if gets the original value back.
+// A similar algorithm applies for values larger than one million; note
+// that for those values, we must divide to get a six-digit number, and
+// then multiply to possibly get the original value again.
+template <typename FloatType>
+int AppropriateResolution(FloatType val) {
+  int full = std::numeric_limits<FloatType>::max_digits10;
+  if (val < 0) val = -val;
+
+  if (val < 1000000) {
+    FloatType mulfor6 = 1e10;
+    if (val >= 100000.0) {  // 100,000 to 999,999
+      mulfor6 = 1.0;
+    } else if (val >= 10000.0) {
+      mulfor6 = 1e1;
+    } else if (val >= 1000.0) {
+      mulfor6 = 1e2;
+    } else if (val >= 100.0) {
+      mulfor6 = 1e3;
+    } else if (val >= 10.0) {
+      mulfor6 = 1e4;
+    } else if (val >= 1.0) {
+      mulfor6 = 1e5;
+    } else if (val >= 0.1) {
+      mulfor6 = 1e6;
+    } else if (val >= 0.01) {
+      mulfor6 = 1e7;
+    } else if (val >= 0.001) {
+      mulfor6 = 1e8;
+    } else if (val >= 0.0001) {
+      mulfor6 = 1e9;
+    }
+    if (static_cast<int32_t>(val * mulfor6 + 0.5) / mulfor6 == val) return 6;
+  } else if (val < 1e10) {
+    FloatType divfor6 = 1.0;
+    if (val >= 1e9) {  // 1,000,000,000 to 9,999,999,999
+      divfor6 = 10000;
+    } else if (val >= 1e8) {  // 100,000,000 to 999,999,999
+      divfor6 = 1000;
+    } else if (val >= 1e7) {  // 10,000,000 to 99,999,999
+      divfor6 = 100;
+    } else if (val >= 1e6) {  // 1,000,000 to 9,999,999
+      divfor6 = 10;
+    }
+    if (static_cast<int32_t>(val / divfor6 + 0.5) * divfor6 == val) return 6;
+  }
+  return full;
+}
+
+inline void PrintTo(float f, ::std::ostream* os) {
+  auto old_precision = os->precision();
+  os->precision(AppropriateResolution(f));
+  *os << f;
+  os->precision(old_precision);
+}
+
+inline void PrintTo(double d, ::std::ostream* os) {
+  auto old_precision = os->precision();
+  os->precision(AppropriateResolution(d));
+  *os << d;
+  os->precision(old_precision);
+}
+
 // Overloads for C strings.
 GTEST_API_ void PrintTo(const char* s, ::std::ostream* os);
 inline void PrintTo(char* s, ::std::ostream* os) {
