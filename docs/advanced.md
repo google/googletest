@@ -1797,6 +1797,15 @@ TestSuite2.
   TestName
 ```
 
+And if flag `--gtest_list_tests_verbosely` is used in conjunction with the above
+flag then the output format is the following:
+
+```none
+TestSuite1.TestName1
+TestSuite1.TestName2
+TestSuite2.TestName
+```
+
 None of the tests listed are actually run if the flag is provided. There is no
 corresponding environment variable for this flag.
 

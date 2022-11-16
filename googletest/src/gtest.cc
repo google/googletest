@@ -286,6 +286,10 @@ GTEST_DEFINE_bool_(
 
 GTEST_DEFINE_bool_(list_tests, false, "List all tests without running them.");
 
+GTEST_DEFINE_bool_(list_tests_verbosely, false, "List all tests verbosely "
+    "without running them.  Outputs the full name of the test.  Can be used "
+    "only in conjunction with --gtest_list_tests.");
+
 // The net priority order after flag processing is thus:
 //   --gtest_output command line flag
 //   GTEST_OUTPUT environment variable
@@ -6140,14 +6144,16 @@ void UnitTestImpl::ListTestsMatchingFilter() {
 
     for (size_t j = 0; j < test_suite->test_info_list().size(); j++) {
       const TestInfo* const test_info = test_suite->test_info_list()[j];
-      if (test_info->matches_filter_) {
+      if (!test_info->matches_filter_)
+        continue;
+      if (!GTEST_FLAG_GET(list_tests_verbosely)) {
         if (!printed_test_suite_name) {
           printed_test_suite_name = true;
           printf("%s.", test_suite->name());
           if (test_suite->type_param() != nullptr) {
             printf("  # %s = ", kTypeParamLabel);
-            // We print the type parameter on a single line to make
-            // the output easy to parse by a program.
+            // We print the type parameter on a single line to make the
+            // output easy to parse by a program.
             PrintOnOneLine(test_suite->type_param(), kMaxParamLength);
           }
           printf("\n");
@@ -6159,6 +6165,9 @@ void UnitTestImpl::ListTestsMatchingFilter() {
           // output easy to parse by a program.
           PrintOnOneLine(test_info->value_param(), kMaxParamLength);
         }
+        printf("\n");
+      } else {
+        printf("%s.%s", test_suite->name(), test_info->name());
         printf("\n");
       }
     }
@@ -6555,6 +6564,7 @@ static bool ParseGoogleTestFlag(const char* const arg) {
   GTEST_INTERNAL_PARSE_FLAG(filter);
   GTEST_INTERNAL_PARSE_FLAG(internal_run_death_test);
   GTEST_INTERNAL_PARSE_FLAG(list_tests);
+  GTEST_INTERNAL_PARSE_FLAG(list_tests_verbosely);
   GTEST_INTERNAL_PARSE_FLAG(output);
   GTEST_INTERNAL_PARSE_FLAG(brief);
   GTEST_INTERNAL_PARSE_FLAG(print_time);
