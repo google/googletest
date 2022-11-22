@@ -51,6 +51,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <functional>
 #include <limits>
 #include <memory>
 #include <ostream>
@@ -1340,6 +1341,13 @@ GTEST_API_ void InitGoogleTest(int* argc, wchar_t** argv);
 // This overloaded version can be used on Arduino/embedded platforms where
 // there is no argc/argv.
 GTEST_API_ void InitGoogleTest();
+
+using CustomFilter = std::function<bool(const std::string& test_suit_name,
+                                        const std::string& test_name)>;
+
+// Set custom filter for tests to run. This must be called before
+// RUN_ALL_TESTS.
+GTEST_API_ void SetCustomFilter(CustomFilter custom_filter);
 
 namespace internal {
 

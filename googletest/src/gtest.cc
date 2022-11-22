@@ -609,6 +609,9 @@ void TypeParameterizedTestSuiteRegistry::CheckForInstantiations() {
 // A copy of all command line arguments.  Set by InitGoogleTest().
 static ::std::vector<std::string> g_argvs;
 
+// A custom tests filter.  Set by SetCustomFilter.
+static CustomFilter g_custom_filter;
+
 ::std::vector<std::string> GetArgvs() {
 #if defined(GTEST_CUSTOM_GET_ARGVS_)
   // GTEST_CUSTOM_GET_ARGVS_() may return a container of std::string or
@@ -6085,7 +6088,9 @@ int UnitTestImpl::FilterTests(ReactionToSharding shard_tests) {
       test_info->is_disabled_ = is_disabled;
 
       const bool matches_filter =
-          gtest_flag_filter.MatchesTest(test_suite_name, test_name);
+          internal::g_custom_filter
+              ? internal::g_custom_filter(test_suite_name, test_name)
+              : gtest_flag_filter.MatchesTest(test_suite_name, test_name);
       test_info->matches_filter_ = matches_filter;
 
       const bool is_runnable =
@@ -6753,6 +6758,12 @@ void InitGoogleTest() {
 #else   // defined(GTEST_CUSTOM_INIT_GOOGLE_TEST_FUNCTION_)
   internal::InitGoogleTestImpl(&argc, argv);
 #endif  // defined(GTEST_CUSTOM_INIT_GOOGLE_TEST_FUNCTION_)
+}
+
+// Set custom filter for tests to run. This must be called before
+// RUN_ALL_TESTS.
+void SetCustomFilter(CustomFilter custom_filter) {
+  internal::g_custom_filter = std::move(custom_filter);
 }
 
 #if !defined(GTEST_CUSTOM_TEMPDIR_FUNCTION_) || \

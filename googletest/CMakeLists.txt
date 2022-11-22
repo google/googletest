@@ -233,6 +233,7 @@ if (gtest_build_tests)
   cxx_test(gtest-unittest-api_test gtest)
   cxx_test(gtest_skip_in_environment_setup_test gtest_main)
   cxx_test(gtest_skip_test gtest_main)
+  cxx_test(gtest_custom_filter gtest_main)
 
   ############################################################
   # C++ tests built with non-standard compiler flags.
