@@ -1904,7 +1904,7 @@ using testing::ReturnPointee;
 ### Combining Actions
 
 Want to do more than one thing when a function is called? That's fine. `DoAll()`
-allow you to do sequence of actions every time. Only the return value of the
+allows you to do a sequence of actions every time. Only the return value of the
 last action in the sequence will be used.
 
 ```cpp
