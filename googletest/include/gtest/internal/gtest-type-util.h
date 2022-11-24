@@ -63,6 +63,22 @@ inline std::string CanonicalizeForStdLibVersioning(std::string s) {
       s.erase(strlen("std"), end - strlen("std"));
     }
   }
+
+  /* Strip redundant space in typename to match MSVC */
+  /* For example, std::pair<int, bool> -> std::pair<int,bool> */
+  const std::string &toSearch = ", ";
+  const std::string &replaceStr = ",";
+  size_t pos = 0;
+  for (;;) {
+    // Get the next occurrence from the current position
+    pos = s.find(toSearch, pos);
+    if (pos == std::string::npos) {
+      break;
+    }
+    // Replace this occurrence of Sub String
+    s.replace(pos, toSearch.size(), replaceStr);
+    pos += replaceStr.size();
+  }
   return s;
 }
 
@@ -81,6 +97,15 @@ inline std::string GetTypeName(const std::type_info& type) {
   const std::string name_str(status == 0 ? readable_name : name);
   free(readable_name);
   return CanonicalizeForStdLibVersioning(name_str);
+#elif defined(_MSC_VER)
+  std::string s = name;
+  if (s.rfind("struct ", 0) == 0) {
+    s = s.substr(strlen("struct "));
+  }
+  if (s.rfind("class ", 0) == 0) {
+    s = s.substr(strlen("class "));
+  }
+  return s;
 #else
   return name;
 #endif  // GTEST_HAS_CXXABI_H_ || __HP_aCC

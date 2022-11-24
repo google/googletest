@@ -161,7 +161,7 @@ class GMockOutputTest(gmock_test_utils.TestCase):
     golden_file.close()
 
     # The normalized output should match the golden file.
-    self.assertEqual(golden, output)
+    self.assertEqual(golden.splitlines(), output.splitlines())
 
     # The raw output should contain 2 leaked mock object errors for
     # test GMockOutputTest.CatchesLeakedMocks.
