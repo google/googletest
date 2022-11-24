@@ -86,6 +86,10 @@ cc_test(
         # Ensure MSVC treats source files as UTF-8 encoded.
         "//:msvc_compiler": ["-utf-8"],
         "//conditions:default": [],
+    }) + select({
+        # Enable Warn if an undefined identifier is evaluated in an #if directive. Such identifiers are replaced with zero.
+        "//:msvc_compiler": [],
+        "//conditions:default": ["-Wundef"],
     }),
     includes = [
         "googletest",

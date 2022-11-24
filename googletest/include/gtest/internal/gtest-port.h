@@ -303,6 +303,10 @@
 #include "gtest/internal/custom/gtest-port.h"
 #include "gtest/internal/gtest-port-arch.h"
 
+#ifndef GTEST_HAS_ABSL
+#define GTEST_HAS_ABSL 0
+#endif
+
 #if GTEST_HAS_ABSL
 #include "absl/flags/declare.h"
 #include "absl/flags/flag.h"
@@ -443,8 +447,12 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 // cleanups prior to that. To reliably check for C++ exception availability with
 // clang, check for
 // __EXCEPTIONS && __has_feature(cxx_exceptions).
+#if defined(__EXCEPTIONS)
 #define GTEST_HAS_EXCEPTIONS (__EXCEPTIONS && __has_feature(cxx_exceptions))
-#elif defined(__GNUC__) && __EXCEPTIONS
+#else
+#define GTEST_HAS_EXCEPTIONS 0
+#endif
+#elif defined(__GNUC__) && defined(__EXCEPTIONS) && __EXCEPTIONS
 // gcc defines __EXCEPTIONS to 1 if and only if exceptions are enabled.
 #define GTEST_HAS_EXCEPTIONS 1
 #elif defined(__SUNPRO_CC)
@@ -452,7 +460,7 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 // detecting whether they are enabled or not.  Therefore, we assume that
 // they are enabled unless the user tells us otherwise.
 #define GTEST_HAS_EXCEPTIONS 1
-#elif defined(__IBMCPP__) && __EXCEPTIONS
+#elif defined(__IBMCPP__) && defined(__EXCEPTIONS) && __EXCEPTIONS
 // xlC defines __EXCEPTIONS to 1 if and only if exceptions are enabled.
 #define GTEST_HAS_EXCEPTIONS 1
 #elif defined(__HP_aCC)
@@ -648,6 +656,78 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 #define GTEST_CAN_STREAM_RESULTS_ 1
 #endif
 
+// Defines macros that will be used but not defined to 0
+
+#ifndef GTEST_USES_RE2
+#define GTEST_USES_RE2 0
+#endif
+#ifndef GTEST_USES_POSIX_RE
+#define GTEST_USES_POSIX_RE 0
+#endif
+#ifndef GTEST_USES_SIMPLE_RE
+#define GTEST_USES_SIMPLE_RE 0
+#endif
+#ifndef GTEST_HAS_DEATH_TEST
+#define GTEST_HAS_DEATH_TEST 0
+#endif
+#ifndef GTEST_HAS_DOWNCAST_
+#define GTEST_HAS_DOWNCAST_ 0
+#endif
+#ifndef GTEST_HAS_MUTEX_AND_THREAD_LOCAL_
+#define GTEST_HAS_MUTEX_AND_THREAD_LOCAL_ 0
+#endif
+#ifndef GTEST_HAS_NOTIFICATION_
+#define GTEST_HAS_NOTIFICATION_ 0
+#endif
+#ifndef GTEST_DONT_DEFINE_FAIL
+#define GTEST_DONT_DEFINE_FAIL 0
+#endif
+#ifndef GTEST_DONT_DEFINE_SUCCEED
+#define GTEST_DONT_DEFINE_SUCCEED 0
+#endif
+#ifndef GTEST_DONT_DEFINE_ASSERT_EQ
+#define GTEST_DONT_DEFINE_ASSERT_EQ 0
+#endif
+#ifndef GTEST_DONT_DEFINE_ASSERT_NE
+#define GTEST_DONT_DEFINE_ASSERT_NE 0
+#endif
+#ifndef GTEST_DONT_DEFINE_ASSERT_LE
+#define GTEST_DONT_DEFINE_ASSERT_LE 0
+#endif
+#ifndef GTEST_DONT_DEFINE_ASSERT_LT
+#define GTEST_DONT_DEFINE_ASSERT_LT 0
+#endif
+#ifndef GTEST_DONT_DEFINE_ASSERT_GE
+#define GTEST_DONT_DEFINE_ASSERT_GE 0
+#endif
+#ifndef GTEST_DONT_DEFINE_ASSERT_GT
+#define GTEST_DONT_DEFINE_ASSERT_GT 0
+#endif
+#ifndef GTEST_DONT_DEFINE_ASSERT_TRUE
+#define GTEST_DONT_DEFINE_ASSERT_TRUE 0
+#endif
+#ifndef GTEST_DONT_DEFINE_ASSERT_FALSE
+#define GTEST_DONT_DEFINE_ASSERT_FALSE 0
+#endif
+#ifndef GTEST_DONT_DEFINE_EXPECT_TRUE
+#define GTEST_DONT_DEFINE_EXPECT_TRUE 0
+#endif
+#ifndef GTEST_DONT_DEFINE_EXPECT_FALSE
+#define GTEST_DONT_DEFINE_EXPECT_FALSE 0
+#endif
+#ifndef GTEST_DONT_DEFINE_TEST_F
+#define GTEST_DONT_DEFINE_TEST_F 0
+#endif
+#ifndef GTEST_DONT_DEFINE_TEST
+#define GTEST_DONT_DEFINE_TEST 0
+#endif
+#ifndef GTEST_CAN_STREAM_RESULTS_
+#define GTEST_CAN_STREAM_RESULTS_ 0
+#endif
+#ifndef GTEST_FOR_GOOGLE_
+#define GTEST_FOR_GOOGLE_ 0
+#endif
+
 // Defines some utility macros.
 
 // The GNU compiler emits a warning if nested "if" statements are followed by
@@ -808,7 +888,7 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 // Ask the compiler not to perform tail call optimization inside
 // the marked function.
 #define GTEST_NO_TAIL_CALL_ __attribute__((disable_tail_calls))
-#elif __GNUC__
+#elif defined(__GNUC__)
 #define GTEST_NO_TAIL_CALL_ \
   __attribute__((optimize("no-optimize-sibling-calls")))
 #else
@@ -2450,6 +2530,19 @@ using Variant = ::std::variant<T...>;
 #if defined(GTEST_INTERNAL_CPLUSPLUS_LANG) && \
     GTEST_INTERNAL_CPLUSPLUS_LANG < 201703L
 #define GTEST_INTERNAL_NEED_REDUNDANT_CONSTEXPR_DECL 1
+#endif
+
+#ifndef GTEST_INTERNAL_HAS_ANY
+#define GTEST_INTERNAL_HAS_ANY 0
+#endif
+#ifndef GTEST_INTERNAL_HAS_OPTIONAL
+#define GTEST_INTERNAL_HAS_OPTIONAL 0
+#endif
+#ifndef GTEST_INTERNAL_HAS_STRING_VIEW
+#define GTEST_INTERNAL_HAS_STRING_VIEW 0
+#endif
+#ifndef GTEST_INTERNAL_HAS_VARIANT
+#define GTEST_INTERNAL_HAS_VARIANT 0
 #endif
 
 #endif  // GOOGLETEST_INCLUDE_GTEST_INTERNAL_GTEST_PORT_H_
