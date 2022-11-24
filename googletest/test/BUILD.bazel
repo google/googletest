@@ -388,7 +388,11 @@ cc_binary(
     name = "googletest-catch-exceptions-ex-test_",
     testonly = 1,
     srcs = ["googletest-catch-exceptions-test_.cc"],
-    copts = ["-fexceptions"],
+    copts =  select({
+        # Enable exception
+        "//:msvc_compiler": ["-EHsc"],
+        "//conditions:default": ["-fexceptions"],
+    }),
     deps = ["//:gtest_main"],
 )
 
@@ -550,7 +554,11 @@ cc_test(
     name = "googletest-death-test_ex_catch_test",
     size = "medium",
     srcs = ["googletest-death-test_ex_test.cc"],
-    copts = ["-fexceptions"],
+    copts =  select({
+        # Enable exception
+        "//:msvc_compiler": ["-EHsc"],
+        "//conditions:default": ["-fexceptions"],
+    }),
     defines = ["GTEST_ENABLE_CATCH_EXCEPTIONS_=1"],
     deps = ["//:gtest"],
 )
