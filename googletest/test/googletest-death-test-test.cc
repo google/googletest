@@ -200,26 +200,6 @@ int DieInDebugElse12(int* sideeffect) {
   return 12;
 }
 
-#if GTEST_OS_WINDOWS
-
-// Death in dbg due to Windows CRT assertion failure, not opt.
-int DieInCRTDebugElse12(int* sideeffect) {
-  if (sideeffect) *sideeffect = 12;
-
-  // Create an invalid fd by closing a valid one
-  int fdpipe[2];
-  EXPECT_EQ(_pipe(fdpipe, 256, O_BINARY), 0);
-  EXPECT_EQ(_close(fdpipe[0]), 0);
-  EXPECT_EQ(_close(fdpipe[1]), 0);
-
-  // _dup() should crash in debug mode
-  EXPECT_EQ(_dup(fdpipe[0]), -1);
-
-  return 12;
-}
-
-#endif  // GTEST_OS_WINDOWS
-
 #if GTEST_OS_WINDOWS || GTEST_OS_FUCHSIA
 
 // Tests the ExitedWithCode predicate.
@@ -662,7 +642,23 @@ TEST_F(TestForDeathTest, TestExpectDebugDeath) {
 #endif
 }
 
-#if GTEST_OS_WINDOWS
+#if GTEST_OS_WINDOWS && defined(_DEBUG)
+
+// Death in dbg due to Windows CRT assertion failure, not opt.
+int DieInCRTDebugElse12(int* sideeffect) {
+  if (sideeffect) *sideeffect = 12;
+
+  // Create an invalid fd by closing a valid one
+  int fdpipe[2];
+  EXPECT_EQ(_pipe(fdpipe, 256, O_BINARY), 0);
+  EXPECT_EQ(_close(fdpipe[0]), 0);
+  EXPECT_EQ(_close(fdpipe[1]), 0);
+
+  // _dup() should crash in debug mode
+  EXPECT_EQ(_dup(fdpipe[0]), -1);
+
+  return 12;
+}
 
 // https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/crtsetreportmode
 // In debug mode, the calls to _CrtSetReportMode and _CrtSetReportFile enable
@@ -671,14 +667,12 @@ TEST_F(TestForDeathTest, TestExpectDebugDeath) {
 // _DEBUG) the Windows CRT crashes the process with an assertion failure.
 // 1. Asserts on death.
 // 2. Has no side effect (doesn't pop up a window or wait for user input).
-#ifdef _DEBUG
 TEST_F(TestForDeathTest, CRTDebugDeath) {
   EXPECT_DEATH(DieInCRTDebugElse12(nullptr), "dup.* : Assertion failed")
       << "Must accept a streamed message";
 }
-#endif  // _DEBUG
 
-#endif  // GTEST_OS_WINDOWS
+#endif  // GTEST_OS_WINDOWS && defined(_DEBUG)
 
 // Tests that ASSERT_DEBUG_DEATH works as expected, that is, you can stream a
 // message to it, and in debug mode it:
