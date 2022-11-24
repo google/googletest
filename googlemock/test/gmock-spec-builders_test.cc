@@ -811,32 +811,32 @@ TEST(ExpectCallTest, InfersCardinality1WhenThereIsWillRepeatedly) {
 // from a prvalue returned from a function.
 TEST(ExpectCallTest, NonMoveableType) {
   // Define a non-moveable result type.
-  struct Result {
-    explicit Result(int x_in) : x(x_in) {}
-    Result(Result&&) = delete;
+  struct ResultLocal {
+    explicit ResultLocal(int x_in) : x(x_in) {}
+    ResultLocal(ResultLocal&&) = delete;
 
     int x;
   };
 
-  static_assert(!std::is_move_constructible_v<Result>);
-  static_assert(!std::is_copy_constructible_v<Result>);
+  static_assert(!std::is_move_constructible_v<ResultLocal>);
+  static_assert(!std::is_copy_constructible_v<ResultLocal>);
 
-  static_assert(!std::is_move_assignable_v<Result>);
-  static_assert(!std::is_copy_assignable_v<Result>);
+  static_assert(!std::is_move_assignable_v<ResultLocal>);
+  static_assert(!std::is_copy_assignable_v<ResultLocal>);
 
   // We should be able to use a callable that returns that result as both a
   // OnceAction and an Action, whether the callable ignores arguments or not.
-  const auto return_17 = [] { return Result(17); };
+  const auto return_17 = [] { return ResultLocal(17); };
 
-  static_cast<void>(OnceAction<Result()>{return_17});
-  static_cast<void>(Action<Result()>{return_17});
+  static_cast<void>(OnceAction<ResultLocal()>{return_17});
+  static_cast<void>(Action<ResultLocal()>{return_17});
 
-  static_cast<void>(OnceAction<Result(int)>{return_17});
-  static_cast<void>(Action<Result(int)>{return_17});
+  static_cast<void>(OnceAction<ResultLocal(int)>{return_17});
+  static_cast<void>(Action<ResultLocal(int)>{return_17});
 
   // It should be possible to return the result end to end through an
   // EXPECT_CALL statement, with both WillOnce and WillRepeatedly.
-  MockFunction<Result()> mock;
+  MockFunction<ResultLocal()> mock;
   EXPECT_CALL(mock, Call)   //
       .WillOnce(return_17)  //
       .WillRepeatedly(return_17);
