@@ -108,8 +108,11 @@ constexpr bool ValidateSpec(const char (&spec)[N]) {
 using internal::FunctionMocker;
 }  // namespace testing
 
-#define MOCK_METHOD(...) \
-  GMOCK_PP_VARIADIC_CALL(GMOCK_INTERNAL_MOCK_METHOD_ARG_, __VA_ARGS__)
+#define MOCK_METHOD(...)                                               \
+  GMOCK_INTERNAL_WARNING_PUSH()                                        \
+  GMOCK_INTERNAL_WARNING_CLANG(ignored, "-Wunused-member-function")    \
+  GMOCK_PP_VARIADIC_CALL(GMOCK_INTERNAL_MOCK_METHOD_ARG_, __VA_ARGS__) \
+  GMOCK_INTERNAL_WARNING_POP()
 
 #define GMOCK_INTERNAL_MOCK_METHOD_ARG_1(...) \
   GMOCK_INTERNAL_WRONG_ARITY(__VA_ARGS__)

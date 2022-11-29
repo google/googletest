@@ -95,6 +95,24 @@ inline Element* GetRawPointer(Element* p) {
   return p;
 }
 
+// Default definitions for all compilers.
+// NOTE: If you implement support for other compilers, make sure to avoid
+// unexpected overlaps.
+// (e.g., Clang also processes #pragma GCC, and clang-cl also handles _MSC_VER.)
+#define GMOCK_INTERNAL_WARNING_PUSH()
+#define GMOCK_INTERNAL_WARNING_CLANG(Level, Name)
+#define GMOCK_INTERNAL_WARNING_POP()
+
+#if defined(__clang__)
+#undef GMOCK_INTERNAL_WARNING_PUSH
+#define GMOCK_INTERNAL_WARNING_PUSH() _Pragma("clang diagnostic push")
+#undef GMOCK_INTERNAL_WARNING_CLANG
+#define GMOCK_INTERNAL_WARNING_CLANG(Level, Warning) \
+  _Pragma(GMOCK_PP_INTERNAL_STRINGIZE(clang diagnostic Level Warning))
+#undef GMOCK_INTERNAL_WARNING_POP
+#define GMOCK_INTERNAL_WARNING_POP() _Pragma("clang diagnostic pop")
+#endif
+
 // MSVC treats wchar_t as a native type usually, but treats it as the
 // same as unsigned short when the compiler option /Zc:wchar_t- is
 // specified.  It defines _NATIVE_WCHAR_T_DEFINED symbol when wchar_t

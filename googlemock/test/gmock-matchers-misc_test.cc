@@ -1615,6 +1615,20 @@ TEST(MatcherPMacroTest, WorksOnMoveOnlyType) {
   EXPECT_THAT(p, Not(UniquePointee(2)));
 }
 
+MATCHER(EnsureNoUnusedButMarkedUnusedWarning, "") { return (arg % 2) == 0; }
+
+TEST(MockMethodMockFunctionTest, EnsureNoUnusedButMarkedUnusedWarning) {
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic error "-Wused-but-marked-unused"
+#endif
+  // https://github.com/google/googletest/issues/4055
+  EXPECT_THAT(0, EnsureNoUnusedButMarkedUnusedWarning());
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
+}
+
 #if GTEST_HAS_EXCEPTIONS
 
 // std::function<void()> is used below for compatibility with older copies of

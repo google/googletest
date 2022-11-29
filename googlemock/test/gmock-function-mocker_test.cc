@@ -958,6 +958,21 @@ TEST(MockMethodMockFunctionTest, MockMethodSizeOverhead) {
   EXPECT_EQ(sizeof(LegacyMockMethodSizes0), sizeof(MockMethodSizes0));
 }
 
+TEST(MockMethodMockFunctionTest, EnsureNoUnusedMemberFunction) {
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic error "-Wunused-member-function"
+#endif
+  // https://github.com/google/googletest/issues/4052
+  struct Foo {
+    MOCK_METHOD(void, foo, ());
+  };
+  EXPECT_CALL(Foo(), foo()).Times(0);
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
+}
+
 void hasTwoParams(int, int);
 void MaybeThrows();
 void DoesntThrow() noexcept;
