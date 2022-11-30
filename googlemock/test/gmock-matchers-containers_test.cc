@@ -1182,8 +1182,8 @@ TEST(SizeIsTest, WorksWithMinimalistCustomType) {
 
 TEST(SizeIsTest, CanDescribeSelf) {
   Matcher<vector<int>> m = SizeIs(2);
-  EXPECT_EQ("size is equal to 2", Describe(m));
-  EXPECT_EQ("size isn't equal to 2", DescribeNegation(m));
+  EXPECT_EQ("has a size that is equal to 2", Describe(m));
+  EXPECT_EQ("has a size that isn't equal to 2", DescribeNegation(m));
 }
 
 TEST(SizeIsTest, ExplainsResult) {
