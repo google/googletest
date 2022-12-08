@@ -1123,17 +1123,24 @@ std::string UnitTestImpl::CurrentOsStackTraceExceptTop(int skip_count) {
 // A helper class for measuring elapsed times.
 class Timer {
  public:
-  Timer() : start_(std::chrono::steady_clock::now()) {}
+  Timer() : start_(clock::now()) {}
 
   // Return time elapsed in milliseconds since the timer was created.
   TimeInMillis Elapsed() {
     return std::chrono::duration_cast<std::chrono::milliseconds>(
-               std::chrono::steady_clock::now() - start_)
+               clock::now() - start_)
         .count();
   }
 
  private:
-  std::chrono::steady_clock::time_point start_;
+  // Fall back to the system_clock when building with newlib on a system
+  // without a monotonic clock.
+#if defined(_NEWLIB_VERSION) && !defined(CLOCK_MONOTONIC)
+  using clock = std::chrono::system_clock;
+#else
+  using clock = std::chrono::steady_clock;
+#endif
+  clock::time_point start_;
 };
 
 // Returns a timestamp as milliseconds since the epoch. Note this time may jump
