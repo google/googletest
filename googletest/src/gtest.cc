@@ -58,6 +58,7 @@
 #include "gtest/gtest-assertion-result.h"
 #include "gtest/gtest-spi.h"
 #include "gtest/internal/custom/gtest.h"
+#include "gtest/internal/gtest-port.h"
 
 #if GTEST_OS_LINUX
 
@@ -194,6 +195,7 @@ const char kStackTraceMarker[] = "\nStack trace:\n";
 // is specified on the command line.
 bool g_help_flag = false;
 
+#if GTEST_HAS_FILE_SYSTEM
 // Utility function to Open File for Writing
 static FILE* OpenFileForWriting(const std::string& output_file) {
   FILE* fileout = nullptr;
@@ -208,6 +210,7 @@ static FILE* OpenFileForWriting(const std::string& output_file) {
   }
   return fileout;
 }
+#endif  // GTEST_HAS_FILE_SYSTEM
 
 }  // namespace internal
 
@@ -620,6 +623,7 @@ static ::std::vector<std::string> g_argvs;
 #endif  // defined(GTEST_CUSTOM_GET_ARGVS_)
 }
 
+#if GTEST_HAS_FILE_SYSTEM
 // Returns the current application's name, removing directory path if that
 // is present.
 FilePath GetCurrentExecutableName() {
@@ -633,6 +637,7 @@ FilePath GetCurrentExecutableName() {
 
   return result.RemoveDirectoryName();
 }
+#endif  // GTEST_HAS_FILE_SYSTEM
 
 // Functions for processing the gtest_output flag.
 
@@ -647,6 +652,7 @@ std::string UnitTestOptions::GetOutputFormat() {
                            static_cast<size_t>(colon - gtest_output_flag));
 }
 
+#if GTEST_HAS_FILE_SYSTEM
 // Returns the name of the requested output file, or the default if none
 // was explicitly specified.
 std::string UnitTestOptions::GetAbsolutePathToOutputFile() {
@@ -677,6 +683,7 @@ std::string UnitTestOptions::GetAbsolutePathToOutputFile() {
       GetOutputFormat().c_str()));
   return result.string();
 }
+#endif  // GTEST_HAS_FILE_SYSTEM
 
 // Returns true if and only if the wildcard pattern matches the string. Each
 // pattern consists of regular characters, single-character wildcards (?), and
@@ -3262,7 +3269,12 @@ static void ColoredPrintf(GTestColor color, const char* fmt, ...) {
   va_start(args, fmt);
 
   static const bool in_color_mode =
+#if GTEST_HAS_FILE_SYSTEM
       ShouldUseColor(posix::IsATTY(posix::FileNo(stdout)) != 0);
+#else
+      false;
+#endif  // GTEST_HAS_FILE_SYSTEM
+
   const bool use_color = in_color_mode && (color != GTestColor::kDefault);
 
   if (!use_color) {
@@ -3867,6 +3879,7 @@ void TestEventRepeater::OnTestIterationEnd(const UnitTest& unit_test,
 
 // End TestEventRepeater
 
+#if GTEST_HAS_FILE_SYSTEM
 // This class generates an XML output file.
 class XmlUnitTestResultPrinter : public EmptyTestEventListener {
  public:
@@ -4414,7 +4427,9 @@ void XmlUnitTestResultPrinter::OutputXmlTestProperties(
 }
 
 // End XmlUnitTestResultPrinter
+#endif  // GTEST_HAS_FILE_SYSTEM
 
+#if GTEST_HAS_FILE_SYSTEM
 // This class generates an JSON output file.
 class JsonUnitTestResultPrinter : public EmptyTestEventListener {
  public:
@@ -4855,6 +4870,7 @@ std::string JsonUnitTestResultPrinter::TestPropertiesAsJson(
 }
 
 // End JsonUnitTestResultPrinter
+#endif  // GTEST_HAS_FILE_SYSTEM
 
 #if GTEST_CAN_STREAM_RESULTS_
 
@@ -4993,6 +5009,7 @@ void OsStackTraceGetter::UponLeavingGTest() GTEST_LOCK_EXCLUDED_(mutex_) {
 #endif  // GTEST_HAS_ABSL
 }
 
+#if GTEST_HAS_DEATH_TEST
 // A helper class that creates the premature-exit file in its
 // constructor and deletes the file in its destructor.
 class ScopedPrematureExitFile {
@@ -5030,6 +5047,7 @@ class ScopedPrematureExitFile {
   ScopedPrematureExitFile(const ScopedPrematureExitFile&) = delete;
   ScopedPrematureExitFile& operator=(const ScopedPrematureExitFile&) = delete;
 };
+#endif  // GTEST_HAS_DEATH_TEST
 
 }  // namespace internal
 
@@ -5355,6 +5373,7 @@ void UnitTest::RecordProperty(const std::string& key,
 // We don't protect this under mutex_, as we only support calling it
 // from the main thread.
 int UnitTest::Run() {
+#if GTEST_HAS_DEATH_TEST
   const bool in_death_test_child_process =
       GTEST_FLAG_GET(internal_run_death_test).length() > 0;
 
@@ -5383,6 +5402,7 @@ int UnitTest::Run() {
       in_death_test_child_process
           ? nullptr
           : internal::posix::GetEnv("TEST_PREMATURE_EXIT_FILE"));
+#endif  // GTEST_HAS_DEATH_TEST
 
   // Captures the value of GTEST_FLAG(catch_exceptions).  This value will be
   // used for the duration of the program.
@@ -5438,11 +5458,13 @@ int UnitTest::Run() {
              : 1;
 }
 
+#if GTEST_HAS_FILE_SYSTEM
 // Returns the working directory when the first TEST() or TEST_F() was
 // executed.
 const char* UnitTest::original_working_dir() const {
   return impl_->original_working_dir_.c_str();
 }
+#endif  // GTEST_HAS_FILE_SYSTEM
 
 // Returns the TestSuite object for the test that's currently running,
 // or NULL if no test is running.
@@ -5575,6 +5597,7 @@ void UnitTestImpl::SuppressTestEventsIfInSubprocess() {
 // UnitTestOptions. Must not be called before InitGoogleTest.
 void UnitTestImpl::ConfigureXmlOutput() {
   const std::string& output_format = UnitTestOptions::GetOutputFormat();
+#if GTEST_HAS_FILE_SYSTEM
   if (output_format == "xml") {
     listeners()->SetDefaultXmlGenerator(new XmlUnitTestResultPrinter(
         UnitTestOptions::GetAbsolutePathToOutputFile().c_str()));
@@ -5585,6 +5608,10 @@ void UnitTestImpl::ConfigureXmlOutput() {
     GTEST_LOG_(WARNING) << "WARNING: unrecognized output format \""
                         << output_format << "\" ignored.";
   }
+#else
+  GTEST_LOG_(ERROR) << "ERROR: alternative output formats require "
+                    << "GTEST_HAS_FILE_SYSTEM to be enabled";
+#endif  // GTEST_HAS_FILE_SYSTEM
 }
 
 #if GTEST_CAN_STREAM_RESULTS_
@@ -5747,10 +5774,12 @@ bool UnitTestImpl::RunAllTests() {
   // user didn't call InitGoogleTest.
   PostFlagParsingInit();
 
+#if GTEST_HAS_FILE_SYSTEM
   // Even if sharding is not on, test runners may want to use the
   // GTEST_SHARD_STATUS_FILE to query whether the test supports the sharding
   // protocol.
   internal::WriteToShardStatusFileIfNeeded();
+#endif  // GTEST_HAS_FILE_SYSTEM
 
   // True if and only if we are in a subprocess for running a thread-safe-style
   // death test.
@@ -5930,6 +5959,7 @@ bool UnitTestImpl::RunAllTests() {
   return !failed;
 }
 
+#if GTEST_HAS_FILE_SYSTEM
 // Reads the GTEST_SHARD_STATUS_FILE environment variable, and creates the file
 // if the variable is present. If a file already exists at this location, this
 // function will write over it. If the variable is present, but the file cannot
@@ -5949,6 +5979,7 @@ void WriteToShardStatusFileIfNeeded() {
     fclose(file);
   }
 }
+#endif  // GTEST_HAS_FILE_SYSTEM
 
 // Checks whether sharding is enabled by examining the relevant
 // environment variable values. If the variables are present,
@@ -6140,6 +6171,7 @@ void UnitTestImpl::ListTestsMatchingFilter() {
     }
   }
   fflush(stdout);
+  #if GTEST_HAS_FILE_SYSTEM
   const std::string& output_format = UnitTestOptions::GetOutputFormat();
   if (output_format == "xml" || output_format == "json") {
     FILE* fileout = OpenFileForWriting(
@@ -6157,6 +6189,7 @@ void UnitTestImpl::ListTestsMatchingFilter() {
     fprintf(fileout, "%s", StringStreamToString(&stream).c_str());
     fclose(fileout);
   }
+#endif  // GTEST_HAS_FILE_SYSTEM
 }
 
 // Sets the OS stack trace getter.
@@ -6545,7 +6578,7 @@ static bool ParseGoogleTestFlag(const char* const arg) {
   return false;
 }
 
-#if GTEST_USE_OWN_FLAGFILE_FLAG_
+#if GTEST_USE_OWN_FLAGFILE_FLAG_ && GTEST_HAS_FILE_SYSTEM
 static void LoadFlagsFromFile(const std::string& path) {
   FILE* flagfile = posix::FOpen(path.c_str(), "r");
   if (!flagfile) {
@@ -6561,7 +6594,7 @@ static void LoadFlagsFromFile(const std::string& path) {
     if (!ParseGoogleTestFlag(lines[i].c_str())) g_help_flag = true;
   }
 }
-#endif  // GTEST_USE_OWN_FLAGFILE_FLAG_
+#endif  // GTEST_USE_OWN_FLAGFILE_FLAG_ && GTEST_HAS_FILE_SYSTEM
 
 // Parses the command line for Google Test flags, without initializing
 // other parts of Google Test.  The type parameter CharType can be
@@ -6578,12 +6611,12 @@ void ParseGoogleTestFlagsOnlyImpl(int* argc, CharType** argv) {
     bool remove_flag = false;
     if (ParseGoogleTestFlag(arg)) {
       remove_flag = true;
-#if GTEST_USE_OWN_FLAGFILE_FLAG_
+#if GTEST_USE_OWN_FLAGFILE_FLAG_ && GTEST_HAS_FILE_SYSTEM
     } else if (ParseFlag(arg, "flagfile", &flagfile_value)) {
       GTEST_FLAG_SET(flagfile, flagfile_value);
       LoadFlagsFromFile(flagfile_value);
       remove_flag = true;
-#endif  // GTEST_USE_OWN_FLAGFILE_FLAG_
+#endif  // GTEST_USE_OWN_FLAGFILE_FLAG_ && GTEST_HAS_FILE_SYSTEM
     } else if (arg_string == "--help" || HasGoogleTestFlagPrefix(arg)) {
       // Both help flag and unrecognized Google Test flags (excluding
       // internal ones) trigger help display.

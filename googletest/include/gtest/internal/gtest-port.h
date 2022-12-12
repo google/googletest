@@ -83,6 +83,8 @@
 //   GTEST_HAS_STD_WSTRING    - Define it to 1/0 to indicate that
 //                              std::wstring does/doesn't work (Google Test can
 //                              be used where std::wstring is unavailable).
+//   GTEST_HAS_FILE_SYSTEM    - Define it to 1/0 to indicate whether or not a
+//                              file system is/isn't available.
 //   GTEST_HAS_SEH            - Define it to 1/0 to indicate whether the
 //                              compiler supports Microsoft's "Structured
 //                              Exception Handling".
@@ -463,6 +465,11 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 
 #endif  // GTEST_HAS_STD_WSTRING
 
+#ifndef GTEST_HAS_FILE_SYSTEM
+// Most platforms support a file system.
+#define GTEST_HAS_FILE_SYSTEM 1
+#endif  // GTEST_HAS_FILE_SYSTEM
+
 // Determines whether RTTI is available.
 #ifndef GTEST_HAS_RTTI
 // The user didn't tell us whether RTTI is enabled, so we need to
@@ -580,10 +587,11 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 // output correctness and to implement death tests.
 #ifndef GTEST_HAS_STREAM_REDIRECTION
 // By default, we assume that stream redirection is supported on all
-// platforms except known mobile / embedded ones.
+// platforms except known mobile / embedded ones. Also, if the port doesn't have
+// a file system, stream redirection is not supported.
 #if GTEST_OS_WINDOWS_MOBILE || GTEST_OS_WINDOWS_PHONE ||          \
     GTEST_OS_WINDOWS_RT || GTEST_OS_ESP8266 || GTEST_OS_XTENSA || \
-    GTEST_OS_QURT
+    GTEST_OS_QURT || !GTEST_HAS_FILE_SYSTEM
 #define GTEST_HAS_STREAM_REDIRECTION 0
 #else
 #define GTEST_HAS_STREAM_REDIRECTION 1
@@ -599,7 +607,10 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
      GTEST_OS_FREEBSD || GTEST_OS_NETBSD || GTEST_OS_FUCHSIA ||           \
      GTEST_OS_DRAGONFLY || GTEST_OS_GNU_KFREEBSD || GTEST_OS_HAIKU ||     \
      GTEST_OS_GNU_HURD)
+// Death tests require a file system to work properly.
+#if GTEST_HAS_FILE_SYSTEM
 #define GTEST_HAS_DEATH_TEST 1
+#endif  // GTEST_HAS_FILE_SYSTEM
 #endif
 
 // Determines whether to support type-driven tests.
@@ -1953,11 +1964,54 @@ inline std::string StripTrailingSpaces(std::string str) {
 
 namespace posix {
 
-// Functions with a different name on Windows.
-
+// File system porting.
+#if GTEST_HAS_FILE_SYSTEM
 #if GTEST_OS_WINDOWS
 
 typedef struct _stat StatStruct;
+
+#if GTEST_OS_WINDOWS_MOBILE
+inline int FileNo(FILE* file) { return reinterpret_cast<int>(_fileno(file)); }
+// Stat(), RmDir(), and IsDir() are not needed on Windows CE at this
+// time and thus not defined there.
+#else
+inline int FileNo(FILE* file) { return _fileno(file); }
+inline int Stat(const char* path, StatStruct* buf) { return _stat(path, buf); }
+inline int RmDir(const char* dir) { return _rmdir(dir); }
+inline bool IsDir(const StatStruct& st) { return (_S_IFDIR & st.st_mode) != 0; }
+#endif  // GTEST_OS_WINDOWS_MOBILE
+
+#elif GTEST_OS_ESP8266
+typedef struct stat StatStruct;
+
+inline int FileNo(FILE* file) { return fileno(file); }
+inline int Stat(const char* path, StatStruct* buf) {
+  // stat function not implemented on ESP8266
+  return 0;
+}
+inline int RmDir(const char* dir) { return rmdir(dir); }
+inline bool IsDir(const StatStruct& st) { return S_ISDIR(st.st_mode); }
+
+#else
+
+typedef struct stat StatStruct;
+
+inline int FileNo(FILE* file) { return fileno(file); }
+inline int Stat(const char* path, StatStruct* buf) { return stat(path, buf); }
+#if GTEST_OS_QURT
+// QuRT doesn't support any directory functions, including rmdir
+inline int RmDir(const char*) { return 0; }
+#else
+inline int RmDir(const char* dir) { return rmdir(dir); }
+#endif
+inline bool IsDir(const StatStruct& st) { return S_ISDIR(st.st_mode); }
+
+#endif  // GTEST_OS_WINDOWS
+#endif  // GTEST_HAS_FILE_SYSTEM
+
+// Other functions with a different name on Windows.
+
+#if GTEST_OS_WINDOWS
 
 #ifdef __BORLANDC__
 inline int DoIsATTY(int fd) { return isatty(fd); }
@@ -1978,51 +2032,21 @@ inline int StrCaseCmp(const char* s1, const char* s2) {
 inline char* StrDup(const char* src) { return _strdup(src); }
 #endif  // __BORLANDC__
 
-#if GTEST_OS_WINDOWS_MOBILE
-inline int FileNo(FILE* file) { return reinterpret_cast<int>(_fileno(file)); }
-// Stat(), RmDir(), and IsDir() are not needed on Windows CE at this
-// time and thus not defined there.
-#else
-inline int FileNo(FILE* file) { return _fileno(file); }
-inline int Stat(const char* path, StatStruct* buf) { return _stat(path, buf); }
-inline int RmDir(const char* dir) { return _rmdir(dir); }
-inline bool IsDir(const StatStruct& st) { return (_S_IFDIR & st.st_mode) != 0; }
-#endif  // GTEST_OS_WINDOWS_MOBILE
-
 #elif GTEST_OS_ESP8266
-typedef struct stat StatStruct;
 
-inline int FileNo(FILE* file) { return fileno(file); }
 inline int DoIsATTY(int fd) { return isatty(fd); }
-inline int Stat(const char* path, StatStruct* buf) {
-  // stat function not implemented on ESP8266
-  return 0;
-}
 inline int StrCaseCmp(const char* s1, const char* s2) {
   return strcasecmp(s1, s2);
 }
 inline char* StrDup(const char* src) { return strdup(src); }
-inline int RmDir(const char* dir) { return rmdir(dir); }
-inline bool IsDir(const StatStruct& st) { return S_ISDIR(st.st_mode); }
 
 #else
 
-typedef struct stat StatStruct;
-
-inline int FileNo(FILE* file) { return fileno(file); }
 inline int DoIsATTY(int fd) { return isatty(fd); }
-inline int Stat(const char* path, StatStruct* buf) { return stat(path, buf); }
 inline int StrCaseCmp(const char* s1, const char* s2) {
   return strcasecmp(s1, s2);
 }
 inline char* StrDup(const char* src) { return strdup(src); }
-#if GTEST_OS_QURT
-// QuRT doesn't support any directory functions, including rmdir
-inline int RmDir(const char*) { return 0; }
-#else
-inline int RmDir(const char* dir) { return rmdir(dir); }
-#endif
-inline bool IsDir(const StatStruct& st) { return S_ISDIR(st.st_mode); }
 
 #endif  // GTEST_OS_WINDOWS
 
@@ -2044,7 +2068,7 @@ GTEST_DISABLE_MSC_DEPRECATED_PUSH_()
 // ChDir(), FReopen(), FDOpen(), Read(), Write(), Close(), and
 // StrError() aren't needed on Windows CE at this time and thus not
 // defined there.
-
+#if GTEST_HAS_FILE_SYSTEM
 #if !GTEST_OS_WINDOWS_MOBILE && !GTEST_OS_WINDOWS_PHONE &&           \
     !GTEST_OS_WINDOWS_RT && !GTEST_OS_ESP8266 && !GTEST_OS_XTENSA && \
     !GTEST_OS_QURT
@@ -2066,7 +2090,7 @@ inline FILE* FReopen(const char* path, const char* mode, FILE* stream) {
   return freopen(path, mode, stream);
 }
 inline FILE* FDOpen(int fd, const char* mode) { return fdopen(fd, mode); }
-#endif
+#endif  // !GTEST_OS_WINDOWS_MOBILE && !GTEST_OS_QURT
 inline int FClose(FILE* fp) { return fclose(fp); }
 #if !GTEST_OS_WINDOWS_MOBILE && !GTEST_OS_QURT
 inline int Read(int fd, void* buf, unsigned int count) {
@@ -2076,8 +2100,13 @@ inline int Write(int fd, const void* buf, unsigned int count) {
   return static_cast<int>(write(fd, buf, count));
 }
 inline int Close(int fd) { return close(fd); }
+#endif  // !GTEST_OS_WINDOWS_MOBILE && !GTEST_OS_QURT
+#endif  // GTEST_HAS_FILE_SYSTEM
+
+#if !GTEST_OS_WINDOWS_MOBILE && !GTEST_OS_QURT
 inline const char* StrError(int errnum) { return strerror(errnum); }
-#endif
+#endif  // !GTEST_OS_WINDOWS_MOBILE && !GTEST_OS_QURT
+
 inline const char* GetEnv(const char* name) {
 #if GTEST_OS_WINDOWS_MOBILE || GTEST_OS_WINDOWS_PHONE ||          \
     GTEST_OS_WINDOWS_RT || GTEST_OS_ESP8266 || GTEST_OS_XTENSA || \
