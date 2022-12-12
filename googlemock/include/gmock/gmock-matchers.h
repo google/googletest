@@ -3644,23 +3644,6 @@ class UnorderedElementsAreMatcherImpl
         AnalyzeElements(stl_container.begin(), stl_container.end(),
                         &element_printouts, listener);
 
-    if (matrix.LhsSize() == 0 && matrix.RhsSize() == 0) {
-      return true;
-    }
-
-    if (match_flags() == UnorderedMatcherRequire::ExactMatch) {
-      if (matrix.LhsSize() != matrix.RhsSize()) {
-        // The element count doesn't match.  If the container is empty,
-        // there's no need to explain anything as Google Mock already
-        // prints the empty container. Otherwise we just need to show
-        // how many elements there actually are.
-        if (matrix.LhsSize() != 0 && listener->IsInterested()) {
-          *listener << "which has " << Elements(matrix.LhsSize());
-        }
-        return false;
-      }
-    }
-
     return VerifyMatchMatrix(element_printouts, matrix, listener) &&
            FindPairing(matrix, listener);
   }
