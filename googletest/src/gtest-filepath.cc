@@ -57,6 +57,8 @@
 #define GTEST_PATH_MAX_ _POSIX_PATH_MAX
 #endif  // GTEST_OS_WINDOWS
 
+#if GTEST_HAS_FILE_SYSTEM
+
 namespace testing {
 namespace internal {
 
@@ -404,3 +406,5 @@ void FilePath::Normalize() {
 
 }  // namespace internal
 }  // namespace testing
+
+#endif  // GTEST_HAS_FILE_SYSTEM
