@@ -1345,7 +1345,7 @@ class BarPlusBazEqMatcher {
 
 ...
   Foo foo;
-  EXPECT_CALL(foo, BarPlusBazEq(5))...;
+  EXPECT_THAT(foo, BarPlusBazEq(5))...;
 ```
 
 ### Matching Containers
