@@ -2164,7 +2164,7 @@ constexpr bool StaticAssertTypeEq() noexcept {
 // Define this macro to 1 to omit the definition of TEST(), which
 // is a generic name and clashes with some other libraries.
 #if !GTEST_DONT_DEFINE_TEST
-#define TEST(test_suite_name, test_name) GTEST_TEST(test_suite_name, test_name)
+#define TEST(test_suite_name, test_name) GTEST_TEST(test_suite_name, test_name)  // NOLINT
 #endif
 
 // Defines a test that uses a test fixture.
@@ -2196,7 +2196,7 @@ constexpr bool StaticAssertTypeEq() noexcept {
   GTEST_TEST_(test_fixture, test_name, test_fixture, \
               ::testing::internal::GetTypeId<test_fixture>())
 #if !GTEST_DONT_DEFINE_TEST_F
-#define TEST_F(test_fixture, test_name) GTEST_TEST_F(test_fixture, test_name)
+#define TEST_F(test_fixture, test_name) GTEST_TEST_F(test_fixture, test_name)  // NOLINT
 #endif
 
 // Returns a path to a temporary directory, which should be writable. It is
