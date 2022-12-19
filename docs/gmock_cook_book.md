@@ -904,7 +904,7 @@ using ::testing::Contains;
 using ::testing::Property;
 
 inline constexpr auto HasFoo = [](const auto& f) {
-  return Property(&MyClass::foo, Contains(f));
+  return Property("foo", &MyClass::foo, Contains(f));
 };
 ...
   EXPECT_THAT(x, HasFoo("blah"));
