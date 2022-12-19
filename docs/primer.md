@@ -274,9 +274,9 @@ First, define a fixture class. By convention, you should give it the name
 class QueueTest : public ::testing::Test {
  protected:
   void SetUp() override {
+     q0_.Enqueue(0);
      q1_.Enqueue(1);
      q2_.Enqueue(2);
-     q2_.Enqueue(3);
   }
 
   // void TearDown() override {}
