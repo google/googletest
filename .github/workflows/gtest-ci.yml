@@ -41,3 +41,29 @@ jobs:
 
     - name: Tests
       run: bazel test --cxxopt=/std:c++14 --features=external_include_paths --test_output=errors ...
+
+  Windows-MinGW:
+    runs-on: windows-latest
+    steps:
+
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - uses: msys2/setup-msys2@v2
+      with:
+          msystem: MINGW64
+          update: true
+          install: >-
+            base-devel
+            mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-ninja
+
+    - shell: msys2 {0}
+      run: |
+        mkdir build
+        cd build
+        cmake .. -DCMAKE_BUILD_TYPE=Release -Dgtest_build_tests=ON -Dgtest_build_samples=ON -Dgmock_build_tests=ON
+        ninja
+        ninja test
