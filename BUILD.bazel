@@ -69,11 +69,20 @@ config_setting(
     values = {"define": "absl=1"},
 )
 
+CXX_OPTS = select({
+    ":qnx": [],
+    # Visual Studio 2017 defaults to C++14
+    ":windows": [],
+    "//conditions:default": ["-std=c++14"]
+})
+
+
 # Library that defines the FRIEND_TEST macro.
 cc_library(
     name = "gtest_prod",
     hdrs = ["googletest/include/gtest/gtest_prod.h"],
     includes = ["googletest/include"],
+    copts = CXX_OPTS,
 )
 
 # Google Test including Google Mock
@@ -98,7 +107,7 @@ cc_library(
         "googletest/include/gtest/*.h",
         "googlemock/include/gmock/*.h",
     ]),
-    copts = select({
+    copts = CXX_OPTS + select({
         ":qnx": [],
         ":windows": [],
         "//conditions:default": ["-pthread"],
@@ -156,6 +165,7 @@ cc_library(
         ":windows": ["windows_export_all_symbols"],
         "//conditions:default": [],
     }),
+    copts = CXX_OPTS,
     deps = [":gtest"],
 )
 
@@ -197,6 +207,7 @@ cc_test(
         "googletest/samples/sample8_unittest.cc",
     ],
     linkstatic = 0,
+    copts = CXX_OPTS,
     deps = [
         "gtest_sample_lib",
         ":gtest_main",
@@ -207,6 +218,7 @@ cc_test(
     name = "sample9_unittest",
     size = "small",
     srcs = ["googletest/samples/sample9_unittest.cc"],
+    copts = CXX_OPTS,
     deps = [":gtest"],
 )
 
@@ -214,5 +226,6 @@ cc_test(
     name = "sample10_unittest",
     size = "small",
     srcs = ["googletest/samples/sample10_unittest.cc"],
+    copts = CXX_OPTS,
     deps = [":gtest"],
 )
