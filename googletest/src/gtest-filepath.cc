@@ -97,8 +97,8 @@ static bool IsPathSeparator(char c) {
 // Returns the current working directory, or "" if unsuccessful.
 FilePath FilePath::GetCurrentDir() {
 #if GTEST_OS_WINDOWS_MOBILE || GTEST_OS_WINDOWS_PHONE ||         \
-    GTEST_OS_WINDOWS_RT || GTEST_OS_ESP8266 || GTEST_OS_ESP32 || \
-    GTEST_OS_XTENSA || GTEST_OS_QURT
+    GTEST_OS_WINDOWS_RT || GTEST_OS_ESP8266 || GTEST_OS_ESP32 ||  \
+    GTEST_OS_XTENSA || GTEST_OS_QURT || GTEST_OS_TI_CGT
   // These platforms do not have a current directory, so we just return
   // something reasonable.
   return FilePath(kCurrentDirectoryString);
@@ -250,6 +250,8 @@ bool FilePath::FileOrDirectoryExists() const {
   const DWORD attributes = GetFileAttributes(unicode);
   delete[] unicode;
   return attributes != kInvalidFileAttributes;
+#elif GTEST_OS_TI_CGT
+  return false;
 #else
   posix::StatStruct file_stat{};
   return posix::Stat(pathname_.c_str(), &file_stat) == 0;
@@ -265,6 +267,9 @@ bool FilePath::DirectoryExists() const {
   // Windows (like "C:\\").
   const FilePath& path(IsRootDirectory() ? *this
                                          : RemoveTrailingPathSeparator());
+
+#elif GTEST_OS_TI_CGT
+
 #else
   const FilePath& path(*this);
 #endif
@@ -277,6 +282,8 @@ bool FilePath::DirectoryExists() const {
       (attributes & FILE_ATTRIBUTE_DIRECTORY)) {
     result = true;
   }
+#elif GTEST_OS_TI_CGT
+  result = false;
 #else
   posix::StatStruct file_stat{};
   result =
@@ -354,7 +361,7 @@ bool FilePath::CreateFolder() const {
   delete[] unicode;
 #elif GTEST_OS_WINDOWS
   int result = _mkdir(pathname_.c_str());
-#elif GTEST_OS_ESP8266 || GTEST_OS_XTENSA || GTEST_OS_QURT
+#elif GTEST_OS_ESP8266 || GTEST_OS_XTENSA || GTEST_OS_QURT || GTEST_OS_TI_CGT
   // do nothing
   int result = 0;
 #else
