@@ -187,6 +187,8 @@ function(cxx_library_with_type name type cxx_flags)
         $<INSTALL_INTERFACE:GTEST_LINKED_AS_SHARED_LIBRARY=1>)
     endif()
   endif()
+  target_compile_definitions(${name} INTERFACE
+    $<INSTALL_INTERFACE:GTEST_HAS_PTHREAD=$<BOOL:${GTEST_HAS_PTHREAD}>>)
   if (DEFINED GTEST_HAS_PTHREAD)
     if ("${CMAKE_VERSION}" VERSION_LESS "3.1.0")
       set(threads_spec ${CMAKE_THREAD_LIBS_INIT})
