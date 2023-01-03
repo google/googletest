@@ -307,7 +307,7 @@ class FloatingPoint {
   static RawType Infinity() { return ReinterpretBits(kExponentBitMask); }
 
   // Returns the maximum representable finite floating-point number.
-  static RawType Max();
+  static RawType MaxValue();
 
   // Non-static methods
 
@@ -392,11 +392,11 @@ class FloatingPoint {
 // We cannot use std::numeric_limits<T>::max() as it clashes with the max()
 // macro defined by <windows.h>.
 template <>
-inline float FloatingPoint<float>::Max() {
+inline float FloatingPoint<float>::MaxValue() {
   return FLT_MAX;
 }
 template <>
-inline double FloatingPoint<double>::Max() {
+inline double FloatingPoint<double>::MaxValue() {
   return DBL_MAX;
 }
 
