@@ -2142,7 +2142,7 @@ GTEST_DISABLE_MSC_DEPRECATED_POP_()
 // MSVC-based platforms.  We map the GTEST_SNPRINTF_ macro to the appropriate
 // function in order to achieve that.  We use macro definition here because
 // snprintf is a variadic function.
-#if _MSC_VER && !GTEST_OS_WINDOWS_MOBILE
+#if defined(_MSC_VER) && !GTEST_OS_WINDOWS_MOBILE
 // MSVC 2005 and above support variadic macros.
 #define GTEST_SNPRINTF_(buffer, size, format, ...) \
   _snprintf_s(buffer, size, size, format, __VA_ARGS__)
