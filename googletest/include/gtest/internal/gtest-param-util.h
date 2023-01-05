@@ -40,8 +40,11 @@
 
 #include <cassert>
 #include <iterator>
+#include <map>
 #include <memory>
+#include <ostream>
 #include <set>
+#include <string>
 #include <tuple>
 #include <type_traits>
 #include <utility>

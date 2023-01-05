@@ -30,6 +30,7 @@
 #include "test/gtest-typed-test_test.h"
 
 #include <set>
+#include <string>
 #include <type_traits>
 #include <vector>
 

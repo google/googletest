@@ -30,6 +30,9 @@
 //
 // Tests for the Message class.
 
+#include <sstream>
+#include <string>
+
 #include "gtest/gtest-message.h"
 #include "gtest/gtest.h"
 

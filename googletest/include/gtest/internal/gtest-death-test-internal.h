@@ -42,6 +42,7 @@
 #include <stdio.h>
 
 #include <memory>
+#include <string>
 
 #include "gtest/gtest-matchers.h"
 #include "gtest/internal/gtest-internal.h"
