@@ -36,6 +36,8 @@
 // make-files on Windows and other platforms. Do not #include this file
 // anywhere else!
 
+#include <string>
+
 #include "gtest/gtest.h"
 
 #if GTEST_OS_WINDOWS_MOBILE

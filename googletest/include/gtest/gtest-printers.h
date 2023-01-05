@@ -108,6 +108,7 @@
 #include <string>
 #include <tuple>
 #include <type_traits>
+#include <typeinfo>
 #include <utility>
 #include <vector>
 

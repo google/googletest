@@ -270,6 +270,7 @@
 #include <limits>
 #include <locale>
 #include <memory>
+#include <ostream>
 #include <string>
 // #include <mutex>  // Guarded by GTEST_IS_THREADSAFE below
 #include <tuple>

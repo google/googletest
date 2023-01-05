@@ -39,6 +39,7 @@
 #include <chrono>  // NOLINT
 #include <list>
 #include <memory>
+#include <string>
 #include <thread>   // NOLINT
 #include <utility>  // For std::pair and std::make_pair.
 #include <vector>

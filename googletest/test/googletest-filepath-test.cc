@@ -35,6 +35,8 @@
 // This file is #included from gtest-internal.h.
 // Do not #include this file anywhere else!
 
+#include <string>
+
 #include "gtest/gtest.h"
 #include "gtest/internal/gtest-filepath.h"
 #include "src/gtest-internal-inl.h"
