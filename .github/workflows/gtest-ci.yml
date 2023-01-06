@@ -16,6 +16,9 @@ jobs:
     - name: Tests
       run: bazel test --cxxopt=-std=c++14 --features=external_include_paths --test_output=errors ...
 
+    - name: Tests with bzlmod
+      run: bazel test --cxxopt=-std=c++14 --features=external_include_paths --test_output=errors --enable_bzlmod ...
+
   macOS:
     runs-on: macos-latest
     steps:
