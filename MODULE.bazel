@@ -5,6 +5,6 @@ module(
 )
 
 bazel_dep(name = "abseil-cpp", repo_name = "com_google_absl", version = "20210324.2")
-bazel_dep(name = "platforms", version = "0.0.5")
+bazel_dep(name = "platforms", version = "0.0.6")
 bazel_dep(name = "rules_cc", version = "0.0.2")
 bazel_dep(name = "rules_python", version = "0.12.0")
