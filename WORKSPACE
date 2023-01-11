@@ -3,42 +3,38 @@ workspace(name = "com_google_googletest")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 http_archive(
-    name = "com_google_absl",
-    sha256 = "1a1745b5ee81392f5ea4371a4ca41e55d446eeaee122903b2eaffbd8a3b67a2b",
-    strip_prefix = "abseil-cpp-01cc6567cff77738e416a7ddc17de2d435a780ce",
-    urls = ["https://github.com/abseil/abseil-cpp/archive/01cc6567cff77738e416a7ddc17de2d435a780ce.zip"],  # 2022-06-21T19:28:27Z
+    name = "com_google_absl",  # 2023-01-10T21:08:25Z
+    sha256 = "f9a4e749f42c386a32a90fddf0e2913ed408d10c42f7f33ccf4c59ac4f0d1d05",
+    strip_prefix = "abseil-cpp-52835439ca90d86b27bf8cd1708296e95604d724",
+    urls = ["https://github.com/abseil/abseil-cpp/archive/52835439ca90d86b27bf8cd1708296e95604d724.zip"],
 )
 
 # Note this must use a commit from the `abseil` branch of the RE2 project.
 # https://github.com/google/re2/tree/abseil
 http_archive(
-    name = "com_googlesource_code_re2",
-    sha256 = "0a890c2aa0bb05b2ce906a15efb520d0f5ad4c7d37b8db959c43772802991887",
-    strip_prefix = "re2-a427f10b9fb4622dd6d8643032600aa1b50fbd12",
-    urls = ["https://github.com/google/re2/archive/a427f10b9fb4622dd6d8643032600aa1b50fbd12.zip"],  # 2022-06-09
+    name = "com_googlesource_code_re2",  # 2022-12-21T14:29:10Z
+    sha256 = "b9ce3a51beebb38534d11d40f8928d40509b9e18a735f6a4a97ad3d014c87cb5",
+    strip_prefix = "re2-d0b1f8f2ecc2ea74956c7608b6f915175314ff0e",
+    urls = ["https://github.com/google/re2/archive/d0b1f8f2ecc2ea74956c7608b6f915175314ff0e.zip"],
 )
 
 http_archive(
-    name = "rules_python",
-    sha256 = "8c8fe44ef0a9afc256d1e75ad5f448bb59b81aba149b8958f02f7b3a98f5d9b4",
-    strip_prefix = "rules_python-0.13.0",
-    url = "https://github.com/bazelbuild/rules_python/archive/refs/tags/0.13.0.tar.gz",
+    name = "rules_python",  # 2023-01-10T22:00:51Z
+    sha256 = "5de54486a60ad8948dabe49605bb1c08053e04001a431ab3e96745b4d97a4419",
+    strip_prefix = "rules_python-70cce26432187a60b4e950118791385e6fb3c26f",
+    urls = ["https://github.com/bazelbuild/rules_python/archive/70cce26432187a60b4e950118791385e6fb3c26f.zip"],
 )
 
 http_archive(
-    name = "bazel_skylib",
-    urls = [
-        "https://mirror.bazel.build/github.com/bazelbuild/bazel-skylib/releases/download/1.3.0/bazel-skylib-1.3.0.tar.gz",
-        "https://github.com/bazelbuild/bazel-skylib/releases/download/1.3.0/bazel-skylib-1.3.0.tar.gz",
-    ],
-    sha256 = "74d544d96f4a5bb630d465ca8bbcfe231e3594e5aae57e1edbf17a6eb3ca2506",
+    name = "bazel_skylib",  # 2022-11-16T18:29:32Z
+    sha256 = "a22290c26d29d3ecca286466f7f295ac6cbe32c0a9da3a91176a90e0725e3649",
+    strip_prefix = "bazel-skylib-5bfcb1a684550626ce138fe0fe8f5f702b3764c3",
+    urls = ["https://github.com/bazelbuild/bazel-skylib/archive/5bfcb1a684550626ce138fe0fe8f5f702b3764c3.zip"],
 )
 
 http_archive(
-    name = "platforms",
-    urls = [
-        "https://mirror.bazel.build/github.com/bazelbuild/platforms/releases/download/0.0.6/platforms-0.0.6.tar.gz",
-        "https://github.com/bazelbuild/platforms/releases/download/0.0.6/platforms-0.0.6.tar.gz",
-    ],
-    sha256 = "5308fc1d8865406a49427ba24a9ab53087f17f5266a7aabbfc28823f3916e1ca",
+    name = "platforms",  # 2022-11-09T19:18:22Z
+    sha256 = "b4a3b45dc4202e2b3e34e3bc49d2b5b37295fc23ea58d88fb9e01f3642ad9b55",
+    strip_prefix = "platforms-3fbc687756043fb58a407c2ea8c944bc2fe1d922",
+    urls = ["https://github.com/bazelbuild/platforms/archive/3fbc687756043fb58a407c2ea8c944bc2fe1d922.zip"],
 )
