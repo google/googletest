@@ -684,7 +684,7 @@ TEST(ReturnTest, SupportsReferenceLikeReturnType) {
   // A reference wrapper for std::vector<int>, implicitly convertible from it.
   struct Result {
     const std::vector<int>* v;
-    Result(const std::vector<int>& v) : v(&v) {}  // NOLINT
+    Result(const std::vector<int>& vec) : v(&vec) {}  // NOLINT
   };
 
   // Set up an action for a mock function that returns the reference wrapper
@@ -717,7 +717,7 @@ TEST(ReturnTest, PrefersConversionOperator) {
   struct Out {
     int x;
 
-    explicit Out(const int x) : x(x) {}
+    explicit Out(const int val) : x(val) {}
     explicit Out(const In&) : x(0) {}
   };
 
