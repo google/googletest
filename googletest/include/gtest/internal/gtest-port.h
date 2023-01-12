@@ -257,6 +257,19 @@
 //                                        deprecated; calling a marked function
 //                                        should generate a compiler warning
 
+// The definition of GTEST_INTERNAL_CPLUSPLUS_LANG comes first because it can
+// potentially be used as an #include guard.
+#if defined(_MSVC_LANG)
+#define GTEST_INTERNAL_CPLUSPLUS_LANG _MSVC_LANG
+#elif defined(__cplusplus)
+#define GTEST_INTERNAL_CPLUSPLUS_LANG __cplusplus
+#endif
+
+#if !defined(GTEST_INTERNAL_CPLUSPLUS_LANG) || \
+    GTEST_INTERNAL_CPLUSPLUS_LANG < 201402L
+#error C++ versions less than C++14 are not supported.
+#endif
+
 #include <ctype.h>   // for isspace, etc
 #include <stddef.h>  // for ptrdiff_t
 #include <stdio.h>
