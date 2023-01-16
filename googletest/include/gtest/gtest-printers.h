@@ -508,43 +508,45 @@ int AppropriateResolution(FloatType val) {
 
   if (val < 1000000) {
     FloatType mulfor6 = 1e10;
-    if (val >= 100000.0) {  // 100,000 to 999,999
+    if (static_cast<double>(val) >= 100000.0) {  // 100,000 to 999,999
       mulfor6 = 1.0;
-    } else if (val >= 10000.0) {
+    } else if (static_cast<double>(val) >= 10000.0) {
       mulfor6 = 1e1;
-    } else if (val >= 1000.0) {
+    } else if (static_cast<double>(val) >= 1000.0) {
       mulfor6 = 1e2;
-    } else if (val >= 100.0) {
+    } else if (static_cast<double>(val) >= 100.0) {
       mulfor6 = 1e3;
-    } else if (val >= 10.0) {
+    } else if (static_cast<double>(val) >= 10.0) {
       mulfor6 = 1e4;
-    } else if (val >= 1.0) {
+    } else if (static_cast<double>(val) >= 1.0) {
       mulfor6 = 1e5;
-    } else if (val >= 0.1) {
+    } else if (static_cast<double>(val) >= 0.1) {
       mulfor6 = 1e6;
-    } else if (val >= 0.01) {
+    } else if (static_cast<double>(val) >= 0.01) {
       mulfor6 = 1e7;
-    } else if (val >= 0.001) {
+    } else if (static_cast<double>(val) >= 0.001) {
       mulfor6 = 1e8;
-    } else if (val >= 0.0001) {
+    } else if (static_cast<double>(val) >= 0.0001) {
       mulfor6 = 1e9;
     }
-    if (static_cast<float>(static_cast<int32_t>(val * mulfor6 + 0.5)) /
+    if (static_cast<FloatType>(
+            static_cast<int32_t>(static_cast<double>(val * mulfor6) + 0.5)) /
             mulfor6 ==
         val)
       return 6;
-  } else if (val < 1e10) {
+  } else if (static_cast<double>(val) < 1e10) {
     FloatType divfor6 = 1.0;
-    if (val >= 1e9) {  // 1,000,000,000 to 9,999,999,999
+    if (static_cast<double>(val) >= 1e9) {  // 1,000,000,000 to 9,999,999,999
       divfor6 = 10000;
-    } else if (val >= 1e8) {  // 100,000,000 to 999,999,999
+    } else if (static_cast<double>(val) >= 1e8) {  // 100,000,000 to 999,999,999
       divfor6 = 1000;
-    } else if (val >= 1e7) {  // 10,000,000 to 99,999,999
+    } else if (static_cast<double>(val) >= 1e7) {  // 10,000,000 to 99,999,999
       divfor6 = 100;
-    } else if (val >= 1e6) {  // 1,000,000 to 9,999,999
+    } else if (static_cast<double>(val) >= 1e6) {  // 1,000,000 to 9,999,999
       divfor6 = 10;
     }
-    if (static_cast<float>(static_cast<int32_t>(val / divfor6 + 0.5)) *
+    if (static_cast<FloatType>(
+            static_cast<int32_t>(static_cast<double>(val / divfor6) + 0.5)) *
             divfor6 ==
         val)
       return 6;
