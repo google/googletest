@@ -81,24 +81,37 @@ if SUPPORTS_SEH_EXCEPTIONS:
   class CatchSehExceptionsTest(gtest_test_utils.TestCase):
     """Tests exception-catching behavior."""
 
-
     def TestSehExceptions(self, test_output):
-      self.assert_('SEH exception with code 0x2a thrown '
-                   'in the test fixture\'s constructor'
-                   in test_output)
-      self.assert_('SEH exception with code 0x2a thrown '
-                   'in the test fixture\'s destructor'
-                   in test_output)
-      self.assert_('SEH exception with code 0x2a thrown in SetUpTestSuite()'
-                   in test_output)
-      self.assert_('SEH exception with code 0x2a thrown in TearDownTestSuite()'
-                   in test_output)
-      self.assert_('SEH exception with code 0x2a thrown in SetUp()'
-                   in test_output)
-      self.assert_('SEH exception with code 0x2a thrown in TearDown()'
-                   in test_output)
-      self.assert_('SEH exception with code 0x2a thrown in the test body'
-                   in test_output)
+      self.assertIn(
+          (
+              'SEH exception with code 0x2a thrown '
+              "in the test fixture's constructor"
+          ),
+          test_output,
+      )
+      self.assertIn(
+          (
+              'SEH exception with code 0x2a thrown '
+              "in the test fixture's destructor"
+          ),
+          test_output,
+      )
+      self.assertIn(
+          'SEH exception with code 0x2a thrown in SetUpTestSuite()', test_output
+      )
+      self.assertIn(
+          'SEH exception with code 0x2a thrown in TearDownTestSuite()',
+          test_output,
+      )
+      self.assertIn(
+          'SEH exception with code 0x2a thrown in SetUp()', test_output
+      )
+      self.assertIn(
+          'SEH exception with code 0x2a thrown in TearDown()', test_output
+      )
+      self.assertIn(
+          'SEH exception with code 0x2a thrown in the test body', test_output
+      )
 
     def testCatchesSehExceptionsWithCxxExceptionsEnabled(self):
       self.TestSehExceptions(EX_BINARY_OUTPUT)
@@ -122,10 +135,14 @@ class CatchCxxExceptionsTest(gtest_test_utils.TestCase):
         '"Standard C++ exception" thrown '
         'in the test fixture\'s constructor' in EX_BINARY_OUTPUT,
         EX_BINARY_OUTPUT)
-    self.assert_('unexpected' not in EX_BINARY_OUTPUT,
-                 'This failure belongs in this test only if '
-                 '"CxxExceptionInConstructorTest" (no quotes) '
-                 'appears on the same line as words "called unexpectedly"')
+    self.assertTrue(
+        'unexpected' not in EX_BINARY_OUTPUT,
+        (
+            'This failure belongs in this test only if '
+            '"CxxExceptionInConstructorTest" (no quotes) '
+            'appears on the same line as words "called unexpectedly"'
+        ),
+    )
 
   if ('CxxExceptionInDestructorTest.ThrowsExceptionInDestructor' in
       EX_BINARY_OUTPUT):
@@ -181,10 +198,14 @@ class CatchCxxExceptionsTest(gtest_test_utils.TestCase):
     self.assertTrue(
         'CxxExceptionInSetUpTest::TearDown() '
         'called as expected.' in EX_BINARY_OUTPUT, EX_BINARY_OUTPUT)
-    self.assert_('unexpected' not in EX_BINARY_OUTPUT,
-                 'This failure belongs in this test only if '
-                 '"CxxExceptionInSetUpTest" (no quotes) '
-                 'appears on the same line as words "called unexpectedly"')
+    self.assertTrue(
+        'unexpected' not in EX_BINARY_OUTPUT,
+        (
+            'This failure belongs in this test only if '
+            '"CxxExceptionInSetUpTest" (no quotes) '
+            'appears on the same line as words "called unexpectedly"'
+        ),
+    )
 
   def testCatchesCxxExceptionsInTearDown(self):
     self.assertTrue(
@@ -227,9 +248,11 @@ class CatchCxxExceptionsTest(gtest_test_utils.TestCase):
          FITLER_OUT_SEH_TESTS_FLAG],
         env=environ).output
 
-    self.assert_('Unhandled C++ exception terminating the program'
-                 in uncaught_exceptions_ex_binary_output)
-    self.assert_('unexpected' not in uncaught_exceptions_ex_binary_output)
+    self.assertIn(
+        'Unhandled C++ exception terminating the program',
+        uncaught_exceptions_ex_binary_output,
+    )
+    self.assertNotIn('unexpected', uncaught_exceptions_ex_binary_output)
 
 
 if __name__ == '__main__':

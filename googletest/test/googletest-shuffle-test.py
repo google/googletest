@@ -177,25 +177,34 @@ class GTestShuffleUnitTest(gtest_test_utils.TestCase):
     self.assertEqual(len(SHARDED_TESTS), len(SHUFFLED_SHARDED_TESTS))
 
   def testShuffleChangesTestOrder(self):
-    self.assert_(SHUFFLED_ALL_TESTS != ALL_TESTS, SHUFFLED_ALL_TESTS)
-    self.assert_(SHUFFLED_ACTIVE_TESTS != ACTIVE_TESTS, SHUFFLED_ACTIVE_TESTS)
-    self.assert_(SHUFFLED_FILTERED_TESTS != FILTERED_TESTS,
-                 SHUFFLED_FILTERED_TESTS)
-    self.assert_(SHUFFLED_SHARDED_TESTS != SHARDED_TESTS,
-                 SHUFFLED_SHARDED_TESTS)
+    self.assertTrue(SHUFFLED_ALL_TESTS != ALL_TESTS, SHUFFLED_ALL_TESTS)
+    self.assertTrue(
+        SHUFFLED_ACTIVE_TESTS != ACTIVE_TESTS, SHUFFLED_ACTIVE_TESTS
+    )
+    self.assertTrue(
+        SHUFFLED_FILTERED_TESTS != FILTERED_TESTS, SHUFFLED_FILTERED_TESTS
+    )
+    self.assertTrue(
+        SHUFFLED_SHARDED_TESTS != SHARDED_TESTS, SHUFFLED_SHARDED_TESTS
+    )
 
   def testShuffleChangesTestCaseOrder(self):
-    self.assert_(GetTestCases(SHUFFLED_ALL_TESTS) != GetTestCases(ALL_TESTS),
-                 GetTestCases(SHUFFLED_ALL_TESTS))
-    self.assert_(
+    self.assertTrue(
+        GetTestCases(SHUFFLED_ALL_TESTS) != GetTestCases(ALL_TESTS),
+        GetTestCases(SHUFFLED_ALL_TESTS),
+    )
+    self.assertTrue(
         GetTestCases(SHUFFLED_ACTIVE_TESTS) != GetTestCases(ACTIVE_TESTS),
-        GetTestCases(SHUFFLED_ACTIVE_TESTS))
-    self.assert_(
+        GetTestCases(SHUFFLED_ACTIVE_TESTS),
+    )
+    self.assertTrue(
         GetTestCases(SHUFFLED_FILTERED_TESTS) != GetTestCases(FILTERED_TESTS),
-        GetTestCases(SHUFFLED_FILTERED_TESTS))
-    self.assert_(
+        GetTestCases(SHUFFLED_FILTERED_TESTS),
+    )
+    self.assertTrue(
         GetTestCases(SHUFFLED_SHARDED_TESTS) != GetTestCases(SHARDED_TESTS),
-        GetTestCases(SHUFFLED_SHARDED_TESTS))
+        GetTestCases(SHUFFLED_SHARDED_TESTS),
+    )
 
   def testShuffleDoesNotRepeatTest(self):
     for test in SHUFFLED_ALL_TESTS:
@@ -213,30 +222,34 @@ class GTestShuffleUnitTest(gtest_test_utils.TestCase):
 
   def testShuffleDoesNotCreateNewTest(self):
     for test in SHUFFLED_ALL_TESTS:
-      self.assert_(test in ALL_TESTS, '%s is an invalid test' % (test,))
+      self.assertTrue(test in ALL_TESTS, '%s is an invalid test' % (test,))
     for test in SHUFFLED_ACTIVE_TESTS:
-      self.assert_(test in ACTIVE_TESTS, '%s is an invalid test' % (test,))
+      self.assertTrue(test in ACTIVE_TESTS, '%s is an invalid test' % (test,))
     for test in SHUFFLED_FILTERED_TESTS:
-      self.assert_(test in FILTERED_TESTS, '%s is an invalid test' % (test,))
+      self.assertTrue(test in FILTERED_TESTS, '%s is an invalid test' % (test,))
     for test in SHUFFLED_SHARDED_TESTS:
-      self.assert_(test in SHARDED_TESTS, '%s is an invalid test' % (test,))
+      self.assertTrue(test in SHARDED_TESTS, '%s is an invalid test' % (test,))
 
   def testShuffleIncludesAllTests(self):
     for test in ALL_TESTS:
-      self.assert_(test in SHUFFLED_ALL_TESTS, '%s is missing' % (test,))
+      self.assertTrue(test in SHUFFLED_ALL_TESTS, '%s is missing' % (test,))
     for test in ACTIVE_TESTS:
-      self.assert_(test in SHUFFLED_ACTIVE_TESTS, '%s is missing' % (test,))
+      self.assertTrue(test in SHUFFLED_ACTIVE_TESTS, '%s is missing' % (test,))
     for test in FILTERED_TESTS:
-      self.assert_(test in SHUFFLED_FILTERED_TESTS, '%s is missing' % (test,))
+      self.assertTrue(
+          test in SHUFFLED_FILTERED_TESTS, '%s is missing' % (test,)
+      )
     for test in SHARDED_TESTS:
-      self.assert_(test in SHUFFLED_SHARDED_TESTS, '%s is missing' % (test,))
+      self.assertTrue(test in SHUFFLED_SHARDED_TESTS, '%s is missing' % (test,))
 
   def testShuffleLeavesDeathTestsAtFront(self):
     non_death_test_found = False
     for test in SHUFFLED_ACTIVE_TESTS:
       if 'DeathTest.' in test:
-        self.assert_(not non_death_test_found,
-                     '%s appears after a non-death test' % (test,))
+        self.assertTrue(
+            not non_death_test_found,
+            '%s appears after a non-death test' % (test,),
+        )
       else:
         non_death_test_found = True
 
@@ -293,12 +306,15 @@ class GTestShuffleUnitTest(gtest_test_utils.TestCase):
         GetTestsForAllIterations(
             {}, [ShuffleFlag(), RandomSeedFlag(1), RepeatFlag(3)]))
 
-    self.assert_(tests_in_iteration1 != tests_in_iteration2,
-                 tests_in_iteration1)
-    self.assert_(tests_in_iteration1 != tests_in_iteration3,
-                 tests_in_iteration1)
-    self.assert_(tests_in_iteration2 != tests_in_iteration3,
-                 tests_in_iteration2)
+    self.assertTrue(
+        tests_in_iteration1 != tests_in_iteration2, tests_in_iteration1
+    )
+    self.assertTrue(
+        tests_in_iteration1 != tests_in_iteration3, tests_in_iteration1
+    )
+    self.assertTrue(
+        tests_in_iteration2 != tests_in_iteration3, tests_in_iteration2
+    )
 
   def testShuffleShardedTestsPreservesPartition(self):
     # If we run M tests on N shards, the same M tests should be run in

@@ -171,15 +171,17 @@ class GTestJsonOutFilesTest(gtest_test_utils.TestCase):
     command = [gtest_prog_path, '--gtest_output=json:%s' % self.output_dir_]
     p = gtest_test_utils.Subprocess(command,
                                     working_dir=gtest_test_utils.GetTempDir())
-    self.assert_(p.exited)
-    self.assertEquals(0, p.exit_code)
+    self.assertTrue(p.exited)
+    self.assertEqual(0, p.exit_code)
 
     output_file_name1 = test_name + '.json'
     output_file1 = os.path.join(self.output_dir_, output_file_name1)
     output_file_name2 = 'lt-' + output_file_name1
     output_file2 = os.path.join(self.output_dir_, output_file_name2)
-    self.assert_(os.path.isfile(output_file1) or os.path.isfile(output_file2),
-                 output_file1)
+    self.assertTrue(
+        os.path.isfile(output_file1) or os.path.isfile(output_file2),
+        output_file1,
+    )
 
     if os.path.isfile(output_file1):
       with open(output_file1) as f:
