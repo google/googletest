@@ -250,10 +250,10 @@ class GTestFilterUnitTest(gtest_test_utils.TestCase):
     """Asserts that two sets are equal."""
 
     for elem in lhs:
-      self.assert_(elem in rhs, '%s in %s' % (elem, rhs))
+      self.assertTrue(elem in rhs, '%s in %s' % (elem, rhs))
 
     for elem in rhs:
-      self.assert_(elem in lhs, '%s in %s' % (elem, lhs))
+      self.assertTrue(elem in lhs, '%s in %s' % (elem, lhs))
 
   def AssertPartitionIsValid(self, set_var, list_of_sets):
     """Asserts that list_of_sets is a valid partition of set_var."""
@@ -595,13 +595,13 @@ class GTestFilterUnitTest(gtest_test_utils.TestCase):
 
     shard_status_file = os.path.join(gtest_test_utils.GetTempDir(),
                                      'shard_status_file')
-    self.assert_(not os.path.exists(shard_status_file))
+    self.assertTrue(not os.path.exists(shard_status_file))
 
     extra_env = {SHARD_STATUS_FILE_ENV_VAR: shard_status_file}
     try:
       InvokeWithModifiedEnv(extra_env, RunAndReturnOutput)
     finally:
-      self.assert_(os.path.exists(shard_status_file))
+      self.assertTrue(os.path.exists(shard_status_file))
       os.remove(shard_status_file)
 
   def testShardStatusFileIsCreatedWithListTests(self):
@@ -609,7 +609,7 @@ class GTestFilterUnitTest(gtest_test_utils.TestCase):
 
     shard_status_file = os.path.join(gtest_test_utils.GetTempDir(),
                                      'shard_status_file2')
-    self.assert_(not os.path.exists(shard_status_file))
+    self.assertTrue(not os.path.exists(shard_status_file))
 
     extra_env = {SHARD_STATUS_FILE_ENV_VAR: shard_status_file}
     try:
@@ -619,12 +619,16 @@ class GTestFilterUnitTest(gtest_test_utils.TestCase):
     finally:
       # This assertion ensures that Google Test enumerated the tests as
       # opposed to running them.
-      self.assert_('[==========]' not in output,
-                   'Unexpected output during test enumeration.\n'
-                   'Please ensure that LIST_TESTS_FLAG is assigned the\n'
-                   'correct flag value for listing Google Test tests.')
+      self.assertTrue(
+          '[==========]' not in output,
+          (
+              'Unexpected output during test enumeration.\n'
+              'Please ensure that LIST_TESTS_FLAG is assigned the\n'
+              'correct flag value for listing Google Test tests.'
+          ),
+      )
 
-      self.assert_(os.path.exists(shard_status_file))
+      self.assertTrue(os.path.exists(shard_status_file))
       os.remove(shard_status_file)
 
   def testDisabledBanner(self):

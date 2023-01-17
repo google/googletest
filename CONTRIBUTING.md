@@ -88,7 +88,7 @@ check your formatting.
 If you plan to contribute a patch, you need to build Google Test, Google Mock,
 and their own tests from a git checkout, which has further requirements:
 
-*   [Python](https://www.python.org/) v2.3 or newer (for running some of the
+*   [Python](https://www.python.org/) v3.6 or newer (for running some of the
     tests and re-generating certain source files from templates)
 *   [CMake](https://cmake.org/) v2.8.12 or newer
 

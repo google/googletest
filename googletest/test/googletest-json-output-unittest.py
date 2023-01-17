@@ -806,9 +806,9 @@ class GTestJsonOutputUnitTest(gtest_test_utils.TestCase):
     p = gtest_test_utils.Subprocess(
         [gtest_prog_path, '%s=json' % GTEST_OUTPUT_FLAG],
         working_dir=gtest_test_utils.GetTempDir())
-    self.assert_(p.exited)
-    self.assertEquals(0, p.exit_code)
-    self.assert_(os.path.isfile(output_file))
+    self.assertTrue(p.exited)
+    self.assertEqual(0, p.exit_code)
+    self.assertTrue(os.path.isfile(output_file))
 
   def testSuppressedJsonOutput(self):
     """Verifies that no JSON output is generated.
@@ -832,13 +832,15 @@ class GTestJsonOutputUnitTest(gtest_test_utils.TestCase):
           p.terminated_by_signal,
           '%s was killed by signal %d' % (GTEST_PROGRAM_NAME, p.signal))
     else:
-      self.assert_(p.exited)
-      self.assertEquals(1, p.exit_code,
-                        "'%s' exited with code %s, which doesn't match "
-                        'the expected exit code %s.'
-                        % (command, p.exit_code, 1))
+      self.assertTrue(p.exited)
+      self.assertEqual(
+          1,
+          p.exit_code,
+          "'%s' exited with code %s, which doesn't match "
+          'the expected exit code %s.' % (command, p.exit_code, 1),
+      )
 
-    self.assert_(not os.path.isfile(json_path))
+    self.assertTrue(not os.path.isfile(json_path))
 
   def testFilteredTestJsonOutput(self):
     """Verifies JSON output when a filter is applied.
@@ -870,14 +872,18 @@ class GTestJsonOutputUnitTest(gtest_test_utils.TestCase):
     )
     p = gtest_test_utils.Subprocess(command)
     if p.terminated_by_signal:
-      self.assert_(False,
-                   '%s was killed by signal %d' % (gtest_prog_name, p.signal))
+      self.assertTrue(
+          False, '%s was killed by signal %d' % (gtest_prog_name, p.signal)
+      )
     else:
-      self.assert_(p.exited)
-      self.assertEquals(expected_exit_code, p.exit_code,
-                        "'%s' exited with code %s, which doesn't match "
-                        'the expected exit code %s.'
-                        % (command, p.exit_code, expected_exit_code))
+      self.assertTrue(p.exited)
+      self.assertEqual(
+          expected_exit_code,
+          p.exit_code,
+          "'%s' exited with code %s, which doesn't match "
+          'the expected exit code %s.'
+          % (command, p.exit_code, expected_exit_code),
+      )
     with open(json_path) as f:
       actual = json.load(f)
     return actual

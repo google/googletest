@@ -120,7 +120,7 @@ class ThrowOnFailureTest(gtest_test_utils.TestCase):
            'exit code.' %
            (THROW_ON_FAILURE, env_var_value_msg, ' '.join(command),
             should_or_not))
-    self.assert_(failed == should_fail, msg)
+    self.assertTrue(failed == should_fail, msg)
 
   def testDefaultBehavior(self):
     """Tests the behavior of the default mode."""
