@@ -22,6 +22,13 @@ now available.
 
 The 1.13.x branch requires at least C++14.
 
+#### Continuous Integration
+
+We use Google's internal systems for continuous integration. \
+GitHub Actions were added for the convenience of open source contributors. They
+are exclusively maintained by the open source community and not used by the
+GoogleTest team.
+
 #### Coming Soon
 
 *   We are planning to take a dependency on
