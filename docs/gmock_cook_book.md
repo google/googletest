@@ -285,6 +285,10 @@ If you are concerned about the performance overhead incurred by virtual
 functions, and profiling confirms your concern, you can combine this with the
 recipe for [mocking non-virtual methods](#MockingNonVirtualMethods).
 
+Alternatively, instead of introducing a new interface, you can rewrite your code
+to accept a std::function instead of the free function, and then use
+[MockFunction](#MockFunction) to mock the std::function.
+
 ### Old-Style `MOCK_METHODn` Macros
 
 Before the generic `MOCK_METHOD` macro
