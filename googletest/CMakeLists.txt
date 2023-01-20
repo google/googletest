@@ -202,6 +202,8 @@ if (gtest_build_tests)
   # 'make test' or ctest.
   enable_testing()
 
+  set_python_interpreter(PYTHON_EXECUTABLE)
+
   ############################################################
   # C++ tests built with standard compiler flags.
 

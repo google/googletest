@@ -135,6 +135,8 @@ if (gmock_build_tests)
   # 'make test' or ctest.
   enable_testing()
 
+  set_python_interpreter(PYTHON_EXECUTABLE)
+
   if (MINGW OR CYGWIN)
     if (CMAKE_VERSION VERSION_LESS "2.8.12")
       add_compile_options("-Wa,-mbig-obj")

@@ -256,14 +256,21 @@ if (POLICY CMP0094)
   cmake_policy(SET CMP0094 NEW)
 endif()
 
-# Sets PYTHONINTERP_FOUND and PYTHON_EXECUTABLE.
-if ("${CMAKE_VERSION}" VERSION_LESS "3.12.0")
-  find_package(PythonInterp)
-else()
-  find_package(Python COMPONENTS Interpreter)
-  set(PYTHONINTERP_FOUND ${Python_Interpreter_FOUND})
-  set(PYTHON_EXECUTABLE ${Python_EXECUTABLE})
-endif()
+# Sets PYTHONINTERP_FOUND and PYTHON_EXECUTABLE if they were not set before.
+macro(set_python_interpreter PYTHON_EXECUTABLE)
+  if(PYTHON_EXECUTABLE)
+    # We add this check for the case when user set python interpreter path explicitly
+    set(PYTHONINTERP_FOUND TRUE)
+  else()
+    if ("${CMAKE_VERSION}" VERSION_LESS "3.12.0")
+      find_package(PythonInterp)
+    else()
+      find_package(Python COMPONENTS Interpreter)
+      set(PYTHONINTERP_FOUND ${Python_Interpreter_FOUND})
+      set(PYTHON_EXECUTABLE ${Python_EXECUTABLE})
+    endif()
+  endif()
+endmacro()
 
 # cxx_test_with_flags(name cxx_flags libs srcs...)
 #
