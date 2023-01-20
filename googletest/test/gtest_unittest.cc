@@ -161,7 +161,47 @@ TEST_F(StreamingListenerTest, OnTestPartResult) {
 
   // Meta characters in the failure message should be properly escaped.
   EXPECT_EQ(
-      "event=TestPartResult&file=foo.cc&line=42&message=failed%3D%0A%26%25\n",
+      "event=TestPartResult&type=failure&file=foo.cc&line=42&message=failed%3D%0A%26%25\n",
+      *output());
+}
+
+TEST_F(StreamingListenerTest, OnTestPartResultSkip) {
+  *output() = "";
+  streamer_.OnTestPartResult(TestPartResult(TestPartResult::kSkip,
+                                            "foo.cc", 42, "Skipped"));
+
+  EXPECT_EQ(
+      "event=TestPartResult&type=skip&file=foo.cc&line=42&message=Skipped\n",
+      *output());
+}
+
+TEST_F(StreamingListenerTest, OnTestPartResultSuccess) {
+  *output() = "";
+  streamer_.OnTestPartResult(TestPartResult(TestPartResult::kSuccess,
+                                            "foo.cc", 42, "Succeeded"));
+
+  EXPECT_EQ(
+      "event=TestPartResult&type=success&file=foo.cc&line=42&message=Succeeded\n",
+      *output());
+}
+
+TEST_F(StreamingListenerTest, OnTestPartResultNonFatalFailure) {
+  *output() = "";
+  streamer_.OnTestPartResult(TestPartResult(TestPartResult::kNonFatalFailure,
+                                            "foo.cc", 42, "Failed"));
+
+  EXPECT_EQ(
+      "event=TestPartResult&type=failure&file=foo.cc&line=42&message=Failed\n",
+      *output());
+}
+
+TEST_F(StreamingListenerTest, OnTestPartResultUnknown) {
+  *output() = "";
+  streamer_.OnTestPartResult(TestPartResult((TestPartResult::Type)-1,
+                                            "foo.cc", 42, "Other"));
+
+  EXPECT_EQ(
+      "event=TestPartResult&type=unknown&file=foo.cc&line=42&message=Other\n",
       *output());
 }
 
