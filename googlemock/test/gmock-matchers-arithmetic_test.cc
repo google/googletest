@@ -41,6 +41,8 @@
 
 #include "test/gmock-matchers_test.h"
 
+#include <limits>
+
 namespace testing {
 namespace gmock_matchers_test {
 namespace {
@@ -1037,7 +1039,7 @@ class FloatingPointTest : public testing::Test {
             Floating::ReinterpretBits(infinity_bits_ - max_ulps_)),
         further_from_infinity_(
             Floating::ReinterpretBits(infinity_bits_ - max_ulps_ - 1)),
-        max_(Floating::Max()),
+        max_(std::numeric_limits<RawType>::max()),
         nan1_(Floating::ReinterpretBits(Floating::kExponentBitMask | 1)),
         nan2_(Floating::ReinterpretBits(Floating::kExponentBitMask | 200)) {}
 
