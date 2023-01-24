@@ -956,7 +956,7 @@ class CartesianProductHolder {
 template <typename From, typename To>
 class ParamGeneratorConverter : public ParamGeneratorInterface<To> {
  public:
-  ParamGeneratorConverter(ParamGenerator<From> gen) // NOLINT
+  ParamGeneratorConverter(ParamGenerator<From> gen)  // NOLINT
       : generator_(std::move(gen)) {}
 
   ParamIteratorInterface<To>* Begin() const override {

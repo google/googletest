@@ -461,10 +461,10 @@ TEST(PrintBuiltInTypeTest, FloatingPoints) {
   // float (32-bit precision)
   EXPECT_EQ("1.5", Print(1.5f));
 
-  EXPECT_EQ("1.0999999",  Print(1.09999990f));
-  EXPECT_EQ("1.1",        Print(1.10000002f));
+  EXPECT_EQ("1.0999999", Print(1.09999990f));
+  EXPECT_EQ("1.1", Print(1.10000002f));
   EXPECT_EQ("1.10000014", Print(1.10000014f));
-  EXPECT_EQ("9e+09",      Print(9e9f));
+  EXPECT_EQ("9e+09", Print(9e9f));
 
   // double
   EXPECT_EQ("-2.5", Print(-2.5));  // double

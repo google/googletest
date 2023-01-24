@@ -1410,7 +1410,7 @@ TEST(DoAll, ProvidesLvalueReferencesToInitialActions) {
       void operator()(Obj&&) const { FAIL() << "Unexpected call"; }
     };
 
-    MockFunction<void(Obj &&)> mock;
+    MockFunction<void(Obj&&)> mock;
     EXPECT_CALL(mock, Call)
         .WillOnce(DoAll(InitialAction{}, InitialAction{}, [](Obj&&) {}))
         .WillRepeatedly(DoAll(InitialAction{}, InitialAction{}, [](Obj&&) {}));
@@ -1438,7 +1438,7 @@ TEST(DoAll, ProvidesLvalueReferencesToInitialActions) {
       void operator()(Obj&) && {}
     };
 
-    MockFunction<void(Obj &&)> mock;
+    MockFunction<void(Obj&&)> mock;
     EXPECT_CALL(mock, Call)
         .WillOnce(DoAll(InitialAction{}, InitialAction{}, [](Obj&&) {}));
 
