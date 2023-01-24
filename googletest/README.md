@@ -152,11 +152,15 @@ GoogleTest is thread-safe where the pthread library is available. After
 If GoogleTest doesn't correctly detect whether pthread is available in your
 environment, you can force it with
 
-    -DGTEST_HAS_PTHREAD=1
+```
+-DGTEST_HAS_PTHREAD=1
+```
 
 or
 
-    -DGTEST_HAS_PTHREAD=0
+```
+-DGTEST_HAS_PTHREAD=0
+```
 
 When GoogleTest uses pthread, you may need to add flags to your compiler and/or
 linker to select the pthread library, or you'll get link errors. If you use the
@@ -172,14 +176,18 @@ as a DLL on Windows) if you prefer.
 
 To compile *gtest* as a shared library, add
 
-    -DGTEST_CREATE_SHARED_LIBRARY=1
+```
+-DGTEST_CREATE_SHARED_LIBRARY=1
+```
 
 to the compiler flags. You'll also need to tell the linker to produce a shared
 library instead - consult your linker's manual for how to do it.
 
 To compile your *tests* that use the gtest shared library, add
 
-    -DGTEST_LINKED_AS_SHARED_LIBRARY=1
+```
+-DGTEST_LINKED_AS_SHARED_LIBRARY=1
+```
 
 to the compiler flags.
 
@@ -200,7 +208,9 @@ rename its macro to avoid the conflict.
 Specifically, if both GoogleTest and some other code define macro FOO, you can
 add
 
-    -DGTEST_DONT_DEFINE_FOO=1
+```
+-DGTEST_DONT_DEFINE_FOO=1
+```
 
 to the compiler flags to tell GoogleTest to change the macro's name from `FOO`
 to `GTEST_FOO`. Currently `FOO` can be `ASSERT_EQ`, `ASSERT_FALSE`, `ASSERT_GE`,
@@ -208,10 +218,14 @@ to `GTEST_FOO`. Currently `FOO` can be `ASSERT_EQ`, `ASSERT_FALSE`, `ASSERT_GE`,
 `EXPECT_FALSE`, `EXPECT_TRUE`, `FAIL`, `SUCCEED`, `TEST`, or `TEST_F`. For
 example, with `-DGTEST_DONT_DEFINE_TEST=1`, you'll need to write
 
-    GTEST_TEST(SomeTest, DoesThis) { ... }
+```
+GTEST_TEST(SomeTest, DoesThis) { ... }
+```
 
 instead of
 
-    TEST(SomeTest, DoesThis) { ... }
+```
+TEST(SomeTest, DoesThis) { ... }
+```
 
 in order to define a test.

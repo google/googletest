@@ -102,30 +102,40 @@ To make sure your changes work as intended and don't break existing
 functionality, you'll want to compile and run Google Test and GoogleMock's own
 tests. For that you can use CMake:
 
-    mkdir mybuild
-    cd mybuild
-    cmake -Dgtest_build_tests=ON -Dgmock_build_tests=ON ${GTEST_REPO_DIR}
+```
+mkdir mybuild
+cd mybuild
+cmake -Dgtest_build_tests=ON -Dgmock_build_tests=ON ${GTEST_REPO_DIR}
+```
 
 To choose between building only Google Test or Google Mock, you may modify your
 cmake command to be one of each
 
-    cmake -Dgtest_build_tests=ON ${GTEST_DIR} # sets up Google Test tests
-    cmake -Dgmock_build_tests=ON ${GMOCK_DIR} # sets up Google Mock tests
+```
+cmake -Dgtest_build_tests=ON ${GTEST_DIR} # sets up Google Test tests
+cmake -Dgmock_build_tests=ON ${GMOCK_DIR} # sets up Google Mock tests
+```
 
 Make sure you have Python installed, as some of Google Test's tests are written
 in Python. If the cmake command complains about not being able to find Python
 (`Could NOT find PythonInterp (missing: PYTHON_EXECUTABLE)`), try telling it
 explicitly where your Python executable can be found:
 
-    cmake -DPYTHON_EXECUTABLE=path/to/python ...
+```
+cmake -DPYTHON_EXECUTABLE=path/to/python ...
+```
 
 Next, you can build Google Test and / or Google Mock and all desired tests. On
 \*nix, this is usually done by
 
-    make
+```
+make
+```
 
 To run the tests, do
 
-    make test
+```
+make test
+```
 
 All tests should pass.
