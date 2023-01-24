@@ -201,8 +201,8 @@ std::set<std::string>* GetIgnoredParameterizedTestSuites();
 class GTestNonCopyable {
  public:
   GTestNonCopyable() = default;
-  GTestNonCopyable(const GTestNonCopyable &) = delete;
-  GTestNonCopyable &operator=(const GTestNonCopyable &) = delete;
+  GTestNonCopyable(const GTestNonCopyable&) = delete;
+  GTestNonCopyable& operator=(const GTestNonCopyable&) = delete;
   ~GTestNonCopyable() = default;
 };
 

@@ -712,7 +712,7 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 #define GTEST_ATTRIBUTE_PRINTF_(string_index, first_to_check) \
   __attribute__((format(__MINGW_PRINTF_FORMAT, string_index, first_to_check)))
 #elif GTEST_HAVE_ATTRIBUTE_(format)
-#define GTEST_ATTRIBUTE_PRINTF_(string_index, first_to_check)   \
+#define GTEST_ATTRIBUTE_PRINTF_(string_index, first_to_check) \
   __attribute__((format(printf, string_index, first_to_check)))
 #else
 #define GTEST_ATTRIBUTE_PRINTF_(string_index, first_to_check)

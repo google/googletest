@@ -148,20 +148,19 @@ const char* FilePath::FindLastPathSeparator() const {
 }
 
 size_t FilePath::CalculateRootLength() const {
-  const auto &path = pathname_;
+  const auto& path = pathname_;
   auto s = path.begin();
   auto end = path.end();
 #if GTEST_OS_WINDOWS
-  if (end - s >= 2 && s[1] == ':' &&
-      (end - s == 2 || IsPathSeparator(s[2])) &&
+  if (end - s >= 2 && s[1] == ':' && (end - s == 2 || IsPathSeparator(s[2])) &&
       (('A' <= s[0] && s[0] <= 'Z') || ('a' <= s[0] && s[0] <= 'z'))) {
     // A typical absolute path like "C:\Windows" or "D:"
     s += 2;
     if (s != end) {
       ++s;
     }
-  } else if (end - s >= 3 && IsPathSeparator(*s) && IsPathSeparator(*(s + 1))
-             && !IsPathSeparator(*(s + 2))) {
+  } else if (end - s >= 3 && IsPathSeparator(*s) && IsPathSeparator(*(s + 1)) &&
+             !IsPathSeparator(*(s + 2))) {
     // Move past the "\\" prefix in a UNC path like "\\Server\Share\Folder"
     s += 2;
     // Skip 2 components and their following separators ("Server\" and "Share\")
@@ -295,9 +294,7 @@ bool FilePath::IsRootDirectory() const {
 }
 
 // Returns true if pathname describes an absolute path.
-bool FilePath::IsAbsolutePath() const {
-  return CalculateRootLength() > 0;
-}
+bool FilePath::IsAbsolutePath() const { return CalculateRootLength() > 0; }
 
 // Returns a pathname for a file that does not currently exist. The pathname
 // will be directory/base_name.extension or

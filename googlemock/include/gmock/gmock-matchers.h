@@ -3317,8 +3317,8 @@ class FieldsAreMatcherImpl<Struct, IndexSequence<I...>>
     std::vector<StringMatchResultListener> inner_listener(sizeof...(I));
 
     VariadicExpand(
-        {failed_pos == ~size_t{}&& !std::get<I>(matchers_).MatchAndExplain(
-                           std::get<I>(tuple), &inner_listener[I])
+        {failed_pos == ~size_t{} && !std::get<I>(matchers_).MatchAndExplain(
+                                        std::get<I>(tuple), &inner_listener[I])
              ? failed_pos = I
              : 0 ...});
     if (failed_pos != ~size_t{}) {
@@ -5474,8 +5474,7 @@ PolymorphicMatcher<internal::ExceptionMatcherImpl<Err>> ThrowsMessage(
   inline name##Matcher GMOCK_INTERNAL_WARNING_PUSH()                           \
       GMOCK_INTERNAL_WARNING_CLANG(ignored, "-Wunused-function")               \
           GMOCK_INTERNAL_WARNING_CLANG(ignored, "-Wunused-member-function")    \
-              name                                                             \
-              GMOCK_INTERNAL_WARNING_POP()() {                                 \
+              name GMOCK_INTERNAL_WARNING_POP()() {                            \
     return {};                                                                 \
   }                                                                            \
   template <typename arg_type>                                                 \

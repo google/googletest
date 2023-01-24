@@ -1792,8 +1792,8 @@ TEST(ThrowsPredicateCompilesTest, ExceptionMatcherAcceptsBroadType) {
   {
     Matcher<uint64_t> inner = Eq(10);
     Matcher<std::function<void()>> matcher = Throws<uint32_t>(inner);
-    EXPECT_TRUE(matcher.Matches([]() { throw(uint32_t) 10; }));
-    EXPECT_FALSE(matcher.Matches([]() { throw(uint32_t) 11; }));
+    EXPECT_TRUE(matcher.Matches([]() { throw (uint32_t)10; }));
+    EXPECT_FALSE(matcher.Matches([]() { throw (uint32_t)11; }));
   }
 }
 
