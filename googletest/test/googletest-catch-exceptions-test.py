@@ -81,7 +81,6 @@ EX_BINARY_OUTPUT = gtest_test_utils.Subprocess(
 
 # The tests.
 if SUPPORTS_SEH_EXCEPTIONS:
-  # pylint:disable-msg=C6302
   class CatchSehExceptionsTest(gtest_test_utils.TestCase):
     """Tests exception-catching behavior."""
 
