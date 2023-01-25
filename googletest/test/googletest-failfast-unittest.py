@@ -62,15 +62,18 @@ FILTER_FLAG = 'gtest_filter'
 
 # Command to run the googletest-failfast-unittest_ program.
 COMMAND = gtest_test_utils.GetTestExecutablePath(
-    'googletest-failfast-unittest_')
+    'googletest-failfast-unittest_'
+)
 
 # The command line flag to tell Google Test to output the list of tests it
 # will run.
 LIST_TESTS_FLAG = '--gtest_list_tests'
 
 # Indicates whether Google Test supports death tests.
-SUPPORTS_DEATH_TESTS = 'HasDeathTest' in gtest_test_utils.Subprocess(
-    [COMMAND, LIST_TESTS_FLAG]).output
+SUPPORTS_DEATH_TESTS = (
+    'HasDeathTest'
+    in gtest_test_utils.Subprocess([COMMAND, LIST_TESTS_FLAG]).output
+)
 
 # Utilities.
 
@@ -90,8 +93,9 @@ def RunAndReturnOutput(test_suite=None, fail_fast=None, run_disabled=False):
   """Runs the test program and returns its output."""
 
   args = []
-  xml_path = os.path.join(gtest_test_utils.GetTempDir(),
-                          '.GTestFailFastUnitTest.xml')
+  xml_path = os.path.join(
+      gtest_test_utils.GetTempDir(), '.GTestFailFastUnitTest.xml'
+  )
   args += ['--gtest_output=xml:' + xml_path]
   if fail_fast is not None:
     if isinstance(fail_fast, str):
@@ -188,49 +192,63 @@ class GTestFailFastUnitTest(gtest_test_utils.TestCase):
     txt, _ = RunAndReturnOutput(test_suite='HasSkipTest', fail_fast=True)
     self.assertIn('1 FAILED TEST', txt)
     self.assertIn('[  SKIPPED ] 3 tests', txt)
-    for expected_count, callback in [(1, 'OnTestSuiteStart'),
-                                     (5, 'OnTestStart'),
-                                     (5, 'OnTestEnd'),
-                                     (5, 'OnTestPartResult'),
-                                     (1, 'OnTestSuiteEnd')]:
+    for expected_count, callback in [
+        (1, 'OnTestSuiteStart'),
+        (5, 'OnTestStart'),
+        (5, 'OnTestEnd'),
+        (5, 'OnTestPartResult'),
+        (1, 'OnTestSuiteEnd'),
+    ]:
       self.assertEqual(
-          expected_count, txt.count(callback),
-          'Expected %d calls to callback %s match count on output: %s ' %
-          (expected_count, callback, txt))
+          expected_count,
+          txt.count(callback),
+          'Expected %d calls to callback %s match count on output: %s '
+          % (expected_count, callback, txt),
+      )
 
     txt, _ = RunAndReturnOutput(test_suite='HasSkipTest', fail_fast=False)
     self.assertIn('3 FAILED TEST', txt)
     self.assertIn('[  SKIPPED ] 1 test', txt)
-    for expected_count, callback in [(1, 'OnTestSuiteStart'),
-                                     (5, 'OnTestStart'),
-                                     (5, 'OnTestEnd'),
-                                     (5, 'OnTestPartResult'),
-                                     (1, 'OnTestSuiteEnd')]:
+    for expected_count, callback in [
+        (1, 'OnTestSuiteStart'),
+        (5, 'OnTestStart'),
+        (5, 'OnTestEnd'),
+        (5, 'OnTestPartResult'),
+        (1, 'OnTestSuiteEnd'),
+    ]:
       self.assertEqual(
-          expected_count, txt.count(callback),
-          'Expected %d calls to callback %s match count on output: %s ' %
-          (expected_count, callback, txt))
+          expected_count,
+          txt.count(callback),
+          'Expected %d calls to callback %s match count on output: %s '
+          % (expected_count, callback, txt),
+      )
 
   def assertXmlResultCount(self, result, count, xml):
     self.assertEqual(
-        count, xml.count('result="%s"' % result),
-        'Expected \'result="%s"\' match count of %s: %s ' %
-        (result, count, xml))
+        count,
+        xml.count('result="%s"' % result),
+        'Expected \'result="%s"\' match count of %s: %s '
+        % (result, count, xml),
+    )
 
   def assertXmlStatusCount(self, status, count, xml):
     self.assertEqual(
-        count, xml.count('status="%s"' % status),
-        'Expected \'status="%s"\' match count of %s: %s ' %
-        (status, count, xml))
+        count,
+        xml.count('status="%s"' % status),
+        'Expected \'status="%s"\' match count of %s: %s '
+        % (status, count, xml),
+    )
 
-  def assertFailFastXmlAndTxtOutput(self,
-                                    fail_fast,
-                                    test_suite,
-                                    passed_count,
-                                    failure_count,
-                                    skipped_count,
-                                    suppressed_count,
-                                    run_disabled=False):
+  def assertFailFastXmlAndTxtOutput(
+      self,
+      fail_fast,
+      test_suite,
+      passed_count,
+      failure_count,
+      skipped_count,
+      suppressed_count,
+      run_disabled=False,
+  ):
     """Assert XML and text output of a test execution."""
 
     txt, xml = RunAndReturnOutput(test_suite, fail_fast, run_disabled)
@@ -240,40 +258,57 @@ class GTestFailFastUnitTest(gtest_test_utils.TestCase):
       self.assertIn('%s DISABLED TEST' % suppressed_count, txt)
     if skipped_count > 0:
       self.assertIn('[  SKIPPED ] %s tests' % skipped_count, txt)
-    self.assertXmlStatusCount('run',
-                              passed_count + failure_count + skipped_count, xml)
+    self.assertXmlStatusCount(
+        'run', passed_count + failure_count + skipped_count, xml
+    )
     self.assertXmlStatusCount('notrun', suppressed_count, xml)
     self.assertXmlResultCount('completed', passed_count + failure_count, xml)
     self.assertXmlResultCount('skipped', skipped_count, xml)
     self.assertXmlResultCount('suppressed', suppressed_count, xml)
 
-  def assertFailFastBehavior(self,
-                             test_suite,
-                             passed_count,
-                             failure_count,
-                             skipped_count,
-                             suppressed_count,
-                             run_disabled=False):
+  def assertFailFastBehavior(
+      self,
+      test_suite,
+      passed_count,
+      failure_count,
+      skipped_count,
+      suppressed_count,
+      run_disabled=False,
+  ):
     """Assert --fail_fast via flag."""
 
     for fail_fast in ('true', '1', 't', True):
-      self.assertFailFastXmlAndTxtOutput(fail_fast, test_suite, passed_count,
-                                         failure_count, skipped_count,
-                                         suppressed_count, run_disabled)
+      self.assertFailFastXmlAndTxtOutput(
+          fail_fast,
+          test_suite,
+          passed_count,
+          failure_count,
+          skipped_count,
+          suppressed_count,
+          run_disabled,
+      )
 
-  def assertNotFailFastBehavior(self,
-                                test_suite,
-                                passed_count,
-                                failure_count,
-                                skipped_count,
-                                suppressed_count,
-                                run_disabled=False):
+  def assertNotFailFastBehavior(
+      self,
+      test_suite,
+      passed_count,
+      failure_count,
+      skipped_count,
+      suppressed_count,
+      run_disabled=False,
+  ):
     """Assert --nofail_fast via flag."""
 
     for fail_fast in ('false', '0', 'f', False):
-      self.assertFailFastXmlAndTxtOutput(fail_fast, test_suite, passed_count,
-                                         failure_count, skipped_count,
-                                         suppressed_count, run_disabled)
+      self.assertFailFastXmlAndTxtOutput(
+          fail_fast,
+          test_suite,
+          passed_count,
+          failure_count,
+          skipped_count,
+          suppressed_count,
+          run_disabled,
+      )
 
   def testFlag_HasFixtureTest(self):
     """Tests the behavior of fail_fast and TEST_F."""
@@ -282,13 +317,15 @@ class GTestFailFastUnitTest(gtest_test_utils.TestCase):
         passed_count=1,
         failure_count=1,
         skipped_count=3,
-        suppressed_count=0)
+        suppressed_count=0,
+    )
     self.assertNotFailFastBehavior(
         test_suite='HasFixtureTest',
         passed_count=1,
         failure_count=4,
         skipped_count=0,
-        suppressed_count=0)
+        suppressed_count=0,
+    )
 
   def testFlag_HasSimpleTest(self):
     """Tests the behavior of fail_fast and TEST."""
@@ -297,13 +334,15 @@ class GTestFailFastUnitTest(gtest_test_utils.TestCase):
         passed_count=1,
         failure_count=1,
         skipped_count=3,
-        suppressed_count=0)
+        suppressed_count=0,
+    )
     self.assertNotFailFastBehavior(
         test_suite='HasSimpleTest',
         passed_count=1,
         failure_count=4,
         skipped_count=0,
-        suppressed_count=0)
+        suppressed_count=0,
+    )
 
   def testFlag_HasParametersTest(self):
     """Tests the behavior of fail_fast and TEST_P."""
@@ -312,13 +351,15 @@ class GTestFailFastUnitTest(gtest_test_utils.TestCase):
         passed_count=0,
         failure_count=1,
         skipped_count=3,
-        suppressed_count=0)
+        suppressed_count=0,
+    )
     self.assertNotFailFastBehavior(
         test_suite='HasParametersSuite/HasParametersTest',
         passed_count=0,
         failure_count=4,
         skipped_count=0,
-        suppressed_count=0)
+        suppressed_count=0,
+    )
 
   def testFlag_HasDisabledTest(self):
     """Tests the behavior of fail_fast and Disabled test cases."""
@@ -328,14 +369,16 @@ class GTestFailFastUnitTest(gtest_test_utils.TestCase):
         failure_count=1,
         skipped_count=2,
         suppressed_count=1,
-        run_disabled=False)
+        run_disabled=False,
+    )
     self.assertNotFailFastBehavior(
         test_suite='HasDisabledTest',
         passed_count=1,
         failure_count=3,
         skipped_count=0,
         suppressed_count=1,
-        run_disabled=False)
+        run_disabled=False,
+    )
 
   def testFlag_HasDisabledRunDisabledTest(self):
     """Tests the behavior of fail_fast and Disabled test cases enabled."""
@@ -345,14 +388,16 @@ class GTestFailFastUnitTest(gtest_test_utils.TestCase):
         failure_count=1,
         skipped_count=3,
         suppressed_count=0,
-        run_disabled=True)
+        run_disabled=True,
+    )
     self.assertNotFailFastBehavior(
         test_suite='HasDisabledTest',
         passed_count=1,
         failure_count=4,
         skipped_count=0,
         suppressed_count=0,
-        run_disabled=True)
+        run_disabled=True,
+    )
 
   def testFlag_HasDisabledSuiteTest(self):
     """Tests the behavior of fail_fast and Disabled test suites."""
@@ -362,14 +407,16 @@ class GTestFailFastUnitTest(gtest_test_utils.TestCase):
         failure_count=0,
         skipped_count=0,
         suppressed_count=5,
-        run_disabled=False)
+        run_disabled=False,
+    )
     self.assertNotFailFastBehavior(
         test_suite='DISABLED_HasDisabledSuite',
         passed_count=0,
         failure_count=0,
         skipped_count=0,
         suppressed_count=5,
-        run_disabled=False)
+        run_disabled=False,
+    )
 
   def testFlag_HasDisabledSuiteRunDisabledTest(self):
     """Tests the behavior of fail_fast and Disabled test suites enabled."""
@@ -379,14 +426,16 @@ class GTestFailFastUnitTest(gtest_test_utils.TestCase):
         failure_count=1,
         skipped_count=3,
         suppressed_count=0,
-        run_disabled=True)
+        run_disabled=True,
+    )
     self.assertNotFailFastBehavior(
         test_suite='DISABLED_HasDisabledSuite',
         passed_count=1,
         failure_count=4,
         skipped_count=0,
         suppressed_count=0,
-        run_disabled=True)
+        run_disabled=True,
+    )
 
   if SUPPORTS_DEATH_TESTS:
 
@@ -397,13 +446,15 @@ class GTestFailFastUnitTest(gtest_test_utils.TestCase):
           passed_count=1,
           failure_count=1,
           skipped_count=3,
-          suppressed_count=0)
+          suppressed_count=0,
+      )
       self.assertNotFailFastBehavior(
           test_suite='HasDeathTest',
           passed_count=1,
           failure_count=4,
           skipped_count=0,
-          suppressed_count=0)
+          suppressed_count=0,
+      )
 
 
 if __name__ == '__main__':

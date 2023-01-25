@@ -47,7 +47,8 @@ THROW_ON_FAILURE = 'gtest_throw_on_failure'
 # Path to the googletest-throw-on-failure-test_ program, compiled with
 # exceptions disabled.
 EXE_PATH = gtest_test_utils.GetTestExecutablePath(
-    'googletest-throw-on-failure-test_')
+    'googletest-throw-on-failure-test_'
+)
 
 
 # Utilities.
@@ -83,9 +84,9 @@ class ThrowOnFailureTest(gtest_test_utils.TestCase):
 
     Args:
       env_var_value:    value of the GTEST_BREAK_ON_FAILURE environment
-                        variable; None if the variable should be unset.
-      flag_value:       value of the --gtest_break_on_failure flag;
-                        None if the flag should not be present.
+        variable; None if the variable should be unset.
+      flag_value:       value of the --gtest_break_on_failure flag; None if the
+        flag should not be present.
       should_fail:      True if and only if the program is expected to fail.
     """
 
@@ -116,10 +117,15 @@ class ThrowOnFailureTest(gtest_test_utils.TestCase):
 
     SetEnvVar(THROW_ON_FAILURE, None)
 
-    msg = ('when %s%s, an assertion failure in "%s" %s cause a non-zero '
-           'exit code.' %
-           (THROW_ON_FAILURE, env_var_value_msg, ' '.join(command),
-            should_or_not))
+    msg = (
+        'when %s%s, an assertion failure in "%s" %s cause a non-zero exit code.'
+        % (
+            THROW_ON_FAILURE,
+            env_var_value_msg,
+            ' '.join(command),
+            should_or_not,
+        )
+    )
     self.assertTrue(failed == should_fail, msg)
 
   def testDefaultBehavior(self):
@@ -130,38 +136,22 @@ class ThrowOnFailureTest(gtest_test_utils.TestCase):
   def testThrowOnFailureEnvVar(self):
     """Tests using the GTEST_THROW_ON_FAILURE environment variable."""
 
-    self.RunAndVerify(env_var_value='0',
-                      flag_value=None,
-                      should_fail=False)
-    self.RunAndVerify(env_var_value='1',
-                      flag_value=None,
-                      should_fail=True)
+    self.RunAndVerify(env_var_value='0', flag_value=None, should_fail=False)
+    self.RunAndVerify(env_var_value='1', flag_value=None, should_fail=True)
 
   def testThrowOnFailureFlag(self):
     """Tests using the --gtest_throw_on_failure flag."""
 
-    self.RunAndVerify(env_var_value=None,
-                      flag_value='0',
-                      should_fail=False)
-    self.RunAndVerify(env_var_value=None,
-                      flag_value='1',
-                      should_fail=True)
+    self.RunAndVerify(env_var_value=None, flag_value='0', should_fail=False)
+    self.RunAndVerify(env_var_value=None, flag_value='1', should_fail=True)
 
   def testThrowOnFailureFlagOverridesEnvVar(self):
     """Tests that --gtest_throw_on_failure overrides GTEST_THROW_ON_FAILURE."""
 
-    self.RunAndVerify(env_var_value='0',
-                      flag_value='0',
-                      should_fail=False)
-    self.RunAndVerify(env_var_value='0',
-                      flag_value='1',
-                      should_fail=True)
-    self.RunAndVerify(env_var_value='1',
-                      flag_value='0',
-                      should_fail=False)
-    self.RunAndVerify(env_var_value='1',
-                      flag_value='1',
-                      should_fail=True)
+    self.RunAndVerify(env_var_value='0', flag_value='0', should_fail=False)
+    self.RunAndVerify(env_var_value='0', flag_value='1', should_fail=True)
+    self.RunAndVerify(env_var_value='1', flag_value='0', should_fail=False)
+    self.RunAndVerify(env_var_value='1', flag_value='1', should_fail=True)
 
 
 if __name__ == '__main__':
