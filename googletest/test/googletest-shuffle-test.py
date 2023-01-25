@@ -275,33 +275,38 @@ class GTestShuffleUnitTest(gtest_test_utils.TestCase):
     # iteration, and this test depends on the current implementation
     # picking successive numbers.  This dependency is not ideal, but
     # makes the test much easier to write.
+    # pylint: disable-next=unbalanced-tuple-unpacking
     [tests_in_iteration1, tests_in_iteration2, tests_in_iteration3] = (
         GetTestsForAllIterations(
             {}, [ShuffleFlag(), RandomSeedFlag(1), RepeatFlag(3)]))
 
     # Make sure running the tests with random seed 1 gets the same
     # order as in iteration 1 above.
-    [tests_with_seed1] = GetTestsForAllIterations(
-        {}, [ShuffleFlag(), RandomSeedFlag(1)])
+    tests_with_seed1 = GetTestsForAllIterations(
+        {}, [ShuffleFlag(), RandomSeedFlag(1)]
+    )[0]
     self.assertEqual(tests_in_iteration1, tests_with_seed1)
 
     # Make sure running the tests with random seed 2 gets the same
     # order as in iteration 2 above.  Success means that Google Test
     # correctly restores the test order before re-shuffling at the
     # beginning of iteration 2.
-    [tests_with_seed2] = GetTestsForAllIterations(
-        {}, [ShuffleFlag(), RandomSeedFlag(2)])
+    tests_with_seed2 = GetTestsForAllIterations(
+        {}, [ShuffleFlag(), RandomSeedFlag(2)]
+    )[0]
     self.assertEqual(tests_in_iteration2, tests_with_seed2)
 
     # Make sure running the tests with random seed 3 gets the same
     # order as in iteration 3 above.  Success means that Google Test
     # correctly restores the test order before re-shuffling at the
     # beginning of iteration 3.
-    [tests_with_seed3] = GetTestsForAllIterations(
-        {}, [ShuffleFlag(), RandomSeedFlag(3)])
+    tests_with_seed3 = GetTestsForAllIterations(
+        {}, [ShuffleFlag(), RandomSeedFlag(3)]
+    )[0]
     self.assertEqual(tests_in_iteration3, tests_with_seed3)
 
   def testShuffleGeneratesNewOrderInEachIteration(self):
+    # pylint: disable-next=unbalanced-tuple-unpacking
     [tests_in_iteration1, tests_in_iteration2, tests_in_iteration3] = (
         GetTestsForAllIterations(
             {}, [ShuffleFlag(), RandomSeedFlag(1), RepeatFlag(3)]))
@@ -319,15 +324,18 @@ class GTestShuffleUnitTest(gtest_test_utils.TestCase):
   def testShuffleShardedTestsPreservesPartition(self):
     # If we run M tests on N shards, the same M tests should be run in
     # total, regardless of the random seeds used by the shards.
-    [tests1] = GetTestsForAllIterations({TOTAL_SHARDS_ENV_VAR: '3',
-                                         SHARD_INDEX_ENV_VAR: '0'},
-                                        [ShuffleFlag(), RandomSeedFlag(1)])
-    [tests2] = GetTestsForAllIterations({TOTAL_SHARDS_ENV_VAR: '3',
-                                         SHARD_INDEX_ENV_VAR: '1'},
-                                        [ShuffleFlag(), RandomSeedFlag(20)])
-    [tests3] = GetTestsForAllIterations({TOTAL_SHARDS_ENV_VAR: '3',
-                                         SHARD_INDEX_ENV_VAR: '2'},
-                                        [ShuffleFlag(), RandomSeedFlag(25)])
+    tests1 = GetTestsForAllIterations(
+        {TOTAL_SHARDS_ENV_VAR: '3', SHARD_INDEX_ENV_VAR: '0'},
+        [ShuffleFlag(), RandomSeedFlag(1)],
+    )[0]
+    tests2 = GetTestsForAllIterations(
+        {TOTAL_SHARDS_ENV_VAR: '3', SHARD_INDEX_ENV_VAR: '1'},
+        [ShuffleFlag(), RandomSeedFlag(20)],
+    )[0]
+    tests3 = GetTestsForAllIterations(
+        {TOTAL_SHARDS_ENV_VAR: '3', SHARD_INDEX_ENV_VAR: '2'},
+        [ShuffleFlag(), RandomSeedFlag(25)],
+    )[0]
     sorted_sharded_tests = tests1 + tests2 + tests3
     sorted_sharded_tests.sort()
     sorted_active_tests = []
