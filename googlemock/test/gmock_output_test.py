@@ -39,7 +39,7 @@ gmock_output_test.py
 
 """
 
-from io import open    # pylint: disable=redefined-builtin, g-importing-member
+from io import open  # pylint: disable=redefined-builtin, g-importing-member
 import os
 import re
 import sys
@@ -168,9 +168,13 @@ class GMockOutputTest(gmock_test_utils.TestCase):
 
     # The raw output should contain 2 leaked mock object errors for
     # test GMockOutputTest.CatchesLeakedMocks.
-    self.assertEqual(['GMockOutputTest.CatchesLeakedMocks',
-                      'GMockOutputTest.CatchesLeakedMocks'],
-                     leaky_tests)
+    self.assertEqual(
+        [
+            'GMockOutputTest.CatchesLeakedMocks',
+            'GMockOutputTest.CatchesLeakedMocks',
+        ],
+        leaky_tests,
+    )
 
 
 if __name__ == '__main__':

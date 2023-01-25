@@ -57,27 +57,43 @@ UNKNOWN_GTEST_PREFIXED_FLAG = FLAG_PREFIX + 'unknown_flag_for_testing'
 LIST_TESTS_FLAG = FLAG_PREFIX + 'list_tests'
 INTERNAL_FLAG_FOR_TESTING = FLAG_PREFIX + 'internal_flag_for_testing'
 
-SUPPORTS_DEATH_TESTS = "DeathTest" in gtest_test_utils.Subprocess(
-    [PROGRAM_PATH, LIST_TESTS_FLAG]).output
+SUPPORTS_DEATH_TESTS = (
+    'DeathTest'
+    in gtest_test_utils.Subprocess([PROGRAM_PATH, LIST_TESTS_FLAG]).output
+)
 
 HAS_ABSL_FLAGS = '--has_absl_flags' in sys.argv
 
 # The help message must match this regex.
 HELP_REGEX = re.compile(
-    FLAG_PREFIX + r'list_tests.*' +
-    FLAG_PREFIX + r'filter=.*' +
-    FLAG_PREFIX + r'also_run_disabled_tests.*' +
-    FLAG_PREFIX + r'repeat=.*' +
-    FLAG_PREFIX + r'shuffle.*' +
-    FLAG_PREFIX + r'random_seed=.*' +
-    FLAG_PREFIX + r'color=.*' +
-    FLAG_PREFIX + r'brief.*' +
-    FLAG_PREFIX + r'print_time.*' +
-    FLAG_PREFIX + r'output=.*' +
-    FLAG_PREFIX + r'break_on_failure.*' +
-    FLAG_PREFIX + r'throw_on_failure.*' +
-    FLAG_PREFIX + r'catch_exceptions=0.*',
-    re.DOTALL)
+    FLAG_PREFIX
+    + r'list_tests.*'
+    + FLAG_PREFIX
+    + r'filter=.*'
+    + FLAG_PREFIX
+    + r'also_run_disabled_tests.*'
+    + FLAG_PREFIX
+    + r'repeat=.*'
+    + FLAG_PREFIX
+    + r'shuffle.*'
+    + FLAG_PREFIX
+    + r'random_seed=.*'
+    + FLAG_PREFIX
+    + r'color=.*'
+    + FLAG_PREFIX
+    + r'brief.*'
+    + FLAG_PREFIX
+    + r'print_time.*'
+    + FLAG_PREFIX
+    + r'output=.*'
+    + FLAG_PREFIX
+    + r'break_on_failure.*'
+    + FLAG_PREFIX
+    + r'throw_on_failure.*'
+    + FLAG_PREFIX
+    + r'catch_exceptions=0.*',
+    re.DOTALL,
+)
 
 
 def RunWithFlag(flag):
@@ -172,13 +188,15 @@ class GTestHelpTest(gtest_test_utils.TestCase):
 
   def testRunsTestsWithoutHelpFlag(self):
     """Verifies that when no help flag is specified, the tests are run
-    and the help message is not printed."""
+    and the help message is not printed.
+    """
 
     self.TestNonHelpFlag(None)
 
   def testRunsTestsWithGtestInternalFlag(self):
     """Verifies that the tests are run and no help message is printed when
-    a flag starting with Google Test prefix and 'internal_' is supplied."""
+    a flag starting with Google Test prefix and 'internal_' is supplied.
+    """
 
     self.TestNonHelpFlag(INTERNAL_FLAG_FOR_TESTING)
 

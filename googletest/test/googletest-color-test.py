@@ -65,6 +65,7 @@ def UsesColor(term, color_env_var, color_flag):
 
 
 class GTestColorTest(gtest_test_utils.TestCase):
+
   def testNoEnvVarNoFlag(self):
     """Tests the case when there's neither GTEST_COLOR nor --gtest_color."""
 

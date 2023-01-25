@@ -224,8 +224,7 @@ EXPECTED_JSON = """{
 
 
 class GTestListTestsOutputUnitTest(gtest_test_utils.TestCase):
-  """Unit test for Google Test's list tests with output to file functionality.
-  """
+  """Unit test for Google Test's list tests with output to file functionality."""
 
   def testXml(self):
     """Verifies XML output for listing tests in a Google Test binary.
@@ -244,19 +243,22 @@ class GTestListTestsOutputUnitTest(gtest_test_utils.TestCase):
     self._TestOutput('json', EXPECTED_JSON)
 
   def _GetOutput(self, out_format):
-    file_path = os.path.join(gtest_test_utils.GetTempDir(),
-                             'test_out.' + out_format)
+    file_path = os.path.join(
+        gtest_test_utils.GetTempDir(), 'test_out.' + out_format
+    )
     gtest_prog_path = gtest_test_utils.GetTestExecutablePath(
-        'gtest_list_output_unittest_')
+        'gtest_list_output_unittest_'
+    )
 
-    command = ([
+    command = [
         gtest_prog_path,
         '%s=%s:%s' % (GTEST_OUTPUT_FLAG, out_format, file_path),
-        '--gtest_list_tests'
-    ])
+        '--gtest_list_tests',
+    ]
     environ_copy = os.environ.copy()
     p = gtest_test_utils.Subprocess(
-        command, env=environ_copy, working_dir=gtest_test_utils.GetTempDir())
+        command, env=environ_copy, working_dir=gtest_test_utils.GetTempDir()
+    )
 
     self.assertTrue(p.exited)
     self.assertEqual(0, p.exit_code)
@@ -275,9 +277,10 @@ class GTestListTestsOutputUnitTest(gtest_test_utils.TestCase):
       expected_line_re = re.compile(expected_line.strip())
       self.assertTrue(
           expected_line_re.match(actual_line.strip()),
-          ('actual output of "%s",\n'
-           'which does not match expected regex of "%s"\n'
-           'on line %d' % (actual, expected_output, line_count)))
+          'actual output of "%s",\n'
+          'which does not match expected regex of "%s"\n'
+          'on line %d' % (actual, expected_output, line_count),
+      )
       line_count = line_count + 1
 
 

@@ -51,7 +51,8 @@ class SkipEntireEnvironmentTest(gtest_test_utils.TestCase):
     skip_fixture = 'Skipped\nskipping all tests for this fixture\n'
     self.assertIsNotNone(
         re.search(skip_fixture + '.*' + skip_fixture, OUTPUT, flags=re.DOTALL),
-        repr(OUTPUT))
+        repr(OUTPUT),
+    )
     self.assertNotIn('FAILED', OUTPUT)
 
 
