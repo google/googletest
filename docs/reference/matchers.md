@@ -288,3 +288,15 @@ which must be a permanent callback.
       return ExplainMatchResult(matcher, arg.nested().property(), result_listener);
     }
     ```
+
+5.  You can use `DescribeMatcher<>` to describe another matcher. For example:
+
+    ```cpp
+    MATCHER_P(XAndYThat, matcher,
+              "X that " + DescribeMatcher<int>(matcher, negation) +
+                  (negation ? " or" : " and") + " Y that " +
+                  DescribeMatcher<double>(matcher, negation)) {
+      return ExplainMatchResult(matcher, arg.x(), result_listener) &&
+             ExplainMatchResult(matcher, arg.y(), result_listener);
+    }
+    ```
