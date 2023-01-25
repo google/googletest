@@ -63,9 +63,8 @@ def SetEnvVar(env_var, value):
 
 
 # Here we expose a class from a particular module, depending on the
-# environment. The comment suppresses the 'Invalid variable name' lint
-# complaint.
-TestCase = _test_module.TestCase  # pylint: disable=C6409
+# environment.
+TestCase = _test_module.TestCase
 
 # Initially maps a flag to its default value. After
 # _ParseAndStripGTestFlags() is called, maps a flag to its actual value.
@@ -77,9 +76,7 @@ _gtest_flags_are_parsed = False
 def _ParseAndStripGTestFlags(argv):
   """Parses and strips Google Test flags from argv.  This is idempotent."""
 
-  # Suppresses the lint complaint about a global variable since we need it
-  # here to maintain module-wide state.
-  global _gtest_flags_are_parsed  # pylint: disable=W0603
+  global _gtest_flags_are_parsed
   if _gtest_flags_are_parsed:
     return
 
