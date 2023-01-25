@@ -282,8 +282,7 @@ class GTestXMLOutputUnitTest(gtest_xml_test_utils.GTestXMLTestCase):
 
     time_delta = abs(datetime.datetime.now() - date_time_from_xml)
     # timestamp value should be near the current local time
-    self.assertTrue(time_delta < datetime.timedelta(seconds=600),
-                    'time_delta is %s' % time_delta)
+    self.assertLess(time_delta, datetime.timedelta(seconds=600))
     actual.unlink()
 
   def testDefaultOutputFile(self):
