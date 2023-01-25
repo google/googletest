@@ -29,7 +29,7 @@
 
 """Unit test utilities for Google C++ Testing and Mocking Framework."""
 # Suppresses the 'Import not at the top of the file' lint complaint.
-# pylint: disable-msg=C6204
+# pylint: disable=g-import-not-at-top
 
 import os
 import subprocess
@@ -43,7 +43,7 @@ import atexit
 import shutil
 import tempfile
 import unittest as _test_module
-# pylint: enable-msg=C6204
+# pylint: enable=g-import-not-at-top
 
 GTEST_OUTPUT_VAR_NAME = 'GTEST_OUTPUT'
 

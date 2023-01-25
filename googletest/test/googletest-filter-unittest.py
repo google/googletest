@@ -285,13 +285,13 @@ class GTestFilterUnitTest(gtest_test_utils.TestCase):
     # into a process using the environment variable.  However, we can still
     # test the case when the variable is not supplied (i.e., gtest_filter is
     # None).
-    # pylint: disable-msg=C6403
+    # pylint: disable=g-explicit-bool-comparison
     if CAN_TEST_EMPTY_FILTER or gtest_filter != '':
       SetEnvVar(FILTER_ENV_VAR, gtest_filter)
       tests_run = RunAndExtractTestList()[0]
       SetEnvVar(FILTER_ENV_VAR, None)
       self.AssertSetEqual(tests_run, tests_to_run)
-    # pylint: enable-msg=C6403
+    # pylint: enable=g-explicit-bool-comparison
 
     # Next, tests using the command line flag.
 
@@ -328,7 +328,7 @@ class GTestFilterUnitTest(gtest_test_utils.TestCase):
     # into a process using the environment variable.  However, we can still
     # test the case when the variable is not supplied (i.e., gtest_filter is
     # None).
-    # pylint: disable-msg=C6403
+    # pylint: disable=g-explicit-bool-comparison
     if CAN_TEST_EMPTY_FILTER or gtest_filter != '':
       SetEnvVar(FILTER_ENV_VAR, gtest_filter)
       partition = []
@@ -340,7 +340,7 @@ class GTestFilterUnitTest(gtest_test_utils.TestCase):
 
       self.AssertPartitionIsValid(tests_to_run, partition)
       SetEnvVar(FILTER_ENV_VAR, None)
-    # pylint: enable-msg=C6403
+    # pylint: enable=g-explicit-bool-comparison
 
   def RunAndVerifyAllowingDisabled(self, gtest_filter, tests_to_run):
     """Checks that the binary runs correct set of tests for the given filter.
