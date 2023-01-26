@@ -896,7 +896,8 @@ Note that `SetUpTestSuite()` may be called multiple times for a test fixture
 class that has derived classes, so you should not expect code in the function
 body to be run only once. Also, derived classes still have access to shared
 resources defined as static members, so careful consideration is needed when
-managing shared resources to avoid memory leaks.
+managing shared resources to avoid memory leaks if shared resources are not
+properly cleaned up in `TearDownTestSuite()`.
 
 Here's an example of per-test-suite set-up and tear-down:
 
@@ -907,10 +908,15 @@ class FooTest : public testing::Test {
   // Called before the first test in this test suite.
   // Can be omitted if not needed.
   static void SetUpTestSuite() {
-    // Avoid reallocating static objects if called in subclasses of FooTest.
-    if (shared_resource_ == nullptr) {
-      shared_resource_ = new ...;
-    }
+    shared_resource_ = new ...;
+
+    // If `shared_resource_` is **not deleted** in `TearDownTestSuite()`,
+    // reallocation should be prevented because `SetUpTestSuite()` may be called
+    // in subclasses of FooTest and lead to memory leak.
+    //
+    // if (shared_resource_ == nullptr) {
+    //   shared_resource_ = new ...;
+    // }
   }
 
   // Per-test-suite tear-down.
