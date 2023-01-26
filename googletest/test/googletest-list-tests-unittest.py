@@ -132,7 +132,9 @@ class GTestListTestsUnitTest(gtest_test_utils.TestCase):
   """Tests using the --gtest_list_tests flag to list all tests."""
 
   def RunAndVerify(self, flag_value, expected_output_re, other_flag):
-    """Runs googletest-list-tests-unittest_ and verifies that it prints
+    """Run googletest-list-tests-unittest_ and verify the output.
+
+    Runs googletest-list-tests-unittest_ and verifies that it prints
     the correct tests.
 
     Args:
@@ -206,7 +208,9 @@ class GTestListTestsUnitTest(gtest_test_utils.TestCase):
     )
 
   def testWithFilterFlags(self):
-    """Tests that --gtest_list_tests takes into account the
+    """Tests that --gtest_list_tests takes into account the filter flags.
+
+    Tests that --gtest_list_tests takes into account the
     --gtest_filter flag.
     """
 

@@ -187,14 +187,18 @@ class GTestHelpTest(gtest_test_utils.TestCase):
       self.TestHelpFlag(UNKNOWN_GTEST_PREFIXED_FLAG)
 
   def testRunsTestsWithoutHelpFlag(self):
-    """Verifies that when no help flag is specified, the tests are run
+    """Verifies correct behavior when no help flag is specified.
+
+    Verifies that when no help flag is specified, the tests are run
     and the help message is not printed.
     """
 
     self.TestNonHelpFlag(None)
 
   def testRunsTestsWithGtestInternalFlag(self):
-    """Verifies that the tests are run and no help message is printed when
+    """Verifies correct behavior when internal testing flag is specified.
+
+    Verifies that the tests are run and no help message is printed when
     a flag starting with Google Test prefix and 'internal_' is supplied.
     """
 
