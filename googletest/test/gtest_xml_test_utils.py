@@ -35,10 +35,9 @@ from googletest.test import gtest_test_utils
 
 GTEST_DEFAULT_OUTPUT_FILE = 'test_detail.xml'
 
+
 class GTestXMLTestCase(gtest_test_utils.TestCase):
-  """
-  Base class for tests of Google Test's XML output functionality.
-  """
+  """Base class for tests of Google Test's XML output functionality."""
 
   def AssertEquivalentNodes(self, expected_node, actual_node):
     """Asserts that actual_node is equivalent to expected_node.
@@ -165,15 +164,19 @@ class GTestXMLTestCase(gtest_test_utils.TestCase):
               'Encountered unknown element <%s>' % child.tagName,
           )
           child_id = child.getAttribute(
-              self.identifying_attribute[child.tagName])
+              self.identifying_attribute[child.tagName]
+          )
         self.assertNotIn(child_id, children)
         children[child_id] = child
       elif child.nodeType in [Node.TEXT_NODE, Node.CDATA_SECTION_NODE]:
         if 'detail' not in children:
-          if (child.nodeType == Node.CDATA_SECTION_NODE or
-              not child.nodeValue.isspace()):
+          if (
+              child.nodeType == Node.CDATA_SECTION_NODE
+              or not child.nodeValue.isspace()
+          ):
             children['detail'] = child.ownerDocument.createCDATASection(
-                child.nodeValue)
+                child.nodeValue
+            )
         else:
           children['detail'].nodeValue += child.nodeValue
       else:
@@ -210,8 +213,9 @@ class GTestXMLTestCase(gtest_test_utils.TestCase):
         source_file.value = re.sub(r'^.*[/\\](.*)', '\\1', source_file.value)
     if element.tagName in ('testsuites', 'testsuite', 'testcase'):
       timestamp = element.getAttributeNode('timestamp')
-      timestamp.value = re.sub(r'^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d\d\d$',
-                               '*', timestamp.value)
+      timestamp.value = re.sub(
+          r'^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d\d\d$', '*', timestamp.value
+      )
     if element.tagName in ('testsuites', 'testsuite', 'testcase'):
       time = element.getAttributeNode('time')
       time.value = re.sub(r'^\d+(\.\d+)?$', '*', time.value)
@@ -228,8 +232,9 @@ class GTestXMLTestCase(gtest_test_utils.TestCase):
           # Replaces the source line information with a normalized form.
           cdata = re.sub(source_line_pat, '\\1*\n', child.nodeValue)
           # Removes the actual stack trace.
-          child.nodeValue = re.sub(r'Stack trace:\n(.|\n)*',
-                                   'Stack trace:\n*', cdata)
+          child.nodeValue = re.sub(
+              r'Stack trace:\n(.|\n)*', 'Stack trace:\n*', cdata
+          )
     for child in element.childNodes:
       if child.nodeType == Node.ELEMENT_NODE:
         self.NormalizeXml(child)
