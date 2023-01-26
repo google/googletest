@@ -40,9 +40,9 @@ class GTestXMLTestCase(gtest_test_utils.TestCase):
   Base class for tests of Google Test's XML output functionality.
   """
 
-
   def AssertEquivalentNodes(self, expected_node, actual_node):
-    """
+    """Asserts that actual_node is equivalent to expected_node.
+
     Asserts that actual_node (a DOM node object) is equivalent to
     expected_node (another DOM node object), in that either both of
     them are CDATA nodes and have the same value, or both are DOM
@@ -58,6 +58,10 @@ class GTestXMLTestCase(gtest_test_utils.TestCase):
        CDATA sections) as expected_node.  Note that we ignore the
        order of the children as they are not guaranteed to be in any
        particular order.
+
+    Args:
+      expected_node: expected DOM node object
+      actual_node: actual DOM node object
     """
 
     if expected_node.nodeType == Node.CDATA_SECTION_NODE:
@@ -126,18 +130,24 @@ class GTestXMLTestCase(gtest_test_utils.TestCase):
   }
 
   def _GetChildren(self, element):
-    """
-    Fetches all of the child nodes of element, a DOM Element object.
-    Returns them as the values of a dictionary keyed by the IDs of the
-    children.  For <testsuites>, <testsuite>, <testcase>, and <property>
-    elements, the ID is the value of their "name" attribute; for <failure>
-    elements, it is the value of the "message" attribute; for <properties>
-    elements, it is the value of their parent's "name" attribute plus the
-    literal string "properties"; CDATA sections and non-whitespace
-    text nodes are concatenated into a single CDATA section with ID
-    "detail".  An exception is raised if any element other than the above
-    four is encountered, if two child elements with the same identifying
-    attributes are encountered, or if any other type of node is encountered.
+    """Fetches all of the child nodes of element, a DOM Element object.
+
+    Returns them as the values of a dictionary keyed by the IDs of the children.
+    For <testsuites>, <testsuite>, <testcase>, and <property> elements, the ID
+    is the value of their "name" attribute; for <failure> elements, it is the
+    value of the "message" attribute; for <properties> elements, it is the value
+    of their parent's "name" attribute plus the literal string "properties";
+    CDATA sections and non-whitespace text nodes are concatenated into a single
+    CDATA section with ID "detail".  An exception is raised if any element other
+    than the above four is encountered, if two child elements with the same
+    identifying attributes are encountered, or if any other type of node is
+    encountered.
+
+    Args:
+      element: DOM Element object
+
+    Returns:
+      Dictionary where keys are the IDs of the children.
     """
 
     children = {}
@@ -171,7 +181,8 @@ class GTestXMLTestCase(gtest_test_utils.TestCase):
     return children
 
   def NormalizeXml(self, element):
-    """
+    """Normalizes XML that may change from run to run.
+
     Normalizes Google Test's XML output to eliminate references to transient
     information that may change from run to run.
 
@@ -188,6 +199,9 @@ class GTestXMLTestCase(gtest_test_utils.TestCase):
        file's basename and a single asterisk for the line number.
     *  The directory names in file paths are removed.
     *  The stack traces are removed.
+
+    Args:
+      element: DOM element to normalize
     """
 
     if element.tagName == 'testcase':

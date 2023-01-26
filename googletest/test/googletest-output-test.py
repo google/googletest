@@ -237,13 +237,16 @@ def GetShellCommandOutput(env_cmd):
 
 
 def GetCommandOutput(env_cmd):
-  """Runs a command and returns its output with all file location
-  info stripped off.
+  """Runs a command and returns output with all file location info stripped off.
 
   Args:
     env_cmd:  The shell command. A 2-tuple where element 0 is a dict of extra
       environment variables to set, and element 1 is a string with the command
       and any flags.
+
+  Returns:
+    A string with the command's combined standard and diagnostic output. File
+    location info is stripped.
   """
 
   # Disables exception pop-ups on Windows.

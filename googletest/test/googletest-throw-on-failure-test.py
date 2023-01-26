@@ -55,8 +55,14 @@ EXE_PATH = gtest_test_utils.GetTestExecutablePath(
 
 
 def SetEnvVar(env_var, value):
-  """Sets an environment variable to a given value; unsets it when the
+  """Sets an environment variable.
+
+  Sets an environment variable to a given value; unsets it when the
   given value is None.
+
+  Args:
+    env_var: environment variable.
+    value: value to set.
   """
 
   env_var = env_var.upper()
@@ -79,7 +85,9 @@ class ThrowOnFailureTest(gtest_test_utils.TestCase):
   """Tests the throw-on-failure mode."""
 
   def RunAndVerify(self, env_var_value, flag_value, should_fail):
-    """Runs googletest-throw-on-failure-test_ and verifies that it does
+    """Runs googletest-throw-on-failure-test_ and verifies its behavior.
+
+    Runs googletest-throw-on-failure-test_ and verifies that it does
     (or does not) exit with a non-zero code.
 
     Args:

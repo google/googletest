@@ -88,13 +88,17 @@ def Run(command):
 
 
 class GTestBreakOnFailureUnitTest(gtest_test_utils.TestCase):
-  """Tests using the GTEST_BREAK_ON_FAILURE environment variable or
+  """Unit test for Google Test's break-on-failure mode.
+
+  Tests using the GTEST_BREAK_ON_FAILURE environment variable or
   the --gtest_break_on_failure flag to turn assertion failures into
   segmentation faults.
   """
 
   def RunAndVerify(self, env_var_value, flag_value, expect_seg_fault):
-    """Runs googletest-break-on-failure-unittest_ and verifies that it does
+    """Runs googletest-break-on-failure-unittest_ and verifies its behavior.
+
+    Runs googletest-break-on-failure-unittest_ and verifies that it does
     (or does not) have a seg-fault.
 
     Args:
