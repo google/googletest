@@ -39,7 +39,20 @@ class PropertyTwo : public testing::Test {
 };
 
 TEST_F(PropertyTwo, TestSomeProperties) {
+// 'initializing': conversion from 'int' to 'short', possible loss of data
+  GTEST_DISABLE_MSC_WARNINGS_PUSH_(4244)
+
+  // Floats and doubles are written as int64_t, since RecordProperty takes an
+  // int64_t, so we test that the values written are truncated to int64_t.
+  float float_prop = 3.25;
+  RecordProperty("TestFloatProperty", float_prop);
+
+  double double_prop = 4.75;
+  RecordProperty("TestDoubleProperty", double_prop);
+
+  GTEST_DISABLE_MSC_WARNINGS_POP_()  // 4244
+
   // Validate we can write an unsigned size_t as a property
-  size_t prop_two = 2;
-  RecordProperty("TestSomeProperty", prop_two);
+  size_t size_t_prop = 5;
+  RecordProperty("TestSizetProperty", size_t_prop);
 }
