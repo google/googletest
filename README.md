@@ -1,5 +1,9 @@
 # GoogleTest
 
+## Personal notes
+
+This doc is used to learn git
+
 ### Announcements
 
 #### Live at Head
