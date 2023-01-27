@@ -60,7 +60,9 @@ EXPECTED_XML_2 = """<?xml version="1.0" encoding="UTF-8"?>
     <testcase name="TestSomeProperties" file="gtest_xml_outfile2_test_.cc" line="41" status="run" result="completed" time="*" timestamp="*" classname="PropertyTwo">
       <properties>
         <property name="SetUpProp" value="2"/>
-        <property name="TestSomeProperty" value="2"/>
+        <property name="TestFloatProperty" value="3"/>
+        <property name="TestDoubleProperty" value="4"/>
+        <property name="TestSizetProperty" value="5"/>
         <property name="TearDownProp" value="2"/>
       </properties>
     </testcase>
