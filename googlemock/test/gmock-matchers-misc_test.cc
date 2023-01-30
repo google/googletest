@@ -863,7 +863,7 @@ TEST(ArgsTest, AcceptsOneTemplateArg) {
 }
 
 TEST(ArgsTest, AcceptsTwoTemplateArgs) {
-  const std::tuple<short, int, long> t(4, 5, 6L);  // NOLINT
+  const std::tuple<short, int, long> t(short{4}, 5, 6L);  // NOLINT
 
   EXPECT_THAT(t, (Args<0, 1>(Lt())));
   EXPECT_THAT(t, (Args<1, 2>(Lt())));
@@ -871,13 +871,13 @@ TEST(ArgsTest, AcceptsTwoTemplateArgs) {
 }
 
 TEST(ArgsTest, AcceptsRepeatedTemplateArgs) {
-  const std::tuple<short, int, long> t(4, 5, 6L);  // NOLINT
+  const std::tuple<short, int, long> t(short{4}, 5, 6L);  // NOLINT
   EXPECT_THAT(t, (Args<0, 0>(Eq())));
   EXPECT_THAT(t, Not(Args<1, 1>(Ne())));
 }
 
 TEST(ArgsTest, AcceptsDecreasingTemplateArgs) {
-  const std::tuple<short, int, long> t(4, 5, 6L);  // NOLINT
+  const std::tuple<short, int, long> t(short{4}, 5, 6L);  // NOLINT
   EXPECT_THAT(t, (Args<2, 0>(Gt())));
   EXPECT_THAT(t, Not(Args<2, 1>(Lt())));
 }
@@ -892,7 +892,7 @@ TEST(ArgsTest, AcceptsMoreTemplateArgsThanArityOfOriginalTuple) {
 }
 
 TEST(ArgsTest, CanBeNested) {
-  const std::tuple<short, int, long, int> t(4, 5, 6L, 6);  // NOLINT
+  const std::tuple<short, int, long, int> t(short{4}, 5, 6L, 6);  // NOLINT
   EXPECT_THAT(t, (Args<1, 2, 3>(Args<1, 2>(Eq()))));
   EXPECT_THAT(t, (Args<0, 1, 3>(Args<0, 2>(Lt()))));
 }
