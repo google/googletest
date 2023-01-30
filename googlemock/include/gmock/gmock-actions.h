@@ -146,10 +146,7 @@
 #include "gmock/internal/gmock-port.h"
 #include "gmock/internal/gmock-pp.h"
 
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4100)
-#endif
+GTEST_DISABLE_MSC_WARNINGS_PUSH_(4100)
 
 namespace testing {
 
@@ -2295,8 +2292,6 @@ template <typename F, typename Impl>
 
 }  // namespace testing
 
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
+GTEST_DISABLE_MSC_WARNINGS_POP_()  // 4100
 
 #endif  // GOOGLEMOCK_INCLUDE_GMOCK_GMOCK_ACTIONS_H_
