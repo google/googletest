@@ -864,7 +864,7 @@ struct Type {
 };
 
 TEST(TypedEqTest, HasSpecifiedType) {
-  // Verfies that the type of TypedEq<T>(v) is Matcher<T>.
+  // Verifies that the type of TypedEq<T>(v) is Matcher<T>.
   Type<Matcher<int>>::IsTypeOf(TypedEq<int>(5));
   Type<Matcher<double>>::IsTypeOf(TypedEq<double>(5));
 }
@@ -1530,7 +1530,7 @@ TEST(PairTest, MatchesCorrectly) {
   EXPECT_THAT(p, Pair(25, "foo"));
   EXPECT_THAT(p, Pair(Ge(20), HasSubstr("o")));
 
-  // 'first' doesnt' match, but 'second' matches.
+  // 'first' doesn't match, but 'second' matches.
   EXPECT_THAT(p, Not(Pair(42, "foo")));
   EXPECT_THAT(p, Not(Pair(Lt(25), "foo")));
 
