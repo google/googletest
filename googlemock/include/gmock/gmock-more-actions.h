@@ -583,10 +583,7 @@ namespace testing {
 // the macro definition, as the warnings are generated when the macro
 // is expanded and macro expansion cannot contain #pragma.  Therefore
 // we suppress them here.
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4100)
-#endif
+GTEST_DISABLE_MSC_WARNINGS_PUSH_(4100)
 
 namespace internal {
 
@@ -654,9 +651,7 @@ InvokeArgument(Params &&...params) {
       internal::FlatTupleConstructTag{}, std::forward<Params>(params)...)};
 }
 
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
+GTEST_DISABLE_MSC_WARNINGS_POP_()  // 4100
 
 }  // namespace testing
 

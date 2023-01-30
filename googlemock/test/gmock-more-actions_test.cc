@@ -31,11 +31,6 @@
 //
 // This file tests the built-in actions in gmock-actions.h.
 
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4577)
-#endif
-
 #include "gmock/gmock-more-actions.h"
 
 #include <functional>
@@ -46,6 +41,8 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest-spi.h"
 #include "gtest/gtest.h"
+
+GTEST_DISABLE_MSC_WARNINGS_PUSH_(4577)
 
 namespace testing {
 namespace gmock_more_actions_test {
@@ -982,11 +979,7 @@ TEST(DoAllTest, ImplicitlyConvertsActionArguments) {
 // is expanded and macro expansion cannot contain #pragma.  Therefore
 // we suppress them here.
 // Also suppress C4503 decorated name length exceeded, name was truncated
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4100)
-#pragma warning(disable : 4503)
-#endif
+GTEST_DISABLE_MSC_WARNINGS_PUSH_(4100 4503)
 // Tests the ACTION*() macro family.
 
 // Tests that ACTION() can define an action that doesn't reference the
@@ -1548,3 +1541,6 @@ TEST(ActionTemplateTest, CanBeOverloadedOnNumberOfValueParameters) {
 
 }  // namespace gmock_more_actions_test
 }  // namespace testing
+
+GTEST_DISABLE_MSC_WARNINGS_POP_()  // 4100 4503
+GTEST_DISABLE_MSC_WARNINGS_POP_()  // 4577

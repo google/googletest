@@ -166,11 +166,7 @@ namespace testing {
 
 // Silence C4100 (unreferenced formal parameter) and 4805
 // unsafe mix of type 'const int' and type 'const bool'
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4805)
-#pragma warning(disable : 4100)
-#endif
+GTEST_DISABLE_MSC_WARNINGS_PUSH_(4805 4100)
 
 // The upper limit for valid stack trace depths.
 const int kMaxStackTraceDepth = 100;
@@ -2214,9 +2210,7 @@ GTEST_API_ std::string TempDir();
 // in it should be considered read-only.
 GTEST_API_ std::string SrcDir();
 
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
+GTEST_DISABLE_MSC_WARNINGS_POP_()  // 4805 4100
 
 // Dynamically registers a test with the framework.
 //
