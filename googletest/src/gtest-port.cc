@@ -47,6 +47,8 @@
 #ifdef _MSC_VER
 #include <crtdbg.h>
 #endif  // _MSC_VER
+#elif GTEST_OS_TI_CGT
+
 #else
 #include <unistd.h>
 #endif  // GTEST_OS_WINDOWS
@@ -1390,5 +1392,21 @@ const char* StringFromGTestEnv(const char* flag, const char* default_value) {
 #endif  // defined(GTEST_GET_STRING_FROM_ENV_)
 }
 
+struct tm * localtime_r(const time_t *timer, struct tm *result)
+{
+  struct tm *local_result;
+
+  if (result == NULL) {
+    return NULL;
+  }
+
+  local_result = localtime (timer);
+  if (local_result == NULL) {
+    return NULL;
+  }
+
+  memcpy(result, local_result, sizeof(*result));
+  return result;
+}
 }  // namespace internal
 }  // namespace testing

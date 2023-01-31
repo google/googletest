@@ -102,6 +102,8 @@
 #include <sys/time.h>  // NOLINT
 #endif                 // GTEST_OS_WINDOWS_MINGW
 
+#elif GTEST_OS_TI_CGT
+#include <time.h>  // NOLINT
 #else
 
 // cpplint thinks that the header is already included, so we want to
@@ -1127,6 +1129,22 @@ std::string UnitTestImpl::CurrentOsStackTraceExceptTop(int skip_count) {
   );  // NOLINT
 }
 
+#if GTEST_OS_TI_CGT
+class Timer {
+ public:
+  Timer() : start_(std::chrono::system_clock::now()) {}
+
+  // Return time elapsed in milliseconds since the timer was created.
+  TimeInMillis Elapsed() {
+    return std::chrono::duration_cast<std::chrono::milliseconds>(
+               std::chrono::system_clock::now() - start_)
+        .count();
+  }
+
+ private:
+  std::chrono::system_clock::time_point start_;
+};
+#else
 // A helper class for measuring elapsed times.
 class Timer {
  public:
@@ -1150,6 +1168,7 @@ class Timer {
   clock::time_point start_;
 };
 
+#endif
 // Returns a timestamp as milliseconds since the epoch. Note this time may jump
 // around subject to adjustments by the system, to measure elapsed time use
 // Timer instead.
@@ -3268,6 +3287,9 @@ static void ColoredPrintf(GTestColor color, const char* fmt, ...) {
   va_list args;
   va_start(args, fmt);
 
+#if GTEST_OS_TI_CGT
+  const bool use_color = false;
+#else
   static const bool in_color_mode =
 #if GTEST_HAS_FILE_SYSTEM
       ShouldUseColor(posix::IsATTY(posix::FileNo(stdout)) != 0);
@@ -3276,7 +3298,7 @@ static void ColoredPrintf(GTestColor color, const char* fmt, ...) {
 #endif  // GTEST_HAS_FILE_SYSTEM
 
   const bool use_color = in_color_mode && (color != GTestColor::kDefault);
-
+#endif
   if (!use_color) {
     vprintf(fmt, args);
     va_end(args);

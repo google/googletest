@@ -377,9 +377,9 @@ typedef struct _CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 // WindowsTypesTest.CRITICAL_SECTIONIs_RTL_CRITICAL_SECTION.
 typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 #endif
-#elif GTEST_OS_XTENSA
+#elif (GTEST_OS_XTENSA || GTEST_OS_TI_CGT)
 #include <unistd.h>
-// Xtensa toolchains define strcasecmp in the string.h header instead of
+// Xtensa and TI CGT toolchains define strcasecmp in the string.h header instead of
 // strings.h. string.h is already included.
 #else
 // This assumes that non-Windows OSes provide unistd.h. For OSes where this
@@ -402,7 +402,7 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 #define GTEST_HAS_POSIX_RE (__ANDROID_API__ >= 9)
 #else
 #define GTEST_HAS_POSIX_RE \
-  !(GTEST_OS_WINDOWS || GTEST_OS_XTENSA || GTEST_OS_QURT)
+  !(GTEST_OS_WINDOWS || GTEST_OS_XTENSA || GTEST_OS_QURT || GTEST_OS_TI_CGT)
 #endif
 #endif
 
@@ -475,7 +475,7 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 #define GTEST_HAS_STD_WSTRING                                         \
   (!(GTEST_OS_LINUX_ANDROID || GTEST_OS_CYGWIN || GTEST_OS_SOLARIS || \
      GTEST_OS_HAIKU || GTEST_OS_ESP32 || GTEST_OS_ESP8266 ||          \
-     GTEST_OS_XTENSA || GTEST_OS_QURT))
+     GTEST_OS_XTENSA || GTEST_OS_QURT || GTEST_OS_TI_CGT))
 
 #endif  // GTEST_HAS_STD_WSTRING
 
@@ -605,7 +605,7 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 // a file system, stream redirection is not supported.
 #if GTEST_OS_WINDOWS_MOBILE || GTEST_OS_WINDOWS_PHONE ||          \
     GTEST_OS_WINDOWS_RT || GTEST_OS_ESP8266 || GTEST_OS_XTENSA || \
-    GTEST_OS_QURT || !GTEST_HAS_FILE_SYSTEM
+    GTEST_OS_QURT || !GTEST_HAS_FILE_SYSTEM || GTEST_OS_TI_CGT
 #define GTEST_HAS_STREAM_REDIRECTION 0
 #else
 #define GTEST_HAS_STREAM_REDIRECTION 1
@@ -2054,6 +2054,19 @@ inline int StrCaseCmp(const char* s1, const char* s2) {
 }
 inline char* StrDup(const char* src) { return strdup(src); }
 
+#elif GTEST_OS_TI_CGT
+typedef struct stat StatStruct;
+
+//inline int FileNo(FILE* file) { return fileno(file); }
+//inline int DoIsATTY(int fd) { return isatty(fd); }
+//inline int Stat(const char* path, StatStruct* buf) { return stat(path, buf); }
+inline int StrCaseCmp(const char* s1, const char* s2) {
+  return strcasecmp(s1, s2);
+}
+inline char* StrDup(const char* src) { return strdup(src); }
+//inline int RmDir(const char* dir) { return rmdir(dir); }
+//inline bool IsDir(const StatStruct& st) { return S_ISDIR(st.st_mode); }
+
 #else
 
 inline int DoIsATTY(int fd) { return isatty(fd); }
@@ -2064,6 +2077,7 @@ inline char* StrDup(const char* src) { return strdup(src); }
 
 #endif  // GTEST_OS_WINDOWS
 
+#if !GTEST_OS_TI_CGT
 inline int IsATTY(int fd) {
   // DoIsATTY might change errno (for example ENOTTY in case you redirect stdout
   // to a file on Linux), which is unexpected, so save the previous value, and
@@ -2074,6 +2088,7 @@ inline int IsATTY(int fd) {
 
   return isAttyValue;
 }
+#endif
 
 // Functions deprecated by MSVC 8.0.
 
@@ -2085,7 +2100,7 @@ GTEST_DISABLE_MSC_DEPRECATED_PUSH_()
 #if GTEST_HAS_FILE_SYSTEM
 #if !GTEST_OS_WINDOWS_MOBILE && !GTEST_OS_WINDOWS_PHONE &&           \
     !GTEST_OS_WINDOWS_RT && !GTEST_OS_ESP8266 && !GTEST_OS_XTENSA && \
-    !GTEST_OS_QURT
+    !GTEST_OS_QURT && !GTEST_OS_TI_CGT
 inline int ChDir(const char* dir) { return chdir(dir); }
 #endif
 inline FILE* FOpen(const char* path, const char* mode) {
@@ -2124,7 +2139,7 @@ inline const char* StrError(int errnum) { return strerror(errnum); }
 inline const char* GetEnv(const char* name) {
 #if GTEST_OS_WINDOWS_MOBILE || GTEST_OS_WINDOWS_PHONE ||          \
     GTEST_OS_WINDOWS_RT || GTEST_OS_ESP8266 || GTEST_OS_XTENSA || \
-    GTEST_OS_QURT
+    GTEST_OS_QURT || GTEST_OS_TI_CGT
   // We are on an embedded platform, which has no environment variables.
   static_cast<void>(name);  // To prevent 'unused argument' warning.
   return nullptr;
