@@ -379,6 +379,15 @@ class GTEST_API_ Mock {
   static bool VerifyAndClear(void* mock_obj)
       GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex);
 
+  // Set name for mock. Will be used in output.
+  // Usefull when multiple instances of same mock is required.
+  static bool SetMockName(void* mock_obj, const std::string& mock_name)
+      GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex);
+
+  // Returns mock name which was setted with SetMockName
+  static std::string GetMockName(const void* mock_obj)
+      GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex);
+
   // Returns whether the mock was created as a naggy mock (default)
   static bool IsNaggy(void* mock_obj)
       GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex);
@@ -1584,6 +1593,8 @@ class FunctionMocker<R(Args...)> final : public UntypedFunctionMockerBase {
     DescribeDefaultActionTo(args, os);
     *os << "    Function call: " << Name();
     UniversalPrint(args, os);
+    const auto mock_name = Mock::GetMockName(MockObject());
+    if (!mock_name.empty()) *os << " on " << mock_name;
   }
 
   // Returns the expectation that matches the given function arguments
