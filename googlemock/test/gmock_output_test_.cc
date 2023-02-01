@@ -33,6 +33,7 @@
 #include <stdio.h>
 
 #include <string>
+#include <tuple>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -254,12 +255,16 @@ TEST_F(GMockOutputTest, CatchesLeakedMocks) {
 }
 
 MATCHER_P2(IsPair, first, second, "") {
-  return Value(arg.first, first) && Value(arg.second, second);
+  return Value(std::get<0>(arg), first) && Value(std::get<1>(arg), second);
 }
 
 TEST_F(GMockOutputTest, PrintsMatcher) {
   const testing::Matcher<int> m1 = Ge(48);
-  EXPECT_THAT((std::pair<int, bool>(42, true)), IsPair(m1, true));
+  // Explicitly using std::tuple instead of std::pair due to differences between
+  // MSVC and other compilers. std::pair is printed as
+  // "struct std::pair<int,bool>" when using MSVC vs "std::pair<int,bool>" with
+  // other compilers.
+  EXPECT_THAT((std::tuple<int, bool>(42, true)), IsPair(m1, true));
 }
 
 void TestCatchesLeakedMocksInAdHocTests() {
