@@ -2597,14 +2597,7 @@ TEST(ParameterlessExpectationsTest,
 }  // namespace
 }  // namespace testing
 
-// Allows the user to define their own main and then invoke gmock_main
-// from it. This might be necessary on some platforms which require
-// specific setup and teardown.
-#if GMOCK_RENAME_MAIN
-int gmock_main(int argc, char** argv) {
-#else
 int main(int argc, char** argv) {
-#endif  // GMOCK_RENAME_MAIN
   testing::InitGoogleMock(&argc, argv);
   // Ensures that the tests pass no matter what value of
   // --gmock_catch_leaked_mocks and --gmock_verbose the user specifies.
