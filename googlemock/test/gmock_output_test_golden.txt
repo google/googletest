@@ -290,9 +290,9 @@ Stack trace:
 [       OK ] GMockOutputTest.CatchesLeakedMocks
 [ RUN      ] GMockOutputTest.PrintsMatcher
 FILE:#: Failure
-Value of: (std::pair<int, bool>(42, true))
+Value of: (std::tuple<int, bool>(42, true))
 Expected: is pair (first: is >= 48, second: true)
-  Actual: (42, true) (of type std::pair<int, bool>)
+  Actual: (42, true)
 [  FAILED  ] GMockOutputTest.PrintsMatcher
 [  FAILED  ] GMockOutputTest.UnexpectedCall
 [  FAILED  ] GMockOutputTest.UnexpectedCallToVoidFunction
