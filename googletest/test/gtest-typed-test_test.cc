@@ -36,9 +36,7 @@
 
 #include "gtest/gtest.h"
 
-#if _MSC_VER
 GTEST_DISABLE_MSC_WARNINGS_PUSH_(4127 /* conditional expression is constant */)
-#endif  //  _MSC_VER
 
 using testing::Test;
 
@@ -421,3 +419,5 @@ typedef Types<int, double, MyPair<int, int> > TrimTypes;
 INSTANTIATE_TYPED_TEST_SUITE_P(My, TrimmedTest, TrimTypes);
 
 }  // namespace library2
+
+GTEST_DISABLE_MSC_WARNINGS_POP_()  // 4127
