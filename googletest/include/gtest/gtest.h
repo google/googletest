@@ -297,7 +297,13 @@ class GTEST_API_ Test {
   // SetUp/TearDown method of Environment objects registered with Google
   // Test) will be output as attributes of the <testsuites> element.
   static void RecordProperty(const std::string& key, const std::string& value);
-  static void RecordProperty(const std::string& key, int64_t value);
+  // We do not define a custom serialization except for values that can be
+  // converted to int64_t, but other values could be logged in this way.
+  template <typename T, std::enable_if_t<std::is_convertible<T, int64_t>::value,
+                                         bool> = true>
+  static void RecordProperty(const std::string& key, const T& value) {
+    RecordProperty(key, (Message() << static_cast<int64_t>(value)).GetString());
+  }
 
  protected:
   // Creates a Test object.
