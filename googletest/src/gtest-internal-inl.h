@@ -92,7 +92,8 @@ GTEST_API_ TimeInMillis GetTimeInMillis();
 // Returns true if and only if Google Test should use colors in the output.
 GTEST_API_ bool ShouldUseColor(bool stdout_is_tty);
 
-// Formats the given time in milliseconds as seconds.
+// Formats the given time in milliseconds as seconds. If the input is an exact N
+// seconds, the output has a trailing decimal point (e.g., "N." intead of "N").
 GTEST_API_ std::string FormatTimeInMillisAsSeconds(TimeInMillis ms);
 
 // Converts the given time in milliseconds to a date string in the ISO 8601
