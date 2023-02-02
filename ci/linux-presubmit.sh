@@ -51,7 +51,7 @@ for cc in /usr/local/bin/gcc /opt/llvm/clang/bin/clang; do
       --workdir="/build" \
       --rm \
       --env="CC=${cc}" \
-      --env="CXX_FLAGS=\"-Werror -Wdeprecated\"" \
+      --env=CXXFLAGS="-Werror -Wdeprecated" \
       ${LINUX_LATEST_CONTAINER} \
       /bin/bash -c "
         cmake /src \
