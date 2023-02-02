@@ -38,21 +38,40 @@ class PropertyTwo : public testing::Test {
   void TearDown() override { RecordProperty("TearDownProp", 2); }
 };
 
-TEST_F(PropertyTwo, TestSomeProperties) {
-// 'initializing': conversion from 'int' to 'short', possible loss of data
-  GTEST_DISABLE_MSC_WARNINGS_PUSH_(4244)
-
-  // Floats and doubles are written as int64_t, since RecordProperty takes an
-  // int64_t, so we test that the values written are truncated to int64_t.
+TEST_F(PropertyTwo, TestInt64Properties) {
+  // Floats and doubles are written as int64_t, so we test that the values
+  // written are truncated to int64_t.
   float float_prop = 3.25;
   RecordProperty("TestFloatProperty", float_prop);
 
   double double_prop = 4.75;
   RecordProperty("TestDoubleProperty", double_prop);
 
-  GTEST_DISABLE_MSC_WARNINGS_POP_()  // 4244
-
   // Validate we can write an unsigned size_t as a property
   size_t size_t_prop = 5;
   RecordProperty("TestSizetProperty", size_t_prop);
+
+  bool bool_prop = true;
+  RecordProperty("TestBoolProperty", bool_prop);
+
+  char char_prop = 'A';
+  RecordProperty("TestCharProperty", char_prop);
+
+  int16_t int16_prop = 6;
+  RecordProperty("TestInt16Property", int16_prop);
+
+  int32_t int32_prop = 7;
+  RecordProperty("TestInt32Property", int32_prop);
+
+  int64_t int64_prop = 8;
+  RecordProperty("TestInt64Property", int64_prop);
+
+  enum Foo {
+    NINE = 9,
+  };
+  Foo enum_prop = NINE;
+  RecordProperty("TestEnumProperty", enum_prop);
+
+  std::atomic<int> atomic_int_prop(10);
+  RecordProperty("TestAtomicIntProperty", atomic_int_prop);
 }

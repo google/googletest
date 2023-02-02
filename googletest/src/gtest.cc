@@ -2459,11 +2459,6 @@ void Test::TearDown() {}
 void Test::RecordProperty(const std::string& key, const std::string& value) {
   UnitTest::GetInstance()->RecordProperty(key, value);
 }
-// We do not define a customary serialization except for integers,
-// but other values could be logged in this way.
-void Test::RecordProperty(const std::string& key, int64_t value) {
-  RecordProperty(key, (Message() << value).GetString());
-}
 
 namespace internal {
 
