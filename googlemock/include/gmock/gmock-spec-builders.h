@@ -380,11 +380,11 @@ class GTEST_API_ Mock {
       GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex);
 
   // Set name for mock. Will be used in output.
-  // Usefull when multiple instances of same mock is required.
-  static bool SetMockName(void* mock_obj, const std::string& mock_name)
+  // Useful when multiple instances of same mock is required.
+  static void SetMockName(void* mock_obj, const std::string& mock_name)
       GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex);
 
-  // Returns mock name which was setted with SetMockName
+  // Returns mock name which was set using SetMockName
   static std::string GetMockName(const void* mock_obj)
       GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex);
 

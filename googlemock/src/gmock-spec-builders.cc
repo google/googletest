@@ -634,16 +634,14 @@ bool Mock::VerifyAndClear(void* mock_obj)
 }
 
 // Set name for mock. Will be used in output.
-// Usefull when multiple instances of same mock is required.
-bool Mock::SetMockName(void* mock_obj, const std::string& mock_name)
+// Useful when multiple instances of same mock is required.
+void Mock::SetMockName(void* mock_obj, const std::string& mock_name)
     GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex) {
   internal::MutexLock l(&internal::g_gmock_mutex);
-
   g_mock_object_registry.states()[mock_obj].name = mock_name;
-  return true;
 }
 
-// Returns mock name which was setted with SetMockName
+// Returns mock name which was set using SetMockName
 std::string Mock::GetMockName(const void* mock_obj)
     GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex) {
   internal::MutexLock l(&internal::g_gmock_mutex);
