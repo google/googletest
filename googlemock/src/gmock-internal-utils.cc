@@ -198,6 +198,10 @@ GTEST_API_ void IllegalDoDefault(const char* file, int line) {
       "the variable in various places.");
 }
 
+constexpr char UndoWebSafeEncoding(char c) {
+  return c == '-' ? '+' : c == '_' ? '/' : c;
+}
+
 constexpr char UnBase64Impl(char c, const char* const base64, char carry) {
   return *base64 == 0 ? static_cast<char>(65)
          : *base64 == c
@@ -208,7 +212,8 @@ constexpr char UnBase64Impl(char c, const char* const base64, char carry) {
 template <size_t... I>
 constexpr std::array<char, 256> UnBase64Impl(IndexSequence<I...>,
                                              const char* const base64) {
-  return {{UnBase64Impl(static_cast<char>(I), base64, 0)...}};
+  return {
+      {UnBase64Impl(UndoWebSafeEncoding(static_cast<char>(I)), base64, 0)...}};
 }
 
 constexpr std::array<char, 256> UnBase64(const char* const base64) {

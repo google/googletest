@@ -1802,11 +1802,13 @@ TEST(WhenBase64UnescapedTest, MatchesUnescapedBase64Strings) {
   EXPECT_FALSE(m1.Matches("invalid base64"));
   EXPECT_FALSE(m1.Matches("aGVsbG8gd29ybGQ="));  // hello world
   EXPECT_TRUE(m1.Matches("aGVsbG8gd29ybGQh"));   // hello world!
+  EXPECT_TRUE(m1.Matches("+/-_IQ"));             // \xfb\xff\xbf!
 
   const Matcher<const std::string&> m2 = WhenBase64Unescaped(EndsWith("!"));
   EXPECT_FALSE(m2.Matches("invalid base64"));
   EXPECT_FALSE(m2.Matches("aGVsbG8gd29ybGQ="));  // hello world
   EXPECT_TRUE(m2.Matches("aGVsbG8gd29ybGQh"));   // hello world!
+  EXPECT_TRUE(m2.Matches("+/-_IQ"));             // \xfb\xff\xbf!
 
 #if GTEST_INTERNAL_HAS_STRING_VIEW
   const Matcher<const internal::StringView&> m3 =
@@ -1814,6 +1816,7 @@ TEST(WhenBase64UnescapedTest, MatchesUnescapedBase64Strings) {
   EXPECT_FALSE(m3.Matches("invalid base64"));
   EXPECT_FALSE(m3.Matches("aGVsbG8gd29ybGQ="));  // hello world
   EXPECT_TRUE(m3.Matches("aGVsbG8gd29ybGQh"));   // hello world!
+  EXPECT_TRUE(m3.Matches("+/-_IQ"));             // \xfb\xff\xbf!
 #endif  // GTEST_INTERNAL_HAS_STRING_VIEW
 }
 
