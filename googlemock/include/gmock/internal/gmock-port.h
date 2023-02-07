@@ -56,7 +56,7 @@
 #include "gmock/internal/custom/gmock-port.h"
 #include "gtest/internal/gtest-port.h"
 
-#if GTEST_HAS_ABSL
+#ifdef GTEST_HAS_ABSL
 #include "absl/flags/declare.h"
 #include "absl/flags/flag.h"
 #endif
@@ -73,7 +73,7 @@
 #define GMOCK_FLAG(name) FLAGS_gmock_##name
 
 // Pick a command line flags implementation.
-#if GTEST_HAS_ABSL
+#ifdef GTEST_HAS_ABSL
 
 // Macros for defining flags.
 #define GMOCK_DEFINE_bool_(name, default_val, doc) \
