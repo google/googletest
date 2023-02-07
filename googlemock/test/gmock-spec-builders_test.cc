@@ -1088,16 +1088,7 @@ TEST(UnexpectedCallTest, UnsatisfiedPrerequisites) {
 
   // Verifies that the failure message contains the two unsatisfied
   // pre-requisites but not the satisfied one.
-#if GTEST_USES_PCRE
-  EXPECT_THAT(
-      r.message(),
-      ContainsRegex(
-          // PCRE has trouble using (.|\n) to match any character, but
-          // supports the (?s) prefix for using . to match any character.
-          "(?s)the following immediate pre-requisites are not satisfied:\n"
-          ".*: pre-requisite #0\n"
-          ".*: pre-requisite #1"));
-#elif GTEST_USES_POSIX_RE
+#if GTEST_USES_POSIX_RE
   EXPECT_THAT(r.message(),
               ContainsRegex(
                   // POSIX RE doesn't understand the (?s) prefix, but has no
@@ -1112,7 +1103,7 @@ TEST(UnexpectedCallTest, UnsatisfiedPrerequisites) {
                   "the following immediate pre-requisites are not satisfied:"));
   EXPECT_THAT(r.message(), ContainsRegex(": pre-requisite #0"));
   EXPECT_THAT(r.message(), ContainsRegex(": pre-requisite #1"));
-#endif  // GTEST_USES_PCRE
+#endif  // GTEST_USES_POSIX_RE
 
   b.DoB(1);
   b.DoB(3);
