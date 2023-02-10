@@ -900,9 +900,6 @@ class HasDebugStringAndShortDebugString {
       HasDebugStringType::value && HasShortDebugStringType::value;
 };
 
-template <typename T>
-constexpr bool HasDebugStringAndShortDebugString<T>::value;
-
 // When the compiler sees expression IsContainerTest<C>(0), if C is an
 // STL-style container class, the first overload of IsContainerTest
 // will be viable (since both C::iterator* and C::const_iterator* are
