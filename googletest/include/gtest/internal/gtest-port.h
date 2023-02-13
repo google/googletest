@@ -2352,7 +2352,8 @@ using Any = ::absl::any;
 }  // namespace testing
 #else
 #ifdef __has_include
-#if __has_include(<any>) && __cplusplus >= 201703L
+#if __has_include(<any>) && __cplusplus >= 201703L && \
+    (!defined(_MSC_VER) || GTEST_HAS_RTTI)
 // Otherwise for C++17 and higher use std::any for UniversalPrinter<>
 // specializations.
 #define GTEST_INTERNAL_HAS_ANY 1
