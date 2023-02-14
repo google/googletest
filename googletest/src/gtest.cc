@@ -2325,7 +2325,9 @@ static std::vector<std::string> GetReservedAttributesForElement(
   return std::vector<std::string>();
 }
 
+#if GTEST_HAS_FILE_SYSTEM
 // TODO(jdesprez): Merge the two getReserved attributes once skip is improved
+// This function is only used when file systems are enabled.
 static std::vector<std::string> GetReservedOutputAttributesForElement(
     const std::string& xml_element) {
   if (xml_element == "testsuites") {
@@ -2340,6 +2342,7 @@ static std::vector<std::string> GetReservedOutputAttributesForElement(
   // This code is unreachable but some compilers may not realizes that.
   return std::vector<std::string>();
 }
+#endif
 
 static std::string FormatWordList(const std::vector<std::string>& words) {
   Message word_list;
@@ -6802,7 +6805,7 @@ std::string TempDir() {
 #endif
 }
 
-#if !defined(GTEST_CUSTOM_SRCDIR_FUNCTION_)
+#if GTEST_HAS_FILE_SYSTEM && !defined(GTEST_CUSTOM_SRCDIR_FUNCTION_)
 // Returns the directory path (including terminating separator) of the current
 // executable as derived from argv[0].
 static std::string GetCurrentExecutableDirectory() {
@@ -6811,6 +6814,7 @@ static std::string GetCurrentExecutableDirectory() {
 }
 #endif
 
+#if GTEST_HAS_FILE_SYSTEM
 std::string SrcDir() {
 #if defined(GTEST_CUSTOM_SRCDIR_FUNCTION_)
   return GTEST_CUSTOM_SRCDIR_FUNCTION_();
@@ -6825,6 +6829,7 @@ std::string SrcDir() {
                        '/');
 #endif
 }
+#endif
 
 // Class ScopedTrace
 
