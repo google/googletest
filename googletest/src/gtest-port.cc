@@ -668,7 +668,6 @@ RE::~RE() {
     regfree(&partial_regex_);
     regfree(&full_regex_);
   }
-  free(const_cast<char*>(pattern_));
 }
 
 // Returns true if and only if regular expression re matches the entire str.
@@ -690,7 +689,7 @@ bool RE::PartialMatch(const char* str, const RE& re) {
 
 // Initializes an RE from its string representation.
 void RE::Init(const char* regex) {
-  pattern_ = posix::StrDup(regex);
+  pattern_ = regex;
 
   // Reserves enough bytes to hold the regular expression used for a
   // full match.
@@ -920,27 +919,26 @@ bool MatchRegexAnywhere(const char* regex, const char* str) {
 
 // Implements the RE class.
 
-RE::~RE() {
-  free(const_cast<char*>(pattern_));
-  free(const_cast<char*>(full_pattern_));
-}
+RE::~RE() = default;
 
 // Returns true if and only if regular expression re matches the entire str.
 bool RE::FullMatch(const char* str, const RE& re) {
-  return re.is_valid_ && MatchRegexAnywhere(re.full_pattern_, str);
+  return re.is_valid_ && MatchRegexAnywhere(re.full_pattern_.c_str(), str);
 }
 
 // Returns true if and only if regular expression re matches a substring of
 // str (including str itself).
 bool RE::PartialMatch(const char* str, const RE& re) {
-  return re.is_valid_ && MatchRegexAnywhere(re.pattern_, str);
+  return re.is_valid_ && MatchRegexAnywhere(re.pattern_.c_str(), str);
 }
 
 // Initializes an RE from its string representation.
 void RE::Init(const char* regex) {
-  pattern_ = full_pattern_ = nullptr;
+  full_pattern_.clear();
+  pattern_.clear();
+
   if (regex != nullptr) {
-    pattern_ = posix::StrDup(regex);
+    pattern_ = regex;
   }
 
   is_valid_ = ValidateRegex(regex);
@@ -949,25 +947,19 @@ void RE::Init(const char* regex) {
     return;
   }
 
-  const size_t len = strlen(regex);
   // Reserves enough bytes to hold the regular expression used for a
-  // full match: we need space to prepend a '^', append a '$', and
-  // terminate the string with '\0'.
-  char* buffer = static_cast<char*>(malloc(len + 3));
-  full_pattern_ = buffer;
+  // full match: we need space to prepend a '^' and append a '$'.
+  full_pattern_.reserve(pattern_.size() + 2);
 
-  if (*regex != '^')
-    *buffer++ = '^';  // Makes sure full_pattern_ starts with '^'.
+  if (pattern_.empty() || pattern_.front() != '^') {
+    full_pattern_.push_back('^');  // Makes sure full_pattern_ starts with '^'.
+  }
 
-  // We don't use snprintf or strncpy, as they trigger a warning when
-  // compiled with VC++ 8.0.
-  memcpy(buffer, regex, len);
-  buffer += len;
+  full_pattern_.append(pattern_);
 
-  if (len == 0 || regex[len - 1] != '$')
-    *buffer++ = '$';  // Makes sure full_pattern_ ends with '$'.
-
-  *buffer = '\0';
+  if (pattern_.empty() || pattern_.back() != '$') {
+    full_pattern_.push_back('$');  // Makes sure full_pattern_ ends with '$'.
+  }
 }
 
 #endif  // GTEST_USES_POSIX_RE

@@ -33,7 +33,9 @@
 #include "gtest/gtest-death-test.h"
 
 #include <functional>
+#include <memory>
 #include <utility>
+#include <vector>
 
 #include "gtest/internal/custom/gtest.h"
 #include "gtest/internal/gtest-port.h"
@@ -621,6 +623,17 @@ bool DeathTestImpl::Passed(bool status_ok) {
   return success;
 }
 
+// Note: The return value points into args, so the return value's lifetime is
+// bound to that of args.
+std::unique_ptr<char*[]> CreateArgvFromArgs(std::vector<std::string>& args) {
+  auto result = std::make_unique<char*[]>(args.size() + 1);
+  for (size_t i = 0; i < args.size(); ++i) {
+    result[i] = &args[i][0];
+  }
+  result[args.size()] = nullptr;  // extra null terminator
+  return result;
+}
+
 #if GTEST_OS_WINDOWS
 // WindowsDeathTest implements death tests on Windows. Due to the
 // specifics of starting new processes on Windows, death tests there are
@@ -836,36 +849,6 @@ class FuchsiaDeathTest : public DeathTestImpl {
   zx::socket stderr_socket_;
 };
 
-// Utility class for accumulating command-line arguments.
-class Arguments {
- public:
-  Arguments() { args_.push_back(nullptr); }
-
-  ~Arguments() {
-    for (std::vector<char*>::iterator i = args_.begin(); i != args_.end();
-         ++i) {
-      free(*i);
-    }
-  }
-  void AddArgument(const char* argument) {
-    args_.insert(args_.end() - 1, posix::StrDup(argument));
-  }
-
-  template <typename Str>
-  void AddArguments(const ::std::vector<Str>& arguments) {
-    for (typename ::std::vector<Str>::const_iterator i = arguments.begin();
-         i != arguments.end(); ++i) {
-      args_.insert(args_.end() - 1, posix::StrDup(i->c_str()));
-    }
-  }
-  char* const* Argv() { return &args_[0]; }
-
-  int size() { return static_cast<int>(args_.size()) - 1; }
-
- private:
-  std::vector<char*> args_;
-};
-
 // Waits for the child in a death test to exit, returning its exit
 // status, or 0 if no child process exists.  As a side effect, sets the
 // outcome data member.
@@ -986,10 +969,10 @@ DeathTest::TestRole FuchsiaDeathTest::AssumeRole() {
                                     kInternalRunDeathTestFlag + "=" + file_ +
                                     "|" + StreamableToString(line_) + "|" +
                                     StreamableToString(death_test_index);
-  Arguments args;
-  args.AddArguments(GetInjectableArgvs());
-  args.AddArgument(filter_flag.c_str());
-  args.AddArgument(internal_flag.c_str());
+
+  std::vector<std::string> args = GetInjectableArgvs();
+  args.push_back(filter_flag);
+  args.push_back(internal_flag);
 
   // Build the pipe for communication with the child.
   zx_status_t status;
@@ -1041,8 +1024,9 @@ DeathTest::TestRole FuchsiaDeathTest::AssumeRole() {
   GTEST_DEATH_TEST_CHECK_(status == ZX_OK);
 
   // Spawn the child process.
-  status = fdio_spawn_etc(child_job, FDIO_SPAWN_CLONE_ALL, args.Argv()[0],
-                          args.Argv(), nullptr, 2, spawn_actions,
+  std::unique_ptr<char*[]> argv = CreateArgvFromArgs(args);
+  status = fdio_spawn_etc(child_job, FDIO_SPAWN_CLONE_ALL, argv[0], argv.get(),
+                          nullptr, 2, spawn_actions,
                           child_process_.reset_and_get_address(), nullptr);
   GTEST_DEATH_TEST_CHECK_(status == ZX_OK);
 
@@ -1171,34 +1155,6 @@ class ExecDeathTest : public ForkingDeathTest {
   const char* const file_;
   // The line number on which the death test is located.
   const int line_;
-};
-
-// Utility class for accumulating command-line arguments.
-class Arguments {
- public:
-  Arguments() { args_.push_back(nullptr); }
-
-  ~Arguments() {
-    for (std::vector<char*>::iterator i = args_.begin(); i != args_.end();
-         ++i) {
-      free(*i);
-    }
-  }
-  void AddArgument(const char* argument) {
-    args_.insert(args_.end() - 1, posix::StrDup(argument));
-  }
-
-  template <typename Str>
-  void AddArguments(const ::std::vector<Str>& arguments) {
-    for (typename ::std::vector<Str>::const_iterator i = arguments.begin();
-         i != arguments.end(); ++i) {
-      args_.insert(args_.end() - 1, posix::StrDup(i->c_str()));
-    }
-  }
-  char* const* Argv() { return &args_[0]; }
-
- private:
-  std::vector<char*> args_;
 };
 
 // A struct that encompasses the arguments to the child process of a
@@ -1410,10 +1366,9 @@ DeathTest::TestRole ExecDeathTest::AssumeRole() {
                                     StreamableToString(line_) + "|" +
                                     StreamableToString(death_test_index) + "|" +
                                     StreamableToString(pipe_fd[1]);
-  Arguments args;
-  args.AddArguments(GetArgvsForDeathTestChildProcess());
-  args.AddArgument(filter_flag.c_str());
-  args.AddArgument(internal_flag.c_str());
+  std::vector<std::string> args = GetArgvsForDeathTestChildProcess();
+  args.push_back(filter_flag);
+  args.push_back(internal_flag);
 
   DeathTest::set_last_death_test_message("");
 
@@ -1422,7 +1377,8 @@ DeathTest::TestRole ExecDeathTest::AssumeRole() {
   // is necessary.
   FlushInfoLog();
 
-  const pid_t child_pid = ExecDeathTestSpawnChild(args.Argv(), pipe_fd[0]);
+  std::unique_ptr<char*[]> argv = CreateArgvFromArgs(args);
+  const pid_t child_pid = ExecDeathTestSpawnChild(argv.get(), pipe_fd[0]);
   GTEST_DEATH_TEST_CHECK_SYSCALL_(close(pipe_fd[1]));
   set_child_pid(child_pid);
   set_read_fd(pipe_fd[0]);
