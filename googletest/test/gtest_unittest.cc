@@ -60,6 +60,7 @@ TEST(CommandLineFlagsTest, CanBeAccessedInCodeOnceGTestHIsIncluded) {
 
 #include <cstdint>
 #include <map>
+#include <memory>
 #include <ostream>
 #include <set>
 #include <string>
@@ -424,10 +425,12 @@ class FormatEpochTimeInMillisAsIso8601Test : public Test {
 
  private:
   void SetUp() override {
-    saved_tz_ = nullptr;
+    saved_tz_.reset();
 
-    GTEST_DISABLE_MSC_DEPRECATED_PUSH_(/* getenv, strdup: deprecated */)
-    if (getenv("TZ")) saved_tz_ = strdup(getenv("TZ"));
+    GTEST_DISABLE_MSC_DEPRECATED_PUSH_(/* getenv: deprecated */)
+    if (const char* tz = getenv("TZ")) {
+      saved_tz_ = std::make_unique<std::string>(tz);
+    }
     GTEST_DISABLE_MSC_DEPRECATED_POP_()
 
     // Set up the time zone for FormatEpochTimeInMillisAsIso8601 to use.  We
@@ -437,9 +440,8 @@ class FormatEpochTimeInMillisAsIso8601Test : public Test {
   }
 
   void TearDown() override {
-    SetTimeZone(saved_tz_);
-    free(const_cast<char*>(saved_tz_));
-    saved_tz_ = nullptr;
+    SetTimeZone(saved_tz_ != nullptr ? saved_tz_->c_str() : nullptr);
+    saved_tz_.reset();
   }
 
   static void SetTimeZone(const char* time_zone) {
@@ -471,7 +473,7 @@ class FormatEpochTimeInMillisAsIso8601Test : public Test {
 #endif
   }
 
-  const char* saved_tz_;
+  std::unique_ptr<std::string> saved_tz_;  // Empty and null are different here
 };
 
 const TimeInMillis FormatEpochTimeInMillisAsIso8601Test::kMillisPerSec;
