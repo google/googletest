@@ -2050,7 +2050,7 @@ class GMockVerboseFlagTest : public VerboseFlagPreservingFixture {
         "See "
         "https://github.com/google/googletest/blob/main/docs/"
         "gmock_cook_book.md#"
-        "knowing-when-to-expect for details.";
+        "knowing-when-to-expect-useoncall for details.";
 
     // A void-returning function.
     CaptureStdout();
