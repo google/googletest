@@ -297,7 +297,7 @@ void ReportUninterestingCall(CallReaction reaction, const std::string& msg) {
               "See "
               "https://github.com/google/googletest/blob/main/docs/"
               "gmock_cook_book.md#"
-              "knowing-when-to-expect for details.\n",
+              "knowing-when-to-expect-useoncall for details.\n",
           stack_frames_to_skip);
       break;
     default:  // FAIL
