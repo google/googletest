@@ -16,6 +16,10 @@ if (POLICY CMP0054)
   cmake_policy(SET CMP0054 NEW)
 endif (POLICY CMP0054)
 
+if (POLICY CMP0069)
+  cmake_policy(SET CMP0069 NEW)
+endif (POLICY CMP0069)
+
 # Tweaks CMake's default compiler/linker settings to suit Google Test's needs.
 #
 # This must be a macro(), as inside a function string() can only
