@@ -515,7 +515,7 @@ Verifies that *`expression`* is a success `HRESULT`.
 ### EXPECT_HRESULT_FAILED {#EXPECT_HRESULT_FAILED}
 
 `EXPECT_HRESULT_FAILED(`*`expression`*`)` \
-`EXPECT_HRESULT_FAILED(`*`expression`*`)`
+`ASSERT_HRESULT_FAILED(`*`expression`*`)`
 
 Verifies that *`expression`* is a failure `HRESULT`.
 
