@@ -302,7 +302,7 @@ class GTEST_API_ Test {
   template <typename T, std::enable_if_t<std::is_convertible<T, int64_t>::value,
                                          bool> = true>
   static void RecordProperty(const std::string& key, const T& value) {
-    RecordProperty(key, (Message() << static_cast<int64_t>(value)).GetString());
+    RecordProperty(key, (Message() << value).GetString());
   }
 
  protected:

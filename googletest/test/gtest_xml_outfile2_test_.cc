@@ -38,9 +38,7 @@ class PropertyTwo : public testing::Test {
   void TearDown() override { RecordProperty("TearDownProp", 2); }
 };
 
-TEST_F(PropertyTwo, TestInt64Properties) {
-  // Floats and doubles are written as int64_t, so we test that the values
-  // written are truncated to int64_t.
+TEST_F(PropertyTwo, TestInt64ConvertibleProperties) {
   float float_prop = 3.25;
   RecordProperty("TestFloatProperty", float_prop);
 
