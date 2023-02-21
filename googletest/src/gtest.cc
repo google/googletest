@@ -5416,6 +5416,9 @@ int UnitTest::Run() {
   impl()->set_catch_exceptions(GTEST_FLAG_GET(catch_exceptions));
 
 #if GTEST_OS_WINDOWS
+#if !GTEST_HAS_DEATH_TEST
+  const bool in_death_test_child_process = false;
+#endif
   // Either the user wants Google Test to catch exceptions thrown by the
   // tests or this is executing in the context of death test child
   // process. In either case the user does not want to see pop-up dialogs
