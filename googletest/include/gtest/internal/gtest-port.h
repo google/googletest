@@ -2447,4 +2447,9 @@ using Variant = ::std::variant<T...>;
 #endif  // __has_include
 #endif  // GTEST_HAS_ABSL
 
+#if defined(GTEST_INTERNAL_CPLUSPLUS_LANG) && \
+    GTEST_INTERNAL_CPLUSPLUS_LANG < 201703L
+#define GTEST_INTERNAL_NEED_REDUNDANT_CONSTEXPR_DECL 1
+#endif
+
 #endif  // GOOGLETEST_INCLUDE_GTEST_INTERNAL_GTEST_PORT_H_
