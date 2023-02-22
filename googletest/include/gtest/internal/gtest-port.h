@@ -125,9 +125,9 @@
 //   GTEST_OS_HAIKU    - Haiku
 //   GTEST_OS_HPUX     - HP-UX
 //   GTEST_OS_LINUX    - Linux
-//   GTEST_OS_LINUX_ANDROID - Google Android
+//     GTEST_OS_LINUX_ANDROID - Google Android
 //   GTEST_OS_MAC      - Mac OS X
-//   GTEST_OS_IOS      - iOS
+//     GTEST_OS_IOS    - iOS
 //   GTEST_OS_NACL     - Google Native Client (NaCl)
 //   GTEST_OS_NETBSD   - NetBSD
 //   GTEST_OS_OPENBSD  - OpenBSD
@@ -135,11 +135,11 @@
 //   GTEST_OS_QNX      - QNX
 //   GTEST_OS_SOLARIS  - Sun Solaris
 //   GTEST_OS_WINDOWS  - Windows (Desktop, MinGW, or Mobile)
-//   GTEST_OS_WINDOWS_DESKTOP  - Windows Desktop
-//   GTEST_OS_WINDOWS_MINGW    - MinGW
-//   GTEST_OS_WINDOWS_MOBILE   - Windows Mobile
-//   GTEST_OS_WINDOWS_PHONE    - Windows Phone
-//   GTEST_OS_WINDOWS_RT       - Windows Store App/WinRT
+//     GTEST_OS_WINDOWS_DESKTOP  - Windows Desktop
+//     GTEST_OS_WINDOWS_MINGW    - MinGW
+//     GTEST_OS_WINDOWS_MOBILE   - Windows Mobile
+//     GTEST_OS_WINDOWS_PHONE    - Windows Phone
+//     GTEST_OS_WINDOWS_RT       - Windows Store App/WinRT
 //   GTEST_OS_ZOS      - z/OS
 //
 // Among the platforms, Cygwin, Linux, Mac OS X, and Windows have the
@@ -474,7 +474,7 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 // no support for it at least as recent as Froyo (2.2).
 #define GTEST_HAS_STD_WSTRING                                         \
   (!(GTEST_OS_LINUX_ANDROID || GTEST_OS_CYGWIN || GTEST_OS_SOLARIS || \
-     GTEST_OS_HAIKU || GTEST_OS_ESP32 || GTEST_OS_ESP8266 || \
+     GTEST_OS_HAIKU || GTEST_OS_ESP32 || GTEST_OS_ESP8266 ||          \
      GTEST_OS_XTENSA || GTEST_OS_QURT))
 
 #endif  // GTEST_HAS_STD_WSTRING
@@ -2014,7 +2014,7 @@ inline int FileNo(FILE* file) { return fileno(file); }
 inline int Stat(const char* path, StatStruct* buf) { return stat(path, buf); }
 #if GTEST_OS_QURT
 // QuRT doesn't support any directory functions, including rmdir
-inline int RmDir(const char* dir GTEST_ATTRIBUTE_UNUSED_) { return 0; }
+inline int RmDir(const char*) { return 0; }
 #else
 inline int RmDir(const char* dir) { return rmdir(dir); }
 #endif
@@ -2072,7 +2072,7 @@ GTEST_DISABLE_MSC_DEPRECATED_PUSH_()
 // StrError() aren't needed on Windows CE at this time and thus not
 // defined there.
 #if GTEST_HAS_FILE_SYSTEM
-#if !GTEST_OS_WINDOWS_MOBILE && !GTEST_OS_WINDOWS_PHONE && \
+#if !GTEST_OS_WINDOWS_MOBILE && !GTEST_OS_WINDOWS_PHONE &&           \
     !GTEST_OS_WINDOWS_RT && !GTEST_OS_ESP8266 && !GTEST_OS_XTENSA && \
     !GTEST_OS_QURT
 inline int ChDir(const char* dir) { return chdir(dir); }
@@ -2111,7 +2111,7 @@ inline const char* StrError(int errnum) { return strerror(errnum); }
 #endif  // !GTEST_OS_WINDOWS_MOBILE && !GTEST_OS_QURT
 
 inline const char* GetEnv(const char* name) {
-#if GTEST_OS_WINDOWS_MOBILE || GTEST_OS_WINDOWS_PHONE || \
+#if GTEST_OS_WINDOWS_MOBILE || GTEST_OS_WINDOWS_PHONE ||          \
     GTEST_OS_WINDOWS_RT || GTEST_OS_ESP8266 || GTEST_OS_XTENSA || \
     GTEST_OS_QURT
   // We are on an embedded platform, which has no environment variables.
@@ -2447,9 +2447,6 @@ using Variant = ::std::variant<T...>;
 #endif  // __has_include
 #endif  // GTEST_HAS_ABSL
 
-
-
-
 #include <stdarg.h>
 namespace testing {
 namespace internal {
@@ -2477,5 +2474,11 @@ inline int gtest_flush_stdout() { return fflush(stdout); }
 
 }  // namespace internal
 }  // namespace testing
+
+#if defined(GTEST_INTERNAL_CPLUSPLUS_LANG) && \
+    GTEST_INTERNAL_CPLUSPLUS_LANG < 201703L
+#define GTEST_INTERNAL_NEED_REDUNDANT_CONSTEXPR_DECL 1
+#endif
+
 
 #endif  // GOOGLETEST_INCLUDE_GTEST_INTERNAL_GTEST_PORT_H_
