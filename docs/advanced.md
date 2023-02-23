@@ -562,7 +562,7 @@ The automated testing framework does not set the style flag. You can choose a
 particular style of death tests by setting the flag programmatically:
 
 ```c++
-GTEST_FLAG_SET(death_test_style, "threadsafe")
+GTEST_FLAG_SET(death_test_style, "threadsafe");
 ```
 
 You can do this in `main()` to set the style for all death tests in the binary,
