@@ -40,6 +40,7 @@
 #include <set>
 #include <sstream>
 #include <string>
+#include <tuple>
 #include <vector>
 
 #include "gtest/gtest.h"
@@ -527,8 +528,9 @@ TEST(CombineTest, NonDefaultConstructAssign) {
 template <typename T>
 class ConstructFromT {
  public:
-  ConstructFromT(const T& t) : t_(t) {}
-  template <typename... Args>
+  explicit ConstructFromT(const T& t) : t_(t) {}
+  template <typename... Args,
+            typename std::enable_if<sizeof...(Args) != 1, int>::type = 0>
   ConstructFromT(Args&&... args) : t_(std::forward<Args>(args)...) {}
 
   bool operator==(const ConstructFromT& other) const { return other.t_ == t_; }
