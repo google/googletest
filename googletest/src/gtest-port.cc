@@ -1167,7 +1167,7 @@ const int kStdErrFileno = 2;
 #else
 const int kStdOutFileno = STDOUT_FILENO;
 const int kStdErrFileno = STDERR_FILENO;
-#endif  // _MSC_VER
+#endif  // defined(_MSC_VER) || defined(__BORLANDC__)
 
 // Starts capturing stdout.
 void CaptureStdout() {

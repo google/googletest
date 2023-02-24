@@ -1741,7 +1741,7 @@ class TestWithParam : public Test, public WithParamInterface<T> {};
 #define GTEST_FAIL() GTEST_FATAL_FAILURE_("Failed")
 
 // Like GTEST_FAIL(), but at the given source file location.
-#define GTEST_FAIL_AT(file, line)         \
+#define GTEST_FAIL_AT(file, line)                \
   return GTEST_MESSAGE_AT_(file, line, "Failed", \
                            ::testing::TestPartResult::kFatalFailure)
 
