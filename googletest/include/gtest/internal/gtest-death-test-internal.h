@@ -238,7 +238,7 @@ inline Matcher<const ::std::string&> MakeDeathTestMatcher(
           }                                                                    \
           break;                                                               \
         case ::testing::internal::DeathTest::EXECUTE_TEST: {                   \
-          ::testing::internal::DeathTest::ReturnSentinel gtest_sentinel(       \
+          const ::testing::internal::DeathTest::ReturnSentinel gtest_sentinel( \
               gtest_dt);                                                       \
           GTEST_EXECUTE_DEATH_TEST_STATEMENT_(statement, gtest_dt);            \
           gtest_dt->Abort(::testing::internal::DeathTest::TEST_DID_NOT_DIE);   \
