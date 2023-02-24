@@ -41,6 +41,7 @@
 #include <memory>
 #include <set>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "gmock/gmock.h"
@@ -50,14 +51,14 @@
 #if GTEST_OS_CYGWIN || GTEST_OS_LINUX || GTEST_OS_MAC
 #include <unistd.h>  // NOLINT
 #endif
+#if GTEST_OS_QURT
+#include <qurt_event.h>
+#endif
 
 // Silence C4800 (C4800: 'int *const ': forcing value
 // to bool 'true' or 'false') for MSVC 15
-#ifdef _MSC_VER
-#if _MSC_VER == 1900
-#pragma warning(push)
-#pragma warning(disable : 4800)
-#endif
+#if defined(_MSC_VER) && (_MSC_VER == 1900)
+GTEST_DISABLE_MSC_WARNINGS_PUSH_(4800)
 #endif
 
 namespace testing {
@@ -294,9 +295,9 @@ void ReportUninterestingCall(CallReaction reaction, const std::string& msg) {
               "call should not happen.  Do not suppress it by blindly adding "
               "an EXPECT_CALL() if you don't mean to enforce the call.  "
               "See "
-              "https://github.com/google/googletest/blob/master/docs/"
+              "https://github.com/google/googletest/blob/main/docs/"
               "gmock_cook_book.md#"
-              "knowing-when-to-expect for details.\n",
+              "knowing-when-to-expect-useoncall for details.\n",
           stack_frames_to_skip);
       break;
     default:  // FAIL
@@ -405,8 +406,15 @@ bool UntypedFunctionMockerBase::VerifyAndClearExpectationsLocked()
     } else if (!untyped_expectation->IsSatisfied()) {
       expectations_met = false;
       ::std::stringstream ss;
-      ss << "Actual function call count doesn't match "
-         << untyped_expectation->source_text() << "...\n";
+
+      const ::std::string& expectation_name =
+          untyped_expectation->GetDescription();
+      ss << "Actual function ";
+      if (!expectation_name.empty()) {
+        ss << "\"" << expectation_name << "\" ";
+      }
+      ss << "call count doesn't match " << untyped_expectation->source_text()
+         << "...\n";
       // No need to show the source file location of the expectation
       // in the description, as the Expect() call that follows already
       // takes care of it.
@@ -434,7 +442,7 @@ bool UntypedFunctionMockerBase::VerifyAndClearExpectationsLocked()
   return expectations_met;
 }
 
-CallReaction intToCallReaction(int mock_behavior) {
+static CallReaction intToCallReaction(int mock_behavior) {
   if (mock_behavior >= kAllow && mock_behavior <= kFail) {
     return static_cast<internal::CallReaction>(mock_behavior);
   }
@@ -518,8 +526,12 @@ class MockObjectRegistry {
       // RUN_ALL_TESTS() has already returned when this destructor is
       // called.  Therefore we cannot use the normal Google Test
       // failure reporting mechanism.
+#if GTEST_OS_QURT
+      qurt_exception_raise_fatal();
+#else
       _exit(1);  // We cannot call exit() as it is not reentrant and
                  // may already have been called.
+#endif
     }
   }
 
@@ -534,46 +546,50 @@ MockObjectRegistry g_mock_object_registry;
 
 // Maps a mock object to the reaction Google Mock should have when an
 // uninteresting method is called.  Protected by g_gmock_mutex.
-std::map<const void*, internal::CallReaction> g_uninteresting_call_reaction;
+std::unordered_map<uintptr_t, internal::CallReaction>&
+UninterestingCallReactionMap() {
+  static auto* map = new std::unordered_map<uintptr_t, internal::CallReaction>;
+  return *map;
+}
 
 // Sets the reaction Google Mock should have when an uninteresting
 // method of the given mock object is called.
-void SetReactionOnUninterestingCalls(const void* mock_obj,
+void SetReactionOnUninterestingCalls(uintptr_t mock_obj,
                                      internal::CallReaction reaction)
     GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex) {
   internal::MutexLock l(&internal::g_gmock_mutex);
-  g_uninteresting_call_reaction[mock_obj] = reaction;
+  UninterestingCallReactionMap()[mock_obj] = reaction;
 }
 
 }  // namespace
 
 // Tells Google Mock to allow uninteresting calls on the given mock
 // object.
-void Mock::AllowUninterestingCalls(const void* mock_obj)
+void Mock::AllowUninterestingCalls(uintptr_t mock_obj)
     GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex) {
   SetReactionOnUninterestingCalls(mock_obj, internal::kAllow);
 }
 
 // Tells Google Mock to warn the user about uninteresting calls on the
 // given mock object.
-void Mock::WarnUninterestingCalls(const void* mock_obj)
+void Mock::WarnUninterestingCalls(uintptr_t mock_obj)
     GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex) {
   SetReactionOnUninterestingCalls(mock_obj, internal::kWarn);
 }
 
 // Tells Google Mock to fail uninteresting calls on the given mock
 // object.
-void Mock::FailUninterestingCalls(const void* mock_obj)
+void Mock::FailUninterestingCalls(uintptr_t mock_obj)
     GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex) {
   SetReactionOnUninterestingCalls(mock_obj, internal::kFail);
 }
 
 // Tells Google Mock the given mock object is being destroyed and its
 // entry in the call-reaction table should be removed.
-void Mock::UnregisterCallReaction(const void* mock_obj)
+void Mock::UnregisterCallReaction(uintptr_t mock_obj)
     GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex) {
   internal::MutexLock l(&internal::g_gmock_mutex);
-  g_uninteresting_call_reaction.erase(mock_obj);
+  UninterestingCallReactionMap().erase(static_cast<uintptr_t>(mock_obj));
 }
 
 // Returns the reaction Google Mock will have on uninteresting calls
@@ -581,10 +597,12 @@ void Mock::UnregisterCallReaction(const void* mock_obj)
 internal::CallReaction Mock::GetReactionOnUninterestingCalls(
     const void* mock_obj) GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex) {
   internal::MutexLock l(&internal::g_gmock_mutex);
-  return (g_uninteresting_call_reaction.count(mock_obj) == 0)
+  return (UninterestingCallReactionMap().count(
+              reinterpret_cast<uintptr_t>(mock_obj)) == 0)
              ? internal::intToCallReaction(
                    GMOCK_FLAG_GET(default_mock_behavior))
-             : g_uninteresting_call_reaction[mock_obj];
+             : UninterestingCallReactionMap()[reinterpret_cast<uintptr_t>(
+                   mock_obj)];
 }
 
 // Tells Google Mock to ignore mock_obj when checking for leaked mock
@@ -767,8 +785,6 @@ InSequence::~InSequence() {
 
 }  // namespace testing
 
-#ifdef _MSC_VER
-#if _MSC_VER == 1900
-#pragma warning(pop)
-#endif
+#if defined(_MSC_VER) && (_MSC_VER == 1900)
+GTEST_DISABLE_MSC_WARNINGS_POP_()  // 4800
 #endif

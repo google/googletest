@@ -1,1 +1,5 @@
 blank_issues_enabled: false
+contact_links:
+    - name: Get Help
+      url: https://github.com/google/googletest/discussions
+      about: Please ask and answer questions here.

@@ -29,7 +29,7 @@
 
 """Unit test utilities for Google C++ Testing and Mocking Framework."""
 # Suppresses the 'Import not at the top of the file' lint complaint.
-# pylint: disable-msg=C6204
+# pylint: disable=g-import-not-at-top
 
 import os
 import subprocess
@@ -43,7 +43,7 @@ import atexit
 import shutil
 import tempfile
 import unittest as _test_module
-# pylint: enable-msg=C6204
+# pylint: enable=g-import-not-at-top
 
 GTEST_OUTPUT_VAR_NAME = 'GTEST_OUTPUT'
 
@@ -63,23 +63,22 @@ def SetEnvVar(env_var, value):
 
 
 # Here we expose a class from a particular module, depending on the
-# environment. The comment suppresses the 'Invalid variable name' lint
-# complaint.
-TestCase = _test_module.TestCase  # pylint: disable=C6409
+# environment.
+TestCase = _test_module.TestCase
 
 # Initially maps a flag to its default value. After
 # _ParseAndStripGTestFlags() is called, maps a flag to its actual value.
-_flag_map = {'source_dir': os.path.dirname(sys.argv[0]),
-             'build_dir': os.path.dirname(sys.argv[0])}
+_flag_map = {
+    'source_dir': os.path.dirname(sys.argv[0]),
+    'build_dir': os.path.dirname(sys.argv[0]),
+}
 _gtest_flags_are_parsed = False
 
 
 def _ParseAndStripGTestFlags(argv):
   """Parses and strips Google Test flags from argv.  This is idempotent."""
 
-  # Suppresses the lint complaint about a global variable since we need it
-  # here to maintain module-wide state.
-  global _gtest_flags_are_parsed  # pylint: disable=W0603
+  global _gtest_flags_are_parsed
   if _gtest_flags_are_parsed:
     return
 
@@ -94,7 +93,7 @@ def _ParseAndStripGTestFlags(argv):
     while i < len(argv):
       prefix = '--' + flag + '='
       if argv[i].startswith(prefix):
-        _flag_map[flag] = argv[i][len(prefix):]
+        _flag_map[flag] = argv[i][len(prefix) :]
         del argv[i]
         break
       else:
@@ -150,15 +149,16 @@ def GetTestExecutablePath(executable_name, build_dir=None):
 
   Args:
     executable_name: name of the test binary that the test script runs.
-    build_dir:       directory where to look for executables, by default
-                     the result of GetBuildDir().
+    build_dir:       directory where to look for executables, by default the
+      result of GetBuildDir().
 
   Returns:
     The absolute path of the test binary.
   """
 
-  path = os.path.abspath(os.path.join(build_dir or GetBuildDir(),
-                                      executable_name))
+  path = os.path.abspath(
+      os.path.join(build_dir or GetBuildDir(), executable_name)
+  )
   if (IS_WINDOWS or IS_CYGWIN or IS_OS2) and not path.endswith('.exe'):
     path += '.exe'
 
@@ -166,7 +166,8 @@ def GetTestExecutablePath(executable_name, build_dir=None):
     message = (
         'Unable to find the test binary "%s". Please make sure to provide\n'
         'a path to the binary via the --build_dir flag or the BUILD_DIR\n'
-        'environment variable.' % path)
+        'environment variable.' % path
+    )
     print(message, file=sys.stderr)
     sys.exit(1)
 
@@ -194,6 +195,7 @@ def GetExitStatus(exit_code):
 
 
 class Subprocess:
+
   def __init__(self, command, working_dir=None, capture_stderr=True, env=None):
     """Changes into a specified directory, if provided, and executes a command.
 
@@ -203,7 +205,7 @@ class Subprocess:
       command:        The command to run, in the form of sys.argv.
       working_dir:    The directory to change into.
       capture_stderr: Determines whether to capture stderr in the output member
-                      or to discard it.
+        or to discard it.
       env:            Dictionary with environment to pass to the subprocess.
 
     Returns:
@@ -223,9 +225,14 @@ class Subprocess:
     else:
       stderr = subprocess.PIPE
 
-    p = subprocess.Popen(command,
-                         stdout=subprocess.PIPE, stderr=stderr,
-                         cwd=working_dir, universal_newlines=True, env=env)
+    p = subprocess.Popen(
+        command,
+        stdout=subprocess.PIPE,
+        stderr=stderr,
+        cwd=working_dir,
+        universal_newlines=True,
+        env=env,
+    )
     # communicate returns a tuple with the file object for the child's
     # output.
     self.output = p.communicate()[0]

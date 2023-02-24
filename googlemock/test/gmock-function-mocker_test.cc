@@ -27,16 +27,13 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-// Silence C4503 (decorated name length exceeded) for MSVC.
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4503)
-#endif
-
 // Google Mock - a framework for writing C++ mock classes.
 //
 // This file tests the function mocker classes.
 #include "gmock/gmock-function-mocker.h"
+
+// Silence C4503 (decorated name length exceeded) for MSVC.
+GTEST_DISABLE_MSC_WARNINGS_PUSH_(4503)
 
 #if GTEST_OS_WINDOWS
 // MSDN says the header file to be included for STDMETHOD is BaseTyps.h but
@@ -137,10 +134,7 @@ class FooInterface {
 // significant in determining whether two virtual functions had the same
 // signature. This was fixed in Visual Studio 2008. However, the compiler
 // still emits a warning that alerts about this change in behavior.
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4373)
-#endif
+GTEST_DISABLE_MSC_WARNINGS_PUSH_(4373)
 class MockFoo : public FooInterface {
  public:
   MockFoo() {}
@@ -285,9 +279,7 @@ class LegacyMockFoo : public FooInterface {
   LegacyMockFoo& operator=(const LegacyMockFoo&) = delete;
 };
 
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
+GTEST_DISABLE_MSC_WARNINGS_POP_()  // 4373
 
 template <class T>
 class FunctionMockerTest : public testing::Test {
@@ -958,6 +950,21 @@ TEST(MockMethodMockFunctionTest, MockMethodSizeOverhead) {
   EXPECT_EQ(sizeof(LegacyMockMethodSizes0), sizeof(MockMethodSizes0));
 }
 
+TEST(MockMethodMockFunctionTest, EnsureNoUnusedMemberFunction) {
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic error "-Wunused-member-function"
+#endif
+  // https://github.com/google/googletest/issues/4052
+  struct Foo {
+    MOCK_METHOD(void, foo, ());
+  };
+  EXPECT_CALL(Foo(), foo()).Times(0);
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
+}
+
 void hasTwoParams(int, int);
 void MaybeThrows();
 void DoesntThrow() noexcept;
@@ -987,3 +994,5 @@ TEST(MockMethodMockFunctionTest, NoexceptSpecifierPreserved) {
 
 }  // namespace gmock_function_mocker_test
 }  // namespace testing
+
+GTEST_DISABLE_MSC_WARNINGS_POP_()  // 4503

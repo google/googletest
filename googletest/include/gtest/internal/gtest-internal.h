@@ -57,12 +57,14 @@
 #include <string.h>
 
 #include <cstdint>
+#include <functional>
 #include <iomanip>
 #include <limits>
 #include <map>
 #include <set>
 #include <string>
 #include <type_traits>
+#include <utility>
 #include <vector>
 
 #include "gtest/gtest-message.h"
@@ -185,14 +187,6 @@ GTEST_API_ std::string CreateUnifiedDiff(const std::vector<std::string>& left,
 
 }  // namespace edit_distance
 
-// Calculate the diff between 'left' and 'right' and return it in unified diff
-// format.
-// If not null, stores in 'total_line_count' the total number of lines found
-// in left + right.
-GTEST_API_ std::string DiffStrings(const std::string& left,
-                                   const std::string& right,
-                                   size_t* total_line_count);
-
 // Constructs and returns the message for an equality assertion
 // (e.g. ASSERT_EQ, EXPECT_STREQ, etc) failure.
 //
@@ -313,9 +307,6 @@ class FloatingPoint {
   // Returns the floating-point number that represent positive infinity.
   static RawType Infinity() { return ReinterpretBits(kExponentBitMask); }
 
-  // Returns the maximum representable finite floating-point number.
-  static RawType Max();
-
   // Non-static methods
 
   // Returns the bits that represents this number.
@@ -396,17 +387,6 @@ class FloatingPoint {
   FloatingPointUnion u_;
 };
 
-// We cannot use std::numeric_limits<T>::max() as it clashes with the max()
-// macro defined by <windows.h>.
-template <>
-inline float FloatingPoint<float>::Max() {
-  return FLT_MAX;
-}
-template <>
-inline double FloatingPoint<double>::Max() {
-  return DBL_MAX;
-}
-
 // Typedefs the instances of the FloatingPoint template class that we
 // care to use.
 typedef FloatingPoint<float> Float;
@@ -469,7 +449,7 @@ class TestFactoryBase {
   TestFactoryBase& operator=(const TestFactoryBase&) = delete;
 };
 
-// This class provides implementation of TeastFactoryBase interface.
+// This class provides implementation of TestFactoryBase interface.
 // It is used in TEST and TEST_F macros.
 template <class TestClass>
 class TestFactoryImpl : public TestFactoryBase {
@@ -639,7 +619,7 @@ class GTEST_API_ TypedTestSuitePState {
                                         const char* registered_tests);
 
  private:
-  typedef ::std::map<std::string, CodeLocation> RegisteredTestsMap;
+  typedef ::std::map<std::string, CodeLocation, std::less<>> RegisteredTestsMap;
 
   bool registered_;
   RegisteredTestsMap registered_tests_;
@@ -837,8 +817,7 @@ class TypeParameterizedTestSuite<Fixture, internal::None, Types> {
 // For example, if Foo() calls Bar(), which in turn calls
 // GetCurrentOsStackTraceExceptTop(..., 1), Foo() will be included in
 // the trace but Bar() and GetCurrentOsStackTraceExceptTop() won't.
-GTEST_API_ std::string GetCurrentOsStackTraceExceptTop(UnitTest* unit_test,
-                                                       int skip_count);
+GTEST_API_ std::string GetCurrentOsStackTraceExceptTop(int skip_count);
 
 // Helpers for suppressing warnings on unreachable code or constant
 // condition.
@@ -921,8 +900,10 @@ class HasDebugStringAndShortDebugString {
       HasDebugStringType::value && HasShortDebugStringType::value;
 };
 
+#ifdef GTEST_INTERNAL_NEED_REDUNDANT_CONSTEXPR_DECL
 template <typename T>
 constexpr bool HasDebugStringAndShortDebugString<T>::value;
+#endif
 
 // When the compiler sees expression IsContainerTest<C>(0), if C is an
 // STL-style container class, the first overload of IsContainerTest

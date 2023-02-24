@@ -285,6 +285,10 @@ If you are concerned about the performance overhead incurred by virtual
 functions, and profiling confirms your concern, you can combine this with the
 recipe for [mocking non-virtual methods](#MockingNonVirtualMethods).
 
+Alternatively, instead of introducing a new interface, you can rewrite your code
+to accept a std::function instead of the free function, and then use
+[MockFunction](#MockFunction) to mock the std::function.
+
 ### Old-Style `MOCK_METHODn` Macros
 
 Before the generic `MOCK_METHOD` macro
@@ -392,8 +396,7 @@ Old macros and their new equivalents:
 If a mock method has no `EXPECT_CALL` spec but is called, we say that it's an
 "uninteresting call", and the default action (which can be specified using
 `ON_CALL()`) of the method will be taken. Currently, an uninteresting call will
-also by default cause gMock to print a warning. (In the future, we might remove
-this warning by default.)
+also by default cause gMock to print a warning.
 
 However, sometimes you may want to ignore these uninteresting calls, and
 sometimes you may want to treat them as errors. gMock lets you make the decision
@@ -905,7 +908,7 @@ using ::testing::Contains;
 using ::testing::Property;
 
 inline constexpr auto HasFoo = [](const auto& f) {
-  return Property(&MyClass::foo, Contains(f));
+  return Property("foo", &MyClass::foo, Contains(f));
 };
 ...
   EXPECT_THAT(x, HasFoo("blah"));
@@ -1159,7 +1162,7 @@ int IsEven(int n) { return (n % 2) == 0 ? 1 : 0; }
 ```
 
 Note that the predicate function / functor doesn't have to return `bool`. It
-works as long as the return value can be used as the condition in in statement
+works as long as the return value can be used as the condition in the statement
 `if (condition) ...`.
 
 ### Matching Arguments that Are Not Copyable
@@ -1346,7 +1349,7 @@ class BarPlusBazEqMatcher {
 
 ...
   Foo foo;
-  EXPECT_CALL(foo, BarPlusBazEq(5))...;
+  EXPECT_THAT(foo, BarPlusBazEq(5))...;
 ```
 
 ### Matching Containers
@@ -1425,11 +1428,12 @@ Use `Pair` when comparing maps or other associative containers.
 {% raw %}
 
 ```cpp
-using testing::ElementsAre;
-using testing::Pair;
+using ::testing::UnorderedElementsAre;
+using ::testing::Pair;
 ...
-  std::map<string, int> m = {{"a", 1}, {"b", 2}, {"c", 3}};
-  EXPECT_THAT(m, ElementsAre(Pair("a", 1), Pair("b", 2), Pair("c", 3)));
+  absl::flat_hash_map<string, int> m = {{"a", 1}, {"b", 2}, {"c", 3}};
+  EXPECT_THAT(m, UnorderedElementsAre(
+      Pair("a", 1), Pair("b", 2), Pair("c", 3)));
 ```
 
 {% endraw %}
@@ -1446,8 +1450,8 @@ using testing::Pair;
 *   If the container is passed by pointer instead of by reference, just write
     `Pointee(ElementsAre*(...))`.
 *   The order of elements *matters* for `ElementsAre*()`. If you are using it
-    with containers whose element order are undefined (e.g. `hash_map`) you
-    should use `WhenSorted` around `ElementsAre`.
+    with containers whose element order are undefined (such as a
+    `std::unordered_map`) you should use `UnorderedElementsAre`.
 
 ### Sharing Matchers
 
@@ -1904,7 +1908,7 @@ using testing::ReturnPointee;
 ### Combining Actions
 
 Want to do more than one thing when a function is called? That's fine. `DoAll()`
-allow you to do sequence of actions every time. Only the return value of the
+allows you to do a sequence of actions every time. Only the return value of the
 last action in the sequence will be used.
 
 ```cpp
@@ -2784,7 +2788,7 @@ If you just need to return a pre-defined move-only value, you can use the
   // When this fires, the unique_ptr<> specified by ByMove(...) will
   // be returned.
   EXPECT_CALL(mock_buzzer_, MakeBuzz("world"))
-      .WillOnce(Return(ByMove(MakeUnique<Buzz>(AccessLevel::kInternal))));
+      .WillOnce(Return(ByMove(std::make_unique<Buzz>(AccessLevel::kInternal))));
 
   EXPECT_NE(nullptr, mock_buzzer_.MakeBuzz("world"));
 ```
@@ -2805,7 +2809,7 @@ pretty much anything you want:
 ```cpp
   EXPECT_CALL(mock_buzzer_, MakeBuzz("x"))
       .WillRepeatedly([](StringPiece text) {
-        return MakeUnique<Buzz>(AccessLevel::kInternal);
+        return std::make_unique<Buzz>(AccessLevel::kInternal);
       });
 
   EXPECT_NE(nullptr, mock_buzzer_.MakeBuzz("x"));
@@ -2824,7 +2828,7 @@ can always use `Return`, or a [lambda or functor](#FunctionsAsActions):
   using ::testing::Unused;
 
   EXPECT_CALL(mock_buzzer_, ShareBuzz(NotNull(), _)).WillOnce(Return(true));
-  EXPECT_TRUE(mock_buzzer_.ShareBuzz(MakeUnique<Buzz>(AccessLevel::kInternal)),
+  EXPECT_TRUE(mock_buzzer_.ShareBuzz(std::make_unique<Buzz>(AccessLevel::kInternal)),
               0);
 
   EXPECT_CALL(mock_buzzer_, ShareBuzz(_, _)).WillOnce(
@@ -2868,7 +2872,7 @@ method:
   // When one calls ShareBuzz() on the MockBuzzer like this, the call is
   // forwarded to DoShareBuzz(), which is mocked.  Therefore this statement
   // will trigger the above EXPECT_CALL.
-  mock_buzzer_.ShareBuzz(MakeUnique<Buzz>(AccessLevel::kInternal), 0);
+  mock_buzzer_.ShareBuzz(std::make_unique<Buzz>(AccessLevel::kInternal), 0);
 ```
 
 ### Making the Compilation Faster

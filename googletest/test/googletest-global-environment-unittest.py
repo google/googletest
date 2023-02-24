@@ -42,10 +42,14 @@ from googletest.test import gtest_test_utils
 def RunAndReturnOutput(args=None):
   """Runs the test program and returns its output."""
 
-  return gtest_test_utils.Subprocess([
-      gtest_test_utils.GetTestExecutablePath(
-          'googletest-global-environment-unittest_')
-  ] + (args or [])).output
+  return gtest_test_utils.Subprocess(
+      [
+          gtest_test_utils.GetTestExecutablePath(
+              'googletest-global-environment-unittest_'
+          )
+      ]
+      + (args or [])
+  ).output
 
 
 class GTestGlobalEnvironmentUnitTest(gtest_test_utils.TestCase):
@@ -78,23 +82,25 @@ class GTestGlobalEnvironmentUnitTest(gtest_test_utils.TestCase):
         '--gtest_recreate_environments_when_repeating=true',
     ])
 
-    expected_pattern = ('(.|\n)*'
-                        r'Repeating all tests \(iteration 1\)'
-                        '(.|\n)*'
-                        'Global test environment set-up.'
-                        '(.|\n)*'
-                        'SomeTest.DoesFoo'
-                        '(.|\n)*'
-                        'Global test environment tear-down'
-                        '(.|\n)*'
-                        r'Repeating all tests \(iteration 2\)'
-                        '(.|\n)*'
-                        'Global test environment set-up.'
-                        '(.|\n)*'
-                        'SomeTest.DoesFoo'
-                        '(.|\n)*'
-                        'Global test environment tear-down'
-                        '(.|\n)*')
+    expected_pattern = (
+        '(.|\n)*'
+        r'Repeating all tests \(iteration 1\)'
+        '(.|\n)*'
+        'Global test environment set-up.'
+        '(.|\n)*'
+        'SomeTest.DoesFoo'
+        '(.|\n)*'
+        'Global test environment tear-down'
+        '(.|\n)*'
+        r'Repeating all tests \(iteration 2\)'
+        '(.|\n)*'
+        'Global test environment set-up.'
+        '(.|\n)*'
+        'SomeTest.DoesFoo'
+        '(.|\n)*'
+        'Global test environment tear-down'
+        '(.|\n)*'
+    )
     self.assertRegex(txt, expected_pattern)
 
   def testEnvironmentSetUpAndTornDownOnce(self):
@@ -102,28 +108,33 @@ class GTestGlobalEnvironmentUnitTest(gtest_test_utils.TestCase):
 
     # By default the environment should only be set up and torn down once, at
     # the start and end of the test respectively.
-    txt = RunAndReturnOutput([
-        '--gtest_repeat=2',
-    ])
+    txt = RunAndReturnOutput(
+        [
+            '--gtest_repeat=2',
+        ]
+    )
 
-    expected_pattern = ('(.|\n)*'
-                        r'Repeating all tests \(iteration 1\)'
-                        '(.|\n)*'
-                        'Global test environment set-up.'
-                        '(.|\n)*'
-                        'SomeTest.DoesFoo'
-                        '(.|\n)*'
-                        r'Repeating all tests \(iteration 2\)'
-                        '(.|\n)*'
-                        'SomeTest.DoesFoo'
-                        '(.|\n)*'
-                        'Global test environment tear-down'
-                        '(.|\n)*')
+    expected_pattern = (
+        '(.|\n)*'
+        r'Repeating all tests \(iteration 1\)'
+        '(.|\n)*'
+        'Global test environment set-up.'
+        '(.|\n)*'
+        'SomeTest.DoesFoo'
+        '(.|\n)*'
+        r'Repeating all tests \(iteration 2\)'
+        '(.|\n)*'
+        'SomeTest.DoesFoo'
+        '(.|\n)*'
+        'Global test environment tear-down'
+        '(.|\n)*'
+    )
     self.assertRegex(txt, expected_pattern)
 
     self.assertEqual(len(re.findall('Global test environment set-up', txt)), 1)
     self.assertEqual(
-        len(re.findall('Global test environment tear-down', txt)), 1)
+        len(re.findall('Global test environment tear-down', txt)), 1
+    )
 
 
 if __name__ == '__main__':

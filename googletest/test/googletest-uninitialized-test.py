@@ -33,7 +33,9 @@
 
 from googletest.test import gtest_test_utils
 
-COMMAND = gtest_test_utils.GetTestExecutablePath('googletest-uninitialized-test_')
+COMMAND = gtest_test_utils.GetTestExecutablePath(
+    'googletest-uninitialized-test_'
+)
 
 
 def Assert(condition):
@@ -54,11 +56,12 @@ def TestExitCodeAndOutput(command):
   # Verifies that 'command' exits with code 1.
   p = gtest_test_utils.Subprocess(command)
   if p.exited and p.exit_code == 0:
-    Assert('IMPORTANT NOTICE' in p.output);
+    Assert('IMPORTANT NOTICE' in p.output)
   Assert('InitGoogleTest' in p.output)
 
 
 class GTestUninitializedTest(gtest_test_utils.TestCase):
+
   def testExitCodeAndOutput(self):
     TestExitCodeAndOutput(COMMAND)
 

@@ -46,6 +46,9 @@
 #include "gtest/gtest-message.h"
 #include "gtest/internal/gtest-port.h"
 
+GTEST_DISABLE_MSC_WARNINGS_PUSH_(4251                                   \
+/* class A needs to have dll-interface to be used by clients of class B */)
+
 namespace testing {
 
 // A class for indicating whether an assertion was successful.  When
@@ -228,5 +231,7 @@ GTEST_API_ AssertionResult AssertionFailure();
 GTEST_API_ AssertionResult AssertionFailure(const Message& msg);
 
 }  // namespace testing
+
+GTEST_DISABLE_MSC_WARNINGS_POP_()  // 4251
 
 #endif  // GOOGLETEST_INCLUDE_GTEST_GTEST_ASSERTION_RESULT_H_

@@ -148,9 +148,9 @@ class GreaterThanMatcher : public MatcherInterface<T> {
 };
 
 // Names and instantiates a new instance of GTestMatcherTestP.
-#define INSTANTIATE_GTEST_MATCHER_TEST_P(TestSuite)                         \
-  using TestSuite##P = GTestMatcherTestP;                                   \
-  INSTANTIATE_TEST_SUITE_P(MatcherInterface, TestSuite##P, Values(false));  \
+#define INSTANTIATE_GTEST_MATCHER_TEST_P(TestSuite)                        \
+  using TestSuite##P = GTestMatcherTestP;                                  \
+  INSTANTIATE_TEST_SUITE_P(MatcherInterface, TestSuite##P, Values(false)); \
   INSTANTIATE_TEST_SUITE_P(GtestMatcher, TestSuite##P, Values(true))
 
 class GTestMatcherTestP : public testing::TestWithParam<bool> {

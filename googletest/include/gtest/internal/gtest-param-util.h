@@ -40,8 +40,11 @@
 
 #include <cassert>
 #include <iterator>
+#include <map>
 #include <memory>
+#include <ostream>
 #include <set>
+#include <string>
 #include <tuple>
 #include <type_traits>
 #include <utility>
@@ -791,10 +794,7 @@ internal::ParamGenerator<typename Container::value_type> ValuesIn(
 namespace internal {
 // Used in the Values() function to provide polymorphic capabilities.
 
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4100)
-#endif
+GTEST_DISABLE_MSC_WARNINGS_PUSH_(4100)
 
 template <typename... Ts>
 class ValueArray {
@@ -815,9 +815,7 @@ class ValueArray {
   FlatTuple<Ts...> v_;
 };
 
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
+GTEST_DISABLE_MSC_WARNINGS_POP_()  // 4100
 
 template <typename... T>
 class CartesianProductGenerator
@@ -948,6 +946,78 @@ class CartesianProductHolder {
 
  private:
   std::tuple<Gen...> generators_;
+};
+
+template <typename From, typename To>
+class ParamGeneratorConverter : public ParamGeneratorInterface<To> {
+ public:
+  ParamGeneratorConverter(ParamGenerator<From> gen)  // NOLINT
+      : generator_(std::move(gen)) {}
+
+  ParamIteratorInterface<To>* Begin() const override {
+    return new Iterator(this, generator_.begin(), generator_.end());
+  }
+  ParamIteratorInterface<To>* End() const override {
+    return new Iterator(this, generator_.end(), generator_.end());
+  }
+
+ private:
+  class Iterator : public ParamIteratorInterface<To> {
+   public:
+    Iterator(const ParamGeneratorInterface<To>* base, ParamIterator<From> it,
+             ParamIterator<From> end)
+        : base_(base), it_(it), end_(end) {
+      if (it_ != end_) value_ = std::make_shared<To>(static_cast<To>(*it_));
+    }
+    ~Iterator() override {}
+
+    const ParamGeneratorInterface<To>* BaseGenerator() const override {
+      return base_;
+    }
+    void Advance() override {
+      ++it_;
+      if (it_ != end_) value_ = std::make_shared<To>(static_cast<To>(*it_));
+    }
+    ParamIteratorInterface<To>* Clone() const override {
+      return new Iterator(*this);
+    }
+    const To* Current() const override { return value_.get(); }
+    bool Equals(const ParamIteratorInterface<To>& other) const override {
+      // Having the same base generator guarantees that the other
+      // iterator is of the same type and we can downcast.
+      GTEST_CHECK_(BaseGenerator() == other.BaseGenerator())
+          << "The program attempted to compare iterators "
+          << "from different generators." << std::endl;
+      const ParamIterator<From> other_it =
+          CheckedDowncastToActualType<const Iterator>(&other)->it_;
+      return it_ == other_it;
+    }
+
+   private:
+    Iterator(const Iterator& other) = default;
+
+    const ParamGeneratorInterface<To>* const base_;
+    ParamIterator<From> it_;
+    ParamIterator<From> end_;
+    std::shared_ptr<To> value_;
+  };  // class ParamGeneratorConverter::Iterator
+
+  ParamGenerator<From> generator_;
+};  // class ParamGeneratorConverter
+
+template <class Gen>
+class ParamConverterGenerator {
+ public:
+  ParamConverterGenerator(ParamGenerator<Gen> g)  // NOLINT
+      : generator_(std::move(g)) {}
+
+  template <typename T>
+  operator ParamGenerator<T>() const {  // NOLINT
+    return ParamGenerator<T>(new ParamGeneratorConverter<Gen, T>(generator_));
+  }
+
+ private:
+  ParamGenerator<Gen> generator_;
 };
 
 }  // namespace internal

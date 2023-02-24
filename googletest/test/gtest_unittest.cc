@@ -60,7 +60,9 @@ TEST(CommandLineFlagsTest, CanBeAccessedInCodeOnceGTestHIsIncluded) {
 
 #include <cstdint>
 #include <map>
+#include <memory>
 #include <ostream>
+#include <set>
 #include <string>
 #include <type_traits>
 #include <unordered_set>
@@ -381,7 +383,7 @@ TEST(CanonicalizeForStdLibVersioning, ElidesDoubleUnderNames) {
 // Tests FormatTimeInMillisAsSeconds().
 
 TEST(FormatTimeInMillisAsSecondsTest, FormatsZero) {
-  EXPECT_EQ("0", FormatTimeInMillisAsSeconds(0));
+  EXPECT_EQ("0.", FormatTimeInMillisAsSeconds(0));
 }
 
 TEST(FormatTimeInMillisAsSecondsTest, FormatsPositiveNumber) {
@@ -389,7 +391,11 @@ TEST(FormatTimeInMillisAsSecondsTest, FormatsPositiveNumber) {
   EXPECT_EQ("0.01", FormatTimeInMillisAsSeconds(10));
   EXPECT_EQ("0.2", FormatTimeInMillisAsSeconds(200));
   EXPECT_EQ("1.2", FormatTimeInMillisAsSeconds(1200));
-  EXPECT_EQ("3", FormatTimeInMillisAsSeconds(3000));
+  EXPECT_EQ("3.", FormatTimeInMillisAsSeconds(3000));
+  EXPECT_EQ("10.", FormatTimeInMillisAsSeconds(10000));
+  EXPECT_EQ("100.", FormatTimeInMillisAsSeconds(100000));
+  EXPECT_EQ("123.456", FormatTimeInMillisAsSeconds(123456));
+  EXPECT_EQ("1234567.89", FormatTimeInMillisAsSeconds(1234567890));
 }
 
 TEST(FormatTimeInMillisAsSecondsTest, FormatsNegativeNumber) {
@@ -397,7 +403,11 @@ TEST(FormatTimeInMillisAsSecondsTest, FormatsNegativeNumber) {
   EXPECT_EQ("-0.01", FormatTimeInMillisAsSeconds(-10));
   EXPECT_EQ("-0.2", FormatTimeInMillisAsSeconds(-200));
   EXPECT_EQ("-1.2", FormatTimeInMillisAsSeconds(-1200));
-  EXPECT_EQ("-3", FormatTimeInMillisAsSeconds(-3000));
+  EXPECT_EQ("-3.", FormatTimeInMillisAsSeconds(-3000));
+  EXPECT_EQ("-10.", FormatTimeInMillisAsSeconds(-10000));
+  EXPECT_EQ("-100.", FormatTimeInMillisAsSeconds(-100000));
+  EXPECT_EQ("-123.456", FormatTimeInMillisAsSeconds(-123456));
+  EXPECT_EQ("-1234567.89", FormatTimeInMillisAsSeconds(-1234567890));
 }
 
 // Tests FormatEpochTimeInMillisAsIso8601().  The correctness of conversion
@@ -415,10 +425,12 @@ class FormatEpochTimeInMillisAsIso8601Test : public Test {
 
  private:
   void SetUp() override {
-    saved_tz_ = nullptr;
+    saved_tz_.reset();
 
-    GTEST_DISABLE_MSC_DEPRECATED_PUSH_(/* getenv, strdup: deprecated */)
-    if (getenv("TZ")) saved_tz_ = strdup(getenv("TZ"));
+    GTEST_DISABLE_MSC_DEPRECATED_PUSH_(/* getenv: deprecated */)
+    if (const char* tz = getenv("TZ")) {
+      saved_tz_ = std::make_unique<std::string>(tz);
+    }
     GTEST_DISABLE_MSC_DEPRECATED_POP_()
 
     // Set up the time zone for FormatEpochTimeInMillisAsIso8601 to use.  We
@@ -428,16 +440,15 @@ class FormatEpochTimeInMillisAsIso8601Test : public Test {
   }
 
   void TearDown() override {
-    SetTimeZone(saved_tz_);
-    free(const_cast<char*>(saved_tz_));
-    saved_tz_ = nullptr;
+    SetTimeZone(saved_tz_ != nullptr ? saved_tz_->c_str() : nullptr);
+    saved_tz_.reset();
   }
 
   static void SetTimeZone(const char* time_zone) {
     // tzset() distinguishes between the TZ variable being present and empty
     // and not being present, so we have to consider the case of time_zone
     // being NULL.
-#if _MSC_VER || GTEST_OS_WINDOWS_MINGW
+#if defined(_MSC_VER) || GTEST_OS_WINDOWS_MINGW
     // ...Unless it's MSVC, whose standard library's _putenv doesn't
     // distinguish between an empty and a missing variable.
     const std::string env_var =
@@ -462,7 +473,7 @@ class FormatEpochTimeInMillisAsIso8601Test : public Test {
 #endif
   }
 
-  const char* saved_tz_;
+  std::unique_ptr<std::string> saved_tz_;  // Empty and null are different here
 };
 
 const TimeInMillis FormatEpochTimeInMillisAsIso8601Test::kMillisPerSec;
@@ -3454,10 +3465,10 @@ TEST_F(NoFatalFailureTest, MessageIsStreamable) {
   TestPartResultArray gtest_failures;
   {
     ScopedFakeTestPartResultReporter gtest_reporter(&gtest_failures);
-    EXPECT_NO_FATAL_FAILURE(FAIL() << "foo") << "my message";
+    EXPECT_NO_FATAL_FAILURE([] { FAIL() << "foo"; }()) << "my message";
   }
   ASSERT_EQ(2, gtest_failures.size());
-  EXPECT_EQ(TestPartResult::kNonFatalFailure,
+  EXPECT_EQ(TestPartResult::kFatalFailure,
             gtest_failures.GetTestPartResult(0).type());
   EXPECT_EQ(TestPartResult::kNonFatalFailure,
             gtest_failures.GetTestPartResult(1).type());
@@ -6636,6 +6647,9 @@ TEST(ColoredOutputTest, UsesColorsWhenTermSupportsColors) {
   SetEnv("TERM", "xterm-color");      // TERM supports colors.
   EXPECT_TRUE(ShouldUseColor(true));  // Stdout is a TTY.
 
+  SetEnv("TERM", "xterm-kitty");      // TERM supports colors.
+  EXPECT_TRUE(ShouldUseColor(true));  // Stdout is a TTY.
+
   SetEnv("TERM", "xterm-256color");   // TERM supports colors.
   EXPECT_TRUE(ShouldUseColor(true));  // Stdout is a TTY.
 
@@ -7703,7 +7717,7 @@ auto* dynamic_test = testing::RegisterTest(
     __LINE__, []() -> DynamicUnitTestFixture* { return new DynamicTest; });
 
 TEST(RegisterTest, WasRegistered) {
-  auto* unittest = testing::UnitTest::GetInstance();
+  const auto& unittest = testing::UnitTest::GetInstance();
   for (int i = 0; i < unittest->total_test_suite_count(); ++i) {
     auto* tests = unittest->GetTestSuite(i);
     if (tests->name() != std::string("DynamicUnitTestFixture")) continue;

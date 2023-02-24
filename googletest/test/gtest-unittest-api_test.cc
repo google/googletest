@@ -106,7 +106,7 @@ const int kTypedTests = 1;
 // Since tests can be run in any order, the values the accessors that track
 // test execution (such as failed_test_count) can not be predicted.
 TEST(ApiTest, UnitTestImmutableAccessorsWork) {
-  UnitTest* unit_test = UnitTest::GetInstance();
+  const auto& unit_test = UnitTest::GetInstance();
 
   ASSERT_EQ(2 + kTypedTestSuites, unit_test->total_test_suite_count());
   EXPECT_EQ(1 + kTypedTestSuites, unit_test->test_suite_to_run_count());
@@ -224,7 +224,7 @@ TEST(DISABLED_Test, Dummy2) {}
 class FinalSuccessChecker : public Environment {
  protected:
   void TearDown() override {
-    UnitTest* unit_test = UnitTest::GetInstance();
+    const auto& unit_test = UnitTest::GetInstance();
 
     EXPECT_EQ(1 + kTypedTestSuites, unit_test->successful_test_suite_count());
     EXPECT_EQ(3 + kTypedTests, unit_test->successful_test_count());

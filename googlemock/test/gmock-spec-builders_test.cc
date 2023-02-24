@@ -739,11 +739,12 @@ TEST(ExpectCallTest, CatchesTooFewCalls) {
   EXPECT_NONFATAL_FAILURE(
       {  // NOLINT
         MockB b;
-        EXPECT_CALL(b, DoB(5)).Times(AtLeast(2));
+        EXPECT_CALL(b, DoB(5)).Description("DoB Method").Times(AtLeast(2));
 
         b.DoB(5);
       },
-      "Actual function call count doesn't match EXPECT_CALL(b, DoB(5))...\n"
+      "Actual function \"DoB Method\" call count "
+      "doesn't match EXPECT_CALL(b, DoB(5))...\n"
       "         Expected: to be called at least twice\n"
       "           Actual: called once - unsatisfied and active");
 }
@@ -1064,7 +1065,7 @@ TEST(UnexpectedCallTest, UnmatchedArguments) {
 
 // Tests that Google Mock explains that an expectation with
 // unsatisfied pre-requisites doesn't match the call.
-TEST(UnexpectedCallTest, UnsatisifiedPrerequisites) {
+TEST(UnexpectedCallTest, UnsatisfiedPrerequisites) {
   Sequence s1, s2;
   MockB b;
   EXPECT_CALL(b, DoB(1)).InSequence(s1);
@@ -1087,16 +1088,7 @@ TEST(UnexpectedCallTest, UnsatisifiedPrerequisites) {
 
   // Verifies that the failure message contains the two unsatisfied
   // pre-requisites but not the satisfied one.
-#if GTEST_USES_PCRE
-  EXPECT_THAT(
-      r.message(),
-      ContainsRegex(
-          // PCRE has trouble using (.|\n) to match any character, but
-          // supports the (?s) prefix for using . to match any character.
-          "(?s)the following immediate pre-requisites are not satisfied:\n"
-          ".*: pre-requisite #0\n"
-          ".*: pre-requisite #1"));
-#elif GTEST_USES_POSIX_RE
+#if GTEST_USES_POSIX_RE
   EXPECT_THAT(r.message(),
               ContainsRegex(
                   // POSIX RE doesn't understand the (?s) prefix, but has no
@@ -1111,7 +1103,7 @@ TEST(UnexpectedCallTest, UnsatisifiedPrerequisites) {
                   "the following immediate pre-requisites are not satisfied:"));
   EXPECT_THAT(r.message(), ContainsRegex(": pre-requisite #0"));
   EXPECT_THAT(r.message(), ContainsRegex(": pre-requisite #1"));
-#endif  // GTEST_USES_PCRE
+#endif  // GTEST_USES_POSIX_RE
 
   b.DoB(1);
   b.DoB(3);
@@ -1148,10 +1140,11 @@ TEST(ExcessiveCallTest, DoesDefaultAction) {
   // When there is no ON_CALL(), the default value for the return type
   // should be returned.
   MockB b;
-  EXPECT_CALL(b, DoB(0)).Times(0);
+  EXPECT_CALL(b, DoB(0)).Description("DoB Method").Times(0);
   int n = -1;
-  EXPECT_NONFATAL_FAILURE(n = b.DoB(0),
-                          "Mock function called more times than expected");
+  EXPECT_NONFATAL_FAILURE(
+      n = b.DoB(0),
+      "Mock function \"DoB Method\" called more times than expected");
   EXPECT_EQ(0, n);
 }
 
@@ -1159,10 +1152,11 @@ TEST(ExcessiveCallTest, DoesDefaultAction) {
 // the failure message contains the argument values.
 TEST(ExcessiveCallTest, GeneratesFailureForVoidFunction) {
   MockA a;
-  EXPECT_CALL(a, DoA(_)).Times(0);
+  EXPECT_CALL(a, DoA(_)).Description("DoA Method").Times(0);
   EXPECT_NONFATAL_FAILURE(
       a.DoA(9),
-      "Mock function called more times than expected - returning directly.\n"
+      "Mock function \"DoA Method\" called more times than expected - "
+      "returning directly.\n"
       "    Function call: DoA(9)\n"
       "         Expected: to be never called\n"
       "           Actual: called once - over-saturated and active");
@@ -1776,16 +1770,11 @@ TEST(DeletingMockEarlyTest, Success2) {
 
 // Suppresses warning on unreferenced formal parameter in MSVC with
 // -W4.
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4100)
-#endif
+GTEST_DISABLE_MSC_WARNINGS_PUSH_(4100)
 
 ACTION_P(Delete, ptr) { delete ptr; }
 
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
+GTEST_DISABLE_MSC_WARNINGS_POP_()  // 4100
 
 TEST(DeletingMockEarlyTest, CanDeleteSelfInActionReturningVoid) {
   MockA* const a = new MockA;
@@ -2059,9 +2048,9 @@ class GMockVerboseFlagTest : public VerboseFlagPreservingFixture {
         "call should not happen.  Do not suppress it by blindly adding "
         "an EXPECT_CALL() if you don't mean to enforce the call.  "
         "See "
-        "https://github.com/google/googletest/blob/master/docs/"
+        "https://github.com/google/googletest/blob/main/docs/"
         "gmock_cook_book.md#"
-        "knowing-when-to-expect for details.";
+        "knowing-when-to-expect-useoncall for details.";
 
     // A void-returning function.
     CaptureStdout();
@@ -2599,14 +2588,7 @@ TEST(ParameterlessExpectationsTest,
 }  // namespace
 }  // namespace testing
 
-// Allows the user to define their own main and then invoke gmock_main
-// from it. This might be necessary on some platforms which require
-// specific setup and teardown.
-#if GMOCK_RENAME_MAIN
-int gmock_main(int argc, char** argv) {
-#else
 int main(int argc, char** argv) {
-#endif  // GMOCK_RENAME_MAIN
   testing::InitGoogleMock(&argc, argv);
   // Ensures that the tests pass no matter what value of
   // --gmock_catch_leaked_mocks and --gmock_verbose the user specifies.

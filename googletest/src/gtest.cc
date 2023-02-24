@@ -46,6 +46,7 @@
 #include <cstdint>
 #include <initializer_list>
 #include <iomanip>
+#include <ios>
 #include <iterator>
 #include <limits>
 #include <list>
@@ -58,6 +59,7 @@
 #include "gtest/gtest-assertion-result.h"
 #include "gtest/gtest-spi.h"
 #include "gtest/internal/custom/gtest.h"
+#include "gtest/internal/gtest-port.h"
 
 #if GTEST_OS_LINUX
 
@@ -145,6 +147,14 @@
 #include "absl/strings/str_replace.h"
 #endif  // GTEST_HAS_ABSL
 
+// Checks builtin compiler feature |x| while avoiding an extra layer of #ifdefs
+// at the callsite.
+#if defined(__has_builtin)
+#define GTEST_HAS_BUILTIN(x) __has_builtin(x)
+#else
+#define GTEST_HAS_BUILTIN(x) 0
+#endif  // defined(__has_builtin)
+
 namespace testing {
 
 using internal::CountIf;
@@ -188,6 +198,7 @@ const char kStackTraceMarker[] = "\nStack trace:\n";
 // is specified on the command line.
 bool g_help_flag = false;
 
+#if GTEST_HAS_FILE_SYSTEM
 // Utility function to Open File for Writing
 static FILE* OpenFileForWriting(const std::string& output_file) {
   FILE* fileout = nullptr;
@@ -202,6 +213,7 @@ static FILE* OpenFileForWriting(const std::string& output_file) {
   }
   return fileout;
 }
+#endif  // GTEST_HAS_FILE_SYSTEM
 
 }  // namespace internal
 
@@ -373,6 +385,8 @@ GTEST_DEFINE_string_(
 
 namespace testing {
 namespace internal {
+
+const uint32_t Random::kMaxRange;
 
 // Generates a random number from [0, range), using a Linear
 // Congruential Generator (LCG).  Crashes if 'range' is 0 or greater
@@ -612,6 +626,7 @@ static ::std::vector<std::string> g_argvs;
 #endif  // defined(GTEST_CUSTOM_GET_ARGVS_)
 }
 
+#if GTEST_HAS_FILE_SYSTEM
 // Returns the current application's name, removing directory path if that
 // is present.
 FilePath GetCurrentExecutableName() {
@@ -625,6 +640,7 @@ FilePath GetCurrentExecutableName() {
 
   return result.RemoveDirectoryName();
 }
+#endif  // GTEST_HAS_FILE_SYSTEM
 
 // Functions for processing the gtest_output flag.
 
@@ -639,6 +655,7 @@ std::string UnitTestOptions::GetOutputFormat() {
                            static_cast<size_t>(colon - gtest_output_flag));
 }
 
+#if GTEST_HAS_FILE_SYSTEM
 // Returns the name of the requested output file, or the default if none
 // was explicitly specified.
 std::string UnitTestOptions::GetAbsolutePathToOutputFile() {
@@ -669,6 +686,7 @@ std::string UnitTestOptions::GetAbsolutePathToOutputFile() {
       GetOutputFormat().c_str()));
   return result.string();
 }
+#endif  // GTEST_HAS_FILE_SYSTEM
 
 // Returns true if and only if the wildcard pattern matches the string. Each
 // pattern consists of regular characters, single-character wildcards (?), and
@@ -1010,14 +1028,14 @@ void DefaultPerThreadTestPartResultReporter::ReportTestPartResult(
 TestPartResultReporterInterface*
 UnitTestImpl::GetGlobalTestPartResultReporter() {
   internal::MutexLock lock(&global_test_part_result_reporter_mutex_);
-  return global_test_part_result_repoter_;
+  return global_test_part_result_reporter_;
 }
 
 // Sets the global test part result reporter.
 void UnitTestImpl::SetGlobalTestPartResultReporter(
     TestPartResultReporterInterface* reporter) {
   internal::MutexLock lock(&global_test_part_result_reporter_mutex_);
-  global_test_part_result_repoter_ = reporter;
+  global_test_part_result_reporter_ = reporter;
 }
 
 // Returns the test part result reporter for the current thread.
@@ -1115,17 +1133,24 @@ std::string UnitTestImpl::CurrentOsStackTraceExceptTop(int skip_count) {
 // A helper class for measuring elapsed times.
 class Timer {
  public:
-  Timer() : start_(std::chrono::steady_clock::now()) {}
+  Timer() : start_(clock::now()) {}
 
   // Return time elapsed in milliseconds since the timer was created.
   TimeInMillis Elapsed() {
-    return std::chrono::duration_cast<std::chrono::milliseconds>(
-               std::chrono::steady_clock::now() - start_)
+    return std::chrono::duration_cast<std::chrono::milliseconds>(clock::now() -
+                                                                 start_)
         .count();
   }
 
  private:
-  std::chrono::steady_clock::time_point start_;
+  // Fall back to the system_clock when building with newlib on a system
+  // without a monotonic clock.
+#if defined(_NEWLIB_VERSION) && !defined(CLOCK_MONOTONIC)
+  using clock = std::chrono::system_clock;
+#else
+  using clock = std::chrono::steady_clock;
+#endif
+  clock::time_point start_;
 };
 
 // Returns a timestamp as milliseconds since the epoch. Note this time may jump
@@ -2302,7 +2327,9 @@ static std::vector<std::string> GetReservedAttributesForElement(
   return std::vector<std::string>();
 }
 
+#if GTEST_HAS_FILE_SYSTEM
 // TODO(jdesprez): Merge the two getReserved attributes once skip is improved
+// This function is only used when file systems are enabled.
 static std::vector<std::string> GetReservedOutputAttributesForElement(
     const std::string& xml_element) {
   if (xml_element == "testsuites") {
@@ -2317,6 +2344,7 @@ static std::vector<std::string> GetReservedOutputAttributesForElement(
   // This code is unreachable but some compilers may not realizes that.
   return std::vector<std::string>();
 }
+#endif
 
 static std::string FormatWordList(const std::vector<std::string>& words) {
   Message word_list;
@@ -2435,13 +2463,6 @@ void Test::TearDown() {}
 // Allows user supplied key value pairs to be recorded for later output.
 void Test::RecordProperty(const std::string& key, const std::string& value) {
   UnitTest::GetInstance()->RecordProperty(key, value);
-}
-
-// Allows user supplied key value pairs to be recorded for later output.
-void Test::RecordProperty(const std::string& key, int value) {
-  Message value_message;
-  value_message << value;
-  RecordProperty(key, value_message.GetString().c_str());
 }
 
 namespace internal {
@@ -2713,7 +2734,8 @@ TestInfo::TestInfo(const std::string& a_test_suite_name,
                    internal::TypeId fixture_class_id,
                    internal::TestFactoryBase* factory)
     : test_suite_name_(a_test_suite_name),
-      name_(a_name),
+      // begin()/end() is MSVC 17.3.3 ASAN crash workaround (GitHub issue #3997)
+      name_(a_name.begin(), a_name.end()),
       type_param_(a_type_param ? new std::string(a_type_param) : nullptr),
       value_param_(a_value_param ? new std::string(a_value_param) : nullptr),
       location_(a_code_location),
@@ -2777,37 +2799,6 @@ void ReportInvalidTestSuiteType(const char* test_suite_name,
                                           code_location.line)
                     << " " << errors.GetString();
 }
-}  // namespace internal
-
-namespace {
-
-// A predicate that checks the test name of a TestInfo against a known
-// value.
-//
-// This is used for implementation of the TestSuite class only.  We put
-// it in the anonymous namespace to prevent polluting the outer
-// namespace.
-//
-// TestNameIs is copyable.
-class TestNameIs {
- public:
-  // Constructor.
-  //
-  // TestNameIs has NO default constructor.
-  explicit TestNameIs(const char* name) : name_(name) {}
-
-  // Returns true if and only if the test name of test_info matches name_.
-  bool operator()(const TestInfo* test_info) const {
-    return test_info && test_info->name() == name_;
-  }
-
- private:
-  std::string name_;
-};
-
-}  // namespace
-
-namespace internal {
 
 // This method expands all parameterized tests registered with macros TEST_P
 // and INSTANTIATE_TEST_SUITE_P into regular tests and registers those.
@@ -3248,17 +3239,15 @@ bool ShouldUseColor(bool stdout_is_tty) {
     // On non-Windows platforms, we rely on the TERM variable.
     const char* const term = posix::GetEnv("TERM");
     const bool term_supports_color =
-        String::CStringEquals(term, "xterm") ||
-        String::CStringEquals(term, "xterm-color") ||
-        String::CStringEquals(term, "xterm-256color") ||
-        String::CStringEquals(term, "screen") ||
-        String::CStringEquals(term, "screen-256color") ||
-        String::CStringEquals(term, "tmux") ||
-        String::CStringEquals(term, "tmux-256color") ||
-        String::CStringEquals(term, "rxvt-unicode") ||
-        String::CStringEquals(term, "rxvt-unicode-256color") ||
-        String::CStringEquals(term, "linux") ||
-        String::CStringEquals(term, "cygwin");
+        term != nullptr && (String::CStringEquals(term, "xterm") ||
+                            String::CStringEquals(term, "xterm-color") ||
+                            String::CStringEquals(term, "xterm-kitty") ||
+                            String::CStringEquals(term, "screen") ||
+                            String::CStringEquals(term, "tmux") ||
+                            String::CStringEquals(term, "rxvt-unicode") ||
+                            String::CStringEquals(term, "linux") ||
+                            String::CStringEquals(term, "cygwin") ||
+                            String::EndsWithCaseInsensitive(term, "-256color"));
     return stdout_is_tty && term_supports_color;
 #endif  // GTEST_OS_WINDOWS
   }
@@ -3282,14 +3271,14 @@ static void ColoredPrintf(GTestColor color, const char* fmt, ...) {
   va_list args;
   va_start(args, fmt);
 
-#if GTEST_OS_WINDOWS_MOBILE || GTEST_OS_ZOS || GTEST_OS_IOS || \
-    GTEST_OS_WINDOWS_PHONE || GTEST_OS_WINDOWS_RT || defined(ESP_PLATFORM)
-  const bool use_color = AlwaysFalse();
-#else
   static const bool in_color_mode =
+#if GTEST_HAS_FILE_SYSTEM
       ShouldUseColor(posix::IsATTY(posix::FileNo(stdout)) != 0);
+#else
+      false;
+#endif  // GTEST_HAS_FILE_SYSTEM
+
   const bool use_color = in_color_mode && (color != GTestColor::kDefault);
-#endif  // GTEST_OS_WINDOWS_MOBILE || GTEST_OS_ZOS
 
   if (!use_color) {
     vprintf(fmt, args);
@@ -3893,6 +3882,7 @@ void TestEventRepeater::OnTestIterationEnd(const UnitTest& unit_test,
 
 // End TestEventRepeater
 
+#if GTEST_HAS_FILE_SYSTEM
 // This class generates an XML output file.
 class XmlUnitTestResultPrinter : public EmptyTestEventListener {
  public:
@@ -4102,6 +4092,13 @@ std::string XmlUnitTestResultPrinter::RemoveInvalidXmlCharacters(
 // Formats the given time in milliseconds as seconds.
 std::string FormatTimeInMillisAsSeconds(TimeInMillis ms) {
   ::std::stringstream ss;
+  // For the exact N seconds, makes sure output has a trailing decimal point.
+  // Sets precision so that we won't have many trailing zeros (e.g., 300 ms
+  // will be just 0.3, 410 ms 0.41, and so on)
+  ss << std::fixed
+     << std::setprecision(
+            ms % 1000 == 0 ? 0 : (ms % 100 == 0 ? 1 : (ms % 10 == 0 ? 2 : 3)))
+     << std::showpoint;
   ss << (static_cast<double>(ms) * 1e-3);
   return ss.str();
 }
@@ -4440,7 +4437,9 @@ void XmlUnitTestResultPrinter::OutputXmlTestProperties(
 }
 
 // End XmlUnitTestResultPrinter
+#endif  // GTEST_HAS_FILE_SYSTEM
 
+#if GTEST_HAS_FILE_SYSTEM
 // This class generates an JSON output file.
 class JsonUnitTestResultPrinter : public EmptyTestEventListener {
  public:
@@ -4830,6 +4829,9 @@ void JsonUnitTestResultPrinter::PrintJsonUnitTest(std::ostream* stream,
   // If there was a test failure outside of one of the test suites (like in a
   // test environment) include that in the output.
   if (unit_test.ad_hoc_test_result().Failed()) {
+    if (comma) {
+      *stream << ",\n";
+    }
     OutputJsonTestSuiteForTestResult(stream, unit_test.ad_hoc_test_result());
   }
 
@@ -4878,6 +4880,7 @@ std::string JsonUnitTestResultPrinter::TestPropertiesAsJson(
 }
 
 // End JsonUnitTestResultPrinter
+#endif  // GTEST_HAS_FILE_SYSTEM
 
 #if GTEST_CAN_STREAM_RESULTS_
 
@@ -4895,7 +4898,8 @@ std::string StreamingListener::UrlEncode(const char* str) {
       case '=':
       case '&':
       case '\n':
-        result.append("%" + String::FormatByte(static_cast<unsigned char>(ch)));
+        result.push_back('%');
+        result.append(String::FormatByte(static_cast<unsigned char>(ch)));
         break;
       default:
         result.push_back(ch);
@@ -5016,6 +5020,7 @@ void OsStackTraceGetter::UponLeavingGTest() GTEST_LOCK_EXCLUDED_(mutex_) {
 #endif  // GTEST_HAS_ABSL
 }
 
+#if GTEST_HAS_DEATH_TEST
 // A helper class that creates the premature-exit file in its
 // constructor and deletes the file in its destructor.
 class ScopedPrematureExitFile {
@@ -5035,7 +5040,7 @@ class ScopedPrematureExitFile {
   }
 
   ~ScopedPrematureExitFile() {
-#if !defined GTEST_OS_ESP8266
+#if !GTEST_OS_ESP8266
     if (!premature_exit_filepath_.empty()) {
       int retval = remove(premature_exit_filepath_.c_str());
       if (retval) {
@@ -5053,6 +5058,7 @@ class ScopedPrematureExitFile {
   ScopedPrematureExitFile(const ScopedPrematureExitFile&) = delete;
   ScopedPrematureExitFile& operator=(const ScopedPrematureExitFile&) = delete;
 };
+#endif  // GTEST_HAS_DEATH_TEST
 
 }  // namespace internal
 
@@ -5340,6 +5346,10 @@ void UnitTest::AddTestPartResult(TestPartResult::Type result_type,
      (defined(__x86_64__) || defined(__i386__)))
       // with clang/gcc we can achieve the same effect on x86 by invoking int3
       asm("int3");
+#elif GTEST_HAS_BUILTIN(__builtin_trap)
+      __builtin_trap();
+#elif defined(SIGTRAP)
+      raise(SIGTRAP);
 #else
       // Dereference nullptr through a volatile pointer to prevent the compiler
       // from removing. We use this rather than abort() or __builtin_trap() for
@@ -5374,6 +5384,7 @@ void UnitTest::RecordProperty(const std::string& key,
 // We don't protect this under mutex_, as we only support calling it
 // from the main thread.
 int UnitTest::Run() {
+#if GTEST_HAS_DEATH_TEST
   const bool in_death_test_child_process =
       GTEST_FLAG_GET(internal_run_death_test).length() > 0;
 
@@ -5402,6 +5413,7 @@ int UnitTest::Run() {
       in_death_test_child_process
           ? nullptr
           : internal::posix::GetEnv("TEST_PREMATURE_EXIT_FILE"));
+#endif  // GTEST_HAS_DEATH_TEST
 
   // Captures the value of GTEST_FLAG(catch_exceptions).  This value will be
   // used for the duration of the program.
@@ -5457,11 +5469,13 @@ int UnitTest::Run() {
              : 1;
 }
 
+#if GTEST_HAS_FILE_SYSTEM
 // Returns the working directory when the first TEST() or TEST_F() was
 // executed.
 const char* UnitTest::original_working_dir() const {
   return impl_->original_working_dir_.c_str();
 }
+#endif  // GTEST_HAS_FILE_SYSTEM
 
 // Returns the TestSuite object for the test that's currently running,
 // or NULL if no test is running.
@@ -5525,7 +5539,7 @@ UnitTestImpl::UnitTestImpl(UnitTest* parent)
       GTEST_DISABLE_MSC_WARNINGS_PUSH_(4355 /* using this in initializer */)
           default_global_test_part_result_reporter_(this),
       default_per_thread_test_part_result_reporter_(this),
-      GTEST_DISABLE_MSC_WARNINGS_POP_() global_test_part_result_repoter_(
+      GTEST_DISABLE_MSC_WARNINGS_POP_() global_test_part_result_reporter_(
           &default_global_test_part_result_reporter_),
       per_thread_test_part_result_reporter_(
           &default_per_thread_test_part_result_reporter_),
@@ -5594,6 +5608,7 @@ void UnitTestImpl::SuppressTestEventsIfInSubprocess() {
 // UnitTestOptions. Must not be called before InitGoogleTest.
 void UnitTestImpl::ConfigureXmlOutput() {
   const std::string& output_format = UnitTestOptions::GetOutputFormat();
+#if GTEST_HAS_FILE_SYSTEM
   if (output_format == "xml") {
     listeners()->SetDefaultXmlGenerator(new XmlUnitTestResultPrinter(
         UnitTestOptions::GetAbsolutePathToOutputFile().c_str()));
@@ -5604,6 +5619,10 @@ void UnitTestImpl::ConfigureXmlOutput() {
     GTEST_LOG_(WARNING) << "WARNING: unrecognized output format \""
                         << output_format << "\" ignored.";
   }
+#else
+  GTEST_LOG_(ERROR) << "ERROR: alternative output formats require "
+                    << "GTEST_HAS_FILE_SYSTEM to be enabled";
+#endif  // GTEST_HAS_FILE_SYSTEM
 }
 
 #if GTEST_CAN_STREAM_RESULTS_
@@ -5766,10 +5785,12 @@ bool UnitTestImpl::RunAllTests() {
   // user didn't call InitGoogleTest.
   PostFlagParsingInit();
 
+#if GTEST_HAS_FILE_SYSTEM
   // Even if sharding is not on, test runners may want to use the
   // GTEST_SHARD_STATUS_FILE to query whether the test supports the sharding
   // protocol.
   internal::WriteToShardStatusFileIfNeeded();
+#endif  // GTEST_HAS_FILE_SYSTEM
 
   // True if and only if we are in a subprocess for running a thread-safe-style
   // death test.
@@ -5949,6 +5970,7 @@ bool UnitTestImpl::RunAllTests() {
   return !failed;
 }
 
+#if GTEST_HAS_FILE_SYSTEM
 // Reads the GTEST_SHARD_STATUS_FILE environment variable, and creates the file
 // if the variable is present. If a file already exists at this location, this
 // function will write over it. If the variable is present, but the file cannot
@@ -5968,6 +5990,7 @@ void WriteToShardStatusFileIfNeeded() {
     fclose(file);
   }
 }
+#endif  // GTEST_HAS_FILE_SYSTEM
 
 // Checks whether sharding is enabled by examining the relevant
 // environment variable values. If the variables are present,
@@ -6046,7 +6069,7 @@ bool ShouldRunTestOnShard(int total_shards, int shard_index, int test_id) {
 // each TestSuite and TestInfo object.
 // If shard_tests == true, further filters tests based on sharding
 // variables in the environment - see
-// https://github.com/google/googletest/blob/master/googletest/docs/advanced.md
+// https://github.com/google/googletest/blob/main/docs/advanced.md
 // . Returns the number of tests that should run.
 int UnitTestImpl::FilterTests(ReactionToSharding shard_tests) {
   const int32_t total_shards = shard_tests == HONOR_SHARDING_PROTOCOL
@@ -6159,6 +6182,7 @@ void UnitTestImpl::ListTestsMatchingFilter() {
     }
   }
   fflush(stdout);
+#if GTEST_HAS_FILE_SYSTEM
   const std::string& output_format = UnitTestOptions::GetOutputFormat();
   if (output_format == "xml" || output_format == "json") {
     FILE* fileout = OpenFileForWriting(
@@ -6176,6 +6200,7 @@ void UnitTestImpl::ListTestsMatchingFilter() {
     fprintf(fileout, "%s", StringStreamToString(&stream).c_str());
     fclose(fileout);
   }
+#endif  // GTEST_HAS_FILE_SYSTEM
 }
 
 // Sets the OS stack trace getter.
@@ -6254,7 +6279,7 @@ void UnitTestImpl::UnshuffleTests() {
 // GetCurrentOsStackTraceExceptTop(..., 1), Foo() will be included in
 // the trace but Bar() and GetCurrentOsStackTraceExceptTop() won't.
 GTEST_NO_INLINE_ GTEST_NO_TAIL_CALL_ std::string
-GetCurrentOsStackTraceExceptTop(UnitTest* /*unit_test*/, int skip_count) {
+GetCurrentOsStackTraceExceptTop(int skip_count) {
   // We pass skip_count + 1 to skip this wrapper function in addition
   // to what the user really wants to skip.
   return GetUnitTestImpl()->CurrentOsStackTraceExceptTop(skip_count + 1);
@@ -6564,7 +6589,7 @@ static bool ParseGoogleTestFlag(const char* const arg) {
   return false;
 }
 
-#if GTEST_USE_OWN_FLAGFILE_FLAG_
+#if GTEST_USE_OWN_FLAGFILE_FLAG_ && GTEST_HAS_FILE_SYSTEM
 static void LoadFlagsFromFile(const std::string& path) {
   FILE* flagfile = posix::FOpen(path.c_str(), "r");
   if (!flagfile) {
@@ -6580,7 +6605,7 @@ static void LoadFlagsFromFile(const std::string& path) {
     if (!ParseGoogleTestFlag(lines[i].c_str())) g_help_flag = true;
   }
 }
-#endif  // GTEST_USE_OWN_FLAGFILE_FLAG_
+#endif  // GTEST_USE_OWN_FLAGFILE_FLAG_ && GTEST_HAS_FILE_SYSTEM
 
 // Parses the command line for Google Test flags, without initializing
 // other parts of Google Test.  The type parameter CharType can be
@@ -6597,12 +6622,12 @@ void ParseGoogleTestFlagsOnlyImpl(int* argc, CharType** argv) {
     bool remove_flag = false;
     if (ParseGoogleTestFlag(arg)) {
       remove_flag = true;
-#if GTEST_USE_OWN_FLAGFILE_FLAG_
+#if GTEST_USE_OWN_FLAGFILE_FLAG_ && GTEST_HAS_FILE_SYSTEM
     } else if (ParseFlag(arg, "flagfile", &flagfile_value)) {
       GTEST_FLAG_SET(flagfile, flagfile_value);
       LoadFlagsFromFile(flagfile_value);
       remove_flag = true;
-#endif  // GTEST_USE_OWN_FLAGFILE_FLAG_
+#endif  // GTEST_USE_OWN_FLAGFILE_FLAG_ && GTEST_HAS_FILE_SYSTEM
     } else if (arg_string == "--help" || HasGoogleTestFlagPrefix(arg)) {
       // Both help flag and unrecognized Google Test flags (excluding
       // internal ones) trigger help display.
@@ -6750,12 +6775,13 @@ void InitGoogleTest() {
 #endif  // defined(GTEST_CUSTOM_INIT_GOOGLE_TEST_FUNCTION_)
 }
 
-#if !defined(GTEST_CUSTOM_TEMPDIR_FUNCTION_)
-// Return value of first environment variable that is set and contains
-// a non-empty string. If there are none, return the "fallback" string.
-// Since we like the temporary directory to have a directory separator suffix,
-// add it if not provided in the environment variable value.
-static std::string GetTempDirFromEnv(
+#if !defined(GTEST_CUSTOM_TEMPDIR_FUNCTION_) || \
+    !defined(GTEST_CUSTOM_SRCDIR_FUNCTION_)
+// Returns the value of the first environment variable that is set and contains
+// a non-empty string. If there are none, returns the "fallback" string. Adds
+// the director-separator character as a suffix if not provided in the
+// environment variable value.
+static std::string GetDirFromEnv(
     std::initializer_list<const char*> environment_variables,
     const char* fallback, char separator) {
   for (const char* variable_name : environment_variables) {
@@ -6775,13 +6801,39 @@ std::string TempDir() {
 #if defined(GTEST_CUSTOM_TEMPDIR_FUNCTION_)
   return GTEST_CUSTOM_TEMPDIR_FUNCTION_();
 #elif GTEST_OS_WINDOWS || GTEST_OS_WINDOWS_MOBILE
-  return GetTempDirFromEnv({"TEST_TMPDIR", "TEMP"}, "\\temp\\", '\\');
+  return GetDirFromEnv({"TEST_TMPDIR", "TEMP"}, "\\temp\\", '\\');
 #elif GTEST_OS_LINUX_ANDROID
-  return GetTempDirFromEnv({"TEST_TMPDIR", "TMPDIR"}, "/data/local/tmp/", '/');
+  return GetDirFromEnv({"TEST_TMPDIR", "TMPDIR"}, "/data/local/tmp/", '/');
 #else
-  return GetTempDirFromEnv({"TEST_TMPDIR", "TMPDIR"}, "/tmp/", '/');
+  return GetDirFromEnv({"TEST_TMPDIR", "TMPDIR"}, "/tmp/", '/');
 #endif
 }
+
+#if GTEST_HAS_FILE_SYSTEM && !defined(GTEST_CUSTOM_SRCDIR_FUNCTION_)
+// Returns the directory path (including terminating separator) of the current
+// executable as derived from argv[0].
+static std::string GetCurrentExecutableDirectory() {
+  internal::FilePath argv_0(internal::GetArgvs()[0]);
+  return argv_0.RemoveFileName().string();
+}
+#endif
+
+#if GTEST_HAS_FILE_SYSTEM
+std::string SrcDir() {
+#if defined(GTEST_CUSTOM_SRCDIR_FUNCTION_)
+  return GTEST_CUSTOM_SRCDIR_FUNCTION_();
+#elif GTEST_OS_WINDOWS || GTEST_OS_WINDOWS_MOBILE
+  return GetDirFromEnv({"TEST_SRCDIR"}, GetCurrentExecutableDirectory().c_str(),
+                       '\\');
+#elif GTEST_OS_LINUX_ANDROID
+  return GetDirFromEnv({"TEST_SRCDIR"}, GetCurrentExecutableDirectory().c_str(),
+                       '/');
+#else
+  return GetDirFromEnv({"TEST_SRCDIR"}, GetCurrentExecutableDirectory().c_str(),
+                       '/');
+#endif
+}
+#endif
 
 // Class ScopedTrace
 

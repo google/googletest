@@ -51,6 +51,7 @@
 #include <string.h>
 
 #include <cstdint>
+#include <sstream>
 #include <string>
 
 #include "gtest/internal/gtest-port.h"

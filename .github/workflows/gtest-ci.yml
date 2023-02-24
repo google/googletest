@@ -4,37 +4,40 @@ on:
   push:
   pull_request:
 
+env:
+  BAZEL_CXXOPTS: -std=c++14
+
 jobs:
   Linux:
     runs-on: ubuntu-latest
     steps:
 
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         fetch-depth: 0
 
     - name: Tests
-      run: bazel test --test_output=errors //...
+      run: bazel test --cxxopt=-std=c++14 --features=external_include_paths --test_output=errors ...
 
-  MacOs:
+  macOS:
     runs-on: macos-latest
     steps:
 
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         fetch-depth: 0
 
     - name: Tests
-      run: bazel test --test_output=errors //...
+      run:  bazel test --cxxopt=-std=c++14 --features=external_include_paths --test_output=errors ...
 
 
   Windows:
     runs-on: windows-latest
     steps:
 
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         fetch-depth: 0
 
     - name: Tests
-      run: bazel test --test_output=errors //...
+      run: bazel test --cxxopt=/std:c++14 --features=external_include_paths --test_output=errors ...

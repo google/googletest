@@ -31,13 +31,11 @@
 //
 // This file tests some commonly used argument matchers.
 
+#include "gtest/gtest.h"
+
 // Silence warning C4244: 'initializing': conversion from 'int' to 'short',
 // possible loss of data and C4100, unreferenced local parameter
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4244)
-#pragma warning(disable : 4100)
-#endif
+GTEST_DISABLE_MSC_WARNINGS_PUSH_(4244 4100)
 
 #include "test/gmock-matchers_test.h"
 
@@ -1182,8 +1180,8 @@ TEST(SizeIsTest, WorksWithMinimalistCustomType) {
 
 TEST(SizeIsTest, CanDescribeSelf) {
   Matcher<vector<int>> m = SizeIs(2);
-  EXPECT_EQ("size is equal to 2", Describe(m));
-  EXPECT_EQ("size isn't equal to 2", DescribeNegation(m));
+  EXPECT_EQ("has a size that is equal to 2", Describe(m));
+  EXPECT_EQ("has a size that isn't equal to 2", DescribeNegation(m));
 }
 
 TEST(SizeIsTest, ExplainsResult) {
@@ -3124,6 +3122,4 @@ TEST(ContainsTest, WorksForTwoDimensionalNativeArray) {
 }  // namespace gmock_matchers_test
 }  // namespace testing
 
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
+GTEST_DISABLE_MSC_WARNINGS_POP_()  // 4244 4100

@@ -61,9 +61,11 @@
 #ifndef GOOGLEMOCK_INCLUDE_GMOCK_GMOCK_SPEC_BUILDERS_H_
 #define GOOGLEMOCK_INCLUDE_GMOCK_GMOCK_SPEC_BUILDERS_H_
 
+#include <cstdint>
 #include <functional>
 #include <map>
 #include <memory>
+#include <ostream>
 #include <set>
 #include <sstream>
 #include <string>
@@ -404,22 +406,22 @@ class GTEST_API_ Mock {
 
   // Tells Google Mock to allow uninteresting calls on the given mock
   // object.
-  static void AllowUninterestingCalls(const void* mock_obj)
+  static void AllowUninterestingCalls(uintptr_t mock_obj)
       GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex);
 
   // Tells Google Mock to warn the user about uninteresting calls on
   // the given mock object.
-  static void WarnUninterestingCalls(const void* mock_obj)
+  static void WarnUninterestingCalls(uintptr_t mock_obj)
       GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex);
 
   // Tells Google Mock to fail uninteresting calls on the given mock
   // object.
-  static void FailUninterestingCalls(const void* mock_obj)
+  static void FailUninterestingCalls(uintptr_t mock_obj)
       GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex);
 
   // Tells Google Mock the given mock object is being destroyed and
   // its entry in the call-reaction table should be removed.
-  static void UnregisterCallReaction(const void* mock_obj)
+  static void UnregisterCallReaction(uintptr_t mock_obj)
       GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex);
 
   // Returns the reaction Google Mock will have on uninteresting calls
@@ -655,7 +657,7 @@ class GTEST_API_ InSequence {
 
   InSequence(const InSequence&) = delete;
   InSequence& operator=(const InSequence&) = delete;
-} GTEST_ATTRIBUTE_UNUSED_;
+};
 
 namespace internal {
 
@@ -704,6 +706,12 @@ class GTEST_API_ ExpectationBase {
   // If this mock method has an extra matcher (i.e. .With(matcher)),
   // describes it to the ostream.
   virtual void MaybeDescribeExtraMatcherTo(::std::ostream* os) = 0;
+
+  // Do not rely on this for correctness.
+  // This is only for making human-readable test output easier to understand.
+  void UntypedDescription(std::string description) {
+    description_ = std::move(description);
+  }
 
  protected:
   friend class ::testing::Expectation;
@@ -771,6 +779,10 @@ class GTEST_API_ ExpectationBase {
     retired_ = true;
   }
 
+  // Returns a human-readable description of this expectation.
+  // Do not rely on this for correctness. It is only for human readability.
+  const std::string& GetDescription() const { return description_; }
+
   // Returns true if and only if this expectation is satisfied.
   bool IsSatisfied() const GTEST_EXCLUSIVE_LOCK_REQUIRED_(g_gmock_mutex) {
     g_gmock_mutex.AssertHeld();
@@ -830,6 +842,7 @@ class GTEST_API_ ExpectationBase {
   const char* file_;               // The file that contains the expectation.
   int line_;                       // The line number of the expectation.
   const std::string source_text_;  // The EXPECT_CALL(...) source text.
+  std::string description_;        // User-readable name for the expectation.
   // True if and only if the cardinality is specified explicitly.
   bool cardinality_specified_;
   Cardinality cardinality_;  // The cardinality of the expectation.
@@ -905,6 +918,13 @@ class TypedExpectation<R(Args...)> : public ExpectationBase {
 
     extra_matcher_ = m;
     extra_matcher_specified_ = true;
+    return *this;
+  }
+
+  // Do not rely on this for correctness.
+  // This is only for making human-readable test output easier to understand.
+  TypedExpectation& Description(std::string name) {
+    ExpectationBase::UntypedDescription(std::move(name));
     return *this;
   }
 
@@ -1198,10 +1218,15 @@ class TypedExpectation<R(Args...)> : public ExpectationBase {
                                          ::std::ostream* why)
       GTEST_EXCLUSIVE_LOCK_REQUIRED_(g_gmock_mutex) {
     g_gmock_mutex.AssertHeld();
+    const ::std::string& expectation_description = GetDescription();
     if (IsSaturated()) {
       // We have an excessive call.
       IncrementCallCount();
-      *what << "Mock function called more times than expected - ";
+      *what << "Mock function ";
+      if (!expectation_description.empty()) {
+        *what << "\"" << expectation_description << "\" ";
+      }
+      *what << "called more times than expected - ";
       mocker->DescribeDefaultActionTo(args, what);
       DescribeCallCountTo(why);
 
@@ -1216,7 +1241,11 @@ class TypedExpectation<R(Args...)> : public ExpectationBase {
     }
 
     // Must be done after IncrementCount()!
-    *what << "Mock function call matches " << source_text() << "...\n";
+    *what << "Mock function ";
+    if (!expectation_description.empty()) {
+      *what << "\"" << expectation_description << "\" ";
+    }
+    *what << "call matches " << source_text() << "...\n";
     return &(GetCurrentAction(mocker, args));
   }
 

@@ -37,6 +37,10 @@
 #ifndef GOOGLETEST_INCLUDE_GTEST_INTERNAL_GTEST_TYPE_UTIL_H_
 #define GOOGLETEST_INCLUDE_GTEST_INTERNAL_GTEST_TYPE_UTIL_H_
 
+#include <string>
+#include <type_traits>
+#include <typeinfo>
+
 #include "gtest/internal/gtest-port.h"
 
 // #ifdef __GNUC__ is too general here.  It is possible to use gcc without using

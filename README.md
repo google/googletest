@@ -15,10 +15,19 @@ Our documentation is now live on GitHub Pages at
 https://google.github.io/googletest/. We recommend browsing the documentation on
 GitHub Pages rather than directly in the repository.
 
-#### Release 1.11.0
+#### Release 1.13.0
 
-[Release 1.11.0](https://github.com/google/googletest/releases/tag/release-1.11.0)
-is now available.
+[Release 1.13.0](https://github.com/google/googletest/releases/tag/v1.13.0) is
+now available.
+
+The 1.13.x branch requires at least C++14.
+
+#### Continuous Integration
+
+We use Google's internal systems for continuous integration. \
+GitHub Actions were added for the convenience of open source contributors. They
+are exclusively maintained by the open source community and not used by the
+GoogleTest team.
 
 #### Coming Soon
 
@@ -56,39 +65,12 @@ More information about building GoogleTest can be found at
 
 ## Supported Platforms
 
-GoogleTest requires a codebase and compiler compliant with the C++11 standard or
-newer.
-
-The GoogleTest code is officially supported on the following platforms.
-Operating systems or tools not listed below are community-supported. For
-community-supported platforms, patches that do not complicate the code may be
-considered.
-
-If you notice any problems on your platform, please file an issue on the
-[GoogleTest GitHub Issue Tracker](https://github.com/google/googletest/issues).
-Pull requests containing fixes are welcome!
-
-### Operating Systems
-
-*   Linux
-*   macOS
-*   Windows
-
-### Compilers
-
-*   gcc 5.0+
-*   clang 5.0+
-*   MSVC 2015+
-
-**macOS users:** Xcode 9.3+ provides clang 5.0+.
-
-### Build Systems
-
-*   [Bazel](https://bazel.build/)
-*   [CMake](https://cmake.org/)
-
-**Note:** Bazel is the build system used by the team internally and in tests.
-CMake is supported on a best-effort basis and by the community.
+GoogleTest follows Google's
+[Foundational C++ Support Policy](https://opensource.google/documentation/policies/cplusplus-support).
+See
+[this table](https://github.com/google/oss-policies-info/blob/main/foundational-cxx-support-matrix.md)
+for a list of currently supported versions compilers, platforms, and build
+tools.
 
 ## Who Is Using GoogleTest?
 
@@ -135,7 +117,7 @@ that generates stub code for GoogleTest.
 ## Contributing Changes
 
 Please read
-[`CONTRIBUTING.md`](https://github.com/google/googletest/blob/master/CONTRIBUTING.md)
+[`CONTRIBUTING.md`](https://github.com/google/googletest/blob/main/CONTRIBUTING.md)
 for details on how to contribute to this project.
 
 Happy testing!
