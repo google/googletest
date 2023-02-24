@@ -402,7 +402,7 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 #define GTEST_HAS_POSIX_RE (__ANDROID_API__ >= 9)
 #else
 #define GTEST_HAS_POSIX_RE \
-  !(GTEST_OS_WINDOWS || GTEST_OS_XTENSA || GTEST_OS_QURT)
+  !(GTEST_OS_WINDOWS || GTEST_OS_XTENSA || GTEST_OS_QURT || GTEST_OS_NUTTX)
 #endif
 #endif
 
@@ -558,7 +558,7 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
   (GTEST_OS_LINUX || GTEST_OS_MAC || GTEST_OS_HPUX || GTEST_OS_QNX ||          \
    GTEST_OS_FREEBSD || GTEST_OS_NACL || GTEST_OS_NETBSD || GTEST_OS_FUCHSIA || \
    GTEST_OS_DRAGONFLY || GTEST_OS_GNU_KFREEBSD || GTEST_OS_OPENBSD ||          \
-   GTEST_OS_HAIKU || GTEST_OS_GNU_HURD)
+   GTEST_OS_HAIKU || GTEST_OS_GNU_HURD || GTEST_OS_NUTTX)
 #endif  // GTEST_HAS_PTHREAD
 
 #if GTEST_HAS_PTHREAD
@@ -644,7 +644,7 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 // Determines whether test results can be streamed to a socket.
 #if GTEST_OS_LINUX || GTEST_OS_GNU_KFREEBSD || GTEST_OS_DRAGONFLY || \
     GTEST_OS_FREEBSD || GTEST_OS_NETBSD || GTEST_OS_OPENBSD ||       \
-    GTEST_OS_GNU_HURD
+    GTEST_OS_GNU_HURD || GTEST_OS_NUTTX
 #define GTEST_CAN_STREAM_RESULTS_ 1
 #endif
 
@@ -817,7 +817,8 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 
 // _LIBCPP_VERSION is defined by the libc++ library from the LLVM project.
 #if !defined(GTEST_HAS_CXXABI_H_)
-#if defined(__GLIBCXX__) || (defined(_LIBCPP_VERSION) && !defined(_MSC_VER))
+#if !defined(GTEST_OS_NUTTX) && (defined(__GLIBCXX__) || \
+    (defined(_LIBCPP_VERSION) && !defined(_MSC_VER)))
 #define GTEST_HAS_CXXABI_H_ 1
 #else
 #define GTEST_HAS_CXXABI_H_ 0
