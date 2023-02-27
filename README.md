@@ -116,7 +116,7 @@ that generates stub code for GoogleTest.
 
 ## Contributing Changes
 
-Please read
+Please read this
 [`CONTRIBUTING.md`](https://github.com/google/googletest/blob/main/CONTRIBUTING.md)
 for details on how to contribute to this project.
 
