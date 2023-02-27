@@ -45,23 +45,23 @@ minutes to learn the basics and get started. So let's go!
 ## Beware of the nomenclature
 
 {: .callout .note}
-_Note:_ There might be some confusion arising from different definitions of the
-terms _Test_, _Test Case_ and _Test Suite_, so beware of misunderstanding these.
+*Note:* There might be some confusion arising from different definitions of the
+terms *Test*, *Test Case* and *Test Suite*, so beware of misunderstanding these.
 
-Historically, googletest started to use the term _Test Case_ for grouping
+Historically, googletest started to use the term *Test Case* for grouping
 related tests, whereas current publications, including International Software
 Testing Qualifications Board ([ISTQB](http://www.istqb.org/)) materials and
 various textbooks on software quality, use the term
-_[Test Suite][istqb test suite]_ for this.
+*[Test Suite][istqb test suite]* for this.
 
-The related term _Test_, as it is used in googletest, corresponds to the term
-_[Test Case][istqb test case]_ of ISTQB and others.
+The related term *Test*, as it is used in googletest, corresponds to the term
+*[Test Case][istqb test case]* of ISTQB and others.
 
-The term _Test_ is commonly of broad enough sense, including ISTQB's definition
-of _Test Case_, so it's not much of a problem here. But the term _Test Case_ as
+The term *Test* is commonly of broad enough sense, including ISTQB's definition
+of *Test Case*, so it's not much of a problem here. But the term *Test Case* as
 was used in Google Test is of contradictory sense and thus confusing.
 
-googletest recently started replacing the term _Test Case_ with _Test Suite_.
+googletest recently started replacing the term *Test Case* with *Test Suite*.
 The preferred API is *TestSuite*. The older TestCase API is being slowly
 deprecated and refactored away.
 
@@ -381,7 +381,7 @@ If a fatal failure happens the subsequent steps will be skipped.
 
 ## Writing the main() Function
 
-Most users should _not_ need to write their own `main` function and instead link
+Most users should *not* need to write their own `main` function and instead link
 with `gtest_main` (as opposed to with `gtest`), which defines a suitable entry
 point. See the end of this section for details. The remainder of this section
 should only apply when you need to do something custom before the tests run that
@@ -476,7 +476,7 @@ NOTE: `ParseGUnitFlags()` is deprecated in favor of `InitGoogleTest()`.
 
 *   Google Test is designed to be thread-safe. The implementation is thread-safe
     on systems where the `pthreads` library is available. It is currently
-    _unsafe_ to use Google Test assertions from two threads concurrently on
+    *unsafe* to use Google Test assertions from two threads concurrently on
     other systems (e.g. Windows). In most tests this is not an issue as usually
     the assertions are done in the main thread. If you want to help, you can
     volunteer to implement the necessary synchronization primitives in
