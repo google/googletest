@@ -227,14 +227,14 @@ When using a fixture, use `TEST_F()` instead of `TEST()` as it allows you to
 access objects and subroutines in the test fixture:
 
 ```c++
-TEST_F(TestFixtureName, TestName) {
+TEST_F(TestFixtureClassName, TestName) {
   ... test body ...
 }
 ```
 
-Like `TEST()`, the first argument is the test suite name, but for `TEST_F()`
-this must be the name of the test fixture class. You've probably guessed: `_F`
-is for fixture.
+Unlike `TEST()`, in `TEST_F()` the first argument must be the name of the test
+fixture class. (`_F` stands for "Fixture"). No test suite name is specified for
+this macro.
 
 Unfortunately, the C++ macro system does not allow us to create a single macro
 that can handle both types of tests. Using the wrong macro causes a compiler
