@@ -6667,8 +6667,7 @@ void ParseGoogleTestFlagsOnly(int* argc, char** argv) {
   if (*argc > 0) {
     // absl::ParseCommandLine() requires *argc > 0.
     auto positional_args = absl::flags_internal::ParseCommandLineImpl(
-        *argc, argv, absl::flags_internal::ArgvListAction::kRemoveParsedArgs,
-        absl::flags_internal::UsageFlagsAction::kHandleUsage,
+        *argc, argv, absl::flags_internal::UsageFlagsAction::kHandleUsage,
         absl::flags_internal::OnUndefinedFlag::kReportUndefined);
     // Any command-line positional arguments not part of any command-line flag
     // (or arguments to a flag) are copied back out to argv, with the program
