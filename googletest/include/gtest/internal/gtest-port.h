@@ -2447,9 +2447,41 @@ using Variant = ::std::variant<T...>;
 #endif  // __has_include
 #endif  // GTEST_HAS_ABSL
 
+
+
+
+#include <stdarg.h>
+namespace testing {
+namespace internal {
+
+#ifndef GTEST_VPRINTF_
+inline int gtest_vprintf(char const* const str, va_list args) {
+  return vprintf(str, args);
+}
+#endif  // GTEST_VPRINTF_
+
+#ifndef GTEST_PRINTF_
+GTEST_ATTRIBUTE_PRINTF_(1, 2)
+inline int gtest_printf(char const* const str, ...) {
+  va_list arg;
+  va_start(arg, str);
+  int result = gtest_vprintf(str, arg);
+  va_end(arg);
+  return result;
+}
+#endif  // #ifndef GTEST_PRINTF_
+
+#ifndef GTEST_FLUSH_STDOUT_
+inline int gtest_flush_stdout() { return fflush(stdout); }
+#endif  // GTEST_FLUSH_STDOUT_
+
+}  // namespace internal
+}  // namespace testing
+
 #if defined(GTEST_INTERNAL_CPLUSPLUS_LANG) && \
     GTEST_INTERNAL_CPLUSPLUS_LANG < 201703L
 #define GTEST_INTERNAL_NEED_REDUNDANT_CONSTEXPR_DECL 1
 #endif
+
 
 #endif  // GOOGLETEST_INCLUDE_GTEST_INTERNAL_GTEST_PORT_H_
