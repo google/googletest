@@ -202,16 +202,17 @@
 //                                        is suppressed.
 //   GTEST_INTERNAL_HAS_ANY - for enabling UniversalPrinter<std::any> or
 //                            UniversalPrinter<absl::any> specializations.
+//                            Always defined to 0 or 1.
 //   GTEST_INTERNAL_HAS_OPTIONAL - for enabling UniversalPrinter<std::optional>
 //   or
 //                                 UniversalPrinter<absl::optional>
-//                                 specializations.
+//                                 specializations. Always defined to 0 or 1.
 //   GTEST_INTERNAL_HAS_STRING_VIEW - for enabling Matcher<std::string_view> or
 //                                    Matcher<absl::string_view>
-//                                    specializations.
+//                                    specializations. Always defined to 0 or 1.
 //   GTEST_INTERNAL_HAS_VARIANT - for enabling UniversalPrinter<std::variant> or
 //                                UniversalPrinter<absl::variant>
-//                                specializations.
+//                                specializations. Always defined to 0 or 1.
 //
 // Synchronization:
 //   Mutex, MutexLock, ThreadLocal, GetThreadCount()
@@ -2389,6 +2390,10 @@ using Any = ::std::any;
 #endif  // __has_include
 #endif  // GTEST_HAS_ABSL
 
+#ifndef GTEST_INTERNAL_HAS_ANY
+#define GTEST_INTERNAL_HAS_ANY 0
+#endif
+
 #if GTEST_HAS_ABSL
 // Always use absl::optional for UniversalPrinter<> specializations if
 // googletest is built with absl support.
@@ -2421,6 +2426,10 @@ inline ::std::nullopt_t Nullopt() { return ::std::nullopt; }
 #endif  // __has_include
 #endif  // GTEST_HAS_ABSL
 
+#ifndef GTEST_INTERNAL_HAS_OPTIONAL
+#define GTEST_INTERNAL_HAS_OPTIONAL 0
+#endif
+
 #if GTEST_HAS_ABSL
 // Always use absl::string_view for Matcher<> specializations if googletest
 // is built with absl support.
@@ -2448,6 +2457,10 @@ using StringView = ::std::string_view;
 #endif  // __has_include(<string_view>) && __cplusplus >= 201703L
 #endif  // __has_include
 #endif  // GTEST_HAS_ABSL
+
+#ifndef GTEST_INTERNAL_HAS_STRING_VIEW
+#define GTEST_INTERNAL_HAS_STRING_VIEW 0
+#endif
 
 #if GTEST_HAS_ABSL
 // Always use absl::variant for UniversalPrinter<> specializations if googletest
@@ -2477,6 +2490,10 @@ using Variant = ::std::variant<T...>;
 #endif  // __has_include(<variant>) && __cplusplus >= 201703L
 #endif  // __has_include
 #endif  // GTEST_HAS_ABSL
+
+#ifndef GTEST_INTERNAL_HAS_VARIANT
+#define GTEST_INTERNAL_HAS_VARIANT 0
+#endif
 
 #if defined(GTEST_INTERNAL_CPLUSPLUS_LANG) && \
     GTEST_INTERNAL_CPLUSPLUS_LANG < 201703L
