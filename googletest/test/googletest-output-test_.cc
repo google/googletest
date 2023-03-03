@@ -1028,7 +1028,7 @@ int main(int argc, char** argv) {
   if (GTEST_FLAG_GET(internal_run_death_test) != "") {
     // Skip the usual output capturing if we're running as the child
     // process of an threadsafe-style death test.
-#if GTEST_OS_WINDOWS
+#if defined(GTEST_OS_WINDOWS)
     posix::FReopen("nul:", "w", stdout);
 #else
     posix::FReopen("/dev/null", "w", stdout);

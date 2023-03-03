@@ -448,7 +448,7 @@ class FormatEpochTimeInMillisAsIso8601Test : public Test {
     // tzset() distinguishes between the TZ variable being present and empty
     // and not being present, so we have to consider the case of time_zone
     // being NULL.
-#if defined(_MSC_VER) || GTEST_OS_WINDOWS_MINGW
+#if defined(_MSC_VER) || defined(GTEST_OS_WINDOWS_MINGW)
     // ...Unless it's MSVC, whose standard library's _putenv doesn't
     // distinguish between an empty and a missing variable.
     const std::string env_var =
@@ -458,7 +458,7 @@ class FormatEpochTimeInMillisAsIso8601Test : public Test {
     tzset();
     GTEST_DISABLE_MSC_WARNINGS_POP_()
 #else
-#if GTEST_OS_LINUX_ANDROID && __ANDROID_API__ < 21
+#if defined(GTEST_OS_LINUX_ANDROID) && __ANDROID_API__ < 21
     // Work around KitKat bug in tzset by setting "UTC" before setting "UTC+00".
     // See https://github.com/android/ndk/issues/1604.
     setenv("TZ", "UTC", 1);
@@ -1090,7 +1090,7 @@ TEST(StringTest, CaseInsensitiveWideCStringEquals) {
   EXPECT_TRUE(String::CaseInsensitiveWideCStringEquals(L"FOOBAR", L"foobar"));
 }
 
-#if GTEST_OS_WINDOWS
+#ifdef GTEST_OS_WINDOWS
 
 // Tests String::ShowWideCString().
 TEST(StringTest, ShowWideCString) {
@@ -1099,7 +1099,7 @@ TEST(StringTest, ShowWideCString) {
   EXPECT_STREQ("foo", String::ShowWideCString(L"foo").c_str());
 }
 
-#if GTEST_OS_WINDOWS_MOBILE
+#ifdef GTEST_OS_WINDOWS_MOBILE
 TEST(StringTest, AnsiAndUtf16Null) {
   EXPECT_EQ(NULL, String::AnsiToUtf16(NULL));
   EXPECT_EQ(NULL, String::Utf16ToAnsi(NULL));
@@ -1676,7 +1676,7 @@ TEST_F(GTestFlagSaverTest, VerifyGTestFlags) { VerifyAndModifyFlags(); }
 // value.  If the value argument is "", unsets the environment
 // variable.  The caller must ensure that both arguments are not NULL.
 static void SetEnv(const char* name, const char* value) {
-#if GTEST_OS_WINDOWS_MOBILE
+#ifdef GTEST_OS_WINDOWS_MOBILE
   // Environment variables are not supported on Windows CE.
   return;
 #elif defined(__BORLANDC__) || defined(__SunOS_5_8) || defined(__SunOS_5_9)
@@ -1699,7 +1699,7 @@ static void SetEnv(const char* name, const char* value) {
   // We cast away the 'const' since that would work for both variants.
   putenv(const_cast<char*>(added_env[name]->c_str()));
   delete prev_env;
-#elif GTEST_OS_WINDOWS  // If we are on Windows proper.
+#elif defined(GTEST_OS_WINDOWS)  // If we are on Windows proper.
   _putenv((Message() << name << "=" << value).GetString().c_str());
 #else
   if (*value == '\0') {
@@ -1710,7 +1710,7 @@ static void SetEnv(const char* name, const char* value) {
 #endif  // GTEST_OS_WINDOWS_MOBILE
 }
 
-#if !GTEST_OS_WINDOWS_MOBILE
+#ifndef GTEST_OS_WINDOWS_MOBILE
 // Environment variables are not supported on Windows CE.
 
 using testing::internal::Int32FromGTestEnv;
@@ -1819,7 +1819,7 @@ TEST(ParseInt32FlagTest, ParsesAndReturnsValidValue) {
 // Tests that Int32FromEnvOrDie() parses the value of the var or
 // returns the correct default.
 // Environment variables are not supported on Windows CE.
-#if !GTEST_OS_WINDOWS_MOBILE
+#ifndef GTEST_OS_WINDOWS_MOBILE
 TEST(Int32FromEnvOrDieTest, ParsesAndReturnsValidValue) {
   EXPECT_EQ(333, Int32FromEnvOrDie(GTEST_FLAG_PREFIX_UPPER_ "UnsetVar", 333));
   SetEnv(GTEST_FLAG_PREFIX_UPPER_ "UnsetVar", "123");
@@ -1892,7 +1892,7 @@ TEST_F(ShouldShardTest, ReturnsFalseWhenTotalShardIsOne) {
 // Tests that sharding is enabled if total_shards > 1 and
 // we are not in a death test subprocess.
 // Environment variables are not supported on Windows CE.
-#if !GTEST_OS_WINDOWS_MOBILE
+#ifndef GTEST_OS_WINDOWS_MOBILE
 TEST_F(ShouldShardTest, WorksWhenShardEnvVarsAreValid) {
   SetEnv(index_var_, "4");
   SetEnv(total_var_, "22");
@@ -3926,7 +3926,7 @@ TEST(AssertionTest, NamedEnum) {
 enum {
   kCaseA = -1,
 
-#if GTEST_OS_LINUX
+#ifdef GTEST_OS_LINUX
 
   // We want to test the case where the size of the anonymous enum is
   // larger than sizeof(int), to make sure our implementation of the
@@ -3949,7 +3949,7 @@ enum {
 };
 
 TEST(AssertionTest, AnonymousEnum) {
-#if GTEST_OS_LINUX
+#ifdef GTEST_OS_LINUX
 
   EXPECT_EQ(static_cast<int>(kCaseA), static_cast<int>(kCaseB));
 
@@ -3983,7 +3983,7 @@ TEST(AssertionTest, AnonymousEnum) {
 
 #endif  // !GTEST_OS_MAC && !defined(__SUNPRO_CC)
 
-#if GTEST_OS_WINDOWS
+#ifdef GTEST_OS_WINDOWS
 
 static HRESULT UnexpectedHRESULTFailure() { return E_UNEXPECTED; }
 
@@ -4343,7 +4343,7 @@ TEST(AssertionWithMessageTest, ASSERT_TRUE) {
       "(null)(null)");
 }
 
-#if GTEST_OS_WINDOWS
+#ifdef GTEST_OS_WINDOWS
 // Tests using wide strings in assertion messages.
 TEST(AssertionWithMessageTest, WideStringMessage) {
   EXPECT_NONFATAL_FAILURE(
@@ -6224,7 +6224,7 @@ TEST_F(ParseFlagsTest, AbseilPositionalFlags) {
 }
 #endif
 
-#if GTEST_OS_WINDOWS
+#ifdef GTEST_OS_WINDOWS
 // Tests parsing wide strings.
 TEST_F(ParseFlagsTest, WideStrings) {
   const wchar_t* argv[] = {L"foo.exe",
@@ -6614,7 +6614,7 @@ TEST(ColoredOutputTest, UsesColorsWhenStdoutIsTty) {
 TEST(ColoredOutputTest, UsesColorsWhenTermSupportsColors) {
   GTEST_FLAG_SET(color, "auto");
 
-#if GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_MINGW
+#if defined(GTEST_OS_WINDOWS) && !defined(GTEST_OS_WINDOWS_MINGW)
   // On Windows, we ignore the TERM variable as it's usually not set.
 
   SetEnv("TERM", "dumb");

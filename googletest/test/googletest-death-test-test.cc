@@ -39,7 +39,7 @@ using testing::internal::AlwaysTrue;
 
 #if GTEST_HAS_DEATH_TEST
 
-#if GTEST_OS_WINDOWS
+#ifdef GTEST_OS_WINDOWS
 #include <direct.h>  // For chdir().
 #include <fcntl.h>   // For O_BINARY
 #include <io.h>
@@ -52,7 +52,7 @@ using testing::internal::AlwaysTrue;
 #include <signal.h>
 #include <stdio.h>
 
-#if GTEST_OS_LINUX
+#ifdef GTEST_OS_LINUX
 #include <sys/time.h>
 #endif  // GTEST_OS_LINUX
 
@@ -200,7 +200,7 @@ int DieInDebugElse12(int* sideeffect) {
   return 12;
 }
 
-#if GTEST_OS_WINDOWS
+#ifdef GTEST_OS_WINDOWS
 
 // Death in dbg due to Windows CRT assertion failure, not opt.
 int DieInCRTDebugElse12(int* sideeffect) {
@@ -220,7 +220,7 @@ int DieInCRTDebugElse12(int* sideeffect) {
 
 #endif  // GTEST_OS_WINDOWS
 
-#if GTEST_OS_WINDOWS || GTEST_OS_FUCHSIA
+#if defined(GTEST_OS_WINDOWS) || defined(GTEST_OS_FUCHSIA)
 
 // Tests the ExitedWithCode predicate.
 TEST(ExitStatusPredicateTest, ExitedWithCode) {
@@ -374,7 +374,7 @@ TEST_F(TestForDeathTest, FastDeathTestInChangedDir) {
   ASSERT_DEATH(_exit(1), "");
 }
 
-#if GTEST_OS_LINUX
+#ifdef GTEST_OS_LINUX
 void SigprofAction(int, siginfo_t*, void*) { /* no op */
 }
 
@@ -641,7 +641,7 @@ TEST_F(TestForDeathTest, TestExpectDebugDeath) {
 #endif
 }
 
-#if GTEST_OS_WINDOWS
+#ifdef GTEST_OS_WINDOWS
 
 // https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/crtsetreportmode
 // In debug mode, the calls to _CrtSetReportMode and _CrtSetReportFile enable
@@ -693,7 +693,7 @@ void ExpectDebugDeathHelper(bool* aborted) {
   *aborted = false;
 }
 
-#if GTEST_OS_WINDOWS
+#ifdef GTEST_OS_WINDOWS
 TEST(PopUpDeathTest, DoesNotShowPopUpOnAbort) {
   printf(
       "This test should be considered failing if it shows "
@@ -805,14 +805,14 @@ static void TestExitMacros() {
   EXPECT_EXIT(_exit(1), testing::ExitedWithCode(1), "");
   ASSERT_EXIT(_exit(42), testing::ExitedWithCode(42), "");
 
-#if GTEST_OS_WINDOWS
+#ifdef GTEST_OS_WINDOWS
 
   // Of all signals effects on the process exit code, only those of SIGABRT
   // are documented on Windows.
   // See https://msdn.microsoft.com/en-us/query-bi/m/dwwzkt4c.
   EXPECT_EXIT(raise(SIGABRT), testing::ExitedWithCode(3), "") << "b_ar";
 
-#elif !GTEST_OS_FUCHSIA
+#elif !defined(GTEST_OS_FUCHSIA)
 
   // Fuchsia has no unix signals.
   EXPECT_EXIT(raise(SIGKILL), testing::KilledBySignal(SIGKILL), "") << "foo";
@@ -1177,7 +1177,7 @@ TEST(GetLastErrnoDescription, GetLastErrnoDescriptionWorks) {
   EXPECT_STREQ("", GetLastErrnoDescription().c_str());
 }
 
-#if GTEST_OS_WINDOWS
+#ifdef GTEST_OS_WINDOWS
 TEST(AutoHandleTest, AutoHandleWorks) {
   HANDLE handle = ::CreateEvent(NULL, FALSE, FALSE, NULL);
   ASSERT_NE(INVALID_HANDLE_VALUE, handle);
@@ -1204,7 +1204,7 @@ TEST(AutoHandleTest, AutoHandleWorks) {
 }
 #endif  // GTEST_OS_WINDOWS
 
-#if GTEST_OS_WINDOWS
+#ifdef GTEST_OS_WINDOWS
 typedef unsigned __int64 BiggestParsable;
 typedef signed __int64 BiggestSignedParsable;
 #else
@@ -1301,7 +1301,7 @@ TEST(ParseNaturalNumberTest, WorksForShorterIntegers) {
   EXPECT_EQ(123, char_result);
 }
 
-#if GTEST_OS_WINDOWS
+#ifdef GTEST_OS_WINDOWS
 TEST(EnvironmentTest, HandleFitsIntoSizeT) {
   ASSERT_TRUE(sizeof(HANDLE) <= sizeof(size_t));
 }

@@ -32,7 +32,7 @@
 
 #include "gtest/internal/gtest-port.h"
 
-#if GTEST_OS_MAC
+#ifdef GTEST_OS_MAC
 #include <time.h>
 #endif  // GTEST_OS_MAC
 
@@ -281,9 +281,11 @@ TEST(FormatCompilerIndependentFileLocationTest, FormatsUknownFileAndLine) {
   EXPECT_EQ("unknown file", FormatCompilerIndependentFileLocation(nullptr, -1));
 }
 
-#if GTEST_OS_LINUX || GTEST_OS_MAC || GTEST_OS_QNX || GTEST_OS_FUCHSIA || \
-    GTEST_OS_DRAGONFLY || GTEST_OS_FREEBSD || GTEST_OS_GNU_KFREEBSD ||    \
-    GTEST_OS_NETBSD || GTEST_OS_OPENBSD || GTEST_OS_GNU_HURD
+#if defined(GTEST_OS_LINUX) || defined(GTEST_OS_MAC) ||           \
+    defined(GTEST_OS_QNX) || defined(GTEST_OS_FUCHSIA) ||         \
+    defined(GTEST_OS_DRAGONFLY) || defined(GTEST_OS_FREEBSD) ||   \
+    defined(GTEST_OS_GNU_KFREEBSD) || defined(GTEST_OS_NETBSD) || \
+    defined(GTEST_OS_OPENBSD) || defined(GTEST_OS_GNU_HURD)
 void* ThreadFunc(void* data) {
   internal::Mutex* mutex = static_cast<internal::Mutex*>(data);
   mutex->Lock();
@@ -916,7 +918,7 @@ TEST(RETest, PartialMatchWorks) {
 
 #endif  // GTEST_USES_POSIX_RE
 
-#if !GTEST_OS_WINDOWS_MOBILE
+#ifndef GTEST_OS_WINDOWS_MOBILE
 
 TEST(CaptureTest, CapturesStdout) {
   CaptureStdout();
@@ -1064,7 +1066,7 @@ class AtomicCounterWithMutex {
 
       GTEST_CHECK_POSIX_SUCCESS_(pthread_mutex_unlock(&memory_barrier_mutex));
       GTEST_CHECK_POSIX_SUCCESS_(pthread_mutex_destroy(&memory_barrier_mutex));
-#elif GTEST_OS_WINDOWS
+#elif defined(GTEST_OS_WINDOWS)
       // On Windows, performing an interlocked access puts up a memory barrier.
       volatile LONG dummy = 0;
       ::InterlockedIncrement(&dummy);
@@ -1146,14 +1148,14 @@ class DestructorCall {
  public:
   DestructorCall() {
     invoked_ = false;
-#if GTEST_OS_WINDOWS
+#ifdef GTEST_OS_WINDOWS
     wait_event_.Reset(::CreateEvent(NULL, TRUE, FALSE, NULL));
     GTEST_CHECK_(wait_event_.Get() != NULL);
 #endif
   }
 
   bool CheckDestroyed() const {
-#if GTEST_OS_WINDOWS
+#ifdef GTEST_OS_WINDOWS
     if (::WaitForSingleObject(wait_event_.Get(), 1000) != WAIT_OBJECT_0)
       return false;
 #endif
@@ -1162,7 +1164,7 @@ class DestructorCall {
 
   void ReportDestroyed() {
     invoked_ = true;
-#if GTEST_OS_WINDOWS
+#ifdef GTEST_OS_WINDOWS
     ::SetEvent(wait_event_.Get());
 #endif
   }
@@ -1178,7 +1180,7 @@ class DestructorCall {
 
  private:
   bool invoked_;
-#if GTEST_OS_WINDOWS
+#ifdef GTEST_OS_WINDOWS
   AutoHandle wait_event_;
 #endif
   static std::vector<DestructorCall*>* const list_;
@@ -1278,12 +1280,12 @@ TEST(ThreadLocalTest, ThreadLocalMutationsAffectOnlyCurrentThread) {
 
 #endif  // GTEST_IS_THREADSAFE
 
-#if GTEST_OS_WINDOWS
+#ifdef GTEST_OS_WINDOWS
 TEST(WindowsTypesTest, HANDLEIsVoidStar) {
   StaticAssertTypeEq<HANDLE, void*>();
 }
 
-#if GTEST_OS_WINDOWS_MINGW && !defined(__MINGW64_VERSION_MAJOR)
+#if defined(GTEST_OS_WINDOWS_MINGW) && !defined(__MINGW64_VERSION_MAJOR)
 TEST(WindowsTypesTest, _CRITICAL_SECTIONIs_CRITICAL_SECTION) {
   StaticAssertTypeEq<CRITICAL_SECTION, _CRITICAL_SECTION>();
 }

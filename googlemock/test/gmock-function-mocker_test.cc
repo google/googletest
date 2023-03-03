@@ -35,7 +35,7 @@
 // Silence C4503 (decorated name length exceeded) for MSVC.
 GTEST_DISABLE_MSC_WARNINGS_PUSH_(4503)
 
-#if GTEST_OS_WINDOWS
+#ifdef GTEST_OS_WINDOWS
 // MSDN says the header file to be included for STDMETHOD is BaseTyps.h but
 // we are getting compiler errors if we use basetyps.h, hence including
 // objbase.h for definition of STDMETHOD.
@@ -120,7 +120,7 @@ class FooInterface {
   virtual int RefQualifiedOverloaded() & = 0;
   virtual int RefQualifiedOverloaded() && = 0;
 
-#if GTEST_OS_WINDOWS
+#ifdef GTEST_OS_WINDOWS
   STDMETHOD_(int, CTNullary)() = 0;
   STDMETHOD_(bool, CTUnary)(int x) = 0;
   STDMETHOD_(int, CTDecimal)
@@ -178,7 +178,7 @@ class MockFoo : public FooInterface {
   MOCK_METHOD(int (*)(bool), ReturnsFunctionPointer1, (int), ());
   MOCK_METHOD(fn_ptr, ReturnsFunctionPointer2, (int), ());
 
-#if GTEST_OS_WINDOWS
+#ifdef GTEST_OS_WINDOWS
   MOCK_METHOD(int, CTNullary, (), (Calltype(STDMETHODCALLTYPE)));
   MOCK_METHOD(bool, CTUnary, (int), (Calltype(STDMETHODCALLTYPE)));
   MOCK_METHOD(int, CTDecimal,
@@ -248,7 +248,7 @@ class LegacyMockFoo : public FooInterface {
   MOCK_METHOD1(ReturnsFunctionPointer1, int (*(int))(bool));
   MOCK_METHOD1(ReturnsFunctionPointer2, fn_ptr(int));
 
-#if GTEST_OS_WINDOWS
+#ifdef GTEST_OS_WINDOWS
   MOCK_METHOD0_WITH_CALLTYPE(STDMETHODCALLTYPE, CTNullary, int());
   MOCK_METHOD1_WITH_CALLTYPE(STDMETHODCALLTYPE, CTUnary, bool(int));  // NOLINT
   MOCK_METHOD10_WITH_CALLTYPE(STDMETHODCALLTYPE, CTDecimal,
@@ -404,7 +404,7 @@ TYPED_TEST(FunctionMockerTest, MocksTypeWithTemplatedCopyCtor) {
   EXPECT_TRUE(this->foo_->TypeWithTemplatedCopyCtor(TemplatedCopyable<int>()));
 }
 
-#if GTEST_OS_WINDOWS
+#ifdef GTEST_OS_WINDOWS
 // Tests mocking a nullary function with calltype.
 TYPED_TEST(FunctionMockerTest, MocksNullaryFunctionWithCallType) {
   EXPECT_CALL(this->mock_foo_, CTNullary())
@@ -620,7 +620,7 @@ TYPED_TEST(TemplateMockTest, MethodWithCommaInReturnTypeWorks) {
   EXPECT_EQ(a_map, mock.ReturnTypeWithComma(1));
 }
 
-#if GTEST_OS_WINDOWS
+#ifdef GTEST_OS_WINDOWS
 // Tests mocking template interfaces with calltype.
 
 template <typename T>
