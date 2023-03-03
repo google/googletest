@@ -36,7 +36,108 @@
 #define GOOGLETEST_INCLUDE_GTEST_INTERNAL_GTEST_PORT_ARCH_H_
 
 // Determines the platform on which Google Test is compiled.
-#ifdef __CYGWIN__
+#ifdef __NuttX__
+#define GTEST_OS_NUTTX 1
+
+// Define the default value to avoid the warning:
+// "GTEST_XXX" is not defined, evaluates to 0 [-Wundef]
+
+#ifndef GTEST_DONT_DEFINE_ASSERT_EQ
+#define GTEST_DONT_DEFINE_ASSERT_EQ 0
+#endif
+#ifndef GTEST_DONT_DEFINE_ASSERT_FALSE
+#define GTEST_DONT_DEFINE_ASSERT_FALSE 0
+#endif
+#ifndef GTEST_DONT_DEFINE_ASSERT_GE
+#define GTEST_DONT_DEFINE_ASSERT_GE 0
+#endif
+#ifndef GTEST_DONT_DEFINE_ASSERT_GT
+#define GTEST_DONT_DEFINE_ASSERT_GT 0
+#endif
+#ifndef GTEST_DONT_DEFINE_ASSERT_LE
+#define GTEST_DONT_DEFINE_ASSERT_LE 0
+#endif
+#ifndef GTEST_DONT_DEFINE_ASSERT_LT
+#define GTEST_DONT_DEFINE_ASSERT_LT 0
+#endif
+#ifndef GTEST_DONT_DEFINE_ASSERT_NE
+#define GTEST_DONT_DEFINE_ASSERT_NE 0
+#endif
+#ifndef GTEST_DONT_DEFINE_ASSERT_TRUE
+#define GTEST_DONT_DEFINE_ASSERT_TRUE 0
+#endif
+#ifndef GTEST_DONT_DEFINE_EXPECT_FALSE
+#define GTEST_DONT_DEFINE_EXPECT_FALSE 0
+#endif
+#ifndef GTEST_DONT_DEFINE_EXPECT_TRUE
+#define GTEST_DONT_DEFINE_EXPECT_TRUE 0
+#endif
+#ifndef GTEST_DONT_DEFINE_FAIL
+#define GTEST_DONT_DEFINE_FAIL 0
+#endif
+#ifndef GTEST_DONT_DEFINE_SUCCEED
+#define GTEST_DONT_DEFINE_SUCCEED 0
+#endif
+#ifndef GTEST_DONT_DEFINE_TEST
+#define GTEST_DONT_DEFINE_TEST 0
+#endif
+#ifndef GTEST_DONT_DEFINE_TEST_F
+#define GTEST_DONT_DEFINE_TEST_F 0
+#endif
+#ifndef GTEST_HAS_DEATH_TEST
+#define GTEST_HAS_DEATH_TEST 0
+#endif
+#ifndef GTEST_FOR_GOOGLE_
+#define GTEST_FOR_GOOGLE_ 0
+#endif
+#ifndef GTEST_HAS_ABSL
+#define GTEST_HAS_ABSL 0
+#define GTEST_USES_RE2 0
+#endif
+#ifndef GTEST_HAS_DOWNCAST_
+#define GTEST_HAS_DOWNCAST_ 0
+#endif
+#ifndef GTEST_HAS_MUTEX_AND_THREAD_LOCAL_
+#define GTEST_HAS_MUTEX_AND_THREAD_LOCAL_ 0
+#endif
+#ifndef GTEST_HAS_NOTIFICATION_
+#define GTEST_HAS_NOTIFICATION_ 0
+#endif
+#ifndef GTEST_USES_POSIX_RE
+#define GTEST_USES_POSIX_RE 0
+#endif
+
+#define GTEST_OS_AIX 0
+#define GTEST_OS_CYGWIN 0
+#define GTEST_OS_DRAGONFLY 0
+#define GTEST_OS_ESP32 0
+#define GTEST_OS_ESP8266 0
+#define GTEST_OS_FUCHSIA 0
+#define GTEST_OS_FREEBSD 0
+#define GTEST_OS_GNU_HURD 0
+#define GTEST_OS_GNU_KFREEBSD 0
+#define GTEST_OS_HAIKU 0
+#define GTEST_OS_HPUX 0
+#define GTEST_OS_IOS 0
+#define GTEST_OS_LINUX 0
+#define GTEST_OS_LINUX_ANDROID 0
+#define GTEST_OS_MAC 0
+#define GTEST_OS_NACL 0
+#define GTEST_OS_NETBSD 0
+#define GTEST_OS_OPENBSD 0
+#define GTEST_OS_OS2 0
+#define GTEST_OS_QNX 0
+#define GTEST_OS_QURT 0
+#define GTEST_OS_SOLARIS 0
+#define GTEST_OS_WINDOWS 0
+#define GTEST_OS_WINDOWS_DESKTOP 0
+#define GTEST_OS_WINDOWS_MINGW 0
+#define GTEST_OS_WINDOWS_MOBILE 0
+#define GTEST_OS_WINDOWS_PHONE 0
+#define GTEST_OS_WINDOWS_RT 0
+#define GTEST_OS_XTENSA 0
+#define GTEST_OS_ZOS 0
+#elif defined(__CYGWIN__)
 #define GTEST_OS_CYGWIN 1
 #elif defined(__MINGW__) || defined(__MINGW32__) || defined(__MINGW64__)
 #define GTEST_OS_WINDOWS_MINGW 1
