@@ -790,8 +790,6 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
       !defined(GTEST_OS_WINDOWS_RT)) ||                                \
      GTEST_HAS_PTHREAD)
 #define GTEST_IS_THREADSAFE 1
-#else
-#define GTEST_IS_THREADSAFE 0
 #endif
 
 #endif  // GTEST_IS_THREADSAFE
