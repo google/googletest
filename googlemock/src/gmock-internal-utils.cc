@@ -87,7 +87,7 @@ GTEST_API_ std::string ConvertIdentifierNameToWords(const char* id_name) {
                                  (!IsDigit(prev_char) && IsDigit(*p));
 
     if (IsAlNum(*p)) {
-      if (starts_new_word && result != "") result += ' ';
+      if (starts_new_word && !result.empty()) result += ' ';
       result += ToLower(*p);
     }
   }

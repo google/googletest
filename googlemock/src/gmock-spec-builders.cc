@@ -503,7 +503,7 @@ class MockObjectRegistry {
       std::cout << internal::FormatFileLocation(state.first_used_file,
                                                 state.first_used_line);
       std::cout << " ERROR: this mock object";
-      if (state.first_used_test != "") {
+      if (!state.first_used_test.empty()) {
         std::cout << " (used in test " << state.first_used_test_suite << "."
                   << state.first_used_test << ")";
       }
