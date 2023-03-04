@@ -214,6 +214,14 @@
 //   GTEST_INTERNAL_HAS_VARIANT - for enabling UniversalPrinter<std::variant> or
 //                                UniversalPrinter<absl::variant>
 //                                specializations. Always defined to 0 or 1.
+//   GTEST_USE_OWN_FLAGFILE_FLAG_ - Always defined to 0 or 1.
+//   GTEST_HAS_CXXABI_H_ - Always defined to 0 or 1.
+//   GTEST_CAN_STREAM_RESULTS_ - Always defined to 0 or 1.
+//   GTEST_HAS_ALT_PATH_SEP_ - Always defined to 0 or 1.
+//   GTEST_WIDE_STRING_USES_UTF16_ - Always defined to 0 or 1.
+//   GTEST_HAS_MUTEX_AND_THREAD_LOCAL_ - Always defined to 0 or 1.
+//   GTEST_HAS_DOWNCAST_ - Always defined to 0 or 1.
+//   GTEST_HAS_NOTIFICATION_- Always defined to 0 or 1.
 //
 // Synchronization:
 //   Mutex, MutexLock, ThreadLocal, GetThreadCount()
@@ -304,6 +312,18 @@
 
 #include "gtest/internal/custom/gtest-port.h"
 #include "gtest/internal/gtest-port-arch.h"
+
+#ifndef GTEST_HAS_DOWNCAST_
+#define GTEST_HAS_DOWNCAST_ 0
+#endif
+
+#ifndef GTEST_HAS_MUTEX_AND_THREAD_LOCAL_
+#define GTEST_HAS_MUTEX_AND_THREAD_LOCAL_ 0
+#endif
+
+#ifndef GTEST_HAS_NOTIFICATION_
+#define GTEST_HAS_NOTIFICATION_ 0
+#endif
 
 #ifdef GTEST_HAS_ABSL
 #include "absl/flags/declare.h"
