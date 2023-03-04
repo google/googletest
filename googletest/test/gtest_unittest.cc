@@ -6178,12 +6178,12 @@ TEST_F(ParseFlagsTest, FilterBad) {
 
   const char* argv2[] = {"foo.exe", "--gtest_filter", nullptr};
 
-#if GTEST_HAS_ABSL && defined(GTEST_HAS_DEATH_TEST)
+#if defined(GTEST_HAS_ABSL) && defined(GTEST_HAS_DEATH_TEST)
   // Invalid flag arguments are a fatal error when using the Abseil Flags.
   EXPECT_EXIT(GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::Filter(""), true),
               testing::ExitedWithCode(1),
               "ERROR: Missing the value for the flag 'gtest_filter'");
-#elif !GTEST_HAS_ABSL
+#elif !defined(GTEST_HAS_ABSL)
   GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::Filter(""), true);
 #else
   static_cast<void>(argv);
@@ -6197,12 +6197,12 @@ TEST_F(ParseFlagsTest, OutputEmpty) {
 
   const char* argv2[] = {"foo.exe", "--gtest_output", nullptr};
 
-#if GTEST_HAS_ABSL && defined(GTEST_HAS_DEATH_TEST)
+#if defined(GTEST_HAS_ABSL) && defined(GTEST_HAS_DEATH_TEST)
   // Invalid flag arguments are a fatal error when using the Abseil Flags.
   EXPECT_EXIT(GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags(), true),
               testing::ExitedWithCode(1),
               "ERROR: Missing the value for the flag 'gtest_output'");
-#elif !GTEST_HAS_ABSL
+#elif !defined(GTEST_HAS_ABSL)
   GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags(), true);
 #else
   static_cast<void>(argv);
@@ -6210,7 +6210,7 @@ TEST_F(ParseFlagsTest, OutputEmpty) {
 #endif
 }
 
-#if GTEST_HAS_ABSL
+#ifdef GTEST_HAS_ABSL
 TEST_F(ParseFlagsTest, AbseilPositionalFlags) {
   const char* argv[] = {"foo.exe", "--gtest_throw_on_failure=1", "--",
                         "--other_flag", nullptr};

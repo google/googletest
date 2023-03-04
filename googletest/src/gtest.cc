@@ -135,7 +135,7 @@
 #endif
 #endif
 
-#if GTEST_HAS_ABSL
+#ifdef GTEST_HAS_ABSL
 #include "absl/debugging/failure_signal_handler.h"
 #include "absl/debugging/stacktrace.h"
 #include "absl/debugging/symbolize.h"
@@ -4958,7 +4958,7 @@ const char* const OsStackTraceGetterInterface::kElidedFramesMarker =
 
 std::string OsStackTraceGetter::CurrentStackTrace(int max_depth, int skip_count)
     GTEST_LOCK_EXCLUDED_(mutex_) {
-#if GTEST_HAS_ABSL
+#ifdef GTEST_HAS_ABSL
   std::string result;
 
   if (max_depth <= 0) {
@@ -5007,7 +5007,7 @@ std::string OsStackTraceGetter::CurrentStackTrace(int max_depth, int skip_count)
 }
 
 void OsStackTraceGetter::UponLeavingGTest() GTEST_LOCK_EXCLUDED_(mutex_) {
-#if GTEST_HAS_ABSL
+#ifdef GTEST_HAS_ABSL
   void* caller_frame = nullptr;
   if (absl::GetStackTrace(&caller_frame, 1, 3) <= 0) {
     caller_frame = nullptr;
@@ -5686,7 +5686,7 @@ void UnitTestImpl::PostFlagParsingInit() {
     ConfigureStreamingOutput();
 #endif  // GTEST_CAN_STREAM_RESULTS_
 
-#if GTEST_HAS_ABSL
+#ifdef GTEST_HAS_ABSL
     if (GTEST_FLAG_GET(install_failure_signal_handler)) {
       absl::FailureSignalHandlerOptions options;
       absl::InstallFailureSignalHandler(options);
@@ -6668,7 +6668,7 @@ void ParseGoogleTestFlagsOnlyImpl(int* argc, CharType** argv) {
 // Parses the command line for Google Test flags, without initializing
 // other parts of Google Test.
 void ParseGoogleTestFlagsOnly(int* argc, char** argv) {
-#if GTEST_HAS_ABSL
+#ifdef GTEST_HAS_ABSL
   if (*argc > 0) {
     // absl::ParseCommandLine() requires *argc > 0.
     auto positional_args = absl::flags_internal::ParseCommandLineImpl(
@@ -6720,7 +6720,7 @@ void InitGoogleTestImpl(int* argc, CharType** argv) {
     g_argvs.push_back(StreamableToString(argv[i]));
   }
 
-#if GTEST_HAS_ABSL
+#ifdef GTEST_HAS_ABSL
   absl::InitializeSymbolizer(g_argvs[0].c_str());
 
   // When using the Abseil Flags library, set the program usage message to the

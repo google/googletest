@@ -390,7 +390,7 @@ TEST(GtestCheckDeathTest, LivesSilentlyOnSuccess) {
 // the platform. The test will produce compiler errors in case of failure.
 // For simplicity, we only cover the most important platforms here.
 TEST(RegexEngineSelectionTest, SelectsCorrectRegexEngine) {
-#if GTEST_HAS_ABSL
+#ifdef GTEST_HAS_ABSL
   EXPECT_TRUE(GTEST_USES_RE2);
 #elif GTEST_HAS_POSIX_RE
   EXPECT_TRUE(GTEST_USES_POSIX_RE);

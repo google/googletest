@@ -178,6 +178,7 @@
 //                            define themselves.
 //   GTEST_USES_SIMPLE_RE   - our own simple regex is used;
 //                            the above RE\b(s) are mutually exclusive.
+//   GTEST_HAS_ABSL         - Google Test is compiled with Abseil.
 
 // Misc public macros
 // ------------------
@@ -304,7 +305,7 @@
 #include "gtest/internal/custom/gtest-port.h"
 #include "gtest/internal/gtest-port-arch.h"
 
-#if GTEST_HAS_ABSL
+#ifdef GTEST_HAS_ABSL
 #include "absl/flags/declare.h"
 #include "absl/flags/flag.h"
 #include "absl/flags/reflection.h"
@@ -412,7 +413,7 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 #endif
 
 // Select the regular expression implementation.
-#if GTEST_HAS_ABSL
+#ifdef GTEST_HAS_ABSL
 // When using Abseil, RE2 is required.
 #include "absl/strings/string_view.h"
 #include "re2/re2.h"
@@ -2248,7 +2249,7 @@ using TimeInMillis = int64_t;  // Represents time in milliseconds.
 #endif  // !defined(GTEST_FLAG)
 
 // Pick a command line flags implementation.
-#if GTEST_HAS_ABSL
+#ifdef GTEST_HAS_ABSL
 
 // Macros for defining flags.
 #define GTEST_DEFINE_bool_(name, default_val, doc) \
@@ -2359,7 +2360,7 @@ const char* StringFromGTestEnv(const char* flag, const char* default_val);
 
 #endif  // !defined(GTEST_INTERNAL_DEPRECATED)
 
-#if GTEST_HAS_ABSL
+#ifdef GTEST_HAS_ABSL
 // Always use absl::any for UniversalPrinter<> specializations if googletest
 // is built with absl support.
 #define GTEST_INTERNAL_HAS_ANY 1
@@ -2392,7 +2393,7 @@ using Any = ::std::any;
 #define GTEST_INTERNAL_HAS_ANY 0
 #endif
 
-#if GTEST_HAS_ABSL
+#ifdef GTEST_HAS_ABSL
 // Always use absl::optional for UniversalPrinter<> specializations if
 // googletest is built with absl support.
 #define GTEST_INTERNAL_HAS_OPTIONAL 1
@@ -2428,7 +2429,7 @@ inline ::std::nullopt_t Nullopt() { return ::std::nullopt; }
 #define GTEST_INTERNAL_HAS_OPTIONAL 0
 #endif
 
-#if GTEST_HAS_ABSL
+#ifdef GTEST_HAS_ABSL
 // Always use absl::string_view for Matcher<> specializations if googletest
 // is built with absl support.
 #define GTEST_INTERNAL_HAS_STRING_VIEW 1
@@ -2460,7 +2461,7 @@ using StringView = ::std::string_view;
 #define GTEST_INTERNAL_HAS_STRING_VIEW 0
 #endif
 
-#if GTEST_HAS_ABSL
+#ifdef GTEST_HAS_ABSL
 // Always use absl::variant for UniversalPrinter<> specializations if googletest
 // is built with absl support.
 #define GTEST_INTERNAL_HAS_VARIANT 1

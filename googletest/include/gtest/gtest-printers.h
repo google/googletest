@@ -857,7 +857,7 @@ class UniversalPrinter<Variant<T...>> {
  public:
   static void Print(const Variant<T...>& value, ::std::ostream* os) {
     *os << '(';
-#if GTEST_HAS_ABSL
+#ifdef GTEST_HAS_ABSL
     absl::visit(Visitor{os, value.index()}, value);
 #else
     std::visit(Visitor{os, value.index()}, value);
