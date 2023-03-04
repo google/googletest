@@ -200,7 +200,7 @@ TEST(IsTrueTest, IsTrueIsFalse) {
   EXPECT_THAT(nonnull_unique, Not(IsFalse()));
 }
 
-#if GTEST_HAS_TYPED_TEST
+#ifdef GTEST_HAS_TYPED_TEST
 // Tests ContainerEq with different container types, and
 // different element types.
 

@@ -361,7 +361,7 @@ TEST(GtestCheckDeathTest, DiesWithCorrectOutputOnFailure) {
   const char regex[] =
 #ifdef _MSC_VER
       "googletest-port-test\\.cc\\(\\d+\\):"
-#elif GTEST_USES_POSIX_RE
+#elif defined(GTEST_USES_POSIX_RE)
       "googletest-port-test\\.cc:[0-9]+"
 #else
       "googletest-port-test\\.cc:\\d+"
@@ -372,7 +372,7 @@ TEST(GtestCheckDeathTest, DiesWithCorrectOutputOnFailure) {
                             regex);
 }
 
-#if GTEST_HAS_DEATH_TEST
+#ifdef GTEST_HAS_DEATH_TEST
 
 TEST(GtestCheckDeathTest, LivesSilentlyOnSuccess) {
   EXPECT_EXIT(
@@ -399,7 +399,7 @@ TEST(RegexEngineSelectionTest, SelectsCorrectRegexEngine) {
 #endif
 }
 
-#if GTEST_USES_POSIX_RE
+#ifdef GTEST_USES_POSIX_RE
 
 template <typename Str>
 class RETest : public ::testing::Test {};
@@ -456,7 +456,7 @@ TYPED_TEST(RETest, PartialMatchWorks) {
   EXPECT_FALSE(RE::PartialMatch(TypeParam("zza"), re));
 }
 
-#elif GTEST_USES_SIMPLE_RE
+#elif defined(GTEST_USES_SIMPLE_RE)
 
 TEST(IsInSetTest, NulCharIsNotInAnySet) {
   EXPECT_FALSE(IsInSet('\0', ""));
@@ -1011,7 +1011,7 @@ TEST(ThreadLocalTest, PointerAndConstPointerReturnSameValue) {
   EXPECT_EQ(thread_local_string.pointer(), const_thread_local_string.pointer());
 }
 
-#if GTEST_IS_THREADSAFE
+#ifdef GTEST_IS_THREADSAFE
 
 void AddTwo(int* param) { *param += 2; }
 

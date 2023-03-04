@@ -51,7 +51,7 @@ GTEST_DECLARE_string_(death_test_style);
 
 namespace testing {
 
-#if GTEST_HAS_DEATH_TEST
+#ifdef GTEST_HAS_DEATH_TEST
 
 namespace internal {
 
@@ -328,7 +328,7 @@ class GTEST_API_ KilledBySignal {
 // death tests are supported; otherwise they just issue a warning.  This is
 // useful when you are combining death test assertions with normal test
 // assertions in one test.
-#if GTEST_HAS_DEATH_TEST
+#ifdef GTEST_HAS_DEATH_TEST
 #define EXPECT_DEATH_IF_SUPPORTED(statement, regex) \
   EXPECT_DEATH(statement, regex)
 #define ASSERT_DEATH_IF_SUPPORTED(statement, regex) \
