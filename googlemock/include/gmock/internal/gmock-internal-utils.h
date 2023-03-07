@@ -311,7 +311,8 @@ GTEST_API_ WithoutMatchers GetWithoutMatchers();
 // crashes).
 template <typename T>
 inline T Invalid() {
-  Assert(false, "", -1, "Internal error: attempt to return invalid value");
+  Assert(/*condition=*/false, /*file=*/"", /*line=*/-1,
+         "Internal error: attempt to return invalid value");
 #if defined(__GNUC__) || defined(__clang__)
   __builtin_unreachable();
 #elif defined(_MSC_VER)
