@@ -78,6 +78,7 @@ time docker run \
       --copt="-Wall" \
       --copt="-Werror" \
       --copt="-Wuninitialized" \
+      --copt="-Wundef" \
       --copt="-Wno-error=pragmas" \
       --distdir="/bazel-distdir" \
       --features=external_include_paths \
@@ -99,6 +100,7 @@ for std in ${STD}; do
         --copt="-Wall" \
         --copt="-Werror" \
         --copt="-Wuninitialized" \
+        --copt="-Wundef" \
         --define="absl=${absl}" \
         --distdir="/bazel-distdir" \
         --features=external_include_paths \
@@ -123,6 +125,7 @@ for std in ${STD}; do
         --copt="-Wall" \
         --copt="-Werror" \
         --copt="-Wuninitialized" \
+        --copt="-Wundef" \
         --define="absl=${absl}" \
         --distdir="/bazel-distdir" \
         --features=external_include_paths \
