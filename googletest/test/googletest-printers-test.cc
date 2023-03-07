@@ -532,7 +532,9 @@ TEST(PrintU8StringTest, NonConst) {
   EXPECT_EQ(PrintPointer(p) + " pointing to u8\"\\xE4\\xB8\\x96\"",
             Print(static_cast<char8_t*>(p)));
 }
+#endif
 
+#ifdef __cpp_lib_char8_t
 // NULL u8 string.
 TEST(PrintU8StringTest, Null) {
   const char8_t* p = nullptr;
@@ -936,7 +938,7 @@ TEST(PrintWideStringTest, StringAmbiguousHex) {
 }
 #endif  // GTEST_HAS_STD_WSTRING
 
-#ifdef __cpp_char8_t
+#ifdef __cpp_lib_char8_t
 TEST(PrintStringTest, U8String) {
   std::u8string str = u8"Hello, 世界";
   EXPECT_EQ(str, str);  // Verify EXPECT_EQ compiles with this type.
