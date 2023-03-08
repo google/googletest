@@ -1025,7 +1025,7 @@ int main(int argc, char** argv) {
                  std::string("internal_skip_environment_and_ad_hoc_tests")) > 0;
 
 #ifdef GTEST_HAS_DEATH_TEST
-  if (GTEST_FLAG_GET(internal_run_death_test) != "") {
+  if (!GTEST_FLAG_GET(internal_run_death_test).empty()) {
     // Skip the usual output capturing if we're running as the child
     // process of an threadsafe-style death test.
 #if defined(GTEST_OS_WINDOWS)
