@@ -1024,6 +1024,11 @@ DeathTest::TestRole FuchsiaDeathTest::AssumeRole() {
   GTEST_DEATH_TEST_CHECK_(status == ZX_OK);
 
   // Spawn the child process.
+  // Note: The test component must have `fuchsia.process.Launcher` declared
+  // in its manifest. (Fuchsia integration tests require creating a
+  // "Fuchsia Test Component" which contains a "Fuchsia Component Manifest")
+  // Launching processes is a privileged operation in Fuschia, and the
+  // declaration indicates that the ability is required for the component.
   std::unique_ptr<char*[]> argv = CreateArgvFromArgs(args);
   status = fdio_spawn_etc(child_job, FDIO_SPAWN_CLONE_ALL, argv[0], argv.get(),
                           nullptr, 2, spawn_actions,
