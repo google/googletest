@@ -1104,9 +1104,9 @@ TEST(MutexTest, OnlyOneThreadCanLockAtATime) {
   // Creates and runs kThreadCount threads that increment locked_counter
   // kCycleCount times each.
   for (int i = 0; i < kThreadCount; ++i) {
-    counting_threads[i].reset(new ThreadType(
+    counting_threads[i] = std::make_unique<ThreadType>(
         &CountingThreadFunc, make_pair(&locked_counter, kCycleCount),
-        &threads_can_start));
+        &threads_can_start);
   }
   threads_can_start.Notify();
   for (int i = 0; i < kThreadCount; ++i) counting_threads[i]->Join();
