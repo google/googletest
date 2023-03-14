@@ -100,12 +100,14 @@ if (INSTALL_GTEST)
   set(version_file "${generated_dir}/${cmake_package_name}ConfigVersion.cmake")
   write_basic_package_version_file(${version_file} VERSION ${GOOGLETEST_VERSION} COMPATIBILITY AnyNewerVersion)
   install(EXPORT ${targets_export_name}
+    COMPONENT "${PROJECT_NAME}"
     NAMESPACE ${cmake_package_name}::
     DESTINATION ${cmake_files_install_dir})
   set(config_file "${generated_dir}/${cmake_package_name}Config.cmake")
   configure_package_config_file("${gtest_SOURCE_DIR}/cmake/Config.cmake.in"
     "${config_file}" INSTALL_DESTINATION ${cmake_files_install_dir})
   install(FILES ${version_file} ${config_file}
+    COMPONENT "${PROJECT_NAME}"
     DESTINATION ${cmake_files_install_dir})
 endif()
 
