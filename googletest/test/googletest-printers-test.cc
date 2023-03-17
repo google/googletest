@@ -359,7 +359,7 @@ TEST(PrintCharTest, Char16) { EXPECT_EQ("U+0041", Print(u'A')); }
 
 TEST(PrintCharTest, Char32) { EXPECT_EQ("U+0041", Print(U'A')); }
 
-#ifdef __cpp_char8_t
+#ifdef __cpp_lib_char8_t
 TEST(PrintCharTest, Char8) { EXPECT_EQ("U+0041", Print(u8'A')); }
 #endif
 
@@ -412,7 +412,7 @@ TEST(PrintBuiltInTypeTest, Integer) {
             Print(std::numeric_limits<uint64_t>::max()));  // uint64
   EXPECT_EQ("-9223372036854775808",
             Print(std::numeric_limits<int64_t>::min()));  // int64
-#ifdef __cpp_char8_t
+#ifdef __cpp_lib_char8_t
   EXPECT_EQ("U+0000",
             Print(std::numeric_limits<char8_t>::min()));  // char8_t
   EXPECT_EQ("U+00FF",
@@ -518,7 +518,7 @@ TEST(PrintCStringTest, EscapesProperly) {
             Print(p));
 }
 
-#ifdef __cpp_char8_t
+#ifdef __cpp_lib_char8_t
 // const char8_t*.
 TEST(PrintU8StringTest, Const) {
   const char8_t* p = u8"界";
@@ -815,7 +815,7 @@ TEST(PrintArrayTest, CharArrayWithTerminatingNul) {
   EXPECT_EQ("\"\\0Hi\"", PrintArrayHelper(a));
 }
 
-#ifdef __cpp_char8_t
+#ifdef __cpp_lib_char8_t
 // char_t array without terminating NUL.
 TEST(PrintArrayTest, Char8ArrayWithNoTerminatingNul) {
   // Array a contains '\0' in the middle and doesn't end with '\0'.
@@ -935,7 +935,7 @@ TEST(PrintWideStringTest, StringAmbiguousHex) {
 }
 #endif  // GTEST_HAS_STD_WSTRING
 
-#ifdef __cpp_char8_t
+#ifdef __cpp_lib_char8_t
 TEST(PrintStringTest, U8String) {
   std::u8string str = u8"Hello, 世界";
   EXPECT_EQ(str, str);  // Verify EXPECT_EQ compiles with this type.
