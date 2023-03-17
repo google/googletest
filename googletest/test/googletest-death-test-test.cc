@@ -304,19 +304,23 @@ TEST(ExitStatusPredicateTest, KilledBySignal) {
 // Tests that the death test macros expand to code which may or may not
 // be followed by operator<<, and that in either case the complete text
 // comprises only a single C++ statement.
-TEST_F(TestForDeathTest, SingleStatement) {
+// Split into two tests so the un-executed assertions aren't reported
+// as rotten.
+TEST_F(TestForDeathTest, DISABLED_SingleStatement1) {
   if (AlwaysFalse())
     // This would fail if executed; this is a compilation test only
     ASSERT_DEATH(return, "");
 
+  if (AlwaysFalse()) ASSERT_DEATH(return, "") << "did not die";
+}
+
+TEST_F(TestForDeathTest, SingleStatement2) {
   if (AlwaysTrue())
     EXPECT_DEATH(_exit(1), "");
   else
     // This empty "else" branch is meant to ensure that EXPECT_DEATH
     // doesn't expand into an "if" statement without an "else"
     ;
-
-  if (AlwaysFalse()) ASSERT_DEATH(return, "") << "did not die";
 
   if (AlwaysFalse())
     ;
@@ -1455,21 +1459,25 @@ namespace {
 // Tests that the death test macros expand to code which may or may not
 // be followed by operator<<, and that in either case the complete text
 // comprises only a single C++ statement.
+// Split into two tests so the un-executed assertions aren't reported
+// as rotten.
 //
 // The syntax should work whether death tests are available or not.
-TEST(ConditionalDeathMacrosSyntaxDeathTest, SingleStatement) {
+TEST(ConditionalDeathMacrosSyntaxDeathTest, DISABLED_SingleStatement1) {
   if (AlwaysFalse())
     // This would fail if executed; this is a compilation test only
     ASSERT_DEATH_IF_SUPPORTED(return, "");
 
+  if (AlwaysFalse()) ASSERT_DEATH_IF_SUPPORTED(return, "") << "did not die";
+}
+
+TEST(ConditionalDeathMacrosSyntaxDeathTest, SingleStatement2) {
   if (AlwaysTrue())
     EXPECT_DEATH_IF_SUPPORTED(_exit(1), "");
   else
     // This empty "else" branch is meant to ensure that EXPECT_DEATH
     // doesn't expand into an "if" statement without an "else"
     ;  // NOLINT
-
-  if (AlwaysFalse()) ASSERT_DEATH_IF_SUPPORTED(return, "") << "did not die";
 
   if (AlwaysFalse())
     ;  // NOLINT

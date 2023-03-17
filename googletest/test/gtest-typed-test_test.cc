@@ -420,4 +420,14 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, TrimmedTest, TrimTypes);
 
 }  // namespace library2
 
+int main(int argc, char** argv) {
+  ::testing::InitGoogleTest(&argc, argv);
+
+  // Rotten green test detection doesn't play nicely with parameterized
+  // tests that conditionalize assertions based on the parameter.
+  GTEST_FLAG_SET(treat_rotten_as_pass, true);
+
+  return RUN_ALL_TESTS();
+}
+
 GTEST_DISABLE_MSC_WARNINGS_POP_()  // 4127

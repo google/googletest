@@ -153,6 +153,10 @@ GTEST_DECLARE_int32_(stack_trace_depth);
 // non-zero code otherwise. For use with an external test framework.
 GTEST_DECLARE_bool_(throw_on_failure);
 
+// This flag controls whether an un-executed assertion within an otherwise
+// passing test is treated as pass or fail.
+GTEST_DECLARE_bool_(treat_rotten_as_pass);
+
 // When this flag is set with a "host:port" string, on supported
 // platforms test results are streamed to the specified port on
 // the specified host machine.
@@ -418,6 +422,9 @@ class GTEST_API_ TestResult {
   // Returns true if and only if the test was skipped.
   bool Skipped() const;
 
+  // Returns true if and only if the test passed but had a rotten assertion.
+  bool Rotten() const;
+
   // Returns true if and only if the test failed.
   bool Failed() const;
 
@@ -599,6 +606,9 @@ class GTEST_API_ TestInfo {
   // Returns the result of the test.
   const TestResult* result() const { return &result_; }
 
+  // Report a rotten assertion location, after the test is done.
+  void ReportRotten(const char *file, int line);
+
  private:
 #ifdef GTEST_HAS_DEATH_TEST
   friend class internal::DefaultDeathTestFactory;
@@ -710,6 +720,9 @@ class GTEST_API_ TestSuite {
   // Gets the number of skipped tests in this test suite.
   int skipped_test_count() const;
 
+  // Gets the number of rotten tests in this test suite.
+  int rotten_test_count() const;
+
   // Gets the number of failed tests in this test suite.
   int failed_test_count() const;
 
@@ -730,6 +743,10 @@ class GTEST_API_ TestSuite {
 
   // Returns true if and only if the test suite passed.
   bool Passed() const { return !Failed(); }
+
+  // Returns true if and only if the test suite passed but there is at least
+  // one rotten assertion.
+  bool Rotten() const { return Passed() && rotten_test_count() > 0; }
 
   // Returns true if and only if the test suite failed.
   bool Failed() const {
@@ -812,6 +829,11 @@ class GTEST_API_ TestSuite {
   // Returns true if and only if test skipped.
   static bool TestSkipped(const TestInfo* test_info) {
     return test_info->should_run() && test_info->result()->Skipped();
+  }
+
+  // Returns true if and only if test was rotten.
+  static bool TestRotten(const TestInfo* test_info) {
+    return test_info->should_run() && test_info->result()->Rotten();
   }
 
   // Returns true if and only if test failed.
@@ -1153,6 +1175,9 @@ class GTEST_API_ UnitTest {
   // Gets the number of successful test suites.
   int successful_test_suite_count() const;
 
+  // Gets the number of test suites with rotten assertions.
+  int rotten_test_suite_count() const;
+
   // Gets the number of failed test suites.
   int failed_test_suite_count() const;
 
@@ -1176,6 +1201,9 @@ class GTEST_API_ UnitTest {
 
   // Gets the number of skipped tests.
   int skipped_test_count() const;
+
+  // Gets the number of rotten tests.
+  int rotten_test_count() const;
 
   // Gets the number of failed tests.
   int failed_test_count() const;
@@ -1205,6 +1233,10 @@ class GTEST_API_ UnitTest {
   // Returns true if and only if the unit test passed (i.e. all test suites
   // passed).
   bool Passed() const;
+
+  // Returns true if and only if the unit test passed but had at least one
+  // rotten assertion.
+  bool Rotten() const;
 
   // Returns true if and only if the unit test failed (i.e. some test suite
   // failed or something outside of all tests failed).

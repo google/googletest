@@ -152,6 +152,7 @@ GTEST_DISABLE_MSC_WARNINGS_POP_()  //  4251
      public:                                                                  \
       static void Execute() { statement; }                                    \
     };                                                                        \
+    GTEST_RGT_EXPECT_FAILURE_;                                                \
     ::testing::TestPartResultArray gtest_failures;                            \
     ::testing::internal::SingleFailureChecker gtest_checker(                  \
         &gtest_failures, ::testing::TestPartResult::kFatalFailure, (substr)); \
@@ -170,6 +171,7 @@ GTEST_DISABLE_MSC_WARNINGS_POP_()  //  4251
      public:                                                                  \
       static void Execute() { statement; }                                    \
     };                                                                        \
+    GTEST_RGT_EXPECT_FAILURE_;                                                \
     ::testing::TestPartResultArray gtest_failures;                            \
     ::testing::internal::SingleFailureChecker gtest_checker(                  \
         &gtest_failures, ::testing::TestPartResult::kFatalFailure, (substr)); \
@@ -216,6 +218,7 @@ GTEST_DISABLE_MSC_WARNINGS_POP_()  //  4251
 // to avoid an MSVC warning on unreachable code.
 #define EXPECT_NONFATAL_FAILURE(statement, substr)                    \
   do {                                                                \
+    GTEST_RGT_EXPECT_FAILURE_;                                        \
     ::testing::TestPartResultArray gtest_failures;                    \
     ::testing::internal::SingleFailureChecker gtest_checker(          \
         &gtest_failures, ::testing::TestPartResult::kNonFatalFailure, \
@@ -233,6 +236,7 @@ GTEST_DISABLE_MSC_WARNINGS_POP_()  //  4251
 
 #define EXPECT_NONFATAL_FAILURE_ON_ALL_THREADS(statement, substr)             \
   do {                                                                        \
+    GTEST_RGT_EXPECT_FAILURE_;                                                \
     ::testing::TestPartResultArray gtest_failures;                            \
     ::testing::internal::SingleFailureChecker gtest_checker(                  \
         &gtest_failures, ::testing::TestPartResult::kNonFatalFailure,         \

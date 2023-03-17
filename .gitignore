@@ -11,6 +11,9 @@ bazel-testlogs
 # python
 *.pyc
 
+# PTR: emacs
+*~
+
 # Visual Studio files
 .vs
 *.sdf

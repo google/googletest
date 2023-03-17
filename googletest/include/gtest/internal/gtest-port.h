@@ -78,6 +78,12 @@
 //                              expressions are/aren't available.
 //   GTEST_HAS_PTHREAD        - Define it to 1/0 to indicate that <pthread.h>
 //                              is/isn't available.
+//   GTEST_HAS_RGT            - Define it to 1/0 to indicate that Rotten Green
+//                              Test detection is/isn't enabled. On by default
+//                              except for GCC older than 8.0, which cannot
+//                              support RGT inside lambdas. If the client does
+//                              not use Google Test macros inside lambdas, this
+//                              can be set in custom/gtest-port.h.
 //   GTEST_HAS_RTTI           - Define it to 1/0 to indicate that RTTI is/isn't
 //                              enabled.
 //   GTEST_HAS_STD_WSTRING    - Define it to 1/0 to indicate that
@@ -1958,6 +1964,22 @@ class GTEST_API_ ThreadLocal {
 // Returns the number of threads running in the process, or 0 to indicate that
 // we cannot detect it.
 GTEST_API_ size_t GetThreadCount();
+
+// Determine whether the compiler can support Rotten Green Test detection.
+// The definition below is guarded by #ifndef to give embedders a chance to
+// define GTEST_HAS_RGT in gtest/internal/custom/gtest-port.h
+#ifndef GTEST_HAS_RGT
+
+#ifdef __GNUC__
+// The RGT implementation for GCC depends on inline asm, which does not work
+// in lambdas prior to GCC 8.0. Clients who do not use lambdas, or at least
+// don't use gtest macros inside lambdas, can override this as stated above.
+#define GTEST_HAS_RGT (GTEST_GCC_VER_ >= 800000)
+#else // __GNUC__
+#define GTEST_HAS_RGT 1
+#endif // __GNUC__
+
+#endif // GTEST_HAS_RGT
 
 #ifdef GTEST_OS_WINDOWS
 #define GTEST_PATH_SEP_ "\\"

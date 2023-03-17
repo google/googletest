@@ -53,6 +53,7 @@ std::ostream& operator<<(std::ostream& os, const TestPartResult& result) {
             << " "
             << (result.type() == TestPartResult::kSuccess ? "Success"
                 : result.type() == TestPartResult::kSkip  ? "Skipped"
+                : result.type() == TestPartResult::kRotten ? "Rotten"
                 : result.type() == TestPartResult::kFatalFailure
                     ? "Fatal failure"
                     : "Non-fatal failure")

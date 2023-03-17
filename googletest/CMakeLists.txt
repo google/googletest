@@ -223,6 +223,7 @@ if (gtest_build_tests)
   cxx_test(gtest_prod_test gtest_main
     test/production.cc)
   cxx_test(gtest_repeat_test gtest)
+  cxx_test(gtest_rgt_parser_test gtest_main)
   cxx_test(gtest_sole_header_test gtest_main)
   cxx_test(gtest_stress_test gtest)
   cxx_test(googletest-test-part-test gtest_main)
@@ -326,6 +327,9 @@ if (gtest_build_tests)
 
   cxx_executable(gtest_list_output_unittest_ test gtest)
   py_test(gtest_list_output_unittest)
+
+ cxx_executable(gtest_rgt_output_test_ test gtest_main)
+ py_test(gtest_rgt_output_test)
 
   cxx_executable(gtest_xml_outfile1_test_ test gtest_main)
   cxx_executable(gtest_xml_outfile2_test_ test gtest_main)

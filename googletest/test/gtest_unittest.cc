@@ -49,7 +49,7 @@ TEST(CommandLineFlagsTest, CanBeAccessedInCodeOnceGTestHIsIncluded) {
       GTEST_FLAG_GET(show_internal_stack_frames) || GTEST_FLAG_GET(shuffle) ||
       GTEST_FLAG_GET(stack_trace_depth) > 0 ||
       GTEST_FLAG_GET(stream_result_to) != "unknown" ||
-      GTEST_FLAG_GET(throw_on_failure);
+      GTEST_FLAG_GET(throw_on_failure) || GTEST_FLAG_GET(treat_rotten_as_pass);
   EXPECT_TRUE(dummy || !dummy);  // Suppresses warning that dummy is unused.
 }
 
@@ -1599,6 +1599,7 @@ class GTestFlagSaverTest : public Test {
     GTEST_FLAG_SET(stack_trace_depth, kMaxStackTraceDepth);
     GTEST_FLAG_SET(stream_result_to, "");
     GTEST_FLAG_SET(throw_on_failure, false);
+    GTEST_FLAG_SET(treat_rotten_as_pass, false);
   }
 
   // Restores the Google Test flags that the tests have modified.  This will
@@ -1629,6 +1630,7 @@ class GTestFlagSaverTest : public Test {
     EXPECT_EQ(kMaxStackTraceDepth, GTEST_FLAG_GET(stack_trace_depth));
     EXPECT_STREQ("", GTEST_FLAG_GET(stream_result_to).c_str());
     EXPECT_FALSE(GTEST_FLAG_GET(throw_on_failure));
+    EXPECT_FALSE(GTEST_FLAG_GET(treat_rotten_as_pass));
 
     GTEST_FLAG_SET(also_run_disabled_tests, true);
     GTEST_FLAG_SET(break_on_failure, true);
@@ -1648,6 +1650,7 @@ class GTestFlagSaverTest : public Test {
     GTEST_FLAG_SET(stack_trace_depth, 1);
     GTEST_FLAG_SET(stream_result_to, "localhost:1234");
     GTEST_FLAG_SET(throw_on_failure, true);
+    GTEST_FLAG_SET(treat_rotten_as_pass, true);
   }
 
  private:
@@ -4071,17 +4074,21 @@ TEST(HRESULTAssertionTest, Streaming) {
 #pragma GCC diagnostic ignored "-Wpragmas"
 #endif
 // Tests that the assertion macros behave like single statements.
-TEST(AssertionSyntaxTest, BasicAssertionsBehavesLikeSingleStatement) {
+// Split into two tests so the un-executed assertions aren't reported
+// as rotten.
+TEST(AssertionSyntaxTest, DISABLED_BasicAssertionsBehavesLikeSingleStatement1) {
   if (AlwaysFalse())
     ASSERT_TRUE(false) << "This should never be executed; "
                           "It's a compilation test only.";
 
+  if (AlwaysFalse()) ASSERT_LT(1, 3);
+}
+
+TEST(AssertionSyntaxTest, BasicAssertionsBehavesLikeSingleStatement2) {
   if (AlwaysTrue())
     EXPECT_FALSE(false);
   else
     ;  // NOLINT
-
-  if (AlwaysFalse()) ASSERT_LT(1, 3);
 
   if (AlwaysFalse())
     ;  // NOLINT
@@ -4112,28 +4119,33 @@ TEST(ExpectThrowTest, DoesNotGenerateDuplicateCatchClauseWarning) {
 }
 
 // The following code intentionally tests a suboptimal syntax.
+// Split into two tests so the un-executed assertions aren't reported
+// as rotten.
 #ifdef __GNUC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdangling-else"
 #pragma GCC diagnostic ignored "-Wempty-body"
 #pragma GCC diagnostic ignored "-Wpragmas"
 #endif
-TEST(AssertionSyntaxTest, ExceptionAssertionsBehavesLikeSingleStatement) {
+TEST(AssertionSyntaxTest,
+     DISABLED_ExceptionAssertionsBehavesLikeSingleStatement1) {
   if (AlwaysFalse()) EXPECT_THROW(ThrowNothing(), bool);
 
+  if (AlwaysFalse()) EXPECT_NO_THROW(ThrowAnInteger());
+
+  if (AlwaysFalse()) EXPECT_ANY_THROW(ThrowNothing());
+}
+
+TEST(AssertionSyntaxTest, ExceptionAssertionsBehavesLikeSingleStatement2) {
   if (AlwaysTrue())
     EXPECT_THROW(ThrowAnInteger(), int);
   else
     ;  // NOLINT
 
-  if (AlwaysFalse()) EXPECT_NO_THROW(ThrowAnInteger());
-
   if (AlwaysTrue())
     EXPECT_NO_THROW(ThrowNothing());
   else
     ;  // NOLINT
-
-  if (AlwaysFalse()) EXPECT_ANY_THROW(ThrowNothing());
 
   if (AlwaysTrue())
     EXPECT_ANY_THROW(ThrowAnInteger());
@@ -4147,13 +4159,16 @@ TEST(AssertionSyntaxTest, ExceptionAssertionsBehavesLikeSingleStatement) {
 #endif  // GTEST_HAS_EXCEPTIONS
 
 // The following code intentionally tests a suboptimal syntax.
+// Split into two tests so the un-executed assertions aren't reported
+// as rotten.
 #ifdef __GNUC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdangling-else"
 #pragma GCC diagnostic ignored "-Wempty-body"
 #pragma GCC diagnostic ignored "-Wpragmas"
 #endif
-TEST(AssertionSyntaxTest, NoFatalFailureAssertionsBehavesLikeSingleStatement) {
+TEST(AssertionSyntaxTest,
+     DISABLED_NoFatalFailureAssertionsBehavesLikeSingleStatement1) {
   if (AlwaysFalse())
     EXPECT_NO_FATAL_FAILURE(FAIL()) << "This should never be executed. "
                                     << "It's a compilation test only.";
@@ -4164,7 +4179,9 @@ TEST(AssertionSyntaxTest, NoFatalFailureAssertionsBehavesLikeSingleStatement) {
     ASSERT_NO_FATAL_FAILURE(FAIL()) << "";
   else
     ;  // NOLINT
+}
 
+TEST(AssertionSyntaxTest, NoFatalFailureAssertionsBehavesLikeSingleStatement2) {
   if (AlwaysTrue())
     EXPECT_NO_FATAL_FAILURE(SUCCEED());
   else
@@ -5472,7 +5489,8 @@ struct Flags {
         shuffle(false),
         stack_trace_depth(kMaxStackTraceDepth),
         stream_result_to(""),
-        throw_on_failure(false) {}
+        throw_on_failure(false),
+        treat_rotten_as_pass(false) {}
 
   // Factory methods.
 
@@ -5614,6 +5632,14 @@ struct Flags {
     return flags;
   }
 
+  // Creates a Flags struct where the gtest_treat_rotten_as_pass flag has
+  // the given value.
+  static Flags TreatRottenAsPass(bool treat_rotten_as_pass) {
+    Flags flags;
+    flags.treat_rotten_as_pass = treat_rotten_as_pass;
+    return flags;
+  }
+
   // These fields store the flag values.
   bool also_run_disabled_tests;
   bool break_on_failure;
@@ -5632,6 +5658,7 @@ struct Flags {
   int32_t stack_trace_depth;
   const char* stream_result_to;
   bool throw_on_failure;
+  bool treat_rotten_as_pass;
 };
 
 // Fixture for testing ParseGoogleTestFlagsOnly().
@@ -5656,6 +5683,7 @@ class ParseFlagsTest : public Test {
     GTEST_FLAG_SET(stack_trace_depth, kMaxStackTraceDepth);
     GTEST_FLAG_SET(stream_result_to, "");
     GTEST_FLAG_SET(throw_on_failure, false);
+    GTEST_FLAG_SET(treat_rotten_as_pass, false);
   }
 
   // Asserts that two narrow or wide string arrays are equal.
@@ -5692,6 +5720,8 @@ class ParseFlagsTest : public Test {
     EXPECT_STREQ(expected.stream_result_to,
                  GTEST_FLAG_GET(stream_result_to).c_str());
     EXPECT_EQ(expected.throw_on_failure, GTEST_FLAG_GET(throw_on_failure));
+    EXPECT_EQ(expected.treat_rotten_as_pass,
+              GTEST_FLAG_GET(treat_rotten_as_pass));
   }
 
   // Parses a command line (specified by argc1 and argv1), then
@@ -6165,6 +6195,25 @@ TEST_F(ParseFlagsTest, ThrowOnFailureTrue) {
   const char* argv2[] = {"foo.exe", nullptr};
 
   GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::ThrowOnFailure(true), false);
+}
+
+// Tests parsing --gtest_treat_rotten_as_pass=0.
+TEST_F(ParseFlagsTest, TreatRottenAsPass_0) {
+  const char* argv[] = {"foo.exe", "--gtest_treat_rotten_as_pass=0", nullptr};
+
+  const char* argv2[] = {"foo.exe", nullptr};
+
+  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::TreatRottenAsPass(false), false);
+}
+
+// Tests parsing a --gtest_rotten_as_pass flag that has a "true"
+// definition.
+TEST_F(ParseFlagsTest, TreatRottenAsPassTrue) {
+  const char* argv[] = {"foo.exe", "--gtest_treat_rotten_as_pass=1", nullptr};
+
+  const char* argv2[] = {"foo.exe", nullptr};
+
+  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::TreatRottenAsPass(true), false);
 }
 
 // Tests parsing a bad --gtest_filter flag.
