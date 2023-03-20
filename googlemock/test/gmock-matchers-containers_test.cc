@@ -1824,8 +1824,8 @@ TEST(UnorderedElementsAreArrayTest, SucceedsWhenExpected) {
 }
 
 TEST(UnorderedElementsAreArrayTest, VectorBool) {
-  const bool a[] = {0, 1, 0, 1, 1};
-  const bool b[] = {1, 0, 1, 1, 0};
+  const bool a[] = {false, true, false, true, true};
+  const bool b[] = {true, false, true, true, false};
   std::vector<bool> expected(std::begin(a), std::end(a));
   std::vector<bool> actual(std::begin(b), std::end(b));
   StringMatchResultListener listener;

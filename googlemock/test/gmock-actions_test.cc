@@ -444,7 +444,7 @@ TEST(DefaultValueTest, GetWorksForMoveOnlyIfSet) {
   EXPECT_TRUE(DefaultValue<std::unique_ptr<int>>::Exists());
   EXPECT_TRUE(DefaultValue<std::unique_ptr<int>>::Get() == nullptr);
   DefaultValue<std::unique_ptr<int>>::SetFactory(
-      [] { return std::unique_ptr<int>(new int(42)); });
+      [] { return std::make_unique<int>(42); });
   EXPECT_TRUE(DefaultValue<std::unique_ptr<int>>::Exists());
   std::unique_ptr<int> i = DefaultValue<std::unique_ptr<int>>::Get();
   EXPECT_EQ(42, *i);
@@ -1751,9 +1751,7 @@ TEST(ReturnNewTest, ConstructorThatTakes10Arguments) {
   delete c;
 }
 
-std::unique_ptr<int> UniquePtrSource() {
-  return std::unique_ptr<int>(new int(19));
-}
+std::unique_ptr<int> UniquePtrSource() { return std::make_unique<int>(19); }
 
 std::vector<std::unique_ptr<int>> VectorUniquePtrSource() {
   std::vector<std::unique_ptr<int>> out;
@@ -1802,7 +1800,7 @@ TEST(MockMethodTest, CanReturnMoveOnlyValue_Invoke) {
 
   // Check default value
   DefaultValue<std::unique_ptr<int>>::SetFactory(
-      [] { return std::unique_ptr<int>(new int(42)); });
+      [] { return std::make_unique<int>(42); });
   EXPECT_EQ(42, *mock.MakeUnique());
 
   EXPECT_CALL(mock, MakeUnique()).WillRepeatedly(Invoke(UniquePtrSource));
@@ -1822,7 +1820,7 @@ TEST(MockMethodTest, CanReturnMoveOnlyValue_Invoke) {
 
 TEST(MockMethodTest, CanTakeMoveOnlyValue) {
   MockClass mock;
-  auto make = [](int i) { return std::unique_ptr<int>(new int(i)); };
+  auto make = [](int i) { return std::make_unique<int>(i); };
 
   EXPECT_CALL(mock, TakeUnique(_)).WillRepeatedly([](std::unique_ptr<int> i) {
     return *i;
@@ -2053,9 +2051,7 @@ struct Double {
   }
 };
 
-std::unique_ptr<int> UniqueInt(int i) {
-  return std::unique_ptr<int>(new int(i));
-}
+std::unique_ptr<int> UniqueInt(int i) { return std::make_unique<int>(i); }
 
 TEST(FunctorActionTest, ActionFromFunction) {
   Action<int(int, int&, int*)> a = &Add;

@@ -31,6 +31,7 @@
 //
 // This file tests some commonly used argument matchers.
 
+#include <memory>
 #include <vector>
 
 #include "test/gmock-matchers_test.h"
@@ -1542,7 +1543,7 @@ TEST(PairTest, MatchesCorrectly) {
 
 TEST(PairTest, WorksWithMoveOnly) {
   pair<std::unique_ptr<int>, std::unique_ptr<int>> p;
-  p.second.reset(new int(7));
+  p.second = std::make_unique<int>(7);
   EXPECT_THAT(p, Pair(Eq(nullptr), Ne(nullptr)));
 }
 
