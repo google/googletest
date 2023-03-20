@@ -40,7 +40,6 @@ using ::testing::Test;
 using ::testing::TestEventListeners;
 using ::testing::TestInfo;
 using ::testing::TestPartResult;
-using ::testing::TestSuite;
 using ::testing::UnitTest;
 namespace {
 // Provides alternative output mode which produces minimal amount of
