@@ -1328,8 +1328,7 @@ static pid_t ExecDeathTestSpawnChild(char* const* argv, int close_fd) {
 #endif  // GTEST_HAS_CLONE
 
   if (use_fork && (child_pid = fork()) == 0) {
-    ExecDeathTestChildMain(&args);
-    _exit(0);
+    _exit(ExecDeathTestChildMain(&args));
   }
 #endif  // GTEST_OS_QNX
 #ifdef GTEST_OS_LINUX
