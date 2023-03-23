@@ -408,7 +408,7 @@ uint32_t Random::Generate(uint32_t range) {
 // GTestIsInitialized() returns true if and only if the user has initialized
 // Google Test.  Useful for catching the user mistake of not initializing
 // Google Test before calling RUN_ALL_TESTS().
-static bool GTestIsInitialized() { return GetArgvs().size() > 0; }
+static bool GTestIsInitialized() { return !GetArgvs().empty(); }
 
 // Iterates over a vector of TestSuites, keeping a running sum of the
 // results of calling a given int-returning method on each.
@@ -5306,7 +5306,7 @@ void UnitTest::AddTestPartResult(TestPartResult::Type result_type,
   msg << message;
 
   internal::MutexLock lock(&mutex_);
-  if (impl_->gtest_trace_stack().size() > 0) {
+  if (!impl_->gtest_trace_stack().empty()) {
     msg << "\n" << GTEST_NAME_ << " trace:";
 
     for (size_t i = impl_->gtest_trace_stack().size(); i > 0; --i) {
@@ -5606,7 +5606,7 @@ void UnitTestImpl::RecordProperty(const TestProperty& test_property) {
 // Disables event forwarding if the control is currently in a death test
 // subprocess. Must not be called before InitGoogleTest.
 void UnitTestImpl::SuppressTestEventsIfInSubprocess() {
-  if (internal_run_death_test_flag_.get() != nullptr)
+  if (internal_run_death_test_flag_ != nullptr)
     listeners()->SuppressEventForwarding();
 }
 #endif  // GTEST_HAS_DEATH_TEST
@@ -5622,7 +5622,7 @@ void UnitTestImpl::ConfigureXmlOutput() {
   } else if (output_format == "json") {
     listeners()->SetDefaultXmlGenerator(new JsonUnitTestResultPrinter(
         UnitTestOptions::GetAbsolutePathToOutputFile().c_str()));
-  } else if (output_format != "") {
+  } else if (!output_format.empty()) {
     GTEST_LOG_(WARNING) << "WARNING: unrecognized output format \""
                         << output_format << "\" ignored.";
   }
@@ -5804,8 +5804,7 @@ bool UnitTestImpl::RunAllTests() {
   bool in_subprocess_for_death_test = false;
 
 #ifdef GTEST_HAS_DEATH_TEST
-  in_subprocess_for_death_test =
-      (internal_run_death_test_flag_.get() != nullptr);
+  in_subprocess_for_death_test = (internal_run_death_test_flag_ != nullptr);
 #if defined(GTEST_EXTRA_DEATH_TEST_CHILD_SETUP_)
   if (in_subprocess_for_death_test) {
     GTEST_EXTRA_DEATH_TEST_CHILD_SETUP_();

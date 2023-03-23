@@ -1524,7 +1524,7 @@ static int GetStatusFileDescriptor(unsigned int parent_process_id,
 // initialized from the GTEST_FLAG(internal_run_death_test) flag if
 // the flag is specified; otherwise returns NULL.
 InternalRunDeathTestFlag* ParseInternalRunDeathTestFlag() {
-  if (GTEST_FLAG_GET(internal_run_death_test) == "") return nullptr;
+  if (GTEST_FLAG_GET(internal_run_death_test).empty()) return nullptr;
 
   // GTEST_HAS_DEATH_TEST implies that we have ::std::string, so we
   // can use it here.
