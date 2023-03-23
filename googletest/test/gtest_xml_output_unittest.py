@@ -59,8 +59,10 @@ SUPPORTS_STACK_TRACES = NO_STACKTRACE_SUPPORT_FLAG not in sys.argv
 
 if SUPPORTS_STACK_TRACES:
   STACK_TRACE_TEMPLATE = '\nStack trace:\n*'
+  STACK_TRACE_ENTITY_TEMPLATE = ''
 else:
-  STACK_TRACE_TEMPLATE = ''
+  STACK_TRACE_TEMPLATE = '\n'
+  STACK_TRACE_ENTITY_TEMPLATE = '&#x0A;'
   # unittest.main() can't handle unknown flags
   sys.argv.remove(NO_STACKTRACE_SUPPORT_FLAG)
 
@@ -71,7 +73,7 @@ EXPECTED_NON_EMPTY_XML = """<?xml version="1.0" encoding="UTF-8"?>
   </testsuite>
   <testsuite name="FailedTest" tests="1" failures="1" disabled="0" skipped="0" errors="0" time="*" timestamp="*">
     <testcase name="Fails" file="gtest_xml_output_unittest_.cc" line="59" status="run" result="completed" time="*" timestamp="*" classname="FailedTest">
-      <failure message="gtest_xml_output_unittest_.cc:*&#x0A;Expected equality of these values:&#x0A;  1&#x0A;  2" type=""><![CDATA[gtest_xml_output_unittest_.cc:*
+      <failure message="gtest_xml_output_unittest_.cc:*&#x0A;Expected equality of these values:&#x0A;  1&#x0A;  2%(stack_entity)s" type=""><![CDATA[gtest_xml_output_unittest_.cc:*
 Expected equality of these values:
   1
   2%(stack)s]]></failure>
@@ -80,11 +82,11 @@ Expected equality of these values:
   <testsuite name="MixedResultTest" tests="3" failures="1" disabled="1" skipped="0" errors="0" time="*" timestamp="*">
     <testcase name="Succeeds" file="gtest_xml_output_unittest_.cc" line="86" status="run" result="completed" time="*" timestamp="*" classname="MixedResultTest"/>
     <testcase name="Fails" file="gtest_xml_output_unittest_.cc" line="91" status="run" result="completed" time="*" timestamp="*" classname="MixedResultTest">
-      <failure message="gtest_xml_output_unittest_.cc:*&#x0A;Expected equality of these values:&#x0A;  1&#x0A;  2" type=""><![CDATA[gtest_xml_output_unittest_.cc:*
+      <failure message="gtest_xml_output_unittest_.cc:*&#x0A;Expected equality of these values:&#x0A;  1&#x0A;  2%(stack_entity)s" type=""><![CDATA[gtest_xml_output_unittest_.cc:*
 Expected equality of these values:
   1
   2%(stack)s]]></failure>
-      <failure message="gtest_xml_output_unittest_.cc:*&#x0A;Expected equality of these values:&#x0A;  2&#x0A;  3" type=""><![CDATA[gtest_xml_output_unittest_.cc:*
+      <failure message="gtest_xml_output_unittest_.cc:*&#x0A;Expected equality of these values:&#x0A;  2&#x0A;  3%(stack_entity)s" type=""><![CDATA[gtest_xml_output_unittest_.cc:*
 Expected equality of these values:
   2
   3%(stack)s]]></failure>
@@ -93,14 +95,14 @@ Expected equality of these values:
   </testsuite>
   <testsuite name="XmlQuotingTest" tests="1" failures="1" disabled="0" skipped="0" errors="0" time="*" timestamp="*">
     <testcase name="OutputsCData" file="gtest_xml_output_unittest_.cc" line="100" status="run" result="completed" time="*" timestamp="*" classname="XmlQuotingTest">
-      <failure message="gtest_xml_output_unittest_.cc:*&#x0A;Failed&#x0A;XML output: &lt;?xml encoding=&quot;utf-8&quot;&gt;&lt;top&gt;&lt;![CDATA[cdata text]]&gt;&lt;/top&gt;" type=""><![CDATA[gtest_xml_output_unittest_.cc:*
+      <failure message="gtest_xml_output_unittest_.cc:*&#x0A;Failed&#x0A;XML output: &lt;?xml encoding=&quot;utf-8&quot;&gt;&lt;top&gt;&lt;![CDATA[cdata text]]&gt;&lt;/top&gt;%(stack_entity)s" type=""><![CDATA[gtest_xml_output_unittest_.cc:*
 Failed
 XML output: <?xml encoding="utf-8"><top><![CDATA[cdata text]]>]]&gt;<![CDATA[</top>%(stack)s]]></failure>
     </testcase>
   </testsuite>
   <testsuite name="InvalidCharactersTest" tests="1" failures="1" disabled="0" skipped="0" errors="0" time="*" timestamp="*">
     <testcase name="InvalidCharactersInMessage" file="gtest_xml_output_unittest_.cc" line="107" status="run" result="completed" time="*" timestamp="*" classname="InvalidCharactersTest">
-      <failure message="gtest_xml_output_unittest_.cc:*&#x0A;Failed&#x0A;Invalid characters in brackets []" type=""><![CDATA[gtest_xml_output_unittest_.cc:*
+      <failure message="gtest_xml_output_unittest_.cc:*&#x0A;Failed&#x0A;Invalid characters in brackets []%(stack_entity)s" type=""><![CDATA[gtest_xml_output_unittest_.cc:*
 Failed
 Invalid characters in brackets []%(stack)s]]></failure>
     </testcase>
@@ -110,19 +112,19 @@ Invalid characters in brackets []%(stack)s]]></failure>
   </testsuite>
   <testsuite name="SkippedTest" tests="3" failures="1" disabled="0" skipped="2" errors="0" time="*" timestamp="*">
     <testcase name="Skipped" status="run" file="gtest_xml_output_unittest_.cc" line="73" result="skipped" time="*" timestamp="*" classname="SkippedTest">
-      <skipped message="gtest_xml_output_unittest_.cc:*&#x0A;"><![CDATA[gtest_xml_output_unittest_.cc:*
+      <skipped message="gtest_xml_output_unittest_.cc:*&#x0A;%(stack_entity)s"><![CDATA[gtest_xml_output_unittest_.cc:*
 %(stack)s]]></skipped>
     </testcase>
     <testcase name="SkippedWithMessage" file="gtest_xml_output_unittest_.cc" line="77" status="run" result="skipped" time="*" timestamp="*" classname="SkippedTest">
-      <skipped message="gtest_xml_output_unittest_.cc:*&#x0A;It is good practice to tell why you skip a test."><![CDATA[gtest_xml_output_unittest_.cc:*
+      <skipped message="gtest_xml_output_unittest_.cc:*&#x0A;It is good practice to tell why you skip a test.%(stack_entity)s"><![CDATA[gtest_xml_output_unittest_.cc:*
 It is good practice to tell why you skip a test.%(stack)s]]></skipped>
     </testcase>
     <testcase name="SkippedAfterFailure" file="gtest_xml_output_unittest_.cc" line="81" status="run" result="completed" time="*" timestamp="*" classname="SkippedTest">
-      <failure message="gtest_xml_output_unittest_.cc:*&#x0A;Expected equality of these values:&#x0A;  1&#x0A;  2" type=""><![CDATA[gtest_xml_output_unittest_.cc:*
+      <failure message="gtest_xml_output_unittest_.cc:*&#x0A;Expected equality of these values:&#x0A;  1&#x0A;  2%(stack_entity)s" type=""><![CDATA[gtest_xml_output_unittest_.cc:*
 Expected equality of these values:
   1
   2%(stack)s]]></failure>
-      <skipped message="gtest_xml_output_unittest_.cc:*&#x0A;It is good practice to tell why you skip a test."><![CDATA[gtest_xml_output_unittest_.cc:*
+      <skipped message="gtest_xml_output_unittest_.cc:*&#x0A;It is good practice to tell why you skip a test.%(stack_entity)s"><![CDATA[gtest_xml_output_unittest_.cc:*
 It is good practice to tell why you skip a test.%(stack)s]]></skipped>
     </testcase>
 
@@ -187,7 +189,8 @@ It is good practice to tell why you skip a test.%(stack)s]]></skipped>
     <testcase name="HasTypeParamAttribute" file="gtest_xml_output_unittest_.cc" line="178" type_param="*" status="run" result="completed" time="*" timestamp="*" classname="Single/TypeParameterizedTestSuite/1" />
   </testsuite>
 </testsuites>""" % {
-    'stack': STACK_TRACE_TEMPLATE
+    'stack': STACK_TRACE_TEMPLATE,
+    'stack_entity': STACK_TRACE_ENTITY_TEMPLATE,
 }
 
 EXPECTED_FILTERED_TEST_XML = """<?xml version="1.0" encoding="UTF-8"?>
@@ -221,14 +224,15 @@ EXPECTED_NO_TEST_XML = """<?xml version="1.0" encoding="UTF-8"?>
             timestamp="*" name="AllTests">
   <testsuite name="NonTestSuiteFailure" tests="1" failures="1" disabled="0" skipped="0" errors="0" time="*" timestamp="*">
     <testcase name="" status="run" result="completed" time="*" timestamp="*" classname="">
-      <failure message="gtest_no_test_unittest.cc:*&#x0A;Expected equality of these values:&#x0A;  1&#x0A;  2" type=""><![CDATA[gtest_no_test_unittest.cc:*
+      <failure message="gtest_no_test_unittest.cc:*&#x0A;Expected equality of these values:&#x0A;  1&#x0A;  2%(stack_entity)s" type=""><![CDATA[gtest_no_test_unittest.cc:*
 Expected equality of these values:
   1
   2%(stack)s]]></failure>
     </testcase>
   </testsuite>
 </testsuites>""" % {
-    'stack': STACK_TRACE_TEMPLATE
+    'stack': STACK_TRACE_TEMPLATE,
+    'stack_entity': STACK_TRACE_ENTITY_TEMPLATE,
 }
 
 GTEST_PROGRAM_PATH = gtest_test_utils.GetTestExecutablePath(GTEST_PROGRAM_NAME)

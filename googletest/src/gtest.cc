@@ -5319,6 +5319,8 @@ void UnitTest::AddTestPartResult(TestPartResult::Type result_type,
 
   if (os_stack_trace.c_str() != nullptr && !os_stack_trace.empty()) {
     msg << internal::kStackTraceMarker << os_stack_trace;
+  } else {
+    msg << "\n";
   }
 
   const TestPartResult result = TestPartResult(
