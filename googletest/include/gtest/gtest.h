@@ -551,14 +551,14 @@ class GTEST_API_ TestInfo {
   // Returns the name of the parameter type, or NULL if this is not a typed
   // or a type-parameterized test.
   const char* type_param() const {
-    if (type_param_.get() != nullptr) return type_param_->c_str();
+    if (type_param_ != nullptr) return type_param_->c_str();
     return nullptr;
   }
 
   // Returns the text representation of the value parameter, or NULL if this
   // is not a value-parameterized test.
   const char* value_param() const {
-    if (value_param_.get() != nullptr) return value_param_->c_str();
+    if (value_param_ != nullptr) return value_param_->c_str();
     return nullptr;
   }
 
@@ -697,7 +697,7 @@ class GTEST_API_ TestSuite {
   // Returns the name of the parameter type, or NULL if this is not a
   // type-parameterized test suite.
   const char* type_param() const {
-    if (type_param_.get() != nullptr) return type_param_->c_str();
+    if (type_param_ != nullptr) return type_param_->c_str();
     return nullptr;
   }
 
