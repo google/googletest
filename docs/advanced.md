@@ -1066,7 +1066,7 @@ they must be declared **public** rather than **protected** in order to use
 
 ```c++
 class FooTest :
-    public testing::TestWithParam<const char*> {
+    public testing::TestWithParam<absl::string_view> {
   // You can implement all the usual fixture class members here.
   // To access the test parameter, call GetParam() from class
   // TestWithParam<T>.
@@ -1077,7 +1077,7 @@ class BaseTest : public testing::Test {
   ...
 };
 class BarTest : public BaseTest,
-                public testing::WithParamInterface<const char*> {
+                public testing::WithParamInterface<absl::string_view> {
   ...
 };
 ```
@@ -1148,8 +1148,8 @@ with parameter values `"cat"` and `"dog"` using the
 [`ValuesIn`](reference/testing.md#param-generators) parameter generator:
 
 ```c++
-const char* pets[] = {"cat", "dog"};
-INSTANTIATE_TEST_SUITE_P(Pets, FooTest, testing::ValuesIn(pets));
+constexpr absl::string_view kPets[] = {"cat", "dog"};
+INSTANTIATE_TEST_SUITE_P(Pets, FooTest, testing::ValuesIn(kPets));
 ```
 
 The tests from the instantiation above will have these names:
