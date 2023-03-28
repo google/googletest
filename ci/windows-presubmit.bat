@@ -2,8 +2,8 @@ SETLOCAL ENABLEDELAYEDEXPANSION
 
 SET BAZEL_EXE=%KOKORO_GFILE_DIR%\bazel-5.1.1-windows-x86_64.exe
 
-SET PATH=C:\Python37;%PATH%
-SET BAZEL_PYTHON=C:\python37\python.exe
+SET PATH=C:\Python34;%PATH%
+SET BAZEL_PYTHON=C:\python34\python.exe
 SET BAZEL_SH=C:\tools\msys64\usr\bin\bash.exe
 SET CMAKE_BIN="cmake.exe"
 SET CTEST_BIN="ctest.exe"
@@ -20,12 +20,12 @@ IF EXIST git\googletest (
 IF %errorlevel% neq 0 EXIT /B 1
 
 :: ----------------------------------------------------------------------------
-:: CMake Visual Studio 17 2022 Win64
+:: CMake
 MKDIR cmake_msvc2022
 CD cmake_msvc2022
 
 %CMAKE_BIN% .. ^
-  -G "Visual Studio 17 2022 Win64" ^
+  -G "Visual Studio 17 2022" ^
   -DPYTHON_EXECUTABLE:FILEPATH=c:\python37\python.exe ^
   -DPYTHON_INCLUDE_DIR:PATH=c:\python37\include ^
   -DPYTHON_LIBRARY:FILEPATH=c:\python37\lib\site-packages\pip ^
@@ -44,7 +44,7 @@ CD ..
 RMDIR /S /Q cmake_msvc2022
 
 :: ----------------------------------------------------------------------------
-:: Bazel Visual Studio 17 2022 Win64
+:: Bazel
 
 SET BAZEL_VS=C:\Program Files\Microsoft Visual Studio\2022\Community
 %BAZEL_EXE% test ... ^
