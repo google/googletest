@@ -44,6 +44,7 @@
 #include <chrono>  // NOLINT
 #include <cmath>
 #include <cstdint>
+#include <cstring>
 #include <initializer_list>
 #include <iomanip>
 #include <ios>
@@ -2980,6 +2981,25 @@ void TestSuite::Run() {
   impl->set_current_test_suite(this);
 
   TestEventListener* repeater = UnitTest::GetInstance()->listeners().repeater();
+
+  // Ensure our tests are in a deterministic order.
+  //
+  // We do this by sorting lexicographically on (file, line number), providing
+  // an order matching what the user can see in the source code.
+  //
+  // In the common case the line number comparison shouldn't be necessary,
+  // because the registrations made by the TEST macro are executed in order
+  // within a translation unit. But this is not true of the manual registration
+  // API, and in more exotic scenarios a single file may be part of multiple
+  // translation units.
+  std::stable_sort(test_info_list_.begin(), test_info_list_.end(),
+                   [](const TestInfo* const a, const TestInfo* const b) {
+                     if (const int result = std::strcmp(a->file(), a->file())) {
+                       return result < 0;
+                     }
+
+                     return a->line() < b->line();
+                   });
 
   // Call both legacy and the new API
   repeater->OnTestSuiteStart(*this);
