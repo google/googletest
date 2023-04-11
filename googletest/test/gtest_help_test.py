@@ -43,6 +43,7 @@ import sys
 from googletest.test import gtest_test_utils
 
 
+IS_DARWIN = os.name == 'posix' and os.uname()[0] == 'Darwin'
 IS_LINUX = os.name == 'posix' and os.uname()[0] == 'Linux'
 IS_GNUHURD = os.name == 'posix' and os.uname()[0] == 'GNU'
 IS_GNUKFREEBSD = os.name == 'posix' and os.uname()[0] == 'GNU/kFreeBSD'
@@ -136,7 +137,7 @@ class GTestHelpTest(gtest_test_utils.TestCase):
 
     self.assertTrue(HELP_REGEX.search(output), output)
 
-    if IS_LINUX or IS_GNUHURD or IS_GNUKFREEBSD or IS_OPENBSD:
+    if IS_DARWIN or IS_LINUX or IS_GNUHURD or IS_GNUKFREEBSD or IS_OPENBSD:
       self.assertIn(STREAM_RESULT_TO_FLAG, output)
     else:
       self.assertNotIn(STREAM_RESULT_TO_FLAG, output)
