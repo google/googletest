@@ -204,6 +204,9 @@ class GTEST_API_ UntypedFunctionMockerBase {
 
   using UntypedExpectations = std::vector<std::shared_ptr<ExpectationBase>>;
 
+  struct UninterestingCallCleanupHandler;
+  struct FailureCleanupHandler;
+
   // Returns an Expectation object that references and co-owns exp,
   // which must be an expectation on this mock function.
   Expectation GetHandleOf(ExpectationBase* exp);
@@ -1396,6 +1399,41 @@ class Cleanup final {
   std::function<void()> f_;
 };
 
+struct UntypedFunctionMockerBase::UninterestingCallCleanupHandler {
+  CallReaction reaction;
+  std::stringstream& ss;
+
+  ~UninterestingCallCleanupHandler() {
+    ReportUninterestingCall(reaction, ss.str());
+  }
+};
+
+struct UntypedFunctionMockerBase::FailureCleanupHandler {
+  std::stringstream& ss;
+  std::stringstream& why;
+  std::stringstream& loc;
+  const ExpectationBase* untyped_expectation;
+  bool found;
+  bool is_excessive;
+
+  ~FailureCleanupHandler() {
+    ss << "\n" << why.str();
+
+    if (!found) {
+      // No expectation matches this call - reports a failure.
+      Expect(false, nullptr, -1, ss.str());
+    } else if (is_excessive) {
+      // We had an upper-bound violation and the failure message is in ss.
+      Expect(false, untyped_expectation->file(), untyped_expectation->line(),
+             ss.str());
+    } else {
+      // We had an expected call and the matching expectation is
+      // described in ss.
+      Log(kInfo, loc.str() + ss.str(), 2);
+    }
+  }
+};
+
 template <typename F>
 class FunctionMocker;
 
@@ -1794,8 +1832,15 @@ R FunctionMocker<R(Args...)>::InvokeWith(ArgumentTuple&& args)
     //
     // We use RAII to do the latter in case R is void or a non-moveable type. In
     // either case we can't assign it to a local variable.
-    const Cleanup report_uninteresting_call(
-        [&] { ReportUninterestingCall(reaction, ss.str()); });
+    //
+    // Note that std::bind() is essential here.
+    // We *don't* use any local callback types (like lambdas).
+    // Doing so slows down compilation dramatically because the *constructor* of
+    // std::function<T> is re-instantiated with different template
+    // parameters each time.
+    const UninterestingCallCleanupHandler report_uninteresting_call = {
+        reaction, ss
+    };
 
     return PerformActionAndPrintResult(nullptr, std::move(args), ss.str(), ss);
   }
@@ -1839,22 +1884,14 @@ R FunctionMocker<R(Args...)>::InvokeWith(ArgumentTuple&& args)
   //
   // We use RAII to do the latter in case R is void or a non-moveable type. In
   // either case we can't assign it to a local variable.
-  const Cleanup handle_failures([&] {
-    ss << "\n" << why.str();
-
-    if (!found) {
-      // No expectation matches this call - reports a failure.
-      Expect(false, nullptr, -1, ss.str());
-    } else if (is_excessive) {
-      // We had an upper-bound violation and the failure message is in ss.
-      Expect(false, untyped_expectation->file(), untyped_expectation->line(),
-             ss.str());
-    } else {
-      // We had an expected call and the matching expectation is
-      // described in ss.
-      Log(kInfo, loc.str() + ss.str(), 2);
-    }
-  });
+  //
+  // Note that we *don't* use any local callback types (like lambdas) here.
+  // Doing so slows down compilation dramatically because the *constructor* of
+  // std::function<T> is re-instantiated with different template
+  // parameters each time.
+  const FailureCleanupHandler handle_failures = {
+      ss, why, loc, untyped_expectation, found, is_excessive
+  };
 
   return PerformActionAndPrintResult(untyped_action, std::move(args), ss.str(),
                                      ss);
