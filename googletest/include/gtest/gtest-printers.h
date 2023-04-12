@@ -206,12 +206,13 @@ struct StreamPrinter {
             // Don't accept member pointers here. We'd print them via implicit
             // conversion to bool, which isn't useful.
             typename = typename std::enable_if<
-                !std::is_member_pointer<T>::value>::type,
-            // Only accept types for which we can find a streaming operator via
-            // ADL (possibly involving implicit conversions).
-            typename = decltype(std::declval<std::ostream&>()
-                                << std::declval<const T&>())>
-  static void PrintValue(const T& value, ::std::ostream* os) {
+                !std::is_member_pointer<T>::value>::type>
+  // Only accept types for which we can find a streaming operator via
+  // ADL (possibly involving implicit conversions).
+  // (Use SFINAE via return type, because it seems GCC < 12 doesn't handle name
+  // lookup properly when we do it in the template parameter list.)
+  static auto PrintValue(const T& value, ::std::ostream* os)
+      -> decltype((void)(*os << value)) {
     // Call streaming operator found by ADL, possibly with implicit conversions
     // of the arguments.
     *os << value;
