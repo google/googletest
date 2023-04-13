@@ -254,14 +254,24 @@ if (gtest_build_tests)
     "${cxx_exception} -DGTEST_ENABLE_CATCH_EXCEPTIONS_=1"
     gtest test/googletest-death-test_ex_test.cc)
 
-  cxx_test_with_flags(gtest_no_rtti_unittest "${cxx_no_rtti}"
-    gtest_main_no_rtti test/gtest_unittest.cc)
+  if(QNX)
+    cxx_test_with_flags(gtest_no_rtti_unittest "${cxx_no_rtti}"
+      "gtest_main_no_rtti;regex" test/gtest_unittest.cc)
+  else()
+    cxx_test_with_flags(gtest_no_rtti_unittest "${cxx_no_rtti}"
+      gtest_main_no_rtti test/gtest_unittest.cc)
+  endif()
 
   cxx_shared_library(gtest_dll "${cxx_default}"
     src/gtest-all.cc src/gtest_main.cc)
 
-  cxx_executable_with_flags(gtest_dll_test_ "${cxx_default}"
-    gtest_dll test/gtest_all_test.cc)
+  if(QNX)
+    cxx_executable_with_flags(gtest_dll_test_ "${cxx_default}"
+      "gtest_dll;regex" test/gtest_all_test.cc)
+  else()
+    cxx_executable_with_flags(gtest_dll_test_ "${cxx_default}"
+      gtest_dll test/gtest_all_test.cc)
+  endif()
   set_target_properties(gtest_dll_test_
                         PROPERTIES
                         COMPILE_DEFINITIONS "GTEST_LINKED_AS_SHARED_LIBRARY=1")
@@ -277,11 +287,19 @@ if (gtest_build_tests)
 
   # Visual Studio .NET 2003 does not support STL with exceptions disabled.
   if (NOT MSVC OR MSVC_VERSION GREATER 1310)  # 1310 is Visual Studio .NET 2003
-    cxx_executable_with_flags(
-      googletest-catch-exceptions-no-ex-test_
-      "${cxx_no_exception}"
-      gtest_main_no_exception
-      test/googletest-catch-exceptions-test_.cc)
+    if(QNX)
+      cxx_executable_with_flags(
+        googletest-catch-exceptions-no-ex-test_
+        "${cxx_no_exception}"
+        "gtest_main_no_exception;regex"
+        test/googletest-catch-exceptions-test_.cc)
+    else()
+      cxx_executable_with_flags(
+        googletest-catch-exceptions-no-ex-test_
+        "${cxx_no_exception}"
+        gtest_main_no_exception
+        test/googletest-catch-exceptions-test_.cc)
+    endif()
   endif()
 
   cxx_executable_with_flags(
@@ -314,7 +332,11 @@ if (gtest_build_tests)
 
   # MSVC 7.1 does not support STL with exceptions disabled.
   if (NOT MSVC OR MSVC_VERSION GREATER 1310)
-    cxx_executable(googletest-throw-on-failure-test_ test gtest_no_exception)
+    if(QNX)
+      cxx_executable(googletest-throw-on-failure-test_ test "gtest_no_exception;regex")
+    else()
+      cxx_executable(googletest-throw-on-failure-test_ test gtest_no_exception)
+    endif()
     set_target_properties(googletest-throw-on-failure-test_
       PROPERTIES
       COMPILE_FLAGS "${cxx_no_exception}")
@@ -335,4 +357,13 @@ if (gtest_build_tests)
   cxx_executable(gtest_xml_output_unittest_ test gtest)
   py_test(gtest_xml_output_unittest --no_stacktrace_support)
   py_test(googletest-json-output-unittest --no_stacktrace_support)
+
+  if(QNX AND INSTALL_GTEST)
+    install(DIRECTORY ${PROJECT_BINARY_DIR}/
+      DESTINATION bin/googletest_tests
+      PATTERN "Makefile" EXCLUDE
+      PATTERN "CMakeFiles" EXCLUDE
+      PATTERN "*.cmake" EXCLUDE
+      PATTERN "generated" EXCLUDE)
+  endif()
 endif()
