@@ -2781,26 +2781,21 @@ action:
 If you are not happy with the default action, you can tweak it as usual; see
 [Setting Default Actions](#OnCall).
 
-If you just need to return a pre-defined move-only value, you can use the
-`Return(ByMove(...))` action:
+If you just need to return a move-only value, you can use it in combination with
+`WillOnce`. For example:
 
 ```cpp
-  // When this fires, the unique_ptr<> specified by ByMove(...) will
-  // be returned.
-  EXPECT_CALL(mock_buzzer_, MakeBuzz("world"))
-      .WillOnce(Return(ByMove(std::make_unique<Buzz>(AccessLevel::kInternal))));
-
-  EXPECT_NE(nullptr, mock_buzzer_.MakeBuzz("world"));
+  EXPECT_CALL(mock_buzzer_, MakeBuzz("hello"))
+      .WillOnce(Return(std::make_unique<Buzz>(AccessLevel::kInternal)));
+  EXPECT_NE(nullptr, mock_buzzer_.MakeBuzz("hello"));
 ```
 
-Note that `ByMove()` is essential here - if you drop it, the code won’t compile.
-
-Quiz time! What do you think will happen if a `Return(ByMove(...))` action is
-performed more than once (e.g. you write `...
-.WillRepeatedly(Return(ByMove(...)));`)? Come think of it, after the first time
-the action runs, the source value will be consumed (since it’s a move-only
-value), so the next time around, there’s no value to move from -- you’ll get a
-run-time error that `Return(ByMove(...))` can only be run once.
+Quiz time! What do you think will happen if a `Return` action is performed more
+than once (e.g. you write `... .WillRepeatedly(Return(std::move(...)));`)? Come
+think of it, after the first time the action runs, the source value will be
+consumed (since it’s a move-only value), so the next time around, there’s no
+value to move from -- you’ll get a run-time error that `Return(std::move(...))`
+can only be run once.
 
 If you need your mock method to do more than just moving a pre-defined value,
 remember that you can always use a lambda or a callable object, which can do
@@ -2817,7 +2812,7 @@ pretty much anything you want:
 ```
 
 Every time this `EXPECT_CALL` fires, a new `unique_ptr<Buzz>` will be created
-and returned. You cannot do this with `Return(ByMove(...))`.
+and returned. You cannot do this with `Return(std::make_unique<...>(...))`.
 
 That covers returning move-only values; but how do we work with methods
 accepting move-only arguments? The answer is that they work normally, although
@@ -4298,7 +4293,7 @@ particular type than to dump the bytes.
 ### Mock std::function {#MockFunction}
 
 `std::function` is a general function type introduced in C++11. It is a
-preferred way of passing callbacks to new interfaces. Functions are copiable,
+preferred way of passing callbacks to new interfaces. Functions are copyable,
 and are not usually passed around by pointer, which makes them tricky to mock.
 But fear not - `MockFunction` can help you with that.
 
