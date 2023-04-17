@@ -5544,7 +5544,8 @@ PolymorphicMatcher<internal::ExceptionMatcherImpl<Err>> ThrowsMessage(
                                                                                \
      private:                                                                  \
       ::std::string FormatDescription(bool negation) const {                   \
-        ::std::string gmock_description = (description);                       \
+        ::std::string gmock_description;                                       \
+        gmock_description = (description);                                     \
         if (!gmock_description.empty()) {                                      \
           return gmock_description;                                            \
         }                                                                      \
