@@ -41,6 +41,7 @@
 #include <cctype>
 #include <cstdint>
 #include <cstring>
+#include <iostream>
 #include <ostream>  // NOLINT
 #include <string>
 #include <vector>

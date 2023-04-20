@@ -29,6 +29,8 @@
 
 // Tests Google Mock's functionality that depends on exceptions.
 
+#include <exception>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 

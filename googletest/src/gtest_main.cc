@@ -28,7 +28,6 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <cstdio>
-
 #include "gtest/gtest.h"
 
 #if defined(GTEST_OS_ESP8266) || defined(GTEST_OS_ESP32)

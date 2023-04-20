@@ -32,6 +32,7 @@
 // This file verifies Google Test event listeners receive events at the
 // right times.
 
+#include <string>
 #include <vector>
 
 #include "gtest/gtest.h"

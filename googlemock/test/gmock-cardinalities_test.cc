@@ -31,6 +31,8 @@
 //
 // This file tests the built-in cardinalities.
 
+#include <ostream>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest-spi.h"
 #include "gtest/gtest.h"

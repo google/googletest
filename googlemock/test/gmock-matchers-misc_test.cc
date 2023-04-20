@@ -31,6 +31,14 @@
 //
 // This file tests some commonly used argument matchers.
 
+#include <array>
+#include <memory>
+#include <ostream>
+#include <string>
+#include <tuple>
+#include <utility>
+#include <vector>
+
 #include "gtest/gtest.h"
 
 // Silence warning C4244: 'initializing': conversion from 'int' to 'short',

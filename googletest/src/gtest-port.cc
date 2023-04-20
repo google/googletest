@@ -37,6 +37,10 @@
 #include <cstdint>
 #include <fstream>
 #include <memory>
+#include <ostream>
+#include <string>
+#include <utility>
+#include <vector>
 
 #ifdef GTEST_OS_WINDOWS
 #include <io.h>

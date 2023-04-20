@@ -257,6 +257,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <exception>
 #include <functional>
 #include <initializer_list>
 #include <ios>
