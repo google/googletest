@@ -30,7 +30,9 @@
 // Tests that SCOPED_TRACE() and various Google Test assertions can be
 // used in a large number of threads concurrently.
 
+#include <algorithm>
 #include <memory>
+#include <string>
 #include <vector>
 
 #include "gtest/gtest.h"

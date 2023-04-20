@@ -31,7 +31,10 @@
 //
 // This file tests some commonly used argument matchers.
 
+#include <cmath>
 #include <limits>
+#include <memory>
+#include <string>
 
 #include "test/gmock-matchers_test.h"
 

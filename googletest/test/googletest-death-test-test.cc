@@ -52,6 +52,9 @@ using testing::internal::AlwaysTrue;
 #include <signal.h>
 #include <stdio.h>
 
+#include <string>
+#include <vector>
+
 #ifdef GTEST_OS_LINUX
 #include <sys/time.h>
 #endif  // GTEST_OS_LINUX
