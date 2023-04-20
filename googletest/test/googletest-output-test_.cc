@@ -35,6 +35,9 @@
 
 #include <stdlib.h>
 
+#include <algorithm>
+#include <string>
+
 #include "gtest/gtest-spi.h"
 #include "gtest/gtest.h"
 #include "src/gtest-internal-inl.h"

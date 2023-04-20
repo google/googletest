@@ -90,7 +90,7 @@ EXPECTED_2 = {
         'testsuite': [{
             'name': 'TestInt64ConvertibleProperties',
             'file': 'gtest_xml_outfile2_test_.cc',
-            'line': 41,
+            'line': 43,
             'status': 'RUN',
             'result': 'COMPLETED',
             'timestamp': '*',
