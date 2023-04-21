@@ -810,33 +810,33 @@ TEST(ExpectCallTest, InfersCardinality1WhenThereIsWillRepeatedly) {
 // C++17 and above, where it's guaranteed that such a type can be initialized
 // from a prvalue returned from a function.
 TEST(ExpectCallTest, NonMoveableType) {
-  // Define a non-moveable result type.
-  struct result {
-    explicit result(int x_in) : x(x_in) {}
-    result(result&&) = delete;
+  // Define a non-moveable NonMovableStruct type.
+  struct NonMoveableStruct {
+    explicit NonMoveableStruct(int x_in) : x(x_in) {}
+    NonMoveableStruct(result&&) = delete;
 
     int x;
   };
 
-  static_assert(!std::is_move_constructible_v<result>);
-  static_assert(!std::is_copy_constructible_v<result>);
+  static_assert(!std::is_move_constructible_v<NonMovableStruct>);
+  static_assert(!std::is_copy_constructible_v<NonMovableStruct>);
 
-  static_assert(!std::is_move_assignable_v<result>);
-  static_assert(!std::is_copy_assignable_v<result>);
+  static_assert(!std::is_move_assignable_v<NonMovableStruct>);
+  static_assert(!std::is_copy_assignable_v<NonMovableStruct>);
 
-  // We should be able to use a callable that returns that result as both a
+  // We should be able to use a callable that returns that NonMovableStruct as both a
   // OnceAction and an Action, whether the callable ignores arguments or not.
-  const auto return_17 = [] { return result(17); };
+  const auto return_17 = [] { return NonMovableStruct(17); };
 
-  static_cast<void>(OnceAction<result()>{return_17});
-  static_cast<void>(Action<result()>{return_17});
+  static_cast<void>(OnceAction<NonMovableStruct()>{return_17});
+  static_cast<void>(Action<NonMovableStruct()>{return_17});
 
-  static_cast<void>(OnceAction<result(int)>{return_17});
-  static_cast<void>(Action<result(int)>{return_17});
+  static_cast<void>(OnceAction<NonMovableStruct(int)>{return_17});
+  static_cast<void>(Action<NonMovableStruct(int)>{return_17});
 
-  // It should be possible to return the result end to end through an
+  // It should be possible to return the NonMovableStruct end to end through an
   // EXPECT_CALL statement, with both WillOnce and WillRepeatedly.
-  MockFunction<result()> mock;
+  MockFunction<NonMovableStruct()> mock;
   EXPECT_CALL(mock, Call)   //
       .WillOnce(return_17)  //
       .WillRepeatedly(return_17);
