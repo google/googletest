@@ -108,7 +108,7 @@ class UnprintableTemplateInGlobal {
 // A user-defined streamable type in the global namespace.
 class StreamableInGlobal {
  public:
-  virtual ~StreamableInGlobal() {}
+  virtual ~StreamableInGlobal() = default;
 };
 
 inline void operator<<(::std::ostream& os, const StreamableInGlobal& /* x */) {
@@ -216,7 +216,7 @@ class PathLike {
   using value_type = char;
   using const_iterator = iterator;
 
-  PathLike() {}
+  PathLike() = default;
 
   iterator begin() const { return iterator(); }
   iterator end() const { return iterator(); }
@@ -749,7 +749,7 @@ AssertionResult HasPrefix(const StringType& str, const StringType& prefix) {
 
 struct Foo {
  public:
-  virtual ~Foo() {}
+  virtual ~Foo() = default;
   int MyMethod(char x) { return x + 1; }
   virtual char MyVirtualMethod(int /* n */) { return 'a'; }
 

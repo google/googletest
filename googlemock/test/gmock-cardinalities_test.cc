@@ -52,7 +52,7 @@ using testing::MakeCardinality;
 
 class MockFoo {
  public:
-  MockFoo() {}
+  MockFoo() = default;
   MOCK_METHOD0(Bar, int());  // NOLINT
 
  private:

@@ -985,7 +985,7 @@ TEST(ReturnRoundRobinTest, WorksForVector) {
 
 class MockClass {
  public:
-  MockClass() {}
+  MockClass() = default;
 
   MOCK_METHOD1(IntFunc, int(bool flag));  // NOLINT
   MOCK_METHOD0(Foo, MyNonDefaultConstructible());

@@ -589,8 +589,8 @@ TEST(MatcherCastTest, ValueIsNotCopied) {
 
 class Base {
  public:
-  virtual ~Base() {}
-  Base() {}
+  virtual ~Base() = default;
+  Base() = default;
 
  private:
   Base(const Base&) = delete;

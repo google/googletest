@@ -53,7 +53,7 @@ using testing::Value;
 
 class MockFoo {
  public:
-  MockFoo() {}
+  MockFoo() = default;
 
   MOCK_METHOD3(Bar, char(const std::string& s, int i, double x));
   MOCK_METHOD2(Bar2, bool(int x, int y));

@@ -97,7 +97,7 @@ class Base {
   explicit Base(int n) : member_(n) {}
   Base(const Base&) = default;
   Base& operator=(const Base&) = default;
-  virtual ~Base() {}
+  virtual ~Base() = default;
   int member() { return member_; }
 
  private:
@@ -982,7 +982,7 @@ TEST(ThreadLocalTest, SingleParamConstructorInitializesToParam) {
 class NoDefaultConstructor {
  public:
   explicit NoDefaultConstructor(const char*) {}
-  NoDefaultConstructor(const NoDefaultConstructor&) {}
+  NoDefaultConstructor(const NoDefaultConstructor&) = default;
 };
 
 TEST(ThreadLocalTest, ValueDefaultContructorIsNotRequiredForParamVersion) {

@@ -4951,7 +4951,7 @@ TEST(ComparisonAssertionTest, AcceptsUnprintableArgs) {
 // both in a TEST and in a TEST_F.
 class Foo {
  public:
-  Foo() {}
+  Foo() = default;
 
  private:
   int Bar() const { return 1; }

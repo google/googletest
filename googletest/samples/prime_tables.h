@@ -39,7 +39,7 @@
 // The prime table interface.
 class PrimeTable {
  public:
-  virtual ~PrimeTable() {}
+  virtual ~PrimeTable() = default;
 
   // Returns true if and only if n is a prime number.
   virtual bool IsPrime(int n) const = 0;

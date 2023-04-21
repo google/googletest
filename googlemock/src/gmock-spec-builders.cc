@@ -96,7 +96,7 @@ ExpectationBase::ExpectationBase(const char* a_file, int a_line,
       action_count_checked_(false) {}
 
 // Destructs an ExpectationBase object.
-ExpectationBase::~ExpectationBase() {}
+ExpectationBase::~ExpectationBase() = default;
 
 // Explicitly specifies the cardinality of this expectation.  Used by
 // the subclasses to implement the .Times() clause.
@@ -309,7 +309,7 @@ void ReportUninterestingCall(CallReaction reaction, const std::string& msg) {
 UntypedFunctionMockerBase::UntypedFunctionMockerBase()
     : mock_obj_(nullptr), name_("") {}
 
-UntypedFunctionMockerBase::~UntypedFunctionMockerBase() {}
+UntypedFunctionMockerBase::~UntypedFunctionMockerBase() = default;
 
 // Sets the mock object this mock method belongs to, and registers
 // this information in the global mock registry.  Will be called
@@ -746,13 +746,13 @@ void Mock::ClearDefaultActionsLocked(void* mock_obj)
   // needed by VerifyAndClearExpectationsLocked().
 }
 
-Expectation::Expectation() {}
+Expectation::Expectation() = default;
 
 Expectation::Expectation(
     const std::shared_ptr<internal::ExpectationBase>& an_expectation_base)
     : expectation_base_(an_expectation_base) {}
 
-Expectation::~Expectation() {}
+Expectation::~Expectation() = default;
 
 // Adds an expectation to a sequence.
 void Sequence::AddExpectation(const Expectation& expectation) const {

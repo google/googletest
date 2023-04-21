@@ -566,7 +566,7 @@ class ExpectationSet {
   typedef Expectation::Set::value_type value_type;
 
   // Constructs an empty set.
-  ExpectationSet() {}
+  ExpectationSet() = default;
 
   // This single-argument ctor must not be explicit, in order to support the
   //   ExpectationSet es = EXPECT_CALL(...);
@@ -1446,7 +1446,7 @@ class FunctionMocker<R(Args...)> final : public UntypedFunctionMockerBase {
   using ArgumentTuple = std::tuple<Args...>;
   using ArgumentMatcherTuple = std::tuple<Matcher<Args>...>;
 
-  FunctionMocker() {}
+  FunctionMocker() = default;
 
   // There is no generally useful and implementable semantics of
   // copying a mock object, so copying a mock is usually a user error.

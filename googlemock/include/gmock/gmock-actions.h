@@ -611,7 +611,7 @@ class DefaultValue {
  private:
   class ValueProducer {
    public:
-    virtual ~ValueProducer() {}
+    virtual ~ValueProducer() = default;
     virtual T Produce() = 0;
   };
 
@@ -699,8 +699,8 @@ class ActionInterface {
   typedef typename internal::Function<F>::Result Result;
   typedef typename internal::Function<F>::ArgumentTuple ArgumentTuple;
 
-  ActionInterface() {}
-  virtual ~ActionInterface() {}
+  ActionInterface() = default;
+  virtual ~ActionInterface() = default;
 
   // Performs the action.  This method is not const, as in general an
   // action can have side effects and be stateful.  For example, a
@@ -749,7 +749,7 @@ class Action<R(Args...)> {
 
   // Constructs a null Action.  Needed for storing Action objects in
   // STL containers.
-  Action() {}
+  Action() = default;
 
   // Construct an Action from a specified callable.
   // This cannot take std::function directly, because then Action would not be

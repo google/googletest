@@ -2788,7 +2788,7 @@ TEST(ElementsAreTest, WorksWithNativeArrayPassedByReference) {
 
 class NativeArrayPassedAsPointerAndSize {
  public:
-  NativeArrayPassedAsPointerAndSize() {}
+  NativeArrayPassedAsPointerAndSize() = default;
 
   MOCK_METHOD(void, Helper, (int* array, int size));
 

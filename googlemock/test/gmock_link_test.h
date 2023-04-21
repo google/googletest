@@ -194,7 +194,7 @@ using testing::MatchesRegex;
 
 class Interface {
  public:
-  virtual ~Interface() {}
+  virtual ~Interface() = default;
   virtual void VoidFromString(char* str) = 0;
   virtual char* StringFromString(char* str) = 0;
   virtual int IntFromString(char* str) = 0;
@@ -208,7 +208,7 @@ class Interface {
 
 class Mock : public Interface {
  public:
-  Mock() {}
+  Mock() = default;
 
   MOCK_METHOD1(VoidFromString, void(char* str));
   MOCK_METHOD1(StringFromString, char*(char* str));

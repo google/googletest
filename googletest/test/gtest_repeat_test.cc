@@ -61,7 +61,7 @@ int g_environment_tear_down_count = 0;
 
 class MyEnvironment : public testing::Environment {
  public:
-  MyEnvironment() {}
+  MyEnvironment() = default;
   void SetUp() override { g_environment_set_up_count++; }
   void TearDown() override { g_environment_tear_down_count++; }
 };

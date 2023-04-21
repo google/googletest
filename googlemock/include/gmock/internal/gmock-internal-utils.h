@@ -224,7 +224,7 @@ class FailureReporterInterface {
   // The type of a failure (either non-fatal or fatal).
   enum FailureType { kNonfatal, kFatal };
 
-  virtual ~FailureReporterInterface() {}
+  virtual ~FailureReporterInterface() = default;
 
   // Reports a failure that occurred at the given source file location.
   virtual void ReportFailure(FailureType type, const char* file, int line,

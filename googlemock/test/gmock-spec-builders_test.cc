@@ -98,7 +98,7 @@ class NonDefaultConstructible {
 
 class MockA {
  public:
-  MockA() {}
+  MockA() = default;
 
   MOCK_METHOD1(DoA, void(int n));
   MOCK_METHOD1(ReturnResult, Result(int n));
@@ -113,7 +113,7 @@ class MockA {
 
 class MockB {
  public:
-  MockB() {}
+  MockB() = default;
 
   MOCK_CONST_METHOD0(DoB, int());  // NOLINT
   MOCK_METHOD1(DoB, int(int n));   // NOLINT
@@ -125,7 +125,7 @@ class MockB {
 
 class ReferenceHoldingMock {
  public:
-  ReferenceHoldingMock() {}
+  ReferenceHoldingMock() = default;
 
   MOCK_METHOD1(AcceptReference, void(std::shared_ptr<MockA>*));
 
@@ -143,12 +143,12 @@ class ReferenceHoldingMock {
 
 class CC {
  public:
-  virtual ~CC() {}
+  virtual ~CC() = default;
   virtual int Method() = 0;
 };
 class MockCC : public CC {
  public:
-  MockCC() {}
+  MockCC() = default;
 
   MOCK_METHOD0(Method, int());
 
@@ -1881,7 +1881,7 @@ struct Unprintable {
 
 class MockC {
  public:
-  MockC() {}
+  MockC() = default;
 
   MOCK_METHOD6(VoidMethod, void(bool cond, int n, std::string s, void* p,
                                 const Printable& x, Unprintable y));
@@ -2121,7 +2121,7 @@ void PrintTo(PrintMeNot /* dummy */, ::std::ostream* /* os */) {
 
 class LogTestHelper {
  public:
-  LogTestHelper() {}
+  LogTestHelper() = default;
 
   MOCK_METHOD1(Foo, PrintMeNot(PrintMeNot));
 
