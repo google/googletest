@@ -44,6 +44,7 @@
 #include <chrono>  // NOLINT
 #include <cmath>
 #include <cstdint>
+#include <cstdlib>
 #include <cstring>
 #include <initializer_list>
 #include <iomanip>
@@ -140,6 +141,7 @@
 #endif
 
 #ifdef GTEST_HAS_ABSL
+#include "absl/container/flat_hash_set.h"
 #include "absl/debugging/failure_signal_handler.h"
 #include "absl/debugging/stacktrace.h"
 #include "absl/debugging/symbolize.h"
@@ -147,6 +149,8 @@
 #include "absl/flags/usage.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_replace.h"
+#include "absl/strings/string_view.h"
+#include "absl/strings/strip.h"
 #endif  // GTEST_HAS_ABSL
 
 // Checks builtin compiler feature |x| while avoiding an extra layer of #ifdefs
@@ -6686,25 +6690,60 @@ void ParseGoogleTestFlagsOnlyImpl(int* argc, CharType** argv) {
 }
 
 // Parses the command line for Google Test flags, without initializing
-// other parts of Google Test.
+// other parts of Google Test. This function updates argc and argv by removing
+// flags that are known to GoogleTest (including other user flags defined using
+// ABSL_FLAG if GoogleTest is built with GTEST_USE_ABSL). Other arguments
+// remain in place. Unrecognized flags are not reported and do not cause the
+// program to exit.
 void ParseGoogleTestFlagsOnly(int* argc, char** argv) {
 #ifdef GTEST_HAS_ABSL
-  if (*argc > 0) {
-    // absl::ParseCommandLine() requires *argc > 0.
-    auto positional_args = absl::flags_internal::ParseCommandLineImpl(
-        *argc, argv, absl::flags_internal::UsageFlagsAction::kHandleUsage,
-        absl::flags_internal::OnUndefinedFlag::kReportUndefined);
-    // Any command-line positional arguments not part of any command-line flag
-    // (or arguments to a flag) are copied back out to argv, with the program
-    // invocation name at position 0, and argc is resized. This includes
-    // positional arguments after the flag-terminating delimiter '--'.
-    // See https://abseil.io/docs/cpp/guides/flags.
-    std::copy(positional_args.begin(), positional_args.end(), argv);
-    if (static_cast<int>(positional_args.size()) < *argc) {
-      argv[positional_args.size()] = nullptr;
-      *argc = static_cast<int>(positional_args.size());
+  if (*argc <= 0) return;
+
+  std::vector<char*> positional_args;
+  std::vector<absl::UnrecognizedFlag> unrecognized_flags;
+  absl::ParseAbseilFlagsOnly(*argc, argv, positional_args, unrecognized_flags);
+  absl::flat_hash_set<absl::string_view> unrecognized;
+  for (const auto& flag : unrecognized_flags) {
+    unrecognized.insert(flag.flag_name);
+  }
+  absl::flat_hash_set<char*> positional;
+  for (const auto& arg : positional_args) {
+    positional.insert(arg);
+  }
+
+  int out_pos = 1;
+  int in_pos = 1;
+  for (; in_pos < *argc; ++in_pos) {
+    char* arg = argv[in_pos];
+    absl::string_view arg_str(arg);
+    if (absl::ConsumePrefix(&arg_str, "--")) {
+      // Flag-like argument. If the flag was unrecognized, keep it.
+      // If it was a GoogleTest flag, remove it.
+      if (unrecognized.contains(arg_str)) {
+        argv[out_pos++] = argv[in_pos];
+        continue;
+      }
+    }
+
+    if (arg_str.empty()) {
+      ++in_pos;
+      break;  // '--' indicates that the rest of the arguments are positional
+    }
+
+    // Probably a positional argument. If it is in fact positional, keep it.
+    // If it was a value for the flag argument, remove it.
+    if (positional.contains(arg)) {
+      argv[out_pos++] = arg;
     }
   }
+
+  // The rest are positional args for sure.
+  while (in_pos < *argc) {
+    argv[out_pos++] = argv[in_pos++];
+  }
+
+  *argc = out_pos;
+  argv[out_pos] = nullptr;
 #else
   ParseGoogleTestFlagsOnlyImpl(argc, argv);
 #endif

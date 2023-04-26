@@ -54,7 +54,6 @@ PROGRAM_PATH = gtest_test_utils.GetTestExecutablePath('gtest_help_test_')
 FLAG_PREFIX = '--gtest_'
 DEATH_TEST_STYLE_FLAG = FLAG_PREFIX + 'death_test_style'
 STREAM_RESULT_TO_FLAG = FLAG_PREFIX + 'stream_result_to'
-UNKNOWN_GTEST_PREFIXED_FLAG = FLAG_PREFIX + 'unknown_flag_for_testing'
 LIST_TESTS_FLAG = FLAG_PREFIX + 'list_tests'
 INTERNAL_FLAG_FOR_TESTING = FLAG_PREFIX + 'internal_flag_for_testing'
 
@@ -176,16 +175,6 @@ class GTestHelpTest(gtest_test_utils.TestCase):
 
   def testPrintsHelpWithFullFlag(self):
     self.TestHelpFlag('--help')
-
-  def testPrintsHelpWithUnrecognizedGoogleTestFlag(self):
-    # The behavior is slightly different when Abseil flags is
-    # used. Abseil flags rejects all unknown flags, while the builtin
-    # GTest flags implementation interprets an unknown flag with a
-    # '--gtest_' prefix as a request for help.
-    if HAS_ABSL_FLAGS:
-      self.TestUnknownFlagWithAbseil(UNKNOWN_GTEST_PREFIXED_FLAG)
-    else:
-      self.TestHelpFlag(UNKNOWN_GTEST_PREFIXED_FLAG)
 
   def testRunsTestsWithoutHelpFlag(self):
     """Verifies correct behavior when no help flag is specified.
