@@ -48,6 +48,7 @@
 #include "gmock/internal/gmock-port.h"
 #include "gtest/gtest-spi.h"
 #include "gtest/gtest.h"
+#include "gtest/internal/gtest-port.h"
 
 // Silence C4100 (unreferenced formal parameter) and C4503 (decorated name
 // length exceeded) for MSVC.
@@ -221,7 +222,8 @@ TEST(TypeTraits, IsInvocableRV) {
   // In C++17 and above, where it's guaranteed that functions can return
   // non-moveable objects, everything should work fine for non-moveable rsult
   // types too.
-#if defined(__cplusplus) && __cplusplus >= 201703L
+#if defined(GTEST_INTERNAL_CPLUSPLUS_LANG) && \
+    GTEST_INTERNAL_CPLUSPLUS_LANG >= 201703L
   {
     struct NonMoveable {
       NonMoveable() = default;

@@ -804,7 +804,8 @@ TEST(ExpectCallTest, InfersCardinality1WhenThereIsWillRepeatedly) {
       "to be called at least once");
 }
 
-#if defined(__cplusplus) && __cplusplus >= 201703L
+#if defined(GTEST_INTERNAL_CPLUSPLUS_LANG) && \
+    GTEST_INTERNAL_CPLUSPLUS_LANG >= 201703L
 
 // It should be possible to return a non-moveable type from a mock action in
 // C++17 and above, where it's guaranteed that such a type can be initialized
