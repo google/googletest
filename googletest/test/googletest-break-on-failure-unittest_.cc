@@ -39,7 +39,7 @@
 
 #include "gtest/gtest.h"
 
-#if GTEST_OS_WINDOWS
+#ifdef GTEST_OS_WINDOWS
 #include <stdlib.h>
 #include <windows.h>
 #endif
@@ -49,7 +49,7 @@ namespace {
 // A test that's expected to fail.
 TEST(Foo, Bar) { EXPECT_EQ(2, 3); }
 
-#if GTEST_HAS_SEH && !GTEST_OS_WINDOWS_MOBILE
+#if GTEST_HAS_SEH && !defined(GTEST_OS_WINDOWS_MOBILE)
 // On Windows Mobile global exception handlers are not supported.
 LONG WINAPI
 ExitWithExceptionCode(struct _EXCEPTION_POINTERS* exception_pointers) {
@@ -60,12 +60,12 @@ ExitWithExceptionCode(struct _EXCEPTION_POINTERS* exception_pointers) {
 }  // namespace
 
 int main(int argc, char** argv) {
-#if GTEST_OS_WINDOWS
+#ifdef GTEST_OS_WINDOWS
   // Suppresses display of the Windows error dialog upon encountering
   // a general protection fault (segment violation).
   SetErrorMode(SEM_NOGPFAULTERRORBOX | SEM_FAILCRITICALERRORS);
 
-#if GTEST_HAS_SEH && !GTEST_OS_WINDOWS_MOBILE
+#if GTEST_HAS_SEH && !defined(GTEST_OS_WINDOWS_MOBILE)
 
   // The default unhandled exception filter does not always exit
   // with the exception code as exit code - for example it exits with

@@ -40,11 +40,11 @@
 
 #include "gtest/gtest.h"
 
-#if GTEST_OS_WINDOWS_MOBILE
+#ifdef GTEST_OS_WINDOWS_MOBILE
 #include <windows.h>
-#elif GTEST_OS_WINDOWS
+#elif defined(GTEST_OS_WINDOWS)
 #include <direct.h>
-#elif GTEST_OS_OS2
+#elif defined(GTEST_OS_OS2)
 // For strcasecmp on OS/2
 #include <strings.h>
 #endif  // GTEST_OS_WINDOWS_MOBILE
@@ -92,7 +92,7 @@ TEST(XmlOutputTest, GetOutputFileFromDirectoryPath) {
           .string();
   const std::string& output_file =
       UnitTestOptions::GetAbsolutePathToOutputFile();
-#if GTEST_OS_WINDOWS
+#ifdef GTEST_OS_WINDOWS
   EXPECT_STRCASEEQ(expected_output_file.c_str(), output_file.c_str());
 #else
   EXPECT_EQ(expected_output_file, output_file.c_str());
@@ -101,19 +101,19 @@ TEST(XmlOutputTest, GetOutputFileFromDirectoryPath) {
 
 TEST(OutputFileHelpersTest, GetCurrentExecutableName) {
   const std::string exe_str = GetCurrentExecutableName().string();
-#if GTEST_OS_WINDOWS
+#ifdef GTEST_OS_WINDOWS
   const bool success =
       _strcmpi("googletest-options-test", exe_str.c_str()) == 0 ||
       _strcmpi("gtest-options-ex_test", exe_str.c_str()) == 0 ||
       _strcmpi("gtest_all_test", exe_str.c_str()) == 0 ||
       _strcmpi("gtest_dll_test", exe_str.c_str()) == 0;
-#elif GTEST_OS_OS2
+#elif defined(GTEST_OS_OS2)
   const bool success =
       strcasecmp("googletest-options-test", exe_str.c_str()) == 0 ||
       strcasecmp("gtest-options-ex_test", exe_str.c_str()) == 0 ||
       strcasecmp("gtest_all_test", exe_str.c_str()) == 0 ||
       strcasecmp("gtest_dll_test", exe_str.c_str()) == 0;
-#elif GTEST_OS_FUCHSIA
+#elif defined(GTEST_OS_FUCHSIA)
   const bool success = exe_str == "app";
 #else
   const bool success =
@@ -123,7 +123,7 @@ TEST(OutputFileHelpersTest, GetCurrentExecutableName) {
   if (!success) FAIL() << "GetCurrentExecutableName() returns " << exe_str;
 }
 
-#if !GTEST_OS_FUCHSIA
+#ifndef GTEST_OS_FUCHSIA
 
 class XmlOutputChangeDirTest : public Test {
  protected:
@@ -176,7 +176,7 @@ TEST_F(XmlOutputChangeDirTest, PreserveOriginalWorkingDirWithRelativePath) {
           .string();
   const std::string& output_file =
       UnitTestOptions::GetAbsolutePathToOutputFile();
-#if GTEST_OS_WINDOWS
+#ifdef GTEST_OS_WINDOWS
   EXPECT_STRCASEEQ(expected_output_file.c_str(), output_file.c_str());
 #else
   EXPECT_EQ(expected_output_file, output_file.c_str());
@@ -184,7 +184,7 @@ TEST_F(XmlOutputChangeDirTest, PreserveOriginalWorkingDirWithRelativePath) {
 }
 
 TEST_F(XmlOutputChangeDirTest, PreserveOriginalWorkingDirWithAbsoluteFile) {
-#if GTEST_OS_WINDOWS
+#ifdef GTEST_OS_WINDOWS
   GTEST_FLAG_SET(output, "xml:c:\\tmp\\filename.abc");
   EXPECT_EQ(FilePath("c:\\tmp\\filename.abc").string(),
             UnitTestOptions::GetAbsolutePathToOutputFile());
@@ -196,7 +196,7 @@ TEST_F(XmlOutputChangeDirTest, PreserveOriginalWorkingDirWithAbsoluteFile) {
 }
 
 TEST_F(XmlOutputChangeDirTest, PreserveOriginalWorkingDirWithAbsolutePath) {
-#if GTEST_OS_WINDOWS
+#ifdef GTEST_OS_WINDOWS
   const std::string path = "c:\\tmp\\";
 #else
   const std::string path = "/tmp/";
@@ -208,7 +208,7 @@ TEST_F(XmlOutputChangeDirTest, PreserveOriginalWorkingDirWithAbsolutePath) {
   const std::string& output_file =
       UnitTestOptions::GetAbsolutePathToOutputFile();
 
-#if GTEST_OS_WINDOWS
+#ifdef GTEST_OS_WINDOWS
   EXPECT_STRCASEEQ(expected_output_file.c_str(), output_file.c_str());
 #else
   EXPECT_EQ(expected_output_file, output_file.c_str());

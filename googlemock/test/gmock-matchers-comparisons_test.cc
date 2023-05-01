@@ -31,6 +31,10 @@
 //
 // This file tests some commonly used argument matchers.
 
+#include <functional>
+#include <memory>
+#include <string>
+#include <tuple>
 #include <vector>
 
 #include "test/gmock-matchers_test.h"
@@ -585,8 +589,8 @@ TEST(MatcherCastTest, ValueIsNotCopied) {
 
 class Base {
  public:
-  virtual ~Base() {}
-  Base() {}
+  virtual ~Base() = default;
+  Base() = default;
 
  private:
   Base(const Base&) = delete;
@@ -1542,7 +1546,7 @@ TEST(PairTest, MatchesCorrectly) {
 
 TEST(PairTest, WorksWithMoveOnly) {
   pair<std::unique_ptr<int>, std::unique_ptr<int>> p;
-  p.second.reset(new int(7));
+  p.second = std::make_unique<int>(7);
   EXPECT_THAT(p, Pair(Eq(nullptr), Ne(nullptr)));
 }
 

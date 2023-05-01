@@ -35,13 +35,16 @@
 
 #include <stdlib.h>
 
+#include <algorithm>
+#include <string>
+
 #include "gtest/gtest-spi.h"
 #include "gtest/gtest.h"
 #include "src/gtest-internal-inl.h"
 
 GTEST_DISABLE_MSC_WARNINGS_PUSH_(4127 /* conditional expression is constant */)
 
-#if GTEST_IS_THREADSAFE
+#ifdef GTEST_IS_THREADSAFE
 using testing::ScopedFakeTestPartResultReporter;
 using testing::TestPartResultArray;
 
@@ -247,7 +250,7 @@ TEST(SCOPED_TRACETest, CanBeRepeated) {
                 << "contain trace point A, B, and D.";
 }
 
-#if GTEST_IS_THREADSAFE
+#ifdef GTEST_IS_THREADSAFE
 // Tests that SCOPED_TRACE()s can be used concurrently from multiple
 // threads.  Namely, an assertion should be affected by
 // SCOPED_TRACE()s in its own thread only.
@@ -773,7 +776,7 @@ REGISTER_TYPED_TEST_SUITE_P(DetectNotInstantiatedTypesTest, Used);
 // typedef ::testing::Types<char, int, unsigned int> MyTypes;
 // INSTANTIATE_TYPED_TEST_SUITE_P(All, DetectNotInstantiatedTypesTest, MyTypes);
 
-#if GTEST_HAS_DEATH_TEST
+#ifdef GTEST_HAS_DEATH_TEST
 
 // We rely on the golden file to verify that tests whose test case
 // name ends with DeathTest are run first.
@@ -851,7 +854,7 @@ TEST_F(ExpectFailureTest, ExpectNonFatalFailure) {
                           "failure.");
 }
 
-#if GTEST_IS_THREADSAFE
+#ifdef GTEST_IS_THREADSAFE
 
 class ExpectFailureWithThreadsTest : public ExpectFailureTest {
  protected:
@@ -1024,11 +1027,11 @@ int main(int argc, char** argv) {
       std::count(argv, argv + argc,
                  std::string("internal_skip_environment_and_ad_hoc_tests")) > 0;
 
-#if GTEST_HAS_DEATH_TEST
-  if (GTEST_FLAG_GET(internal_run_death_test) != "") {
+#ifdef GTEST_HAS_DEATH_TEST
+  if (!GTEST_FLAG_GET(internal_run_death_test).empty()) {
     // Skip the usual output capturing if we're running as the child
     // process of an threadsafe-style death test.
-#if GTEST_OS_WINDOWS
+#if defined(GTEST_OS_WINDOWS)
     posix::FReopen("nul:", "w", stdout);
 #else
     posix::FReopen("/dev/null", "w", stdout);

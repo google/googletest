@@ -132,7 +132,7 @@ def RemoveStackTraces(output):
   """Removes all traces of stack traces from a Google Test program's output."""
 
   # *? means "find the shortest string that matches".
-  return re.sub(r'Stack trace:(.|\n)*?\n\n', '', output)
+  return re.sub(r'Stack trace:(.|\n)*?\n', '', output)
 
 
 def RemoveTime(output):

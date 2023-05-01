@@ -42,9 +42,11 @@
 #include <list>
 #include <map>
 #include <memory>
+#include <ostream>
 #include <set>
 #include <sstream>
 #include <string>
+#include <tuple>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
@@ -106,7 +108,7 @@ class UnprintableTemplateInGlobal {
 // A user-defined streamable type in the global namespace.
 class StreamableInGlobal {
  public:
-  virtual ~StreamableInGlobal() {}
+  virtual ~StreamableInGlobal() = default;
 };
 
 inline void operator<<(::std::ostream& os, const StreamableInGlobal& /* x */) {
@@ -214,7 +216,7 @@ class PathLike {
   using value_type = char;
   using const_iterator = iterator;
 
-  PathLike() {}
+  PathLike() = default;
 
   iterator begin() const { return iterator(); }
   iterator end() const { return iterator(); }
@@ -266,7 +268,6 @@ using ::std::set;
 using ::std::vector;
 using ::testing::PrintToString;
 using ::testing::internal::FormatForComparisonFailureMessage;
-using ::testing::internal::ImplicitCast_;
 using ::testing::internal::NativeArray;
 using ::testing::internal::RelationToSourceReference;
 using ::testing::internal::Strings;
@@ -360,7 +361,7 @@ TEST(PrintCharTest, Char16) { EXPECT_EQ("U+0041", Print(u'A')); }
 
 TEST(PrintCharTest, Char32) { EXPECT_EQ("U+0041", Print(U'A')); }
 
-#ifdef __cpp_char8_t
+#ifdef __cpp_lib_char8_t
 TEST(PrintCharTest, Char8) { EXPECT_EQ("U+0041", Print(u8'A')); }
 #endif
 
@@ -413,7 +414,7 @@ TEST(PrintBuiltInTypeTest, Integer) {
             Print(std::numeric_limits<uint64_t>::max()));  // uint64
   EXPECT_EQ("-9223372036854775808",
             Print(std::numeric_limits<int64_t>::min()));  // int64
-#ifdef __cpp_char8_t
+#ifdef __cpp_lib_char8_t
   EXPECT_EQ("U+0000",
             Print(std::numeric_limits<char8_t>::min()));  // char8_t
   EXPECT_EQ("U+00FF",
@@ -432,7 +433,7 @@ TEST(PrintBuiltInTypeTest, Integer) {
 // Size types.
 TEST(PrintBuiltInTypeTest, Size_t) {
   EXPECT_EQ("1", Print(sizeof('a')));  // size_t.
-#if !GTEST_OS_WINDOWS
+#ifndef GTEST_OS_WINDOWS
   // Windows has no ssize_t type.
   EXPECT_EQ("-2", Print(static_cast<ssize_t>(-2)));  // ssize_t.
 #endif                                               // !GTEST_OS_WINDOWS
@@ -519,7 +520,7 @@ TEST(PrintCStringTest, EscapesProperly) {
             Print(p));
 }
 
-#ifdef __cpp_char8_t
+#ifdef __cpp_lib_char8_t
 // const char8_t*.
 TEST(PrintU8StringTest, Const) {
   const char8_t* p = u8"界";
@@ -748,7 +749,7 @@ AssertionResult HasPrefix(const StringType& str, const StringType& prefix) {
 
 struct Foo {
  public:
-  virtual ~Foo() {}
+  virtual ~Foo() = default;
   int MyMethod(char x) { return x + 1; }
   virtual char MyVirtualMethod(int /* n */) { return 'a'; }
 
@@ -816,7 +817,7 @@ TEST(PrintArrayTest, CharArrayWithTerminatingNul) {
   EXPECT_EQ("\"\\0Hi\"", PrintArrayHelper(a));
 }
 
-#ifdef __cpp_char8_t
+#ifdef __cpp_lib_char8_t
 // char_t array without terminating NUL.
 TEST(PrintArrayTest, Char8ArrayWithNoTerminatingNul) {
   // Array a contains '\0' in the middle and doesn't end with '\0'.
@@ -936,7 +937,7 @@ TEST(PrintWideStringTest, StringAmbiguousHex) {
 }
 #endif  // GTEST_HAS_STD_WSTRING
 
-#ifdef __cpp_char8_t
+#ifdef __cpp_lib_char8_t
 TEST(PrintStringTest, U8String) {
   std::u8string str = u8"Hello, 世界";
   EXPECT_EQ(str, str);  // Verify EXPECT_EQ compiles with this type.
@@ -1796,7 +1797,8 @@ TEST(UniversalPrintTest, SmartPointers) {
   std::shared_ptr<int> p3(new int(1979));
   EXPECT_EQ("(ptr = " + PrintPointer(p3.get()) + ", value = 1979)",
             PrintToString(p3));
-#if __cpp_lib_shared_ptr_arrays >= 201611L
+#if defined(__cpp_lib_shared_ptr_arrays) && \
+    (__cpp_lib_shared_ptr_arrays >= 201611L)
   std::shared_ptr<int[]> p4(new int[2]);
   EXPECT_EQ("(" + PrintPointer(p4.get()) + ")", PrintToString(p4));
 #endif
@@ -1815,7 +1817,8 @@ TEST(UniversalPrintTest, SmartPointers) {
   EXPECT_EQ("(nullptr)", PrintToString(std::shared_ptr<const int>()));
   EXPECT_EQ("(nullptr)", PrintToString(std::shared_ptr<volatile int>()));
   EXPECT_EQ("(nullptr)", PrintToString(std::shared_ptr<volatile const int>()));
-#if __cpp_lib_shared_ptr_arrays >= 201611L
+#if defined(__cpp_lib_shared_ptr_arrays) && \
+    (__cpp_lib_shared_ptr_arrays >= 201611L)
   EXPECT_EQ("(nullptr)", PrintToString(std::shared_ptr<int[]>()));
   EXPECT_EQ("(nullptr)", PrintToString(std::shared_ptr<const int[]>()));
   EXPECT_EQ("(nullptr)", PrintToString(std::shared_ptr<volatile int[]>()));

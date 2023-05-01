@@ -221,7 +221,7 @@ class DogAdder {
   }
   DogAdder operator+(const DogAdder& other) const {
     Message msg;
-    msg << value_.c_str() << other.value_.c_str();
+    msg << value_ << other.value_;
     return DogAdder(msg.GetString().c_str());
   }
   bool operator<(const DogAdder& other) const { return value_ < other.value_; }

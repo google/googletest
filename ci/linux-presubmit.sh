@@ -31,8 +31,8 @@
 
 set -euox pipefail
 
-readonly LINUX_LATEST_CONTAINER="gcr.io/google.com/absl-177019/linux_hybrid-latest:20220217"
-readonly LINUX_GCC_FLOOR_CONTAINER="gcr.io/google.com/absl-177019/linux_gcc-floor:20220621"
+readonly LINUX_LATEST_CONTAINER="gcr.io/google.com/absl-177019/linux_hybrid-latest:20230217"
+readonly LINUX_GCC_FLOOR_CONTAINER="gcr.io/google.com/absl-177019/linux_gcc-floor:20230120"
 
 if [[ -z ${GTEST_ROOT:-} ]]; then
   GTEST_ROOT="$(realpath $(dirname ${0})/..)"
@@ -78,6 +78,7 @@ time docker run \
       --copt="-Wall" \
       --copt="-Werror" \
       --copt="-Wuninitialized" \
+      --copt="-Wundef" \
       --copt="-Wno-error=pragmas" \
       --distdir="/bazel-distdir" \
       --features=external_include_paths \
@@ -99,6 +100,7 @@ for std in ${STD}; do
         --copt="-Wall" \
         --copt="-Werror" \
         --copt="-Wuninitialized" \
+        --copt="-Wundef" \
         --define="absl=${absl}" \
         --distdir="/bazel-distdir" \
         --features=external_include_paths \
@@ -123,6 +125,7 @@ for std in ${STD}; do
         --copt="-Wall" \
         --copt="-Werror" \
         --copt="-Wuninitialized" \
+        --copt="-Wundef" \
         --define="absl=${absl}" \
         --distdir="/bazel-distdir" \
         --features=external_include_paths \

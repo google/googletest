@@ -38,7 +38,6 @@ using ::testing::InitGoogleTest;
 using ::testing::Test;
 using ::testing::TestEventListeners;
 using ::testing::TestInfo;
-using ::testing::TestPartResult;
 using ::testing::UnitTest;
 
 namespace {

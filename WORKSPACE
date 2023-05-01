@@ -1,22 +1,9 @@
 workspace(name = "com_google_googletest")
 
+load("//:googletest_deps.bzl", "googletest_deps")
+googletest_deps()
+
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-
-http_archive(
-    name = "com_google_absl",  # 2023-01-10T21:08:25Z
-    sha256 = "f9a4e749f42c386a32a90fddf0e2913ed408d10c42f7f33ccf4c59ac4f0d1d05",
-    strip_prefix = "abseil-cpp-52835439ca90d86b27bf8cd1708296e95604d724",
-    urls = ["https://github.com/abseil/abseil-cpp/archive/52835439ca90d86b27bf8cd1708296e95604d724.zip"],
-)
-
-# Note this must use a commit from the `abseil` branch of the RE2 project.
-# https://github.com/google/re2/tree/abseil
-http_archive(
-    name = "com_googlesource_code_re2",  # 2022-12-21T14:29:10Z
-    sha256 = "b9ce3a51beebb38534d11d40f8928d40509b9e18a735f6a4a97ad3d014c87cb5",
-    strip_prefix = "re2-d0b1f8f2ecc2ea74956c7608b6f915175314ff0e",
-    urls = ["https://github.com/google/re2/archive/d0b1f8f2ecc2ea74956c7608b6f915175314ff0e.zip"],
-)
 
 http_archive(
     name = "rules_python",  # 2023-01-10T22:00:51Z

@@ -40,6 +40,7 @@
 #include <map>
 #include <memory>
 #include <set>
+#include <sstream>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -48,10 +49,10 @@
 #include "gtest/gtest.h"
 #include "gtest/internal/gtest-port.h"
 
-#if GTEST_OS_CYGWIN || GTEST_OS_LINUX || GTEST_OS_MAC
+#if defined(GTEST_OS_CYGWIN) || defined(GTEST_OS_LINUX) || defined(GTEST_OS_MAC)
 #include <unistd.h>  // NOLINT
 #endif
-#if GTEST_OS_QURT
+#ifdef GTEST_OS_QURT
 #include <qurt_event.h>
 #endif
 
@@ -95,7 +96,7 @@ ExpectationBase::ExpectationBase(const char* a_file, int a_line,
       action_count_checked_(false) {}
 
 // Destructs an ExpectationBase object.
-ExpectationBase::~ExpectationBase() {}
+ExpectationBase::~ExpectationBase() = default;
 
 // Explicitly specifies the cardinality of this expectation.  Used by
 // the subclasses to implement the .Times() clause.
@@ -297,7 +298,7 @@ void ReportUninterestingCall(CallReaction reaction, const std::string& msg) {
               "See "
               "https://github.com/google/googletest/blob/main/docs/"
               "gmock_cook_book.md#"
-              "knowing-when-to-expect for details.\n",
+              "knowing-when-to-expect-useoncall for details.\n",
           stack_frames_to_skip);
       break;
     default:  // FAIL
@@ -308,7 +309,7 @@ void ReportUninterestingCall(CallReaction reaction, const std::string& msg) {
 UntypedFunctionMockerBase::UntypedFunctionMockerBase()
     : mock_obj_(nullptr), name_("") {}
 
-UntypedFunctionMockerBase::~UntypedFunctionMockerBase() {}
+UntypedFunctionMockerBase::~UntypedFunctionMockerBase() = default;
 
 // Sets the mock object this mock method belongs to, and registers
 // this information in the global mock registry.  Will be called
@@ -503,7 +504,7 @@ class MockObjectRegistry {
       std::cout << internal::FormatFileLocation(state.first_used_file,
                                                 state.first_used_line);
       std::cout << " ERROR: this mock object";
-      if (state.first_used_test != "") {
+      if (!state.first_used_test.empty()) {
         std::cout << " (used in test " << state.first_used_test_suite << "."
                   << state.first_used_test << ")";
       }
@@ -526,7 +527,7 @@ class MockObjectRegistry {
       // RUN_ALL_TESTS() has already returned when this destructor is
       // called.  Therefore we cannot use the normal Google Test
       // failure reporting mechanism.
-#if GTEST_OS_QURT
+#ifdef GTEST_OS_QURT
       qurt_exception_raise_fatal();
 #else
       _exit(1);  // We cannot call exit() as it is not reentrant and
@@ -745,13 +746,13 @@ void Mock::ClearDefaultActionsLocked(void* mock_obj)
   // needed by VerifyAndClearExpectationsLocked().
 }
 
-Expectation::Expectation() {}
+Expectation::Expectation() = default;
 
 Expectation::Expectation(
     const std::shared_ptr<internal::ExpectationBase>& an_expectation_base)
     : expectation_base_(an_expectation_base) {}
 
-Expectation::~Expectation() {}
+Expectation::~Expectation() = default;
 
 // Adds an expectation to a sequence.
 void Sequence::AddExpectation(const Expectation& expectation) const {

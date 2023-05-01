@@ -218,7 +218,7 @@ class GTestXMLTestCase(gtest_test_utils.TestCase):
       )
     if element.tagName in ('testsuites', 'testsuite', 'testcase'):
       time = element.getAttributeNode('time')
-      # The value for exact N seconds has a traling decimal point (e.g., "10."
+      # The value for exact N seconds has a trailing decimal point (e.g., "10."
       # instead of "10")
       time.value = re.sub(r'^\d+\.(\d+)?$', '*', time.value)
       type_param = element.getAttributeNode('type_param')

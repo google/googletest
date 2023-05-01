@@ -35,7 +35,7 @@
 // Silence C4503 (decorated name length exceeded) for MSVC.
 GTEST_DISABLE_MSC_WARNINGS_PUSH_(4503)
 
-#if GTEST_OS_WINDOWS
+#ifdef GTEST_OS_WINDOWS
 // MSDN says the header file to be included for STDMETHOD is BaseTyps.h but
 // we are getting compiler errors if we use basetyps.h, hence including
 // objbase.h for definition of STDMETHOD.
@@ -70,7 +70,7 @@ using testing::TypedEq;
 template <typename T>
 class TemplatedCopyable {
  public:
-  TemplatedCopyable() {}
+  TemplatedCopyable() = default;
 
   template <typename U>
   TemplatedCopyable(const U& other) {}  // NOLINT
@@ -78,7 +78,7 @@ class TemplatedCopyable {
 
 class FooInterface {
  public:
-  virtual ~FooInterface() {}
+  virtual ~FooInterface() = default;
 
   virtual void VoidReturning(int x) = 0;
 
@@ -120,7 +120,7 @@ class FooInterface {
   virtual int RefQualifiedOverloaded() & = 0;
   virtual int RefQualifiedOverloaded() && = 0;
 
-#if GTEST_OS_WINDOWS
+#ifdef GTEST_OS_WINDOWS
   STDMETHOD_(int, CTNullary)() = 0;
   STDMETHOD_(bool, CTUnary)(int x) = 0;
   STDMETHOD_(int, CTDecimal)
@@ -137,7 +137,7 @@ class FooInterface {
 GTEST_DISABLE_MSC_WARNINGS_PUSH_(4373)
 class MockFoo : public FooInterface {
  public:
-  MockFoo() {}
+  MockFoo() = default;
 
   // Makes sure that a mock function parameter can be named.
   MOCK_METHOD(void, VoidReturning, (int n));  // NOLINT
@@ -178,7 +178,7 @@ class MockFoo : public FooInterface {
   MOCK_METHOD(int (*)(bool), ReturnsFunctionPointer1, (int), ());
   MOCK_METHOD(fn_ptr, ReturnsFunctionPointer2, (int), ());
 
-#if GTEST_OS_WINDOWS
+#ifdef GTEST_OS_WINDOWS
   MOCK_METHOD(int, CTNullary, (), (Calltype(STDMETHODCALLTYPE)));
   MOCK_METHOD(bool, CTUnary, (int), (Calltype(STDMETHODCALLTYPE)));
   MOCK_METHOD(int, CTDecimal,
@@ -208,7 +208,7 @@ class MockFoo : public FooInterface {
 
 class LegacyMockFoo : public FooInterface {
  public:
-  LegacyMockFoo() {}
+  LegacyMockFoo() = default;
 
   // Makes sure that a mock function parameter can be named.
   MOCK_METHOD1(VoidReturning, void(int n));  // NOLINT
@@ -248,7 +248,7 @@ class LegacyMockFoo : public FooInterface {
   MOCK_METHOD1(ReturnsFunctionPointer1, int (*(int))(bool));
   MOCK_METHOD1(ReturnsFunctionPointer2, fn_ptr(int));
 
-#if GTEST_OS_WINDOWS
+#ifdef GTEST_OS_WINDOWS
   MOCK_METHOD0_WITH_CALLTYPE(STDMETHODCALLTYPE, CTNullary, int());
   MOCK_METHOD1_WITH_CALLTYPE(STDMETHODCALLTYPE, CTUnary, bool(int));  // NOLINT
   MOCK_METHOD10_WITH_CALLTYPE(STDMETHODCALLTYPE, CTDecimal,
@@ -404,7 +404,7 @@ TYPED_TEST(FunctionMockerTest, MocksTypeWithTemplatedCopyCtor) {
   EXPECT_TRUE(this->foo_->TypeWithTemplatedCopyCtor(TemplatedCopyable<int>()));
 }
 
-#if GTEST_OS_WINDOWS
+#ifdef GTEST_OS_WINDOWS
 // Tests mocking a nullary function with calltype.
 TYPED_TEST(FunctionMockerTest, MocksNullaryFunctionWithCallType) {
   EXPECT_CALL(this->mock_foo_, CTNullary())
@@ -487,7 +487,7 @@ TEST(FunctionMockerTest, RefQualified) {
 
 class MockB {
  public:
-  MockB() {}
+  MockB() = default;
 
   MOCK_METHOD(void, DoB, ());
 
@@ -498,7 +498,7 @@ class MockB {
 
 class LegacyMockB {
  public:
-  LegacyMockB() {}
+  LegacyMockB() = default;
 
   MOCK_METHOD0(DoB, void());
 
@@ -534,7 +534,7 @@ TYPED_TEST(ExpectCallTest, UnmentionedFunctionCanBeCalledAnyNumberOfTimes) {
 template <typename T>
 class StackInterface {
  public:
-  virtual ~StackInterface() {}
+  virtual ~StackInterface() = default;
 
   // Template parameter appears in function parameter.
   virtual void Push(const T& value) = 0;
@@ -547,7 +547,7 @@ class StackInterface {
 template <typename T>
 class MockStack : public StackInterface<T> {
  public:
-  MockStack() {}
+  MockStack() = default;
 
   MOCK_METHOD(void, Push, (const T& elem), ());
   MOCK_METHOD(void, Pop, (), (final));
@@ -566,7 +566,7 @@ class MockStack : public StackInterface<T> {
 template <typename T>
 class LegacyMockStack : public StackInterface<T> {
  public:
-  LegacyMockStack() {}
+  LegacyMockStack() = default;
 
   MOCK_METHOD1_T(Push, void(const T& elem));
   MOCK_METHOD0_T(Pop, void());
@@ -620,7 +620,7 @@ TYPED_TEST(TemplateMockTest, MethodWithCommaInReturnTypeWorks) {
   EXPECT_EQ(a_map, mock.ReturnTypeWithComma(1));
 }
 
-#if GTEST_OS_WINDOWS
+#ifdef GTEST_OS_WINDOWS
 // Tests mocking template interfaces with calltype.
 
 template <typename T>
@@ -711,7 +711,7 @@ TYPED_TEST(TemplateMockTestWithCallType, Works) {
 
 class MockOverloadedOnArgNumber {
  public:
-  MockOverloadedOnArgNumber() {}
+  MockOverloadedOnArgNumber() = default;
 
   MY_MOCK_METHODS1_;
 
@@ -723,7 +723,7 @@ class MockOverloadedOnArgNumber {
 
 class LegacyMockOverloadedOnArgNumber {
  public:
-  LegacyMockOverloadedOnArgNumber() {}
+  LegacyMockOverloadedOnArgNumber() = default;
 
   LEGACY_MY_MOCK_METHODS1_;
 
@@ -758,7 +758,7 @@ TYPED_TEST(OverloadedMockMethodTest, CanOverloadOnArgNumberInMacroBody) {
 
 class MockOverloadedOnConstness {
  public:
-  MockOverloadedOnConstness() {}
+  MockOverloadedOnConstness() = default;
 
   MY_MOCK_METHODS2_;
 

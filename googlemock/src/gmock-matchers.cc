@@ -53,7 +53,7 @@ GTEST_API_ std::string FormatMatcherDescription(
     bool negation, const char* matcher_name,
     const std::vector<const char*>& param_names, const Strings& param_values) {
   std::string result = ConvertIdentifierNameToWords(matcher_name);
-  if (param_values.size() >= 1) {
+  if (!param_values.empty()) {
     result += " " + JoinAsKeyValueTuple(param_names, param_values);
   }
   return negation ? "not (" + result + ")" : result;

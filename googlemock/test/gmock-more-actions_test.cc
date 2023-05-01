@@ -33,10 +33,14 @@
 
 #include "gmock/gmock-more-actions.h"
 
+#include <algorithm>
 #include <functional>
+#include <iterator>
 #include <memory>
 #include <sstream>
 #include <string>
+#include <tuple>
+#include <vector>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest-spi.h"
@@ -673,7 +677,7 @@ TEST(SetArrayArgumentTest, SetsTheNthArrayWithIteratorArgument) {
   Action<MyFunction> a = SetArrayArgument<1>(letters.begin(), letters.end());
 
   std::string s;
-  a.Perform(std::make_tuple(true, back_inserter(s)));
+  a.Perform(std::make_tuple(true, std::back_inserter(s)));
   EXPECT_EQ(letters, s);
 }
 

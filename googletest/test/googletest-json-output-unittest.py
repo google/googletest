@@ -54,7 +54,7 @@ SUPPORTS_STACK_TRACES = NO_STACKTRACE_SUPPORT_FLAG not in sys.argv
 if SUPPORTS_STACK_TRACES:
   STACK_TRACE_TEMPLATE = '\nStack trace:\n*'
 else:
-  STACK_TRACE_TEMPLATE = ''
+  STACK_TRACE_TEMPLATE = '\n'
 
 EXPECTED_NON_EMPTY = {
     'tests': 26,
@@ -77,7 +77,7 @@ EXPECTED_NON_EMPTY = {
             'testsuite': [{
                 'name': 'Succeeds',
                 'file': 'gtest_xml_output_unittest_.cc',
-                'line': 51,
+                'line': 53,
                 'status': 'RUN',
                 'result': 'COMPLETED',
                 'time': '*',
@@ -96,7 +96,7 @@ EXPECTED_NON_EMPTY = {
             'testsuite': [{
                 'name': 'Fails',
                 'file': 'gtest_xml_output_unittest_.cc',
-                'line': 59,
+                'line': 61,
                 'status': 'RUN',
                 'result': 'COMPLETED',
                 'time': '*',
@@ -124,7 +124,7 @@ EXPECTED_NON_EMPTY = {
             'testsuite': [{
                 'name': 'DISABLED_test_not_run',
                 'file': 'gtest_xml_output_unittest_.cc',
-                'line': 66,
+                'line': 68,
                 'status': 'NOTRUN',
                 'result': 'SUPPRESSED',
                 'time': '*',
@@ -144,7 +144,7 @@ EXPECTED_NON_EMPTY = {
                 {
                     'name': 'Skipped',
                     'file': 'gtest_xml_output_unittest_.cc',
-                    'line': 73,
+                    'line': 75,
                     'status': 'RUN',
                     'result': 'SKIPPED',
                     'time': '*',
@@ -154,7 +154,7 @@ EXPECTED_NON_EMPTY = {
                 {
                     'name': 'SkippedWithMessage',
                     'file': 'gtest_xml_output_unittest_.cc',
-                    'line': 77,
+                    'line': 79,
                     'status': 'RUN',
                     'result': 'SKIPPED',
                     'time': '*',
@@ -164,7 +164,7 @@ EXPECTED_NON_EMPTY = {
                 {
                     'name': 'SkippedAfterFailure',
                     'file': 'gtest_xml_output_unittest_.cc',
-                    'line': 81,
+                    'line': 83,
                     'status': 'RUN',
                     'result': 'COMPLETED',
                     'time': '*',
@@ -194,7 +194,7 @@ EXPECTED_NON_EMPTY = {
                 {
                     'name': 'Succeeds',
                     'file': 'gtest_xml_output_unittest_.cc',
-                    'line': 86,
+                    'line': 88,
                     'status': 'RUN',
                     'result': 'COMPLETED',
                     'time': '*',
@@ -204,7 +204,7 @@ EXPECTED_NON_EMPTY = {
                 {
                     'name': 'Fails',
                     'file': 'gtest_xml_output_unittest_.cc',
-                    'line': 91,
+                    'line': 93,
                     'status': 'RUN',
                     'result': 'COMPLETED',
                     'time': '*',
@@ -234,7 +234,7 @@ EXPECTED_NON_EMPTY = {
                 {
                     'name': 'DISABLED_test',
                     'file': 'gtest_xml_output_unittest_.cc',
-                    'line': 96,
+                    'line': 98,
                     'status': 'NOTRUN',
                     'result': 'SUPPRESSED',
                     'time': '*',
@@ -254,7 +254,7 @@ EXPECTED_NON_EMPTY = {
             'testsuite': [{
                 'name': 'OutputsCData',
                 'file': 'gtest_xml_output_unittest_.cc',
-                'line': 100,
+                'line': 102,
                 'status': 'RUN',
                 'result': 'COMPLETED',
                 'time': '*',
@@ -282,7 +282,7 @@ EXPECTED_NON_EMPTY = {
             'testsuite': [{
                 'name': 'InvalidCharactersInMessage',
                 'file': 'gtest_xml_output_unittest_.cc',
-                'line': 107,
+                'line': 109,
                 'status': 'RUN',
                 'result': 'COMPLETED',
                 'time': '*',
@@ -313,7 +313,7 @@ EXPECTED_NON_EMPTY = {
                 {
                     'name': 'OneProperty',
                     'file': 'gtest_xml_output_unittest_.cc',
-                    'line': 119,
+                    'line': 121,
                     'status': 'RUN',
                     'result': 'COMPLETED',
                     'time': '*',
@@ -324,7 +324,7 @@ EXPECTED_NON_EMPTY = {
                 {
                     'name': 'IntValuedProperty',
                     'file': 'gtest_xml_output_unittest_.cc',
-                    'line': 123,
+                    'line': 125,
                     'status': 'RUN',
                     'result': 'COMPLETED',
                     'time': '*',
@@ -335,7 +335,7 @@ EXPECTED_NON_EMPTY = {
                 {
                     'name': 'ThreeProperties',
                     'file': 'gtest_xml_output_unittest_.cc',
-                    'line': 127,
+                    'line': 129,
                     'status': 'RUN',
                     'result': 'COMPLETED',
                     'time': '*',
@@ -348,7 +348,7 @@ EXPECTED_NON_EMPTY = {
                 {
                     'name': 'TwoValuesForOneKeyUsesLastValue',
                     'file': 'gtest_xml_output_unittest_.cc',
-                    'line': 133,
+                    'line': 135,
                     'status': 'RUN',
                     'result': 'COMPLETED',
                     'time': '*',
@@ -370,7 +370,7 @@ EXPECTED_NON_EMPTY = {
                 {
                     'name': 'RecordProperty',
                     'file': 'gtest_xml_output_unittest_.cc',
-                    'line': 138,
+                    'line': 140,
                     'status': 'RUN',
                     'result': 'COMPLETED',
                     'time': '*',
@@ -381,7 +381,7 @@ EXPECTED_NON_EMPTY = {
                 {
                     'name': 'ExternalUtilityThatCallsRecordIntValuedProperty',
                     'file': 'gtest_xml_output_unittest_.cc',
-                    'line': 151,
+                    'line': 153,
                     'status': 'RUN',
                     'result': 'COMPLETED',
                     'time': '*',
@@ -394,7 +394,7 @@ EXPECTED_NON_EMPTY = {
                         'ExternalUtilityThatCallsRecordStringValuedProperty'
                     ),
                     'file': 'gtest_xml_output_unittest_.cc',
-                    'line': 155,
+                    'line': 157,
                     'status': 'RUN',
                     'result': 'COMPLETED',
                     'time': '*',
@@ -416,7 +416,7 @@ EXPECTED_NON_EMPTY = {
                 'name': 'HasTypeParamAttribute',
                 'type_param': 'int',
                 'file': 'gtest_xml_output_unittest_.cc',
-                'line': 171,
+                'line': 173,
                 'status': 'RUN',
                 'result': 'COMPLETED',
                 'time': '*',
@@ -436,7 +436,7 @@ EXPECTED_NON_EMPTY = {
                 'name': 'HasTypeParamAttribute',
                 'type_param': 'long',
                 'file': 'gtest_xml_output_unittest_.cc',
-                'line': 171,
+                'line': 173,
                 'status': 'RUN',
                 'result': 'COMPLETED',
                 'time': '*',
@@ -456,7 +456,7 @@ EXPECTED_NON_EMPTY = {
                 'name': 'HasTypeParamAttribute',
                 'type_param': 'int',
                 'file': 'gtest_xml_output_unittest_.cc',
-                'line': 178,
+                'line': 180,
                 'status': 'RUN',
                 'result': 'COMPLETED',
                 'time': '*',
@@ -476,7 +476,7 @@ EXPECTED_NON_EMPTY = {
                 'name': 'HasTypeParamAttribute',
                 'type_param': 'long',
                 'file': 'gtest_xml_output_unittest_.cc',
-                'line': 178,
+                'line': 180,
                 'status': 'RUN',
                 'result': 'COMPLETED',
                 'time': '*',
@@ -497,7 +497,7 @@ EXPECTED_NON_EMPTY = {
                     'name': 'HasValueParamAttribute/0',
                     'value_param': '33',
                     'file': 'gtest_xml_output_unittest_.cc',
-                    'line': 162,
+                    'line': 164,
                     'status': 'RUN',
                     'result': 'COMPLETED',
                     'time': '*',
@@ -508,7 +508,7 @@ EXPECTED_NON_EMPTY = {
                     'name': 'HasValueParamAttribute/1',
                     'value_param': '42',
                     'file': 'gtest_xml_output_unittest_.cc',
-                    'line': 162,
+                    'line': 164,
                     'status': 'RUN',
                     'result': 'COMPLETED',
                     'time': '*',
@@ -519,7 +519,7 @@ EXPECTED_NON_EMPTY = {
                     'name': 'AnotherTestThatHasValueParamAttribute/0',
                     'value_param': '33',
                     'file': 'gtest_xml_output_unittest_.cc',
-                    'line': 163,
+                    'line': 165,
                     'status': 'RUN',
                     'result': 'COMPLETED',
                     'time': '*',
@@ -530,7 +530,7 @@ EXPECTED_NON_EMPTY = {
                     'name': 'AnotherTestThatHasValueParamAttribute/1',
                     'value_param': '42',
                     'file': 'gtest_xml_output_unittest_.cc',
-                    'line': 163,
+                    'line': 165,
                     'status': 'RUN',
                     'result': 'COMPLETED',
                     'time': '*',
@@ -562,7 +562,7 @@ EXPECTED_FILTERED = {
         'testsuite': [{
             'name': 'Succeeds',
             'file': 'gtest_xml_output_unittest_.cc',
-            'line': 51,
+            'line': 53,
             'status': 'RUN',
             'result': 'COMPLETED',
             'time': '*',
