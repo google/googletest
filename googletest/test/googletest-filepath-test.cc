@@ -515,7 +515,7 @@ class DirectoryCreationTest : public Test {
   }
 
   // Strings representing a directory and a file, with identical paths
-  // except for the trailing separator character that distinquishes
+  // except for the trailing separator character that distinguishes
   // a directory named 'test' from a file named 'test'. Example names:
   FilePath testdata_path_;  // "/tmp/directory_creation/test/"
   FilePath testdata_file_;  // "/tmp/directory_creation/test"
