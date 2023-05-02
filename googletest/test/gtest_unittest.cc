@@ -3312,11 +3312,7 @@ TEST_F(SingleEvaluationTest, OtherCases) {
 
 #if GTEST_HAS_RTTI
 
-#ifdef _MSC_VER
-#define ERROR_DESC "class std::runtime_error"
-#else
 #define ERROR_DESC "std::runtime_error"
-#endif
 
 #else  // GTEST_HAS_RTTI
 
@@ -6679,7 +6675,7 @@ TEST(ColoredOutputTest, UsesColorsWhenTermSupportsColors) {
   SetEnv("TERM", "linux");            // TERM supports colors.
   EXPECT_TRUE(ShouldUseColor(true));  // Stdout is a TTY.
 
-  SetEnv("TERM", "cygwin");           // TERM supports colors.
+  SetEnv("TERM", "cygwin");  // TERM supports colors.
   EXPECT_TRUE(ShouldUseColor(true));  // Stdout is a TTY.
 #endif  // GTEST_OS_WINDOWS
 }
