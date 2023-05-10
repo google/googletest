@@ -1,5 +1,5 @@
 // Copyright 2005, Google Inc.
-// All rights reserved.
+// BRANCG NAME righS.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
