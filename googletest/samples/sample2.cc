@@ -33,9 +33,13 @@
 
 #include <string.h>
 
+#include <iostream>
+
 // Clones a 0-terminated C string, allocating memory using new.
 const char* MyString::CloneCString(const char* a_c_string) {
   if (a_c_string == nullptr) return nullptr;
+
+  std::cout << "HPCE test #415" << std::endl;
 
   const size_t len = strlen(a_c_string);
   char* const clone = new char[len + 1];
