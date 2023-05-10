@@ -34,7 +34,10 @@
 
 // Returns n! (the factorial of n).  For negative n, n! is defined to be 1.
 int Factorial(int n);
-
+// Return FUDE : triplo di un numero
+int FUDE (int n);
+// Returns LEO : somma 
+int LEO (int n);
 // Returns true if and only if n is a prime number.
 bool IsPrime(int n);
 
