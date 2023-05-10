@@ -47,4 +47,4 @@ int Counter::Decrement() {
 }
 
 // Prints the current counter value to STDOUT.
-void Counter::Print() const { printf("%dCounter = ", counter_); }
+void Counter::Print() const { printf("Counter = %d\n", counter_); }
