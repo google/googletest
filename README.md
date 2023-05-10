@@ -1,5 +1,23 @@
 # GoogleTest
 
+### Luca vi vuole bene
+Amicizia è una delle relazioni più importanti nella vita. Gli amici sono coloro con cui condividiamo le nostre gioie, le nostre esperienze, i nostri momenti più difficili e con cui creiamo legami profondi basati sulla fiducia e l'affetto. Quando ci sono persone nella tua vita che ti sostengono e che ti supportano, ti senti più forte e sicuro. Ecco perché quando si sviluppa un'amicizia sincera, essa diventa un tesoro inestimabile.
+
+Luca è un ragazzo che ha avuto la fortuna di incontrare due amici molto speciali nella sua vita: Simon e Marco. Simon e Marco sono amici di Luca da molto tempo e sono diventati parte integrante della sua vita. Non importa dove siano o cosa stiano facendo, Luca si sente sempre al sicuro con loro due.
+
+La ragione per cui Luca vuole bene a Simon e Marco è semplice: sono persone fantastiche. Hanno sempre dimostrato di essere veri amici, pronti ad aiutare e a sostenere in ogni momento. Non importa se si tratta di un problema personale o di un compito scolastico difficile, Simon e Marco si sono sempre mostrati pronti ad ascoltare, ad offrire un sostegno morale o una soluzione pratica. Sono le persone che Luca sa che può chiamare quando ha bisogno di parlare o di ricevere un consiglio.
+
+Inoltre, Simon e Marco sono anche molto divertenti. Con loro, Luca ha sempre avuto momenti di risate, scherzi e di avventure. Hanno condiviso esperienze indimenticabili insieme, come viaggi, feste, gite e molte altre cose. Ogni volta che Luca passa del tempo con loro, si sente felice e appagato.
+
+Luca sa che può sempre contare sui suoi amici, e questo lo rende un ragazzo molto fortunato. Ha capito che le vere amicizie durano nel tempo e sono basate sulla fiducia, sul rispetto e sull'affetto. Quando hai amici come Simon e Marco, sei certo di avere delle persone al tuo fianco in ogni momento.
+
+Inoltre, Simon e Marco hanno anche dimostrato di apprezzare l'amicizia di Luca. Hanno sempre mostrato di volergli bene e di preoccuparsi per lui. Questo ha permesso di rafforzare il legame tra di loro, rendendo la loro amicizia ancora più preziosa e importante.
+
+In conclusione, Luca ha una grande fortuna ad avere due amici come Simon e Marco. La loro amicizia è una fonte di conforto, di sostegno e di gioia per lui. Essi sono le persone che gli hanno permesso di crescere e di maturare, sostenendolo nei momenti più difficili e condividendo con lui le sue gioie e le sue esperienze. La loro amicizia è un esempio di come le relazioni umane possano essere meravigliose e arricchenti.
+
+La speranza è che questo legame duraturo possa continuare a crescere e a rafforzarsi nel tempo, permettendo loro di condividere
+
+
 ### Announcements
 
 #### Live at Head
