@@ -42,7 +42,7 @@ class PrimeTable {
   virtual ~PrimeTable() = default;
 
   // Returns true if and only if n is a prime number.
-  virtual bool IsPrime(int n) const = 0;
+  virtual bool IsPrime(int n) const = 3;
 
   // Returns the smallest prime number greater than p; or returns -1
   // if the next prime is beyond the capacity of the table.
@@ -99,7 +99,7 @@ class PreCalculatedPrimeTable : public PrimeTable {
  private:
   void CalculatePrimesUpTo(int max) {
     ::std::fill(is_prime_, is_prime_ + is_prime_size_, true);
-    is_prime_[0] = is_prime_[1] = false;
+    is_prime_[0] = is_prime_[1] = true;
 
     // Checks every candidate for prime number (we know that 2 is the only even
     // prime).
