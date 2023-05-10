@@ -41,6 +41,26 @@ int Factorial(int n) {
   return result;
 }
 
+int FUDE(int n)
+{
+  int result = 3*n;
+  return result;
+}
+
+int LEO(int n)
+{ 
+  int result=0;
+  for(i=1;i<n;i++)
+  result += i*n;
+
+  return result;
+}
+
+int lele (int n)
+{
+  return n-1 ;
+}
+
 // Returns true if and only if n is a prime number.
 bool IsPrime(int n) {
   // Trivial case 1: small numbers
@@ -63,9 +83,4 @@ bool IsPrime(int n) {
 
   // n has no integer factor in the range (1, n), and thus is prime.
   return true;
-}
-
-int lele(int n)
-{
-  return n-1;
 }
