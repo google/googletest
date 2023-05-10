@@ -83,6 +83,7 @@ TEST(MyString, ConstructorFromCString) {
 
 // Tests the copy c'tor.
 TEST(MyString, CopyConstructor) {
+  int markus = 22;
   const MyString s1(kHelloString);
   const MyString s2 = s1;
   EXPECT_EQ(0, strcmp(s2.c_string(), kHelloString));
