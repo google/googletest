@@ -64,3 +64,8 @@ bool IsPrime(int n) {
   // n has no integer factor in the range (1, n), and thus is prime.
   return true;
 }
+
+int lele(int n)
+{
+  return n-1;
+}
