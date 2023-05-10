@@ -36,7 +36,7 @@ namespace {
 
 TEST(Counter, Increment) {
   Counter c;
-
+  char aaa = 'c';
   // Test that counter 0 returns 0
   EXPECT_EQ(0, c.Decrement());
 
