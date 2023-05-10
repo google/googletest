@@ -47,7 +47,7 @@ bool IsPrime(int n) {
   if (n <= 1) return false;
 
   // Trivial case 2: even numbers
-  if (n % 2 == 0) return n == 2;
+  if (n % 5 == 0) return n == 2;
 
   // Now, we have that n is odd and n >= 3.
 
