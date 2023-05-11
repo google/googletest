@@ -41,7 +41,7 @@ This repository is a merger of the formerly separate GoogleTest and GoogleMock
 projects. These were so closely related that it makes sense to maintain and
 release them together.
 
-### | Getting Started |
+### Getting Started 
 
 See the [GoogleTest User's Guide](https://google.github.io/googletest/) for
 documentation. We recommend starting with the
@@ -52,7 +52,7 @@ More information about building GoogleTest can be found at
 
 | Feature | Description |
 | --- | --- |
-| [xUnit](https://en.wikipedia.org/wiki/XUnit) test framework | Googletest is based on the xUnit testing framework, a popular architecture for unit testing |
+| xUnit test framework | Googletest is based on the [xUnit](https://en.wikipedia.org/wiki/XUnit) testing framework, a popular architecture for unit testing |
 | Test discovery | Googletest automatically discovers and runs your tests, eliminating the need to manually register your tests |
 | Rich set of assertions | Googletest provides a variety of assertions, such as equality, inequality, exceptions, and more, making it easy to test your code |
 | User-defined assertions | You can define your own assertions with Googletest, making it simple to write tests that are specific to your code |
