@@ -625,9 +625,11 @@ bool DeathTestImpl::Passed(bool status_ok) {
   return success;
 }
 
+#ifndef GTEST_OS_WINDOWS
 // Note: The return value points into args, so the return value's lifetime is
 // bound to that of args.
-std::unique_ptr<char*[]> CreateArgvFromArgs(std::vector<std::string>& args) {
+static std::unique_ptr<char*[]> CreateArgvFromArgs(
+    std::vector<std::string>& args) {
   auto result = std::make_unique<char*[]>(args.size() + 1);
   for (size_t i = 0; i < args.size(); ++i) {
     result[i] = &args[i][0];
@@ -635,6 +637,7 @@ std::unique_ptr<char*[]> CreateArgvFromArgs(std::vector<std::string>& args) {
   result[args.size()] = nullptr;  // extra null terminator
   return result;
 }
+#endif
 
 #ifdef GTEST_OS_WINDOWS
 // WindowsDeathTest implements death tests on Windows. Due to the
