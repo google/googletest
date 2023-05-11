@@ -61,7 +61,6 @@ More information about building GoogleTest can be found at
 | Value-parameterized tests | Googletest supports value-parameterized tests, which run multiple times with different input values, making it useful for testing functions that take different inputs |
 | Type-parameterized tests | Googletest also supports type-parameterized tests, which run with different data types, making it useful for testing functions that work with different data types |
 | Various options for running tests | Googletest provides many options for running tests, including running individual tests, running tests in a specific order, and running tests in parallel |
-| XML test report generation | Googletest can generate XML test reports, which can be used by tools like Jenkins to track the results of your tests |
 
 
 ## Supported Platforms
