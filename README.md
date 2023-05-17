@@ -9,7 +9,7 @@ GoogleTest now follows the
 We recommend
 [updating to the latest commit in the `main` branch as often as possible](https://github.com/abseil/abseil-cpp/blob/master/FAQ.md#what-is-live-at-head-and-how-do-i-do-it).
 We do publish occasional semantic versions, tagged with
-`v${major}.${minor}.${patch}` (e.g. `v.1.13.0`).
+`v${major}.${minor}.${patch}` (e.g. `v1.13.0`).
 
 #### Documentation Updates
 
