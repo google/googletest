@@ -251,6 +251,8 @@ TEST_F(GMockOutputTest, CatchesLeakedMocks) {
   foo2->Bar2(1, 1);
 
   // Both foo1 and foo2 are deliberately leaked.
+  // Call the instant leak check in order to validate it's output.
+  ASSERT_EQ(testing::Mock::CheckLeakInstant(),false);
 }
 
 MATCHER_P2(IsPair, first, second, "") {
