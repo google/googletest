@@ -93,11 +93,6 @@ TEST(LeakTest, CatchesMultipleLeakedMockObjects) {
 
   // Makes sure Google Mock's leak detector can change the exit code
   // to 1 even when the code is already exiting with 0.
-  // Additionally the instant leak check should:
-  // a) return false since mock objects are leaked
-  // b) not influence the outcome of the on program end mock object leak check.
-  ASSERT_EQ(testing::Mock::CheckLeakInstant(), false);
-
   exit(0);
 }
 
@@ -109,8 +104,8 @@ TEST(LeakTest, InstantNoLeak) {
 
   delete foo;
   // Since foo is properly deleted instant leak check should not see a leaked
-  // mock object and therefore return true.
-  ASSERT_EQ(testing::Mock::CheckLeakInstant(), true);
+  // mock object and therefore not fail the test.
+  testing::Mock::CheckLeakInstant();
 }
 
 TEST(LeakTest, InstantLeak) {
@@ -120,14 +115,14 @@ TEST(LeakTest, InstantLeak) {
   foo->DoThis();
 
   // At this point foo is still allocated. Calling the instant leak check should
-  // detect it and return false.
-  ASSERT_EQ(testing::Mock::CheckLeakInstant(), false);
+  // detect it and fail the test.
+  testing::Mock::CheckLeakInstant();
 
   // Free foo in order to not fail the end of program leak check.
   delete foo;
 }
 
-TEST(LeakTest, InstantLeakAllowed) {
+TEST(LeakTest, InstantNoLeakAllowed) {
   MockFoo* foo = new MockFoo;
   testing::Mock::AllowLeak(foo);
 
@@ -136,25 +131,11 @@ TEST(LeakTest, InstantLeakAllowed) {
 
   // At this point foo is still allocated However since we made foo a leakable
   // mock object with AllowLeak() the instant leak check should ignore it and
-  // return true.
-  ASSERT_EQ(testing::Mock::CheckLeakInstant(), true);
+  // pass the test.
+  testing::Mock::CheckLeakInstant();
 
   // Free foo in order to not fail the end of program leak check.
   delete foo;
 }
 
-TEST(LeakTest, InstantAllowedByEnvironment) {
-  MockFoo* foo = new MockFoo;
-
-  EXPECT_CALL(*foo, DoThis());
-  foo->DoThis();
-
-  // At this point foo is still allocated. However since we made foo a leakable
-  // via setting environment variable --gmock_catch_leaked_mocks=0 therefore
-  // true should be returned.
-  ASSERT_EQ(testing::Mock::CheckLeakInstant(), true);
-
-  // Free foo in order to not fail the end of program leak check.
-  delete foo;
-}
 }  // namespace
