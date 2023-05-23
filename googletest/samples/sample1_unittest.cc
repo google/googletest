@@ -48,24 +48,25 @@ namespace {
 
 // Step 2. Use the TEST macro to define your tests.
 //
-// TEST has two parameters: the test case name and the test name.
+// TEST has two parameters: the test-suite name and the test-case name.
 // After using the macro, you should define your test logic between a
 // pair of braces.  You can use a bunch of macros to indicate the
-// success or failure of a test.  EXPECT_TRUE and EXPECT_EQ are
-// examples of such macros.  For a complete list, see gtest.h.
+// success or failure of a test(it means a test-assertion here).  
+// EXPECT_TRUE and EXPECT_EQ are examples of such macros.  
+// For a complete list, see gtest.h.
 //
 // <TechnicalDetails>
 //
-// In Google Test, tests are grouped into test cases.  This is how we
+// In Google Test, tests are grouped into test-suites.  This is how we
 // keep test code organized.  You should put logically related tests
-// into the same test case.
+// into the same test-suite.
 //
-// The test case name and the test name should both be valid C++
+// The test-suite name and the test-case name should both be valid C++
 // identifiers.  And you should not use underscore (_) in the names.
 //
-// Google Test guarantees that each test you define is run exactly
-// once, but it makes no guarantee on the order the tests are
-// executed.  Therefore, you should write your tests in such a way
+// Google Test guarantees that each test-case you define is run exactly
+// once, but it makes no guarantee on the order the test-cases are
+// executed.  Therefore, you should write your test-cases in such a way
 // that their results don't depend on their order.
 //
 // </TechnicalDetails>
@@ -74,8 +75,8 @@ namespace {
 
 // Tests factorial of negative numbers.
 TEST(FactorialTest, Negative) {
-  // This test is named "Negative", and belongs to the "FactorialTest"
-  // test case.
+  // This test-case is named "Negative", and belongs to the 
+  // "FactorialTest" test-suite.
   EXPECT_EQ(1, Factorial(-5));
   EXPECT_EQ(1, Factorial(-1));
   EXPECT_GT(Factorial(-10), 0);
@@ -97,7 +98,9 @@ TEST(FactorialTest, Negative) {
 }
 
 // Tests factorial of 0.
-TEST(FactorialTest, Zero) { EXPECT_EQ(1, Factorial(0)); }
+TEST(FactorialTest, Zero) {
+  EXPECT_EQ(1, Factorial(0)); 
+}
 
 // Tests factorial of positive numbers.
 TEST(FactorialTest, Positive) {
@@ -111,7 +114,7 @@ TEST(FactorialTest, Positive) {
 
 // Tests negative input.
 TEST(IsPrimeTest, Negative) {
-  // This test belongs to the IsPrimeTest test case.
+  // This test-case belongs to the IsPrimeTest test-suite.
 
   EXPECT_FALSE(IsPrime(-1));
   EXPECT_FALSE(IsPrime(-2));

@@ -65,7 +65,7 @@ class PrimeTableTest : public testing::Test {
   // instead of the actual implementation class.  This is important
   // for keeping the tests close to the real world scenario, where the
   // implementation is invoked via the base interface.  It avoids
-  // got-yas where the implementation class has a method that shadows
+  // gotchas where the implementation class has a method that shadows
   // a method with the same name (but slightly different argument
   // types) in the base interface, for example.
   PrimeTable* const table_;
@@ -73,24 +73,24 @@ class PrimeTableTest : public testing::Test {
 
 using testing::Types;
 
-// Google Test offers two ways for reusing tests for different types.
+// Google Test offers two ways for reusing test-cases for different types.
 // The first is called "typed tests".  You should use it if you
 // already know *all* the types you are gonna exercise when you write
 // the tests.
 
 // To write a typed test case, first use
 //
-//   TYPED_TEST_SUITE(TestCaseName, TypeList);
+//   TYPED_TEST_SUITE(TestSuiteName, TypeList);
 //
 // to declare it and specify the type parameters.  As with TEST_F,
-// TestCaseName must match the test fixture name.
+// TestSuiteName must match the test fixture name.
 
 // The list of types we want to test.
 typedef Types<OnTheFlyPrimeTable, PreCalculatedPrimeTable> Implementations;
 
 TYPED_TEST_SUITE(PrimeTableTest, Implementations);
 
-// Then use TYPED_TEST(TestCaseName, TestName) to define a typed test,
+// Then use TYPED_TEST(TestSuiteName, TestCaseName) to define a typed test,
 // similar to TEST_F.
 TYPED_TEST(PrimeTableTest, ReturnsFalseForNonPrimes) {
   // Inside the test body, you can refer to the type parameter by
@@ -130,6 +130,8 @@ TYPED_TEST(PrimeTableTest, CanGetNextPrime) {
 // in the type list specified in TYPED_TEST_SUITE.  Sit back and be
 // happy that you don't have to define them multiple times.
 
+
+
 using testing::Types;
 
 // Sometimes, however, you don't yet know all the types that you want
@@ -151,12 +153,12 @@ using testing::Types;
 template <class T>
 class PrimeTableTest2 : public PrimeTableTest<T> {};
 
-// Then, declare the test case.  The argument is the name of the test
-// fixture, and also the name of the test case (as usual).  The _P
+// Then, declare the test-suite.  The argument is the name of the test
+// fixture, and also the name of the test-suite (as usual).  The _P
 // suffix is for "parameterized" or "pattern".
 TYPED_TEST_SUITE_P(PrimeTableTest2);
 
-// Next, use TYPED_TEST_P(TestCaseName, TestName) to define a test,
+// Next, use TYPED_TEST_P(TestSuiteName, TestCaseName) to define a test,
 // similar to what you do with TEST_F.
 TYPED_TEST_P(PrimeTableTest2, ReturnsFalseForNonPrimes) {
   EXPECT_FALSE(this->table_->IsPrime(-5));
@@ -186,10 +188,10 @@ TYPED_TEST_P(PrimeTableTest2, CanGetNextPrime) {
 }
 
 // Type-parameterized tests involve one extra step: you have to
-// enumerate the tests you defined:
+// enumerate the test-cases you defined:
 REGISTER_TYPED_TEST_SUITE_P(
-    PrimeTableTest2,  // The first argument is the test case name.
-    // The rest of the arguments are the test names.
+    PrimeTableTest2,  // The first argument is the test-suite name.
+    // The rest of the arguments are the test-case names.
     ReturnsFalseForNonPrimes, ReturnsTrueForPrimes, CanGetNextPrime);
 
 // At this point the test pattern is done.  However, you don't have
@@ -201,14 +203,14 @@ REGISTER_TYPED_TEST_SUITE_P(
 // in a .h file, and anyone can #include and instantiate it.  You can
 // even instantiate it more than once in the same program.  To tell
 // different instances apart, you give each of them a name, which will
-// become part of the test case name and can be used in test filters.
+// become part of the test-suite name and can be used in test filters.
 
 // The list of types we want to test.  Note that it doesn't have to be
 // defined at the time we write the TYPED_TEST_P()s.
 typedef Types<OnTheFlyPrimeTable, PreCalculatedPrimeTable>
     PrimeTableImplementations;
 INSTANTIATE_TYPED_TEST_SUITE_P(OnTheFlyAndPreCalculated,    // Instance name
-                               PrimeTableTest2,             // Test case name
+                               PrimeTableTest2,             // Test-suite name
                                PrimeTableImplementations);  // Type list
 
 }  // namespace

@@ -33,24 +33,24 @@
 // test fixture.
 //
 // A test fixture is a place to hold objects and functions shared by
-// all tests in a test case.  Using a test fixture avoids duplicating
+// all test-cases in a test-suite.  Using a test fixture avoids duplicating
 // the test code necessary to initialize and cleanup those common
-// objects for each test.  It is also useful for defining sub-routines
+// objects for each test-case.  It is also useful for defining sub-routines
 // that your tests need to invoke a lot.
 //
 // <TechnicalDetails>
 //
-// The tests share the test fixture in the sense of code sharing, not
-// data sharing.  Each test is given its own fresh copy of the
-// fixture.  You cannot expect the data modified by one test to be
-// passed on to another test, which is a bad idea.
+// The test-cases share the test fixture in the sense of code sharing, 
+// not data sharing.  Each test-case is given its own fresh copy of the
+// fixture.  You cannot expect the data modified by one test-case to be
+// passed on to another test-case, which is a bad idea.
 //
-// The reason for this design is that tests should be independent and
-// repeatable.  In particular, a test should not fail as the result of
-// another test's failure.  If one test depends on info produced by
-// another test, then the two tests should really be one big test.
+// The reason for this design is that test-cases should be independent and
+// repeatable.  In particular, a test-case should not fail as the result of
+// another test-case's failure.  If one test-case depends on info produced by
+// another test-case, then the two test-cases should really be one big test-case.
 //
-// The macros for indicating the success/failure of a test
+// The macros for indicating the success/failure of a test-assertion
 // (EXPECT_TRUE, FAIL, etc) need to know what the current test is
 // (when Google Test prints the test result, it tells you which test
 // each failure belongs to).  Technically, these macros invoke a
@@ -67,7 +67,7 @@ namespace {
 class QueueTestSmpl3 : public testing::Test {
  protected:  // You should make the members protected s.t. they can be
              // accessed from sub-classes.
-  // virtual void SetUp() will be called before each test is run.  You
+  // virtual void SetUp() will be called *before* each test-case is run.  You
   // should define it if you need to initialize the variables.
   // Otherwise, this can be skipped.
   void SetUp() override {
@@ -76,7 +76,7 @@ class QueueTestSmpl3 : public testing::Test {
     q2_.Enqueue(3);
   }
 
-  // virtual void TearDown() will be called after each test is run.
+  // virtual void TearDown() will be called *after* each test-case is run.
   // You should define it if there is cleanup work to do.  Otherwise,
   // you don't have to provide it.
   //
@@ -110,7 +110,7 @@ class QueueTestSmpl3 : public testing::Test {
   Queue<int> q2_;
 };
 
-// When you have a test fixture, you define a test using TEST_F
+// When you have a test fixture, you define a test-case using TEST_F
 // instead of TEST.
 
 // Tests the default c'tor.

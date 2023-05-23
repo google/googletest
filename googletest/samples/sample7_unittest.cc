@@ -29,7 +29,7 @@
 
 // This sample shows how to test common properties of multiple
 // implementations of an interface (aka interface tests) using
-// value-parameterized tests. Each test in the test case has
+// value-parameterized tests. Each test-case in the test-suite has
 // a parameter that is an interface pointer to an implementation
 // tested.
 
@@ -41,10 +41,10 @@ namespace {
 using ::testing::TestWithParam;
 using ::testing::Values;
 
-// As a general rule, to prevent a test from affecting the tests that come
-// after it, you should create and destroy the tested objects for each test
+// As a general rule, to prevent a test-case from affecting those that come
+// after it, you should create and destroy the tested objects for each test-case
 // instead of reusing them.  In this sample we will define a simple factory
-// function for PrimeTable objects.  We will instantiate objects in test's
+// function for PrimeTable objects.  We will instantiate objects in test-suite's
 // SetUp() method and delete them in TearDown() method.
 typedef PrimeTable* CreatePrimeTableFunc();
 
@@ -55,7 +55,7 @@ PrimeTable* CreatePreCalculatedPrimeTable() {
   return new PreCalculatedPrimeTable(max_precalculated);
 }
 
-// Inside the test body, fixture constructor, SetUp(), and TearDown() you
+// Inside the test-case body, fixture constructor, SetUp(), and TearDown() you
 // can refer to the test parameter by GetParam().  In this case, the test
 // parameter is a factory function which we call in fixture's SetUp() to
 // create and store an instance of PrimeTable.
@@ -104,8 +104,8 @@ TEST_P(PrimeTableTestSmpl7, CanGetNextPrime) {
 // You can instantiate them in a different translation module, or even
 // instantiate them several times.
 //
-// Here, we instantiate our tests with a list of two PrimeTable object
-// factory functions:
+// Here, we instantiate our test-suite with a list of two PrimeTable object
+// factory functions. The instantiation name is called OnTheFlyAndPreCalculated.
 INSTANTIATE_TEST_SUITE_P(OnTheFlyAndPreCalculated, PrimeTableTestSmpl7,
                          Values(&CreateOnTheFlyPrimeTable,
                                 &CreatePreCalculatedPrimeTable<1000>));

@@ -29,7 +29,7 @@
 
 // This sample shows how to test code relying on some global flag variables.
 // Combine() helps with generating all possible combinations of such flags,
-// and each test is given one combination as a parameter.
+// and each test-case is given one combination as a parameter.
 
 // Use class definitions to test from this header.
 #include <tuple>
@@ -105,7 +105,7 @@ class PrimeTableTest : public TestWithParam< ::std::tuple<bool, int> > {
 };
 
 TEST_P(PrimeTableTest, ReturnsFalseForNonPrimes) {
-  // Inside the test body, you can refer to the test parameter by GetParam().
+  // Inside the test-case body, you can refer to the test parameter by GetParam().
   // In this case, the test parameter is a PrimeTable interface pointer which
   // we can use directly.
   // Please note that you can also save it in the fixture's SetUp() method
@@ -142,12 +142,15 @@ TEST_P(PrimeTableTest, CanGetNextPrime) {
 // You can instantiate them in a different translation module, or even
 // instantiate them several times.
 //
-// Here, we instantiate our tests with a list of parameters. We must combine
+// Here, we instantiate our test-suite with a list of parameters. We must combine
 // all variations of the boolean flag suppressing PrecalcPrimeTable and some
 // meaningful values for tests. We choose a small value (1), and a value that
 // will put some of the tested numbers beyond the capability of the
 // PrecalcPrimeTable instance and some inside it (10). Combine will produce all
 // possible combinations.
+//   ::testing::Bool() equals ::testing::Values(false, true), this is 2 values.
+//   ::testing::Values(1, 10) is another 2 values.
+// So the combination results in 2*2=4 ways to initialize a PrimeTableTest instance.
 INSTANTIATE_TEST_SUITE_P(MeaningfulTestParameters, PrimeTableTest,
                          Combine(Bool(), Values(1, 10)));
 
