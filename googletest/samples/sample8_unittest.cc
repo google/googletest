@@ -105,12 +105,6 @@ class PrimeTableTest : public TestWithParam< ::std::tuple<bool, int> > {
 };
 
 TEST_P(PrimeTableTest, ReturnsFalseForNonPrimes) {
-  // Inside the test-case body, you can refer to the test parameter by GetParam().
-  // In this case, the test parameter is a PrimeTable interface pointer which
-  // we can use directly.
-  // Please note that you can also save it in the fixture's SetUp() method
-  // or constructor and use saved copy in the tests.
-
   EXPECT_FALSE(table_->IsPrime(-5));
   EXPECT_FALSE(table_->IsPrime(0));
   EXPECT_FALSE(table_->IsPrime(1));
