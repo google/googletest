@@ -1599,7 +1599,7 @@ class GTestFlagSaverTest : public Test {
     GTEST_FLAG_SET(stack_trace_depth, kMaxStackTraceDepth);
     GTEST_FLAG_SET(stream_result_to, "");
     GTEST_FLAG_SET(throw_on_failure, false);
-    GTEST_FLAG_SET(treat_rotten_as_pass, false);
+    GTEST_FLAG_SET(treat_rotten_as_pass, GTEST_DEFAULT_RGT_PASS);
   }
 
   // Restores the Google Test flags that the tests have modified.  This will
@@ -1630,7 +1630,7 @@ class GTestFlagSaverTest : public Test {
     EXPECT_EQ(kMaxStackTraceDepth, GTEST_FLAG_GET(stack_trace_depth));
     EXPECT_STREQ("", GTEST_FLAG_GET(stream_result_to).c_str());
     EXPECT_FALSE(GTEST_FLAG_GET(throw_on_failure));
-    EXPECT_FALSE(GTEST_FLAG_GET(treat_rotten_as_pass));
+    EXPECT_EQ(GTEST_DEFAULT_RGT_PASS, GTEST_FLAG_GET(treat_rotten_as_pass));
 
     GTEST_FLAG_SET(also_run_disabled_tests, true);
     GTEST_FLAG_SET(break_on_failure, true);
@@ -1650,7 +1650,7 @@ class GTestFlagSaverTest : public Test {
     GTEST_FLAG_SET(stack_trace_depth, 1);
     GTEST_FLAG_SET(stream_result_to, "localhost:1234");
     GTEST_FLAG_SET(throw_on_failure, true);
-    GTEST_FLAG_SET(treat_rotten_as_pass, true);
+    GTEST_FLAG_SET(treat_rotten_as_pass, !GTEST_DEFAULT_RGT_PASS);
   }
 
  private:
@@ -5490,7 +5490,7 @@ struct Flags {
         stack_trace_depth(kMaxStackTraceDepth),
         stream_result_to(""),
         throw_on_failure(false),
-        treat_rotten_as_pass(false) {}
+        treat_rotten_as_pass(GTEST_DEFAULT_RGT_PASS) {}
 
   // Factory methods.
 
@@ -5683,7 +5683,7 @@ class ParseFlagsTest : public Test {
     GTEST_FLAG_SET(stack_trace_depth, kMaxStackTraceDepth);
     GTEST_FLAG_SET(stream_result_to, "");
     GTEST_FLAG_SET(throw_on_failure, false);
-    GTEST_FLAG_SET(treat_rotten_as_pass, false);
+    GTEST_FLAG_SET(treat_rotten_as_pass, GTEST_DEFAULT_RGT_PASS);
   }
 
   // Asserts that two narrow or wide string arrays are equal.

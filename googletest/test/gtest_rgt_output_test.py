@@ -55,9 +55,10 @@ GOLDEN_NAME = 'gtest_rgt_output_test_golden_lin.txt'
 PROGRAM_PATH = gtest_test_utils.GetTestExecutablePath('gtest_rgt_output_test_')
 
 COMMAND_LIST_TESTS = ({}, [PROGRAM_PATH, '--gtest_list_tests'])
-COMMAND_WITH_COLOR = ({}, [PROGRAM_PATH, '--gtest_color=yes'])
+COMMAND_WITH_COLOR = ({}, [PROGRAM_PATH, '--gtest_color=yes',
+                           '--gtest_treat_rotten_as_pass=0'])
 COMMAND_WITH_RGT_PASSING = ({}, [PROGRAM_PATH,
-                                 '--gtest_treat_rotten_as_pass'])
+                                 '--gtest_treat_rotten_as_pass=1'])
 
 GOLDEN_PATH = os.path.join(gtest_test_utils.GetSourceDir(), GOLDEN_NAME)
 

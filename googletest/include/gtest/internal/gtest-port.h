@@ -84,6 +84,10 @@
 //                              support RGT inside lambdas. If the client does
 //                              not use Google Test macros inside lambdas, this
 //                              can be set in custom/gtest-port.h.
+//   GTEST_DEFAULT_RGT_PASS   - The default for --gtest_treat_rotten_as_pass.
+//                              Set true here so existing test suites don't fail
+//                              en masse. The recommended value is false and can
+//                              be set in custom/gtest-port.h.
 //   GTEST_HAS_RTTI           - Define it to 1/0 to indicate that RTTI is/isn't
 //                              enabled.
 //   GTEST_HAS_STD_WSTRING    - Define it to 1/0 to indicate that
@@ -1980,6 +1984,11 @@ GTEST_API_ size_t GetThreadCount();
 #endif // __GNUC__
 
 #endif // GTEST_HAS_RGT
+
+#ifndef GTEST_DEFAULT_RGT_PASS
+#define GTEST_DEFAULT_RGT_PASS true
+#endif // GTEST_DEFAULT_RGT_PASS
+
 
 #ifdef GTEST_OS_WINDOWS
 #define GTEST_PATH_SEP_ "\\"

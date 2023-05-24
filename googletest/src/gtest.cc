@@ -377,9 +377,10 @@ GTEST_DEFINE_bool_(
 
 GTEST_DEFINE_bool_(
     treat_rotten_as_pass,
-    testing::internal::BoolFromGTestEnv("treat_rotten_as_pass", false),
-    "This flag causes un-executed assertions within an executed test "
-    "to be treated as if they passed.");
+    testing::internal::BoolFromGTestEnv("treat_rotten_as_pass",
+                                        GTEST_DEFAULT_RGT_PASS),
+    "Determines whether un-executed assertions within an executed test "
+    "should be treated as if they had passed.");
 
 #if GTEST_USE_OWN_FLAGFILE_FLAG_
 GTEST_DEFINE_string_(
