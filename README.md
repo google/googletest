@@ -55,37 +55,37 @@ More information about building GoogleTest can be found at
 | Feature                      | Description                                   |
 | ---------------------------- | --------------------------------------------- |
 | xUnit test framework         | Googletest is based on the                    |
-:                              : [xUnit](https\://en.wikipedia.org/wiki/XUnit) :
-:                              : testing framework, a popular architecture for :
-:                              : unit testing                                  :
+|                              | [xUnit](https\://en.wikipedia.org/wiki/XUnit) |
+|                              | testing framework, a popular architecture for |
+|                              | unit testing                                  |
 | Test discovery               | Googletest automatically discovers and runs   |
-:                              : your tests, eliminating the need to manually  :
-:                              : register your tests                           :
+|                              | your tests, eliminating the need to manually  |
+|                              | register your tests                           |
 | Rich set of assertions       | Googletest provides a variety of assertions,  |
-:                              : such as equality, inequality, exceptions, and :
-:                              : more, making it easy to test your code        :
+|                              | such as equality, inequality, exceptions, and |
+|                              | more, making it easy to test your code        |
 | User-defined assertions      | You can define your own assertions with       |
-:                              : Googletest, making it simple to write tests   :
-:                              : that are specific to your code                :
+|                              | Googletest, making it simple to write tests   |
+|                              | that are specific to your code                |
 | Death tests                  | Googletest supports death tests, which verify |
-:                              : that your code exits in a certain way, making :
-:                              : it useful for testing error-handling code     :
+|                              | that your code exits in a certain way, making |
+|                              | it useful for testing error-handling code     |
 | Fatal and non-fatal failures | You can specify whether a test failure should |
-:                              : be treated as fatal or non-fatal with         :
-:                              : Googletest, allowing tests to continue        :
-:                              : running even if a failure occurs              :
+|                              | be treated as fatal or non-fatal with         |
+|                              | Googletest, allowing tests to continue        |
+|                              | running even if a failure occurs              |
 | Value-parameterized tests    | Googletest supports value-parameterized       |
-:                              : tests, which run multiple times with          :
-:                              : different input values, making it useful for  :
-:                              : testing functions that take different inputs  :
+|                              | tests, which run multiple times with          |
+|                              | different input values, making it useful for  |
+|                              | testing functions that take different inputs  |
 | Type-parameterized tests     | Googletest also supports type-parameterized   |
-:                              : tests, which run with different data types,   :
-:                              : making it useful for testing functions that   :
-:                              : work with different data types                :
+|                              | tests, which run with different data types,   |
+|                              | making it useful for testing functions that   |
+|                              | work with different data types                |
 | Various options for running  | Googletest provides many options for running  |
-: tests                        : tests, including running individual tests,    :
-:                              : running tests in a specific order, and        :
-:                              : running tests in parallel                     :
+| tests                        | tests, including running individual tests,    |
+|                              | running tests in a specific order, and        |
+|                              | running tests in parallel                     |
 
 ## Supported Platforms
 
