@@ -105,10 +105,17 @@ file (`@com_google_googletest`). For more information about Bazel `BUILD` files,
 see the
 [Bazel C++ Tutorial](https://docs.bazel.build/versions/main/tutorial/cpp.html).
 
+{: .callout .note}
+NOTE: In the example below, we assume Clang or GCC and set `--cxxopt=-std=c++14`
+to ensure that GoogleTest is compiled as C++14 instead of the compiler's default
+setting (which could be C++11). For MSVC, the equivalent would be
+`--cxxopt=/std:c++14`. See [Supported Platforms](platforms.md) for more details
+on supported language versions.
+
 Now you can build and run your test:
 
 <pre>
-<strong>my_workspace$ bazel test --test_output=all //:hello_test</strong>
+<strong>my_workspace$ bazel test --cxxopt=-std=c++14 --test_output=all //:hello_test</strong>
 INFO: Analyzed target //:hello_test (26 packages loaded, 362 targets configured).
 INFO: Found 1 test target...
 INFO: From Testing //:hello_test:
