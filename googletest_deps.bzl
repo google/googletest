@@ -7,10 +7,10 @@ def googletest_deps():
 
     if not native.existing_rule("com_googlesource_code_re2"):
         http_archive(
-            name = "com_googlesource_code_re2",  # 2022-12-21T14:29:10Z
-            sha256 = "b9ce3a51beebb38534d11d40f8928d40509b9e18a735f6a4a97ad3d014c87cb5",
-            strip_prefix = "re2-d0b1f8f2ecc2ea74956c7608b6f915175314ff0e",
-            urls = ["https://github.com/google/re2/archive/d0b1f8f2ecc2ea74956c7608b6f915175314ff0e.zip"],
+            name = "com_googlesource_code_re2",  # 2023-06-01
+            sha256 = "1726508efc93a50854c92e3f7ac66eb28f0e57652e413f11d7c1e28f97d997ba",
+            strip_prefix = "re2-03da4fc0857c285e3a26782f6bc8931c4c950df4",
+            urls = ["https://github.com/google/re2/archive/03da4fc0857c285e3a26782f6bc8931c4c950df4.zip"],
         )
 
     if not native.existing_rule("com_google_absl"):
