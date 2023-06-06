@@ -1516,7 +1516,7 @@ class NeverThrown {
 #define GTEST_TEST_CLASS_NAME_(test_suite_name, test_name) \
   test_suite_name##_##test_name##_Test
 
-// Helper macro for defining tests.
+// BEGINNOLINT Helper macro for defining tests.
 #define GTEST_TEST_(test_suite_name, test_name, parent_class, parent_id)       \
   static_assert(sizeof(GTEST_STRINGIFY_(test_suite_name)) > 1,                 \
                 "test_suite_name must not be empty");                          \
@@ -1554,6 +1554,6 @@ class NeverThrown {
               parent_class>::GetTearDownCaseOrSuite(__FILE__, __LINE__),       \
           new ::testing::internal::TestFactoryImpl<GTEST_TEST_CLASS_NAME_(     \
               test_suite_name, test_name)>);                                   \
-  void GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)::TestBody()
+  void GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)::TestBody() // ENDNOLINT
 
 #endif  // GOOGLETEST_INCLUDE_GTEST_INTERNAL_GTEST_INTERNAL_H_
