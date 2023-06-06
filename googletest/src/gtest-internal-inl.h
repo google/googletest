@@ -672,7 +672,7 @@ class GTEST_API_ UnitTestImpl {
   void AddTestInfo(internal::SetUpTestSuiteFunc set_up_tc,
                    internal::TearDownTestSuiteFunc tear_down_tc,
                    TestInfo* test_info) {
-#ifdef GTEST_HAS_DEATH_TEST
+#ifdef GTEST_HAS_FILE_SYSTEM
     // In order to support thread-safe death tests, we need to
     // remember the original working directory when the test program
     // was first invoked.  We cannot do this in RUN_ALL_TESTS(), as
@@ -685,7 +685,7 @@ class GTEST_API_ UnitTestImpl {
       GTEST_CHECK_(!original_working_dir_.IsEmpty())
           << "Failed to get the current working directory.";
     }
-#endif  // GTEST_HAS_DEATH_TEST
+#endif  // GTEST_HAS_FILE_SYSTEM
 
     GetTestSuite(test_info->test_suite_name(), test_info->type_param(),
                  set_up_tc, tear_down_tc)
