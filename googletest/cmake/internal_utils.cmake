@@ -341,10 +341,12 @@ endfunction()
 function(install_project)
   if(INSTALL_GTEST)
     install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/"
+      COMPONENT "${PROJECT_NAME}"
       DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
     # Install the project targets.
     install(TARGETS ${ARGN}
       EXPORT ${targets_export_name}
+      COMPONENT "${PROJECT_NAME}"
       RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
       ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
       LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}")
@@ -356,6 +358,7 @@ function(install_project)
         get_target_property(t_pdb_output_directory ${t} PDB_OUTPUT_DIRECTORY)
         install(FILES
           "${t_pdb_output_directory}/\${CMAKE_INSTALL_CONFIG_NAME}/$<$<CONFIG:Debug>:${t_pdb_name_debug}>$<$<NOT:$<CONFIG:Debug>>:${t_pdb_name}>.pdb"
+          COMPONENT "${PROJECT_NAME}"
           DESTINATION ${CMAKE_INSTALL_LIBDIR}
           OPTIONAL)
       endforeach()
@@ -366,6 +369,7 @@ function(install_project)
       configure_file("${PROJECT_SOURCE_DIR}/cmake/${t}.pc.in"
         "${configured_pc}" @ONLY)
       install(FILES "${configured_pc}"
+        COMPONENT "${PROJECT_NAME}"
         DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
     endforeach()
   endif()
