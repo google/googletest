@@ -57,6 +57,7 @@ using testing::internal::AlwaysTrue;
 
 #ifdef GTEST_OS_LINUX
 #include <sys/time.h>
+#include <sys/prctl.h>
 #endif  // GTEST_OS_LINUX
 
 #include "gtest/gtest-spi.h"
@@ -1387,6 +1388,15 @@ TEST(MatcherDeathTest, PolymorphicMatcherDoesNotMatch) {
                    ContainsRegex("rest is science")),
       "Expected: contains regular expression \"rest is science\"");
 }
+
+// Shows that death tests are fast when core dumps can be disabled.
+#if PR_SET_DUMPABLE
+TEST_F(TestForDeathTest, TestFastDeathNoCoreDump) {
+  for (int i = 0; i < 10; ++i) {
+    ASSERT_DEATH(raise(SIGABRT), "");
+  }
+}
+#endif // PR_SET_DUMPABLE
 
 }  // namespace
 

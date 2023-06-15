@@ -51,9 +51,11 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
+#include <sys/resource.h>
 
 #ifdef GTEST_OS_LINUX
 #include <signal.h>
+#include <sys/prctl.h>
 #endif  // GTEST_OS_LINUX
 
 #include <stdarg.h>
@@ -164,6 +166,23 @@ bool InDeathTestChild() {
   else
     return g_in_fast_death_test_child;
 #endif
+}
+
+// Tries to disable core dumps.
+// Disabling core dumps in child processes can make death tests significantly
+// faster, especially when the address space is large or dumping cores is slow
+// because of e.g. compression or slow IO.
+void TryDisableCoreDumps() {
+  // Important: because this is called after fork, this must be
+  // async-signal-safe.
+  // See https://lkml.org/lkml/2011/8/25/124 for why we only use RLIMIT_CORE as
+  // a fallback.
+#ifdef PR_SET_DUMPABLE
+  (void)prctl(PR_SET_DUMPABLE, 0);
+#elif defined RLIMIT_CORE  // PR_SET_DUMPABLE
+  struct rlimit limit = {0, 0};
+  (void)setrlimit(RLIMIT_CORE, &limit);
+#endif  // RLIMIT_CORE
 }
 
 }  // namespace internal
@@ -1129,6 +1148,7 @@ DeathTest::TestRole NoExecDeathTest::AssumeRole() {
     // Event forwarding to the listeners of event listener API mush be shut
     // down in death test subprocesses.
     GetUnitTestImpl()->listeners()->SuppressEventForwarding();
+    internal::TryDisableCoreDumps();
     g_in_fast_death_test_child = true;
     return EXECUTE_TEST;
   } else {
@@ -1195,6 +1215,8 @@ static int ExecDeathTestChildMain(void* child_arg) {
                    "\") failed: " + GetLastErrnoDescription());
     return EXIT_FAILURE;
   }
+
+  internal::TryDisableCoreDumps();
 
   // We can safely call execv() as it's almost a direct system call. We
   // cannot use execvp() as it's a libc function and thus potentially
