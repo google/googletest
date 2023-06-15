@@ -1128,7 +1128,7 @@ DeathTest::TestRole NoExecDeathTest::AssumeRole() {
     LogToStderr();
     // Event forwarding to the listeners of event listener API mush be shut
     // down in death test subprocesses.
-    GetUnitTestImpl()->listeners()->SuppressEventForwarding();
+    GetUnitTestImpl()->listeners()->SuppressEventForwarding(true);
     g_in_fast_death_test_child = true;
     return EXECUTE_TEST;
   } else {
