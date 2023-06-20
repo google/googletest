@@ -3019,7 +3019,8 @@ void TestSuite::Run() {
   internal::HandleExceptionsInMethodIfSupported(
       this, &TestSuite::RunSetUpTestSuite, "SetUpTestSuite()");
 
-  const bool skip_all = ad_hoc_test_result().Failed();
+  const bool skip_all =
+      ad_hoc_test_result().Failed() || ad_hoc_test_result().Skipped();
 
   start_timestamp_ = internal::GetTimeInMillis();
   internal::Timer timer;
@@ -5155,8 +5156,8 @@ bool TestEventListeners::EventForwardingEnabled() const {
   return repeater_->forwarding_enabled();
 }
 
-void TestEventListeners::SuppressEventForwarding() {
-  repeater_->set_forwarding_enabled(false);
+void TestEventListeners::SuppressEventForwarding(bool suppress) {
+  repeater_->set_forwarding_enabled(!suppress);
 }
 
 // class UnitTest
@@ -5634,7 +5635,7 @@ void UnitTestImpl::RecordProperty(const TestProperty& test_property) {
 // subprocess. Must not be called before InitGoogleTest.
 void UnitTestImpl::SuppressTestEventsIfInSubprocess() {
   if (internal_run_death_test_flag_ != nullptr)
-    listeners()->SuppressEventForwarding();
+    listeners()->SuppressEventForwarding(true);
 }
 #endif  // GTEST_HAS_DEATH_TEST
 

@@ -94,12 +94,22 @@ macro(config_compiler_and_linker)
     if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
       set(cxx_base_flags "${cxx_base_flags} -utf-8")
     endif()
-  elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "IntelLLVM")
+      set(cxx_base_flags "${cxx_base_flags} /fp:precise -Wno-inconsistent-missing-override -Wno-microsoft-exception-spec -Wno-unused-function -Wno-unused-but-set-variable")
+    endif()
+  elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR
+      CMAKE_CXX_COMPILER_ID STREQUAL "IntelLLVM")
     set(cxx_base_flags "-Wall -Wshadow -Wconversion -Wundef")
     set(cxx_exception_flags "-fexceptions")
     set(cxx_no_exception_flags "-fno-exceptions")
-    set(cxx_strict_flags "-W -Wpointer-arith -Wreturn-type -Wcast-qual -Wwrite-strings -Wswitch -Wunused-parameter -Wcast-align -Wchar-subscripts -Winline -Wredundant-decls")
+    set(cxx_strict_flags "-W -Wpointer-arith -Wreturn-type -Wcast-qual -Wwrite-strings -Wswitch -Wunused-parameter -Wcast-align -Winline -Wredundant-decls")
     set(cxx_no_rtti_flags "-fno-rtti")
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+      set(cxx_strict_flags "${cxx_strict_flags} -Wchar-subscripts")
+    endif()
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "IntelLLVM")
+      set(cxx_base_flags "${cxx_base_flags} -Wno-implicit-float-size-conversion -ffp-model=precise")
+    endif()
   elseif (CMAKE_COMPILER_IS_GNUCXX)
     set(cxx_base_flags "-Wall -Wshadow -Wundef")
     if(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 7.0.0)
@@ -331,10 +341,12 @@ endfunction()
 function(install_project)
   if(INSTALL_GTEST)
     install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/"
+      COMPONENT "${PROJECT_NAME}"
       DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
     # Install the project targets.
     install(TARGETS ${ARGN}
       EXPORT ${targets_export_name}
+      COMPONENT "${PROJECT_NAME}"
       RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
       ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
       LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}")
@@ -346,6 +358,7 @@ function(install_project)
         get_target_property(t_pdb_output_directory ${t} PDB_OUTPUT_DIRECTORY)
         install(FILES
           "${t_pdb_output_directory}/\${CMAKE_INSTALL_CONFIG_NAME}/$<$<CONFIG:Debug>:${t_pdb_name_debug}>$<$<NOT:$<CONFIG:Debug>>:${t_pdb_name}>.pdb"
+          COMPONENT "${PROJECT_NAME}"
           DESTINATION ${CMAKE_INSTALL_LIBDIR}
           OPTIONAL)
       endforeach()
@@ -356,6 +369,7 @@ function(install_project)
       configure_file("${PROJECT_SOURCE_DIR}/cmake/${t}.pc.in"
         "${configured_pc}" @ONLY)
       install(FILES "${configured_pc}"
+        COMPONENT "${PROJECT_NAME}"
         DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
     endforeach()
   endif()

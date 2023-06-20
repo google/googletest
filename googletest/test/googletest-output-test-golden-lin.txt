@@ -12,7 +12,7 @@ Expected equality of these values:
   3
 Stack trace: (omitted)
 
-[0;32m[==========] [mRunning 89 tests from 42 test suites.
+[0;32m[==========] [mRunning 90 tests from 43 test suites.
 [0;32m[----------] [mGlobal test environment set-up.
 FooEnvironment::SetUp() called.
 BarEnvironment::SetUp() called.
@@ -967,6 +967,15 @@ Stack trace: (omitted)
 googletest-output-test_.cc:#: Skipped
 
 [0;32m[  SKIPPED ] [mTestSuiteThatFailsToSetUp.ShouldNotRun
+[0;32m[----------] [m1 test from TestSuiteThatSkipsInSetUp
+googletest-output-test_.cc:#: Skipped
+Skip entire test suite
+Stack trace: (omitted)
+
+[0;32m[ RUN      ] [mTestSuiteThatSkipsInSetUp.ShouldNotRun
+googletest-output-test_.cc:#: Skipped
+
+[0;32m[  SKIPPED ] [mTestSuiteThatSkipsInSetUp.ShouldNotRun
 [0;32m[----------] [m1 test from PrintingFailingParams/FailingParamTest
 [0;32m[ RUN      ] [mPrintingFailingParams/FailingParamTest.Fails/0
 googletest-output-test_.cc:#: Failure
@@ -1043,10 +1052,11 @@ Failed
 Expected fatal failure.
 Stack trace: (omitted)
 
-[0;32m[==========] [m89 tests from 42 test suites ran.
+[0;32m[==========] [m90 tests from 43 test suites ran.
 [0;32m[  PASSED  ] [m31 tests.
-[0;32m[  SKIPPED ] [m1 test, listed below:
+[0;32m[  SKIPPED ] [m2 tests, listed below:
 [0;32m[  SKIPPED ] [mTestSuiteThatFailsToSetUp.ShouldNotRun
+[0;32m[  SKIPPED ] [mTestSuiteThatSkipsInSetUp.ShouldNotRun
 [0;31m[  FAILED  ] [m57 tests, listed below:
 [0;31m[  FAILED  ] [mNonfatalFailureTest.EscapesStringOperands
 [0;31m[  FAILED  ] [mNonfatalFailureTest.DiffForLongStrings

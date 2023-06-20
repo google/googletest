@@ -42,7 +42,7 @@ Since GoogleTest is based on the popular xUnit architecture, you'll feel right
 at home if you've used JUnit or PyUnit before. If not, it will take you about 10
 minutes to learn the basics and get started. So let's go!
 
-## Beware of the nomenclature
+## Beware of the Nomenclature
 
 {: .callout .note}
 *Note:* There might be some confusion arising from different definitions of the

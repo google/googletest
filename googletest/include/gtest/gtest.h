@@ -1055,6 +1055,10 @@ class GTEST_API_ TestEventListeners {
     return default_xml_generator_;
   }
 
+  // Controls whether events will be forwarded by the repeater to the
+  // listeners in the list.
+  void SuppressEventForwarding(bool);
+
  private:
   friend class TestSuite;
   friend class TestInfo;
@@ -1084,7 +1088,6 @@ class GTEST_API_ TestEventListeners {
   // Controls whether events will be forwarded by the repeater to the
   // listeners in the list.
   bool EventForwardingEnabled() const;
-  void SuppressEventForwarding();
 
   // The actual list of listeners.
   internal::TestEventRepeater* repeater_;
