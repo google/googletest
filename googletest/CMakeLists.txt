@@ -49,10 +49,6 @@ endif()
 cmake_minimum_required(VERSION 3.13)
 project(gtest VERSION ${GOOGLETEST_VERSION} LANGUAGES CXX C)
 
-if (POLICY CMP0063) # Visibility
-  cmake_policy(SET CMP0063 NEW)
-endif (POLICY CMP0063)
-
 if (COMMAND set_up_hermetic_build)
   set_up_hermetic_build()
 endif()

@@ -12,14 +12,6 @@
 #   Test and Google Mock's option() definitions, and thus must be
 #   called *after* the options have been defined.
 
-if (POLICY CMP0054)
-  cmake_policy(SET CMP0054 NEW)
-endif (POLICY CMP0054)
-
-if (POLICY CMP0069)
-  cmake_policy(SET CMP0069 NEW)
-endif (POLICY CMP0069)
-
 # Tweaks CMake's default compiler/linker settings to suit Google Test's needs.
 #
 # This must be a macro(), as inside a function string() can only
@@ -263,12 +255,6 @@ function(cxx_executable name dir libs)
   cxx_executable_with_flags(
     ${name} "${cxx_default}" "${libs}" "${dir}/${name}.cc" ${ARGN})
 endfunction()
-
-# CMP0094 policy enables finding a Python executable in the LOCATION order, as
-# specified by the PATH environment variable.
-if (POLICY CMP0094)
-  cmake_policy(SET CMP0094 NEW)
-endif()
 
 # Sets PYTHONINTERP_FOUND and PYTHON_EXECUTABLE.
 if ("${CMAKE_VERSION}" VERSION_LESS "3.12.0")
