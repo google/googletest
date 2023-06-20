@@ -39,5 +39,9 @@ jobs:
       with:
         fetch-depth: 0
 
+    - uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: amd64
+
     - name: Tests
       run: bazel test --cxxopt=/std:c++14 --features=external_include_paths --test_output=errors ...
