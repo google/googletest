@@ -100,18 +100,14 @@ else()
   target_link_libraries(gmock_main PUBLIC gmock)
   set_target_properties(gmock_main PROPERTIES VERSION ${GOOGLETEST_VERSION})
 endif()
-# If the CMake version supports it, attach header directory information
-# to the targets for when we are part of a parent build (ie being pulled
-# in via add_subdirectory() rather than being a standalone build).
-if (DEFINED CMAKE_VERSION AND NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.11")
-  string(REPLACE ";" "$<SEMICOLON>" dirs "${gmock_build_include_dirs}")
-  target_include_directories(gmock SYSTEM INTERFACE
-    "$<BUILD_INTERFACE:${dirs}>"
-    "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
-  target_include_directories(gmock_main SYSTEM INTERFACE
-    "$<BUILD_INTERFACE:${dirs}>"
-    "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
-endif()
+
+string(REPLACE ";" "$<SEMICOLON>" dirs "${gmock_build_include_dirs}")
+target_include_directories(gmock SYSTEM INTERFACE
+  "$<BUILD_INTERFACE:${dirs}>"
+  "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
+target_include_directories(gmock_main SYSTEM INTERFACE
+  "$<BUILD_INTERFACE:${dirs}>"
+  "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
 
 ########################################################################
 #
@@ -135,11 +131,7 @@ if (gmock_build_tests)
   enable_testing()
 
   if (MINGW OR CYGWIN)
-    if (CMAKE_VERSION VERSION_LESS "2.8.12")
-      add_compile_options("-Wa,-mbig-obj")
-    else()
-      add_definitions("-Wa,-mbig-obj")
-    endif()
+    add_compile_options("-Wa,-mbig-obj")
   endif()
 
   ############################################################
