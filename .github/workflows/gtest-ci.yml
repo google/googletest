@@ -7,6 +7,9 @@ on:
 env:
   BAZEL_CXXOPTS: -std=c++14
 
+permissions:
+  contents: read
+
 jobs:
   Linux:
     runs-on: ubuntu-latest
