@@ -6,12 +6,13 @@ on:
 
 env:
   BAZEL_CXXOPTS: -std=c++14
+  CTEST_OUTPUT_ON_FAILURE: 1
 
 permissions:
   contents: read
 
 jobs:
-  Linux:
+  Linux-Bazel:
     runs-on: ubuntu-latest
     steps:
 
@@ -22,7 +23,7 @@ jobs:
     - name: Tests
       run: bazel test --cxxopt=-std=c++14 --features=external_include_paths --test_output=errors ...
 
-  macOS:
+  macOS-Bazel:
     runs-on: macos-latest
     steps:
 
@@ -34,7 +35,7 @@ jobs:
       run:  bazel test --cxxopt=-std=c++14 --features=external_include_paths --test_output=errors ...
 
 
-  Windows:
+  Windows-Bazel:
     runs-on: windows-latest
     steps:
 
@@ -44,3 +45,58 @@ jobs:
 
     - name: Tests
       run: bazel test --cxxopt=/std:c++14 --features=external_include_paths --test_output=errors ...
+
+  Linux-CMake-Min:
+    runs-on: ubuntu-latest
+    steps:
+
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - uses: lukka/get-cmake@latest
+        with:
+          cmakeVersion: 3.13.0
+
+      - name: Configure
+        run: cmake -S. -B build -DCMAKE_BUILD_TYPE=Release -Dgtest_build_samples=ON -Dgtest_build_tests=ON -Dgmock_build_tests=ON
+      - name: Build
+        run: cmake --build build
+      - name: Test
+        working-directory: ./build
+        run: ctest
+
+  Linux-CMake:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        config: [Debug, Release]
+        generator: ["Unix Makefiles", "Ninja Multi-Config"]
+        cpp_std: [14, 17, 20]
+        cmake_off_on: ["ON", "OFF"]
+
+    steps:
+
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - uses: lukka/get-cmake@latest
+
+      - name: Configure
+        run: cmake -S. -B build \
+          -D CMAKE_BUILD_TYPE=${{ matrix.config }} \
+          -D CMAKE_CXX_STANDARD=${{ matrix.cpp_std }} \
+          -D gtest_build_samples=ON \
+          -D gtest_build_tests=ON \
+          -D gmock_build_tests=ON \
+          -D cxx_no_exception=${{ matrix.cmake_off_on }} \
+          -D cxx_no_rtti=${{ matrix.cmake_off_on }}
+          -G "${{ matrix.generator }}"
+      - name: Build
+        run: cmake --build build --config ${{ matrix.config }}
+      - name: Test
+        working-directory: ./build
+        run: ctest -C ${{ matrix.config }}
+      - name: Install
+        run: cmake --install build --prefix build/install --config ${{ matrix.config }}
