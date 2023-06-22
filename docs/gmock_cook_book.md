@@ -697,9 +697,9 @@ TEST(AbcTest, Xyz) {
   EXPECT_CALL(foo, DoThat(_, _));
 
   int n = 0;
-  EXPECT_EQ('+', foo.DoThis(5));  // FakeFoo::DoThis() is invoked.
+  EXPECT_EQ(foo.DoThis(5), '+');  // FakeFoo::DoThis() is invoked.
   foo.DoThat("Hi", &n);  // FakeFoo::DoThat() is invoked.
-  EXPECT_EQ(2, n);
+  EXPECT_EQ(n, 2);
 }
 ```
 
@@ -1129,11 +1129,11 @@ using STL's `<functional>` header is just painful). For example, here's a
 predicate that's satisfied by any number that is >= 0, <= 100, and != 50:
 
 ```cpp
-using testing::AllOf;
-using testing::Ge;
-using testing::Le;
-using testing::Matches;
-using testing::Ne;
+using ::testing::AllOf;
+using ::testing::Ge;
+using ::testing::Le;
+using ::testing::Matches;
+using ::testing::Ne;
 ...
 Matches(AllOf(Ge(0), Le(100), Ne(50)))
 ```
@@ -1861,7 +1861,7 @@ error. So, what shall you do?
 Though you may be tempted, DO NOT use `std::ref()`:
 
 ```cpp
-using testing::Return;
+using ::testing::Return;
 
 class MockFoo : public Foo {
  public:
@@ -1873,7 +1873,7 @@ class MockFoo : public Foo {
   EXPECT_CALL(foo, GetValue())
       .WillRepeatedly(Return(std::ref(x)));  // Wrong!
   x = 42;
-  EXPECT_EQ(42, foo.GetValue());
+  EXPECT_EQ(foo.GetValue(), 42);
 ```
 
 Unfortunately, it doesn't work here. The above code will fail with error:
@@ -1895,14 +1895,14 @@ the expectation is set, and `Return(std::ref(x))` will always return 0.
 returns the value pointed to by `pointer` at the time the action is *executed*:
 
 ```cpp
-using testing::ReturnPointee;
+using ::testing::ReturnPointee;
 ...
   int x = 0;
   MockFoo foo;
   EXPECT_CALL(foo, GetValue())
       .WillRepeatedly(ReturnPointee(&x));  // Note the & here.
   x = 42;
-  EXPECT_EQ(42, foo.GetValue());  // This will succeed now.
+  EXPECT_EQ(foo.GetValue(), 42);  // This will succeed now.
 ```
 
 ### Combining Actions
@@ -2264,7 +2264,7 @@ TEST_F(FooTest, Test) {
 
   EXPECT_CALL(foo, DoThis(2))
       .WillOnce(Invoke(NewPermanentCallback(SignOfSum, 5)));
-  EXPECT_EQ('+', foo.DoThis(2));  // Invokes SignOfSum(5, 2).
+  EXPECT_EQ(foo.DoThis(2), '+');  // Invokes SignOfSum(5, 2).
 }
 ```
 
@@ -2771,11 +2771,13 @@ returns a null `unique_ptr`, that’s what you’ll get if you don’t specify a
 action:
 
 ```cpp
+using ::testing::IsNull;
+...
   // Use the default action.
   EXPECT_CALL(mock_buzzer_, MakeBuzz("hello"));
 
   // Triggers the previous EXPECT_CALL.
-  EXPECT_EQ(nullptr, mock_buzzer_.MakeBuzz("hello"));
+  EXPECT_THAT(mock_buzzer_.MakeBuzz("hello"), IsNull());
 ```
 
 If you are not happy with the default action, you can tweak it as usual; see
@@ -3194,9 +3196,9 @@ flag. For example, given the test program:
 ```cpp
 #include "gmock/gmock.h"
 
-using testing::_;
-using testing::HasSubstr;
-using testing::Return;
+using ::testing::_;
+using ::testing::HasSubstr;
+using ::testing::Return;
 
 class MockFoo {
  public:
@@ -3817,15 +3819,15 @@ If the built-in actions don't work for you, you can easily define your own one.
 All you need is a call operator with a signature compatible with the mocked
 function. So you can use a lambda:
 
-```
+```cpp
 MockFunction<int(int)> mock;
 EXPECT_CALL(mock, Call).WillOnce([](const int input) { return input * 7; });
-EXPECT_EQ(14, mock.AsStdFunction()(2));
+EXPECT_EQ(mock.AsStdFunction()(2), 14);
 ```
 
 Or a struct with a call operator (even a templated one):
 
-```
+```cpp
 struct MultiplyBy {
   template <typename T>
   T operator()(T arg) { return arg * multiplier; }
@@ -3840,16 +3842,16 @@ struct MultiplyBy {
 It's also fine for the callable to take no arguments, ignoring the arguments
 supplied to the mock function:
 
-```
+```cpp
 MockFunction<int(int)> mock;
 EXPECT_CALL(mock, Call).WillOnce([] { return 17; });
-EXPECT_EQ(17, mock.AsStdFunction()(0));
+EXPECT_EQ(mock.AsStdFunction()(0), 17);
 ```
 
 When used with `WillOnce`, the callable can assume it will be called at most
 once and is allowed to be a move-only type:
 
-```
+```cpp
 // An action that contains move-only types and has an &&-qualified operator,
 // demanding in the type system that it be called at most once. This can be
 // used with WillOnce, but the compiler will reject it if handed to
