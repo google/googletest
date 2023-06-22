@@ -12,14 +12,6 @@
 #   Test and Google Mock's option() definitions, and thus must be
 #   called *after* the options have been defined.
 
-if (POLICY CMP0054)
-  cmake_policy(SET CMP0054 NEW)
-endif (POLICY CMP0054)
-
-if (POLICY CMP0069)
-  cmake_policy(SET CMP0069 NEW)
-endif (POLICY CMP0069)
-
 # Tweaks CMake's default compiler/linker settings to suit Google Test's needs.
 #
 # This must be a macro(), as inside a function string() can only
@@ -196,23 +188,14 @@ function(cxx_library_with_type name type cxx_flags)
     set_target_properties(${name}
       PROPERTIES
       COMPILE_DEFINITIONS "GTEST_CREATE_SHARED_LIBRARY=1")
-    if (NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.11")
-      target_compile_definitions(${name} INTERFACE
-        $<INSTALL_INTERFACE:GTEST_LINKED_AS_SHARED_LIBRARY=1>)
-    endif()
+    target_compile_definitions(${name} INTERFACE
+      $<INSTALL_INTERFACE:GTEST_LINKED_AS_SHARED_LIBRARY=1>)
   endif()
   if (DEFINED GTEST_HAS_PTHREAD)
-    if ("${CMAKE_VERSION}" VERSION_LESS "3.1.0")
-      set(threads_spec ${CMAKE_THREAD_LIBS_INIT})
-    else()
-      set(threads_spec Threads::Threads)
-    endif()
-    target_link_libraries(${name} PUBLIC ${threads_spec})
+    target_link_libraries(${name} PUBLIC Threads::Threads)
   endif()
 
-  if (NOT "${CMAKE_VERSION}" VERSION_LESS "3.8")
-    target_compile_features(${name} PUBLIC cxx_std_14)
-  endif()
+  target_compile_features(${name} PUBLIC cxx_std_14)
 endfunction()
 
 ########################################################################
@@ -264,22 +247,7 @@ function(cxx_executable name dir libs)
     ${name} "${cxx_default}" "${libs}" "${dir}/${name}.cc" ${ARGN})
 endfunction()
 
-# CMP0094 policy enables finding a Python executable in the LOCATION order, as
-# specified by the PATH environment variable.
-if (POLICY CMP0094)
-  cmake_policy(SET CMP0094 NEW)
-endif()
-
-# Sets PYTHONINTERP_FOUND and PYTHON_EXECUTABLE.
-if ("${CMAKE_VERSION}" VERSION_LESS "3.12.0")
-  find_package(PythonInterp)
-  set(PYTHONINTERP_FOUND ${PYTHONINTERP_FOUND} CACHE INTERNAL "")
-  set(PYTHON_EXECUTABLE ${PYTHON_EXECUTABLE} CACHE INTERNAL "")
-else()
-  find_package(Python COMPONENTS Interpreter)
-  set(PYTHONINTERP_FOUND ${Python_Interpreter_FOUND} CACHE INTERNAL "")
-  set(PYTHON_EXECUTABLE ${Python_EXECUTABLE} CACHE INTERNAL "")
-endif()
+find_package(Python3)
 
 # cxx_test_with_flags(name cxx_flags libs srcs...)
 #
@@ -305,34 +273,22 @@ endfunction()
 # creates a Python test with the given name whose main module is in
 # test/name.py.  It does nothing if Python is not installed.
 function(py_test name)
-  if (PYTHONINTERP_FOUND)
-    if ("${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" VERSION_GREATER 3.1)
-      if (CMAKE_CONFIGURATION_TYPES)
-        # Multi-configuration build generators as for Visual Studio save
-        # output in a subdirectory of CMAKE_CURRENT_BINARY_DIR (Debug,
-        # Release etc.), so we have to provide it here.
-        add_test(NAME ${name}
-          COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/${name}.py
-              --build_dir=${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG> ${ARGN})
-      else (CMAKE_CONFIGURATION_TYPES)
-        # Single-configuration build generators like Makefile generators
-        # don't have subdirs below CMAKE_CURRENT_BINARY_DIR.
-        add_test(NAME ${name}
-          COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/${name}.py
-            --build_dir=${CMAKE_CURRENT_BINARY_DIR} ${ARGN})
-      endif (CMAKE_CONFIGURATION_TYPES)
-    else()
-      # ${CMAKE_CURRENT_BINARY_DIR} is known at configuration time, so we can
-      # directly bind it from cmake. ${CTEST_CONFIGURATION_TYPE} is known
-      # only at ctest runtime (by calling ctest -c <Configuration>), so
-      # we have to escape $ to delay variable substitution here.
-      add_test(NAME ${name}
-        COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/${name}.py
-          --build_dir=${CMAKE_CURRENT_BINARY_DIR}/\${CTEST_CONFIGURATION_TYPE} ${ARGN})
-    endif()
-    # Make the Python import path consistent between Bazel and CMake.
-    set_tests_properties(${name} PROPERTIES ENVIRONMENT PYTHONPATH=${CMAKE_SOURCE_DIR})
-  endif(PYTHONINTERP_FOUND)
+  if (NOT Python3_Interpreter_FOUND)
+    return()
+  endif()
+
+  get_cmake_property(is_multi "GENERATOR_IS_MULTI_CONFIG")
+  set(build_dir "${CMAKE_CURRENT_BINARY_DIR}")
+  if (is_multi)
+    set(build_dir "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>")
+  endif()
+
+  add_test(NAME ${name}
+      COMMAND Python3::Interpreter ${CMAKE_CURRENT_SOURCE_DIR}/test/${name}.py
+          --build_dir=${build_dir} ${ARGN})
+
+  # Make the Python import path consistent between Bazel and CMake.
+  set_tests_properties(${name} PROPERTIES ENVIRONMENT PYTHONPATH=${CMAKE_SOURCE_DIR})
 endfunction()
 
 # install_project(targets...)

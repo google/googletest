@@ -49,10 +49,6 @@ endif()
 cmake_minimum_required(VERSION 3.13)
 project(gtest VERSION ${GOOGLETEST_VERSION} LANGUAGES CXX C)
 
-if (POLICY CMP0063) # Visibility
-  cmake_policy(SET CMP0063 NEW)
-endif (POLICY CMP0063)
-
 if (COMMAND set_up_hermetic_build)
   set_up_hermetic_build()
 endif()
@@ -144,18 +140,13 @@ if(GTEST_HAS_ABSL)
 endif()
 cxx_library(gtest_main "${cxx_strict}" src/gtest_main.cc)
 set_target_properties(gtest_main PROPERTIES VERSION ${GOOGLETEST_VERSION})
-# If the CMake version supports it, attach header directory information
-# to the targets for when we are part of a parent build (ie being pulled
-# in via add_subdirectory() rather than being a standalone build).
-if (DEFINED CMAKE_VERSION AND NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.11")
-  string(REPLACE ";" "$<SEMICOLON>" dirs "${gtest_build_include_dirs}")
-  target_include_directories(gtest SYSTEM INTERFACE
-    "$<BUILD_INTERFACE:${dirs}>"
-    "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
-  target_include_directories(gtest_main SYSTEM INTERFACE
-    "$<BUILD_INTERFACE:${dirs}>"
-    "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
-endif()
+string(REPLACE ";" "$<SEMICOLON>" dirs "${gtest_build_include_dirs}")
+target_include_directories(gtest SYSTEM INTERFACE
+  "$<BUILD_INTERFACE:${dirs}>"
+  "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
+target_include_directories(gtest_main SYSTEM INTERFACE
+  "$<BUILD_INTERFACE:${dirs}>"
+  "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
 if(CMAKE_SYSTEM_NAME MATCHES "QNX")
   target_link_libraries(gtest PUBLIC regex)
 endif()
