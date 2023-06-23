@@ -176,15 +176,13 @@ size_t RgtInit();
 
 #ifdef __GNUC__
 
-#define GTEST_RGT_RECORD_ITEM_(ITEM)                                \
-  struct RgtRecorderHelper_##ITEM {                                 \
-    static void Record() { ::testing::internal::RgtRecord(&ITEM); } \
-  };                                                                \
-  __asm__(                                                          \
-  ".pushsection .init_array" "\n"                                   \
-  ".quad %c0" "\n"                                                  \
-  ".popsection" "\n"                                                \
-  : : "i"(RgtRecorderHelper_##ITEM::Record));
+#define GTEST_RGT_RECORD_ITEM_(ITEM)                                    \
+  struct RgtRecorderHelper_##ITEM {                                     \
+    static void Record() { ::testing::internal::RgtRecord(&ITEM); }     \
+  };                                                                    \
+  static auto RgtHelper2_##ITEM __attribute__((section(".init_array"))) \
+    = RgtRecorderHelper_##ITEM::Record;                                 \
+  (void)RgtHelper2_##ITEM;
 
 #else // __GNUC__
 
