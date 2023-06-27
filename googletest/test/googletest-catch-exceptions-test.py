@@ -297,10 +297,10 @@ class CatchCxxExceptionsTest(gtest_test_utils.TestCase):
   def testUnhandledCxxExceptionsAbortTheProgram(self):
     # Filters out SEH exception tests on Windows. Unhandled SEH exceptions
     # cause tests to show pop-up windows there.
-    FITLER_OUT_SEH_TESTS_FLAG = FILTER_FLAG + '=-*Seh*'
+    filter_out_seh_tests_flag = FILTER_FLAG + '=-*Seh*'
     # By default, Google Test doesn't catch the exceptions.
     uncaught_exceptions_ex_binary_output = gtest_test_utils.Subprocess(
-        [EX_EXE_PATH, NO_CATCH_EXCEPTIONS_FLAG, FITLER_OUT_SEH_TESTS_FLAG],
+        [EX_EXE_PATH, NO_CATCH_EXCEPTIONS_FLAG, filter_out_seh_tests_flag],
         env=environ,
     ).output
 
