@@ -925,9 +925,11 @@ using std::tuple_size;
 namespace internal {
 
 // A secret type that Google Test users don't know about.  It has no
-// definition on purpose.  Therefore it's impossible to create a
+// accessible constructors on purpose.  Therefore it's impossible to create a
 // Secret object, which is what we want.
-class Secret;
+class Secret {
+  Secret(const Secret&) = delete;
+};
 
 // A helper for suppressing warnings on constant condition.  It just
 // returns 'condition'.
