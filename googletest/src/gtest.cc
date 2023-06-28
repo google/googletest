@@ -866,7 +866,7 @@ bool UnitTestOptions::FilterMatchesTest(const std::string& test_suite_name,
 // Returns EXCEPTION_EXECUTE_HANDLER if Google Test should handle the
 // given SEH exception, or EXCEPTION_CONTINUE_SEARCH otherwise.
 // This function is useful as an __except condition.
-int UnitTestOptions::GTestShouldProcessSEH(DWORD exception_code) {
+int UnitTestOptions::GTestShouldProcessSEH(DWORD seh_code) {
   // Google Test should handle a SEH exception if:
   //   1. the user wants it to, AND
   //   2. this is not a breakpoint exception, AND
@@ -881,9 +881,11 @@ int UnitTestOptions::GTestShouldProcessSEH(DWORD exception_code) {
 
   if (!GTEST_FLAG_GET(catch_exceptions))
     should_handle = false;
-  else if (exception_code == EXCEPTION_BREAKPOINT)
+  else if (seh_code == EXCEPTION_BREAKPOINT)
     should_handle = false;
-  else if (exception_code == kCxxExceptionCode)
+  else if (seh_code == EXCEPTION_STACK_OVERFLOW)
+    should_handle = false;
+  else if (seh_code == kCxxExceptionCode)
     should_handle = false;
 
   return should_handle ? EXCEPTION_EXECUTE_HANDLER : EXCEPTION_CONTINUE_SEARCH;
@@ -2555,17 +2557,12 @@ bool Test::HasSameFixtureClass() {
 
 #if GTEST_HAS_SEH
 
-// Adds an "exception thrown" fatal failure to the current test.  This
-// function returns its result via an output parameter pointer because VC++
-// prohibits creation of objects with destructors on stack in functions
-// using __try (see error C2712).
-static std::string* FormatSehExceptionMessage(DWORD exception_code,
-                                              const char* location) {
+static std::string FormatSehExceptionMessage(DWORD exception_code,
+                                             const char* location) {
   Message message;
   message << "SEH exception with code 0x" << std::setbase(16) << exception_code
           << std::setbase(10) << " thrown in " << location << ".";
-
-  return new std::string(message.GetString());
+  return message.GetString();
 }
 
 #endif  // GTEST_HAS_SEH
@@ -2613,14 +2610,20 @@ Result HandleSehExceptionsInMethodIfSupported(T* object, Result (T::*method)(),
     return (object->*method)();
   } __except (internal::UnitTestOptions::GTestShouldProcessSEH(  // NOLINT
       GetExceptionCode())) {
-    // We create the exception message on the heap because VC++ prohibits
-    // creation of objects with destructors on stack in functions using __try
+    // We wrap an inner function because VC++ prohibits direct creation of
+    // objects with destructors on stack in functions using __try
     // (see error C2712).
-    std::string* exception_message =
-        FormatSehExceptionMessage(GetExceptionCode(), location);
-    internal::ReportFailureInUnknownLocation(TestPartResult::kFatalFailure,
-                                             *exception_message);
-    delete exception_message;
+    struct Wrapper {
+      static void ReportFailure(DWORD code, const char* location) {
+        return internal::ReportFailureInUnknownLocation(
+            TestPartResult::kFatalFailure,
+            FormatSehExceptionMessage(code, location) +
+                "\n"
+                "Stack trace:\n" +
+                ::testing::internal::GetCurrentOsStackTraceExceptTop(1));
+      }
+    };
+    Wrapper::ReportFailure(GetExceptionCode(), location);
     return static_cast<Result>(0);
   }
 #else
