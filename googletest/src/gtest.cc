@@ -5655,8 +5655,10 @@ void UnitTestImpl::ConfigureXmlOutput() {
                         << output_format << "\" ignored.";
   }
 #else
-  GTEST_LOG_(ERROR) << "ERROR: alternative output formats require "
-                    << "GTEST_HAS_FILE_SYSTEM to be enabled";
+  if (!output_format.empty()) {
+    GTEST_LOG_(ERROR) << "ERROR: alternative output formats require "
+                      << "GTEST_HAS_FILE_SYSTEM to be enabled";
+  }
 #endif  // GTEST_HAS_FILE_SYSTEM
 }
 
