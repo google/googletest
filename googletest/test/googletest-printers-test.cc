@@ -1753,12 +1753,12 @@ TEST(UniversalPrintTest, WorksForCString) {
   const char* s1 = "abc";
   ::std::stringstream ss1;
   UniversalPrint(s1, &ss1);
-  EXPECT_EQ(PrintPointer(s1) + " pointing to \"abc\"", std::string(ss1.str()));
+  EXPECT_EQ(PrintPointer(s1) + " pointing to \"abc\"", ss1.str());
 
   char* s2 = const_cast<char*>(s1);
   ::std::stringstream ss2;
   UniversalPrint(s2, &ss2);
-  EXPECT_EQ(PrintPointer(s2) + " pointing to \"abc\"", std::string(ss2.str()));
+  EXPECT_EQ(PrintPointer(s2) + " pointing to \"abc\"", ss2.str());
 
   const char* s3 = nullptr;
   ::std::stringstream ss3;

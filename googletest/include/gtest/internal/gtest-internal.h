@@ -1489,8 +1489,7 @@ class NeverThrown {
 // representation of expression as it was passed into the EXPECT_TRUE.
 #define GTEST_TEST_BOOLEAN_(expression, text, actual, expected, fail) \
   GTEST_AMBIGUOUS_ELSE_BLOCKER_                                       \
-  if (const ::testing::AssertionResult gtest_ar_ =                    \
-          ::testing::AssertionResult(expression))                     \
+  if (const ::testing::AssertionResult gtest_ar_{expression})         \
     ;                                                                 \
   else                                                                \
     fail(::testing::internal::GetBoolAssertionFailureMessage(         \

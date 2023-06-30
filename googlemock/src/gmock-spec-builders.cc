@@ -590,7 +590,7 @@ void Mock::FailUninterestingCalls(uintptr_t mock_obj)
 void Mock::UnregisterCallReaction(uintptr_t mock_obj)
     GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex) {
   internal::MutexLock l(&internal::g_gmock_mutex);
-  UninterestingCallReactionMap().erase(static_cast<uintptr_t>(mock_obj));
+  UninterestingCallReactionMap().erase(mock_obj);
 }
 
 // Returns the reaction Google Mock will have on uninteresting calls

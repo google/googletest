@@ -68,7 +68,7 @@ TEST(IsXDigitTest, WorksForNarrowAscii) {
 }
 
 TEST(IsXDigitTest, ReturnsFalseForNarrowNonAscii) {
-  EXPECT_FALSE(IsXDigit(static_cast<char>('\x80')));
+  EXPECT_FALSE(IsXDigit('\x80'));
   EXPECT_FALSE(IsXDigit(static_cast<char>('0' | '\x80')));
 }
 
@@ -927,7 +927,7 @@ TEST(CaptureTest, CapturesStdout) {
 
   CaptureStdout();
   fprintf(stdout, "def%cghi", '\0');
-  EXPECT_EQ(::std::string("def\0ghi", 7), ::std::string(GetCapturedStdout()));
+  EXPECT_EQ(::std::string("def\0ghi", 7), GetCapturedStdout());
 }
 
 TEST(CaptureTest, CapturesStderr) {
@@ -937,7 +937,7 @@ TEST(CaptureTest, CapturesStderr) {
 
   CaptureStderr();
   fprintf(stderr, "jkl%cmno", '\0');
-  EXPECT_EQ(::std::string("jkl\0mno", 7), ::std::string(GetCapturedStderr()));
+  EXPECT_EQ(::std::string("jkl\0mno", 7), GetCapturedStderr());
 }
 
 // Tests that stdout and stderr capture don't interfere with each other.

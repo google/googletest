@@ -583,7 +583,7 @@ TEST_P(BipartiteRandomTest, LargerNets) {
   }
 
   for (; iters > 0; --iters, ++seed) {
-    srand(static_cast<unsigned int>(seed));
+    srand(seed);
     graph.Randomize();
     EXPECT_EQ(FindBacktrackingMaxBPM(graph).size(),
               internal::FindMaxBipartiteMatching(graph).size())

@@ -254,7 +254,7 @@ void VerifyResults(const std::vector<std::string>& data,
 
   // Prints extra elements in the actual data.
   for (; i < actual_size; ++i) {
-    printf("  Actual event #%lu: %s\n", static_cast<unsigned long>(i),
+    printf("  Actual event #%lu: %s\n", i,
            data[i].c_str());
   }
 }

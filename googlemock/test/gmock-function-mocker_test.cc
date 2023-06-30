@@ -467,7 +467,7 @@ TEST(FunctionMockerTest, RefQualified) {
       .WillOnce(Return(5));
   EXPECT_CALL(static_cast<const MockFoo&&>(mock_foo), RefQualifiedOverloaded())
       .WillOnce(Return(6));
-  EXPECT_CALL(static_cast<MockFoo&>(mock_foo), RefQualifiedOverloaded())
+  EXPECT_CALL(mock_foo, RefQualifiedOverloaded())
       .WillOnce(Return(7));
   EXPECT_CALL(static_cast<MockFoo&&>(mock_foo), RefQualifiedOverloaded())
       .WillOnce(Return(8));

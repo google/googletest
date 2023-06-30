@@ -1097,7 +1097,10 @@ class CapturedStream {
     // The const_cast is needed below C++17. The constraints on std::string
     // implementations in C++11 and above make assumption behind the const_cast
     // fairly safe.
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wuseless-cast"
     const int captured_fd = ::mkstemp(const_cast<char*>(name_template.data()));
+    #pragma GCC diagnostic pop
     if (captured_fd == -1) {
       GTEST_LOG_(WARNING)
           << "Failed to create tmp file " << name_template

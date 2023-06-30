@@ -2157,10 +2157,10 @@ inline FILE* FDOpen(int fd, const char* mode) { return fdopen(fd, mode); }
 inline int FClose(FILE* fp) { return fclose(fp); }
 #if !defined(GTEST_OS_WINDOWS_MOBILE) && !defined(GTEST_OS_QURT)
 inline int Read(int fd, void* buf, unsigned int count) {
-  return static_cast<int>(read(fd, buf, count));
+  return read(fd, buf, count);
 }
 inline int Write(int fd, const void* buf, unsigned int count) {
-  return static_cast<int>(write(fd, buf, count));
+  return write(fd, buf, count);
 }
 inline int Close(int fd) { return close(fd); }
 #endif  // !GTEST_OS_WINDOWS_MOBILE && !GTEST_OS_QURT

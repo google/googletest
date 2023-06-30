@@ -527,7 +527,7 @@ void ExpectCallLogger() {
 
 // Verifies that EXPECT_CALL logs if the --gmock_verbose flag is set to "info".
 TEST(ExpectCallTest, LogsWhenVerbosityIsInfo) {
-  EXPECT_THAT(std::string(GrabOutput(ExpectCallLogger, kInfoVerbosity)),
+  EXPECT_THAT(GrabOutput(ExpectCallLogger, kInfoVerbosity),
               HasSubstr("EXPECT_CALL(mock, TestMethod())"));
 }
 
@@ -550,7 +550,7 @@ void OnCallLogger() {
 
 // Verifies that ON_CALL logs if the --gmock_verbose flag is set to "info".
 TEST(OnCallTest, LogsWhenVerbosityIsInfo) {
-  EXPECT_THAT(std::string(GrabOutput(OnCallLogger, kInfoVerbosity)),
+  EXPECT_THAT(GrabOutput(OnCallLogger, kInfoVerbosity),
               HasSubstr("ON_CALL(mock, TestMethod())"));
 }
 
@@ -573,7 +573,7 @@ void OnCallAnyArgumentLogger() {
 
 // Verifies that ON_CALL prints provided _ argument.
 TEST(OnCallTest, LogsAnythingArgument) {
-  EXPECT_THAT(std::string(GrabOutput(OnCallAnyArgumentLogger, kInfoVerbosity)),
+  EXPECT_THAT(GrabOutput(OnCallAnyArgumentLogger, kInfoVerbosity),
               HasSubstr("ON_CALL(mock, TestMethodArg(_)"));
 }
 
