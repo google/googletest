@@ -1973,16 +1973,7 @@ GTEST_API_ size_t GetThreadCount();
 // The definition below is guarded by #ifndef to give embedders a chance to
 // define GTEST_HAS_RGT in gtest/internal/custom/gtest-port.h
 #ifndef GTEST_HAS_RGT
-
-#ifdef __GNUC__
-// The RGT implementation for GCC depends on inline asm, which does not work
-// in lambdas prior to GCC 8.0. Clients who do not use lambdas, or at least
-// don't use gtest macros inside lambdas, can override this as stated above.
-#define GTEST_HAS_RGT (GTEST_GCC_VER_ >= 800000)
-#else // __GNUC__
 #define GTEST_HAS_RGT 1
-#endif // __GNUC__
-
 #endif // GTEST_HAS_RGT
 
 #ifndef GTEST_DEFAULT_RGT_PASS
