@@ -53,6 +53,7 @@ cc_test(
             "gtest_all_test.cc",
             "gtest-death-test_ex_test.cc",
             "gtest-listener_test.cc",
+            "gtest_rgt_output_test_.cc",
             "gtest-unittest-api_test.cc",
             "googletest-param-test-test.cc",
             "googletest-param-test2-test.cc",
@@ -200,6 +201,28 @@ py_test(
     data = [
         "googletest-output-test-golden-lin.txt",
         ":googletest-output-test_",
+    ],
+    deps = [":gtest_test_utils"],
+)
+
+cc_binary(
+    name = "gtest_rgt_output_test_",
+    testonly = 1,
+    srcs = ["gtest_rgt_output_test_.cc"],
+    deps = ["//:gtest"],
+)
+
+py_test(
+    name = "gtest_rgt_output_test",
+    size = "small",
+    srcs = ["gtest_rgt_output_test.py"],
+    args = select({
+        "//:has_absl": [],
+        "//conditions:default": ["--no_stacktrace_support"],
+    }),
+    data = [
+        "gtest_rgt_output_test_golden_lin.txt",
+        ":gtest_rgt_output_test_",
     ],
     deps = [":gtest_test_utils"],
 )
