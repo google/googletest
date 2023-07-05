@@ -29,17 +29,18 @@
 
 // Support for Rotten Green Test detection within Google Test.
 
-#if GTEST_HAS_RGT
-
 #include "gtest/internal/gtest-rgt.h"
+
+#if GTEST_HAS_RGT
 
 #include <algorithm>
 #include <cassert>
 #include <map>
 #include <vector>
 
-#include "gtest/internal/gtest-internal.h"
+#include "gtest/gtest.h"
 #include "gtest/internal/gtest-rgt-parser.h"
+#include "src/gtest-internal-inl.h"
 
 // When we can't statically allocate the array of items into a custom
 // section, they get registered on startup and we keep pointers to the

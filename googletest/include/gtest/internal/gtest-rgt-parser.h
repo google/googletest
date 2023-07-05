@@ -39,6 +39,8 @@
 
 #include "gtest/internal/gtest-port.h"
 
+#if GTEST_HAS_RGT
+
 namespace testing {
 namespace internal {
 
@@ -127,5 +129,7 @@ public:
 
 } // end namespace internal
 } // end namespace testing
+
+#endif // GTEST_HAS_RGT
 
 #endif  // GTEST_INCLUDE_GTEST_INTERNAL_GTEST_RGT_PARSER_H_

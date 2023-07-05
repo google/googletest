@@ -33,6 +33,8 @@
 #ifndef GTEST_INCLUDE_GTEST_INTERNAL_GTEST_RGT_H_
 #define GTEST_INCLUDE_GTEST_INTERNAL_GTEST_RGT_H_
 
+#include "gtest/internal/gtest-port.h"
+
 #if GTEST_HAS_RGT
 
 // A Rotten Green Test is a test assertion that _looks_ like it verifies
@@ -48,8 +50,6 @@
 #include <map>
 #include <string>
 #include <utility>
-
-#include "gtest/internal/gtest-port.h"
 
 // Overview:
 //

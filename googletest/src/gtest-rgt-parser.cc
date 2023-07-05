@@ -35,14 +35,14 @@
 
 #include "gtest/internal/gtest-rgt-parser.h"
 
+#if GTEST_HAS_RGT
+
 #include <algorithm>
 #include <cassert>
 #include <cctype>
 #include <cerrno>
 #include <cstdio>
 #include <vector>
-
-#include "gtest/internal/gtest-port.h"
 
 namespace testing {
 namespace internal {
@@ -883,3 +883,5 @@ void RgtParser::PrintTokens(std::string &out) const {
 
 } // end namespace internal
 } // end namespace testing
+
+#endif // GTEST_HAS_RGT
