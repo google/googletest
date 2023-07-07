@@ -298,8 +298,8 @@ struct FindFirstPrinter<
 //  - Print containers (they have begin/end/etc).
 //  - Print function pointers.
 //  - Print object pointers.
-//  - Use the stream operator, if available.
 //  - Print protocol buffers.
+//  - Use the stream operator, if available.
 //  - Print types convertible to BiggestInt.
 //  - Print types convertible to StringView, if available.
 //  - Fallback to printing the raw bytes of the object.
