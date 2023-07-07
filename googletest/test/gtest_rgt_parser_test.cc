@@ -32,6 +32,8 @@
 #include "gtest/internal/gtest-rgt-parser.h"
 #include "gtest/gtest.h"
 
+#if GTEST_HAS_RGT
+
 using ::testing::internal::RgtParser;
 using ::testing::internal::RgtTestInfo;
 using ::testing::internal::LineRange;
@@ -543,6 +545,7 @@ TEST(ParserTest, ParseWithEmbeddedDirective) {
   EXPECT_EQ(4, info->lines.end);
 }
 
+#if GTEST_HAS_FILE_SYSTEM
 // Read and parse this very source file. Checking a lot of it would
 // make the test excessively fragile, but we can readily verify that
 // this test method was parsed correctly. Among other things, it's
@@ -550,6 +553,15 @@ TEST(ParserTest, ParseWithEmbeddedDirective) {
 // not at file level.
 TEST(ParserTest, ParseFile) {
   int start_line = __LINE__ - 1; // Obviously must be the first line.
+
+  // __FILE__ might be relative, and the cwd when the test is run might
+  // not be the same as the compilation directory. So, verify a source of
+  // the same name is available, and if it is, assume it's the correct
+  // source file.
+  testing::internal::FilePath filepath(__FILE__);
+  if (!filepath.FileOrDirectoryExists())
+    GTEST_SKIP();
+
   RgtParser parser;
   parser.Parse(__FILE__);
   ASSERT_TRUE(parser.Parsed());
@@ -562,5 +574,8 @@ TEST(ParserTest, ParseFile) {
   int end_line = __LINE__ + 2;
   EXPECT_EQ(end_line, info->lines.end);
 }
+#endif // GTEST_HAS_FILE_SYSTEM
 
 } // namespace
+
+#endif // GTEST_HAS_RGT
