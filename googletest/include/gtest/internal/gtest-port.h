@@ -78,6 +78,16 @@
 //                              expressions are/aren't available.
 //   GTEST_HAS_PTHREAD        - Define it to 1/0 to indicate that <pthread.h>
 //                              is/isn't available.
+//   GTEST_HAS_RGT            - Define it to 1/0 to indicate that Rotten Green
+//                              Test detection is/isn't enabled. On by default
+//                              except for GCC older than 8.0, which cannot
+//                              support RGT inside lambdas. If the client does
+//                              not use Google Test macros inside lambdas, this
+//                              can be set in custom/gtest-port.h.
+//   GTEST_DEFAULT_RGT_PASS   - The default for --gtest_treat_rotten_as_pass.
+//                              Set true here so existing test suites don't fail
+//                              en masse. The recommended value is false and can
+//                              be set in custom/gtest-port.h.
 //   GTEST_HAS_RTTI           - Define it to 1/0 to indicate that RTTI is/isn't
 //                              enabled.
 //   GTEST_HAS_STD_WSTRING    - Define it to 1/0 to indicate that
@@ -1961,6 +1971,18 @@ class GTEST_API_ ThreadLocal {
 // Returns the number of threads running in the process, or 0 to indicate that
 // we cannot detect it.
 GTEST_API_ size_t GetThreadCount();
+
+// Determine whether the compiler can support Rotten Green Test detection.
+// The definition below is guarded by #ifndef to give embedders a chance to
+// define GTEST_HAS_RGT in gtest/internal/custom/gtest-port.h
+#ifndef GTEST_HAS_RGT
+#define GTEST_HAS_RGT 1
+#endif // GTEST_HAS_RGT
+
+#ifndef GTEST_DEFAULT_RGT_PASS
+#define GTEST_DEFAULT_RGT_PASS true
+#endif // GTEST_DEFAULT_RGT_PASS
+
 
 #ifdef GTEST_OS_WINDOWS
 #define GTEST_PATH_SEP_ "\\"

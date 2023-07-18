@@ -69,6 +69,7 @@
 
 #include "gtest/gtest-message.h"
 #include "gtest/internal/gtest-filepath.h"
+#include "gtest/internal/gtest-rgt.h"
 #include "gtest/internal/gtest-string.h"
 #include "gtest/internal/gtest-type-util.h"
 
@@ -1408,6 +1409,7 @@ class NeverThrown {
   GTEST_AMBIGUOUS_ELSE_BLOCKER_                                             \
   if (::testing::internal::TrueWithString gtest_msg{}) {                    \
     bool gtest_caught_expected = false;                                     \
+    { GTEST_RGT_DECLARE_ }                                                  \
     try {                                                                   \
       GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement);            \
     } catch (expected_exception const&) {                                   \
@@ -1451,6 +1453,7 @@ class NeverThrown {
 #define GTEST_TEST_NO_THROW_(statement, fail)                            \
   GTEST_AMBIGUOUS_ELSE_BLOCKER_                                          \
   if (::testing::internal::TrueWithString gtest_msg{}) {                 \
+    { GTEST_RGT_DECLARE_ }                                               \
     try {                                                                \
       GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement);         \
     }                                                                    \
@@ -1470,6 +1473,7 @@ class NeverThrown {
   GTEST_AMBIGUOUS_ELSE_BLOCKER_                                      \
   if (::testing::internal::AlwaysTrue()) {                           \
     bool gtest_caught_any = false;                                   \
+    { GTEST_RGT_DECLARE_ }                                           \
     try {                                                            \
       GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement);     \
     } catch (...) {                                                  \
@@ -1491,7 +1495,7 @@ class NeverThrown {
   GTEST_AMBIGUOUS_ELSE_BLOCKER_                                       \
   if (const ::testing::AssertionResult gtest_ar_ =                    \
           ::testing::AssertionResult(expression))                     \
-    ;                                                                 \
+    { GTEST_RGT_DECLARE_ }                                            \
   else                                                                \
     fail(::testing::internal::GetBoolAssertionFailureMessage(         \
              gtest_ar_, text, #actual, #expected)                     \
@@ -1500,6 +1504,7 @@ class NeverThrown {
 #define GTEST_TEST_NO_FATAL_FAILURE_(statement, fail)                          \
   GTEST_AMBIGUOUS_ELSE_BLOCKER_                                                \
   if (::testing::internal::AlwaysTrue()) {                                     \
+    { GTEST_RGT_DECLARE_ }                                                     \
     ::testing::internal::HasNewFatalFailureHelper gtest_fatal_failure_checker; \
     GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement);                 \
     if (gtest_fatal_failure_checker.has_new_fatal_failure()) {                 \

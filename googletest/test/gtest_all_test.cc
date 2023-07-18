@@ -41,6 +41,7 @@
 #include "test/gtest-typed-test_test.cc"
 #include "test/gtest_pred_impl_unittest.cc"
 #include "test/gtest_prod_test.cc"
+#include "test/gtest_rgt_parser_test.cc"
 #include "test/gtest_skip_test.cc"
 #include "test/gtest_unittest.cc"
 #include "test/production.cc"

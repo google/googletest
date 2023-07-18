@@ -1,0 +1,556 @@
+gtest_main.cc
+[0;32m[==========] [mRunning 45 tests from 14 test suites.
+[0;32m[----------] [mGlobal test environment set-up.
+[0;32m[----------] [m16 tests from NotRotten
+[0;32m[ RUN      ] [mNotRotten.EmptyIsntRotten
+[0;32m[       OK ] [mNotRotten.EmptyIsntRotten (? ms)
+[0;33m[ DISABLED ] [mNotRotten.DISABLED_DisabledIsntRotten
+[0;32m[ RUN      ] [mNotRotten.SkippedIsntRotten
+gtest_rgt_output_test_.cc:#: Skipped
+
+[0;32m[  SKIPPED ] [mNotRotten.SkippedIsntRotten (? ms)
+[0;32m[ RUN      ] [mNotRotten.AllPass
+[0;32m[       OK ] [mNotRotten.AllPass (? ms)
+[0;32m[ RUN      ] [mNotRotten.ExpectFailingIsntRotten
+gtest_rgt_output_test_.cc:#: Failure
+Expected equality of these values:
+  1
+  2
+[0;31m[  FAILED  ] [mNotRotten.ExpectFailingIsntRotten (? ms)
+[0;32m[ RUN      ] [mNotRotten.AssertFailingIsntRotten
+gtest_rgt_output_test_.cc:#: Failure
+Expected equality of these values:
+  0
+  1
+[0;31m[  FAILED  ] [mNotRotten.AssertFailingIsntRotten (? ms)
+[0;32m[ RUN      ] [mNotRotten.ExpectFailingWithUnexecutedIsntRotten
+gtest_rgt_output_test_.cc:#: Failure
+Expected equality of these values:
+  1
+  2
+[0;31m[  FAILED  ] [mNotRotten.ExpectFailingWithUnexecutedIsntRotten (? ms)
+[0;32m[ RUN      ] [mNotRotten.SingleLineExpectNonfatalFailureIsntRotten
+[0;32m[       OK ] [mNotRotten.SingleLineExpectNonfatalFailureIsntRotten (? ms)
+[0;32m[ RUN      ] [mNotRotten.DoubleLineExpectNonfatalFailureIsntRotten
+[0;32m[       OK ] [mNotRotten.DoubleLineExpectNonfatalFailureIsntRotten (? ms)
+[0;32m[ RUN      ] [mNotRotten.MultiLineExpectNonfatalFailureIsntRotten
+[0;32m[       OK ] [mNotRotten.MultiLineExpectNonfatalFailureIsntRotten (? ms)
+[0;32m[ RUN      ] [mNotRotten.SingleLineExpectFatalFailureIsntRotten
+[0;32m[       OK ] [mNotRotten.SingleLineExpectFatalFailureIsntRotten (? ms)
+[0;32m[ RUN      ] [mNotRotten.DoubleLineExpectFatalFailureIsntRotten
+[0;32m[       OK ] [mNotRotten.DoubleLineExpectFatalFailureIsntRotten (? ms)
+[0;32m[ RUN      ] [mNotRotten.MultiLineExpectFatalFailureIsntRotten
+[0;32m[       OK ] [mNotRotten.MultiLineExpectFatalFailureIsntRotten (? ms)
+[0;32m[ RUN      ] [mNotRotten.ExpectFatalFailureFails
+gtest.cc:#: Failure
+Expected: 1 fatal failure
+  Actual: 0 failures
+gtest.cc:#: Failure
+Expected: 1 fatal failure
+  Actual: 0 failures
+[0;31m[  FAILED  ] [mNotRotten.ExpectFatalFailureFails (? ms)
+[0;32m[ RUN      ] [mNotRotten.ExpectNonfatalFailureFails
+gtest.cc:#: Failure
+Expected: 1 non-fatal failure
+  Actual: 0 failures
+gtest.cc:#: Failure
+Expected: 1 non-fatal failure
+  Actual:
+gtest_rgt_output_test_.cc:139: Fatal failure:
+Expected equality of these values:
+  1
+  2
+Fails
+
+[0;31m[  FAILED  ] [mNotRotten.ExpectNonfatalFailureFails (? ms)
+[0;32m[ RUN      ] [mNotRotten.ExpectNoFatalFailurePasses
+[0;32m[       OK ] [mNotRotten.ExpectNoFatalFailurePasses (? ms)
+[0;32m[ RUN      ] [mNotRotten.ExpectNoFatalFailureFails
+gtest_rgt_output_test_.cc:#: Failure
+Expected equality of these values:
+  1
+  0
+gtest_rgt_output_test_.cc:#: Failure
+Expected: MustFail() doesn't generate new fatal failures in the current thread.
+  Actual: it does.
+gtest_rgt_output_test_.cc:#: Failure
+Expected equality of these values:
+  1
+  0
+gtest_rgt_output_test_.cc:#: Failure
+Expected: MustFail() doesn't generate new fatal failures in the current thread.
+  Actual: it does.
+[0;31m[  FAILED  ] [mNotRotten.ExpectNoFatalFailureFails (? ms)
+[0;32m[----------] [m16 tests from NotRotten (? ms total)
+
+[0;32m[----------] [m6 tests from IsRotten
+[0;32m[ RUN      ] [mIsRotten.SingleLineExpect
+[0;32m[       OK ] [mIsRotten.SingleLineExpect (? ms)
+[0;32m[ RUN      ] [mIsRotten.MultiLineExpect
+[0;32m[       OK ] [mIsRotten.MultiLineExpect (? ms)
+[0;32m[ RUN      ] [mIsRotten.SingleLineAssert
+[0;32m[       OK ] [mIsRotten.SingleLineAssert (? ms)
+[0;32m[ RUN      ] [mIsRotten.MultiLineAssert
+[0;32m[       OK ] [mIsRotten.MultiLineAssert (? ms)
+[0;32m[ RUN      ] [mIsRotten.MultipleRottenAssertions
+[0;32m[       OK ] [mIsRotten.MultipleRottenAssertions (? ms)
+[0;32m[ RUN      ] [mIsRotten.ExpectNoFatalFailure
+[0;32m[       OK ] [mIsRotten.ExpectNoFatalFailure (? ms)
+gtest_rgt_output_test_.cc:164: Rotten
+[0;33m[  ROTTEN  ] [mIsRotten.SingleLineExpect
+gtest_rgt_output_test_.cc:172: Rotten
+[0;33m[  ROTTEN  ] [mIsRotten.MultiLineExpect
+gtest_rgt_output_test_.cc:178: Rotten
+[0;33m[  ROTTEN  ] [mIsRotten.SingleLineAssert
+gtest_rgt_output_test_.cc:185: Rotten
+[0;33m[  ROTTEN  ] [mIsRotten.MultiLineAssert
+gtest_rgt_output_test_.cc:191: Rotten
+gtest_rgt_output_test_.cc:195: Rotten
+[0;33m[  ROTTEN  ] [mIsRotten.MultipleRottenAssertions
+gtest_rgt_output_test_.cc:201: Rotten
+gtest_rgt_output_test_.cc:202: Rotten
+[0;33m[  ROTTEN  ] [mIsRotten.ExpectNoFatalFailure
+[0;32m[----------] [m6 tests from IsRotten (? ms total)
+
+[0;32m[----------] [m2 tests from NotRottenFixture
+[0;32m[ RUN      ] [mNotRottenFixture.ExpectFailureIsntRotten
+gtest_rgt_output_test_.cc:#: Failure
+Expected equality of these values:
+  0
+  1
+[0;31m[  FAILED  ] [mNotRottenFixture.ExpectFailureIsntRotten (? ms)
+[0;32m[ RUN      ] [mNotRottenFixture.AssertFailureIsntRotten
+gtest_rgt_output_test_.cc:#: Failure
+Expected equality of these values:
+  0
+  1
+[0;31m[  FAILED  ] [mNotRottenFixture.AssertFailureIsntRotten (? ms)
+[0;32m[----------] [m2 tests from NotRottenFixture (? ms total)
+
+[0;32m[----------] [m2 tests from IsRottenFixture
+[0;32m[ RUN      ] [mIsRottenFixture.SingleLineExpect
+[0;32m[       OK ] [mIsRottenFixture.SingleLineExpect (? ms)
+[0;32m[ RUN      ] [mIsRottenFixture.MultiLineAssert
+[0;32m[       OK ] [mIsRottenFixture.MultiLineAssert (? ms)
+gtest_rgt_output_test_.cc:223: Rotten
+[0;33m[  ROTTEN  ] [mIsRottenFixture.SingleLineExpect
+gtest_rgt_output_test_.cc:230: Rotten
+[0;33m[  ROTTEN  ] [mIsRottenFixture.MultiLineAssert
+[0;32m[----------] [m2 tests from IsRottenFixture (? ms total)
+
+[0;32m[----------] [m2 tests from NotRottenTypedTest/0, where TypeParam = char
+[0;32m[ RUN      ] [mNotRottenTypedTest/0.SuccessIsntRotten
+[0;32m[       OK ] [mNotRottenTypedTest/0.SuccessIsntRotten (? ms)
+[0;32m[ RUN      ] [mNotRottenTypedTest/0.FailureIsntRotten
+gtest_rgt_output_test_.cc:#: Failure
+Expected equality of these values:
+  1
+  TypeParam()
+    Which is: '\0'
+[0;31m[  FAILED  ] [mNotRottenTypedTest/0.FailureIsntRotten, where TypeParam = char (? ms)
+[0;32m[----------] [m2 tests from NotRottenTypedTest/0 (? ms total)
+
+[0;32m[----------] [m2 tests from NotRottenTypedTest/1, where TypeParam = int
+[0;32m[ RUN      ] [mNotRottenTypedTest/1.SuccessIsntRotten
+[0;32m[       OK ] [mNotRottenTypedTest/1.SuccessIsntRotten (? ms)
+[0;32m[ RUN      ] [mNotRottenTypedTest/1.FailureIsntRotten
+gtest_rgt_output_test_.cc:#: Failure
+Expected equality of these values:
+  1
+  TypeParam()
+    Which is: 0
+[0;31m[  FAILED  ] [mNotRottenTypedTest/1.FailureIsntRotten, where TypeParam = int (? ms)
+[0;32m[----------] [m2 tests from NotRottenTypedTest/1 (? ms total)
+
+[0;32m[----------] [m1 test from IsRottenTypedTest/0, where TypeParam = char
+[0;32m[ RUN      ] [mIsRottenTypedTest/0.ConditionalOnType
+[0;32m[       OK ] [mIsRottenTypedTest/0.ConditionalOnType (? ms)
+gtest_rgt_output_test_.cc:305: Rotten
+[0;33m[  ROTTEN  ] [mIsRottenTypedTest/0.ConditionalOnType
+[0;32m[----------] [m1 test from IsRottenTypedTest/0 (? ms total)
+
+[0;32m[----------] [m1 test from IsRottenTypedTest/1, where TypeParam = int
+[0;32m[ RUN      ] [mIsRottenTypedTest/1.ConditionalOnType
+[0;32m[       OK ] [mIsRottenTypedTest/1.ConditionalOnType (? ms)
+[0;32m[----------] [m1 test from IsRottenTypedTest/1 (? ms total)
+
+[0;32m[----------] [m2 tests from My/NotRottenTypeParamTest/0, where TypeParam = char
+[0;32m[ RUN      ] [mMy/NotRottenTypeParamTest/0.SuccessIsntRotten
+[0;32m[       OK ] [mMy/NotRottenTypeParamTest/0.SuccessIsntRotten (? ms)
+[0;32m[ RUN      ] [mMy/NotRottenTypeParamTest/0.FailureIsntRotten
+gtest_rgt_output_test_.cc:#: Failure
+Expected equality of these values:
+  1
+  TypeParam()
+    Which is: '\0'
+[0;31m[  FAILED  ] [mMy/NotRottenTypeParamTest/0.FailureIsntRotten, where TypeParam = char (? ms)
+[0;32m[----------] [m2 tests from My/NotRottenTypeParamTest/0 (? ms total)
+
+[0;32m[----------] [m2 tests from My/NotRottenTypeParamTest/1, where TypeParam = int
+[0;32m[ RUN      ] [mMy/NotRottenTypeParamTest/1.SuccessIsntRotten
+[0;32m[       OK ] [mMy/NotRottenTypeParamTest/1.SuccessIsntRotten (? ms)
+[0;32m[ RUN      ] [mMy/NotRottenTypeParamTest/1.FailureIsntRotten
+gtest_rgt_output_test_.cc:#: Failure
+Expected equality of these values:
+  1
+  TypeParam()
+    Which is: 0
+[0;31m[  FAILED  ] [mMy/NotRottenTypeParamTest/1.FailureIsntRotten, where TypeParam = int (? ms)
+[0;32m[----------] [m2 tests from My/NotRottenTypeParamTest/1 (? ms total)
+
+[0;32m[----------] [m1 test from My/IsRottenTypeParamTest/0, where TypeParam = char
+[0;32m[ RUN      ] [mMy/IsRottenTypeParamTest/0.ConditionalOnType
+[0;32m[       OK ] [mMy/IsRottenTypeParamTest/0.ConditionalOnType (? ms)
+gtest_rgt_output_test_.cc:341: Rotten
+[0;33m[  ROTTEN  ] [mMy/IsRottenTypeParamTest/0.ConditionalOnType
+[0;32m[----------] [m1 test from My/IsRottenTypeParamTest/0 (? ms total)
+
+[0;32m[----------] [m1 test from My/IsRottenTypeParamTest/1, where TypeParam = int
+[0;32m[ RUN      ] [mMy/IsRottenTypeParamTest/1.ConditionalOnType
+[0;32m[       OK ] [mMy/IsRottenTypeParamTest/1.ConditionalOnType (? ms)
+[0;32m[----------] [m1 test from My/IsRottenTypeParamTest/1 (? ms total)
+
+[0;32m[----------] [m3 tests from NotRottenParamTest
+[0;32m[ RUN      ] [mNotRottenParamTest.Passes/0
+[0;32m[       OK ] [mNotRottenParamTest.Passes/0 (? ms)
+[0;32m[ RUN      ] [mNotRottenParamTest.AssertFailingIsntRotten/0
+gtest_rgt_output_test_.cc:#: Failure
+Expected equality of these values:
+  2
+  GetParam()
+    Which is: 1
+[0;31m[  FAILED  ] [mNotRottenParamTest.AssertFailingIsntRotten/0, where GetParam() = 1 (? ms)
+[0;32m[ RUN      ] [mNotRottenParamTest.FailingIsntRotten/0
+gtest_rgt_output_test_.cc:#: Failure
+Expected equality of these values:
+  2
+  GetParam()
+    Which is: 1
+[0;31m[  FAILED  ] [mNotRottenParamTest.FailingIsntRotten/0, where GetParam() = 1 (? ms)
+[0;32m[----------] [m3 tests from NotRottenParamTest (? ms total)
+
+[0;32m[----------] [m4 tests from IsRottenParamTest
+[0;32m[ RUN      ] [mIsRottenParamTest.SingleExpect/0
+[0;32m[       OK ] [mIsRottenParamTest.SingleExpect/0 (? ms)
+[0;32m[ RUN      ] [mIsRottenParamTest.SingleExpect/1
+[0;32m[       OK ] [mIsRottenParamTest.SingleExpect/1 (? ms)
+[0;32m[ RUN      ] [mIsRottenParamTest.ConditionalOnParam/0
+[0;32m[       OK ] [mIsRottenParamTest.ConditionalOnParam/0 (? ms)
+[0;32m[ RUN      ] [mIsRottenParamTest.ConditionalOnParam/1
+[0;32m[       OK ] [mIsRottenParamTest.ConditionalOnParam/1 (? ms)
+gtest_rgt_output_test_.cc:258: Rotten
+[0;33m[  ROTTEN  ] [mIsRottenParamTest.SingleExpect/0
+gtest_rgt_output_test_.cc:258: Rotten
+[0;33m[  ROTTEN  ] [mIsRottenParamTest.SingleExpect/1
+[0;32m[----------] [m4 tests from IsRottenParamTest (? ms total)
+
+[0;32m[----------] [mGlobal test environment tear-down
+[0;32m[==========] [m45 tests from 14 test suites ran. (? ms total)
+[0;32m[  PASSED  ] [m30 tests.
+[0;32m[  SKIPPED ] [m1 test, listed below:
+[0;32m[  SKIPPED ] [mNotRotten.SkippedIsntRotten
+[0;31m[  FAILED  ] [m14 tests, listed below:
+[0;31m[  FAILED  ] [mNotRotten.ExpectFailingIsntRotten
+[0;31m[  FAILED  ] [mNotRotten.AssertFailingIsntRotten
+[0;31m[  FAILED  ] [mNotRotten.ExpectFailingWithUnexecutedIsntRotten
+[0;31m[  FAILED  ] [mNotRotten.ExpectFatalFailureFails
+[0;31m[  FAILED  ] [mNotRotten.ExpectNonfatalFailureFails
+[0;31m[  FAILED  ] [mNotRotten.ExpectNoFatalFailureFails
+[0;31m[  FAILED  ] [mNotRottenFixture.ExpectFailureIsntRotten
+[0;31m[  FAILED  ] [mNotRottenFixture.AssertFailureIsntRotten
+[0;31m[  FAILED  ] [mNotRottenTypedTest/0.FailureIsntRotten, where TypeParam = char
+[0;31m[  FAILED  ] [mNotRottenTypedTest/1.FailureIsntRotten, where TypeParam = int
+[0;31m[  FAILED  ] [mMy/NotRottenTypeParamTest/0.FailureIsntRotten, where TypeParam = char
+[0;31m[  FAILED  ] [mMy/NotRottenTypeParamTest/1.FailureIsntRotten, where TypeParam = int
+[0;31m[  FAILED  ] [mNotRottenParamTest.AssertFailingIsntRotten/0, where GetParam() = 1
+[0;31m[  FAILED  ] [mNotRottenParamTest.FailingIsntRotten/0, where GetParam() = 1
+
+14 FAILED TESTS
+
+[0;33m[  ROTTEN  ] [m12 tests, listed below:
+[0;33m[  ROTTEN  ] [mIsRotten.SingleLineExpect
+[0;33m[  ROTTEN  ] [mIsRotten.MultiLineExpect
+[0;33m[  ROTTEN  ] [mIsRotten.SingleLineAssert
+[0;33m[  ROTTEN  ] [mIsRotten.MultiLineAssert
+[0;33m[  ROTTEN  ] [mIsRotten.MultipleRottenAssertions
+[0;33m[  ROTTEN  ] [mIsRotten.ExpectNoFatalFailure
+[0;33m[  ROTTEN  ] [mIsRottenFixture.SingleLineExpect
+[0;33m[  ROTTEN  ] [mIsRottenFixture.MultiLineAssert
+[0;33m[  ROTTEN  ] [mIsRottenTypedTest/0.ConditionalOnType
+[0;33m[  ROTTEN  ] [mMy/IsRottenTypeParamTest/0.ConditionalOnType
+[0;33m[  ROTTEN  ] [mIsRottenParamTest.SingleExpect/0
+[0;33m[  ROTTEN  ] [mIsRottenParamTest.SingleExpect/1
+[0;33m  YOU HAVE 12 ROTTEN TESTS
+
+[m[0;33m  YOU HAVE 1 DISABLED TEST
+
+[mgtest_main.cc
+[==========] Running 45 tests from 14 test suites.
+[----------] Global test environment set-up.
+[----------] 16 tests from NotRotten
+[ RUN      ] NotRotten.EmptyIsntRotten
+[       OK ] NotRotten.EmptyIsntRotten (? ms)
+[ DISABLED ] NotRotten.DISABLED_DisabledIsntRotten
+[ RUN      ] NotRotten.SkippedIsntRotten
+gtest_rgt_output_test_.cc:#: Skipped
+
+[  SKIPPED ] NotRotten.SkippedIsntRotten (? ms)
+[ RUN      ] NotRotten.AllPass
+[       OK ] NotRotten.AllPass (? ms)
+[ RUN      ] NotRotten.ExpectFailingIsntRotten
+gtest_rgt_output_test_.cc:#: Failure
+Expected equality of these values:
+  1
+  2
+[  FAILED  ] NotRotten.ExpectFailingIsntRotten (? ms)
+[ RUN      ] NotRotten.AssertFailingIsntRotten
+gtest_rgt_output_test_.cc:#: Failure
+Expected equality of these values:
+  0
+  1
+[  FAILED  ] NotRotten.AssertFailingIsntRotten (? ms)
+[ RUN      ] NotRotten.ExpectFailingWithUnexecutedIsntRotten
+gtest_rgt_output_test_.cc:#: Failure
+Expected equality of these values:
+  1
+  2
+[  FAILED  ] NotRotten.ExpectFailingWithUnexecutedIsntRotten (? ms)
+[ RUN      ] NotRotten.SingleLineExpectNonfatalFailureIsntRotten
+[       OK ] NotRotten.SingleLineExpectNonfatalFailureIsntRotten (? ms)
+[ RUN      ] NotRotten.DoubleLineExpectNonfatalFailureIsntRotten
+[       OK ] NotRotten.DoubleLineExpectNonfatalFailureIsntRotten (? ms)
+[ RUN      ] NotRotten.MultiLineExpectNonfatalFailureIsntRotten
+[       OK ] NotRotten.MultiLineExpectNonfatalFailureIsntRotten (? ms)
+[ RUN      ] NotRotten.SingleLineExpectFatalFailureIsntRotten
+[       OK ] NotRotten.SingleLineExpectFatalFailureIsntRotten (? ms)
+[ RUN      ] NotRotten.DoubleLineExpectFatalFailureIsntRotten
+[       OK ] NotRotten.DoubleLineExpectFatalFailureIsntRotten (? ms)
+[ RUN      ] NotRotten.MultiLineExpectFatalFailureIsntRotten
+[       OK ] NotRotten.MultiLineExpectFatalFailureIsntRotten (? ms)
+[ RUN      ] NotRotten.ExpectFatalFailureFails
+gtest.cc:#: Failure
+Expected: 1 fatal failure
+  Actual: 0 failures
+gtest.cc:#: Failure
+Expected: 1 fatal failure
+  Actual: 0 failures
+[  FAILED  ] NotRotten.ExpectFatalFailureFails (? ms)
+[ RUN      ] NotRotten.ExpectNonfatalFailureFails
+gtest.cc:#: Failure
+Expected: 1 non-fatal failure
+  Actual: 0 failures
+gtest.cc:#: Failure
+Expected: 1 non-fatal failure
+  Actual:
+gtest_rgt_output_test_.cc:139: Fatal failure:
+Expected equality of these values:
+  1
+  2
+Fails
+
+[  FAILED  ] NotRotten.ExpectNonfatalFailureFails (? ms)
+[ RUN      ] NotRotten.ExpectNoFatalFailurePasses
+[       OK ] NotRotten.ExpectNoFatalFailurePasses (? ms)
+[ RUN      ] NotRotten.ExpectNoFatalFailureFails
+gtest_rgt_output_test_.cc:#: Failure
+Expected equality of these values:
+  1
+  0
+gtest_rgt_output_test_.cc:#: Failure
+Expected: MustFail() doesn't generate new fatal failures in the current thread.
+  Actual: it does.
+gtest_rgt_output_test_.cc:#: Failure
+Expected equality of these values:
+  1
+  0
+gtest_rgt_output_test_.cc:#: Failure
+Expected: MustFail() doesn't generate new fatal failures in the current thread.
+  Actual: it does.
+[  FAILED  ] NotRotten.ExpectNoFatalFailureFails (? ms)
+[----------] 16 tests from NotRotten (? ms total)
+
+[----------] 6 tests from IsRotten
+[ RUN      ] IsRotten.SingleLineExpect
+[       OK ] IsRotten.SingleLineExpect (? ms)
+[ RUN      ] IsRotten.MultiLineExpect
+[       OK ] IsRotten.MultiLineExpect (? ms)
+[ RUN      ] IsRotten.SingleLineAssert
+[       OK ] IsRotten.SingleLineAssert (? ms)
+[ RUN      ] IsRotten.MultiLineAssert
+[       OK ] IsRotten.MultiLineAssert (? ms)
+[ RUN      ] IsRotten.MultipleRottenAssertions
+[       OK ] IsRotten.MultipleRottenAssertions (? ms)
+[ RUN      ] IsRotten.ExpectNoFatalFailure
+[       OK ] IsRotten.ExpectNoFatalFailure (? ms)
+gtest_rgt_output_test_.cc:164: Rotten
+[  ROTTEN  ] IsRotten.SingleLineExpect
+gtest_rgt_output_test_.cc:172: Rotten
+[  ROTTEN  ] IsRotten.MultiLineExpect
+gtest_rgt_output_test_.cc:178: Rotten
+[  ROTTEN  ] IsRotten.SingleLineAssert
+gtest_rgt_output_test_.cc:185: Rotten
+[  ROTTEN  ] IsRotten.MultiLineAssert
+gtest_rgt_output_test_.cc:191: Rotten
+gtest_rgt_output_test_.cc:195: Rotten
+[  ROTTEN  ] IsRotten.MultipleRottenAssertions
+gtest_rgt_output_test_.cc:201: Rotten
+gtest_rgt_output_test_.cc:202: Rotten
+[  ROTTEN  ] IsRotten.ExpectNoFatalFailure
+[----------] 6 tests from IsRotten (? ms total)
+
+[----------] 2 tests from NotRottenFixture
+[ RUN      ] NotRottenFixture.ExpectFailureIsntRotten
+gtest_rgt_output_test_.cc:#: Failure
+Expected equality of these values:
+  0
+  1
+[  FAILED  ] NotRottenFixture.ExpectFailureIsntRotten (? ms)
+[ RUN      ] NotRottenFixture.AssertFailureIsntRotten
+gtest_rgt_output_test_.cc:#: Failure
+Expected equality of these values:
+  0
+  1
+[  FAILED  ] NotRottenFixture.AssertFailureIsntRotten (? ms)
+[----------] 2 tests from NotRottenFixture (? ms total)
+
+[----------] 2 tests from IsRottenFixture
+[ RUN      ] IsRottenFixture.SingleLineExpect
+[       OK ] IsRottenFixture.SingleLineExpect (? ms)
+[ RUN      ] IsRottenFixture.MultiLineAssert
+[       OK ] IsRottenFixture.MultiLineAssert (? ms)
+gtest_rgt_output_test_.cc:223: Rotten
+[  ROTTEN  ] IsRottenFixture.SingleLineExpect
+gtest_rgt_output_test_.cc:230: Rotten
+[  ROTTEN  ] IsRottenFixture.MultiLineAssert
+[----------] 2 tests from IsRottenFixture (? ms total)
+
+[----------] 2 tests from NotRottenTypedTest/0, where TypeParam = char
+[ RUN      ] NotRottenTypedTest/0.SuccessIsntRotten
+[       OK ] NotRottenTypedTest/0.SuccessIsntRotten (? ms)
+[ RUN      ] NotRottenTypedTest/0.FailureIsntRotten
+gtest_rgt_output_test_.cc:#: Failure
+Expected equality of these values:
+  1
+  TypeParam()
+    Which is: '\0'
+[  FAILED  ] NotRottenTypedTest/0.FailureIsntRotten, where TypeParam = char (? ms)
+[----------] 2 tests from NotRottenTypedTest/0 (? ms total)
+
+[----------] 2 tests from NotRottenTypedTest/1, where TypeParam = int
+[ RUN      ] NotRottenTypedTest/1.SuccessIsntRotten
+[       OK ] NotRottenTypedTest/1.SuccessIsntRotten (? ms)
+[ RUN      ] NotRottenTypedTest/1.FailureIsntRotten
+gtest_rgt_output_test_.cc:#: Failure
+Expected equality of these values:
+  1
+  TypeParam()
+    Which is: 0
+[  FAILED  ] NotRottenTypedTest/1.FailureIsntRotten, where TypeParam = int (? ms)
+[----------] 2 tests from NotRottenTypedTest/1 (? ms total)
+
+[----------] 1 test from IsRottenTypedTest/0, where TypeParam = char
+[ RUN      ] IsRottenTypedTest/0.ConditionalOnType
+[       OK ] IsRottenTypedTest/0.ConditionalOnType (? ms)
+gtest_rgt_output_test_.cc:305: Rotten
+[  ROTTEN  ] IsRottenTypedTest/0.ConditionalOnType
+[----------] 1 test from IsRottenTypedTest/0 (? ms total)
+
+[----------] 1 test from IsRottenTypedTest/1, where TypeParam = int
+[ RUN      ] IsRottenTypedTest/1.ConditionalOnType
+[       OK ] IsRottenTypedTest/1.ConditionalOnType (? ms)
+[----------] 1 test from IsRottenTypedTest/1 (? ms total)
+
+[----------] 2 tests from My/NotRottenTypeParamTest/0, where TypeParam = char
+[ RUN      ] My/NotRottenTypeParamTest/0.SuccessIsntRotten
+[       OK ] My/NotRottenTypeParamTest/0.SuccessIsntRotten (? ms)
+[ RUN      ] My/NotRottenTypeParamTest/0.FailureIsntRotten
+gtest_rgt_output_test_.cc:#: Failure
+Expected equality of these values:
+  1
+  TypeParam()
+    Which is: '\0'
+[  FAILED  ] My/NotRottenTypeParamTest/0.FailureIsntRotten, where TypeParam = char (? ms)
+[----------] 2 tests from My/NotRottenTypeParamTest/0 (? ms total)
+
+[----------] 2 tests from My/NotRottenTypeParamTest/1, where TypeParam = int
+[ RUN      ] My/NotRottenTypeParamTest/1.SuccessIsntRotten
+[       OK ] My/NotRottenTypeParamTest/1.SuccessIsntRotten (? ms)
+[ RUN      ] My/NotRottenTypeParamTest/1.FailureIsntRotten
+gtest_rgt_output_test_.cc:#: Failure
+Expected equality of these values:
+  1
+  TypeParam()
+    Which is: 0
+[  FAILED  ] My/NotRottenTypeParamTest/1.FailureIsntRotten, where TypeParam = int (? ms)
+[----------] 2 tests from My/NotRottenTypeParamTest/1 (? ms total)
+
+[----------] 1 test from My/IsRottenTypeParamTest/0, where TypeParam = char
+[ RUN      ] My/IsRottenTypeParamTest/0.ConditionalOnType
+[       OK ] My/IsRottenTypeParamTest/0.ConditionalOnType (? ms)
+gtest_rgt_output_test_.cc:341: Rotten
+[  ROTTEN  ] My/IsRottenTypeParamTest/0.ConditionalOnType
+[----------] 1 test from My/IsRottenTypeParamTest/0 (? ms total)
+
+[----------] 1 test from My/IsRottenTypeParamTest/1, where TypeParam = int
+[ RUN      ] My/IsRottenTypeParamTest/1.ConditionalOnType
+[       OK ] My/IsRottenTypeParamTest/1.ConditionalOnType (? ms)
+[----------] 1 test from My/IsRottenTypeParamTest/1 (? ms total)
+
+[----------] 3 tests from NotRottenParamTest
+[ RUN      ] NotRottenParamTest.Passes/0
+[       OK ] NotRottenParamTest.Passes/0 (? ms)
+[ RUN      ] NotRottenParamTest.AssertFailingIsntRotten/0
+gtest_rgt_output_test_.cc:#: Failure
+Expected equality of these values:
+  2
+  GetParam()
+    Which is: 1
+[  FAILED  ] NotRottenParamTest.AssertFailingIsntRotten/0, where GetParam() = 1 (? ms)
+[ RUN      ] NotRottenParamTest.FailingIsntRotten/0
+gtest_rgt_output_test_.cc:#: Failure
+Expected equality of these values:
+  2
+  GetParam()
+    Which is: 1
+[  FAILED  ] NotRottenParamTest.FailingIsntRotten/0, where GetParam() = 1 (? ms)
+[----------] 3 tests from NotRottenParamTest (? ms total)
+
+[----------] 4 tests from IsRottenParamTest
+[ RUN      ] IsRottenParamTest.SingleExpect/0
+[       OK ] IsRottenParamTest.SingleExpect/0 (? ms)
+[ RUN      ] IsRottenParamTest.SingleExpect/1
+[       OK ] IsRottenParamTest.SingleExpect/1 (? ms)
+[ RUN      ] IsRottenParamTest.ConditionalOnParam/0
+[       OK ] IsRottenParamTest.ConditionalOnParam/0 (? ms)
+[ RUN      ] IsRottenParamTest.ConditionalOnParam/1
+[       OK ] IsRottenParamTest.ConditionalOnParam/1 (? ms)
+gtest_rgt_output_test_.cc:258: Rotten
+[  ROTTEN  ] IsRottenParamTest.SingleExpect/0
+gtest_rgt_output_test_.cc:258: Rotten
+[  ROTTEN  ] IsRottenParamTest.SingleExpect/1
+[----------] 4 tests from IsRottenParamTest (? ms total)
+
+[----------] Global test environment tear-down
+[==========] 45 tests from 14 test suites ran. (? ms total)
+[  PASSED  ] 30 tests.
+[  SKIPPED ] 1 test, listed below:
+[  SKIPPED ] NotRotten.SkippedIsntRotten
+[  FAILED  ] 14 tests, listed below:
+[  FAILED  ] NotRotten.ExpectFailingIsntRotten
+[  FAILED  ] NotRotten.AssertFailingIsntRotten
+[  FAILED  ] NotRotten.ExpectFailingWithUnexecutedIsntRotten
+[  FAILED  ] NotRotten.ExpectFatalFailureFails
+[  FAILED  ] NotRotten.ExpectNonfatalFailureFails
+[  FAILED  ] NotRotten.ExpectNoFatalFailureFails
+[  FAILED  ] NotRottenFixture.ExpectFailureIsntRotten
+[  FAILED  ] NotRottenFixture.AssertFailureIsntRotten
+[  FAILED  ] NotRottenTypedTest/0.FailureIsntRotten, where TypeParam = char
+[  FAILED  ] NotRottenTypedTest/1.FailureIsntRotten, where TypeParam = int
+[  FAILED  ] My/NotRottenTypeParamTest/0.FailureIsntRotten, where TypeParam = char
+[  FAILED  ] My/NotRottenTypeParamTest/1.FailureIsntRotten, where TypeParam = int
+[  FAILED  ] NotRottenParamTest.AssertFailingIsntRotten/0, where GetParam() = 1
+[  FAILED  ] NotRottenParamTest.FailingIsntRotten/0, where GetParam() = 1
+
+14 FAILED TESTS
+  YOU HAVE 1 DISABLED TEST
+
