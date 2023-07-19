@@ -2640,8 +2640,8 @@ action will exhibit different behaviors. Example:
       .WillRepeatedly(IncrementCounter(0));
   foo.DoThis();  // Returns 1.
   foo.DoThis();  // Returns 2.
-  foo.DoThat();  // Returns 1 - Blah() uses a different
-                 // counter than Bar()'s.
+  foo.DoThat();  // Returns 1 - DoThat() uses a different
+                 // counter than DoThis()'s.
 ```
 
 versus
