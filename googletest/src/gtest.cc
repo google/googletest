@@ -3228,7 +3228,8 @@ static const char* GetAnsiColorCode(GTestColor color) {
     case GTestColor::kYellow:
       return "3";
     default:
-      return nullptr;
+      assert(false);
+      return "9" ;
   }
 }
 
