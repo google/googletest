@@ -4109,7 +4109,7 @@ TEST(AssertionSyntaxTest, BasicAssertionsBehavesLikeSingleStatement) {
 // Tests that the compiler will not complain about unreachable code in the
 // EXPECT_THROW/EXPECT_ANY_THROW/EXPECT_NO_THROW macros.
 TEST(ExpectThrowTest, DoesNotGenerateUnreachableCodeWarning) {
-  int n = 0;
+  [[maybe_unused]] int n{0};
 
   EXPECT_THROW(throw 1, int);
   EXPECT_NONFATAL_FAILURE(EXPECT_THROW(n++, int), "");
