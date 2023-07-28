@@ -3194,7 +3194,7 @@ You can unlock this power by running your test with the `--gmock_verbose=info`
 flag. For example, given the test program:
 
 ```cpp
-#include "gmock/gmock.h"
+#include <gmock/gmock.h>
 
 using ::testing::_;
 using ::testing::HasSubstr;

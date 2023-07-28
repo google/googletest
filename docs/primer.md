@@ -395,7 +395,7 @@ You can start from this boilerplate:
 ```c++
 #include "this/package/foo.h"
 
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 
 namespace my {
 namespace project {

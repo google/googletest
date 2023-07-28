@@ -88,7 +88,7 @@ For example, the following code verifies that the string `value1` starts with
 10:
 
 ```cpp
-#include "gmock/gmock.h"
+#include <gmock/gmock.h>
 
 using ::testing::AllOf;
 using ::testing::Gt;

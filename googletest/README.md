@@ -145,7 +145,7 @@ We list the most frequently used macros below. For a complete list, see file
 ### Multi-threaded Tests
 
 GoogleTest is thread-safe where the pthread library is available. After
-`#include "gtest/gtest.h"`, you can check the
+`#include <gtest/gtest.h>`, you can check the
 `GTEST_IS_THREADSAFE` macro to see whether this is the case (yes if the macro is
 `#defined` to 1, no if it's undefined.).
 

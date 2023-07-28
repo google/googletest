@@ -164,7 +164,7 @@ follow:
 After the process, you should have something like:
 
 ```cpp
-#include "gmock/gmock.h"  // Brings in gMock.
+#include <gmock/gmock.h>  // Brings in gMock.
 
 class MockTurtle : public Turtle {
  public:
@@ -224,8 +224,8 @@ Here's an example:
 
 ```cpp
 #include "path/to/mock-turtle.h"
-#include "gmock/gmock.h"
-#include "gtest/gtest.h"
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 using ::testing::AtLeast;                         // #1
 
