@@ -9,7 +9,7 @@ GoogleTest now follows the
 We recommend
 [updating to the latest commit in the `main` branch as often as possible](https://github.com/abseil/abseil-cpp/blob/master/FAQ.md#what-is-live-at-head-and-how-do-i-do-it).
 We do publish occasional semantic versions, tagged with
-`v${major}.${minor}.${patch}` (e.g. `v1.13.0`).
+`v${major}.${minor}.${patch}` (e.g. `v1.14.0`).
 
 #### Documentation Updates
 
@@ -17,12 +17,12 @@ Our documentation is now live on GitHub Pages at
 https://google.github.io/googletest/. We recommend browsing the documentation on
 GitHub Pages rather than directly in the repository.
 
-#### Release 1.13.0
+#### Release 1.14.0
 
-[Release 1.13.0](https://github.com/google/googletest/releases/tag/v1.13.0) is
+[Release 1.14.0](https://github.com/google/googletest/releases/tag/v1.14.0) is
 now available.
 
-The 1.13.x branch requires at least C++14.
+The 1.14.x branch requires at least C++14.
 
 #### Continuous Integration
 
