@@ -227,6 +227,7 @@ inline Matcher<const ::std::string&> MakeDeathTestMatcher(
             #statement,                                                        \
             ::testing::internal::MakeDeathTestMatcher(regex_or_matcher),       \
             __FILE__, __LINE__, &gtest_dt)) {                                  \
+      /* NOLINTNEXTLINE(cppcoreguidelines-avoid-goto, hicpp-avoid-goto) */     \
       goto GTEST_CONCAT_TOKEN_(gtest_label_, __LINE__);                        \
     }                                                                          \
     if (gtest_dt != nullptr) {                                                 \
@@ -234,6 +235,7 @@ inline Matcher<const ::std::string&> MakeDeathTestMatcher(
       switch (gtest_dt->AssumeRole()) {                                        \
         case ::testing::internal::DeathTest::OVERSEE_TEST:                     \
           if (!gtest_dt->Passed(predicate(gtest_dt->Wait()))) {                \
+            /* NOLINTNEXTLINE(cppcoreguidelines-avoid-goto, hicpp-avoid-goto) */ \
             goto GTEST_CONCAT_TOKEN_(gtest_label_, __LINE__);                  \
           }                                                                    \
           break;                                                               \
