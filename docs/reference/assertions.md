@@ -1,7 +1,7 @@
 # Assertions Reference
 
 This page lists the assertion macros provided by GoogleTest for verifying code
-behavior. To use them, include the header `gtest/gtest.h`.
+behavior. To use them, add `#include <gtest/gtest.h>`.
 
 The majority of the macros listed below come as a pair with an `EXPECT_` variant
 and an `ASSERT_` variant. Upon failure, `EXPECT_` macros generate nonfatal
