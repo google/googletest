@@ -175,9 +175,15 @@ struct BuiltInDefaultValueGetter<T, false> {
   static T Get() {
     Assert(false, __FILE__, __LINE__,
            "Default action undefined for the function return type.");
-    return internal::Invalid<T>();
+#if defined(__GNUC__) || defined(__clang__)
+    __builtin_unreachable();
+#elif defined(_MSC_VER)
+    __assume(0);
+#else
+    return Invalid<T>();
     // The above statement will never be reached, but is required in
     // order for this function to compile.
+#endif
   }
 };
 
