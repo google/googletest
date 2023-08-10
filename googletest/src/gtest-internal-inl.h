@@ -433,16 +433,16 @@ class OsStackTraceGetterInterface {
       delete;
 };
 
+#ifdef GTEST_HAS_ABSL
 // A working implementation of the OsStackTraceGetterInterface interface.
-class OsStackTraceGetter : public OsStackTraceGetterInterface {
+class AbslStackTraceGetter : public OsStackTraceGetterInterface {
  public:
-  OsStackTraceGetter() = default;
+  AbslStackTraceGetter() = default;
 
   std::string CurrentStackTrace(int max_depth, int skip_count) override;
   void UponLeavingGTest() override;
 
  private:
-#ifdef GTEST_HAS_ABSL
   Mutex mutex_;  // Protects all internal state.
 
   // We save the stack frame below the frame that calls user code.
@@ -450,10 +450,20 @@ class OsStackTraceGetter : public OsStackTraceGetterInterface {
   // the user code changes between the call to UponLeavingGTest()
   // and any calls to the stack trace code from within the user code.
   void* caller_frame_ = nullptr;
+
+  AbslStackTraceGetter(const AbslStackTraceGetter&) = delete;
+  AbslStackTraceGetter& operator=(const AbslStackTraceGetter&) = delete;
+};
 #endif  // GTEST_HAS_ABSL
 
-  OsStackTraceGetter(const OsStackTraceGetter&) = delete;
-  OsStackTraceGetter& operator=(const OsStackTraceGetter&) = delete;
+// An implementation of OsStackTraceGetterInterface which returns no
+// stack trace.
+class NoopStackTraceGetter : public OsStackTraceGetterInterface {
+ public:
+  NoopStackTraceGetter() = default;
+
+  std::string CurrentStackTrace(int max_depth, int skip_count) override;
+  void UponLeavingGTest() override;
 };
 
 // Information about a Google Test trace point.
@@ -622,8 +632,8 @@ class GTEST_API_ UnitTestImpl {
   void set_os_stack_trace_getter(OsStackTraceGetterInterface* getter);
 
   // Returns the current OS stack trace getter if it is not NULL;
-  // otherwise, creates an OsStackTraceGetter, makes it the current
-  // getter, and returns it.
+  // otherwise, creates an OsStackTraceGetterInterface, makes it the
+  // current getter, and returns it.
   OsStackTraceGetterInterface* os_stack_trace_getter();
 
   // Returns the current OS stack trace as an std::string.
@@ -922,9 +932,9 @@ class GTEST_API_ UnitTestImpl {
   TestEventListeners listeners_;
 
   // The OS stack trace getter.  Will be deleted when the UnitTest
-  // object is destructed.  By default, an OsStackTraceGetter is used,
-  // but the user can set this field to use a custom getter if that is
-  // desired.
+  // object is destructed.  By default, an OsStackTraceGetterInterface
+  // is created when os_stack_trace_getter is first called, but the user
+  // can set this field to use a custom getter if that is desired.
   OsStackTraceGetterInterface* os_stack_trace_getter_;
 
   // True if and only if PostFlagParsingInit() has been called.
