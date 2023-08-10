@@ -59,6 +59,10 @@
 #include <windows.h>  // NOLINT
 #endif                // GTEST_OS_WINDOWS
 
+#if GTEST_HAS_STD_STACKTRACE_
+#include <stacktrace>
+#endif
+
 #include "gtest/gtest-spi.h"
 #include "gtest/gtest.h"
 
@@ -455,6 +459,29 @@ class AbslStackTraceGetter : public OsStackTraceGetterInterface {
   AbslStackTraceGetter& operator=(const AbslStackTraceGetter&) = delete;
 };
 #endif  // GTEST_HAS_ABSL
+
+#if GTEST_HAS_STD_STACKTRACE_
+// A working implementation of the OsStackTraceGetterInterface interface.
+class StdStackTraceGetter : public OsStackTraceGetterInterface {
+ public:
+  StdStackTraceGetter() = default;
+
+  std::string CurrentStackTrace(int max_depth, int skip_count) override;
+  void UponLeavingGTest() override;
+
+ private:
+  Mutex mutex_;  // Protects all internal state.
+
+  // We save the stack frame below the frame that calls user code.
+  // We do this because the address of the frame immediately below
+  // the user code changes between the call to UponLeavingGTest()
+  // and any calls to the stack trace code from within the user code.
+  std::stacktrace_entry::native_handle_type caller_frame_ = {};
+
+  StdStackTraceGetter(const StdStackTraceGetter&) = delete;
+  StdStackTraceGetter& operator=(const StdStackTraceGetter&) = delete;
+};
+#endif  // GTEST_HAS_STD_STACKTRACE_
 
 // An implementation of OsStackTraceGetterInterface which returns no
 // stack trace.

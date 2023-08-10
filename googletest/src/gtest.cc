@@ -153,6 +153,10 @@
 #include "absl/strings/strip.h"
 #endif  // GTEST_HAS_ABSL
 
+#if GTEST_HAS_STD_STACKTRACE_
+#include <stacktrace>
+#endif
+
 // Checks builtin compiler feature |x| while avoiding an extra layer of #ifdefs
 // at the callsite.
 #if defined(__has_builtin)
@@ -5025,6 +5029,64 @@ void AbslStackTraceGetter::UponLeavingGTest() GTEST_LOCK_EXCLUDED_(mutex_) {
 }
 #endif  // GTEST_HAS_ABSL
 
+#if GTEST_HAS_STD_STACKTRACE_
+std::string StdStackTraceGetter::CurrentStackTrace(int max_depth, int skip_count)
+    GTEST_LOCK_EXCLUDED_(mutex_) {
+  if (max_depth <= 0) {
+    return "";
+  }
+
+  max_depth = std::min(max_depth, kMaxStackTraceDepth);
+  // Skips the frames requested by the caller, plus this function.
+  skip_count += 1;
+
+  std::stacktrace stack = std::stacktrace::current(skip_count, max_depth);
+
+  std::stacktrace_entry::native_handle_type caller_frame = {};
+  {
+    MutexLock lock(&mutex_);
+    caller_frame = caller_frame_;
+  }
+
+  std::ostringstream result;
+  for (const std::stacktrace_entry &entry : stack) {
+    if (entry.native_handle() == caller_frame &&
+        !GTEST_FLAG_GET(show_internal_stack_frames)) {
+      // Add a marker to the trace and stop adding frames.
+      result << kElidedFramesMarker << '\n';
+      break;
+    }
+
+    result << "  " << entry.native_handle() << ": ";
+    std::string description = entry.description();
+    if (description.empty()) {
+        result << "(unknown)";
+    } else {
+        result << description;
+    }
+    std::string source_file = entry.source_file();
+    if (!source_file.empty()) {
+      result << ' ' << source_file << ':' << entry.source_line();
+    }
+    result << '\n';
+  }
+  return std::move(result).str();
+}
+#endif  // GTEST_HAS_ABSL
+
+#if GTEST_HAS_STD_STACKTRACE_
+void StdStackTraceGetter::UponLeavingGTest() GTEST_LOCK_EXCLUDED_(mutex_) {
+  std::stacktrace stack = std::stacktrace::current(/*skip=*/2, /*max_depth=*/1);
+  std::stacktrace_entry::native_handle_type caller_frame = {};
+  if (!stack.empty()) {
+    caller_frame = stack[0].native_handle();
+  }
+
+  MutexLock lock(&mutex_);
+  caller_frame_ = caller_frame;
+}
+#endif  // GTEST_HAS_ABSL
+
 std::string NoopStackTraceGetter::CurrentStackTrace(int max_depth, int skip_count) {
   static_cast<void>(max_depth);
   static_cast<void>(skip_count);
@@ -6244,6 +6306,8 @@ OsStackTraceGetterInterface* UnitTestImpl::os_stack_trace_getter() {
   if (os_stack_trace_getter_ == nullptr) {
 #ifdef GTEST_OS_STACK_TRACE_GETTER_
     os_stack_trace_getter_ = new GTEST_OS_STACK_TRACE_GETTER_;
+#elif GTEST_HAS_STD_STACKTRACE_
+    os_stack_trace_getter_ = new StdStackTraceGetter;
 #elif defined(GTEST_HAS_ABSL)
     os_stack_trace_getter_ = new AbslStackTraceGetter;
 #else
