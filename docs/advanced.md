@@ -899,10 +899,10 @@ also supports per-test-suite set-up/tear-down. To use it:
     variables to hold the shared resources.
 2.  Outside your test fixture class (typically just below it), define those
     member variables, optionally giving them initial values.
-3.  In the same test fixture class, define a `static void SetUpTestSuite()`
-    function (remember not to spell it as **`SetupTestSuite`** with a small
-    `u`!) to set up the shared resources and a `static void TearDownTestSuite()`
-    function to tear them down.
+3.  In the same test fixture class, define a public member function `static void
+    SetUpTestSuite()` (remember not to spell it as **`SetupTestSuite`** with a
+    small `u`!) to set up the shared resources and a `static void
+    TearDownTestSuite()` function to tear them down.
 
 That's it! GoogleTest automatically calls `SetUpTestSuite()` before running the
 *first test* in the `FooTest` test suite (i.e. before creating the first
