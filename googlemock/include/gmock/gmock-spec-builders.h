@@ -1096,11 +1096,16 @@ class TypedExpectation<R(Args...)> : public ExpectationBase {
 
   // An adaptor that turns a OneAction<F> into something compatible with
   // Action<F>. Must be called at most once.
-  struct ActionAdaptor {
-    std::shared_ptr<OnceAction<R(Args...)>> once_action;
+  class ActionAdaptor {
+   private:
+    std::shared_ptr<OnceAction<R(Args...)>> once_action_;
+
+   public:
+    ActionAdaptor(std::shared_ptr<OnceAction<R(Args...)>>&& once_action) :
+      once_action_(once_action) {}
 
     R operator()(Args&&... args) const {
-      return std::move(*once_action).Call(std::forward<Args>(args)...);
+      return std::move(*once_action_).Call(std::forward<Args>(args)...);
     }
   };
 
