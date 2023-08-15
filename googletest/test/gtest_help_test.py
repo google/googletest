@@ -146,19 +146,6 @@ class GTestHelpTest(gtest_test_utils.TestCase):
     else:
       self.assertNotIn(DEATH_TEST_STYLE_FLAG, output)
 
-  def TestUnknownFlagWithAbseil(self, flag):
-    """Verifies correct behavior when an unknown flag is specified.
-
-    The right message must be printed and the tests must
-    skipped when the given flag is specified.
-
-    Args:
-      flag:  A flag to pass to the binary or None.
-    """
-    exit_code, output = RunWithFlag(flag)
-    self.assertEqual(1, exit_code)
-    self.assertIn('ERROR: Unknown command line flag', output)
-
   def TestNonHelpFlag(self, flag):
     """Verifies correct behavior when no help flag is specified.
 
