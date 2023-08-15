@@ -116,17 +116,14 @@ def RunWithFlag(flag):
 class GTestHelpTest(gtest_test_utils.TestCase):
   """Tests the --help flag and its equivalent forms."""
 
-  def TestHelpFlag(self, flag):
+  def testPrintsHelpWithFullFlag(self):
     """Verifies correct behavior when help flag is specified.
 
     The right message must be printed and the tests must
     skipped when the given flag is specified.
-
-    Args:
-      flag:  A flag to pass to the binary or None.
     """
 
-    exit_code, output = RunWithFlag(flag)
+    exit_code, output = RunWithFlag('--help')
     if HAS_ABSL_FLAGS:
       # The Abseil flags library prints the ProgramUsageMessage() with
       # --help and returns 1.
@@ -146,23 +143,6 @@ class GTestHelpTest(gtest_test_utils.TestCase):
     else:
       self.assertNotIn(DEATH_TEST_STYLE_FLAG, output)
 
-  def TestNonHelpFlag(self, flag):
-    """Verifies correct behavior when no help flag is specified.
-
-    Verifies that when no help flag is specified, the tests are run
-    and the help message is not printed.
-
-    Args:
-      flag:  A flag to pass to the binary or None.
-    """
-
-    exit_code, output = RunWithFlag(flag)
-    self.assertNotEqual(exit_code, 0)
-    self.assertFalse(HELP_REGEX.search(output), output)
-
-  def testPrintsHelpWithFullFlag(self):
-    self.TestHelpFlag('--help')
-
   def testRunsTestsWithoutHelpFlag(self):
     """Verifies correct behavior when no help flag is specified.
 
@@ -170,7 +150,9 @@ class GTestHelpTest(gtest_test_utils.TestCase):
     and the help message is not printed.
     """
 
-    self.TestNonHelpFlag(None)
+    exit_code, output = RunWithFlag(None)
+    self.assertNotEqual(exit_code, 0)
+    self.assertFalse(HELP_REGEX.search(output), output)
 
   def testRunsTestsWithGtestInternalFlag(self):
     """Verifies correct behavior when internal testing flag is specified.
@@ -179,7 +161,9 @@ class GTestHelpTest(gtest_test_utils.TestCase):
     a flag starting with Google Test prefix and 'internal_' is supplied.
     """
 
-    self.TestNonHelpFlag(INTERNAL_FLAG_FOR_TESTING)
+    exit_code, output = RunWithFlag(INTERNAL_FLAG_FOR_TESTING)
+    self.assertNotEqual(exit_code, 0)
+    self.assertFalse(HELP_REGEX.search(output), output)
 
 
 if __name__ == '__main__':
