@@ -1064,7 +1064,13 @@ class CapturedStream {
     // The location /data/local/tmp is directly accessible from native code.
     // '/sdcard' and other variants cannot be relied on, as they are not
     // guaranteed to be mounted, or may have a delay in mounting.
-    name_template = "/data/local/tmp/";
+    //
+    // However, prefer using the TMPDIR environment variable if set, as newer
+    // devices may have /data/local/tmp read-only.
+    if (auto tmpdir = ::getenv("TMPDIR"))
+      name_template.assign(tmpdir) += '/';
+    else
+      name_template = "/data/local/tmp/";
 #elif defined(GTEST_OS_IOS)
     char user_temp_dir[PATH_MAX + 1];
 
