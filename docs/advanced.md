@@ -2171,7 +2171,7 @@ The report format conforms to the following JSON Schema:
 
 ```json
 {
-  "$schema": "http://json-schema.org/schema#",
+  "$schema": "https://json-schema.org/schema#",
   "type": "object",
   "definitions": {
     "TestCase": {
