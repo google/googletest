@@ -1,4 +1,39 @@
 # GoogleTest
+### Installation Process (macOS)
+1. Clone Google Test to your local machine
+    ```
+    git clone https://github.com/google/googletest
+    ```
+2. Open a terminal and navigate to the googletest directory that you cloned.
+
+### Build & Install Google Test
+- Create a build directory inside the googletest directory:
+    ```
+    mkdir build
+    cd build
+    ```
+- Generate the build files using CMake:
+    ```
+    cmake ..
+    ```
+- Build & Install Google Test:
+    ```
+    cmake --build .
+    sudo make install
+    ```
+
+### Verify Installation
+After the installation is complete, you can verify that Google Test is installed correctly by running the following commands:
+- Compile a simple test program using Google Test:
+    ```
+    g++ -std=c++14 -o exec testcases.cpp -lgtest -lgtest_main -pthread
+    ```
+- Run the compiled executable:
+  ```
+  ./exec
+  ```
+If the tests in main.cpp execute successfully, it means Google Test is properly installed and working
+
 
 ### Announcements
 
