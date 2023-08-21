@@ -100,7 +100,7 @@ tools.
 In addition to many internal projects at Google, GoogleTest is also used by the
 following notable projects:
 
-*   The [Chromium projects](http://www.chromium.org/) (behind the Chrome browser
+*   The [Chromium projects](https://www.chromium.org/) (behind the Chrome browser
     and Chrome OS).
 *   The [LLVM](http://llvm.org/) compiler.
 *   [Protocol Buffers](https://github.com/google/protobuf), Google's data
