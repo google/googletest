@@ -28,7 +28,7 @@ After the installation is complete, you can verify that Google Test is installed
     ```
     g++ -std=c++14 -o exec testcases.cpp -lgtest -lgtest_main -pthread
     ```
-- Run the compiled executable:
+- Run the compiled executable file:
   ```
   ./exec
   ```
