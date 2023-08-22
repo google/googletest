@@ -97,7 +97,7 @@ tests like this are expensive to run and fragile (What if you just upgraded to a
 shiny new graphics card that has better anti-aliasing? Suddenly you have to
 update all your golden images.). It would be too painful if all your tests are
 like this. Fortunately, you learned about
-[Dependency Injection](http://en.wikipedia.org/wiki/Dependency_injection) and know the right thing
+[Dependency Injection](https://en.wikipedia.org/wiki/Dependency_injection) and know the right thing
 to do: instead of having your application talk to the system API directly, wrap
 the API in an interface (say, `Turtle`) and code to that interface:
 

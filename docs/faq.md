@@ -607,7 +607,7 @@ defined such that we can print a value of `FooType`.
 
 In addition, if `FooType` is declared in a name space, the `<<` operator also
 needs to be defined in the *same* name space. See
-[Tip of the Week #49](http://abseil.io/tips/49) for details.
+[Tip of the Week #49](https://abseil.io/tips/49) for details.
 
 ## How do I suppress the memory leak messages on Windows?
 
@@ -628,10 +628,10 @@ mistake in production. Such cleverness also leads to
 advise against the practice, and GoogleTest doesn't provide a way to do it.
 
 In general, the recommended way to cause the code to behave differently under
-test is [Dependency Injection](http://en.wikipedia.org/wiki/Dependency_injection). You can inject
+test is [Dependency Injection](https://en.wikipedia.org/wiki/Dependency_injection). You can inject
 different functionality from the test and from the production code. Since your
 production code doesn't link in the for-test logic at all (the
-[`testonly`](http://docs.bazel.build/versions/master/be/common-definitions.html#common.testonly) attribute for BUILD targets helps to ensure
+[`testonly`](https://docs.bazel.build/versions/master/be/common-definitions.html#common.testonly) attribute for BUILD targets helps to ensure
 that), there is no danger in accidentally running it.
 
 However, if you *really*, *really*, *really* have no choice, and if you follow
