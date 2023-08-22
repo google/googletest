@@ -90,7 +90,7 @@ gMock is bundled with googletest.
 ## A Case for Mock Turtles
 
 Let's look at an example. Suppose you are developing a graphics program that
-relies on a [LOGO](http://en.wikipedia.org/wiki/Logo_programming_language)-like
+relies on a [LOGO](https://en.wikipedia.org/wiki/Logo_programming_language)-like
 API for drawing. How would you test that it does the right thing? Well, you can
 run it and compare the screen with a golden screen snapshot, but let's admit it:
 tests like this are expensive to run and fragile (What if you just upgraded to a
