@@ -50,7 +50,7 @@ terms *Test*, *Test Case* and *Test Suite*, so beware of misunderstanding these.
 
 Historically, GoogleTest started to use the term *Test Case* for grouping
 related tests, whereas current publications, including International Software
-Testing Qualifications Board ([ISTQB](http://www.istqb.org/)) materials and
+Testing Qualifications Board ([ISTQB](https://www.istqb.org/)) materials and
 various textbooks on software quality, use the term
 *[Test Suite][istqb test suite]* for this.
 
@@ -68,13 +68,13 @@ deprecated and refactored away.
 So please be aware of the different definitions of the terms:
 
 
-Meaning                                                                              | GoogleTest Term         | [ISTQB](http://www.istqb.org/) Term
+Meaning                                                                              | GoogleTest Term         | [ISTQB](https://www.istqb.org/) Term
 :----------------------------------------------------------------------------------- | :---------------------- | :----------------------------------
 Exercise a particular program path with specific input values and verify the results | [TEST()](#simple-tests) | [Test Case][istqb test case]
 
 
-[istqb test case]: http://glossary.istqb.org/en/search/test%20case
-[istqb test suite]: http://glossary.istqb.org/en/search/test%20suite
+[istqb test case]: https://glossary.istqb.org/en/search/test%20case
+[istqb test suite]: https://glossary.istqb.org/en/search/test%20suite
 
 ## Basic Concepts
 
