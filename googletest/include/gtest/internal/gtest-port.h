@@ -1190,7 +1190,7 @@ void ClearInjectableArgvs();
 #endif  // GTEST_HAS_DEATH_TEST
 
 // Defines synchronization primitives.
-#ifdef GTEST_IS_THREADSAFE
+#if defined(GTEST_IS_THREADSAFE) && (GTEST_IS_THREADSAFE==1)
 
 #ifdef GTEST_OS_WINDOWS
 // Provides leak-safe Windows kernel handle ownership.
