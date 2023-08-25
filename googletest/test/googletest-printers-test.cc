@@ -54,10 +54,15 @@
 
 #include "gtest/gtest-printers.h"
 #include "gtest/gtest.h"
+#include "gtest/internal/gtest-port.h"
 
 #ifdef GTEST_HAS_ABSL
 #include "absl/strings/str_format.h"
 #endif
+
+#if GTEST_INTERNAL_HAS_STD_SPAN
+#include <span>  // NOLINT
+#endif  // GTEST_INTERNAL_HAS_STD_SPAN
 
 // Some user-defined types for testing the universal value printer.
 
@@ -1177,6 +1182,17 @@ TEST(PrintStlContainerTest, Vector) {
   v.push_back(1);
   v.push_back(2);
   EXPECT_EQ("{ 1, 2 }", Print(v));
+}
+
+TEST(PrintStlContainerTest, StdSpan) {
+#if GTEST_INTERNAL_HAS_STD_SPAN
+  int a[] = {3, 6, 5};
+  std::span<int> s = a;
+
+  EXPECT_EQ("{ 3, 6, 5 }", Print(s));
+#else
+  GTEST_SKIP() << "Does not have std::span.";
+#endif  // GTEST_INTERNAL_HAS_STD_SPAN
 }
 
 TEST(PrintStlContainerTest, LongSequence) {
