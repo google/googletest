@@ -1067,10 +1067,7 @@ class CapturedStream {
     //
     // However, prefer using the TMPDIR environment variable if set, as newer
     // devices may have /data/local/tmp read-only.
-    if (auto tmpdir = ::getenv("TMPDIR"))
-      name_template.assign(tmpdir) += '/';
-    else
-      name_template = "/data/local/tmp/";
+    name_template = TempDir();
 #elif defined(GTEST_OS_IOS)
     char user_temp_dir[PATH_MAX + 1];
 
