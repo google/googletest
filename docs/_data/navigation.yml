@@ -1,5 +1,5 @@
 nav:
-- section: "Get Started"
+- section: "Get Started" <Get started with first pull request>
   items:
   - title: "Supported Platforms"
     url: "/platforms.html"
