@@ -1,5 +1,5 @@
 nav:
-- section: "Get Started"
+- section: "Get Started" (adding a sentence in google navigation)(learning pull requuest)
   items:
   - title: "Supported Platforms"
     url: "/platforms.html"
