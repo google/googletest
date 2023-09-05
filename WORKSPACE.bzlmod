@@ -1,0 +1,3 @@
+# When using Bzlmod WORKSPACE.bzlmod will take precedence before the WORKSPACE file.
+# Via this "empty" WORKSPACE.bzlmod file we can assure that Bzlmod works without the legacy WORKSPACE file
+# and everything is prepared for a "pure" Bzlmod approach

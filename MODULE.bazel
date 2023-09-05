@@ -1,0 +1,42 @@
+module(
+    name = "googletest",
+    compatibility_level = 1,
+)
+
+bazel_dep(name = "abseil-cpp", version = "20230802.0", repo_name = "com_google_absl")
+bazel_dep(name = "bazel_skylib", version = "1.4.2")
+bazel_dep(name = "platforms", version = "0.0.7")
+bazel_dep(name = "re2", version = "2021-09-01", repo_name = "com_googlesource_code_re2")
+bazel_dep(name = "rules_cc", version = "0.0.8")
+bazel_dep(name = "rules_python", version = "0.25.0")
+
+archive_override(
+    module_name = "rules_python",  # 2023-07-31T20:39:27Z
+    strip_prefix = "rules_python-e355becc30275939d87116a4ec83dad4bb50d9e1",
+    urls = ["https://github.com/bazelbuild/rules_python/archive/e355becc30275939d87116a4ec83dad4bb50d9e1.zip"],
+)
+
+archive_override(
+    module_name = "bazel_skylib",  # 2023-05-31T19:24:07Z
+    strip_prefix = "bazel-skylib-288731ef9f7f688932bd50e704a91a45ec185f9b",
+    urls = ["https://github.com/bazelbuild/bazel-skylib/archive/288731ef9f7f688932bd50e704a91a45ec185f9b.zip"],
+)
+
+archive_override(
+    module_name = "platforms",  # 2023-07-28T19:44:27Z
+    strip_prefix = "platforms-4ad40ef271da8176d4fc0194d2089b8a76e19d7b",
+    urls = ["https://github.com/bazelbuild/platforms/archive/4ad40ef271da8176d4fc0194d2089b8a76e19d7b.zip"],
+)
+
+archive_override(
+    module_name = "com_googlesource_code_re2",  # 2023-03-17T11:36:51Z
+    strip_prefix = "re2-578843a516fd1da7084ae46209a75f3613b6065e",
+    urls = ["https://github.com/google/re2/archive/578843a516fd1da7084ae46209a75f3613b6065e.zip"],
+)
+
+archive_override(
+    module_name = "abseil-cpp",  # 2023-08-01T14:59:13Z
+    patches = ["//:module_dot_bazel.patch"],
+    strip_prefix = "abseil-cpp-22091f4c0d6626b3ef40446ce3d4ccab19425ca3",
+    urls = ["https://github.com/abseil/abseil-cpp/archive/22091f4c0d6626b3ef40446ce3d4ccab19425ca3.zip"],
+)

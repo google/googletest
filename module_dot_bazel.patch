@@ -1,0 +1,14 @@
+--- MODULE.bazel
++++ MODULE.bazel
+@@ -0,0 +1,11 @@
++"""Module definition for Abseil LTS 20230802.0."""
++module(
++    name = "abseil-cpp",
++    version = "20230802.0",
++    compatibility_level = 1,
++)
++bazel_dep(name = "rules_cc", version = "0.0.8")
++bazel_dep(name = "platforms", version = "0.0.7")
++bazel_dep(name = "bazel_skylib", version = "1.4.2")
++bazel_dep(name = "googletest", version = "1.14.0", repo_name = "com_google_googletest")
++bazel_dep(name = "google_benchmark", version = "1.8.2", repo_name = "com_github_google_benchmark")
