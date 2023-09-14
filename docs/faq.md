@@ -3,7 +3,7 @@
 ## Why should test suite names and test names not contain underscore?
 
 {: .callout .note}
-Note: GoogleTest reserves underscore (`_`) for special purpose keywords, such as
+Note: GoogleTest reserves underscore (`_`) for special-purpose keywords, such as
 [the `DISABLED_` prefix](advanced.md#temporarily-disabling-tests), in addition
 to the following rationale.
 
@@ -33,9 +33,9 @@ contains `_`?
     `TestSuiteName_Bar__Test`, which is invalid.
 
 So clearly `TestSuiteName` and `TestName` cannot start or end with `_`
-(Actually, `TestSuiteName` can start with `_` -- as long as the `_` isn't
-followed by an upper-case letter. But that's getting complicated. So for
-simplicity we just say that it cannot start with `_`.).
+(Actually, `TestSuiteName` can start with `_`—as long as the `_` isn't followed
+by an upper-case letter. But that's getting complicated. So for simplicity we
+just say that it cannot start with `_`.).
 
 It may seem fine for `TestSuiteName` and `TestName` to contain `_` in the
 middle. However, consider this:
@@ -130,7 +130,7 @@ can much more easily decide which one to use the next time.
 
 ## My death test modifies some state, but the change seems lost after the death test finishes. Why?
 
-Death tests (`EXPECT_DEATH`, etc) are executed in a sub-process s.t. the
+Death tests (`EXPECT_DEATH`, etc.) are executed in a sub-process s.t. the
 expected crash won't kill the test program (i.e. the parent process). As a
 result, any in-memory side effects they incur are observable in their respective
 sub-processes, but not in the parent process. You can think of them as running
@@ -171,16 +171,16 @@ class Foo {
 };
 ```
 
-You also need to define it *outside* of the class body in `foo.cc`:
+you also need to define it *outside* of the class body in `foo.cc`:
 
 ```c++
 const int Foo::kBar;  // No initializer here.
 ```
 
 Otherwise your code is **invalid C++**, and may break in unexpected ways. In
-particular, using it in GoogleTest comparison assertions (`EXPECT_EQ`, etc) will
-generate an "undefined reference" linker error. The fact that "it used to work"
-doesn't mean it's valid. It just means that you were lucky. :-)
+particular, using it in GoogleTest comparison assertions (`EXPECT_EQ`, etc.)
+will generate an "undefined reference" linker error. The fact that "it used to
+work" doesn't mean it's valid. It just means that you were lucky. :-)
 
 If the declaration of the static data member is `constexpr` then it is
 implicitly an `inline` definition, and a separate definition in `foo.cc` is not
@@ -290,7 +290,7 @@ a **fresh** test fixture object, immediately call `SetUp()`, run the test body,
 call `TearDown()`, and then delete the test fixture object.
 
 When you need to write per-test set-up and tear-down logic, you have the choice
-between using the test fixture constructor/destructor or `SetUp()/TearDown()`.
+between using the test fixture constructor/destructor or `SetUp()`/`TearDown()`.
 The former is usually preferred, as it has the following benefits:
 
 *   By initializing a member variable in the constructor, we have the option to
@@ -331,7 +331,7 @@ You may still want to use `SetUp()/TearDown()` in the following cases:
     GoogleTest assertions in a destructor if your code could run on such a
     platform.
 
-## The compiler complains "no matching function to call" when I use ASSERT_PRED*. How do I fix it?
+## The compiler complains "no matching function to call" when I use `ASSERT_PRED*`. How do I fix it?
 
 See details for [`EXPECT_PRED*`](reference/assertions.md#EXPECT_PRED) in the
 Assertions Reference.
@@ -389,7 +389,7 @@ C++ is case-sensitive. Did you spell it as `Setup()`?
 Similarly, sometimes people spell `SetUpTestSuite()` as `SetupTestSuite()` and
 wonder why it's never called.
 
-## I have several test suites which share the same test fixture logic, do I have to define a new test fixture class for each of them? This seems pretty tedious.
+## I have several test suites which share the same test fixture logic; do I have to define a new test fixture class for each of them? This seems pretty tedious.
 
 You don't have to. Instead of
 
@@ -524,7 +524,7 @@ The new NPTL thread library doesn't suffer from this problem, as it doesn't
 create a manager thread. However, if you don't control which machine your test
 runs on, you shouldn't depend on this.
 
-## Why does GoogleTest require the entire test suite, instead of individual tests, to be named *DeathTest when it uses ASSERT_DEATH?
+## Why does GoogleTest require the entire test suite, instead of individual tests, to be named `*DeathTest` when it uses `ASSERT_DEATH`?
 
 GoogleTest does not interleave tests from different test suites. That is, it
 runs all tests in one test suite first, and then runs all tests in the next test
@@ -549,7 +549,7 @@ interleave tests from different test suites, we need to run all tests in the
 `FooTest` case before running any test in the `BarTest` case. This contradicts
 with the requirement to run `BarTest.DefDeathTest` before `FooTest.Uvw`.
 
-## But I don't like calling my entire test suite \*DeathTest when it contains both death tests and non-death tests. What do I do?
+## But I don't like calling my entire test suite `*DeathTest` when it contains both death tests and non-death tests. What do I do?
 
 You don't have to, but if you like, you may split up the test suite into
 `FooTest` and `FooDeathTest`, where the names make it clear that they are
@@ -633,7 +633,7 @@ the `--gtest_also_run_disabled_tests` flag.
 Yes.
 
 The rule is **all test methods in the same test suite must use the same fixture
-class.** This means that the following is **allowed** because both tests use the
+class**. This means that the following is **allowed** because both tests use the
 same fixture class (`::testing::Test`).
 
 ```c++
