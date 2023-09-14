@@ -128,27 +128,6 @@ both approaches a try. Practice is a much better way to grasp the subtle
 differences between the two tools. Once you have some concrete experience, you
 can much more easily decide which one to use the next time.
 
-## I got some run-time errors about invalid proto descriptors when using `ProtocolMessageEquals`. Help!
-
-{: .callout .note}
-**Note:** `ProtocolMessageEquals` and `ProtocolMessageEquiv` are *deprecated*
-now. Please use `EqualsProto`, etc instead.
-
-`ProtocolMessageEquals` and `ProtocolMessageEquiv` were redefined recently and
-are now less tolerant of invalid protocol buffer definitions. In particular, if
-you have a `foo.proto` that doesn't fully qualify the type of a protocol message
-it references (e.g. `message<Bar>` where it should be `message<blah.Bar>`), you
-will now get run-time errors like:
-
-```
-... descriptor.cc:...] Invalid proto descriptor for file "path/to/foo.proto":
-... descriptor.cc:...]  blah.MyMessage.my_field: ".Bar" is not defined.
-```
-
-If you see this, your `.proto` file is broken and needs to be fixed by making
-the types fully qualified. The new definition of `ProtocolMessageEquals` and
-`ProtocolMessageEquiv` just happen to reveal your bug.
-
 ## My death test modifies some state, but the change seems lost after the death test finishes. Why?
 
 Death tests (`EXPECT_DEATH`, etc) are executed in a sub-process s.t. the
