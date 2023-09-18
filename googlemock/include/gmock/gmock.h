@@ -53,13 +53,13 @@
 //
 // where all clauses are optional and WillOnce() can be repeated.
 
-#include "gmock/gmock-actions.h"
-#include "gmock/gmock-cardinalities.h"
-#include "gmock/gmock-function-mocker.h"
-#include "gmock/gmock-matchers.h"
-#include "gmock/gmock-more-actions.h"
-#include "gmock/gmock-more-matchers.h"
-#include "gmock/gmock-nice-strict.h"
+#include "gmock/gmock-actions.h"  // IWYU pragma: export
+#include "gmock/gmock-cardinalities.h"  // IWYU pragma: export
+#include "gmock/gmock-function-mocker.h"  // IWYU pragma: export
+#include "gmock/gmock-matchers.h"  // IWYU pragma: export
+#include "gmock/gmock-more-actions.h"  // IWYU pragma: export
+#include "gmock/gmock-more-matchers.h"  // IWYU pragma: export
+#include "gmock/gmock-nice-strict.h"  // IWYU pragma: export
 #include "gmock/internal/gmock-internal-utils.h"
 #include "gmock/internal/gmock-port.h"
 
