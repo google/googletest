@@ -279,6 +279,13 @@ TYPED_TEST(ContainerEqTest, DuplicateDifference) {
 }
 #endif  // GTEST_HAS_TYPED_TEST
 
+TEST(ContainerEqTest, DeducesValueType)
+{
+  const ContainerWithoutValueType lhs{1, 2, 3};
+  const ContainerWithoutValueType rhs{1, 2, 3};
+  EXPECT_THAT(lhs, ContainerEq(rhs));
+}
+
 // Tests that multiple missing values are reported.
 // Using just vector here, so order is predictable.
 TEST(ContainerEqExtraTest, MultipleValuesMissing) {
@@ -1512,6 +1519,12 @@ TEST(AllOfArrayTest, Matchers) {
   EXPECT_THAT(1, AllOfArray({Ge(0), Ge(1)}));
 }
 
+TEST(AllOfArrayTest, DeducesValueType)
+{
+  const ContainerWithoutValueType container{1, 2, 3};
+  EXPECT_THAT(0, Not(AllOfArray(container)));
+}
+
 INSTANTIATE_GTEST_MATCHER_TEST_P(AnyOfArrayTest);
 
 TEST(AnyOfArrayTest, BasicForms) {
@@ -1599,6 +1612,12 @@ TEST_P(AnyOfArrayTestP, ExplainsMatchResultCorrectly) {
             Explain(g2, 1));
   EXPECT_EQ("which is 1 more than 1",  // Only the first
             Explain(g2, 2));
+}
+
+TEST(AnyOfArrayTest, DeducesValueType)
+{
+  const ContainerWithoutValueType container{1, 2, 3};
+  EXPECT_THAT(1, AnyOfArray(container));
 }
 
 MATCHER(IsNotNull, "") { return arg != nullptr; }

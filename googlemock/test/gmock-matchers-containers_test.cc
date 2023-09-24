@@ -1640,6 +1640,11 @@ TEST(IsSupersetOfTest, WorksWithMoveOnly) {
   helper.Call(MakeUniquePtrs({2}));
 }
 
+TEST(IsSupersetOfTest, DeducesValueType) {
+  const ContainerWithoutValueType container{1, 2, 3};
+  EXPECT_THAT(container, IsSupersetOf(ContainerWithoutValueType{1, 2}));
+}
+
 TEST(IsSubsetOfTest, WorksForNativeArray) {
   const int subset[] = {1, 4};
   const int superset[] = {1, 2, 4};
@@ -1766,6 +1771,11 @@ TEST(IsSubsetOfTest, WorksWithMoveOnly) {
   helper.Call(MakeUniquePtrs({1}));
   EXPECT_CALL(helper, Call(Not(IsSubsetOf({Pointee(1)}))));
   helper.Call(MakeUniquePtrs({2}));
+}
+
+TEST(IsSubsetOfTest, DeducesValueType) {
+  const ContainerWithoutValueType container{1, 2, 3};
+  EXPECT_THAT(container, IsSubsetOf(ContainerWithoutValueType{1, 2, 3, 4}));
 }
 
 // Tests using ElementsAre() and ElementsAreArray() with stream-like
@@ -1915,6 +1925,11 @@ TEST(UnorderedElementsAreArrayTest, WorksWithMoveOnly) {
   EXPECT_CALL(helper,
               Call(UnorderedElementsAreArray({Pointee(1), Pointee(2)})));
   helper.Call(MakeUniquePtrs({2, 1}));
+}
+
+TEST(UnorderedElementsAreArrayTest, DeducesValueType) {
+  const ContainerWithoutValueType container{1, 2, 3};
+  EXPECT_THAT(container, UnorderedElementsAreArray(container));
 }
 
 class UnorderedElementsAreTest : public testing::Test {
@@ -2127,6 +2142,11 @@ TEST_F(UnorderedElementsAreTest, DescribeNegation) {
                  " - element #2 is equal to 345"));
 }
 
+TEST_F(UnorderedElementsAreTest, DeducesValueType) {
+  const ContainerWithoutValueType container{1, 2, 3};
+  EXPECT_THAT(container, UnorderedElementsAre(1, 2, 3));
+}
+
 // Tests Each().
 
 INSTANTIATE_GTEST_MATCHER_TEST_P(EachTest);
@@ -2221,6 +2241,11 @@ TEST(EachTest, WorksWithMoveOnly) {
   helper.Call(MakeUniquePtrs({1, 2}));
 }
 
+TEST(EachTest, DeducesValueType) {
+  const ContainerWithoutValueType container{1, 2, 3};
+  EXPECT_THAT(container, Each(Gt(0)));
+}
+
 // For testing Pointwise().
 class IsHalfOfMatcher {
  public:
@@ -2278,6 +2303,11 @@ TEST(PointwiseTest, MakesCopyOfRhs) {
   // Changing rhs now shouldn't affect m, which made a copy of rhs.
   rhs.push_back(6);
   EXPECT_THAT(lhs, m);
+}
+
+TEST(PointwiseTest, DeducesValueType) {
+  const ContainerWithoutValueType container{1, 2, 3};
+  EXPECT_THAT(container, Pointwise(Eq(), container));
 }
 
 TEST(PointwiseTest, WorksForLhsNativeArray) {
@@ -2484,6 +2514,11 @@ TEST(UnorderedPointwiseTest, WorksWithMoveOnly) {
   EXPECT_CALL(helper, Call(UnorderedPointwise(PointeeEquals(),
                                               std::vector<int>{1, 2})));
   helper.Call(MakeUniquePtrs({2, 1}));
+}
+
+TEST(UnorderedPointwiseTest, DeducesValueType) {
+  const ContainerWithoutValueType container{1, 2, 3};
+  EXPECT_THAT(container, UnorderedPointwise(Eq(), container));
 }
 
 TEST(PointeeTest, WorksOnMoveOnlyType) {
@@ -2855,6 +2890,11 @@ TEST(ElementsAreTest, MakesCopyOfArguments) {
   EXPECT_THAT(array2, Not(polymorphic_matcher));
 }
 
+TEST(ElementsAreTest, DeducesValueType) {
+  const ContainerWithoutValueType container{1, 2, 3};
+  EXPECT_THAT(container, ElementsAre(1, 2, 3));
+}
+
 // Tests for ElementsAreArray().  Since ElementsAreArray() shares most
 // of the implementation with ElementsAre(), we don't test it as
 // thoroughly here.
@@ -2996,6 +3036,11 @@ TEST(ElementsAreArrayTest, SourceLifeSpan) {
   EXPECT_THAT(test_vector, Not(matcher_maker));
 }
 
+TEST(ElementsAreArrayTest, DeducesValueType) {
+  const ContainerWithoutValueType container{1, 2, 3};
+  EXPECT_THAT(container, ElementsAreArray(container));
+}
+
 // Tests Contains().
 
 INSTANTIATE_GTEST_MATCHER_TEST_P(ContainsTest);
@@ -3128,6 +3173,11 @@ TEST(ContainsTest, WorksForTwoDimensionalNativeArray) {
   EXPECT_THAT(a, Contains(Contains(5)));
   EXPECT_THAT(a, Not(Contains(ElementsAre(3, 4, 5))));
   EXPECT_THAT(a, Contains(Not(Contains(5))));
+}
+
+TEST(ContainsTest, DeducesValueType) {
+  const ContainerWithoutValueType container{1, 2, 3};
+  EXPECT_THAT(container, Contains(1));
 }
 
 }  // namespace

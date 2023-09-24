@@ -186,6 +186,26 @@ std::string Explain(const MatcherType& m, const Value& x) {
   return listener.str();
 }
 
+// A minimal container that does not expose value_type
+class ContainerWithoutValueType {
+  using UnderlyingContainer = std::vector<int>;
+
+ public:
+  ContainerWithoutValueType(std::initializer_list<int> const args) : _v{args} {}
+
+  UnderlyingContainer::const_iterator begin() const { return _v.begin(); }
+  UnderlyingContainer::const_iterator end() const { return _v.end(); }
+  UnderlyingContainer::size_type size() const { return _v.size(); }
+
+  friend bool operator==(ContainerWithoutValueType const& lhs,
+                         ContainerWithoutValueType const& rhs) {
+    return lhs._v == rhs._v;
+  }
+
+ private:
+  UnderlyingContainer _v;
+};
+
 }  // namespace gmock_matchers_test
 }  // namespace testing
 
