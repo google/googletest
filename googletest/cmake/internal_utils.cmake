@@ -29,7 +29,7 @@ macro(fix_default_compiler_settings_)
              CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
       if (NOT BUILD_SHARED_LIBS AND NOT gtest_force_shared_crt)
         # When Google Test is built as a shared library, it should also use
-        # shared runtime libraries.  Otherwise, it may end up with multiple
+        # shared runtime libraries. Otherwise, it may end up with multiple
         # copies of runtime library data in different modules, resulting in
         # hard-to-find crashes. When it is built as a static library, it is
         # preferable to use CRT as static libraries, as we don't have to rely
@@ -55,11 +55,11 @@ macro(fix_default_compiler_settings_)
 endmacro()
 
 # Defines the compiler/linker flags used to build Google Test and
-# Google Mock.  You can tweak these definitions to suit your need.  A
+# Google Mock. You can tweak these definitions to suit your need. A
 # variable's value is empty before it's explicitly assigned to.
 macro(config_compiler_and_linker)
   # Note: pthreads on MinGW is not supported, even if available
-  # instead, we use windows threading primitives
+  # instead, we use windows threading primitives.
   unset(GTEST_HAS_PTHREAD)
   if (NOT gtest_disable_pthreads AND NOT MINGW)
     # Defines CMAKE_USE_PTHREADS_INIT and CMAKE_THREAD_LIBS_INIT.
@@ -79,7 +79,7 @@ macro(config_compiler_and_linker)
     set(cxx_exception_flags "-EHsc -D_HAS_EXCEPTIONS=1")
     set(cxx_no_exception_flags "-EHs-c- -D_HAS_EXCEPTIONS=0")
     set(cxx_no_rtti_flags "-GR-")
-    # Suppress "unreachable code" warning
+    # Suppress "unreachable code" warning,
     # https://stackoverflow.com/questions/3232669 explains the issue.
     set(cxx_base_flags "${cxx_base_flags} -wd4702")
     # Ensure MSVC treats source files as UTF-8 encoded.
@@ -110,7 +110,7 @@ macro(config_compiler_and_linker)
     set(cxx_exception_flags "-fexceptions")
     set(cxx_no_exception_flags "-fno-exceptions")
     # Until version 4.3.2, GCC doesn't define a macro to indicate
-    # whether RTTI is enabled.  Therefore we define GTEST_HAS_RTTI
+    # whether RTTI is enabled. Therefore we define GTEST_HAS_RTTI
     # explicitly.
     set(cxx_no_rtti_flags "-fno-rtti -DGTEST_HAS_RTTI=0")
     set(cxx_strict_flags
@@ -127,7 +127,7 @@ macro(config_compiler_and_linker)
     set(cxx_exception_flags "-qeh")
     set(cxx_no_exception_flags "-qnoeh")
     # Until version 9.0, Visual Age doesn't define a macro to indicate
-    # whether RTTI is enabled.  Therefore we define GTEST_HAS_RTTI
+    # whether RTTI is enabled. Therefore we define GTEST_HAS_RTTI
     # explicitly.
     set(cxx_no_rtti_flags "-qnortti -DGTEST_HAS_RTTI=0")
   elseif (CMAKE_CXX_COMPILER_ID STREQUAL "HP")
@@ -157,7 +157,7 @@ macro(config_compiler_and_linker)
   set(cxx_strict "${cxx_default} ${cxx_strict_flags}")
 endmacro()
 
-# Defines the gtest & gtest_main libraries.  User tests should link
+# Defines the gtest & gtest_main libraries. User tests should link
 # with one of them.
 function(cxx_library_with_type name type cxx_flags)
   # type can be either STATIC or SHARED to denote a static or shared library.
@@ -167,7 +167,7 @@ function(cxx_library_with_type name type cxx_flags)
   set_target_properties(${name}
     PROPERTIES
     COMPILE_FLAGS "${cxx_flags}")
-  # Set the output directory for build artifacts
+  # Set the output directory for build artifacts.
   set_target_properties(${name}
     PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
@@ -175,7 +175,7 @@ function(cxx_library_with_type name type cxx_flags)
     ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
     PDB_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
     COMPILE_PDB_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
-  # make PDBs match library name
+  # Make PDBs match library name.
   get_target_property(pdb_debug_postfix ${name} DEBUG_POSTFIX)
   set_target_properties(${name}
     PROPERTIES
@@ -212,7 +212,7 @@ endfunction()
 
 # cxx_executable_with_flags(name cxx_flags libs srcs...)
 #
-# creates a named C++ executable that depends on the given libraries and
+# Creates a named C++ executable that depends on the given libraries and
 # is built from the given source files with the given compiler flags.
 function(cxx_executable_with_flags name cxx_flags libs)
   add_executable(${name} ${ARGN})
@@ -239,8 +239,8 @@ endfunction()
 
 # cxx_executable(name dir lib srcs...)
 #
-# creates a named target that depends on the given libs and is built
-# from the given source files.  dir/name.cc is implicitly included in
+# Creates a named target that depends on the given libs and is built
+# from the given source files. dir/name.cc is implicitly included in
 # the source file list.
 function(cxx_executable name dir libs)
   cxx_executable_with_flags(
@@ -251,7 +251,7 @@ find_package(Python3)
 
 # cxx_test_with_flags(name cxx_flags libs srcs...)
 #
-# creates a named C++ test that depends on the given libs and is built
+# Creates a named C++ test that depends on the given libs and is built
 # from the given source files with the given compiler flags.
 function(cxx_test_with_flags name cxx_flags libs)
   cxx_executable_with_flags(${name} "${cxx_flags}" "${libs}" ${ARGN})
@@ -260,8 +260,8 @@ endfunction()
 
 # cxx_test(name libs srcs...)
 #
-# creates a named test target that depends on the given libs and is
-# built from the given source files.  Unlike cxx_test_with_flags,
+# Creates a named test target that depends on the given libs and is
+# built from the given source files. Unlike cxx_test_with_flags,
 # test/name.cc is already implicitly included in the source file list.
 function(cxx_test name libs)
   cxx_test_with_flags("${name}" "${cxx_default}" "${libs}"
@@ -270,8 +270,8 @@ endfunction()
 
 # py_test(name)
 #
-# creates a Python test with the given name whose main module is in
-# test/name.py.  It does nothing if Python is not installed.
+# Creates a Python test with the given name whose main module is in
+# test/name.py. It does nothing if Python is not installed.
 function(py_test name)
   if (NOT Python3_Interpreter_FOUND)
     return()
@@ -307,7 +307,7 @@ function(install_project)
       ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
       LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}")
     if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-      # Install PDBs
+      # Install PDBs.
       foreach(t ${ARGN})
         get_target_property(t_pdb_name ${t} COMPILE_PDB_NAME)
         get_target_property(t_pdb_name_debug ${t} COMPILE_PDB_NAME_DEBUG)

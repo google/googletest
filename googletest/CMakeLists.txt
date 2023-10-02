@@ -5,7 +5,7 @@
 # CMake build script for Google Test.
 #
 # To run the tests for Google Test itself on Linux, use 'make test' or
-# ctest.  You can select which tests to run using 'ctest -R regex'.
+# ctest. You can select which tests to run using 'ctest -R regex'.
 # For more options, run 'ctest --help'.
 
 # When other libraries are using a shared version of runtime libraries,
@@ -35,7 +35,7 @@ endif()
 
 ########################################################################
 #
-# Project-wide settings
+# Project-wide settings.
 
 # Name of the project.
 #
@@ -44,7 +44,7 @@ endif()
 # ${gtest_BINARY_DIR}.
 # Language "C" is required for find_package(Threads).
 
-# Project version:
+# Project version.
 
 cmake_minimum_required(VERSION 3.13)
 project(gtest VERSION ${GOOGLETEST_VERSION} LANGUAGES CXX C)
@@ -53,7 +53,7 @@ if (COMMAND set_up_hermetic_build)
   set_up_hermetic_build()
 endif()
 
-# These commands only run if this is the main project
+# These commands only run if this is the main project.
 if(CMAKE_PROJECT_NAME STREQUAL "gtest" OR CMAKE_PROJECT_NAME STREQUAL "googletest-distribution")
 
   # BUILD_SHARED_LIBS is a standard CMake variable, but we declare it here to
@@ -83,7 +83,7 @@ include(cmake/internal_utils.cmake)
 config_compiler_and_linker()  # Defined in internal_utils.cmake.
 
 # Needed to set the namespace for both the export targets and the
-# alias libraries
+# alias libraries.
 set(cmake_package_name GTest CACHE INTERNAL "")
 
 # Create the CMake package file descriptors.
@@ -114,10 +114,10 @@ include_directories(${gtest_build_include_dirs})
 
 ########################################################################
 #
-# Defines the gtest & gtest_main libraries.  User tests should link
+# Defines the gtest & gtest_main libraries. User tests should link
 # with one of them.
 
-# Google Test libraries.  We build them using more strict warnings than what
+# Google Test libraries. We build them using more strict warnings than what
 # are used for other targets, to ensure that gtest can be compiled by a user
 # aggressive about warnings.
 cxx_library(gtest "${cxx_strict}" src/gtest-all.cc)
@@ -154,15 +154,15 @@ target_link_libraries(gtest_main PUBLIC gtest)
 
 ########################################################################
 #
-# Install rules
+# Install rules.
 install_project(gtest gtest_main)
 
 ########################################################################
 #
 # Samples on how to link user tests with gtest or gtest_main.
 #
-# They are not built by default.  To build them, set the
-# gtest_build_samples option to ON.  You can do it by running ccmake
+# They are not built by default. To build them, set the
+# gtest_build_samples option to ON. You can do it by running ccmake
 # or specifying the -Dgtest_build_samples=ON flag when running cmake.
 
 if (gtest_build_samples)
@@ -185,8 +185,8 @@ endif()
 # You can skip this section if you aren't interested in testing
 # Google Test itself.
 #
-# The tests are not built by default.  To build them, set the
-# gtest_build_tests option to ON.  You can do it by running ccmake
+# The tests are not built by default. To build them, set the
+# gtest_build_tests option to ON. You can do it by running ccmake
 # or specifying the -Dgtest_build_tests=ON flag when running cmake.
 
 if (gtest_build_tests)
@@ -268,7 +268,7 @@ if (gtest_build_tests)
   py_test(gtest_skip_environment_check_output_test)
 
   # Visual Studio .NET 2003 does not support STL with exceptions disabled.
-  if (NOT MSVC OR MSVC_VERSION GREATER 1310)  # 1310 is Visual Studio .NET 2003
+  if (NOT MSVC OR MSVC_VERSION GREATER 1310) # 1310 is Visual Studio .NET 2003
     cxx_executable_with_flags(
       googletest-catch-exceptions-no-ex-test_
       "${cxx_no_exception}"
