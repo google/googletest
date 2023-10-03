@@ -1927,6 +1927,12 @@ class MockFoo : public Foo {
                       action_n));
 ```
 
+The return value of the last action **must** match the return type of the mocked
+method. In the example above, `action_n` could be `Return(true)`, or a lambda
+that returns a `bool`, but not `SaveArg`, which returns `void`. Otherwise the
+signature of `DoAll` would not match the signature expected by `WillOnce`, which
+is the signature of the mocked method, and it wouldn't compile.
+
 ### Verifying Complex Arguments {#SaveArgVerify}
 
 If you want to verify that a method is called with a particular argument but the
