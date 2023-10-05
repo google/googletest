@@ -418,8 +418,8 @@ TYPED_TEST(RETest, ImplicitConstructorWorks) {
   const RE simple(TypeParam("hello"));
   EXPECT_STREQ("hello", simple.pattern());
 
-  const RE normal(TypeParam(".*([[:alnum:]_]+)"));
-  EXPECT_STREQ(".*([[:alnum:]_]+)", normal.pattern());
+  const RE normal(TypeParam(".*(\\w+)"));
+  EXPECT_STREQ(".*(\\w+)", normal.pattern());
 }
 
 // Tests that RE's constructors reject invalid regular expressions.
