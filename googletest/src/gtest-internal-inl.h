@@ -75,6 +75,8 @@ GTEST_DECLARE_bool_(death_test_use_fork);
 namespace testing {
 namespace internal {
 
+enum class GTestColorMode { kNo, kYes, kAnsi };
+
 // The value of GetTestTypeId() as seen from within the Google Test
 // library.  This is solely for testing GetTestTypeId().
 GTEST_API_ extern const TypeId kTestTypeIdInGoogleTest;
@@ -89,8 +91,9 @@ GTEST_API_ extern bool g_help_flag;
 // Returns the current time in milliseconds.
 GTEST_API_ TimeInMillis GetTimeInMillis();
 
-// Returns true if and only if Google Test should use colors in the output.
-GTEST_API_ bool ShouldUseColor(bool stdout_is_tty);
+// Returns the color mode kNo if and only if Google Test should not use colors
+// in the output.
+GTEST_API_ GTestColorMode ShouldUseColor(bool stdout_is_tty);
 
 // Formats the given time in milliseconds as seconds. If the input is an exact N
 // seconds, the output has a trailing decimal point (e.g., "N." instead of "N").

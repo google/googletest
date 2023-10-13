@@ -250,6 +250,7 @@ using testing::internal::GetTestTypeId;
 using testing::internal::GetTimeInMillis;
 using testing::internal::GetTypeId;
 using testing::internal::GetUnitTestImpl;
+using testing::internal::GTestColorMode;
 using testing::internal::GTestFlagSaver;
 using testing::internal::HasDebugStringAndShortDebugString;
 using testing::internal::Int32FromEnvOrDie;
@@ -6573,59 +6574,67 @@ TEST(StreamingAssertionsTest, AnyThrow) {
 TEST(ColoredOutputTest, UsesColorsWhenGTestColorFlagIsYes) {
   GTEST_FLAG_SET(color, "yes");
 
-  SetEnv("TERM", "xterm");             // TERM supports colors.
-  EXPECT_TRUE(ShouldUseColor(true));   // Stdout is a TTY.
-  EXPECT_TRUE(ShouldUseColor(false));  // Stdout is not a TTY.
+  SetEnv("TERM", "xterm");  // TERM supports colors.
+  EXPECT_EQ(ShouldUseColor(true), GTestColorMode::kYes);  // Stdout is a TTY.
+  EXPECT_EQ(ShouldUseColor(false),
+            GTestColorMode::kYes);  // Stdout is not a TTY.
 
-  SetEnv("TERM", "dumb");              // TERM doesn't support colors.
-  EXPECT_TRUE(ShouldUseColor(true));   // Stdout is a TTY.
-  EXPECT_TRUE(ShouldUseColor(false));  // Stdout is not a TTY.
+  SetEnv("TERM", "dumb");  // TERM doesn't support colors.
+  EXPECT_EQ(ShouldUseColor(true), GTestColorMode::kYes);  // Stdout is a TTY.
+  EXPECT_EQ(ShouldUseColor(false),
+            GTestColorMode::kYes);  // Stdout is not a TTY.
 }
 
 TEST(ColoredOutputTest, UsesColorsWhenGTestColorFlagIsAliasOfYes) {
   SetEnv("TERM", "dumb");  // TERM doesn't support colors.
 
   GTEST_FLAG_SET(color, "True");
-  EXPECT_TRUE(ShouldUseColor(false));  // Stdout is not a TTY.
+  EXPECT_EQ(ShouldUseColor(false),
+            GTestColorMode::kYes);  // Stdout is not a TTY.
 
   GTEST_FLAG_SET(color, "t");
-  EXPECT_TRUE(ShouldUseColor(false));  // Stdout is not a TTY.
+  EXPECT_EQ(ShouldUseColor(false),
+            GTestColorMode::kYes);  // Stdout is not a TTY.
 
   GTEST_FLAG_SET(color, "1");
-  EXPECT_TRUE(ShouldUseColor(false));  // Stdout is not a TTY.
+  EXPECT_EQ(ShouldUseColor(false),
+            GTestColorMode::kYes);  // Stdout is not a TTY.
 }
 
 TEST(ColoredOutputTest, UsesNoColorWhenGTestColorFlagIsNo) {
   GTEST_FLAG_SET(color, "no");
 
-  SetEnv("TERM", "xterm");              // TERM supports colors.
-  EXPECT_FALSE(ShouldUseColor(true));   // Stdout is a TTY.
-  EXPECT_FALSE(ShouldUseColor(false));  // Stdout is not a TTY.
+  SetEnv("TERM", "xterm");  // TERM supports colors.
+  EXPECT_EQ(ShouldUseColor(true), GTestColorMode::kNo);  // Stdout is a TTY.
+  EXPECT_EQ(ShouldUseColor(false),
+            GTestColorMode::kNo);  // Stdout is not a TTY.
 
-  SetEnv("TERM", "dumb");               // TERM doesn't support colors.
-  EXPECT_FALSE(ShouldUseColor(true));   // Stdout is a TTY.
-  EXPECT_FALSE(ShouldUseColor(false));  // Stdout is not a TTY.
+  SetEnv("TERM", "dumb");  // TERM doesn't support colors.
+  EXPECT_EQ(ShouldUseColor(true), GTestColorMode::kNo);  // Stdout is a TTY.
+  EXPECT_EQ(ShouldUseColor(false),
+            GTestColorMode::kNo);  // Stdout is not a TTY.
 }
 
 TEST(ColoredOutputTest, UsesNoColorWhenGTestColorFlagIsInvalid) {
   SetEnv("TERM", "xterm");  // TERM supports colors.
 
   GTEST_FLAG_SET(color, "F");
-  EXPECT_FALSE(ShouldUseColor(true));  // Stdout is a TTY.
+  EXPECT_EQ(ShouldUseColor(true), GTestColorMode::kNo);  // Stdout is a TTY.
 
   GTEST_FLAG_SET(color, "0");
-  EXPECT_FALSE(ShouldUseColor(true));  // Stdout is a TTY.
+  EXPECT_EQ(ShouldUseColor(true), GTestColorMode::kNo);  // Stdout is a TTY.
 
   GTEST_FLAG_SET(color, "unknown");
-  EXPECT_FALSE(ShouldUseColor(true));  // Stdout is a TTY.
+  EXPECT_EQ(ShouldUseColor(true), GTestColorMode::kNo);  // Stdout is a TTY.
 }
 
 TEST(ColoredOutputTest, UsesColorsWhenStdoutIsTty) {
   GTEST_FLAG_SET(color, "auto");
 
-  SetEnv("TERM", "xterm");              // TERM supports colors.
-  EXPECT_FALSE(ShouldUseColor(false));  // Stdout is not a TTY.
-  EXPECT_TRUE(ShouldUseColor(true));    // Stdout is a TTY.
+  SetEnv("TERM", "xterm");  // TERM supports colors.
+  EXPECT_EQ(ShouldUseColor(false),
+            GTestColorMode::kNo);  // Stdout is not a TTY.
+  EXPECT_EQ(ShouldUseColor(true), GTestColorMode::kYes);  // Stdout is a TTY.
 }
 
 TEST(ColoredOutputTest, UsesColorsWhenTermSupportsColors) {
@@ -6635,64 +6644,68 @@ TEST(ColoredOutputTest, UsesColorsWhenTermSupportsColors) {
   // On Windows, we ignore the TERM variable as it's usually not set.
 
   SetEnv("TERM", "dumb");
-  EXPECT_TRUE(ShouldUseColor(true));  // Stdout is a TTY.
+  EXPECT_EQ(ShouldUseColor(true), GTestColorMode::kYes);  // Stdout is a TTY.
 
   SetEnv("TERM", "");
-  EXPECT_TRUE(ShouldUseColor(true));  // Stdout is a TTY.
+  EXPECT_EQ(ShouldUseColor(true), GTestColorMode::kYes);  // Stdout is a TTY.
 
   SetEnv("TERM", "xterm");
-  EXPECT_TRUE(ShouldUseColor(true));  // Stdout is a TTY.
+  EXPECT_EQ(ShouldUseColor(true), GTestColorMode::kYes);  // Stdout is a TTY.
 #else
   // On non-Windows platforms, we rely on TERM to determine if the
   // terminal supports colors.
 
-  SetEnv("TERM", "dumb");              // TERM doesn't support colors.
-  EXPECT_FALSE(ShouldUseColor(true));  // Stdout is a TTY.
+  SetEnv("TERM", "dumb");  // TERM doesn't support colors.
+  EXPECT_EQ(ShouldUseColor(true),
+            GTestColorMode::kNo);  // Stdout is a TTY.
 
-  SetEnv("TERM", "emacs");             // TERM doesn't support colors.
-  EXPECT_FALSE(ShouldUseColor(true));  // Stdout is a TTY.
+  SetEnv("TERM", "emacs");  // TERM doesn't support colors.
+  EXPECT_EQ(ShouldUseColor(true),
+            GTestColorMode::kNo);  // Stdout is a TTY.
 
-  SetEnv("TERM", "vt100");             // TERM doesn't support colors.
-  EXPECT_FALSE(ShouldUseColor(true));  // Stdout is a TTY.
+  SetEnv("TERM", "vt100");  // TERM doesn't support colors.
+  EXPECT_EQ(ShouldUseColor(true),
+            GTestColorMode::kNo);  // Stdout is a TTY.
 
-  SetEnv("TERM", "xterm-mono");        // TERM doesn't support colors.
-  EXPECT_FALSE(ShouldUseColor(true));  // Stdout is a TTY.
+  SetEnv("TERM", "xterm-mono");  // TERM doesn't support colors.
+  EXPECT_EQ(ShouldUseColor(true),
+            GTestColorMode::kNo);  // Stdout is a TTY.
 
-  SetEnv("TERM", "xterm");            // TERM supports colors.
-  EXPECT_TRUE(ShouldUseColor(true));  // Stdout is a TTY.
+  SetEnv("TERM", "xterm");  // TERM supports colors.
+  EXPECT_EQ(ShouldUseColor(true), GTestColorMode::kYes);  // Stdout is a TTY.
 
-  SetEnv("TERM", "xterm-color");      // TERM supports colors.
-  EXPECT_TRUE(ShouldUseColor(true));  // Stdout is a TTY.
+  SetEnv("TERM", "xterm-color");  // TERM supports colors.
+  EXPECT_EQ(ShouldUseColor(true), GTestColorMode::kYes);  // Stdout is a TTY.
 
-  SetEnv("TERM", "xterm-kitty");      // TERM supports colors.
-  EXPECT_TRUE(ShouldUseColor(true));  // Stdout is a TTY.
+  SetEnv("TERM", "xterm-kitty");  // TERM supports colors.
+  EXPECT_EQ(ShouldUseColor(true), GTestColorMode::kYes);  // Stdout is a TTY.
 
-  SetEnv("TERM", "xterm-256color");   // TERM supports colors.
-  EXPECT_TRUE(ShouldUseColor(true));  // Stdout is a TTY.
+  SetEnv("TERM", "xterm-256color");  // TERM supports colors.
+  EXPECT_EQ(ShouldUseColor(true), GTestColorMode::kYes);  // Stdout is a TTY.
 
-  SetEnv("TERM", "screen");           // TERM supports colors.
-  EXPECT_TRUE(ShouldUseColor(true));  // Stdout is a TTY.
+  SetEnv("TERM", "screen");  // TERM supports colors.
+  EXPECT_EQ(ShouldUseColor(true), GTestColorMode::kYes);  // Stdout is a TTY.
 
   SetEnv("TERM", "screen-256color");  // TERM supports colors.
-  EXPECT_TRUE(ShouldUseColor(true));  // Stdout is a TTY.
+  EXPECT_EQ(ShouldUseColor(true), GTestColorMode::kYes);  // Stdout is a TTY.
 
-  SetEnv("TERM", "tmux");             // TERM supports colors.
-  EXPECT_TRUE(ShouldUseColor(true));  // Stdout is a TTY.
+  SetEnv("TERM", "tmux");  // TERM supports colors.
+  EXPECT_EQ(ShouldUseColor(true), GTestColorMode::kYes);  // Stdout is a TTY.
 
-  SetEnv("TERM", "tmux-256color");    // TERM supports colors.
-  EXPECT_TRUE(ShouldUseColor(true));  // Stdout is a TTY.
+  SetEnv("TERM", "tmux-256color");  // TERM supports colors.
+  EXPECT_EQ(ShouldUseColor(true), GTestColorMode::kYes);  // Stdout is a TTY.
 
-  SetEnv("TERM", "rxvt-unicode");     // TERM supports colors.
-  EXPECT_TRUE(ShouldUseColor(true));  // Stdout is a TTY.
+  SetEnv("TERM", "rxvt-unicode");  // TERM supports colors.
+  EXPECT_EQ(ShouldUseColor(true), GTestColorMode::kYes);  // Stdout is a TTY.
 
   SetEnv("TERM", "rxvt-unicode-256color");  // TERM supports colors.
-  EXPECT_TRUE(ShouldUseColor(true));        // Stdout is a TTY.
+  EXPECT_EQ(ShouldUseColor(true), GTestColorMode::kYes);  // Stdout is a TTY.
 
-  SetEnv("TERM", "linux");            // TERM supports colors.
-  EXPECT_TRUE(ShouldUseColor(true));  // Stdout is a TTY.
+  SetEnv("TERM", "linux");  // TERM supports colors.
+  EXPECT_EQ(ShouldUseColor(true), GTestColorMode::kYes);  // Stdout is a TTY.
 
   SetEnv("TERM", "cygwin");  // TERM supports colors.
-  EXPECT_TRUE(ShouldUseColor(true));  // Stdout is a TTY.
+  EXPECT_EQ(ShouldUseColor(true), GTestColorMode::kYes);  // Stdout is a TTY.
 #endif  // GTEST_OS_WINDOWS
 }
 

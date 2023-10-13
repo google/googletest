@@ -3215,7 +3215,7 @@ static WORD GetNewColor(GTestColor color, WORD old_color_attrs) {
   return new_color;
 }
 
-#else
+#endif  // GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_MOBILE
 
 // Returns the ANSI color code for the given color. GTestColor::kDefault is
 // an invalid input.
@@ -3233,10 +3233,9 @@ static const char* GetAnsiColorCode(GTestColor color) {
   }
 }
 
-#endif  // GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_MOBILE
-
-// Returns true if and only if Google Test should use colors in the output.
-bool ShouldUseColor(bool stdout_is_tty) {
+// Returns color mode, kNo if and only if Google Test should not use colors in
+// the output.
+GTestColorMode ShouldUseColor(bool stdout_is_tty) {
   std::string c = GTEST_FLAG_GET(color);
   const char* const gtest_color = c.c_str();
 
@@ -3244,7 +3243,7 @@ bool ShouldUseColor(bool stdout_is_tty) {
 #if defined(GTEST_OS_WINDOWS) && !defined(GTEST_OS_WINDOWS_MINGW)
     // On Windows the TERM variable is usually not set, but the
     // console there does support colors.
-    return stdout_is_tty;
+    return stdout_is_tty ? GTestColorMode::kYes : GTestColorMode::kNo;
 #else
     // On non-Windows platforms, we rely on the TERM variable.
     const char* const term = posix::GetEnv("TERM");
@@ -3258,17 +3257,23 @@ bool ShouldUseColor(bool stdout_is_tty) {
                             String::CStringEquals(term, "linux") ||
                             String::CStringEquals(term, "cygwin") ||
                             String::EndsWithCaseInsensitive(term, "-256color"));
-    return stdout_is_tty && term_supports_color;
+    return (stdout_is_tty && term_supports_color) ? GTestColorMode::kYes
+                                                  : GTestColorMode::kNo;
 #endif  // GTEST_OS_WINDOWS
   }
 
-  return String::CaseInsensitiveCStringEquals(gtest_color, "yes") ||
-         String::CaseInsensitiveCStringEquals(gtest_color, "true") ||
-         String::CaseInsensitiveCStringEquals(gtest_color, "t") ||
-         String::CStringEquals(gtest_color, "1");
-  // We take "yes", "true", "t", and "1" as meaning "yes".  If the
-  // value is neither one of these nor "auto", we treat it as "no" to
-  // be conservative.
+  // We take "yes", "true", "t", and "1" as meaning "yes". If the value is
+  // neither one of these nor "auto" and nor "ansi", we treat it as "no" to be
+  // conservative.
+  if (String::CaseInsensitiveCStringEquals(gtest_color, "yes") ||
+      String::CaseInsensitiveCStringEquals(gtest_color, "true") ||
+      String::CaseInsensitiveCStringEquals(gtest_color, "t") ||
+      String::CStringEquals(gtest_color, "1")) {
+    return GTestColorMode::kYes;
+  }
+  return String::CaseInsensitiveCStringEquals(gtest_color, "ansi")
+             ? GTestColorMode::kAnsi
+             : GTestColorMode::kNo;
 }
 
 // Helpers for printing colored strings to stdout. Note that on Windows, we
@@ -3281,14 +3286,15 @@ static void ColoredPrintf(GTestColor color, const char* fmt, ...) {
   va_list args;
   va_start(args, fmt);
 
-  static const bool in_color_mode =
+  static const auto in_color_mode =
 #if GTEST_HAS_FILE_SYSTEM
       ShouldUseColor(posix::IsATTY(posix::FileNo(stdout)) != 0);
 #else
-      false;
+      GTestColorMode::kNo;
 #endif  // GTEST_HAS_FILE_SYSTEM
 
-  const bool use_color = in_color_mode && (color != GTestColor::kDefault);
+  const bool use_color =
+      (in_color_mode != GTestColorMode::kNo) && (color != GTestColor::kDefault);
 
   if (!use_color) {
     vprintf(fmt, args);
@@ -3299,30 +3305,33 @@ static void ColoredPrintf(GTestColor color, const char* fmt, ...) {
 #if defined(GTEST_OS_WINDOWS) && !defined(GTEST_OS_WINDOWS_MOBILE) &&    \
     !defined(GTEST_OS_WINDOWS_PHONE) && !defined(GTEST_OS_WINDOWS_RT) && \
     !defined(GTEST_OS_WINDOWS_MINGW)
-  const HANDLE stdout_handle = GetStdHandle(STD_OUTPUT_HANDLE);
+  if (in_color_mode != GTestColorMode::kAnsi) {
+    const HANDLE stdout_handle = GetStdHandle(STD_OUTPUT_HANDLE);
 
-  // Gets the current text color.
-  CONSOLE_SCREEN_BUFFER_INFO buffer_info;
-  GetConsoleScreenBufferInfo(stdout_handle, &buffer_info);
-  const WORD old_color_attrs = buffer_info.wAttributes;
-  const WORD new_color = GetNewColor(color, old_color_attrs);
+    // Gets the current text color.
+    CONSOLE_SCREEN_BUFFER_INFO buffer_info;
+    GetConsoleScreenBufferInfo(stdout_handle, &buffer_info);
+    const WORD old_color_attrs = buffer_info.wAttributes;
+    const WORD new_color = GetNewColor(color, old_color_attrs);
 
-  // We need to flush the stream buffers into the console before each
-  // SetConsoleTextAttribute call lest it affect the text that is already
-  // printed but has not yet reached the console.
-  fflush(stdout);
-  SetConsoleTextAttribute(stdout_handle, new_color);
+    // We need to flush the stream buffers into the console before each
+    // SetConsoleTextAttribute call lest it affect the text that is already
+    // printed but has not yet reached the console.
+    fflush(stdout);
+    SetConsoleTextAttribute(stdout_handle, new_color);
 
-  vprintf(fmt, args);
+    vprintf(fmt, args);
 
-  fflush(stdout);
-  // Restores the text color.
-  SetConsoleTextAttribute(stdout_handle, old_color_attrs);
-#else
+    fflush(stdout);
+    // Restores the text color.
+    SetConsoleTextAttribute(stdout_handle, old_color_attrs);
+    return;
+  }
+#endif  // GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_MOBILE
+
   printf("\033[0;3%sm", GetAnsiColorCode(color));
   vprintf(fmt, args);
   printf("\033[m");  // Resets the terminal to default.
-#endif  // GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_MOBILE
   va_end(args);
 }
 
