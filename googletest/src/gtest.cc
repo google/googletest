@@ -2571,7 +2571,14 @@ static std::string FormatCxxExceptionMessage(const char* description,
                                              const char* location) {
   Message message;
   if (description != nullptr) {
-    message << "C++ exception with description \"" << description << "\"";
+    std::string desc(description);
+    if (desc.find('\n') == std::string::npos) {
+      message << "C++ exception with description \"" << desc << "\"";
+    } else {
+      message << "C++ exception with description\n> ";
+      std::replace(desc.begin(), desc.end(), '\n', '\n> ');
+      message << desc;
+    }
   } else {
     message << "Unknown C++ exception";
   }
@@ -2579,6 +2586,7 @@ static std::string FormatCxxExceptionMessage(const char* description,
 
   return message.GetString();
 }
+
 
 static std::string PrintTestPartResultToString(
     const TestPartResult& test_part_result);
