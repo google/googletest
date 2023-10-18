@@ -210,7 +210,7 @@ objects for several different tests.
 
 To create a fixture:
 
-1.  Derive a class from `::testing::Test` . Start its body with `protected:`, as
+1.  Derive a class from `testing::Test` . Start its body with `protected:`, as
     we'll want to access fixture members from sub-classes.
 2.  Inside the class, declare any objects you plan to use.
 3.  If necessary, write a default constructor or `SetUp()` function to prepare
@@ -271,7 +271,7 @@ First, define a fixture class. By convention, you should give it the name
 `FooTest` where `Foo` is the class being tested.
 
 ```c++
-class QueueTest : public ::testing::Test {
+class QueueTest : public testing::Test {
  protected:
   void SetUp() override {
      // q0_ remains empty
@@ -402,7 +402,7 @@ namespace project {
 namespace {
 
 // The fixture for testing class Foo.
-class FooTest : public ::testing::Test {
+class FooTest : public testing::Test {
  protected:
   // You can remove any or all of the following functions if their bodies would
   // be empty.
@@ -450,14 +450,14 @@ TEST_F(FooTest, DoesXyz) {
 }  // namespace my
 
 int main(int argc, char **argv) {
-  ::testing::InitGoogleTest(&argc, argv);
+  testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
 ```
 
-The `::testing::InitGoogleTest()` function parses the command line for
-GoogleTest flags, and removes all recognized flags. This allows the user to
-control a test program's behavior via various flags, which we'll cover in the
+The `testing::InitGoogleTest()` function parses the command line for GoogleTest
+flags, and removes all recognized flags. This allows the user to control a test
+program's behavior via various flags, which we'll cover in the
 [AdvancedGuide](advanced.md). You **must** call this function before calling
 `RUN_ALL_TESTS()`, or the flags won't be properly initialized.
 
