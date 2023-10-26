@@ -60,6 +60,7 @@
 #include "gmock/gmock-more-actions.h"  // IWYU pragma: export
 #include "gmock/gmock-more-matchers.h"  // IWYU pragma: export
 #include "gmock/gmock-nice-strict.h"  // IWYU pragma: export
+#include "gmock/gmock-spec-builders.h"  // IWYU pragma: export
 #include "gmock/internal/gmock-internal-utils.h"
 #include "gmock/internal/gmock-port.h"
 
