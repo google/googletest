@@ -2342,7 +2342,6 @@ static std::vector<std::string> GetReservedAttributesForElement(
   return std::vector<std::string>();
 }
 
-#if GTEST_HAS_FILE_SYSTEM
 // TODO(jdesprez): Merge the two getReserved attributes once skip is improved
 // This function is only used when file systems are enabled.
 static std::vector<std::string> GetReservedOutputAttributesForElement(
@@ -2359,7 +2358,6 @@ static std::vector<std::string> GetReservedOutputAttributesForElement(
   // This code is unreachable but some compilers may not realizes that.
   return std::vector<std::string>();
 }
-#endif
 
 static std::string FormatWordList(const std::vector<std::string>& words) {
   Message word_list;
@@ -3893,7 +3891,6 @@ void TestEventRepeater::OnTestIterationEnd(const UnitTest& unit_test,
 
 // End TestEventRepeater
 
-#if GTEST_HAS_FILE_SYSTEM
 // This class generates an XML output file.
 class XmlUnitTestResultPrinter : public EmptyTestEventListener {
  public:
@@ -4414,7 +4411,6 @@ void XmlUnitTestResultPrinter::OutputXmlTestProperties(
 }
 
 // End XmlUnitTestResultPrinter
-#endif  // GTEST_HAS_FILE_SYSTEM
 
 #if GTEST_HAS_FILE_SYSTEM
 // This class generates an JSON output file.
@@ -5111,6 +5107,7 @@ void TestEventListeners::SuppressEventForwarding(bool suppress) {
   repeater_->set_forwarding_enabled(!suppress);
 }
 
+#if GTEST_HAS_FILE_SYSTEM
 // Creates a new XmlUnitTestResultPrinter.
 XmlUnitTestResultPrinter::XmlUnitTestResultPrinter(const char* output_file)
     : output_file_(output_file) {
@@ -5118,6 +5115,7 @@ XmlUnitTestResultPrinter::XmlUnitTestResultPrinter(const char* output_file)
     GTEST_LOG_(FATAL) << "XML output file may not be null";
   }
 }
+#endif  // GTEST_HAS_FILE_SYSTEM
 
 // Creates a new XmlUnitTestResultPrinter.
 XmlUnitTestResultPrinter::XmlUnitTestResultPrinter(std::ostream* output_stream)
@@ -5130,38 +5128,46 @@ XmlUnitTestResultPrinter::XmlUnitTestResultPrinter(std::ostream* output_stream)
 // Called after the unit test ends.
 void XmlUnitTestResultPrinter::OnTestIterationEnd(const UnitTest& unit_test,
                                                   int /*iteration*/) {
+#if GTEST_HAS_FILE_SYSTEM
   FILE* xmlout = 0;
   if(!output_stream_) {
       xmlout = internal::OpenFileForWriting(output_file_);
       output_stream_ = new std::stringstream;
   }
+#endif  // GTEST_HAS_FILE_SYSTEM
 
   internal::XmlUnitTestResultPrinter::PrintXmlUnitTest(output_stream_, unit_test);
 
+#if GTEST_HAS_FILE_SYSTEM
   if(xmlout) {
       fprintf(xmlout, "%s", internal::StringStreamToString(static_cast<std::stringstream*>(output_stream_)).c_str());
       fclose(xmlout);
       delete output_stream_;
       output_stream_ = 0;
   }
+#endif  // GTEST_HAS_FILE_SYSTEM
 }
 
 void XmlUnitTestResultPrinter::ListTestsMatchingFilter(
       const std::vector<TestSuite*>& test_suites) {
+#if GTEST_HAS_FILE_SYSTEM
   FILE* xmlout = 0;
   if(!output_stream_) {
       xmlout = internal::OpenFileForWriting(output_file_);
       output_stream_ = new std::stringstream;
   }
+#endif  // GTEST_HAS_FILE_SYSTEM
 
   internal::XmlUnitTestResultPrinter::PrintXmlTestsList(output_stream_, test_suites);
 
+#if GTEST_HAS_FILE_SYSTEM
   if(xmlout) {
       fprintf(xmlout, "%s", internal::StringStreamToString(static_cast<std::stringstream*>(output_stream_)).c_str());
       fclose(xmlout);
       delete output_stream_;
       output_stream_ = 0;
   }
+#endif  // GTEST_HAS_FILE_SYSTEM
 }
 
 // class UnitTest

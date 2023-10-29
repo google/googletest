@@ -1020,7 +1020,9 @@ class EmptyTestEventListener : public TestEventListener {
 
 class XmlUnitTestResultPrinter : public EmptyTestEventListener {
  public:
+#if GTEST_HAS_FILE_SYSTEM
   XmlUnitTestResultPrinter(const char* output_file);
+#endif  // GTEST_HAS_FILE_SYSTEM
 
   XmlUnitTestResultPrinter(std::ostream* output_stream);
 
@@ -1031,7 +1033,9 @@ class XmlUnitTestResultPrinter : public EmptyTestEventListener {
   void ListTestsMatchingFilter(const std::vector<TestSuite*>& test_suites);
 
  private:
+#if GTEST_HAS_FILE_SYSTEM
   const std::string output_file_;
+#endif  // GTEST_HAS_FILE_SYSTEM
   std::ostream* output_stream_;
 };
 
