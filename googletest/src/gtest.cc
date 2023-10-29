@@ -60,6 +60,7 @@
 #include <unordered_set>
 #include <utility>
 #include <vector>
+#include <regex>
 
 #include "gtest/gtest-assertion-result.h"
 #include "gtest/gtest-spi.h"
@@ -2571,11 +2572,20 @@ static std::string FormatCxxExceptionMessage(const char* description,
                                              const char* location) {
   Message message;
   if (description != nullptr) {
-    message << "C++ exception with description \"" << description << "\"";
+    auto desc = std::regex_replace(description, std::regex("\n"), "\n> ");
+    auto leading_desc = desc.substr(0, 3);
+    if (leading_desc != "\n> ") {
+      desc = "\n> " + desc;
+    }
+    auto trailing_desc = desc.substr(desc.size()-3);
+    if (trailing_desc == "\n> ") {
+      desc = desc.substr(0, desc.size()-3);
+    }
+      message << "C++ exception with description " << desc;
   } else {
     message << "Unknown C++ exception";
   }
-  message << " thrown in " << location << ".";
+  message << "\nthrown in " << location << ".";
 
   return message.GetString();
 }
