@@ -5342,14 +5342,14 @@ void UnitTest::AddTestPartResult(TestPartResult::Type result_type,
       result);
 
   if (result_type != TestPartResult::kSuccess &&
-      result_type != TestPartResult::kSkip &&
-      result_type != TestPartResult::kNonFatalFailure) {
+      result_type != TestPartResult::kSkip) {
     // gtest_break_on_failure takes precedence over
     // gtest_throw_on_failure.  This allows a user to set the latter
     // in the code (perhaps in order to use Google Test assertions
     // with another testing framework) and specify the former on the
     // command line for debugging.
-    if (GTEST_FLAG_GET(break_on_failure)) {
+    if (GTEST_FLAG_GET(break_on_failure) &&
+      result_type != TestPartResult::kNonFatalFailure) {
 #if defined(GTEST_OS_WINDOWS) && !defined(GTEST_OS_WINDOWS_PHONE) && \
     !defined(GTEST_OS_WINDOWS_RT)
       // Using DebugBreak on Windows allows gtest to still break into a debugger
