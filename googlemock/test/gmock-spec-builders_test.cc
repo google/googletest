@@ -2154,6 +2154,7 @@ TEST_F(GMockLogTest, DoesNotPrintWarningInternallyIfVerbosityIsError) {
   helper_.Foo(PrintMeNot());  // This should generate a warning.
 }
 
+#if !defined(GTEST_HAS_ADDRESS_SANITIZER)
 // Tests Mock::AllowLeak().
 
 TEST(AllowLeakTest, AllowsLeakingUnusedMockObject) {
@@ -2193,6 +2194,7 @@ TEST(AllowLeakTest, WorksWhenBothOnCallAndExpectCallArePresent) {
   EXPECT_CALL(*a, DoA(_)).Times(AnyNumber());
   Mock::AllowLeak(a);
 }
+#endif
 
 // Tests that we can verify and clear a mock object's expectations
 // when none of its methods has expectations.

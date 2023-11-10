@@ -283,6 +283,8 @@ TEST(ExitStatusPredicateTest, ExitedWithCode) {
   EXPECT_FALSE(pred1(status42));
 }
 
+#if !defined(GTEST_HAS_ADDRESS_SANITIZER) && \
+    !defined(GTEST_HAS_THREAD_SANITIZER)
 // Tests the KilledBySignal predicate.
 TEST(ExitStatusPredicateTest, KilledBySignal) {
   const int status_segv = KilledExitStatus(SIGSEGV);
@@ -294,6 +296,7 @@ TEST(ExitStatusPredicateTest, KilledBySignal) {
   EXPECT_FALSE(pred_segv(status_kill));
   EXPECT_FALSE(pred_kill(status_segv));
 }
+#endif
 
 #endif  // GTEST_OS_WINDOWS || GTEST_OS_FUCHSIA
 

@@ -215,5 +215,9 @@ cc_test(
     name = "sample10_unittest",
     size = "small",
     srcs = ["googletest/samples/sample10_unittest.cc"],
+    tags = [
+        # A memory error is expected.
+        "no_asan",
+    ],
     deps = [":gtest"],
 )

@@ -19,6 +19,20 @@ jobs:
     - name: Tests
       run: bazel test --cxxopt=-std=c++14 --features=external_include_paths --test_output=errors ...
 
+  Linux_with_sanitizer:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        config: [asan, ubsan, tsan]
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Tests with '${{ matrix.config }}'
+      run: bazel test -c dbg --config=${{ matrix.config }} --cxxopt=-std=c++14 --features=external_include_paths --test_output=errors ...
+
   macOS:
     runs-on: macos-latest
     steps:
