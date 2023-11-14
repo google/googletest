@@ -67,10 +67,26 @@ TEST(CommandLineFlagsTest, CanBeAccessedInCodeOnceGTestHIsIncluded) {
 #include <string>
 #include <type_traits>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 
 #include "gtest/gtest-spi.h"
 #include "src/gtest-internal-inl.h"
+
+struct ConvertibleGlobalType {
+  // The inner enable_if is to ensure invoking is_constructible doesn't fail.
+  // The outer enable_if is to ensure the overload resolution doesn't encounter
+  // an ambiguity.
+  template <
+      class T,
+      std::enable_if_t<
+          false, std::enable_if_t<std::is_constructible<T>::value, int>> = 0>
+  operator T() const;  // NOLINT(google-explicit-constructor)
+};
+void operator<<(ConvertibleGlobalType&, int);
+static_assert(sizeof(decltype(std::declval<ConvertibleGlobalType&>()
+                              << 1)(*)()) > 0,
+              "error in operator<< overload resolution");
 
 namespace testing {
 namespace internal {
@@ -173,7 +189,7 @@ class TestEventListenersAccessor {
   }
 
   static void SuppressEventForwarding(TestEventListeners* listeners) {
-    listeners->SuppressEventForwarding();
+    listeners->SuppressEventForwarding(true);
   }
 };
 
@@ -4097,7 +4113,7 @@ TEST(ExpectThrowTest, DoesNotGenerateUnreachableCodeWarning) {
 
   EXPECT_THROW(throw 1, int);
   EXPECT_NONFATAL_FAILURE(EXPECT_THROW(n++, int), "");
-  EXPECT_NONFATAL_FAILURE(EXPECT_THROW(throw 1, const char*), "");
+  EXPECT_NONFATAL_FAILURE(EXPECT_THROW(throw n, const char*), "");
   EXPECT_NO_THROW(n++);
   EXPECT_NONFATAL_FAILURE(EXPECT_NO_THROW(throw 1), "");
   EXPECT_ANY_THROW(throw 1);

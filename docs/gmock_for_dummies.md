@@ -90,14 +90,14 @@ gMock is bundled with googletest.
 ## A Case for Mock Turtles
 
 Let's look at an example. Suppose you are developing a graphics program that
-relies on a [LOGO](http://en.wikipedia.org/wiki/Logo_programming_language)-like
+relies on a [LOGO](https://en.wikipedia.org/wiki/Logo_programming_language)-like
 API for drawing. How would you test that it does the right thing? Well, you can
 run it and compare the screen with a golden screen snapshot, but let's admit it:
 tests like this are expensive to run and fragile (What if you just upgraded to a
 shiny new graphics card that has better anti-aliasing? Suddenly you have to
 update all your golden images.). It would be too painful if all your tests are
 like this. Fortunately, you learned about
-[Dependency Injection](http://en.wikipedia.org/wiki/Dependency_injection) and know the right thing
+[Dependency Injection](https://en.wikipedia.org/wiki/Dependency_injection) and know the right thing
 to do: instead of having your application talk to the system API directly, wrap
 the API in an interface (say, `Turtle`) and code to that interface:
 
@@ -164,7 +164,7 @@ follow:
 After the process, you should have something like:
 
 ```cpp
-#include "gmock/gmock.h"  // Brings in gMock.
+#include <gmock/gmock.h>  // Brings in gMock.
 
 class MockTurtle : public Turtle {
  public:
@@ -224,8 +224,8 @@ Here's an example:
 
 ```cpp
 #include "path/to/mock-turtle.h"
-#include "gmock/gmock.h"
-#include "gtest/gtest.h"
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 using ::testing::AtLeast;                         // #1
 

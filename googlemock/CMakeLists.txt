@@ -5,7 +5,7 @@
 # CMake build script for Google Mock.
 #
 # To run the tests for Google Mock itself on Linux, use 'make test' or
-# ctest.  You can select which tests to run using 'ctest -R regex'.
+# ctest. You can select which tests to run using 'ctest -R regex'.
 # For more options, run 'ctest --help'.
 
 option(gmock_build_tests "Build all of Google Mock's own tests." OFF)
@@ -36,8 +36,7 @@ endif()
 # as ${gmock_SOURCE_DIR} and to the root binary directory as
 # ${gmock_BINARY_DIR}.
 # Language "C" is required for find_package(Threads).
-cmake_minimum_required(VERSION 3.5)
-cmake_policy(SET CMP0048 NEW)
+cmake_minimum_required(VERSION 3.13)
 project(gmock VERSION ${GOOGLETEST_VERSION} LANGUAGES CXX C)
 
 if (COMMAND set_up_hermetic_build)
@@ -45,7 +44,7 @@ if (COMMAND set_up_hermetic_build)
 endif()
 
 # Instructs CMake to process Google Test's CMakeLists.txt and add its
-# targets to the current scope.  We are placing Google Test's binary
+# targets to the current scope. We are placing Google Test's binary
 # directory in a subdirectory of our own as VC compilation may break
 # if they are the same (the default).
 add_subdirectory("${gtest_dir}" "${gmock_BINARY_DIR}/${gtest_dir}")
@@ -61,9 +60,9 @@ else()
 endif()
 
 # Although Google Test's CMakeLists.txt calls this function, the
-# changes there don't affect the current scope.  Therefore we have to
+# changes there don't affect the current scope. Therefore we have to
 # call it again here.
-config_compiler_and_linker()  # from ${gtest_dir}/cmake/internal_utils.cmake
+config_compiler_and_linker() # from ${gtest_dir}/cmake/internal_utils.cmake
 
 # Adds Google Mock's and Google Test's header directories to the search path.
 set(gmock_build_include_dirs
@@ -76,10 +75,10 @@ include_directories(${gmock_build_include_dirs})
 
 ########################################################################
 #
-# Defines the gmock & gmock_main libraries.  User tests should link
+# Defines the gmock & gmock_main libraries. User tests should link
 # with one of them.
 
-# Google Mock libraries.  We build them using more strict warnings than what
+# Google Mock libraries. We build them using more strict warnings than what
 # are used for other targets, to ensure that Google Mock can be compiled by
 # a user aggressive about warnings.
 if (MSVC)
@@ -101,22 +100,18 @@ else()
   target_link_libraries(gmock_main PUBLIC gmock)
   set_target_properties(gmock_main PROPERTIES VERSION ${GOOGLETEST_VERSION})
 endif()
-# If the CMake version supports it, attach header directory information
-# to the targets for when we are part of a parent build (ie being pulled
-# in via add_subdirectory() rather than being a standalone build).
-if (DEFINED CMAKE_VERSION AND NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.11")
-  string(REPLACE ";" "$<SEMICOLON>" dirs "${gmock_build_include_dirs}")
-  target_include_directories(gmock SYSTEM INTERFACE
-    "$<BUILD_INTERFACE:${dirs}>"
-    "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
-  target_include_directories(gmock_main SYSTEM INTERFACE
-    "$<BUILD_INTERFACE:${dirs}>"
-    "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
-endif()
+
+string(REPLACE ";" "$<SEMICOLON>" dirs "${gmock_build_include_dirs}")
+target_include_directories(gmock SYSTEM INTERFACE
+  "$<BUILD_INTERFACE:${dirs}>"
+  "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
+target_include_directories(gmock_main SYSTEM INTERFACE
+  "$<BUILD_INTERFACE:${dirs}>"
+  "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
 
 ########################################################################
 #
-# Install rules
+# Install rules.
 install_project(gmock gmock_main)
 
 ########################################################################
@@ -126,8 +121,8 @@ install_project(gmock gmock_main)
 # You can skip this section if you aren't interested in testing
 # Google Mock itself.
 #
-# The tests are not built by default.  To build them, set the
-# gmock_build_tests option to ON.  You can do it by running ccmake
+# The tests are not built by default. To build them, set the
+# gmock_build_tests option to ON. You can do it by running ccmake
 # or specifying the -Dgmock_build_tests=ON flag when running cmake.
 
 if (gmock_build_tests)
@@ -136,11 +131,7 @@ if (gmock_build_tests)
   enable_testing()
 
   if (MINGW OR CYGWIN)
-    if (CMAKE_VERSION VERSION_LESS "2.8.12")
-      add_compile_options("-Wa,-mbig-obj")
-    else()
-      add_definitions("-Wa,-mbig-obj")
-    endif()
+    add_compile_options("-Wa,-mbig-obj")
   endif()
 
   ############################################################
@@ -196,7 +187,7 @@ if (gmock_build_tests)
   cxx_shared_library(shared_gmock_main "${cxx_default}"
     "${gtest_dir}/src/gtest-all.cc" src/gmock-all.cc src/gmock_main.cc)
 
-  # Tests that a binary can be built with Google Mock as a shared library.  On
+  # Tests that a binary can be built with Google Mock as a shared library. On
   # some system configurations, it may not possible to run the binary without
   # knowing more details about the system configurations. We do not try to run
   # this binary. To get a more robust shared library coverage, configure with

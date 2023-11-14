@@ -47,11 +47,11 @@ PR is acceptable as an alternative.
 ## The Google Test and Google Mock Communities
 
 The Google Test community exists primarily through the
-[discussion group](http://groups.google.com/group/googletestframework) and the
+[discussion group](https://groups.google.com/group/googletestframework) and the
 GitHub repository. Likewise, the Google Mock community exists primarily through
-their own [discussion group](http://groups.google.com/group/googlemock). You are
-definitely encouraged to contribute to the discussion and you can also help us
-to keep the effectiveness of the group high by following and promoting the
+their own [discussion group](https://groups.google.com/group/googlemock). You
+are definitely encouraged to contribute to the discussion and you can also help
+us to keep the effectiveness of the group high by following and promoting the
 guidelines listed here.
 
 ### Please Be Friendly

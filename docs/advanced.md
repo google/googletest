@@ -508,9 +508,9 @@ TEST_F(FooDeathTest, DoesThat) {
 When built with Bazel and using Abseil, GoogleTest uses the
 [RE2](https://github.com/google/re2/wiki/Syntax) syntax. Otherwise, for POSIX
 systems (Linux, Cygwin, Mac), GoogleTest uses the
-[POSIX extended regular expression](http://www.opengroup.org/onlinepubs/009695399/basedefs/xbd_chap09.html#tag_09_04)
+[POSIX extended regular expression](https://www.opengroup.org/onlinepubs/009695399/basedefs/xbd_chap09.html#tag_09_04)
 syntax. To learn about POSIX syntax, you may want to read this
-[Wikipedia entry](http://en.wikipedia.org/wiki/Regular_expression#POSIX_extended).
+[Wikipedia entry](https://en.wikipedia.org/wiki/Regular_expression#POSIX_extended).
 
 On Windows, GoogleTest uses its own simple regular expression implementation. It
 lacks many features. For example, we don't support union (`"x|y"`), grouping
@@ -899,10 +899,10 @@ also supports per-test-suite set-up/tear-down. To use it:
     variables to hold the shared resources.
 2.  Outside your test fixture class (typically just below it), define those
     member variables, optionally giving them initial values.
-3.  In the same test fixture class, define a `static void SetUpTestSuite()`
-    function (remember not to spell it as **`SetupTestSuite`** with a small
-    `u`!) to set up the shared resources and a `static void TearDownTestSuite()`
-    function to tear them down.
+3.  In the same test fixture class, define a public member function `static void
+    SetUpTestSuite()` (remember not to spell it as **`SetupTestSuite`** with a
+    small `u`!) to set up the shared resources and a `static void
+    TearDownTestSuite()` function to tear them down.
 
 That's it! GoogleTest automatically calls `SetUpTestSuite()` before running the
 *first test* in the `FooTest` test suite (i.e. before creating the first
@@ -2171,7 +2171,7 @@ The report format conforms to the following JSON Schema:
 
 ```json
 {
-  "$schema": "http://json-schema.org/schema#",
+  "$schema": "https://json-schema.org/schema#",
   "type": "object",
   "definitions": {
     "TestCase": {

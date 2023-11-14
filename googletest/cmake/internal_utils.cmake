@@ -12,14 +12,6 @@
 #   Test and Google Mock's option() definitions, and thus must be
 #   called *after* the options have been defined.
 
-if (POLICY CMP0054)
-  cmake_policy(SET CMP0054 NEW)
-endif (POLICY CMP0054)
-
-if (POLICY CMP0069)
-  cmake_policy(SET CMP0069 NEW)
-endif (POLICY CMP0069)
-
 # Tweaks CMake's default compiler/linker settings to suit Google Test's needs.
 #
 # This must be a macro(), as inside a function string() can only
@@ -37,7 +29,7 @@ macro(fix_default_compiler_settings_)
              CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
       if (NOT BUILD_SHARED_LIBS AND NOT gtest_force_shared_crt)
         # When Google Test is built as a shared library, it should also use
-        # shared runtime libraries.  Otherwise, it may end up with multiple
+        # shared runtime libraries. Otherwise, it may end up with multiple
         # copies of runtime library data in different modules, resulting in
         # hard-to-find crashes. When it is built as a static library, it is
         # preferable to use CRT as static libraries, as we don't have to rely
@@ -63,11 +55,11 @@ macro(fix_default_compiler_settings_)
 endmacro()
 
 # Defines the compiler/linker flags used to build Google Test and
-# Google Mock.  You can tweak these definitions to suit your need.  A
+# Google Mock. You can tweak these definitions to suit your need. A
 # variable's value is empty before it's explicitly assigned to.
 macro(config_compiler_and_linker)
   # Note: pthreads on MinGW is not supported, even if available
-  # instead, we use windows threading primitives
+  # instead, we use windows threading primitives.
   unset(GTEST_HAS_PTHREAD)
   if (NOT gtest_disable_pthreads AND NOT MINGW)
     # Defines CMAKE_USE_PTHREADS_INIT and CMAKE_THREAD_LIBS_INIT.
@@ -87,8 +79,8 @@ macro(config_compiler_and_linker)
     set(cxx_exception_flags "-EHsc -D_HAS_EXCEPTIONS=1")
     set(cxx_no_exception_flags "-EHs-c- -D_HAS_EXCEPTIONS=0")
     set(cxx_no_rtti_flags "-GR-")
-    # Suppress "unreachable code" warning
-    # http://stackoverflow.com/questions/3232669 explains the issue.
+    # Suppress "unreachable code" warning,
+    # https://stackoverflow.com/questions/3232669 explains the issue.
     set(cxx_base_flags "${cxx_base_flags} -wd4702")
     # Ensure MSVC treats source files as UTF-8 encoded.
     if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
@@ -118,7 +110,7 @@ macro(config_compiler_and_linker)
     set(cxx_exception_flags "-fexceptions")
     set(cxx_no_exception_flags "-fno-exceptions")
     # Until version 4.3.2, GCC doesn't define a macro to indicate
-    # whether RTTI is enabled.  Therefore we define GTEST_HAS_RTTI
+    # whether RTTI is enabled. Therefore we define GTEST_HAS_RTTI
     # explicitly.
     set(cxx_no_rtti_flags "-fno-rtti -DGTEST_HAS_RTTI=0")
     set(cxx_strict_flags
@@ -135,7 +127,7 @@ macro(config_compiler_and_linker)
     set(cxx_exception_flags "-qeh")
     set(cxx_no_exception_flags "-qnoeh")
     # Until version 9.0, Visual Age doesn't define a macro to indicate
-    # whether RTTI is enabled.  Therefore we define GTEST_HAS_RTTI
+    # whether RTTI is enabled. Therefore we define GTEST_HAS_RTTI
     # explicitly.
     set(cxx_no_rtti_flags "-qnortti -DGTEST_HAS_RTTI=0")
   elseif (CMAKE_CXX_COMPILER_ID STREQUAL "HP")
@@ -165,7 +157,7 @@ macro(config_compiler_and_linker)
   set(cxx_strict "${cxx_default} ${cxx_strict_flags}")
 endmacro()
 
-# Defines the gtest & gtest_main libraries.  User tests should link
+# Defines the gtest & gtest_main libraries. User tests should link
 # with one of them.
 function(cxx_library_with_type name type cxx_flags)
   # type can be either STATIC or SHARED to denote a static or shared library.
@@ -175,7 +167,7 @@ function(cxx_library_with_type name type cxx_flags)
   set_target_properties(${name}
     PROPERTIES
     COMPILE_FLAGS "${cxx_flags}")
-  # Set the output directory for build artifacts
+  # Set the output directory for build artifacts.
   set_target_properties(${name}
     PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
@@ -183,7 +175,7 @@ function(cxx_library_with_type name type cxx_flags)
     ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
     PDB_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
     COMPILE_PDB_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
-  # make PDBs match library name
+  # Make PDBs match library name.
   get_target_property(pdb_debug_postfix ${name} DEBUG_POSTFIX)
   set_target_properties(${name}
     PROPERTIES
@@ -196,23 +188,14 @@ function(cxx_library_with_type name type cxx_flags)
     set_target_properties(${name}
       PROPERTIES
       COMPILE_DEFINITIONS "GTEST_CREATE_SHARED_LIBRARY=1")
-    if (NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.11")
-      target_compile_definitions(${name} INTERFACE
-        $<INSTALL_INTERFACE:GTEST_LINKED_AS_SHARED_LIBRARY=1>)
-    endif()
+    target_compile_definitions(${name} INTERFACE
+      $<INSTALL_INTERFACE:GTEST_LINKED_AS_SHARED_LIBRARY=1>)
   endif()
   if (DEFINED GTEST_HAS_PTHREAD)
-    if ("${CMAKE_VERSION}" VERSION_LESS "3.1.0")
-      set(threads_spec ${CMAKE_THREAD_LIBS_INIT})
-    else()
-      set(threads_spec Threads::Threads)
-    endif()
-    target_link_libraries(${name} PUBLIC ${threads_spec})
+    target_link_libraries(${name} PUBLIC Threads::Threads)
   endif()
 
-  if (NOT "${CMAKE_VERSION}" VERSION_LESS "3.8")
-    target_compile_features(${name} PUBLIC cxx_std_14)
-  endif()
+  target_compile_features(${name} PUBLIC cxx_std_14)
 endfunction()
 
 ########################################################################
@@ -229,7 +212,7 @@ endfunction()
 
 # cxx_executable_with_flags(name cxx_flags libs srcs...)
 #
-# creates a named C++ executable that depends on the given libraries and
+# Creates a named C++ executable that depends on the given libraries and
 # is built from the given source files with the given compiler flags.
 function(cxx_executable_with_flags name cxx_flags libs)
   add_executable(${name} ${ARGN})
@@ -256,34 +239,19 @@ endfunction()
 
 # cxx_executable(name dir lib srcs...)
 #
-# creates a named target that depends on the given libs and is built
-# from the given source files.  dir/name.cc is implicitly included in
+# Creates a named target that depends on the given libs and is built
+# from the given source files. dir/name.cc is implicitly included in
 # the source file list.
 function(cxx_executable name dir libs)
   cxx_executable_with_flags(
     ${name} "${cxx_default}" "${libs}" "${dir}/${name}.cc" ${ARGN})
 endfunction()
 
-# CMP0094 policy enables finding a Python executable in the LOCATION order, as
-# specified by the PATH environment variable.
-if (POLICY CMP0094)
-  cmake_policy(SET CMP0094 NEW)
-endif()
-
-# Sets PYTHONINTERP_FOUND and PYTHON_EXECUTABLE.
-if ("${CMAKE_VERSION}" VERSION_LESS "3.12.0")
-  find_package(PythonInterp)
-  set(PYTHONINTERP_FOUND ${PYTHONINTERP_FOUND} CACHE INTERNAL "")
-  set(PYTHON_EXECUTABLE ${PYTHON_EXECUTABLE} CACHE INTERNAL "")
-else()
-  find_package(Python COMPONENTS Interpreter)
-  set(PYTHONINTERP_FOUND ${Python_Interpreter_FOUND} CACHE INTERNAL "")
-  set(PYTHON_EXECUTABLE ${Python_EXECUTABLE} CACHE INTERNAL "")
-endif()
+find_package(Python3)
 
 # cxx_test_with_flags(name cxx_flags libs srcs...)
 #
-# creates a named C++ test that depends on the given libs and is built
+# Creates a named C++ test that depends on the given libs and is built
 # from the given source files with the given compiler flags.
 function(cxx_test_with_flags name cxx_flags libs)
   cxx_executable_with_flags(${name} "${cxx_flags}" "${libs}" ${ARGN})
@@ -292,8 +260,8 @@ endfunction()
 
 # cxx_test(name libs srcs...)
 #
-# creates a named test target that depends on the given libs and is
-# built from the given source files.  Unlike cxx_test_with_flags,
+# Creates a named test target that depends on the given libs and is
+# built from the given source files. Unlike cxx_test_with_flags,
 # test/name.cc is already implicitly included in the source file list.
 function(cxx_test name libs)
   cxx_test_with_flags("${name}" "${cxx_default}" "${libs}"
@@ -302,37 +270,25 @@ endfunction()
 
 # py_test(name)
 #
-# creates a Python test with the given name whose main module is in
-# test/name.py.  It does nothing if Python is not installed.
+# Creates a Python test with the given name whose main module is in
+# test/name.py. It does nothing if Python is not installed.
 function(py_test name)
-  if (PYTHONINTERP_FOUND)
-    if ("${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" VERSION_GREATER 3.1)
-      if (CMAKE_CONFIGURATION_TYPES)
-        # Multi-configuration build generators as for Visual Studio save
-        # output in a subdirectory of CMAKE_CURRENT_BINARY_DIR (Debug,
-        # Release etc.), so we have to provide it here.
-        add_test(NAME ${name}
-          COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/${name}.py
-              --build_dir=${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG> ${ARGN})
-      else (CMAKE_CONFIGURATION_TYPES)
-        # Single-configuration build generators like Makefile generators
-        # don't have subdirs below CMAKE_CURRENT_BINARY_DIR.
-        add_test(NAME ${name}
-          COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/${name}.py
-            --build_dir=${CMAKE_CURRENT_BINARY_DIR} ${ARGN})
-      endif (CMAKE_CONFIGURATION_TYPES)
-    else()
-      # ${CMAKE_CURRENT_BINARY_DIR} is known at configuration time, so we can
-      # directly bind it from cmake. ${CTEST_CONFIGURATION_TYPE} is known
-      # only at ctest runtime (by calling ctest -c <Configuration>), so
-      # we have to escape $ to delay variable substitution here.
-      add_test(NAME ${name}
-        COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/${name}.py
-          --build_dir=${CMAKE_CURRENT_BINARY_DIR}/\${CTEST_CONFIGURATION_TYPE} ${ARGN})
-    endif()
-    # Make the Python import path consistent between Bazel and CMake.
-    set_tests_properties(${name} PROPERTIES ENVIRONMENT PYTHONPATH=${CMAKE_SOURCE_DIR})
-  endif(PYTHONINTERP_FOUND)
+  if (NOT Python3_Interpreter_FOUND)
+    return()
+  endif()
+
+  get_cmake_property(is_multi "GENERATOR_IS_MULTI_CONFIG")
+  set(build_dir "${CMAKE_CURRENT_BINARY_DIR}")
+  if (is_multi)
+    set(build_dir "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>")
+  endif()
+
+  add_test(NAME ${name}
+      COMMAND Python3::Interpreter ${CMAKE_CURRENT_SOURCE_DIR}/test/${name}.py
+          --build_dir=${build_dir} ${ARGN})
+
+  # Make the Python import path consistent between Bazel and CMake.
+  set_tests_properties(${name} PROPERTIES ENVIRONMENT PYTHONPATH=${CMAKE_SOURCE_DIR})
 endfunction()
 
 # install_project(targets...)
@@ -341,21 +297,24 @@ endfunction()
 function(install_project)
   if(INSTALL_GTEST)
     install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/"
+      COMPONENT "${PROJECT_NAME}"
       DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
     # Install the project targets.
     install(TARGETS ${ARGN}
       EXPORT ${targets_export_name}
+      COMPONENT "${PROJECT_NAME}"
       RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
       ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
       LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}")
     if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-      # Install PDBs
+      # Install PDBs.
       foreach(t ${ARGN})
         get_target_property(t_pdb_name ${t} COMPILE_PDB_NAME)
         get_target_property(t_pdb_name_debug ${t} COMPILE_PDB_NAME_DEBUG)
         get_target_property(t_pdb_output_directory ${t} PDB_OUTPUT_DIRECTORY)
         install(FILES
           "${t_pdb_output_directory}/\${CMAKE_INSTALL_CONFIG_NAME}/$<$<CONFIG:Debug>:${t_pdb_name_debug}>$<$<NOT:$<CONFIG:Debug>>:${t_pdb_name}>.pdb"
+          COMPONENT "${PROJECT_NAME}"
           DESTINATION ${CMAKE_INSTALL_LIBDIR}
           OPTIONAL)
       endforeach()
@@ -366,6 +325,7 @@ function(install_project)
       configure_file("${PROJECT_SOURCE_DIR}/cmake/${t}.pc.in"
         "${configured_pc}" @ONLY)
       install(FILES "${configured_pc}"
+        COMPONENT "${PROJECT_NAME}"
         DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
     endforeach()
   endif()

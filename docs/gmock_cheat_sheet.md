@@ -20,7 +20,7 @@ class Foo {
 (note that `~Foo()` **must** be virtual) we can define its mock as
 
 ```cpp
-#include "gmock/gmock.h"
+#include <gmock/gmock.h>
 
 class MockFoo : public Foo {
  public:

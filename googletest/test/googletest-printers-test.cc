@@ -54,6 +54,15 @@
 
 #include "gtest/gtest-printers.h"
 #include "gtest/gtest.h"
+#include "gtest/internal/gtest-port.h"
+
+#ifdef GTEST_HAS_ABSL
+#include "absl/strings/str_format.h"
+#endif
+
+#if GTEST_INTERNAL_HAS_STD_SPAN
+#include <span>  // NOLINT
+#endif  // GTEST_INTERNAL_HAS_STD_SPAN
 
 // Some user-defined types for testing the universal value printer.
 
@@ -118,6 +127,19 @@ inline void operator<<(::std::ostream& os, const StreamableInGlobal& /* x */) {
 void operator<<(::std::ostream& os, const StreamableInGlobal* /* x */) {
   os << "StreamableInGlobal*";
 }
+
+#ifdef GTEST_HAS_ABSL
+// A user-defined type with AbslStringify
+struct Point {
+  template <typename Sink>
+  friend void AbslStringify(Sink& sink, const Point& p) {
+    absl::Format(&sink, "(%d, %d)", p.x, p.y);
+  }
+
+  int x = 10;
+  int y = 20;
+};
+#endif
 
 namespace foo {
 
@@ -316,6 +338,11 @@ TEST(PrintEnumTest, EnumWithPrintTo) {
   EXPECT_EQ("kEWPT1", Print(kEWPT1));
   EXPECT_EQ("invalid", Print(static_cast<EnumWithPrintTo>(0)));
 }
+
+#ifdef GTEST_HAS_ABSL
+// Tests printing a class that defines AbslStringify
+TEST(PrintClassTest, AbslStringify) { EXPECT_EQ("(10, 20)", Print(Point())); }
+#endif
 
 // Tests printing a class implicitly convertible to BiggestInt.
 
@@ -1157,6 +1184,17 @@ TEST(PrintStlContainerTest, Vector) {
   EXPECT_EQ("{ 1, 2 }", Print(v));
 }
 
+TEST(PrintStlContainerTest, StdSpan) {
+#if GTEST_INTERNAL_HAS_STD_SPAN
+  int a[] = {3, 6, 5};
+  std::span<int> s = a;
+
+  EXPECT_EQ("{ 3, 6, 5 }", Print(s));
+#else
+  GTEST_SKIP() << "Does not have std::span.";
+#endif  // GTEST_INTERNAL_HAS_STD_SPAN
+}
+
 TEST(PrintStlContainerTest, LongSequence) {
   const int a[100] = {1, 2, 3};
   const vector<int> v(a, a + 100);
@@ -1635,6 +1673,12 @@ TEST(PrintToStringTest, PrintReferenceToStreamableInGlobal) {
   std::reference_wrapper<StreamableInGlobal> r(s);
   EXPECT_STREQ("StreamableInGlobal", PrintToString(r).c_str());
 }
+
+#ifdef GTEST_HAS_ABSL
+TEST(PrintToStringTest, AbslStringify) {
+  EXPECT_PRINT_TO_STRING_(Point(), "(10, 20)");
+}
+#endif
 
 TEST(IsValidUTF8Test, IllFormedUTF8) {
   // The following test strings are ill-formed UTF-8 and are printed

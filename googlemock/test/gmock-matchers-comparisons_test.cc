@@ -1769,6 +1769,15 @@ TEST(StartsWithTest, CanDescribeSelf) {
   EXPECT_EQ("starts with \"Hi\"", Describe(m));
 }
 
+TEST(StartsWithTest, WorksWithStringMatcherOnStringViewMatchee) {
+#if GTEST_INTERNAL_HAS_STRING_VIEW
+  EXPECT_THAT(internal::StringView("talk to me goose"),
+              StartsWith(std::string("talk")));
+#else
+  GTEST_SKIP() << "Not applicable without internal::StringView.";
+#endif  // GTEST_INTERNAL_HAS_STRING_VIEW
+}
+
 // Tests EndsWith(s).
 
 TEST(EndsWithTest, MatchesStringWithGivenSuffix) {

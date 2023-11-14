@@ -12,7 +12,7 @@ GoogleTest comes with a CMake build script
 ([CMakeLists.txt](https://github.com/google/googletest/blob/main/CMakeLists.txt))
 that can be used on a wide range of platforms ("C" stands for cross-platform.).
 If you don't have CMake installed already, you can download it for free from
-<http://www.cmake.org/>.
+<https://cmake.org/>.
 
 CMake works by generating native makefiles or build projects that can be used in
 the compiler environment of your choice. You can either build GoogleTest as a
@@ -25,7 +25,7 @@ When building GoogleTest as a standalone project, the typical workflow starts
 with
 
 ```
-git clone https://github.com/google/googletest.git -b v1.13.0
+git clone https://github.com/google/googletest.git -b v1.14.0
 cd googletest        # Main directory of the cloned repository.
 mkdir build          # Create a directory to hold the build output.
 cd build
@@ -124,10 +124,10 @@ match the project in which it is included.
 
 #### C++ Standard Version
 
-An environment that supports C++11 is required in order to successfully build
+An environment that supports C++14 is required in order to successfully build
 GoogleTest. One way to ensure this is to specify the standard in the top-level
-project, for example by using the `set(CMAKE_CXX_STANDARD 11)` command along
-with `set(CMAKE_CXX_STANDARD_REQUIRED ON). If this is not feasible, for example
+project, for example by using the `set(CMAKE_CXX_STANDARD 14)` command along
+with `set(CMAKE_CXX_STANDARD_REQUIRED ON)`. If this is not feasible, for example
 in a C project using GoogleTest for validation, then it can be specified by
 adding it to the options for cmake via the`-DCMAKE_CXX_FLAGS` option.
 
@@ -145,7 +145,7 @@ We list the most frequently used macros below. For a complete list, see file
 ### Multi-threaded Tests
 
 GoogleTest is thread-safe where the pthread library is available. After
-`#include "gtest/gtest.h"`, you can check the
+`#include <gtest/gtest.h>`, you can check the
 `GTEST_IS_THREADSAFE` macro to see whether this is the case (yes if the macro is
 `#defined` to 1, no if it's undefined.).
 
