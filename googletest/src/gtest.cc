@@ -30,7 +30,7 @@
 //
 // The Google C++ Testing and Mocking Framework (Google Test)
 
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 
 #include <ctype.h>
 #include <stdarg.h>
@@ -62,10 +62,10 @@
 #include <utility>
 #include <vector>
 
-#include "gtest/gtest-assertion-result.h"
-#include "gtest/gtest-spi.h"
-#include "gtest/internal/custom/gtest.h"
-#include "gtest/internal/gtest-port.h"
+#include <gtest/gtest-assertion-result.h>
+#include <gtest/gtest-spi.h>
+#include <gtest/internal/custom/gtest.h>
+#include <gtest/internal/gtest-port.h>
 
 #ifdef GTEST_OS_LINUX
 

@@ -30,12 +30,12 @@
 //
 // The Google C++ Testing and Mocking Framework (Google Test)
 
-#include "gtest/gtest-test-part.h"
+#include <gtest/gtest-test-part.h>
 
 #include <ostream>
 #include <string>
 
-#include "gtest/internal/gtest-port.h"
+#include <gtest/internal/gtest-port.h>
 #include "gtest-internal-inl.h"
 
 namespace testing {

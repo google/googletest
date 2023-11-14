@@ -27,11 +27,11 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "gmock/gmock.h"
+#include <gmock/gmock.h>
 
 #include <string>
 
-#include "gmock/internal/gmock-port.h"
+#include <gmock/internal/gmock-port.h>
 
 GMOCK_DEFINE_bool_(catch_leaked_mocks, true,
                    "true if and only if Google Mock should report leaked "

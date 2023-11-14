@@ -108,8 +108,7 @@ endif()
 
 # Where Google Test's .h files can be found.
 set(gtest_build_include_dirs
-  "${gtest_SOURCE_DIR}/include"
-  "${gtest_SOURCE_DIR}")
+  "${gtest_SOURCE_DIR}/include")
 include_directories(${gtest_build_include_dirs})
 
 ########################################################################

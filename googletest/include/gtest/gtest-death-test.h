@@ -40,7 +40,7 @@
 #ifndef GOOGLETEST_INCLUDE_GTEST_GTEST_DEATH_TEST_H_
 #define GOOGLETEST_INCLUDE_GTEST_GTEST_DEATH_TEST_H_
 
-#include "gtest/internal/gtest-death-test-internal.h"
+#include "internal/gtest-death-test-internal.h"
 
 // This flag controls the style of death tests.  Valid values are "threadsafe",
 // meaning that the death test child process will re-execute the test binary

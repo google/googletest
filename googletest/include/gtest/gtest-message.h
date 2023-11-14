@@ -54,7 +54,7 @@
 #include <sstream>
 #include <string>
 
-#include "gtest/internal/gtest-port.h"
+#include "internal/gtest-port.h"
 
 #ifdef GTEST_HAS_ABSL
 #include <type_traits>

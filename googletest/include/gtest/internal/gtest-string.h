@@ -54,7 +54,7 @@
 #include <sstream>
 #include <string>
 
-#include "gtest/internal/gtest-port.h"
+#include "gtest-port.h"
 
 namespace testing {
 namespace internal {

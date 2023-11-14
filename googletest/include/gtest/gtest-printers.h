@@ -119,8 +119,8 @@
 #include "absl/strings/has_absl_stringify.h"
 #include "absl/strings/str_cat.h"
 #endif  // GTEST_HAS_ABSL
-#include "gtest/internal/gtest-internal.h"
-#include "gtest/internal/gtest-port.h"
+#include "internal/gtest-internal.h"
+#include "internal/gtest-port.h"
 
 #if GTEST_INTERNAL_HAS_STD_SPAN
 #include <span>  // NOLINT

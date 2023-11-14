@@ -31,12 +31,12 @@
 //
 // This file defines the AssertionResult type.
 
-#include "gtest/gtest-assertion-result.h"
+#include <gtest/gtest-assertion-result.h>
 
 #include <string>
 #include <utility>
 
-#include "gtest/gtest-message.h"
+#include <gtest/gtest-message.h>
 
 namespace testing {
 

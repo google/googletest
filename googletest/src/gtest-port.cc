@@ -27,7 +27,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "gtest/internal/gtest-port.h"
+#include <gtest/internal/gtest-port.h>
 
 #include <limits.h>
 #include <stdio.h>
@@ -87,10 +87,10 @@
 #include <zircon/syscalls.h>
 #endif  // GTEST_OS_FUCHSIA
 
-#include "gtest/gtest-message.h"
-#include "gtest/gtest-spi.h"
-#include "gtest/internal/gtest-internal.h"
-#include "gtest/internal/gtest-string.h"
+#include <gtest/gtest-message.h>
+#include <gtest/gtest-spi.h>
+#include <gtest/internal/gtest-internal.h>
+#include <gtest/internal/gtest-string.h>
 #include "gtest-internal-inl.h"
 
 namespace testing {

@@ -43,8 +43,8 @@
 #include <string>
 #include <type_traits>
 
-#include "gtest/gtest-message.h"
-#include "gtest/internal/gtest-port.h"
+#include "gtest-message.h"
+#include "internal/gtest-port.h"
 
 GTEST_DISABLE_MSC_WARNINGS_PUSH_(4251                                   \
 /* class A needs to have dll-interface to be used by clients of class B */)

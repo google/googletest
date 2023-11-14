@@ -40,7 +40,7 @@
 // or void PrintTo(const Foo&, ::std::ostream*) in the namespace that
 // defines Foo.
 
-#include "gtest/gtest-printers.h"
+#include <gtest/gtest-printers.h>
 
 #include <stdio.h>
 
@@ -53,7 +53,7 @@
 #include <string>
 #include <type_traits>
 
-#include "gtest/internal/gtest-port.h"
+#include <gtest/internal/gtest-port.h>
 #include "gtest-internal-inl.h"
 
 namespace testing {

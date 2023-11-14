@@ -39,7 +39,7 @@
 #ifndef GOOGLETEST_INCLUDE_GTEST_INTERNAL_GTEST_INTERNAL_H_
 #define GOOGLETEST_INCLUDE_GTEST_INTERNAL_GTEST_INTERNAL_H_
 
-#include "gtest/internal/gtest-port.h"
+#include "gtest-port.h"
 
 #ifdef GTEST_OS_LINUX
 #include <stdlib.h>
@@ -66,10 +66,10 @@
 #include <utility>
 #include <vector>
 
-#include "gtest/gtest-message.h"
-#include "gtest/internal/gtest-filepath.h"
-#include "gtest/internal/gtest-string.h"
-#include "gtest/internal/gtest-type-util.h"
+#include <gtest/gtest-message.h>
+#include "gtest-filepath.h"
+#include "gtest-string.h"
+#include "gtest-type-util.h"
 
 // Due to C++ preprocessor weirdness, we need double indirection to
 // concatenate two tokens when one of them is __LINE__.  Writing

@@ -271,10 +271,10 @@
 #include <utility>
 #include <vector>
 
-#include "gmock/internal/gmock-internal-utils.h"
-#include "gmock/internal/gmock-port.h"
-#include "gmock/internal/gmock-pp.h"
-#include "gtest/gtest.h"
+#include "internal/gmock-internal-utils.h"
+#include "internal/gmock-port.h"
+#include "internal/gmock-pp.h"
+#include <gtest/gtest.h>
 
 // MSVC warning C5046 is new as of VS2017 version 15.8.
 #if defined(_MSC_VER) && _MSC_VER >= 1915
