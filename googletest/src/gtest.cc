@@ -1712,13 +1712,19 @@ AssertionResult FloatingPointLE(const char* expr1, const char* expr2,
                                 RawType val1, RawType val2) {
   // Returns success if val1 is less than val2,
   if (val1 < val2) {
-    return AssertionSuccess();
+    return AssertionSuccess()
+    << "Expected: (" << expr1 << ") <= (" << expr2 << ")\n"
+         << "  Actual: " << StringStreamToString(&val1) << " vs "
+         << StringStreamToString(&val2);
   }
 
   // or if val1 is almost equal to val2.
   const FloatingPoint<RawType> lhs(val1), rhs(val2);
   if (lhs.AlmostEquals(rhs)) {
-    return AssertionSuccess();
+    return AssertionSuccess()
+    << "Expected: (" << expr1 << ") <= (" << expr2 << ")\n"
+         << "  Actual: " << StringStreamToString(&lhs(val1)) << " vs "
+         << StringStreamToString(&lhs(val2));
   }
 
   // Note that the above two checks will both fail if either val1 or
