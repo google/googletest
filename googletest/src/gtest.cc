@@ -1768,7 +1768,9 @@ AssertionResult CmpHelperSTREQ(const char* lhs_expression,
                                const char* rhs_expression, const char* lhs,
                                const char* rhs) {
   if (String::CStringEquals(lhs, rhs)) {
-    return AssertionSuccess();
+    // Add output on Success Equals
+    return EqSuccess(lhs_expression, rhs_expression, PrintToString(lhs),
+                   PrintToString(rhs), false);
   }
 
   return EqFailure(lhs_expression, rhs_expression, PrintToString(lhs),
@@ -1780,7 +1782,9 @@ AssertionResult CmpHelperSTRCASEEQ(const char* lhs_expression,
                                    const char* rhs_expression, const char* lhs,
                                    const char* rhs) {
   if (String::CaseInsensitiveCStringEquals(lhs, rhs)) {
-    return AssertionSuccess();
+    // Add output on Success Equals
+    return EqSuccess(lhs_expression, rhs_expression, PrintToString(lhs),
+                   PrintToString(rhs), false);
   }
 
   return EqFailure(lhs_expression, rhs_expression, PrintToString(lhs),
@@ -1792,7 +1796,10 @@ AssertionResult CmpHelperSTRNE(const char* s1_expression,
                                const char* s2_expression, const char* s1,
                                const char* s2) {
   if (!String::CStringEquals(s1, s2)) {
-    return AssertionSuccess();
+    // Add output on Success Equals
+    return AssertionSuccess()
+          << "Expected: (" << s1_expression << ") != (" << s2_expression
+           << "), actual: \"" << s1 << "\" vs \"" << s2 << "\"";
   } else {
     return AssertionFailure()
            << "Expected: (" << s1_expression << ") != (" << s2_expression
@@ -1805,7 +1812,8 @@ AssertionResult CmpHelperSTRCASENE(const char* s1_expression,
                                    const char* s2_expression, const char* s1,
                                    const char* s2) {
   if (!String::CaseInsensitiveCStringEquals(s1, s2)) {
-    return AssertionSuccess();
+    return AssertionSuccess() << "Expected: (" << s1_expression << ") != (" << s2_expression
+           << ") (ignoring case), actual: \"" << s1 << "\" vs \"" << s2 << "\"";;
   } else {
     return AssertionFailure()
            << "Expected: (" << s1_expression << ") != (" << s2_expression
@@ -1852,7 +1860,12 @@ AssertionResult IsSubstringImpl(bool expected_to_be_substring,
                                 const StringType& needle,
                                 const StringType& haystack) {
   if (IsSubstringPred(needle, haystack) == expected_to_be_substring)
-    return AssertionSuccess();
+    return AssertionSuccess()
+         << "Value of: " << needle_expr << "\n"
+         << "  Actual: " << begin_string_quote << needle << "\"\n"
+         << "Expected: " << (expected_to_be_substring ? "" : "not ")
+         << "a substring of " << haystack_expr << "\n"
+         << "Which is: " << begin_string_quote << haystack << "\"";
 
   const bool is_wide_string = sizeof(needle[0]) > 1;
   const char* const begin_string_quote = is_wide_string ? "L\"" : "\"";
@@ -2140,7 +2153,8 @@ AssertionResult CmpHelperSTREQ(const char* lhs_expression,
                                const char* rhs_expression, const wchar_t* lhs,
                                const wchar_t* rhs) {
   if (String::WideCStringEquals(lhs, rhs)) {
-    return AssertionSuccess();
+    return EqSuccess(lhs_expression, rhs_expression, PrintToString(lhs),
+                   PrintToString(rhs), false);
   }
 
   return EqFailure(lhs_expression, rhs_expression, PrintToString(lhs),
@@ -2152,7 +2166,8 @@ AssertionResult CmpHelperSTRNE(const char* s1_expression,
                                const char* s2_expression, const wchar_t* s1,
                                const wchar_t* s2) {
   if (!String::WideCStringEquals(s1, s2)) {
-    return AssertionSuccess();
+    return AssertionSuccess()<< "Expected: (" << s1_expression << ") != (" << s2_expression
+         << "), actual: " << PrintToString(s1) << " vs " << PrintToString(s2);
   }
 
   return AssertionFailure()
