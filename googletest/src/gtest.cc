@@ -4352,6 +4352,17 @@ void XmlUnitTestResultPrinter::OutputXmlTestResult(::std::ostream* stream,
       const std::string detail = location + "\n" + part.message();
       OutputXmlCDataSection(stream, RemoveInvalidXmlCharacters(detail).c_str());
       *stream << "</skipped>\n";
+    } else
+    {
+      const std::string location =
+          internal::FormatCompilerIndependentFileLocation(part.file_name(),
+                                                          part.line_number());
+      const std::string summary = location + "\n" + part.summary();
+      *stream << "      <success message=\"" << EscapeXmlAttribute(summary)
+              << "\" type=\"\">";
+      const std::string detail = location + "\n" + part.message();
+      OutputXmlCDataSection(stream, RemoveInvalidXmlCharacters(detail).c_str());
+      *stream << "</success>\n";
     }
   }
 
