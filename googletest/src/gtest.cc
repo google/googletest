@@ -1710,27 +1710,6 @@ AssertionResult DoubleNearPredFormat(const char* expr1, const char* expr2,
 template <typename RawType>
 AssertionResult FloatingPointLE(const char* expr1, const char* expr2,
                                 RawType val1, RawType val2) {
-  // Returns success if val1 is less than val2,
-  if (val1 < val2) {
-    return AssertionSuccess()
-    << "Expected: (" << expr1 << ") <= (" << expr2 << ")\n"
-         << "  Actual: " << StringStreamToString(&val1) << " vs "
-         << StringStreamToString(&val2);
-  }
-
-  // or if val1 is almost equal to val2.
-  const FloatingPoint<RawType> lhs(val1), rhs(val2);
-  if (lhs.AlmostEquals(rhs)) {
-    return AssertionSuccess()
-    << "Expected: (" << expr1 << ") <= (" << expr2 << ")\n"
-         << "  Actual: " << StringStreamToString(&lhs(val1)) << " vs "
-         << StringStreamToString(&lhs(val2));
-  }
-
-  // Note that the above two checks will both fail if either val1 or
-  // val2 is NaN, as the IEEE floating-point standard requires that
-  // any predicate involving a NaN must return false.
-
   ::std::stringstream val1_ss;
   val1_ss << std::setprecision(std::numeric_limits<RawType>::digits10 + 2)
           << val1;
@@ -1738,6 +1717,27 @@ AssertionResult FloatingPointLE(const char* expr1, const char* expr2,
   ::std::stringstream val2_ss;
   val2_ss << std::setprecision(std::numeric_limits<RawType>::digits10 + 2)
           << val2;
+  // Returns success if val1 is less than val2,
+  if (val1 < val2) {
+    return AssertionSuccess()
+    << "Expected: (" << expr1 << ") <= (" << expr2 << ")\n"
+         << "  Actual: " << StringStreamToString(&val1_ss) << " vs "
+         << StringStreamToString(&val2_ss);
+  }
+
+  // or if val1 is almost equal to val2.
+  const FloatingPoint<RawType> lhs(val1), rhs(val2);
+  if (lhs.AlmostEquals(rhs)) {
+    return AssertionSuccess()
+    << "Expected: (" << expr1 << ") <= (" << expr2 << ")\n"
+         << "  Actual: " << StringStreamToString(&val1_ss) << " vs "
+         << StringStreamToString(&val2_ss);
+  }
+
+  // Note that the above two checks will both fail if either val1 or
+  // val2 is NaN, as the IEEE floating-point standard requires that
+  // any predicate involving a NaN must return false.
+
 
   return AssertionFailure()
          << "Expected: (" << expr1 << ") <= (" << expr2 << ")\n"
@@ -1859,6 +1859,8 @@ AssertionResult IsSubstringImpl(bool expected_to_be_substring,
                                 const char* haystack_expr,
                                 const StringType& needle,
                                 const StringType& haystack) {
+  const bool is_wide_string = sizeof(needle[0]) > 1;
+  const char* const begin_string_quote = is_wide_string ? "L\"" : "\"";
   if (IsSubstringPred(needle, haystack) == expected_to_be_substring)
     return AssertionSuccess()
          << "Value of: " << needle_expr << "\n"
@@ -1867,8 +1869,6 @@ AssertionResult IsSubstringImpl(bool expected_to_be_substring,
          << "a substring of " << haystack_expr << "\n"
          << "Which is: " << begin_string_quote << haystack << "\"";
 
-  const bool is_wide_string = sizeof(needle[0]) > 1;
-  const char* const begin_string_quote = is_wide_string ? "L\"" : "\"";
   return AssertionFailure()
          << "Value of: " << needle_expr << "\n"
          << "  Actual: " << begin_string_quote << needle << "\"\n"
