@@ -94,7 +94,8 @@ Instantiates the value-parameterized test suite *`TestSuiteName`* (defined with
 The argument *`InstantiationName`* is a unique name for the instantiation of the
 test suite, to distinguish between multiple instantiations. In test output, the
 instantiation name is added as a prefix to the test suite name
-*`TestSuiteName`*.
+*`TestSuiteName`*. If *`InstantiationName`* is empty
+(`INSTANTIATE_TEST_SUITE_P(, ...)`), no prefix is added.
 
 The argument *`param_generator`* is one of the following GoogleTest-provided
 functions that generate the test parameters, all defined in the `::testing`
@@ -277,7 +278,8 @@ must be registered with
 The argument *`InstantiationName`* is a unique name for the instantiation of the
 test suite, to distinguish between multiple instantiations. In test output, the
 instantiation name is added as a prefix to the test suite name
-*`TestSuiteName`*.
+*`TestSuiteName`*. If *`InstantiationName`* is empty
+(`INSTANTIATE_TYPED_TEST_SUITE_P(, ...)`), no prefix is added.
 
 The argument *`Types`* is a [`Types`](#Types) object representing the list of
 types to run the tests on, for example:
