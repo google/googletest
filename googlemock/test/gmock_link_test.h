@@ -187,6 +187,7 @@ using testing::SetErrnoAndReturn;
 
 #if GTEST_HAS_EXCEPTIONS
 using testing::Throw;
+using testing::Rethrow;
 #endif
 
 using testing::ContainsRegex;
@@ -414,6 +415,14 @@ TEST(LinkTest, TestThrow) {
   Mock mock;
 
   EXPECT_CALL(mock, VoidFromString(_)).WillOnce(Throw(42));
+  EXPECT_THROW(mock.VoidFromString(nullptr), int);
+}
+// Tests the linkage of the Rethrow action.
+TEST(LinkTest, TestRethrow) {
+  Mock mock;
+
+  EXPECT_CALL(mock, VoidFromString(_))
+      .WillOnce(Rethrow(std::make_exception_ptr(42)));
   EXPECT_THROW(mock.VoidFromString(nullptr), int);
 }
 #endif  // GTEST_HAS_EXCEPTIONS

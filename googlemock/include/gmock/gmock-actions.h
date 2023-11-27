@@ -135,6 +135,7 @@
 #endif
 
 #include <algorithm>
+#include <exception>
 #include <functional>
 #include <memory>
 #include <string>
@@ -1746,6 +1747,13 @@ struct ThrowAction {
     return [copy](Args...) -> R { throw copy; };
   }
 };
+struct RethrowAction {
+  std::exception_ptr exception;
+  template <typename R, typename... Args>
+  operator Action<R(Args...)>() const {  // NOLINT
+    return [ex = exception](Args...) -> R { std::rethrow_exception(ex); };
+  }
+};
 #endif  // GTEST_HAS_EXCEPTIONS
 
 }  // namespace internal
@@ -2062,12 +2070,22 @@ internal::ReturnPointeeAction<Ptr> ReturnPointee(Ptr pointer) {
   return {pointer};
 }
 
-// Action Throw(exception) can be used in a mock function of any type
-// to throw the given exception.  Any copyable value can be thrown.
 #if GTEST_HAS_EXCEPTIONS
+// Action Throw(exception) can be used in a mock function of any type
+// to throw the given exception.  Any copyable value can be thrown,
+// except for std::exception_ptr, which is likely a mistake if
+// thrown directly.
 template <typename T>
-internal::ThrowAction<typename std::decay<T>::type> Throw(T&& exception) {
+typename std::enable_if<
+    !std::is_base_of<std::exception_ptr, typename std::decay<T>::type>::value,
+    internal::ThrowAction<typename std::decay<T>::type>>::type
+Throw(T&& exception) {
   return {std::forward<T>(exception)};
+}
+// Action Rethrow(exception_ptr) can be used in a mock function of any type
+// to rethrow any exception_ptr. Note that the same object is thrown each time.
+inline internal::RethrowAction Rethrow(std::exception_ptr exception) {
+  return {std::move(exception)};
 }
 #endif  // GTEST_HAS_EXCEPTIONS
 
