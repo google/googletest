@@ -247,7 +247,9 @@ function(cxx_executable name dir libs)
     ${name} "${cxx_default}" "${libs}" "${dir}/${name}.cc" ${ARGN})
 endfunction()
 
-find_package(Python3)
+if(gtest_build_tests)
+  find_package(Python3)
+endif()
 
 # cxx_test_with_flags(name cxx_flags libs srcs...)
 #
