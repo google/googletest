@@ -79,11 +79,7 @@
 //   GTEST_HAS_PTHREAD        - Define it to 1/0 to indicate that <pthread.h>
 //                              is/isn't available.
 //   GTEST_HAS_RGT            - Define it to 1/0 to indicate that Rotten Green
-//                              Test detection is/isn't enabled. On by default
-//                              except for GCC older than 8.0, which cannot
-//                              support RGT inside lambdas. If the client does
-//                              not use Google Test macros inside lambdas, this
-//                              can be set in custom/gtest-port.h.
+//                              Test detection is/isn't enabled. On by default.
 //   GTEST_DEFAULT_RGT_PASS   - The default for --gtest_treat_rotten_as_pass.
 //                              Set true here so existing test suites don't fail
 //                              en masse. The recommended value is false and can
