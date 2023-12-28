@@ -606,7 +606,7 @@ struct InvokeArgumentAction {
     internal::FlatTuple<Args &&...> args_tuple(FlatTupleConstructTag{},
                                                std::forward<Args>(args)...);
     return params.Apply([&](const Params &...unpacked_params) {
-      auto &&callable = args_tuple.template Get<index>();
+      auto &&callable = std::move(args_tuple.template Get<index>());
       return internal::InvokeArgument(
           std::forward<decltype(callable)>(callable), unpacked_params...);
     });
