@@ -1006,9 +1006,12 @@ Environment* AddGlobalTestEnvironment(Environment* env);
 
 Now, when `RUN_ALL_TESTS()` is called, it first calls the `SetUp()` method of
 each environment object, then runs the tests if none of the environments
-reported fatal failures and `GTEST_SKIP()` was not called. `RUN_ALL_TESTS()`
-always calls `TearDown()` with each environment object, regardless of whether or
-not the tests were run.
+reported fatal failures and `GTEST_SKIP()` was not called. 
+
+RUN_ALL_TESTS() calls TearDown() for each environment object when they are recreated
+for each iteration. However, if the test environments are not recreated for each iteration,
+TearDown() is called only on the last iteration.
+Additionally, TearDown() is executed regardless of whether the tests were run or not.
 
 It's OK to register multiple environment objects. In this suite, their `SetUp()`
 will be called in the order they are registered, and their `TearDown()` will be
