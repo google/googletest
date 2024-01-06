@@ -27,7 +27,6 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
 // This program is meant to be run by gtest_help_test.py.  Do not run
 // it directly.
 
@@ -40,6 +39,6 @@ TEST(HelpFlagTest, ShouldNotBeRun) {
   ASSERT_TRUE(false) << "Tests shouldn't be run when --help is specified.";
 }
 
-#if GTEST_HAS_DEATH_TEST
+#ifdef GTEST_HAS_DEATH_TEST
 TEST(DeathTest, UsedByPythonScriptToDetectSupportForDeathTestsInThisBinary) {}
 #endif

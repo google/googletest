@@ -30,15 +30,38 @@
 #
 #   Bazel Build for Google C++ Testing Framework(Google Test)
 
-load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
-
 package(default_visibility = ["//visibility:public"])
 
 licenses(["notice"])
 
+exports_files(["LICENSE"])
+
+config_setting(
+    name = "qnx",
+    constraint_values = ["@platforms//os:qnx"],
+)
+
 config_setting(
     name = "windows",
-    constraint_values = ["@bazel_tools//platforms:windows"],
+    constraint_values = ["@platforms//os:windows"],
+)
+
+config_setting(
+    name = "freebsd",
+    constraint_values = ["@platforms//os:freebsd"],
+)
+
+config_setting(
+    name = "openbsd",
+    constraint_values = ["@platforms//os:openbsd"],
+)
+
+config_setting(
+    name = "msvc_compiler",
+    flag_values = {
+        "@bazel_tools//tools/cpp:compiler": "msvc-cl",
+    },
+    visibility = [":__subpackages__"],
 )
 
 config_setting(
@@ -76,6 +99,7 @@ cc_library(
         "googlemock/include/gmock/*.h",
     ]),
     copts = select({
+        ":qnx": [],
         ":windows": [],
         "//conditions:default": ["-pthread"],
     }),
@@ -94,17 +118,33 @@ cc_library(
         "googletest/include",
     ],
     linkopts = select({
+        ":qnx": ["-lregex"],
         ":windows": [],
+        ":freebsd": [
+            "-lm",
+            "-pthread",
+        ],
+        ":openbsd": [
+            "-lm",
+            "-pthread",
+        ],
         "//conditions:default": ["-pthread"],
     }),
     deps = select({
         ":has_absl": [
+            "@com_google_absl//absl/container:flat_hash_set",
             "@com_google_absl//absl/debugging:failure_signal_handler",
             "@com_google_absl//absl/debugging:stacktrace",
             "@com_google_absl//absl/debugging:symbolize",
+            "@com_google_absl//absl/flags:flag",
+            "@com_google_absl//absl/flags:parse",
+            "@com_google_absl//absl/flags:reflection",
+            "@com_google_absl//absl/flags:usage",
             "@com_google_absl//absl/strings",
+            "@com_google_absl//absl/types:any",
             "@com_google_absl//absl/types:optional",
             "@com_google_absl//absl/types:variant",
+            "@com_googlesource_code_re2//:re2",
         ],
         "//conditions:default": [],
     }),

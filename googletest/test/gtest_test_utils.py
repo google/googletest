@@ -29,9 +29,10 @@
 
 """Unit test utilities for Google C++ Testing and Mocking Framework."""
 # Suppresses the 'Import not at the top of the file' lint complaint.
-# pylint: disable-msg=C6204
+# pylint: disable=g-import-not-at-top
 
 import os
+import subprocess
 import sys
 
 IS_WINDOWS = os.name == 'nt'
@@ -42,14 +43,7 @@ import atexit
 import shutil
 import tempfile
 import unittest as _test_module
-
-try:
-  import subprocess
-  _SUBPROCESS_MODULE_AVAILABLE = True
-except:
-  import popen2
-  _SUBPROCESS_MODULE_AVAILABLE = False
-# pylint: enable-msg=C6204
+# pylint: enable=g-import-not-at-top
 
 GTEST_OUTPUT_VAR_NAME = 'GTEST_OUTPUT'
 
@@ -69,23 +63,22 @@ def SetEnvVar(env_var, value):
 
 
 # Here we expose a class from a particular module, depending on the
-# environment. The comment suppresses the 'Invalid variable name' lint
-# complaint.
-TestCase = _test_module.TestCase  # pylint: disable=C6409
+# environment.
+TestCase = _test_module.TestCase
 
 # Initially maps a flag to its default value. After
 # _ParseAndStripGTestFlags() is called, maps a flag to its actual value.
-_flag_map = {'source_dir': os.path.dirname(sys.argv[0]),
-             'build_dir': os.path.dirname(sys.argv[0])}
+_flag_map = {
+    'source_dir': os.path.dirname(sys.argv[0]),
+    'build_dir': os.path.dirname(sys.argv[0]),
+}
 _gtest_flags_are_parsed = False
 
 
 def _ParseAndStripGTestFlags(argv):
   """Parses and strips Google Test flags from argv.  This is idempotent."""
 
-  # Suppresses the lint complaint about a global variable since we need it
-  # here to maintain module-wide state.
-  global _gtest_flags_are_parsed  # pylint: disable=W0603
+  global _gtest_flags_are_parsed
   if _gtest_flags_are_parsed:
     return
 
@@ -100,7 +93,7 @@ def _ParseAndStripGTestFlags(argv):
     while i < len(argv):
       prefix = '--' + flag + '='
       if argv[i].startswith(prefix):
-        _flag_map[flag] = argv[i][len(prefix):]
+        _flag_map[flag] = argv[i][len(prefix) :]
         del argv[i]
         break
       else:
@@ -156,15 +149,16 @@ def GetTestExecutablePath(executable_name, build_dir=None):
 
   Args:
     executable_name: name of the test binary that the test script runs.
-    build_dir:       directory where to look for executables, by default
-                     the result of GetBuildDir().
+    build_dir:       directory where to look for executables, by default the
+      result of GetBuildDir().
 
   Returns:
     The absolute path of the test binary.
   """
 
-  path = os.path.abspath(os.path.join(build_dir or GetBuildDir(),
-                                      executable_name))
+  path = os.path.abspath(
+      os.path.join(build_dir or GetBuildDir(), executable_name)
+  )
   if (IS_WINDOWS or IS_CYGWIN or IS_OS2) and not path.endswith('.exe'):
     path += '.exe'
 
@@ -172,8 +166,9 @@ def GetTestExecutablePath(executable_name, build_dir=None):
     message = (
         'Unable to find the test binary "%s". Please make sure to provide\n'
         'a path to the binary via the --build_dir flag or the BUILD_DIR\n'
-        'environment variable.' % path)
-    print >> sys.stderr, message
+        'environment variable.' % path
+    )
+    print(message, file=sys.stderr)
     sys.exit(1)
 
   return path
@@ -200,6 +195,7 @@ def GetExitStatus(exit_code):
 
 
 class Subprocess:
+
   def __init__(self, command, working_dir=None, capture_stderr=True, env=None):
     """Changes into a specified directory, if provided, and executes a command.
 
@@ -209,7 +205,7 @@ class Subprocess:
       command:        The command to run, in the form of sys.argv.
       working_dir:    The directory to change into.
       capture_stderr: Determines whether to capture stderr in the output member
-                      or to discard it.
+        or to discard it.
       env:            Dictionary with environment to pass to the subprocess.
 
     Returns:
@@ -217,7 +213,6 @@ class Subprocess:
       following attributes:
         terminated_by_signal   True if and only if the child process has been
                                terminated by a signal.
-        signal                 Sygnal that terminated the child process.
         exited                 True if and only if the child process exited
                                normally.
         exit_code              The code with which the child process exited.
@@ -225,74 +220,27 @@ class Subprocess:
                                combined in a string.
     """
 
-    # The subprocess module is the preferrable way of running programs
-    # since it is available and behaves consistently on all platforms,
-    # including Windows. But it is only available starting in python 2.4.
-    # In earlier python versions, we revert to the popen2 module, which is
-    # available in python 2.0 and later but doesn't provide required
-    # functionality (Popen4) under Windows. This allows us to support Mac
-    # OS X 10.4 Tiger, which has python 2.3 installed.
-    if _SUBPROCESS_MODULE_AVAILABLE:
-      if capture_stderr:
-        stderr = subprocess.STDOUT
-      else:
-        stderr = subprocess.PIPE
-
-      p = subprocess.Popen(command,
-                           stdout=subprocess.PIPE, stderr=stderr,
-                           cwd=working_dir, universal_newlines=True, env=env)
-      # communicate returns a tuple with the file object for the child's
-      # output.
-      self.output = p.communicate()[0]
-      self._return_code = p.returncode
+    if capture_stderr:
+      stderr = subprocess.STDOUT
     else:
-      old_dir = os.getcwd()
+      stderr = subprocess.PIPE
 
-      def _ReplaceEnvDict(dest, src):
-        # Changes made by os.environ.clear are not inheritable by child
-        # processes until Python 2.6. To produce inheritable changes we have
-        # to delete environment items with the del statement.
-        for key in dest.keys():
-          del dest[key]
-        dest.update(src)
+    p = subprocess.Popen(
+        command,
+        stdout=subprocess.PIPE,
+        stderr=stderr,
+        cwd=working_dir,
+        universal_newlines=True,
+        env=env,
+    )
+    # communicate returns a tuple with the file object for the child's
+    # output.
+    self.output = p.communicate()[0]
+    self._return_code = p.returncode
 
-      # When 'env' is not None, backup the environment variables and replace
-      # them with the passed 'env'. When 'env' is None, we simply use the
-      # current 'os.environ' for compatibility with the subprocess.Popen
-      # semantics used above.
-      if env is not None:
-        old_environ = os.environ.copy()
-        _ReplaceEnvDict(os.environ, env)
-
-      try:
-        if working_dir is not None:
-          os.chdir(working_dir)
-        if capture_stderr:
-          p = popen2.Popen4(command)
-        else:
-          p = popen2.Popen3(command)
-        p.tochild.close()
-        self.output = p.fromchild.read()
-        ret_code = p.wait()
-      finally:
-        os.chdir(old_dir)
-
-        # Restore the old environment variables
-        # if they were replaced.
-        if env is not None:
-          _ReplaceEnvDict(os.environ, old_environ)
-
-      # Converts ret_code to match the semantics of
-      # subprocess.Popen.returncode.
-      if os.WIFSIGNALED(ret_code):
-        self._return_code = -os.WTERMSIG(ret_code)
-      else:  # os.WIFEXITED(ret_code) should return True here.
-        self._return_code = os.WEXITSTATUS(ret_code)
-
-    if self._return_code < 0:
+    if bool(self._return_code & 0x80000000):
       self.terminated_by_signal = True
       self.exited = False
-      self.signal = -self._return_code
     else:
       self.terminated_by_signal = False
       self.exited = True

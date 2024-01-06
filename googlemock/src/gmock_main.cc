@@ -27,13 +27,14 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
 #include <iostream>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-#if GTEST_OS_ESP8266 || GTEST_OS_ESP32
-#if GTEST_OS_ESP8266
+#if defined(GTEST_OS_ESP8266) || defined(GTEST_OS_ESP32) || \
+    (defined(GTEST_OS_NRF52) && defined(ARDUINO))
+#ifdef GTEST_OS_ESP8266
 extern "C" {
 #endif
 void setup() {
@@ -43,7 +44,7 @@ void setup() {
   testing::InitGoogleMock();
 }
 void loop() { RUN_ALL_TESTS(); }
-#if GTEST_OS_ESP8266
+#ifdef GTEST_OS_ESP8266
 }
 #endif
 
@@ -55,8 +56,8 @@ void loop() { RUN_ALL_TESTS(); }
 // Windows. See the following link to track the current status of this bug:
 // https://web.archive.org/web/20170912203238/connect.microsoft.com/VisualStudio/feedback/details/394464/wmain-link-error-in-the-static-library
 // // NOLINT
-#if GTEST_OS_WINDOWS_MOBILE
-# include <tchar.h>  // NOLINT
+#ifdef GTEST_OS_WINDOWS_MOBILE
+#include <tchar.h>  // NOLINT
 
 GTEST_API_ int _tmain(int argc, TCHAR** argv) {
 #else

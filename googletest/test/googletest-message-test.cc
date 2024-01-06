@@ -30,13 +30,31 @@
 //
 // Tests for the Message class.
 
-#include "gtest/gtest-message.h"
+#include <sstream>
+#include <string>
 
+#include "gtest/gtest-message.h"
 #include "gtest/gtest.h"
+
+#ifdef GTEST_HAS_ABSL
+#include "absl/strings/str_format.h"
+#endif  // GTEST_HAS_ABSL
 
 namespace {
 
 using ::testing::Message;
+
+#ifdef GTEST_HAS_ABSL
+struct AbslStringifiablePoint {
+  template <typename Sink>
+  friend void AbslStringify(Sink& sink, const AbslStringifiablePoint& p) {
+    absl::Format(&sink, "(%d, %d)", p.x, p.y);
+  }
+
+  int x;
+  int y;
+};
+#endif  // GTEST_HAS_ABSL
 
 // Tests the testing::Message class
 
@@ -69,8 +87,9 @@ TEST(MessageTest, StreamsFloat) {
 
 // Tests streaming a double.
 TEST(MessageTest, StreamsDouble) {
-  const std::string s = (Message() << 1260570880.4555497 << " "
-                                  << 1260572265.1954534).GetString();
+  const std::string s =
+      (Message() << 1260570880.4555497 << " " << 1260572265.1954534)
+          .GetString();
   // Both numbers should be printed with enough precision.
   EXPECT_PRED_FORMAT2(testing::IsSubstring, "1260570880.45", s.c_str());
   EXPECT_PRED_FORMAT2(testing::IsSubstring, " 1260572265.19", s.c_str());
@@ -108,8 +127,7 @@ TEST(MessageTest, StreamsString) {
 
 // Tests that we can output strings containing embedded NULs.
 TEST(MessageTest, StreamsStringWithEmbeddedNUL) {
-  const char char_array_with_nul[] =
-      "Here's a NUL\0 and some more string";
+  const char char_array_with_nul[] = "Here's a NUL\0 and some more string";
   const ::std::string string_with_nul(char_array_with_nul,
                                       sizeof(char_array_with_nul) - 1);
   EXPECT_EQ("Here's a NUL\\0 and some more string",
@@ -126,13 +144,21 @@ TEST(MessageTest, StreamsInt) {
   EXPECT_EQ("123", (Message() << 123).GetString());
 }
 
+#ifdef GTEST_HAS_ABSL
+// Tests streaming a type with an AbslStringify definition.
+TEST(MessageTest, StreamsAbslStringify) {
+  EXPECT_EQ("(1, 2)", (Message() << AbslStringifiablePoint{1, 2}).GetString());
+}
+#endif  // GTEST_HAS_ABSL
+
 // Tests that basic IO manipulators (endl, ends, and flush) can be
 // streamed to Message.
 TEST(MessageTest, StreamsBasicIoManip) {
-  EXPECT_EQ("Line 1.\nA NUL char \\0 in line 2.",
-               (Message() << "Line 1." << std::endl
-                         << "A NUL char " << std::ends << std::flush
-                         << " in line 2.").GetString());
+  EXPECT_EQ(
+      "Line 1.\nA NUL char \\0 in line 2.",
+      (Message() << "Line 1." << std::endl
+                 << "A NUL char " << std::ends << std::flush << " in line 2.")
+          .GetString());
 }
 
 // Tests Message::GetString()

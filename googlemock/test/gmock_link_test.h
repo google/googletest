@@ -27,7 +27,6 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
 // Google Mock - a framework for writing C++ mock classes.
 //
 // This file tests that:
@@ -112,13 +111,13 @@
 // is defined as LinkTest1 in gmock_link_test.cc and as LinkTest2 in
 // gmock_link2_test.cc to avoid producing linker errors.
 
-#ifndef GMOCK_TEST_GMOCK_LINK_TEST_H_
-#define GMOCK_TEST_GMOCK_LINK_TEST_H_
+#ifndef GOOGLEMOCK_TEST_GMOCK_LINK_TEST_H_
+#define GOOGLEMOCK_TEST_GMOCK_LINK_TEST_H_
 
 #include "gmock/gmock.h"
 
-#if !GTEST_OS_WINDOWS_MOBILE
-# include <errno.h>
+#ifndef GTEST_OS_WINDOWS_MOBILE
+#include <errno.h>
 #endif
 
 #include <iostream>
@@ -182,12 +181,13 @@ using testing::WithArg;
 using testing::WithArgs;
 using testing::WithoutArgs;
 
-#if !GTEST_OS_WINDOWS_MOBILE
+#ifndef GTEST_OS_WINDOWS_MOBILE
 using testing::SetErrnoAndReturn;
 #endif
 
 #if GTEST_HAS_EXCEPTIONS
 using testing::Throw;
+using testing::Rethrow;
 #endif
 
 using testing::ContainsRegex;
@@ -195,34 +195,35 @@ using testing::MatchesRegex;
 
 class Interface {
  public:
-  virtual ~Interface() {}
+  virtual ~Interface() = default;
   virtual void VoidFromString(char* str) = 0;
   virtual char* StringFromString(char* str) = 0;
   virtual int IntFromString(char* str) = 0;
   virtual int& IntRefFromString(char* str) = 0;
-  virtual void VoidFromFunc(void(*func)(char* str)) = 0;
+  virtual void VoidFromFunc(void (*func)(char* str)) = 0;
   virtual void VoidFromIntRef(int& n) = 0;  // NOLINT
   virtual void VoidFromFloat(float n) = 0;
   virtual void VoidFromDouble(double n) = 0;
   virtual void VoidFromVector(const std::vector<int>& v) = 0;
 };
 
-class Mock: public Interface {
+class Mock : public Interface {
  public:
-  Mock() {}
+  Mock() = default;
 
   MOCK_METHOD1(VoidFromString, void(char* str));
   MOCK_METHOD1(StringFromString, char*(char* str));
   MOCK_METHOD1(IntFromString, int(char* str));
   MOCK_METHOD1(IntRefFromString, int&(char* str));
-  MOCK_METHOD1(VoidFromFunc, void(void(*func)(char* str)));
+  MOCK_METHOD1(VoidFromFunc, void(void (*func)(char* str)));
   MOCK_METHOD1(VoidFromIntRef, void(int& n));  // NOLINT
   MOCK_METHOD1(VoidFromFloat, void(float n));
   MOCK_METHOD1(VoidFromDouble, void(double n));
   MOCK_METHOD1(VoidFromVector, void(const std::vector<int>& v));
 
  private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(Mock);
+  Mock(const Mock&) = delete;
+  Mock& operator=(const Mock&) = delete;
 };
 
 class InvokeHelper {
@@ -301,12 +302,12 @@ TEST(LinkTest, TestSetArrayArgument) {
   char ch = 'x';
   char ch2 = 'y';
 
-  EXPECT_CALL(mock, VoidFromString(_)).WillOnce(SetArrayArgument<0>(&ch2,
-                                                                    &ch2 + 1));
+  EXPECT_CALL(mock, VoidFromString(_))
+      .WillOnce(SetArrayArgument<0>(&ch2, &ch2 + 1));
   mock.VoidFromString(&ch);
 }
 
-#if !GTEST_OS_WINDOWS_MOBILE
+#ifndef GTEST_OS_WINDOWS_MOBILE
 
 // Tests the linkage of the SetErrnoAndReturn action.
 TEST(LinkTest, TestSetErrnoAndReturn) {
@@ -339,8 +340,8 @@ TEST(LinkTest, TestInvokeWithoutArgs) {
 
   EXPECT_CALL(mock, VoidFromString(_))
       .WillOnce(InvokeWithoutArgs(&InvokeHelper::StaticVoidFromVoid))
-      .WillOnce(InvokeWithoutArgs(&test_invoke_helper,
-                                  &InvokeHelper::VoidFromVoid));
+      .WillOnce(
+          InvokeWithoutArgs(&test_invoke_helper, &InvokeHelper::VoidFromVoid));
   mock.VoidFromString(nullptr);
   mock.VoidFromString(nullptr);
 }
@@ -416,6 +417,14 @@ TEST(LinkTest, TestThrow) {
   EXPECT_CALL(mock, VoidFromString(_)).WillOnce(Throw(42));
   EXPECT_THROW(mock.VoidFromString(nullptr), int);
 }
+// Tests the linkage of the Rethrow action.
+TEST(LinkTest, TestRethrow) {
+  Mock mock;
+
+  EXPECT_CALL(mock, VoidFromString(_))
+      .WillOnce(Rethrow(std::make_exception_ptr(42)));
+  EXPECT_THROW(mock.VoidFromString(nullptr), int);
+}
 #endif  // GTEST_HAS_EXCEPTIONS
 
 // The ACTION*() macros trigger warning C4100 (unreferenced formal
@@ -423,15 +432,12 @@ TEST(LinkTest, TestThrow) {
 // the macro definition, as the warnings are generated when the macro
 // is expanded and macro expansion cannot contain #pragma.  Therefore
 // we suppress them here.
-#ifdef _MSC_VER
-# pragma warning(push)
-# pragma warning(disable:4100)
-#endif
+GTEST_DISABLE_MSC_WARNINGS_PUSH_(4100)
 
 // Tests the linkage of actions created using ACTION macro.
 namespace {
 ACTION(Return1) { return 1; }
-}
+}  // namespace
 
 TEST(LinkTest, TestActionMacro) {
   Mock mock;
@@ -443,7 +449,7 @@ TEST(LinkTest, TestActionMacro) {
 // Tests the linkage of actions created using ACTION_P macro.
 namespace {
 ACTION_P(ReturnArgument, ret_value) { return ret_value; }
-}
+}  // namespace
 
 TEST(LinkTest, TestActionPMacro) {
   Mock mock;
@@ -457,11 +463,9 @@ namespace {
 ACTION_P2(ReturnEqualsEitherOf, first, second) {
   return arg0 == first || arg0 == second;
 }
-}
+}  // namespace
 
-#ifdef _MSC_VER
-# pragma warning(pop)
-#endif
+GTEST_DISABLE_MSC_WARNINGS_POP_()  // 4100
 
 TEST(LinkTest, TestActionP2Macro) {
   Mock mock;
@@ -492,8 +496,7 @@ TEST(LinkTest, TestMatchersEq) {
   const char* p = "x";
 
   ON_CALL(mock, VoidFromString(Eq(p))).WillByDefault(Return());
-  ON_CALL(mock, VoidFromString(const_cast<char*>("y")))
-      .WillByDefault(Return());
+  ON_CALL(mock, VoidFromString(const_cast<char*>("y"))).WillByDefault(Return());
 }
 
 // Tests the linkage of the Lt, Gt, Le, Ge, and Ne matchers.
@@ -592,7 +595,7 @@ TEST(LinkTest, TestMatcherElementsAre) {
 // Tests the linkage of the ElementsAreArray matcher.
 TEST(LinkTest, TestMatcherElementsAreArray) {
   Mock mock;
-  char arr[] = { 'a', 'b' };
+  char arr[] = {'a', 'b'};
 
   ON_CALL(mock, VoidFromVector(ElementsAreArray(arr))).WillByDefault(Return());
 }
@@ -687,4 +690,4 @@ TEST(LinkTest, TestMatcherCast) {
   EXPECT_TRUE(m.Matches(nullptr));
 }
 
-#endif  // GMOCK_TEST_GMOCK_LINK_TEST_H_
+#endif  // GOOGLEMOCK_TEST_GMOCK_LINK_TEST_H_

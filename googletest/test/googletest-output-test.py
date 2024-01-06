@@ -42,7 +42,7 @@ import difflib
 import os
 import re
 import sys
-import gtest_test_utils
+from googletest.test import gtest_test_utils
 
 
 # The flag for generating the golden file
@@ -63,20 +63,32 @@ PROGRAM_PATH = gtest_test_utils.GetTestExecutablePath('googletest-output-test_')
 # 'internal_skip_environment_and_ad_hoc_tests' argument.
 COMMAND_LIST_TESTS = ({}, [PROGRAM_PATH, '--gtest_list_tests'])
 COMMAND_WITH_COLOR = ({}, [PROGRAM_PATH, '--gtest_color=yes'])
-COMMAND_WITH_TIME = ({}, [PROGRAM_PATH,
-                          '--gtest_print_time',
-                          'internal_skip_environment_and_ad_hoc_tests',
-                          '--gtest_filter=FatalFailureTest.*:LoggingTest.*'])
+COMMAND_WITH_TIME = (
+    {},
+    [
+        PROGRAM_PATH,
+        '--gtest_print_time',
+        'internal_skip_environment_and_ad_hoc_tests',
+        '--gtest_filter=FatalFailureTest.*:LoggingTest.*',
+    ],
+)
 COMMAND_WITH_DISABLED = (
-    {}, [PROGRAM_PATH,
-         '--gtest_also_run_disabled_tests',
-         'internal_skip_environment_and_ad_hoc_tests',
-         '--gtest_filter=*DISABLED_*'])
+    {},
+    [
+        PROGRAM_PATH,
+        '--gtest_also_run_disabled_tests',
+        'internal_skip_environment_and_ad_hoc_tests',
+        '--gtest_filter=*DISABLED_*',
+    ],
+)
 COMMAND_WITH_SHARDING = (
     {'GTEST_SHARD_INDEX': '1', 'GTEST_TOTAL_SHARDS': '2'},
-    [PROGRAM_PATH,
-     'internal_skip_environment_and_ad_hoc_tests',
-     '--gtest_filter=PassingTest.*'])
+    [
+        PROGRAM_PATH,
+        'internal_skip_environment_and_ad_hoc_tests',
+        '--gtest_filter=PassingTest.*',
+    ],
+)
 
 GOLDEN_PATH = os.path.join(gtest_test_utils.GetSourceDir(), GOLDEN_NAME)
 
@@ -100,23 +112,27 @@ def RemoveLocations(test_output):
        'FILE_NAME:#: '.
   """
 
-  return re.sub(r'.*[/\\]((googletest-output-test_|gtest).cc)(\:\d+|\(\d+\))\: ',
-                r'\1:#: ', test_output)
+  return re.sub(
+      r'.*[/\\]((googletest-output-test_|gtest).cc)(\:\d+|\(\d+\))\: ',
+      r'\1:#: ',
+      test_output,
+  )
 
 
 def RemoveStackTraceDetails(output):
   """Removes all stack traces from a Google Test program's output."""
 
   # *? means "find the shortest string that matches".
-  return re.sub(r'Stack trace:(.|\n)*?\n\n',
-                'Stack trace: (omitted)\n\n', output)
+  return re.sub(
+      r'Stack trace:(.|\n)*?\n\n', 'Stack trace: (omitted)\n\n', output
+  )
 
 
 def RemoveStackTraces(output):
   """Removes all traces of stack traces from a Google Test program's output."""
 
   # *? means "find the shortest string that matches".
-  return re.sub(r'Stack trace:(.|\n)*?\n\n', '', output)
+  return re.sub(r'Stack trace:(.|\n)*?\n', '', output)
 
 
 def RemoveTime(output):
@@ -156,14 +172,12 @@ def NormalizeToCurrentPlatform(test_output):
 def RemoveTestCounts(output):
   """Removes test counts from a Google Test program's output."""
 
-  output = re.sub(r'\d+ tests?, listed below',
-                  '? tests, listed below', output)
-  output = re.sub(r'\d+ FAILED TESTS',
-                  '? FAILED TESTS', output)
-  output = re.sub(r'\d+ tests? from \d+ test cases?',
-                  '? tests from ? test cases', output)
-  output = re.sub(r'\d+ tests? from ([a-zA-Z_])',
-                  r'? tests from \1', output)
+  output = re.sub(r'\d+ tests?, listed below', '? tests, listed below', output)
+  output = re.sub(r'\d+ FAILED TESTS', '? FAILED TESTS', output)
+  output = re.sub(
+      r'\d+ tests? from \d+ test cases?', '? tests from ? test cases', output
+  )
+  output = re.sub(r'\d+ tests? from ([a-zA-Z_])', r'? tests from \1', output)
   return re.sub(r'\d+ tests?\.', '? tests.', output)
 
 
@@ -175,18 +189,19 @@ def RemoveMatchingTests(test_output, pattern):
 
   Args:
     test_output:       A string containing the test output.
-    pattern:           A regex string that matches names of test cases or
-                       tests to remove.
+    pattern:           A regex string that matches names of test cases or tests
+      to remove.
 
   Returns:
     Contents of test_output with tests whose names match pattern removed.
   """
 
   test_output = re.sub(
-      r'.*\[ RUN      \] .*%s(.|\n)*?\[(  FAILED  |       OK )\] .*%s.*\n' % (
-          pattern, pattern),
+      r'.*\[ RUN      \] .*%s(.|\n)*?\[(  FAILED  |       OK )\] .*%s.*\n'
+      % (pattern, pattern),
       '',
-      test_output)
+      test_output,
+  )
   return re.sub(r'.*%s.*\n' % pattern, '', test_output)
 
 
@@ -205,8 +220,8 @@ def GetShellCommandOutput(env_cmd):
 
   Args:
     env_cmd: The shell command. A 2-tuple where element 0 is a dict of extra
-             environment variables to set, and element 1 is a string with
-             the command and any flags.
+      environment variables to set, and element 1 is a string with the command
+      and any flags.
 
   Returns:
     A string with the command's combined standard and diagnostic output.
@@ -222,13 +237,16 @@ def GetShellCommandOutput(env_cmd):
 
 
 def GetCommandOutput(env_cmd):
-  """Runs a command and returns its output with all file location
-  info stripped off.
+  """Runs a command and returns output with all file location info stripped off.
 
   Args:
     env_cmd:  The shell command. A 2-tuple where element 0 is a dict of extra
-              environment variables to set, and element 1 is a string with
-              the command and any flags.
+      environment variables to set, and element 1 is a string with the command
+      and any flags.
+
+  Returns:
+    A string with the command's combined standard and diagnostic output. File
+    location info is stripped.
   """
 
   # Disables exception pop-ups on Windows.
@@ -241,10 +259,12 @@ def GetCommandOutput(env_cmd):
 def GetOutputOfAllCommands():
   """Returns concatenated output from several representative commands."""
 
-  return (GetCommandOutput(COMMAND_WITH_COLOR) +
-          GetCommandOutput(COMMAND_WITH_TIME) +
-          GetCommandOutput(COMMAND_WITH_DISABLED) +
-          GetCommandOutput(COMMAND_WITH_SHARDING))
+  return (
+      GetCommandOutput(COMMAND_WITH_COLOR)
+      + GetCommandOutput(COMMAND_WITH_TIME)
+      + GetCommandOutput(COMMAND_WITH_DISABLED)
+      + GetCommandOutput(COMMAND_WITH_SHARDING)
+  )
 
 
 test_list = GetShellCommandOutput(COMMAND_LIST_TESTS)
@@ -253,12 +273,16 @@ SUPPORTS_TYPED_TESTS = 'TypedTest' in test_list
 SUPPORTS_THREADS = 'ExpectFailureWithThreadsTest' in test_list
 SUPPORTS_STACK_TRACES = NO_STACKTRACE_SUPPORT_FLAG not in sys.argv
 
-CAN_GENERATE_GOLDEN_FILE = (SUPPORTS_DEATH_TESTS and
-                            SUPPORTS_TYPED_TESTS and
-                            SUPPORTS_THREADS and
-                            SUPPORTS_STACK_TRACES)
+CAN_GENERATE_GOLDEN_FILE = (
+    SUPPORTS_DEATH_TESTS
+    and SUPPORTS_TYPED_TESTS
+    and SUPPORTS_THREADS
+    and SUPPORTS_STACK_TRACES
+)
+
 
 class GTestOutputTest(gtest_test_utils.TestCase):
+
   def RemoveUnsupportedTests(self, test_output):
     if not SUPPORTS_DEATH_TESTS:
       test_output = RemoveMatchingTests(test_output, 'DeathTest')
@@ -267,12 +291,13 @@ class GTestOutputTest(gtest_test_utils.TestCase):
       test_output = RemoveMatchingTests(test_output, 'TypedDeathTest')
       test_output = RemoveMatchingTests(test_output, 'TypeParamDeathTest')
     if not SUPPORTS_THREADS:
-      test_output = RemoveMatchingTests(test_output,
-                                        'ExpectFailureWithThreadsTest')
-      test_output = RemoveMatchingTests(test_output,
-                                        'ScopedFakeTestPartResultReporterTest')
-      test_output = RemoveMatchingTests(test_output,
-                                        'WorksConcurrently')
+      test_output = RemoveMatchingTests(
+          test_output, 'ExpectFailureWithThreadsTest'
+      )
+      test_output = RemoveMatchingTests(
+          test_output, 'ScopedFakeTestPartResultReporterTest'
+      )
+      test_output = RemoveMatchingTests(test_output, 'WorksConcurrently')
     if not SUPPORTS_STACK_TRACES:
       test_output = RemoveStackTraces(test_output)
 
@@ -297,27 +322,42 @@ class GTestOutputTest(gtest_test_utils.TestCase):
     normalized_golden = RemoveTypeInfoDetails(golden)
 
     if CAN_GENERATE_GOLDEN_FILE:
-      self.assertEqual(normalized_golden, normalized_actual,
-                       '\n'.join(difflib.unified_diff(
-                           normalized_golden.split('\n'),
-                           normalized_actual.split('\n'),
-                           'golden', 'actual')))
+      self.assertEqual(
+          normalized_golden,
+          normalized_actual,
+          '\n'.join(
+              difflib.unified_diff(
+                  normalized_golden.split('\n'),
+                  normalized_actual.split('\n'),
+                  'golden',
+                  'actual',
+              )
+          ),
+      )
     else:
       normalized_actual = NormalizeToCurrentPlatform(
-          RemoveTestCounts(normalized_actual))
+          RemoveTestCounts(normalized_actual)
+      )
       normalized_golden = NormalizeToCurrentPlatform(
-          RemoveTestCounts(self.RemoveUnsupportedTests(normalized_golden)))
+          RemoveTestCounts(self.RemoveUnsupportedTests(normalized_golden))
+      )
 
       # This code is very handy when debugging golden file differences:
       if os.getenv('DEBUG_GTEST_OUTPUT_TEST'):
-        open(os.path.join(
-            gtest_test_utils.GetSourceDir(),
-            '_googletest-output-test_normalized_actual.txt'), 'wb').write(
-                normalized_actual)
-        open(os.path.join(
-            gtest_test_utils.GetSourceDir(),
-            '_googletest-output-test_normalized_golden.txt'), 'wb').write(
-                normalized_golden)
+        open(
+            os.path.join(
+                gtest_test_utils.GetSourceDir(),
+                '_googletest-output-test_normalized_actual.txt',
+            ),
+            'wb',
+        ).write(normalized_actual)
+        open(
+            os.path.join(
+                gtest_test_utils.GetSourceDir(),
+                '_googletest-output-test_normalized_golden.txt',
+            ),
+            'wb',
+        ).write(normalized_golden)
 
       self.assertEqual(normalized_golden, normalized_actual)
 
@@ -334,11 +374,10 @@ if __name__ == '__main__':
       golden_file.write(output.encode())
       golden_file.close()
     else:
-      message = (
-          """Unable to write a golden file when compiled in an environment
+      message = """Unable to write a golden file when compiled in an environment
 that does not support all the required features (death tests,
 typed tests, stack traces, and multiple threads).
-Please build this test and generate the golden file using Blaze on Linux.""")
+Please build this test and generate the golden file using Blaze on Linux."""
 
       sys.stderr.write(message)
       sys.exit(1)

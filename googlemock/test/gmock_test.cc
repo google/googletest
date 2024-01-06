@@ -27,7 +27,6 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
 // Google Mock - a framework for writing C++ mock classes.
 //
 // This file tests code in gmock.cc.
@@ -35,13 +34,12 @@
 #include "gmock/gmock.h"
 
 #include <string>
+
 #include "gtest/gtest.h"
 #include "gtest/internal/custom/gtest.h"
 
 #if !defined(GTEST_CUSTOM_INIT_GOOGLE_TEST_FUNCTION_)
 
-using testing::GMOCK_FLAG(default_mock_behavior);
-using testing::GMOCK_FLAG(verbose);
 using testing::InitGoogleMock;
 
 // Verifies that calling InitGoogleMock() on argv results in new_argv,
@@ -49,7 +47,7 @@ using testing::InitGoogleMock;
 template <typename Char, int M, int N>
 void TestInitGoogleMock(const Char* (&argv)[M], const Char* (&new_argv)[N],
                         const ::std::string& expected_gmock_verbose) {
-  const ::std::string old_verbose = GMOCK_FLAG(verbose);
+  const ::std::string old_verbose = GMOCK_FLAG_GET(verbose);
 
   int argc = M - 1;
   InitGoogleMock(&argc, const_cast<Char**>(argv));
@@ -59,8 +57,8 @@ void TestInitGoogleMock(const Char* (&argv)[M], const Char* (&new_argv)[N],
     EXPECT_STREQ(new_argv[i], argv[i]);
   }
 
-  EXPECT_EQ(expected_gmock_verbose, GMOCK_FLAG(verbose).c_str());
-  GMOCK_FLAG(verbose) = old_verbose;  // Restores the gmock_verbose flag.
+  EXPECT_EQ(expected_gmock_verbose, GMOCK_FLAG_GET(verbose));
+  GMOCK_FLAG_SET(verbose, old_verbose);  // Restores the gmock_verbose flag.
 }
 
 TEST(InitGoogleMockTest, ParsesInvalidCommandLine) {
@@ -68,7 +66,7 @@ TEST(InitGoogleMockTest, ParsesInvalidCommandLine) {
 
   const char* new_argv[] = {nullptr};
 
-  TestInitGoogleMock(argv, new_argv, GMOCK_FLAG(verbose));
+  TestInitGoogleMock(argv, new_argv, GMOCK_FLAG_GET(verbose));
 }
 
 TEST(InitGoogleMockTest, ParsesEmptyCommandLine) {
@@ -76,7 +74,7 @@ TEST(InitGoogleMockTest, ParsesEmptyCommandLine) {
 
   const char* new_argv[] = {"foo.exe", nullptr};
 
-  TestInitGoogleMock(argv, new_argv, GMOCK_FLAG(verbose));
+  TestInitGoogleMock(argv, new_argv, GMOCK_FLAG_GET(verbose));
 }
 
 TEST(InitGoogleMockTest, ParsesSingleFlag) {
@@ -88,16 +86,16 @@ TEST(InitGoogleMockTest, ParsesSingleFlag) {
 }
 
 TEST(InitGoogleMockTest, ParsesMultipleFlags) {
-  int old_default_behavior = GMOCK_FLAG(default_mock_behavior);
+  int old_default_behavior = GMOCK_FLAG_GET(default_mock_behavior);
   const wchar_t* argv[] = {L"foo.exe", L"--gmock_verbose=info",
                            L"--gmock_default_mock_behavior=2", nullptr};
 
   const wchar_t* new_argv[] = {L"foo.exe", nullptr};
 
   TestInitGoogleMock(argv, new_argv, "info");
-  EXPECT_EQ(2, GMOCK_FLAG(default_mock_behavior));
+  EXPECT_EQ(2, GMOCK_FLAG_GET(default_mock_behavior));
   EXPECT_NE(2, old_default_behavior);
-  GMOCK_FLAG(default_mock_behavior) = old_default_behavior;
+  GMOCK_FLAG_SET(default_mock_behavior, old_default_behavior);
 }
 
 TEST(InitGoogleMockTest, ParsesUnrecognizedFlag) {
@@ -105,7 +103,7 @@ TEST(InitGoogleMockTest, ParsesUnrecognizedFlag) {
 
   const char* new_argv[] = {"foo.exe", "--non_gmock_flag=blah", nullptr};
 
-  TestInitGoogleMock(argv, new_argv, GMOCK_FLAG(verbose));
+  TestInitGoogleMock(argv, new_argv, GMOCK_FLAG_GET(verbose));
 }
 
 TEST(InitGoogleMockTest, ParsesGoogleMockFlagAndUnrecognizedFlag) {
@@ -122,7 +120,7 @@ TEST(WideInitGoogleMockTest, ParsesInvalidCommandLine) {
 
   const wchar_t* new_argv[] = {nullptr};
 
-  TestInitGoogleMock(argv, new_argv, GMOCK_FLAG(verbose));
+  TestInitGoogleMock(argv, new_argv, GMOCK_FLAG_GET(verbose));
 }
 
 TEST(WideInitGoogleMockTest, ParsesEmptyCommandLine) {
@@ -130,7 +128,7 @@ TEST(WideInitGoogleMockTest, ParsesEmptyCommandLine) {
 
   const wchar_t* new_argv[] = {L"foo.exe", nullptr};
 
-  TestInitGoogleMock(argv, new_argv, GMOCK_FLAG(verbose));
+  TestInitGoogleMock(argv, new_argv, GMOCK_FLAG_GET(verbose));
 }
 
 TEST(WideInitGoogleMockTest, ParsesSingleFlag) {
@@ -142,16 +140,16 @@ TEST(WideInitGoogleMockTest, ParsesSingleFlag) {
 }
 
 TEST(WideInitGoogleMockTest, ParsesMultipleFlags) {
-  int old_default_behavior = GMOCK_FLAG(default_mock_behavior);
+  int old_default_behavior = GMOCK_FLAG_GET(default_mock_behavior);
   const wchar_t* argv[] = {L"foo.exe", L"--gmock_verbose=info",
                            L"--gmock_default_mock_behavior=2", nullptr};
 
   const wchar_t* new_argv[] = {L"foo.exe", nullptr};
 
   TestInitGoogleMock(argv, new_argv, "info");
-  EXPECT_EQ(2, GMOCK_FLAG(default_mock_behavior));
+  EXPECT_EQ(2, GMOCK_FLAG_GET(default_mock_behavior));
   EXPECT_NE(2, old_default_behavior);
-  GMOCK_FLAG(default_mock_behavior) = old_default_behavior;
+  GMOCK_FLAG_SET(default_mock_behavior, old_default_behavior);
 }
 
 TEST(WideInitGoogleMockTest, ParsesUnrecognizedFlag) {
@@ -159,7 +157,7 @@ TEST(WideInitGoogleMockTest, ParsesUnrecognizedFlag) {
 
   const wchar_t* new_argv[] = {L"foo.exe", L"--non_gmock_flag=blah", nullptr};
 
-  TestInitGoogleMock(argv, new_argv, GMOCK_FLAG(verbose));
+  TestInitGoogleMock(argv, new_argv, GMOCK_FLAG_GET(verbose));
 }
 
 TEST(WideInitGoogleMockTest, ParsesGoogleMockFlagAndUnrecognizedFlag) {
@@ -175,7 +173,7 @@ TEST(WideInitGoogleMockTest, ParsesGoogleMockFlagAndUnrecognizedFlag) {
 
 // Makes sure Google Mock flags can be accessed in code.
 TEST(FlagTest, IsAccessibleInCode) {
-  bool dummy = testing::GMOCK_FLAG(catch_leaked_mocks) &&
-      testing::GMOCK_FLAG(verbose) == "";
+  bool dummy =
+      GMOCK_FLAG_GET(catch_leaked_mocks) && GMOCK_FLAG_GET(verbose).empty();
   (void)dummy;  // Avoids the "unused local variable" warning.
 }

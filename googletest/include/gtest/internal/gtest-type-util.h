@@ -30,20 +30,26 @@
 // Type utilities needed for implementing typed and type-parameterized
 // tests.
 
-// GOOGLETEST_CM0001 DO NOT DELETE
+// IWYU pragma: private, include "gtest/gtest.h"
+// IWYU pragma: friend gtest/.*
+// IWYU pragma: friend gmock/.*
 
-#ifndef GTEST_INCLUDE_GTEST_INTERNAL_GTEST_TYPE_UTIL_H_
-#define GTEST_INCLUDE_GTEST_INTERNAL_GTEST_TYPE_UTIL_H_
+#ifndef GOOGLETEST_INCLUDE_GTEST_INTERNAL_GTEST_TYPE_UTIL_H_
+#define GOOGLETEST_INCLUDE_GTEST_INTERNAL_GTEST_TYPE_UTIL_H_
+
+#include <string>
+#include <type_traits>
+#include <typeinfo>
 
 #include "gtest/internal/gtest-port.h"
 
 // #ifdef __GNUC__ is too general here.  It is possible to use gcc without using
 // libstdc++ (which is where cxxabi.h comes from).
-# if GTEST_HAS_CXXABI_H_
-#  include <cxxabi.h>
-# elif defined(__HP_aCC)
-#  include <acxx_demangle.h>
-# endif  // GTEST_HASH_CXXABI_H_
+#if GTEST_HAS_CXXABI_H_
+#include <cxxabi.h>
+#elif defined(__HP_aCC)
+#include <acxx_demangle.h>
+#endif  // GTEST_HASH_CXXABI_H_
 
 namespace testing {
 namespace internal {
@@ -61,45 +67,79 @@ inline std::string CanonicalizeForStdLibVersioning(std::string s) {
       s.erase(strlen("std"), end - strlen("std"));
     }
   }
+
+  // Strip redundant spaces in typename to match MSVC
+  // For example, std::pair<int, bool> -> std::pair<int,bool>
+  static const char to_search[] = ", ";
+  static const char replace_str[] = ",";
+  size_t pos = 0;
+  while (true) {
+    // Get the next occurrence from the current position
+    pos = s.find(to_search, pos);
+    if (pos == std::string::npos) {
+      break;
+    }
+    // Replace this occurrence of substring
+    s.replace(pos, strlen(to_search), replace_str);
+    pos += strlen(replace_str);
+  }
   return s;
 }
 
-// GetTypeName<T>() returns a human-readable name of type T.
-// NB: This function is also used in Google Mock, so don't move it inside of
-// the typed-test-only section below.
-template <typename T>
-std::string GetTypeName() {
-# if GTEST_HAS_RTTI
-
-  const char* const name = typeid(T).name();
-#  if GTEST_HAS_CXXABI_H_ || defined(__HP_aCC)
+#if GTEST_HAS_RTTI
+// GetTypeName(const std::type_info&) returns a human-readable name of type T.
+inline std::string GetTypeName(const std::type_info& type) {
+  const char* const name = type.name();
+#if GTEST_HAS_CXXABI_H_ || defined(__HP_aCC)
   int status = 0;
   // gcc's implementation of typeid(T).name() mangles the type name,
   // so we have to demangle it.
-#   if GTEST_HAS_CXXABI_H_
+#if GTEST_HAS_CXXABI_H_
   using abi::__cxa_demangle;
-#   endif  // GTEST_HAS_CXXABI_H_
+#endif  // GTEST_HAS_CXXABI_H_
   char* const readable_name = __cxa_demangle(name, nullptr, nullptr, &status);
   const std::string name_str(status == 0 ? readable_name : name);
   free(readable_name);
   return CanonicalizeForStdLibVersioning(name_str);
-#  else
+#elif defined(_MSC_VER)
+  // Strip struct and class due to differences between
+  // MSVC and other compilers. std::pair<int,bool> is printed as
+  // "struct std::pair<int,bool>" when using MSVC vs "std::pair<int, bool>" with
+  // other compilers.
+  std::string s = name;
+  // Only strip the leading "struct " and "class ", so uses rfind == 0 to
+  // ensure that
+  if (s.rfind("struct ", 0) == 0) {
+    s = s.substr(strlen("struct "));
+  } else if (s.rfind("class ", 0) == 0) {
+    s = s.substr(strlen("class "));
+  }
+  return s;
+#else
   return name;
-#  endif  // GTEST_HAS_CXXABI_H_ || __HP_aCC
-
-# else
-
-  return "<type>";
-
-# endif  // GTEST_HAS_RTTI
+#endif  // GTEST_HAS_CXXABI_H_ || __HP_aCC
 }
+#endif  // GTEST_HAS_RTTI
 
-#if GTEST_HAS_TYPED_TEST || GTEST_HAS_TYPED_TEST_P
+// GetTypeName<T>() returns a human-readable name of type T if and only if
+// RTTI is enabled, otherwise it returns a dummy type name.
+// NB: This function is also used in Google Mock, so don't move it inside of
+// the typed-test-only section below.
+template <typename T>
+std::string GetTypeName() {
+#if GTEST_HAS_RTTI
+  return GetTypeName(typeid(T));
+#else
+  return "<type>";
+#endif  // GTEST_HAS_RTTI
+}
 
 // A unique type indicating an empty node
 struct None {};
 
-# define GTEST_TEMPLATE_ template <typename T> class
+#define GTEST_TEMPLATE_ \
+  template <typename T> \
+  class
 
 // The template "selector" struct TemplateSel<Tmpl> is used to
 // represent Tmpl, which must be a class template with one type
@@ -117,8 +157,7 @@ struct TemplateSel {
   };
 };
 
-# define GTEST_BIND_(TmplSel, T) \
-  TmplSel::template Bind<T>::type
+#define GTEST_BIND_(TmplSel, T) TmplSel::template Bind<T>::type
 
 template <GTEST_TEMPLATE_ Head_, GTEST_TEMPLATE_... Tail_>
 struct Templates {
@@ -171,8 +210,6 @@ struct GenerateTypeList {
   using type = typename proxy::type;
 };
 
-#endif  // GTEST_HAS_TYPED_TEST || GTEST_HAS_TYPED_TEST_P
-
 }  // namespace internal
 
 template <typename... Ts>
@@ -180,4 +217,4 @@ using Types = internal::ProxyTypeList<Ts...>;
 
 }  // namespace testing
 
-#endif  // GTEST_INCLUDE_GTEST_INTERNAL_GTEST_TYPE_UTIL_H_
+#endif  // GOOGLETEST_INCLUDE_GTEST_INTERNAL_GTEST_TYPE_UTIL_H_

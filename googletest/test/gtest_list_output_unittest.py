@@ -40,22 +40,48 @@ This script tests such functionality by invoking gtest_list_output_unittest_
 
 import os
 import re
-import gtest_test_utils
+from googletest.test import gtest_test_utils
 
 GTEST_LIST_TESTS_FLAG = '--gtest_list_tests'
 GTEST_OUTPUT_FLAG = '--gtest_output'
 
 EXPECTED_XML = """<\?xml version="1.0" encoding="UTF-8"\?>
-<testsuites tests="2" name="AllTests">
+<testsuites tests="16" name="AllTests">
   <testsuite name="FooTest" tests="2">
     <testcase name="Test1" file=".*gtest_list_output_unittest_.cc" line="43" />
     <testcase name="Test2" file=".*gtest_list_output_unittest_.cc" line="45" />
+  </testsuite>
+  <testsuite name="FooTestFixture" tests="2">
+    <testcase name="Test3" file=".*gtest_list_output_unittest_.cc" line="48" />
+    <testcase name="Test4" file=".*gtest_list_output_unittest_.cc" line="49" />
+  </testsuite>
+  <testsuite name="TypedTest/0" tests="2">
+    <testcase name="Test7" type_param="int" file=".*gtest_list_output_unittest_.cc" line="60" />
+    <testcase name="Test8" type_param="int" file=".*gtest_list_output_unittest_.cc" line="61" />
+  </testsuite>
+  <testsuite name="TypedTest/1" tests="2">
+    <testcase name="Test7" type_param="bool" file=".*gtest_list_output_unittest_.cc" line="60" />
+    <testcase name="Test8" type_param="bool" file=".*gtest_list_output_unittest_.cc" line="61" />
+  </testsuite>
+  <testsuite name="Single/TypeParameterizedTestSuite/0" tests="2">
+    <testcase name="Test9" type_param="int" file=".*gtest_list_output_unittest_.cc" line="66" />
+    <testcase name="Test10" type_param="int" file=".*gtest_list_output_unittest_.cc" line="67" />
+  </testsuite>
+  <testsuite name="Single/TypeParameterizedTestSuite/1" tests="2">
+    <testcase name="Test9" type_param="bool" file=".*gtest_list_output_unittest_.cc" line="66" />
+    <testcase name="Test10" type_param="bool" file=".*gtest_list_output_unittest_.cc" line="67" />
+  </testsuite>
+  <testsuite name="ValueParam/ValueParamTest" tests="4">
+    <testcase name="Test5/0" value_param="33" file=".*gtest_list_output_unittest_.cc" line="52" />
+    <testcase name="Test5/1" value_param="42" file=".*gtest_list_output_unittest_.cc" line="52" />
+    <testcase name="Test6/0" value_param="33" file=".*gtest_list_output_unittest_.cc" line="53" />
+    <testcase name="Test6/1" value_param="42" file=".*gtest_list_output_unittest_.cc" line="53" />
   </testsuite>
 </testsuites>
 """
 
 EXPECTED_JSON = """{
-  "tests": 2,
+  "tests": 16,
   "name": "AllTests",
   "testsuites": \[
     {
@@ -73,6 +99,124 @@ EXPECTED_JSON = """{
           "line": 45
         }
       \]
+    },
+    {
+      "name": "FooTestFixture",
+      "tests": 2,
+      "testsuite": \[
+        {
+          "name": "Test3",
+          "file": ".*gtest_list_output_unittest_.cc",
+          "line": 48
+        },
+        {
+          "name": "Test4",
+          "file": ".*gtest_list_output_unittest_.cc",
+          "line": 49
+        }
+      \]
+    },
+    {
+      "name": "TypedTest\\\\/0",
+      "tests": 2,
+      "testsuite": \[
+        {
+          "name": "Test7",
+          "type_param": "int",
+          "file": ".*gtest_list_output_unittest_.cc",
+          "line": 60
+        },
+        {
+          "name": "Test8",
+          "type_param": "int",
+          "file": ".*gtest_list_output_unittest_.cc",
+          "line": 61
+        }
+      \]
+    },
+    {
+      "name": "TypedTest\\\\/1",
+      "tests": 2,
+      "testsuite": \[
+        {
+          "name": "Test7",
+          "type_param": "bool",
+          "file": ".*gtest_list_output_unittest_.cc",
+          "line": 60
+        },
+        {
+          "name": "Test8",
+          "type_param": "bool",
+          "file": ".*gtest_list_output_unittest_.cc",
+          "line": 61
+        }
+      \]
+    },
+    {
+      "name": "Single\\\\/TypeParameterizedTestSuite\\\\/0",
+      "tests": 2,
+      "testsuite": \[
+        {
+          "name": "Test9",
+          "type_param": "int",
+          "file": ".*gtest_list_output_unittest_.cc",
+          "line": 66
+        },
+        {
+          "name": "Test10",
+          "type_param": "int",
+          "file": ".*gtest_list_output_unittest_.cc",
+          "line": 67
+        }
+      \]
+    },
+    {
+      "name": "Single\\\\/TypeParameterizedTestSuite\\\\/1",
+      "tests": 2,
+      "testsuite": \[
+        {
+          "name": "Test9",
+          "type_param": "bool",
+          "file": ".*gtest_list_output_unittest_.cc",
+          "line": 66
+        },
+        {
+          "name": "Test10",
+          "type_param": "bool",
+          "file": ".*gtest_list_output_unittest_.cc",
+          "line": 67
+        }
+      \]
+    },
+    {
+      "name": "ValueParam\\\\/ValueParamTest",
+      "tests": 4,
+      "testsuite": \[
+        {
+          "name": "Test5\\\\/0",
+          "value_param": "33",
+          "file": ".*gtest_list_output_unittest_.cc",
+          "line": 52
+        },
+        {
+          "name": "Test5\\\\/1",
+          "value_param": "42",
+          "file": ".*gtest_list_output_unittest_.cc",
+          "line": 52
+        },
+        {
+          "name": "Test6\\\\/0",
+          "value_param": "33",
+          "file": ".*gtest_list_output_unittest_.cc",
+          "line": 53
+        },
+        {
+          "name": "Test6\\\\/1",
+          "value_param": "42",
+          "file": ".*gtest_list_output_unittest_.cc",
+          "line": 53
+        }
+      \]
     }
   \]
 }
@@ -80,8 +224,7 @@ EXPECTED_JSON = """{
 
 
 class GTestListTestsOutputUnitTest(gtest_test_utils.TestCase):
-  """Unit test for Google Test's list tests with output to file functionality.
-  """
+  """Unit test for Google Test's list tests with output to file functionality."""
 
   def testXml(self):
     """Verifies XML output for listing tests in a Google Test binary.
@@ -100,22 +243,26 @@ class GTestListTestsOutputUnitTest(gtest_test_utils.TestCase):
     self._TestOutput('json', EXPECTED_JSON)
 
   def _GetOutput(self, out_format):
-    file_path = os.path.join(gtest_test_utils.GetTempDir(),
-                             'test_out.' + out_format)
+    file_path = os.path.join(
+        gtest_test_utils.GetTempDir(), 'test_out.' + out_format
+    )
     gtest_prog_path = gtest_test_utils.GetTestExecutablePath(
-        'gtest_list_output_unittest_')
+        'gtest_list_output_unittest_'
+    )
 
-    command = ([
+    command = [
         gtest_prog_path,
         '%s=%s:%s' % (GTEST_OUTPUT_FLAG, out_format, file_path),
-        '--gtest_list_tests'
-    ])
+        '--gtest_list_tests',
+    ]
     environ_copy = os.environ.copy()
     p = gtest_test_utils.Subprocess(
-        command, env=environ_copy, working_dir=gtest_test_utils.GetTempDir())
+        command, env=environ_copy, working_dir=gtest_test_utils.GetTempDir()
+    )
 
-    self.assert_(p.exited)
-    self.assertEquals(0, p.exit_code)
+    self.assertTrue(p.exited)
+    self.assertEqual(0, p.exit_code)
+    self.assertTrue(os.path.isfile(file_path))
     with open(file_path) as f:
       result = f.read()
     return result
@@ -128,11 +275,12 @@ class GTestListTestsOutputUnitTest(gtest_test_utils.TestCase):
     for actual_line in actual_lines:
       expected_line = expected_lines[line_count]
       expected_line_re = re.compile(expected_line.strip())
-      self.assert_(
+      self.assertTrue(
           expected_line_re.match(actual_line.strip()),
-          ('actual output of "%s",\n'
-           'which does not match expected regex of "%s"\n'
-           'on line %d' % (actual, expected_output, line_count)))
+          'actual output of "%s",\n'
+          'which does not match expected regex of "%s"\n'
+          'on line %d' % (actual, expected_output, line_count),
+      )
       line_count = line_count + 1
 
 

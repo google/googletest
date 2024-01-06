@@ -31,7 +31,7 @@
 
 import os
 
-import gtest_test_utils
+from googletest.test import gtest_test_utils
 
 binary_name = 'gtest_testbridge_test_'
 COMMAND = gtest_test_utils.GetTestExecutablePath(binary_name)
@@ -52,7 +52,7 @@ class GTestTestFilterTest(gtest_test_utils.TestCase):
     subprocess_env[TESTBRIDGE_NAME] = '*.TestThatSucceeds'
     p = gtest_test_utils.Subprocess(COMMAND, env=subprocess_env)
 
-    self.assertEquals(0, p.exit_code)
+    self.assertEqual(0, p.exit_code)
 
     Assert('filter = *.TestThatSucceeds' in p.output)
     Assert('[       OK ] TestFilterTest.TestThatSucceeds' in p.output)

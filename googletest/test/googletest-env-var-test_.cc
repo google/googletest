@@ -27,7 +27,6 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
 // A helper program for testing that Google Test parses the environment
 // variables correctly.
 
@@ -43,72 +42,71 @@ namespace testing {
 // The purpose of this is to make the test more realistic by ensuring
 // that the UnitTest singleton is created before main() is entered.
 // We don't actual run the TEST itself.
-TEST(GTestEnvVarTest, Dummy) {
-}
+TEST(GTestEnvVarTest, Dummy) {}
 
 void PrintFlag(const char* flag) {
   if (strcmp(flag, "break_on_failure") == 0) {
-    cout << GTEST_FLAG(break_on_failure);
+    cout << GTEST_FLAG_GET(break_on_failure);
     return;
   }
 
   if (strcmp(flag, "catch_exceptions") == 0) {
-    cout << GTEST_FLAG(catch_exceptions);
+    cout << GTEST_FLAG_GET(catch_exceptions);
     return;
   }
 
   if (strcmp(flag, "color") == 0) {
-    cout << GTEST_FLAG(color);
+    cout << GTEST_FLAG_GET(color);
     return;
   }
 
   if (strcmp(flag, "death_test_style") == 0) {
-    cout << GTEST_FLAG(death_test_style);
+    cout << GTEST_FLAG_GET(death_test_style);
     return;
   }
 
   if (strcmp(flag, "death_test_use_fork") == 0) {
-    cout << GTEST_FLAG(death_test_use_fork);
+    cout << GTEST_FLAG_GET(death_test_use_fork);
     return;
   }
 
   if (strcmp(flag, "fail_fast") == 0) {
-    cout << GTEST_FLAG(fail_fast);
+    cout << GTEST_FLAG_GET(fail_fast);
     return;
   }
 
   if (strcmp(flag, "filter") == 0) {
-    cout << GTEST_FLAG(filter);
+    cout << GTEST_FLAG_GET(filter);
     return;
   }
 
   if (strcmp(flag, "output") == 0) {
-    cout << GTEST_FLAG(output);
+    cout << GTEST_FLAG_GET(output);
     return;
   }
 
   if (strcmp(flag, "brief") == 0) {
-    cout << GTEST_FLAG(brief);
+    cout << GTEST_FLAG_GET(brief);
     return;
   }
 
   if (strcmp(flag, "print_time") == 0) {
-    cout << GTEST_FLAG(print_time);
+    cout << GTEST_FLAG_GET(print_time);
     return;
   }
 
   if (strcmp(flag, "repeat") == 0) {
-    cout << GTEST_FLAG(repeat);
+    cout << GTEST_FLAG_GET(repeat);
     return;
   }
 
   if (strcmp(flag, "stack_trace_depth") == 0) {
-    cout << GTEST_FLAG(stack_trace_depth);
+    cout << GTEST_FLAG_GET(stack_trace_depth);
     return;
   }
 
   if (strcmp(flag, "throw_on_failure") == 0) {
-    cout << GTEST_FLAG(throw_on_failure);
+    cout << GTEST_FLAG_GET(throw_on_failure);
     return;
   }
 

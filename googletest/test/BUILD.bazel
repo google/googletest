@@ -30,10 +30,11 @@
 #
 # Bazel BUILD for The Google C++ Testing Framework (Google Test)
 
-load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_test")
 load("@rules_python//python:defs.bzl", "py_library", "py_test")
 
 licenses(["notice"])
+
+package(default_visibility = ["//:__subpackages__"])
 
 #on windows exclude gtest-tuple.h
 cc_test(
@@ -60,8 +61,10 @@ cc_test(
             "googletest-env-var-test_.cc",
             "googletest-failfast-unittest_.cc",
             "googletest-filter-unittest_.cc",
+            "googletest-global-environment-unittest_.cc",
             "googletest-break-on-failure-unittest_.cc",
             "googletest-listener-test.cc",
+            "googletest-message-test.cc",
             "googletest-output-test_.cc",
             "googletest-list-tests-unittest_.cc",
             "googletest-shuffle-test_.cc",
@@ -80,6 +83,10 @@ cc_test(
     copts = select({
         "//:windows": ["-DGTEST_USE_OWN_TR1_TUPLE=0"],
         "//conditions:default": ["-DGTEST_USE_OWN_TR1_TUPLE=1"],
+    }) + select({
+        # Ensure MSVC treats source files as UTF-8 encoded.
+        "//:msvc_compiler": ["-utf-8"],
+        "//conditions:default": [],
     }),
     includes = [
         "googletest",
@@ -88,6 +95,7 @@ cc_test(
         "googletest/test",
     ],
     linkopts = select({
+        "//:qnx": [],
         "//:windows": [],
         "//conditions:default": ["-pthread"],
     }),
@@ -143,7 +151,6 @@ cc_test(
     name = "gtest_unittest",
     size = "small",
     srcs = ["gtest_unittest.cc"],
-    args = ["--heap_check=strict"],
     shard_count = 2,
     deps = ["//:gtest_main"],
 )
@@ -154,6 +161,7 @@ py_library(
     name = "gtest_test_utils",
     testonly = 1,
     srcs = ["gtest_test_utils.py"],
+    imports = ["."],
 )
 
 cc_binary(
@@ -167,6 +175,10 @@ py_test(
     name = "gtest_help_test",
     size = "small",
     srcs = ["gtest_help_test.py"],
+    args = select({
+        "//:has_absl": ["--has_absl_flags"],
+        "//conditions:default": [],
+    }),
     data = [":gtest_help_test_"],
     deps = [":gtest_test_utils"],
 )
@@ -250,6 +262,21 @@ py_test(
     size = "medium",
     srcs = ["googletest-filter-unittest.py"],
     data = [":googletest-filter-unittest_"],
+    deps = [":gtest_test_utils"],
+)
+
+cc_binary(
+    name = "googletest-global-environment-unittest_",
+    testonly = 1,
+    srcs = ["googletest-global-environment-unittest_.cc"],
+    deps = ["//:gtest"],
+)
+
+py_test(
+    name = "googletest-global-environment-unittest",
+    size = "medium",
+    srcs = ["googletest-global-environment-unittest.py"],
+    data = [":googletest-global-environment-unittest_"],
     deps = [":gtest_test_utils"],
 )
 
@@ -548,6 +575,10 @@ py_test(
     size = "small",
     srcs = ["googletest-param-test-invalid-name1-test.py"],
     data = [":googletest-param-test-invalid-name1-test_"],
+    tags = [
+        "no_test_msvc2015",
+        "no_test_msvc2017",
+    ],
     deps = [":gtest_test_utils"],
 )
 
@@ -556,5 +587,9 @@ py_test(
     size = "small",
     srcs = ["googletest-param-test-invalid-name2-test.py"],
     data = [":googletest-param-test-invalid-name2-test_"],
+    tags = [
+        "no_test_msvc2015",
+        "no_test_msvc2017",
+    ],
     deps = [":gtest_test_utils"],
 )

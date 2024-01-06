@@ -32,18 +32,18 @@
 // exceptions, and the output is verified by
 // googletest-catch-exceptions-test.py.
 
-#include <stdio.h>  // NOLINT
+#include <stdio.h>   // NOLINT
 #include <stdlib.h>  // For exit().
 
 #include "gtest/gtest.h"
 
 #if GTEST_HAS_SEH
-# include <windows.h>
+#include <windows.h>
 #endif
 
 #if GTEST_HAS_EXCEPTIONS
-# include <exception>  // For set_terminate().
-# include <stdexcept>
+#include <exception>  // For set_terminate().
+#include <stdexcept>
 #endif
 
 using testing::Test;
@@ -93,9 +93,7 @@ class SehExceptionInTearDownTest : public Test {
 
 TEST_F(SehExceptionInTearDownTest, ThrowsExceptionInTearDown) {}
 
-TEST(SehExceptionTest, ThrowsSehException) {
-  RaiseException(42, 0, 0, NULL);
-}
+TEST(SehExceptionTest, ThrowsSehException) { RaiseException(42, 0, 0, NULL); }
 
 #endif  // GTEST_HAS_SEH
 
@@ -269,9 +267,7 @@ TEST_F(CxxExceptionInTestBodyTest, ThrowsStdCxxException) {
   throw std::runtime_error("Standard C++ exception");
 }
 
-TEST(CxxExceptionTest, ThrowsNonStdCxxException) {
-  throw "C-string";
-}
+TEST(CxxExceptionTest, ThrowsNonStdCxxException) { throw "C-string"; }
 
 // This terminate handler aborts the program using exit() rather than abort().
 // This avoids showing pop-ups on Windows systems and core dumps on Unix-like

@@ -27,7 +27,6 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
 // Google Mock - a framework for writing C++ mock classes.
 //
 // This file tests the spec builder syntax.
@@ -38,74 +37,28 @@
 #include <ostream>  // NOLINT
 #include <sstream>
 #include <string>
+#include <type_traits>
 
 #include "gmock/gmock.h"
 #include "gmock/internal/gmock-port.h"
-#include "gtest/gtest.h"
 #include "gtest/gtest-spi.h"
+#include "gtest/gtest.h"
 #include "gtest/internal/gtest-port.h"
 
 namespace testing {
-namespace internal {
-
-// Helper class for testing the Expectation class template.
-class ExpectationTester {
- public:
-  // Sets the call count of the given expectation to the given number.
-  void SetCallCount(int n, ExpectationBase* exp) {
-    exp->call_count_ = n;
-  }
-};
-
-}  // namespace internal
-}  // namespace testing
-
 namespace {
 
-using testing::_;
-using testing::AnyNumber;
-using testing::AtLeast;
-using testing::AtMost;
-using testing::Between;
-using testing::Cardinality;
-using testing::CardinalityInterface;
-using testing::Const;
-using testing::ContainsRegex;
-using testing::DoAll;
-using testing::DoDefault;
-using testing::Eq;
-using testing::Expectation;
-using testing::ExpectationSet;
-using testing::GMOCK_FLAG(verbose);
-using testing::Gt;
-using testing::IgnoreResult;
-using testing::InSequence;
-using testing::Invoke;
-using testing::InvokeWithoutArgs;
-using testing::IsNotSubstring;
-using testing::IsSubstring;
-using testing::Lt;
-using testing::Message;
-using testing::Mock;
-using testing::NaggyMock;
-using testing::Ne;
-using testing::Return;
-using testing::SaveArg;
-using testing::Sequence;
-using testing::SetArgPointee;
-using testing::internal::ExpectationTester;
-using testing::internal::FormatFileLocation;
-using testing::internal::kAllow;
-using testing::internal::kErrorVerbosity;
-using testing::internal::kFail;
-using testing::internal::kInfoVerbosity;
-using testing::internal::kWarn;
-using testing::internal::kWarningVerbosity;
+using ::testing::internal::FormatFileLocation;
+using ::testing::internal::kAllow;
+using ::testing::internal::kErrorVerbosity;
+using ::testing::internal::kFail;
+using ::testing::internal::kInfoVerbosity;
+using ::testing::internal::kWarn;
+using ::testing::internal::kWarningVerbosity;
 
 #if GTEST_HAS_STREAM_REDIRECTION
-using testing::HasSubstr;
-using testing::internal::CaptureStdout;
-using testing::internal::GetCapturedStdout;
+using ::testing::internal::CaptureStdout;
+using ::testing::internal::GetCapturedStdout;
 #endif
 
 class Incomplete;
@@ -126,8 +79,7 @@ TEST(MockMethodTest, CanInstantiateWithIncompleteArgType) {
   // use the mock, as long as Google Mock knows how to print the
   // argument.
   MockIncomplete incomplete;
-  EXPECT_CALL(incomplete, ByRefFunc(_))
-      .Times(AnyNumber());
+  EXPECT_CALL(incomplete, ByRefFunc(_)).Times(AnyNumber());
 }
 
 // The definition of the printer for the argument type doesn't have to
@@ -146,7 +98,7 @@ class NonDefaultConstructible {
 
 class MockA {
  public:
-  MockA() {}
+  MockA() = default;
 
   MOCK_METHOD1(DoA, void(int n));
   MOCK_METHOD1(ReturnResult, Result(int n));
@@ -155,28 +107,31 @@ class MockA {
   MOCK_METHOD2(ReturnInt, int(int x, int y));
 
  private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(MockA);
+  MockA(const MockA&) = delete;
+  MockA& operator=(const MockA&) = delete;
 };
 
 class MockB {
  public:
-  MockB() {}
+  MockB() = default;
 
   MOCK_CONST_METHOD0(DoB, int());  // NOLINT
-  MOCK_METHOD1(DoB, int(int n));  // NOLINT
+  MOCK_METHOD1(DoB, int(int n));   // NOLINT
 
  private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(MockB);
+  MockB(const MockB&) = delete;
+  MockB& operator=(const MockB&) = delete;
 };
 
 class ReferenceHoldingMock {
  public:
-  ReferenceHoldingMock() {}
+  ReferenceHoldingMock() = default;
 
   MOCK_METHOD1(AcceptReference, void(std::shared_ptr<MockA>*));
 
  private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(ReferenceHoldingMock);
+  ReferenceHoldingMock(const ReferenceHoldingMock&) = delete;
+  ReferenceHoldingMock& operator=(const ReferenceHoldingMock&) = delete;
 };
 
 // Tests that EXPECT_CALL and ON_CALL compile in a presence of macro
@@ -188,17 +143,18 @@ class ReferenceHoldingMock {
 
 class CC {
  public:
-  virtual ~CC() {}
+  virtual ~CC() = default;
   virtual int Method() = 0;
 };
 class MockCC : public CC {
  public:
-  MockCC() {}
+  MockCC() = default;
 
   MOCK_METHOD0(Method, int());
 
  private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(MockCC);
+  MockCC(const MockCC&) = delete;
+  MockCC& operator=(const MockCC&) = delete;
 };
 
 // Tests that a method with expanded name compiles.
@@ -254,41 +210,42 @@ TEST(OnCallSyntaxTest, EvaluatesSecondArgumentOnce) {
 TEST(OnCallSyntaxTest, WithIsOptional) {
   MockA a;
 
-  ON_CALL(a, DoA(5))
-      .WillByDefault(Return());
-  ON_CALL(a, DoA(_))
-      .With(_)
-      .WillByDefault(Return());
+  ON_CALL(a, DoA(5)).WillByDefault(Return());
+  ON_CALL(a, DoA(_)).With(_).WillByDefault(Return());
 }
 
 TEST(OnCallSyntaxTest, WithCanAppearAtMostOnce) {
   MockA a;
 
-  EXPECT_NONFATAL_FAILURE({  // NOLINT
-    ON_CALL(a, ReturnResult(_))
-        .With(_)
-        .With(_)
-        .WillByDefault(Return(Result()));
-  }, ".With() cannot appear more than once in an ON_CALL()");
+  EXPECT_NONFATAL_FAILURE(
+      {  // NOLINT
+        ON_CALL(a, ReturnResult(_))
+            .With(_)
+            .With(_)
+            .WillByDefault(Return(Result()));
+      },
+      ".With() cannot appear more than once in an ON_CALL()");
 }
 
 TEST(OnCallSyntaxTest, WillByDefaultIsMandatory) {
   MockA a;
 
-  EXPECT_DEATH_IF_SUPPORTED({
-    ON_CALL(a, DoA(5));
-    a.DoA(5);
-  }, "");
+  EXPECT_DEATH_IF_SUPPORTED(
+      {
+        ON_CALL(a, DoA(5));
+        a.DoA(5);
+      },
+      "");
 }
 
 TEST(OnCallSyntaxTest, WillByDefaultCanAppearAtMostOnce) {
   MockA a;
 
-  EXPECT_NONFATAL_FAILURE({  // NOLINT
-    ON_CALL(a, DoA(5))
-        .WillByDefault(Return())
-        .WillByDefault(Return());
-  }, ".WillByDefault() must appear exactly once in an ON_CALL()");
+  EXPECT_NONFATAL_FAILURE(
+      {  // NOLINT
+        ON_CALL(a, DoA(5)).WillByDefault(Return()).WillByDefault(Return());
+      },
+      ".WillByDefault() must appear exactly once in an ON_CALL()");
 }
 
 // Tests that EXPECT_CALL evaluates its arguments exactly once as
@@ -316,21 +273,18 @@ TEST(ExpectCallSyntaxTest, EvaluatesSecondArgumentOnce) {
 TEST(ExpectCallSyntaxTest, WithIsOptional) {
   MockA a;
 
-  EXPECT_CALL(a, DoA(5))
-      .Times(0);
-  EXPECT_CALL(a, DoA(6))
-      .With(_)
-      .Times(0);
+  EXPECT_CALL(a, DoA(5)).Times(0);
+  EXPECT_CALL(a, DoA(6)).With(_).Times(0);
 }
 
 TEST(ExpectCallSyntaxTest, WithCanAppearAtMostOnce) {
   MockA a;
 
-  EXPECT_NONFATAL_FAILURE({  // NOLINT
-    EXPECT_CALL(a, DoA(6))
-        .With(_)
-        .With(_);
-  }, ".With() cannot appear more than once in an EXPECT_CALL()");
+  EXPECT_NONFATAL_FAILURE(
+      {  // NOLINT
+        EXPECT_CALL(a, DoA(6)).With(_).With(_);
+      },
+      ".With() cannot appear more than once in an EXPECT_CALL()");
 
   a.DoA(6);
 }
@@ -338,19 +292,19 @@ TEST(ExpectCallSyntaxTest, WithCanAppearAtMostOnce) {
 TEST(ExpectCallSyntaxTest, WithMustBeFirstClause) {
   MockA a;
 
-  EXPECT_NONFATAL_FAILURE({  // NOLINT
-    EXPECT_CALL(a, DoA(1))
-        .Times(1)
-        .With(_);
-  }, ".With() must be the first clause in an EXPECT_CALL()");
+  EXPECT_NONFATAL_FAILURE(
+      {  // NOLINT
+        EXPECT_CALL(a, DoA(1)).Times(1).With(_);
+      },
+      ".With() must be the first clause in an EXPECT_CALL()");
 
   a.DoA(1);
 
-  EXPECT_NONFATAL_FAILURE({  // NOLINT
-    EXPECT_CALL(a, DoA(2))
-        .WillOnce(Return())
-        .With(_);
-  }, ".With() must be the first clause in an EXPECT_CALL()");
+  EXPECT_NONFATAL_FAILURE(
+      {  // NOLINT
+        EXPECT_CALL(a, DoA(2)).WillOnce(Return()).With(_);
+      },
+      ".With() must be the first clause in an EXPECT_CALL()");
 
   a.DoA(2);
 }
@@ -358,12 +312,9 @@ TEST(ExpectCallSyntaxTest, WithMustBeFirstClause) {
 TEST(ExpectCallSyntaxTest, TimesCanBeInferred) {
   MockA a;
 
-  EXPECT_CALL(a, DoA(1))
-      .WillOnce(Return());
+  EXPECT_CALL(a, DoA(1)).WillOnce(Return());
 
-  EXPECT_CALL(a, DoA(2))
-      .WillOnce(Return())
-      .WillRepeatedly(Return());
+  EXPECT_CALL(a, DoA(2)).WillOnce(Return()).WillRepeatedly(Return());
 
   a.DoA(1);
   a.DoA(2);
@@ -373,11 +324,11 @@ TEST(ExpectCallSyntaxTest, TimesCanBeInferred) {
 TEST(ExpectCallSyntaxTest, TimesCanAppearAtMostOnce) {
   MockA a;
 
-  EXPECT_NONFATAL_FAILURE({  // NOLINT
-    EXPECT_CALL(a, DoA(1))
-        .Times(1)
-        .Times(2);
-  }, ".Times() cannot appear more than once in an EXPECT_CALL()");
+  EXPECT_NONFATAL_FAILURE(
+      {  // NOLINT
+        EXPECT_CALL(a, DoA(1)).Times(1).Times(2);
+      },
+      ".Times() cannot appear more than once in an EXPECT_CALL()");
 
   a.DoA(1);
   a.DoA(1);
@@ -387,11 +338,11 @@ TEST(ExpectCallSyntaxTest, TimesMustBeBeforeInSequence) {
   MockA a;
   Sequence s;
 
-  EXPECT_NONFATAL_FAILURE({  // NOLINT
-    EXPECT_CALL(a, DoA(1))
-        .InSequence(s)
-        .Times(1);
-  }, ".Times() cannot appear after ");
+  EXPECT_NONFATAL_FAILURE(
+      {  // NOLINT
+        EXPECT_CALL(a, DoA(1)).InSequence(s).Times(1);
+      },
+      ".Times() may only appear *before* ");
 
   a.DoA(1);
 }
@@ -401,8 +352,7 @@ TEST(ExpectCallSyntaxTest, InSequenceIsOptional) {
   Sequence s;
 
   EXPECT_CALL(a, DoA(1));
-  EXPECT_CALL(a, DoA(2))
-      .InSequence(s);
+  EXPECT_CALL(a, DoA(2)).InSequence(s);
 
   a.DoA(1);
   a.DoA(2);
@@ -412,9 +362,7 @@ TEST(ExpectCallSyntaxTest, InSequenceCanAppearMultipleTimes) {
   MockA a;
   Sequence s1, s2;
 
-  EXPECT_CALL(a, DoA(1))
-      .InSequence(s1, s2)
-      .InSequence(s1);
+  EXPECT_CALL(a, DoA(1)).InSequence(s1, s2).InSequence(s1);
 
   a.DoA(1);
 }
@@ -423,13 +371,12 @@ TEST(ExpectCallSyntaxTest, InSequenceMustBeBeforeAfter) {
   MockA a;
   Sequence s;
 
-  Expectation e = EXPECT_CALL(a, DoA(1))
-      .Times(AnyNumber());
-  EXPECT_NONFATAL_FAILURE({  // NOLINT
-    EXPECT_CALL(a, DoA(2))
-        .After(e)
-        .InSequence(s);
-  }, ".InSequence() cannot appear after ");
+  Expectation e = EXPECT_CALL(a, DoA(1)).Times(AnyNumber());
+  EXPECT_NONFATAL_FAILURE(
+      {  // NOLINT
+        EXPECT_CALL(a, DoA(2)).After(e).InSequence(s);
+      },
+      ".InSequence() cannot appear after ");
 
   a.DoA(2);
 }
@@ -438,11 +385,11 @@ TEST(ExpectCallSyntaxTest, InSequenceMustBeBeforeWillOnce) {
   MockA a;
   Sequence s;
 
-  EXPECT_NONFATAL_FAILURE({  // NOLINT
-    EXPECT_CALL(a, DoA(1))
-        .WillOnce(Return())
-        .InSequence(s);
-  }, ".InSequence() cannot appear after ");
+  EXPECT_NONFATAL_FAILURE(
+      {  // NOLINT
+        EXPECT_CALL(a, DoA(1)).WillOnce(Return()).InSequence(s);
+      },
+      ".InSequence() cannot appear after ");
 
   a.DoA(1);
 }
@@ -451,11 +398,9 @@ TEST(ExpectCallSyntaxTest, AfterMustBeBeforeWillOnce) {
   MockA a;
 
   Expectation e = EXPECT_CALL(a, DoA(1));
-  EXPECT_NONFATAL_FAILURE({
-    EXPECT_CALL(a, DoA(2))
-        .WillOnce(Return())
-        .After(e);
-  }, ".After() cannot appear after ");
+  EXPECT_NONFATAL_FAILURE(
+      { EXPECT_CALL(a, DoA(2)).WillOnce(Return()).After(e); },
+      ".After() cannot appear after ");
 
   a.DoA(1);
   a.DoA(2);
@@ -465,8 +410,7 @@ TEST(ExpectCallSyntaxTest, WillIsOptional) {
   MockA a;
 
   EXPECT_CALL(a, DoA(1));
-  EXPECT_CALL(a, DoA(2))
-      .WillOnce(Return());
+  EXPECT_CALL(a, DoA(2)).WillOnce(Return());
 
   a.DoA(1);
   a.DoA(2);
@@ -485,11 +429,11 @@ TEST(ExpectCallSyntaxTest, WillCanAppearMultipleTimes) {
 TEST(ExpectCallSyntaxTest, WillMustBeBeforeWillRepeatedly) {
   MockA a;
 
-  EXPECT_NONFATAL_FAILURE({  // NOLINT
-    EXPECT_CALL(a, DoA(1))
-        .WillRepeatedly(Return())
-        .WillOnce(Return());
-  }, ".WillOnce() cannot appear after ");
+  EXPECT_NONFATAL_FAILURE(
+      {  // NOLINT
+        EXPECT_CALL(a, DoA(1)).WillRepeatedly(Return()).WillOnce(Return());
+      },
+      ".WillOnce() cannot appear after ");
 
   a.DoA(1);
 }
@@ -497,11 +441,8 @@ TEST(ExpectCallSyntaxTest, WillMustBeBeforeWillRepeatedly) {
 TEST(ExpectCallSyntaxTest, WillRepeatedlyIsOptional) {
   MockA a;
 
-  EXPECT_CALL(a, DoA(1))
-      .WillOnce(Return());
-  EXPECT_CALL(a, DoA(2))
-      .WillOnce(Return())
-      .WillRepeatedly(Return());
+  EXPECT_CALL(a, DoA(1)).WillOnce(Return());
+  EXPECT_CALL(a, DoA(2)).WillOnce(Return()).WillRepeatedly(Return());
 
   a.DoA(1);
   a.DoA(2);
@@ -511,30 +452,30 @@ TEST(ExpectCallSyntaxTest, WillRepeatedlyIsOptional) {
 TEST(ExpectCallSyntaxTest, WillRepeatedlyCannotAppearMultipleTimes) {
   MockA a;
 
-  EXPECT_NONFATAL_FAILURE({  // NOLINT
-    EXPECT_CALL(a, DoA(1))
-        .WillRepeatedly(Return())
-        .WillRepeatedly(Return());
-  }, ".WillRepeatedly() cannot appear more than once in an "
-     "EXPECT_CALL()");
+  EXPECT_NONFATAL_FAILURE(
+      {  // NOLINT
+        EXPECT_CALL(a, DoA(1)).WillRepeatedly(Return()).WillRepeatedly(
+            Return());
+      },
+      ".WillRepeatedly() cannot appear more than once in an "
+      "EXPECT_CALL()");
 }
 
 TEST(ExpectCallSyntaxTest, WillRepeatedlyMustBeBeforeRetiresOnSaturation) {
   MockA a;
 
-  EXPECT_NONFATAL_FAILURE({  // NOLINT
-    EXPECT_CALL(a, DoA(1))
-        .RetiresOnSaturation()
-        .WillRepeatedly(Return());
-  }, ".WillRepeatedly() cannot appear after ");
+  EXPECT_NONFATAL_FAILURE(
+      {  // NOLINT
+        EXPECT_CALL(a, DoA(1)).RetiresOnSaturation().WillRepeatedly(Return());
+      },
+      ".WillRepeatedly() cannot appear after ");
 }
 
 TEST(ExpectCallSyntaxTest, RetiresOnSaturationIsOptional) {
   MockA a;
 
   EXPECT_CALL(a, DoA(1));
-  EXPECT_CALL(a, DoA(1))
-      .RetiresOnSaturation();
+  EXPECT_CALL(a, DoA(1)).RetiresOnSaturation();
 
   a.DoA(1);
   a.DoA(1);
@@ -543,11 +484,11 @@ TEST(ExpectCallSyntaxTest, RetiresOnSaturationIsOptional) {
 TEST(ExpectCallSyntaxTest, RetiresOnSaturationCannotAppearMultipleTimes) {
   MockA a;
 
-  EXPECT_NONFATAL_FAILURE({  // NOLINT
-    EXPECT_CALL(a, DoA(1))
-        .RetiresOnSaturation()
-        .RetiresOnSaturation();
-  }, ".RetiresOnSaturation() cannot appear more than once");
+  EXPECT_NONFATAL_FAILURE(
+      {  // NOLINT
+        EXPECT_CALL(a, DoA(1)).RetiresOnSaturation().RetiresOnSaturation();
+      },
+      ".RetiresOnSaturation() cannot appear more than once");
 
   a.DoA(1);
 }
@@ -558,16 +499,20 @@ TEST(ExpectCallSyntaxTest, DefaultCardinalityIsOnce) {
     EXPECT_CALL(a, DoA(1));
     a.DoA(1);
   }
-  EXPECT_NONFATAL_FAILURE({  // NOLINT
-    MockA a;
-    EXPECT_CALL(a, DoA(1));
-  }, "to be called once");
-  EXPECT_NONFATAL_FAILURE({  // NOLINT
-    MockA a;
-    EXPECT_CALL(a, DoA(1));
-    a.DoA(1);
-    a.DoA(1);
-  }, "to be called once");
+  EXPECT_NONFATAL_FAILURE(
+      {  // NOLINT
+        MockA a;
+        EXPECT_CALL(a, DoA(1));
+      },
+      "to be called once");
+  EXPECT_NONFATAL_FAILURE(
+      {  // NOLINT
+        MockA a;
+        EXPECT_CALL(a, DoA(1));
+        a.DoA(1);
+        a.DoA(1);
+      },
+      "to be called once");
 }
 
 #if GTEST_HAS_STREAM_REDIRECTION
@@ -580,13 +525,9 @@ TEST(ExpectCallSyntaxTest, DoesNotWarnOnAdequateActionCount) {
     MockB b;
 
     // It's always fine to omit WillOnce() entirely.
-    EXPECT_CALL(b, DoB())
-        .Times(0);
-    EXPECT_CALL(b, DoB(1))
-        .Times(AtMost(1));
-    EXPECT_CALL(b, DoB(2))
-        .Times(1)
-        .WillRepeatedly(Return(1));
+    EXPECT_CALL(b, DoB()).Times(0);
+    EXPECT_CALL(b, DoB(1)).Times(AtMost(1));
+    EXPECT_CALL(b, DoB(2)).Times(1).WillRepeatedly(Return(1));
 
     // It's fine for the number of WillOnce()s to equal the upper bound.
     EXPECT_CALL(b, DoB(3))
@@ -596,10 +537,8 @@ TEST(ExpectCallSyntaxTest, DoesNotWarnOnAdequateActionCount) {
 
     // It's fine for the number of WillOnce()s to be smaller than the
     // upper bound when there is a WillRepeatedly().
-    EXPECT_CALL(b, DoB(4))
-        .Times(AtMost(3))
-        .WillOnce(Return(1))
-        .WillRepeatedly(Return(2));
+    EXPECT_CALL(b, DoB(4)).Times(AtMost(3)).WillOnce(Return(1)).WillRepeatedly(
+        Return(2));
 
     // Satisfies the above expectations.
     b.DoB(2);
@@ -616,13 +555,9 @@ TEST(ExpectCallSyntaxTest, WarnsOnTooManyActions) {
     MockB b;
 
     // Warns when the number of WillOnce()s is larger than the upper bound.
-    EXPECT_CALL(b, DoB())
-        .Times(0)
-        .WillOnce(Return(1));  // #1
-    EXPECT_CALL(b, DoB())
-        .Times(AtMost(1))
-        .WillOnce(Return(1))
-        .WillOnce(Return(2));  // #2
+    EXPECT_CALL(b, DoB()).Times(0).WillOnce(Return(1));  // #1
+    EXPECT_CALL(b, DoB()).Times(AtMost(1)).WillOnce(Return(1)).WillOnce(
+        Return(2));  // #2
     EXPECT_CALL(b, DoB(1))
         .Times(1)
         .WillOnce(Return(1))
@@ -631,41 +566,34 @@ TEST(ExpectCallSyntaxTest, WarnsOnTooManyActions) {
 
     // Warns when the number of WillOnce()s equals the upper bound and
     // there is a WillRepeatedly().
-    EXPECT_CALL(b, DoB())
-        .Times(0)
-        .WillRepeatedly(Return(1));  // #4
-    EXPECT_CALL(b, DoB(2))
-        .Times(1)
-        .WillOnce(Return(1))
-        .WillRepeatedly(Return(2));  // #5
+    EXPECT_CALL(b, DoB()).Times(0).WillRepeatedly(Return(1));  // #4
+    EXPECT_CALL(b, DoB(2)).Times(1).WillOnce(Return(1)).WillRepeatedly(
+        Return(2));  // #5
 
     // Satisfies the above expectations.
     b.DoB(1);
     b.DoB(2);
   }
   const std::string output = GetCapturedStdout();
-  EXPECT_PRED_FORMAT2(
-      IsSubstring,
-      "Too many actions specified in EXPECT_CALL(b, DoB())...\n"
-      "Expected to be never called, but has 1 WillOnce().",
-      output);  // #1
-  EXPECT_PRED_FORMAT2(
-      IsSubstring,
-      "Too many actions specified in EXPECT_CALL(b, DoB())...\n"
-      "Expected to be called at most once, "
-      "but has 2 WillOnce()s.",
-      output);  // #2
+  EXPECT_PRED_FORMAT2(IsSubstring,
+                      "Too many actions specified in EXPECT_CALL(b, DoB())...\n"
+                      "Expected to be never called, but has 1 WillOnce().",
+                      output);  // #1
+  EXPECT_PRED_FORMAT2(IsSubstring,
+                      "Too many actions specified in EXPECT_CALL(b, DoB())...\n"
+                      "Expected to be called at most once, "
+                      "but has 2 WillOnce()s.",
+                      output);  // #2
   EXPECT_PRED_FORMAT2(
       IsSubstring,
       "Too many actions specified in EXPECT_CALL(b, DoB(1))...\n"
       "Expected to be called once, but has 2 WillOnce()s.",
       output);  // #3
-  EXPECT_PRED_FORMAT2(
-      IsSubstring,
-      "Too many actions specified in EXPECT_CALL(b, DoB())...\n"
-      "Expected to be never called, but has 0 WillOnce()s "
-      "and a WillRepeatedly().",
-      output);  // #4
+  EXPECT_PRED_FORMAT2(IsSubstring,
+                      "Too many actions specified in EXPECT_CALL(b, DoB())...\n"
+                      "Expected to be never called, but has 0 WillOnce()s "
+                      "and a WillRepeatedly().",
+                      output);  // #4
   EXPECT_PRED_FORMAT2(
       IsSubstring,
       "Too many actions specified in EXPECT_CALL(b, DoB(2))...\n"
@@ -679,26 +607,23 @@ TEST(ExpectCallSyntaxTest, WarnsOnTooManyActions) {
 TEST(ExpectCallSyntaxTest, WarnsOnTooFewActions) {
   MockB b;
 
-  EXPECT_CALL(b, DoB())
-      .Times(Between(2, 3))
-      .WillOnce(Return(1));
+  EXPECT_CALL(b, DoB()).Times(Between(2, 3)).WillOnce(Return(1));
 
   CaptureStdout();
   b.DoB();
   const std::string output = GetCapturedStdout();
-  EXPECT_PRED_FORMAT2(
-      IsSubstring,
-      "Too few actions specified in EXPECT_CALL(b, DoB())...\n"
-      "Expected to be called between 2 and 3 times, "
-      "but has only 1 WillOnce().",
-      output);
+  EXPECT_PRED_FORMAT2(IsSubstring,
+                      "Too few actions specified in EXPECT_CALL(b, DoB())...\n"
+                      "Expected to be called between 2 and 3 times, "
+                      "but has only 1 WillOnce().",
+                      output);
   b.DoB();
 }
 
 TEST(ExpectCallSyntaxTest, WarningIsErrorWithFlag) {
-  int original_behavior = testing::GMOCK_FLAG(default_mock_behavior);
+  int original_behavior = GMOCK_FLAG_GET(default_mock_behavior);
 
-  testing::GMOCK_FLAG(default_mock_behavior) = kAllow;
+  GMOCK_FLAG_SET(default_mock_behavior, kAllow);
   CaptureStdout();
   {
     MockA a;
@@ -707,7 +632,7 @@ TEST(ExpectCallSyntaxTest, WarningIsErrorWithFlag) {
   std::string output = GetCapturedStdout();
   EXPECT_TRUE(output.empty()) << output;
 
-  testing::GMOCK_FLAG(default_mock_behavior) = kWarn;
+  GMOCK_FLAG_SET(default_mock_behavior, kWarn);
   CaptureStdout();
   {
     MockA a;
@@ -718,14 +643,16 @@ TEST(ExpectCallSyntaxTest, WarningIsErrorWithFlag) {
   EXPECT_PRED_FORMAT2(IsSubstring, "Uninteresting mock function call",
                       warning_output);
 
-  testing::GMOCK_FLAG(default_mock_behavior) = kFail;
-  EXPECT_NONFATAL_FAILURE({
-    MockA a;
-    a.DoA(0);
-  }, "Uninteresting mock function call");
+  GMOCK_FLAG_SET(default_mock_behavior, kFail);
+  EXPECT_NONFATAL_FAILURE(
+      {
+        MockA a;
+        a.DoA(0);
+      },
+      "Uninteresting mock function call");
 
   // Out of bounds values are converted to kWarn
-  testing::GMOCK_FLAG(default_mock_behavior) = -1;
+  GMOCK_FLAG_SET(default_mock_behavior, -1);
   CaptureStdout();
   {
     MockA a;
@@ -735,7 +662,7 @@ TEST(ExpectCallSyntaxTest, WarningIsErrorWithFlag) {
   EXPECT_PRED_FORMAT2(IsSubstring, "GMOCK WARNING", warning_output);
   EXPECT_PRED_FORMAT2(IsSubstring, "Uninteresting mock function call",
                       warning_output);
-  testing::GMOCK_FLAG(default_mock_behavior) = 3;
+  GMOCK_FLAG_SET(default_mock_behavior, 3);
   CaptureStdout();
   {
     MockA a;
@@ -746,7 +673,7 @@ TEST(ExpectCallSyntaxTest, WarningIsErrorWithFlag) {
   EXPECT_PRED_FORMAT2(IsSubstring, "Uninteresting mock function call",
                       warning_output);
 
-  testing::GMOCK_FLAG(default_mock_behavior) = original_behavior;
+  GMOCK_FLAG_SET(default_mock_behavior, original_behavior);
 }
 
 #endif  // GTEST_HAS_STREAM_REDIRECTION
@@ -766,8 +693,7 @@ TEST(OnCallTest, TakesBuiltInDefaultActionWhenNoOnCall) {
 // matches the invocation.
 TEST(OnCallTest, TakesBuiltInDefaultActionWhenNoOnCallMatches) {
   MockB b;
-  ON_CALL(b, DoB(1))
-      .WillByDefault(Return(1));
+  ON_CALL(b, DoB(1)).WillByDefault(Return(1));
   EXPECT_CALL(b, DoB(_));
 
   EXPECT_EQ(0, b.DoB(2));
@@ -776,12 +702,9 @@ TEST(OnCallTest, TakesBuiltInDefaultActionWhenNoOnCallMatches) {
 // Tests that the last matching ON_CALL() action is taken.
 TEST(OnCallTest, PicksLastMatchingOnCall) {
   MockB b;
-  ON_CALL(b, DoB(_))
-      .WillByDefault(Return(3));
-  ON_CALL(b, DoB(2))
-      .WillByDefault(Return(2));
-  ON_CALL(b, DoB(1))
-      .WillByDefault(Return(1));
+  ON_CALL(b, DoB(_)).WillByDefault(Return(3));
+  ON_CALL(b, DoB(2)).WillByDefault(Return(2));
+  ON_CALL(b, DoB(1)).WillByDefault(Return(1));
   EXPECT_CALL(b, DoB(_));
 
   EXPECT_EQ(2, b.DoB(2));
@@ -805,25 +728,25 @@ TEST(ExpectCallTest, AllowsAnyCallWhenNoSpec) {
 // Tests that the last matching EXPECT_CALL() fires.
 TEST(ExpectCallTest, PicksLastMatchingExpectCall) {
   MockB b;
-  EXPECT_CALL(b, DoB(_))
-      .WillRepeatedly(Return(2));
-  EXPECT_CALL(b, DoB(1))
-      .WillRepeatedly(Return(1));
+  EXPECT_CALL(b, DoB(_)).WillRepeatedly(Return(2));
+  EXPECT_CALL(b, DoB(1)).WillRepeatedly(Return(1));
 
   EXPECT_EQ(1, b.DoB(1));
 }
 
 // Tests lower-bound violation.
 TEST(ExpectCallTest, CatchesTooFewCalls) {
-  EXPECT_NONFATAL_FAILURE({  // NOLINT
-    MockB b;
-    EXPECT_CALL(b, DoB(5))
-        .Times(AtLeast(2));
+  EXPECT_NONFATAL_FAILURE(
+      {  // NOLINT
+        MockB b;
+        EXPECT_CALL(b, DoB(5)).Description("DoB Method").Times(AtLeast(2));
 
-    b.DoB(5);
-  }, "Actual function call count doesn't match EXPECT_CALL(b, DoB(5))...\n"
-     "         Expected: to be called at least twice\n"
-     "           Actual: called once - unsatisfied and active");
+        b.DoB(5);
+      },
+      "Actual function \"DoB Method\" call count "
+      "doesn't match EXPECT_CALL(b, DoB(5))...\n"
+      "         Expected: to be called at least twice\n"
+      "           Actual: called once - unsatisfied and active");
 }
 
 // Tests that the cardinality can be inferred when no Times(...) is
@@ -831,28 +754,24 @@ TEST(ExpectCallTest, CatchesTooFewCalls) {
 TEST(ExpectCallTest, InfersCardinalityWhenThereIsNoWillRepeatedly) {
   {
     MockB b;
-    EXPECT_CALL(b, DoB())
-        .WillOnce(Return(1))
-        .WillOnce(Return(2));
+    EXPECT_CALL(b, DoB()).WillOnce(Return(1)).WillOnce(Return(2));
 
     EXPECT_EQ(1, b.DoB());
     EXPECT_EQ(2, b.DoB());
   }
 
-  EXPECT_NONFATAL_FAILURE({  // NOLINT
-    MockB b;
-    EXPECT_CALL(b, DoB())
-        .WillOnce(Return(1))
-        .WillOnce(Return(2));
+  EXPECT_NONFATAL_FAILURE(
+      {  // NOLINT
+        MockB b;
+        EXPECT_CALL(b, DoB()).WillOnce(Return(1)).WillOnce(Return(2));
 
-    EXPECT_EQ(1, b.DoB());
-  }, "to be called twice");
+        EXPECT_EQ(1, b.DoB());
+      },
+      "to be called twice");
 
   {  // NOLINT
     MockB b;
-    EXPECT_CALL(b, DoB())
-        .WillOnce(Return(1))
-        .WillOnce(Return(2));
+    EXPECT_CALL(b, DoB()).WillOnce(Return(1)).WillOnce(Return(2));
 
     EXPECT_EQ(1, b.DoB());
     EXPECT_EQ(2, b.DoB());
@@ -863,40 +782,79 @@ TEST(ExpectCallTest, InfersCardinalityWhenThereIsNoWillRepeatedly) {
 TEST(ExpectCallTest, InfersCardinality1WhenThereIsWillRepeatedly) {
   {
     MockB b;
-    EXPECT_CALL(b, DoB())
-        .WillOnce(Return(1))
-        .WillRepeatedly(Return(2));
+    EXPECT_CALL(b, DoB()).WillOnce(Return(1)).WillRepeatedly(Return(2));
 
     EXPECT_EQ(1, b.DoB());
   }
 
   {  // NOLINT
     MockB b;
-    EXPECT_CALL(b, DoB())
-        .WillOnce(Return(1))
-        .WillRepeatedly(Return(2));
+    EXPECT_CALL(b, DoB()).WillOnce(Return(1)).WillRepeatedly(Return(2));
 
     EXPECT_EQ(1, b.DoB());
     EXPECT_EQ(2, b.DoB());
     EXPECT_EQ(2, b.DoB());
   }
 
-  EXPECT_NONFATAL_FAILURE({  // NOLINT
-    MockB b;
-    EXPECT_CALL(b, DoB())
-        .WillOnce(Return(1))
-        .WillRepeatedly(Return(2));
-  }, "to be called at least once");
+  EXPECT_NONFATAL_FAILURE(
+      {  // NOLINT
+        MockB b;
+        EXPECT_CALL(b, DoB()).WillOnce(Return(1)).WillRepeatedly(Return(2));
+      },
+      "to be called at least once");
 }
+
+#if defined(GTEST_INTERNAL_CPLUSPLUS_LANG) && \
+    GTEST_INTERNAL_CPLUSPLUS_LANG >= 201703L
+
+// It should be possible to return a non-moveable type from a mock action in
+// C++17 and above, where it's guaranteed that such a type can be initialized
+// from a prvalue returned from a function.
+TEST(ExpectCallTest, NonMoveableType) {
+  // Define a non-moveable result type.
+  struct NonMoveableStruct {
+    explicit NonMoveableStruct(int x_in) : x(x_in) {}
+    NonMoveableStruct(NonMoveableStruct&&) = delete;
+
+    int x;
+  };
+
+  static_assert(!std::is_move_constructible_v<NonMoveableStruct>);
+  static_assert(!std::is_copy_constructible_v<NonMoveableStruct>);
+
+  static_assert(!std::is_move_assignable_v<NonMoveableStruct>);
+  static_assert(!std::is_copy_assignable_v<NonMoveableStruct>);
+
+  // We should be able to use a callable that returns that result as both a
+  // OnceAction and an Action, whether the callable ignores arguments or not.
+  const auto return_17 = [] { return NonMoveableStruct(17); };
+
+  static_cast<void>(OnceAction<NonMoveableStruct()>{return_17});
+  static_cast<void>(Action<NonMoveableStruct()>{return_17});
+
+  static_cast<void>(OnceAction<NonMoveableStruct(int)>{return_17});
+  static_cast<void>(Action<NonMoveableStruct(int)>{return_17});
+
+  // It should be possible to return the result end to end through an
+  // EXPECT_CALL statement, with both WillOnce and WillRepeatedly.
+  MockFunction<NonMoveableStruct()> mock;
+  EXPECT_CALL(mock, Call)   //
+      .WillOnce(return_17)  //
+      .WillRepeatedly(return_17);
+
+  EXPECT_EQ(17, mock.AsStdFunction()().x);
+  EXPECT_EQ(17, mock.AsStdFunction()().x);
+  EXPECT_EQ(17, mock.AsStdFunction()().x);
+}
+
+#endif  // C++17 and above
 
 // Tests that the n-th action is taken for the n-th matching
 // invocation.
 TEST(ExpectCallTest, NthMatchTakesNthAction) {
   MockB b;
-  EXPECT_CALL(b, DoB())
-      .WillOnce(Return(1))
-      .WillOnce(Return(2))
-      .WillOnce(Return(3));
+  EXPECT_CALL(b, DoB()).WillOnce(Return(1)).WillOnce(Return(2)).WillOnce(
+      Return(3));
 
   EXPECT_EQ(1, b.DoB());
   EXPECT_EQ(2, b.DoB());
@@ -907,9 +865,7 @@ TEST(ExpectCallTest, NthMatchTakesNthAction) {
 // list is exhausted.
 TEST(ExpectCallTest, TakesRepeatedActionWhenWillListIsExhausted) {
   MockB b;
-  EXPECT_CALL(b, DoB())
-      .WillOnce(Return(1))
-      .WillRepeatedly(Return(2));
+  EXPECT_CALL(b, DoB()).WillOnce(Return(1)).WillRepeatedly(Return(2));
 
   EXPECT_EQ(1, b.DoB());
   EXPECT_EQ(2, b.DoB());
@@ -922,8 +878,7 @@ TEST(ExpectCallTest, TakesRepeatedActionWhenWillListIsExhausted) {
 // exhausted and there is no WillRepeatedly().
 TEST(ExpectCallTest, TakesDefaultActionWhenWillListIsExhausted) {
   MockB b;
-  EXPECT_CALL(b, DoB(_))
-      .Times(1);
+  EXPECT_CALL(b, DoB(_)).Times(1);
   EXPECT_CALL(b, DoB())
       .Times(AnyNumber())
       .WillOnce(Return(1))
@@ -951,7 +906,7 @@ TEST(ExpectCallTest, TakesDefaultActionWhenWillListIsExhausted) {
                         " - returning default value."));
 }
 
-TEST(FunctionMockerMessageTest, ReportsExpectCallLocationForExhausedActions) {
+TEST(FunctionMockerMessageTest, ReportsExpectCallLocationForExhaustedActions) {
   MockB b;
   std::string expect_call_location = FormatFileLocation(__FILE__, __LINE__ + 1);
   EXPECT_CALL(b, DoB()).Times(AnyNumber()).WillOnce(Return(1));
@@ -985,8 +940,7 @@ TEST(UninterestingCallTest, DoesDefaultAction) {
   // When there is an ON_CALL() statement, the action specified by it
   // should be taken.
   MockA a;
-  ON_CALL(a, Binary(_, _))
-      .WillByDefault(Return(true));
+  ON_CALL(a, Binary(_, _)).WillByDefault(Return(true));
   EXPECT_TRUE(a.Binary(1, 2));
 
   // When there is no ON_CALL(), the default value for the return type
@@ -1000,8 +954,7 @@ TEST(UnexpectedCallTest, DoesDefaultAction) {
   // When there is an ON_CALL() statement, the action specified by it
   // should be taken.
   MockA a;
-  ON_CALL(a, Binary(_, _))
-      .WillByDefault(Return(true));
+  ON_CALL(a, Binary(_, _)).WillByDefault(Return(true));
   EXPECT_CALL(a, Binary(0, 0));
   a.Binary(0, 0);
   bool result = false;
@@ -1012,11 +965,9 @@ TEST(UnexpectedCallTest, DoesDefaultAction) {
   // When there is no ON_CALL(), the default value for the return type
   // should be returned.
   MockB b;
-  EXPECT_CALL(b, DoB(0))
-      .Times(0);
+  EXPECT_CALL(b, DoB(0)).Times(0);
   int n = -1;
-  EXPECT_NONFATAL_FAILURE(n = b.DoB(1),
-                          "Unexpected mock function call");
+  EXPECT_NONFATAL_FAILURE(n = b.DoB(1), "Unexpected mock function call");
   EXPECT_EQ(0, n);
 }
 
@@ -1093,14 +1044,12 @@ TEST(UnexpectedCallTest, GeneartesFailureForNonVoidFunction) {
 // match the call.
 TEST(UnexpectedCallTest, RetiredExpectation) {
   MockB b;
-  EXPECT_CALL(b, DoB(1))
-      .RetiresOnSaturation();
+  EXPECT_CALL(b, DoB(1)).RetiresOnSaturation();
 
   b.DoB(1);
-  EXPECT_NONFATAL_FAILURE(
-      b.DoB(1),
-      "         Expected: the expectation is active\n"
-      "           Actual: it is retired");
+  EXPECT_NONFATAL_FAILURE(b.DoB(1),
+                          "         Expected: the expectation is active\n"
+                          "           Actual: it is retired");
 }
 
 // Tests that Google Mock explains that an expectation that doesn't
@@ -1109,27 +1058,21 @@ TEST(UnexpectedCallTest, UnmatchedArguments) {
   MockB b;
   EXPECT_CALL(b, DoB(1));
 
-  EXPECT_NONFATAL_FAILURE(
-      b.DoB(2),
-      "  Expected arg #0: is equal to 1\n"
-      "           Actual: 2\n");
+  EXPECT_NONFATAL_FAILURE(b.DoB(2),
+                          "  Expected arg #0: is equal to 1\n"
+                          "           Actual: 2\n");
   b.DoB(1);
 }
 
 // Tests that Google Mock explains that an expectation with
 // unsatisfied pre-requisites doesn't match the call.
-TEST(UnexpectedCallTest, UnsatisifiedPrerequisites) {
+TEST(UnexpectedCallTest, UnsatisfiedPrerequisites) {
   Sequence s1, s2;
   MockB b;
-  EXPECT_CALL(b, DoB(1))
-      .InSequence(s1);
-  EXPECT_CALL(b, DoB(2))
-      .Times(AnyNumber())
-      .InSequence(s1);
-  EXPECT_CALL(b, DoB(3))
-      .InSequence(s2);
-  EXPECT_CALL(b, DoB(4))
-      .InSequence(s1, s2);
+  EXPECT_CALL(b, DoB(1)).InSequence(s1);
+  EXPECT_CALL(b, DoB(2)).Times(AnyNumber()).InSequence(s1);
+  EXPECT_CALL(b, DoB(3)).InSequence(s2);
+  EXPECT_CALL(b, DoB(4)).InSequence(s1, s2);
 
   ::testing::TestPartResultArray failures;
   {
@@ -1146,27 +1089,22 @@ TEST(UnexpectedCallTest, UnsatisifiedPrerequisites) {
 
   // Verifies that the failure message contains the two unsatisfied
   // pre-requisites but not the satisfied one.
-#if GTEST_USES_PCRE
-  EXPECT_THAT(r.message(), ContainsRegex(
-      // PCRE has trouble using (.|\n) to match any character, but
-      // supports the (?s) prefix for using . to match any character.
-      "(?s)the following immediate pre-requisites are not satisfied:\n"
-      ".*: pre-requisite #0\n"
-      ".*: pre-requisite #1"));
-#elif GTEST_USES_POSIX_RE
-  EXPECT_THAT(r.message(), ContainsRegex(
-      // POSIX RE doesn't understand the (?s) prefix, but has no trouble
-      // with (.|\n).
-      "the following immediate pre-requisites are not satisfied:\n"
-      "(.|\n)*: pre-requisite #0\n"
-      "(.|\n)*: pre-requisite #1"));
+#ifdef GTEST_USES_POSIX_RE
+  EXPECT_THAT(r.message(),
+              ContainsRegex(
+                  // POSIX RE doesn't understand the (?s) prefix, but has no
+                  // trouble with (.|\n).
+                  "the following immediate pre-requisites are not satisfied:\n"
+                  "(.|\n)*: pre-requisite #0\n"
+                  "(.|\n)*: pre-requisite #1"));
 #else
   // We can only use Google Test's own simple regex.
-  EXPECT_THAT(r.message(), ContainsRegex(
-      "the following immediate pre-requisites are not satisfied:"));
+  EXPECT_THAT(r.message(),
+              ContainsRegex(
+                  "the following immediate pre-requisites are not satisfied:"));
   EXPECT_THAT(r.message(), ContainsRegex(": pre-requisite #0"));
   EXPECT_THAT(r.message(), ContainsRegex(": pre-requisite #1"));
-#endif  // GTEST_USES_PCRE
+#endif  // GTEST_USES_POSIX_RE
 
   b.DoB(1);
   b.DoB(3);
@@ -1192,8 +1130,7 @@ TEST(ExcessiveCallTest, DoesDefaultAction) {
   // When there is an ON_CALL() statement, the action specified by it
   // should be taken.
   MockA a;
-  ON_CALL(a, Binary(_, _))
-      .WillByDefault(Return(true));
+  ON_CALL(a, Binary(_, _)).WillByDefault(Return(true));
   EXPECT_CALL(a, Binary(0, 0));
   a.Binary(0, 0);
   bool result = false;
@@ -1204,11 +1141,11 @@ TEST(ExcessiveCallTest, DoesDefaultAction) {
   // When there is no ON_CALL(), the default value for the return type
   // should be returned.
   MockB b;
-  EXPECT_CALL(b, DoB(0))
-      .Times(0);
+  EXPECT_CALL(b, DoB(0)).Description("DoB Method").Times(0);
   int n = -1;
-  EXPECT_NONFATAL_FAILURE(n = b.DoB(0),
-                          "Mock function called more times than expected");
+  EXPECT_NONFATAL_FAILURE(
+      n = b.DoB(0),
+      "Mock function \"DoB Method\" called more times than expected");
   EXPECT_EQ(0, n);
 }
 
@@ -1216,11 +1153,11 @@ TEST(ExcessiveCallTest, DoesDefaultAction) {
 // the failure message contains the argument values.
 TEST(ExcessiveCallTest, GeneratesFailureForVoidFunction) {
   MockA a;
-  EXPECT_CALL(a, DoA(_))
-      .Times(0);
+  EXPECT_CALL(a, DoA(_)).Description("DoA Method").Times(0);
   EXPECT_NONFATAL_FAILURE(
       a.DoA(9),
-      "Mock function called more times than expected - returning directly.\n"
+      "Mock function \"DoA Method\" called more times than expected - "
+      "returning directly.\n"
       "    Function call: DoA(9)\n"
       "         Expected: to be never called\n"
       "           Actual: called once - over-saturated and active");
@@ -1253,9 +1190,11 @@ TEST(InSequenceTest, AllExpectationInScopeAreInSequence) {
     EXPECT_CALL(a, DoA(2));
   }
 
-  EXPECT_NONFATAL_FAILURE({  // NOLINT
-    a.DoA(2);
-  }, "Unexpected mock function call");
+  EXPECT_NONFATAL_FAILURE(
+      {  // NOLINT
+        a.DoA(2);
+      },
+      "Unexpected mock function call");
 
   a.DoA(1);
   a.DoA(2);
@@ -1275,10 +1214,12 @@ TEST(InSequenceTest, NestedInSequence) {
     }
   }
 
-  EXPECT_NONFATAL_FAILURE({  // NOLINT
-    a.DoA(1);
-    a.DoA(3);
-  }, "Unexpected mock function call");
+  EXPECT_NONFATAL_FAILURE(
+      {  // NOLINT
+        a.DoA(1);
+        a.DoA(3);
+      },
+      "Unexpected mock function call");
 
   a.DoA(2);
   a.DoA(3);
@@ -1294,9 +1235,11 @@ TEST(InSequenceTest, ExpectationsOutOfScopeAreNotAffected) {
   }
   EXPECT_CALL(a, DoA(3));
 
-  EXPECT_NONFATAL_FAILURE({  // NOLINT
-    a.DoA(2);
-  }, "Unexpected mock function call");
+  EXPECT_NONFATAL_FAILURE(
+      {  // NOLINT
+        a.DoA(2);
+      },
+      "Unexpected mock function call");
 
   a.DoA(3);
   a.DoA(1);
@@ -1310,8 +1253,7 @@ TEST(SequenceTest, AnyOrderIsOkByDefault) {
     MockB b;
 
     EXPECT_CALL(a, DoA(1));
-    EXPECT_CALL(b, DoB())
-        .Times(AnyNumber());
+    EXPECT_CALL(b, DoB()).Times(AnyNumber());
 
     a.DoA(1);
     b.DoB();
@@ -1322,8 +1264,7 @@ TEST(SequenceTest, AnyOrderIsOkByDefault) {
     MockB b;
 
     EXPECT_CALL(a, DoA(1));
-    EXPECT_CALL(b, DoB())
-        .Times(AnyNumber());
+    EXPECT_CALL(b, DoB()).Times(AnyNumber());
 
     b.DoB();
     a.DoA(1);
@@ -1334,16 +1275,12 @@ TEST(SequenceTest, AnyOrderIsOkByDefault) {
 // is specified.
 TEST(SequenceTest, CallsMustBeInStrictOrderWhenSaidSo1) {
   MockA a;
-  ON_CALL(a, ReturnResult(_))
-      .WillByDefault(Return(Result()));
+  ON_CALL(a, ReturnResult(_)).WillByDefault(Return(Result()));
 
   Sequence s;
-  EXPECT_CALL(a, ReturnResult(1))
-      .InSequence(s);
-  EXPECT_CALL(a, ReturnResult(2))
-      .InSequence(s);
-  EXPECT_CALL(a, ReturnResult(3))
-      .InSequence(s);
+  EXPECT_CALL(a, ReturnResult(1)).InSequence(s);
+  EXPECT_CALL(a, ReturnResult(2)).InSequence(s);
+  EXPECT_CALL(a, ReturnResult(3)).InSequence(s);
 
   a.ReturnResult(1);
 
@@ -1358,14 +1295,11 @@ TEST(SequenceTest, CallsMustBeInStrictOrderWhenSaidSo1) {
 // is specified.
 TEST(SequenceTest, CallsMustBeInStrictOrderWhenSaidSo2) {
   MockA a;
-  ON_CALL(a, ReturnResult(_))
-      .WillByDefault(Return(Result()));
+  ON_CALL(a, ReturnResult(_)).WillByDefault(Return(Result()));
 
   Sequence s;
-  EXPECT_CALL(a, ReturnResult(1))
-      .InSequence(s);
-  EXPECT_CALL(a, ReturnResult(2))
-      .InSequence(s);
+  EXPECT_CALL(a, ReturnResult(1)).InSequence(s);
+  EXPECT_CALL(a, ReturnResult(2)).InSequence(s);
 
   // May only be called after a.ReturnResult(1).
   EXPECT_NONFATAL_FAILURE(a.ReturnResult(2), "Unexpected mock function call");
@@ -1378,8 +1312,7 @@ TEST(SequenceTest, CallsMustBeInStrictOrderWhenSaidSo2) {
 class PartialOrderTest : public testing::Test {
  protected:
   PartialOrderTest() {
-    ON_CALL(a_, ReturnResult(_))
-        .WillByDefault(Return(Result()));
+    ON_CALL(a_, ReturnResult(_)).WillByDefault(Return(Result()));
 
     // Specifies this partial ordering:
     //
@@ -1387,16 +1320,10 @@ class PartialOrderTest : public testing::Test {
     //                       a.ReturnResult(2) * n  ==>  a.ReturnResult(3)
     // b.DoB() * 2       ==>
     Sequence x, y;
-    EXPECT_CALL(a_, ReturnResult(1))
-        .InSequence(x);
-    EXPECT_CALL(b_, DoB())
-        .Times(2)
-        .InSequence(y);
-    EXPECT_CALL(a_, ReturnResult(2))
-        .Times(AnyNumber())
-        .InSequence(x, y);
-    EXPECT_CALL(a_, ReturnResult(3))
-        .InSequence(x);
+    EXPECT_CALL(a_, ReturnResult(1)).InSequence(x);
+    EXPECT_CALL(b_, DoB()).Times(2).InSequence(y);
+    EXPECT_CALL(a_, ReturnResult(2)).Times(AnyNumber()).InSequence(x, y);
+    EXPECT_CALL(a_, ReturnResult(3)).InSequence(x);
   }
 
   MockA a_;
@@ -1448,13 +1375,9 @@ TEST(SequenceTest, Retirement) {
   MockA a;
   Sequence s;
 
-  EXPECT_CALL(a, DoA(1))
-      .InSequence(s);
-  EXPECT_CALL(a, DoA(_))
-      .InSequence(s)
-      .RetiresOnSaturation();
-  EXPECT_CALL(a, DoA(1))
-      .InSequence(s);
+  EXPECT_CALL(a, DoA(1)).InSequence(s);
+  EXPECT_CALL(a, DoA(_)).InSequence(s).RetiresOnSaturation();
+  EXPECT_CALL(a, DoA(1)).InSequence(s);
 
   a.DoA(1);
   a.DoA(2);
@@ -1519,12 +1442,12 @@ TEST(ExpectationSetTest, ConstructorsWork) {
 
   Expectation e1;
   const Expectation e2;
-  ExpectationSet es1;  // Default ctor.
+  ExpectationSet es1;                           // Default ctor.
   ExpectationSet es2 = EXPECT_CALL(a, DoA(1));  // Ctor from EXPECT_CALL.
-  ExpectationSet es3 = e1;  // Ctor from Expectation.
-  ExpectationSet es4(e1);   // Ctor from Expectation; alternative syntax.
-  ExpectationSet es5 = e2;  // Ctor from const Expectation.
-  ExpectationSet es6(e2);   // Ctor from const Expectation; alternative syntax.
+  ExpectationSet es3 = e1;                      // Ctor from Expectation.
+  ExpectationSet es4(e1);    // Ctor from Expectation; alternative syntax.
+  ExpectationSet es5 = e2;   // Ctor from const Expectation.
+  ExpectationSet es6(e2);    // Ctor from const Expectation; alternative syntax.
   ExpectationSet es7 = es2;  // Copy ctor.
 
   EXPECT_EQ(0, es1.size());
@@ -1596,7 +1519,7 @@ TEST(ExpectationSetTest, IsEnumerable) {
   EXPECT_TRUE(it != es.end());
   EXPECT_THAT(*it, Eq(Expectation()));
   ++it;
-  EXPECT_TRUE(it== es.end());
+  EXPECT_TRUE(it == es.end());
 }
 
 // Tests the .After() clause.
@@ -1606,8 +1529,7 @@ TEST(AfterTest, SucceedsWhenPartialOrderIsSatisfied) {
   ExpectationSet es;
   es += EXPECT_CALL(a, DoA(1));
   es += EXPECT_CALL(a, DoA(2));
-  EXPECT_CALL(a, DoA(3))
-      .After(es);
+  EXPECT_CALL(a, DoA(3)).After(es);
 
   a.DoA(1);
   a.DoA(2);
@@ -1620,9 +1542,7 @@ TEST(AfterTest, SucceedsWhenTotalOrderIsSatisfied) {
   // The following also verifies that const Expectation objects work
   // too.  Do not remove the const modifiers.
   const Expectation e1 = EXPECT_CALL(a, DoA(1));
-  const Expectation e2 = EXPECT_CALL(b, DoB())
-      .Times(2)
-      .After(e1);
+  const Expectation e2 = EXPECT_CALL(b, DoB()).Times(2).After(e1);
   EXPECT_CALL(a, DoA(2)).After(e2);
 
   a.DoA(1);
@@ -1639,10 +1559,8 @@ TEST(AfterTest, CallsMustBeInStrictOrderWhenSpecifiedSo1) {
   // Define ordering:
   //   a.DoA(1) ==> b.DoB() ==> a.DoA(2)
   Expectation e1 = EXPECT_CALL(a, DoA(1));
-  Expectation e2 = EXPECT_CALL(b, DoB())
-      .After(e1);
-  EXPECT_CALL(a, DoA(2))
-      .After(e2);
+  Expectation e2 = EXPECT_CALL(b, DoB()).After(e1);
+  EXPECT_CALL(a, DoA(2)).After(e2);
 
   a.DoA(1);
 
@@ -1661,11 +1579,8 @@ TEST(AfterTest, CallsMustBeInStrictOrderWhenSpecifiedSo2) {
   // Define ordering:
   //   a.DoA(1) ==> b.DoB() * 2 ==> a.DoA(2)
   Expectation e1 = EXPECT_CALL(a, DoA(1));
-  Expectation e2 = EXPECT_CALL(b, DoB())
-      .Times(2)
-      .After(e1);
-  EXPECT_CALL(a, DoA(2))
-      .After(e2);
+  Expectation e2 = EXPECT_CALL(b, DoB()).Times(2).After(e1);
+  EXPECT_CALL(a, DoA(2)).After(e2);
 
   a.DoA(1);
   b.DoB();
@@ -1680,16 +1595,14 @@ TEST(AfterTest, CallsMustBeInStrictOrderWhenSpecifiedSo2) {
 // Calls must satisfy the partial order when specified so.
 TEST(AfterTest, CallsMustSatisfyPartialOrderWhenSpecifiedSo) {
   MockA a;
-  ON_CALL(a, ReturnResult(_))
-      .WillByDefault(Return(Result()));
+  ON_CALL(a, ReturnResult(_)).WillByDefault(Return(Result()));
 
   // Define ordering:
   //   a.DoA(1) ==>
   //   a.DoA(2) ==> a.ReturnResult(3)
   Expectation e = EXPECT_CALL(a, DoA(1));
   const ExpectationSet es = EXPECT_CALL(a, DoA(2));
-  EXPECT_CALL(a, ReturnResult(3))
-      .After(e, es);
+  EXPECT_CALL(a, ReturnResult(3)).After(e, es);
 
   // May only be called last.
   EXPECT_NONFATAL_FAILURE(a.ReturnResult(3), "Unexpected mock function call");
@@ -1708,8 +1621,7 @@ TEST(AfterTest, CallsMustSatisfyPartialOrderWhenSpecifiedSo2) {
   //   a.DoA(2) ==> a.DoA(3)
   Expectation e = EXPECT_CALL(a, DoA(1));
   const ExpectationSet es = EXPECT_CALL(a, DoA(2));
-  EXPECT_CALL(a, DoA(3))
-      .After(e, es);
+  EXPECT_CALL(a, DoA(3)).After(e, es);
 
   a.DoA(2);
 
@@ -1726,9 +1638,7 @@ TEST(AfterTest, CanBeUsedWithInSequence) {
   Sequence s;
   Expectation e = EXPECT_CALL(a, DoA(1));
   EXPECT_CALL(a, DoA(2)).InSequence(s);
-  EXPECT_CALL(a, DoA(3))
-      .InSequence(s)
-      .After(e);
+  EXPECT_CALL(a, DoA(3)).InSequence(s).After(e);
 
   a.DoA(1);
 
@@ -1745,10 +1655,7 @@ TEST(AfterTest, CanBeCalledManyTimes) {
   Expectation e1 = EXPECT_CALL(a, DoA(1));
   Expectation e2 = EXPECT_CALL(a, DoA(2));
   Expectation e3 = EXPECT_CALL(a, DoA(3));
-  EXPECT_CALL(a, DoA(4))
-      .After(e1)
-      .After(e2)
-      .After(e3);
+  EXPECT_CALL(a, DoA(4)).After(e1).After(e2).After(e3);
 
   a.DoA(3);
   a.DoA(1);
@@ -1764,8 +1671,7 @@ TEST(AfterTest, AcceptsUpToFiveArguments) {
   Expectation e3 = EXPECT_CALL(a, DoA(3));
   ExpectationSet es1 = EXPECT_CALL(a, DoA(4));
   ExpectationSet es2 = EXPECT_CALL(a, DoA(5));
-  EXPECT_CALL(a, DoA(6))
-      .After(e1, e2, e3, es1, es2);
+  EXPECT_CALL(a, DoA(6)).After(e1, e2, e3, es1, es2);
 
   a.DoA(5);
   a.DoA(2);
@@ -1778,8 +1684,7 @@ TEST(AfterTest, AcceptsUpToFiveArguments) {
 // .After() allows input to contain duplicated Expectations.
 TEST(AfterTest, AcceptsDuplicatedInput) {
   MockA a;
-  ON_CALL(a, ReturnResult(_))
-      .WillByDefault(Return(Result()));
+  ON_CALL(a, ReturnResult(_)).WillByDefault(Return(Result()));
 
   // Define ordering:
   //   DoA(1) ==>
@@ -1789,8 +1694,7 @@ TEST(AfterTest, AcceptsDuplicatedInput) {
   ExpectationSet es;
   es += e1;
   es += e2;
-  EXPECT_CALL(a, ReturnResult(3))
-      .After(e1, e2, es, e1);
+  EXPECT_CALL(a, ReturnResult(3)).After(e1, e2, es, e1);
 
   a.DoA(1);
 
@@ -1807,8 +1711,7 @@ TEST(AfterTest, ChangesToExpectationSetHaveNoEffectAfterwards) {
   MockA a;
   ExpectationSet es1 = EXPECT_CALL(a, DoA(1));
   Expectation e2 = EXPECT_CALL(a, DoA(2));
-  EXPECT_CALL(a, DoA(3))
-      .After(es1);
+  EXPECT_CALL(a, DoA(3)).After(es1);
   es1 += e2;
 
   a.DoA(1);
@@ -1827,14 +1730,11 @@ TEST(DeletingMockEarlyTest, Success1) {
 
   {
     InSequence dummy;
-    EXPECT_CALL(*b1, DoB(_))
-        .WillOnce(Return(1));
+    EXPECT_CALL(*b1, DoB(_)).WillOnce(Return(1));
     EXPECT_CALL(*a, Binary(_, _))
         .Times(AnyNumber())
         .WillRepeatedly(Return(true));
-    EXPECT_CALL(*b2, DoB(_))
-        .Times(AnyNumber())
-        .WillRepeatedly(Return(2));
+    EXPECT_CALL(*b2, DoB(_)).Times(AnyNumber()).WillRepeatedly(Return(2));
   }
 
   EXPECT_EQ(1, b1->DoB(1));
@@ -1855,13 +1755,9 @@ TEST(DeletingMockEarlyTest, Success2) {
 
   {
     InSequence dummy;
-    EXPECT_CALL(*b1, DoB(_))
-        .WillOnce(Return(1));
-    EXPECT_CALL(*a, Binary(_, _))
-        .Times(AnyNumber());
-    EXPECT_CALL(*b2, DoB(_))
-        .Times(AnyNumber())
-        .WillRepeatedly(Return(2));
+    EXPECT_CALL(*b1, DoB(_)).WillOnce(Return(1));
+    EXPECT_CALL(*a, Binary(_, _)).Times(AnyNumber());
+    EXPECT_CALL(*b2, DoB(_)).Times(AnyNumber()).WillRepeatedly(Return(2));
   }
 
   delete a;  // a is trivially satisfied.
@@ -1875,16 +1771,11 @@ TEST(DeletingMockEarlyTest, Success2) {
 
 // Suppresses warning on unreferenced formal parameter in MSVC with
 // -W4.
-#ifdef _MSC_VER
-# pragma warning(push)
-# pragma warning(disable:4100)
-#endif
+GTEST_DISABLE_MSC_WARNINGS_PUSH_(4100)
 
 ACTION_P(Delete, ptr) { delete ptr; }
 
-#ifdef _MSC_VER
-# pragma warning(pop)
-#endif
+GTEST_DISABLE_MSC_WARNINGS_POP_()  // 4100
 
 TEST(DeletingMockEarlyTest, CanDeleteSelfInActionReturningVoid) {
   MockA* const a = new MockA;
@@ -1894,8 +1785,7 @@ TEST(DeletingMockEarlyTest, CanDeleteSelfInActionReturningVoid) {
 
 TEST(DeletingMockEarlyTest, CanDeleteSelfInActionReturningValue) {
   MockA* const a = new MockA;
-  EXPECT_CALL(*a, ReturnResult(_))
-      .WillOnce(DoAll(Delete(a), Return(Result())));
+  EXPECT_CALL(*a, ReturnResult(_)).WillOnce(DoAll(Delete(a), Return(Result())));
   a->ReturnResult(42);  // This will cause a to be deleted.
 }
 
@@ -1907,19 +1797,13 @@ TEST(DeletingMockEarlyTest, Failure1) {
 
   {
     InSequence dummy;
-    EXPECT_CALL(*b1, DoB(_))
-        .WillOnce(Return(1));
-    EXPECT_CALL(*a, Binary(_, _))
-        .Times(AnyNumber());
-    EXPECT_CALL(*b2, DoB(_))
-        .Times(AnyNumber())
-        .WillRepeatedly(Return(2));
+    EXPECT_CALL(*b1, DoB(_)).WillOnce(Return(1));
+    EXPECT_CALL(*a, Binary(_, _)).Times(AnyNumber());
+    EXPECT_CALL(*b2, DoB(_)).Times(AnyNumber()).WillRepeatedly(Return(2));
   }
 
   delete a;  // a is trivially satisfied.
-  EXPECT_NONFATAL_FAILURE({
-    b2->DoB(2);
-  }, "Unexpected mock function call");
+  EXPECT_NONFATAL_FAILURE({ b2->DoB(2); }, "Unexpected mock function call");
   EXPECT_EQ(1, b1->DoB(1));
   delete b1;
   delete b2;
@@ -1934,18 +1818,13 @@ TEST(DeletingMockEarlyTest, Failure2) {
   {
     InSequence dummy;
     EXPECT_CALL(*b1, DoB(_));
-    EXPECT_CALL(*a, Binary(_, _))
-        .Times(AnyNumber());
-    EXPECT_CALL(*b2, DoB(_))
-        .Times(AnyNumber());
+    EXPECT_CALL(*a, Binary(_, _)).Times(AnyNumber());
+    EXPECT_CALL(*b2, DoB(_)).Times(AnyNumber());
   }
 
-  EXPECT_NONFATAL_FAILURE(delete b1,
-                          "Actual: never called");
-  EXPECT_NONFATAL_FAILURE(a->Binary(0, 1),
-                          "Unexpected mock function call");
-  EXPECT_NONFATAL_FAILURE(b2->DoB(1),
-                          "Unexpected mock function call");
+  EXPECT_NONFATAL_FAILURE(delete b1, "Actual: never called");
+  EXPECT_NONFATAL_FAILURE(a->Binary(0, 1), "Unexpected mock function call");
+  EXPECT_NONFATAL_FAILURE(b2->DoB(1), "Unexpected mock function call");
   delete a;
   delete b2;
 }
@@ -1970,23 +1849,16 @@ class EvenNumberCardinality : public CardinalityInterface {
   }
 };
 
-Cardinality EvenNumber() {
-  return Cardinality(new EvenNumberCardinality);
-}
+Cardinality EvenNumber() { return Cardinality(new EvenNumberCardinality); }
 
 TEST(ExpectationBaseTest,
      AllPrerequisitesAreSatisfiedWorksForNonMonotonicCardinality) {
   MockA* a = new MockA;
   Sequence s;
 
-  EXPECT_CALL(*a, DoA(1))
-      .Times(EvenNumber())
-      .InSequence(s);
-  EXPECT_CALL(*a, DoA(2))
-      .Times(AnyNumber())
-      .InSequence(s);
-  EXPECT_CALL(*a, DoA(3))
-      .Times(AnyNumber());
+  EXPECT_CALL(*a, DoA(1)).Times(EvenNumber()).InSequence(s);
+  EXPECT_CALL(*a, DoA(2)).Times(AnyNumber()).InSequence(s);
+  EXPECT_CALL(*a, DoA(3)).Times(AnyNumber());
 
   a->DoA(3);
   a->DoA(1);
@@ -1997,8 +1869,7 @@ TEST(ExpectationBaseTest,
 // The following tests verify the message generated when a mock
 // function is called.
 
-struct Printable {
-};
+struct Printable {};
 
 inline void operator<<(::std::ostream& os, const Printable&) {
   os << "Printable";
@@ -2011,29 +1882,32 @@ struct Unprintable {
 
 class MockC {
  public:
-  MockC() {}
+  MockC() = default;
 
   MOCK_METHOD6(VoidMethod, void(bool cond, int n, std::string s, void* p,
                                 const Printable& x, Unprintable y));
   MOCK_METHOD0(NonVoidMethod, int());  // NOLINT
 
  private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(MockC);
+  MockC(const MockC&) = delete;
+  MockC& operator=(const MockC&) = delete;
 };
 
 class VerboseFlagPreservingFixture : public testing::Test {
  protected:
   VerboseFlagPreservingFixture()
-      : saved_verbose_flag_(GMOCK_FLAG(verbose)) {}
+      : saved_verbose_flag_(GMOCK_FLAG_GET(verbose)) {}
 
   ~VerboseFlagPreservingFixture() override {
-    GMOCK_FLAG(verbose) = saved_verbose_flag_;
+    GMOCK_FLAG_SET(verbose, saved_verbose_flag_);
   }
 
  private:
   const std::string saved_verbose_flag_;
 
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(VerboseFlagPreservingFixture);
+  VerboseFlagPreservingFixture(const VerboseFlagPreservingFixture&) = delete;
+  VerboseFlagPreservingFixture& operator=(const VerboseFlagPreservingFixture&) =
+      delete;
 };
 
 #if GTEST_HAS_STREAM_REDIRECTION
@@ -2043,7 +1917,7 @@ class VerboseFlagPreservingFixture : public testing::Test {
 // --gmock_verbose=warning is specified.
 TEST(FunctionCallMessageTest,
      UninterestingCallOnNaggyMockGeneratesNoStackTraceWhenVerboseWarning) {
-  GMOCK_FLAG(verbose) = kWarningVerbosity;
+  GMOCK_FLAG_SET(verbose, kWarningVerbosity);
   NaggyMock<MockC> c;
   CaptureStdout();
   c.VoidMethod(false, 5, "Hi", nullptr, Printable(), Unprintable());
@@ -2057,7 +1931,7 @@ TEST(FunctionCallMessageTest,
 // --gmock_verbose=info is specified.
 TEST(FunctionCallMessageTest,
      UninterestingCallOnNaggyMockGeneratesFyiWithStackTraceWhenVerboseInfo) {
-  GMOCK_FLAG(verbose) = kInfoVerbosity;
+  GMOCK_FLAG_SET(verbose, kInfoVerbosity);
   NaggyMock<MockC> c;
   CaptureStdout();
   c.VoidMethod(false, 5, "Hi", nullptr, Printable(), Unprintable());
@@ -2065,7 +1939,7 @@ TEST(FunctionCallMessageTest,
   EXPECT_PRED_FORMAT2(IsSubstring, "GMOCK WARNING", output);
   EXPECT_PRED_FORMAT2(IsSubstring, "Stack trace:", output);
 
-# ifndef NDEBUG
+#ifndef NDEBUG
 
   // We check the stack trace content in dbg-mode only, as opt-mode
   // may inline the call we are interested in seeing.
@@ -2081,7 +1955,7 @@ TEST(FunctionCallMessageTest,
   const std::string output2 = GetCapturedStdout();
   EXPECT_PRED_FORMAT2(IsSubstring, "NonVoidMethod(", output2);
 
-# endif  // NDEBUG
+#endif  // NDEBUG
 }
 
 // Tests that an uninteresting mock function call on a naggy mock
@@ -2097,7 +1971,8 @@ TEST(FunctionCallMessageTest,
       IsSubstring,
       "Uninteresting mock function call - returning default value.\n"
       "    Function call: DoB()\n"
-      "          Returns: 0\n", output1.c_str());
+      "          Returns: 0\n",
+      output1.c_str());
   // Makes sure the return value is printed.
 
   // A void mock function.
@@ -2105,12 +1980,12 @@ TEST(FunctionCallMessageTest,
   CaptureStdout();
   c.VoidMethod(false, 5, "Hi", nullptr, Printable(), Unprintable());
   const std::string output2 = GetCapturedStdout();
-  EXPECT_THAT(output2.c_str(),
-              ContainsRegex(
-                  "Uninteresting mock function call - returning directly\\.\n"
-                  "    Function call: VoidMethod"
-                  "\\(false, 5, \"Hi\", NULL, @.+ "
-                  "Printable, 4-byte object <00-00 00-00>\\)"));
+  EXPECT_THAT(
+      output2.c_str(),
+      ContainsRegex("Uninteresting mock function call - returning directly\\.\n"
+                    "    Function call: VoidMethod"
+                    "\\(false, 5, \"Hi\", NULL, @.+ "
+                    "Printable, 4-byte object <00-00 00-00>\\)"));
   // A void function has no return value to print.
 }
 
@@ -2127,14 +2002,14 @@ class GMockVerboseFlagTest : public VerboseFlagPreservingFixture {
                     const std::string& function_name) {
     if (should_print) {
       EXPECT_THAT(output.c_str(), HasSubstr(expected_substring));
-# ifndef NDEBUG
+#ifndef NDEBUG
       // We check the stack trace content in dbg-mode only, as opt-mode
       // may inline the call we are interested in seeing.
       EXPECT_THAT(output.c_str(), HasSubstr(function_name));
-# else
+#else
       // Suppresses 'unused function parameter' warnings.
       static_cast<void>(function_name);
-# endif  // NDEBUG
+#endif  // NDEBUG
     } else {
       EXPECT_STREQ("", output.c_str());
     }
@@ -2144,31 +2019,26 @@ class GMockVerboseFlagTest : public VerboseFlagPreservingFixture {
   void TestExpectedCall(bool should_print) {
     MockA a;
     EXPECT_CALL(a, DoA(5));
-    EXPECT_CALL(a, Binary(_, 1))
-        .WillOnce(Return(true));
+    EXPECT_CALL(a, Binary(_, 1)).WillOnce(Return(true));
 
     // A void-returning function.
     CaptureStdout();
     a.DoA(5);
-    VerifyOutput(
-        GetCapturedStdout(),
-        should_print,
-        "Mock function call matches EXPECT_CALL(a, DoA(5))...\n"
-        "    Function call: DoA(5)\n"
-        "Stack trace:\n",
-        "DoA");
+    VerifyOutput(GetCapturedStdout(), should_print,
+                 "Mock function call matches EXPECT_CALL(a, DoA(5))...\n"
+                 "    Function call: DoA(5)\n"
+                 "Stack trace:\n",
+                 "DoA");
 
     // A non-void-returning function.
     CaptureStdout();
     a.Binary(2, 1);
-    VerifyOutput(
-        GetCapturedStdout(),
-        should_print,
-        "Mock function call matches EXPECT_CALL(a, Binary(_, 1))...\n"
-        "    Function call: Binary(2, 1)\n"
-        "          Returns: true\n"
-        "Stack trace:\n",
-        "Binary");
+    VerifyOutput(GetCapturedStdout(), should_print,
+                 "Mock function call matches EXPECT_CALL(a, Binary(_, 1))...\n"
+                 "    Function call: Binary(2, 1)\n"
+                 "          Returns: true\n"
+                 "Stack trace:\n",
+                 "Binary");
   }
 
   // Tests how the flag affects uninteresting calls on a naggy mock.
@@ -2179,41 +2049,37 @@ class GMockVerboseFlagTest : public VerboseFlagPreservingFixture {
         "call should not happen.  Do not suppress it by blindly adding "
         "an EXPECT_CALL() if you don't mean to enforce the call.  "
         "See "
-        "https://github.com/google/googletest/blob/master/googlemock/docs/"
-        "cook_book.md#"
-        "knowing-when-to-expect for details.";
+        "https://github.com/google/googletest/blob/main/docs/"
+        "gmock_cook_book.md#"
+        "knowing-when-to-expect-useoncall for details.";
 
     // A void-returning function.
     CaptureStdout();
     a.DoA(5);
-    VerifyOutput(
-        GetCapturedStdout(),
-        should_print,
-        "\nGMOCK WARNING:\n"
-        "Uninteresting mock function call - returning directly.\n"
-        "    Function call: DoA(5)\n" +
-        note,
-        "DoA");
+    VerifyOutput(GetCapturedStdout(), should_print,
+                 "\nGMOCK WARNING:\n"
+                 "Uninteresting mock function call - returning directly.\n"
+                 "    Function call: DoA(5)\n" +
+                     note,
+                 "DoA");
 
     // A non-void-returning function.
     CaptureStdout();
     a.Binary(2, 1);
-    VerifyOutput(
-        GetCapturedStdout(),
-        should_print,
-        "\nGMOCK WARNING:\n"
-        "Uninteresting mock function call - returning default value.\n"
-        "    Function call: Binary(2, 1)\n"
-        "          Returns: false\n" +
-        note,
-        "Binary");
+    VerifyOutput(GetCapturedStdout(), should_print,
+                 "\nGMOCK WARNING:\n"
+                 "Uninteresting mock function call - returning default value.\n"
+                 "    Function call: Binary(2, 1)\n"
+                 "          Returns: false\n" +
+                     note,
+                 "Binary");
   }
 };
 
 // Tests that --gmock_verbose=info causes both expected and
 // uninteresting calls to be reported.
 TEST_F(GMockVerboseFlagTest, Info) {
-  GMOCK_FLAG(verbose) = kInfoVerbosity;
+  GMOCK_FLAG_SET(verbose, kInfoVerbosity);
   TestExpectedCall(true);
   TestUninterestingCallOnNaggyMock(true);
 }
@@ -2221,7 +2087,7 @@ TEST_F(GMockVerboseFlagTest, Info) {
 // Tests that --gmock_verbose=warning causes uninteresting calls to be
 // reported.
 TEST_F(GMockVerboseFlagTest, Warning) {
-  GMOCK_FLAG(verbose) = kWarningVerbosity;
+  GMOCK_FLAG_SET(verbose, kWarningVerbosity);
   TestExpectedCall(false);
   TestUninterestingCallOnNaggyMock(true);
 }
@@ -2229,7 +2095,7 @@ TEST_F(GMockVerboseFlagTest, Warning) {
 // Tests that --gmock_verbose=warning causes neither expected nor
 // uninteresting calls to be reported.
 TEST_F(GMockVerboseFlagTest, Error) {
-  GMOCK_FLAG(verbose) = kErrorVerbosity;
+  GMOCK_FLAG_SET(verbose, kErrorVerbosity);
   TestExpectedCall(false);
   TestUninterestingCallOnNaggyMock(false);
 }
@@ -2237,7 +2103,7 @@ TEST_F(GMockVerboseFlagTest, Error) {
 // Tests that --gmock_verbose=SOME_INVALID_VALUE has the same effect
 // as --gmock_verbose=warning.
 TEST_F(GMockVerboseFlagTest, InvalidFlagIsTreatedAsWarning) {
-  GMOCK_FLAG(verbose) = "invalid";  // Treated as "warning".
+  GMOCK_FLAG_SET(verbose, "invalid");  // Treated as "warning".
   TestExpectedCall(false);
   TestUninterestingCallOnNaggyMock(true);
 }
@@ -2256,12 +2122,13 @@ void PrintTo(PrintMeNot /* dummy */, ::std::ostream* /* os */) {
 
 class LogTestHelper {
  public:
-  LogTestHelper() {}
+  LogTestHelper() = default;
 
   MOCK_METHOD1(Foo, PrintMeNot(PrintMeNot));
 
  private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(LogTestHelper);
+  LogTestHelper(const LogTestHelper&) = delete;
+  LogTestHelper& operator=(const LogTestHelper&) = delete;
 };
 
 class GMockLogTest : public VerboseFlagPreservingFixture {
@@ -2270,23 +2137,20 @@ class GMockLogTest : public VerboseFlagPreservingFixture {
 };
 
 TEST_F(GMockLogTest, DoesNotPrintGoodCallInternallyIfVerbosityIsWarning) {
-  GMOCK_FLAG(verbose) = kWarningVerbosity;
-  EXPECT_CALL(helper_, Foo(_))
-      .WillOnce(Return(PrintMeNot()));
+  GMOCK_FLAG_SET(verbose, kWarningVerbosity);
+  EXPECT_CALL(helper_, Foo(_)).WillOnce(Return(PrintMeNot()));
   helper_.Foo(PrintMeNot());  // This is an expected call.
 }
 
 TEST_F(GMockLogTest, DoesNotPrintGoodCallInternallyIfVerbosityIsError) {
-  GMOCK_FLAG(verbose) = kErrorVerbosity;
-  EXPECT_CALL(helper_, Foo(_))
-      .WillOnce(Return(PrintMeNot()));
+  GMOCK_FLAG_SET(verbose, kErrorVerbosity);
+  EXPECT_CALL(helper_, Foo(_)).WillOnce(Return(PrintMeNot()));
   helper_.Foo(PrintMeNot());  // This is an expected call.
 }
 
 TEST_F(GMockLogTest, DoesNotPrintWarningInternallyIfVerbosityIsError) {
-  GMOCK_FLAG(verbose) = kErrorVerbosity;
-  ON_CALL(helper_, Foo(_))
-      .WillByDefault(Return(PrintMeNot()));
+  GMOCK_FLAG_SET(verbose, kErrorVerbosity);
+  ON_CALL(helper_, Foo(_)).WillByDefault(Return(PrintMeNot()));
   helper_.Foo(PrintMeNot());  // This should generate a warning.
 }
 
@@ -2347,8 +2211,7 @@ TEST(VerifyAndClearExpectationsTest, NoMethodHasExpectations) {
 // verification succeeds.
 TEST(VerifyAndClearExpectationsTest, SomeMethodsHaveExpectationsAndSucceed) {
   MockB b;
-  EXPECT_CALL(b, DoB())
-      .WillOnce(Return(1));
+  EXPECT_CALL(b, DoB()).WillOnce(Return(1));
   b.DoB();
   ASSERT_TRUE(Mock::VerifyAndClearExpectations(&b));
 
@@ -2363,8 +2226,7 @@ TEST(VerifyAndClearExpectationsTest, SomeMethodsHaveExpectationsAndSucceed) {
 // verification fails.
 TEST(VerifyAndClearExpectationsTest, SomeMethodsHaveExpectationsAndFail) {
   MockB b;
-  EXPECT_CALL(b, DoB())
-      .WillOnce(Return(1));
+  EXPECT_CALL(b, DoB()).WillOnce(Return(1));
   bool result = true;
   EXPECT_NONFATAL_FAILURE(result = Mock::VerifyAndClearExpectations(&b),
                           "Actual: never called");
@@ -2380,10 +2242,8 @@ TEST(VerifyAndClearExpectationsTest, SomeMethodsHaveExpectationsAndFail) {
 // when all of its methods have expectations.
 TEST(VerifyAndClearExpectationsTest, AllMethodsHaveExpectations) {
   MockB b;
-  EXPECT_CALL(b, DoB())
-      .WillOnce(Return(1));
-  EXPECT_CALL(b, DoB(_))
-      .WillOnce(Return(2));
+  EXPECT_CALL(b, DoB()).WillOnce(Return(1));
+  EXPECT_CALL(b, DoB(_)).WillOnce(Return(2));
   b.DoB();
   b.DoB(1);
   ASSERT_TRUE(Mock::VerifyAndClearExpectations(&b));
@@ -2398,10 +2258,8 @@ TEST(VerifyAndClearExpectationsTest, AllMethodsHaveExpectations) {
 // when a method has more than one expectation.
 TEST(VerifyAndClearExpectationsTest, AMethodHasManyExpectations) {
   MockB b;
-  EXPECT_CALL(b, DoB(0))
-      .WillOnce(Return(1));
-  EXPECT_CALL(b, DoB(_))
-      .WillOnce(Return(2));
+  EXPECT_CALL(b, DoB(0)).WillOnce(Return(1));
+  EXPECT_CALL(b, DoB(_)).WillOnce(Return(2));
   b.DoB(1);
   bool result = true;
   EXPECT_NONFATAL_FAILURE(result = Mock::VerifyAndClearExpectations(&b),
@@ -2422,8 +2280,7 @@ TEST(VerifyAndClearExpectationsTest, CanCallManyTimes) {
   b.DoB();
   Mock::VerifyAndClearExpectations(&b);
 
-  EXPECT_CALL(b, DoB(_))
-      .WillOnce(Return(1));
+  EXPECT_CALL(b, DoB(_)).WillOnce(Return(1));
   b.DoB(1);
   Mock::VerifyAndClearExpectations(&b);
   Mock::VerifyAndClearExpectations(&b);
@@ -2447,8 +2304,7 @@ TEST(VerifyAndClearTest, NoMethodHasDefaultActions) {
 // but not all of its methods have default actions.
 TEST(VerifyAndClearTest, SomeMethodsHaveDefaultActions) {
   MockB b;
-  ON_CALL(b, DoB())
-      .WillByDefault(Return(1));
+  ON_CALL(b, DoB()).WillByDefault(Return(1));
 
   Mock::VerifyAndClear(&b);
 
@@ -2460,10 +2316,8 @@ TEST(VerifyAndClearTest, SomeMethodsHaveDefaultActions) {
 // its methods have default actions.
 TEST(VerifyAndClearTest, AllMethodsHaveDefaultActions) {
   MockB b;
-  ON_CALL(b, DoB())
-      .WillByDefault(Return(1));
-  ON_CALL(b, DoB(_))
-      .WillByDefault(Return(2));
+  ON_CALL(b, DoB()).WillByDefault(Return(1));
+  ON_CALL(b, DoB(_)).WillByDefault(Return(2));
 
   Mock::VerifyAndClear(&b);
 
@@ -2478,10 +2332,8 @@ TEST(VerifyAndClearTest, AllMethodsHaveDefaultActions) {
 // method has more than one ON_CALL() set on it.
 TEST(VerifyAndClearTest, AMethodHasManyDefaultActions) {
   MockB b;
-  ON_CALL(b, DoB(0))
-      .WillByDefault(Return(1));
-  ON_CALL(b, DoB(_))
-      .WillByDefault(Return(2));
+  ON_CALL(b, DoB(0)).WillByDefault(Return(1));
+  ON_CALL(b, DoB(_)).WillByDefault(Return(2));
 
   Mock::VerifyAndClear(&b);
 
@@ -2495,13 +2347,11 @@ TEST(VerifyAndClearTest, AMethodHasManyDefaultActions) {
 // times.
 TEST(VerifyAndClearTest, CanCallManyTimes) {
   MockB b;
-  ON_CALL(b, DoB())
-      .WillByDefault(Return(1));
+  ON_CALL(b, DoB()).WillByDefault(Return(1));
   Mock::VerifyAndClear(&b);
   Mock::VerifyAndClear(&b);
 
-  ON_CALL(b, DoB(_))
-      .WillByDefault(Return(1));
+  ON_CALL(b, DoB(_)).WillByDefault(Return(1));
   Mock::VerifyAndClear(&b);
 
   EXPECT_EQ(0, b.DoB());
@@ -2511,10 +2361,8 @@ TEST(VerifyAndClearTest, CanCallManyTimes) {
 // Tests that VerifyAndClear() works when the verification succeeds.
 TEST(VerifyAndClearTest, Success) {
   MockB b;
-  ON_CALL(b, DoB())
-      .WillByDefault(Return(1));
-  EXPECT_CALL(b, DoB(1))
-      .WillOnce(Return(2));
+  ON_CALL(b, DoB()).WillByDefault(Return(1));
+  EXPECT_CALL(b, DoB(1)).WillOnce(Return(2));
 
   b.DoB();
   b.DoB(1);
@@ -2529,10 +2377,8 @@ TEST(VerifyAndClearTest, Success) {
 // Tests that VerifyAndClear() works when the verification fails.
 TEST(VerifyAndClearTest, Failure) {
   MockB b;
-  ON_CALL(b, DoB(_))
-      .WillByDefault(Return(1));
-  EXPECT_CALL(b, DoB())
-      .WillOnce(Return(2));
+  ON_CALL(b, DoB(_)).WillByDefault(Return(1));
+  EXPECT_CALL(b, DoB()).WillOnce(Return(2));
 
   b.DoB(1);
   bool result = true;
@@ -2550,12 +2396,9 @@ TEST(VerifyAndClearTest, Failure) {
 // expectations are set on a const mock object.
 TEST(VerifyAndClearTest, Const) {
   MockB b;
-  ON_CALL(Const(b), DoB())
-      .WillByDefault(Return(1));
+  ON_CALL(Const(b), DoB()).WillByDefault(Return(1));
 
-  EXPECT_CALL(Const(b), DoB())
-      .WillOnce(DoDefault())
-      .WillOnce(Return(2));
+  EXPECT_CALL(Const(b), DoB()).WillOnce(DoDefault()).WillOnce(Return(2));
 
   b.DoB();
   b.DoB();
@@ -2571,18 +2414,14 @@ TEST(VerifyAndClearTest, Const) {
 // object after VerifyAndClear() has been called on it.
 TEST(VerifyAndClearTest, CanSetDefaultActionsAndExpectationsAfterwards) {
   MockB b;
-  ON_CALL(b, DoB())
-      .WillByDefault(Return(1));
-  EXPECT_CALL(b, DoB(_))
-      .WillOnce(Return(2));
+  ON_CALL(b, DoB()).WillByDefault(Return(1));
+  EXPECT_CALL(b, DoB(_)).WillOnce(Return(2));
   b.DoB(1);
 
   Mock::VerifyAndClear(&b);
 
-  EXPECT_CALL(b, DoB())
-      .WillOnce(Return(3));
-  ON_CALL(b, DoB(_))
-      .WillByDefault(Return(4));
+  EXPECT_CALL(b, DoB()).WillOnce(Return(3));
+  ON_CALL(b, DoB(_)).WillByDefault(Return(4));
 
   EXPECT_EQ(3, b.DoB());
   EXPECT_EQ(4, b.DoB(1));
@@ -2595,19 +2434,13 @@ TEST(VerifyAndClearTest, DoesNotAffectOtherMockObjects) {
   MockB b1;
   MockB b2;
 
-  ON_CALL(a, Binary(_, _))
-      .WillByDefault(Return(true));
-  EXPECT_CALL(a, Binary(_, _))
-      .WillOnce(DoDefault())
-      .WillOnce(Return(false));
+  ON_CALL(a, Binary(_, _)).WillByDefault(Return(true));
+  EXPECT_CALL(a, Binary(_, _)).WillOnce(DoDefault()).WillOnce(Return(false));
 
-  ON_CALL(b1, DoB())
-      .WillByDefault(Return(1));
-  EXPECT_CALL(b1, DoB(_))
-      .WillOnce(Return(2));
+  ON_CALL(b1, DoB()).WillByDefault(Return(1));
+  EXPECT_CALL(b1, DoB(_)).WillOnce(Return(2));
 
-  ON_CALL(b2, DoB())
-      .WillByDefault(Return(3));
+  ON_CALL(b2, DoB()).WillByDefault(Return(3));
   EXPECT_CALL(b2, DoB(_));
 
   b2.DoB(0);
@@ -2648,8 +2481,7 @@ TEST(VerifyAndClearTest,
   ReferenceHoldingMock test_mock;
 
   // ON_CALL stores a reference to a inside test_mock.
-  ON_CALL(test_mock, AcceptReference(_))
-      .WillByDefault(SetArgPointee<0>(a));
+  ON_CALL(test_mock, AcceptReference(_)).WillByDefault(SetArgPointee<0>(a));
 
   // Throw away the reference to the mock that we have in a. After this, the
   // only reference to it is stored by test_mock.
@@ -2670,9 +2502,8 @@ TEST(VerifyAndClearTest,
 TEST(SynchronizationTest, CanCallMockMethodInAction) {
   MockA a;
   MockC c;
-  ON_CALL(a, DoA(_))
-      .WillByDefault(IgnoreResult(InvokeWithoutArgs(&c,
-                                                    &MockC::NonVoidMethod)));
+  ON_CALL(a, DoA(_)).WillByDefault(
+      IgnoreResult(InvokeWithoutArgs(&c, &MockC::NonVoidMethod)));
   EXPECT_CALL(a, DoA(1));
   EXPECT_CALL(a, DoA(1))
       .WillOnce(Invoke(&a, &MockA::DoA))
@@ -2756,20 +2587,14 @@ TEST(ParameterlessExpectationsTest,
 }
 
 }  // namespace
+}  // namespace testing
 
-// Allows the user to define their own main and then invoke gmock_main
-// from it. This might be necessary on some platforms which require
-// specific setup and teardown.
-#if GMOCK_RENAME_MAIN
-int gmock_main(int argc, char **argv) {
-#else
-int main(int argc, char **argv) {
-#endif  // GMOCK_RENAME_MAIN
+int main(int argc, char** argv) {
   testing::InitGoogleMock(&argc, argv);
   // Ensures that the tests pass no matter what value of
   // --gmock_catch_leaked_mocks and --gmock_verbose the user specifies.
-  testing::GMOCK_FLAG(catch_leaked_mocks) = true;
-  testing::GMOCK_FLAG(verbose) = testing::internal::kWarningVerbosity;
+  GMOCK_FLAG_SET(catch_leaked_mocks, true);
+  GMOCK_FLAG_SET(verbose, testing::internal::kWarningVerbosity);
 
   return RUN_ALL_TESTS();
 }

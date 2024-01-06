@@ -27,22 +27,18 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
 // Tests Google Mock's output in various scenarios.  This ensures that
 // Google Mock's messages are readable and useful.
 
-#include "gmock/gmock.h"
-
 #include <stdio.h>
+
 #include <string>
 
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
 // Silence C4100 (unreferenced formal parameter)
-#ifdef _MSC_VER
-# pragma warning(push)
-# pragma warning(disable:4100)
-#endif
+GTEST_DISABLE_MSC_WARNINGS_PUSH_(4100)
 
 using testing::_;
 using testing::AnyNumber;
@@ -56,14 +52,15 @@ using testing::Value;
 
 class MockFoo {
  public:
-  MockFoo() {}
+  MockFoo() = default;
 
   MOCK_METHOD3(Bar, char(const std::string& s, int i, double x));
   MOCK_METHOD2(Bar2, bool(int x, int y));
   MOCK_METHOD2(Bar3, void(int x, int y));
 
  private:
-  GTEST_DISALLOW_COPY_AND_ASSIGN_(MockFoo);
+  MockFoo(const MockFoo&) = delete;
+  MockFoo& operator=(const MockFoo&) = delete;
 };
 
 class GMockOutputTest : public testing::Test {
@@ -72,27 +69,25 @@ class GMockOutputTest : public testing::Test {
 };
 
 TEST_F(GMockOutputTest, ExpectedCall) {
-  testing::GMOCK_FLAG(verbose) = "info";
+  GMOCK_FLAG_SET(verbose, "info");
 
   EXPECT_CALL(foo_, Bar2(0, _));
   foo_.Bar2(0, 0);  // Expected call
 
-  testing::GMOCK_FLAG(verbose) = "warning";
+  GMOCK_FLAG_SET(verbose, "warning");
 }
 
 TEST_F(GMockOutputTest, ExpectedCallToVoidFunction) {
-  testing::GMOCK_FLAG(verbose) = "info";
+  GMOCK_FLAG_SET(verbose, "info");
 
   EXPECT_CALL(foo_, Bar3(0, _));
   foo_.Bar3(0, 0);  // Expected call
 
-  testing::GMOCK_FLAG(verbose) = "warning";
+  GMOCK_FLAG_SET(verbose, "warning");
 }
 
 TEST_F(GMockOutputTest, ExplicitActionsRunOut) {
-  EXPECT_CALL(foo_, Bar2(_, _))
-      .Times(2)
-      .WillOnce(Return(false));
+  EXPECT_CALL(foo_, Bar2(_, _)).Times(2).WillOnce(Return(false));
   foo_.Bar2(2, 2);
   foo_.Bar2(1, 1);  // Explicit actions in EXPECT_CALL run out.
 }
@@ -134,8 +129,7 @@ TEST_F(GMockOutputTest, UninterestingCallToVoidFunction) {
 }
 
 TEST_F(GMockOutputTest, RetiredExpectation) {
-  EXPECT_CALL(foo_, Bar2(_, _))
-      .RetiresOnSaturation();
+  EXPECT_CALL(foo_, Bar2(_, _)).RetiresOnSaturation();
   EXPECT_CALL(foo_, Bar2(0, 0));
 
   foo_.Bar2(1, 1);
@@ -160,12 +154,9 @@ TEST_F(GMockOutputTest, UnsatisfiedPrerequisite) {
 TEST_F(GMockOutputTest, UnsatisfiedPrerequisites) {
   Sequence s1, s2;
 
-  EXPECT_CALL(foo_, Bar(_, 0, _))
-      .InSequence(s1);
-  EXPECT_CALL(foo_, Bar2(0, 0))
-      .InSequence(s2);
-  EXPECT_CALL(foo_, Bar2(1, _))
-      .InSequence(s1, s2);
+  EXPECT_CALL(foo_, Bar(_, 0, _)).InSequence(s1);
+  EXPECT_CALL(foo_, Bar2(0, 0)).InSequence(s2);
+  EXPECT_CALL(foo_, Bar2(1, _)).InSequence(s1, s2);
 
   foo_.Bar2(1, 0);  // Has two immediate unsatisfied pre-requisites
   foo_.Bar("Hi", 0, 0);
@@ -179,8 +170,7 @@ TEST_F(GMockOutputTest, UnsatisfiedWith) {
 
 TEST_F(GMockOutputTest, UnsatisfiedExpectation) {
   EXPECT_CALL(foo_, Bar(_, _, _));
-  EXPECT_CALL(foo_, Bar2(0, _))
-      .Times(2);
+  EXPECT_CALL(foo_, Bar2(0, _)).Times(2);
 
   foo_.Bar2(0, 1);
 }
@@ -194,26 +184,22 @@ TEST_F(GMockOutputTest, MismatchArguments) {
 }
 
 TEST_F(GMockOutputTest, MismatchWith) {
-  EXPECT_CALL(foo_, Bar2(Ge(2), Ge(1)))
-      .With(Ge());
+  EXPECT_CALL(foo_, Bar2(Ge(2), Ge(1))).With(Ge());
 
   foo_.Bar2(2, 3);  // Mismatch With()
   foo_.Bar2(2, 1);
 }
 
 TEST_F(GMockOutputTest, MismatchArgumentsAndWith) {
-  EXPECT_CALL(foo_, Bar2(Ge(2), Ge(1)))
-      .With(Ge());
+  EXPECT_CALL(foo_, Bar2(Ge(2), Ge(1))).With(Ge());
 
   foo_.Bar2(1, 3);  // Mismatch arguments and mismatch With()
   foo_.Bar2(2, 1);
 }
 
 TEST_F(GMockOutputTest, UnexpectedCallWithDefaultAction) {
-  ON_CALL(foo_, Bar2(_, _))
-      .WillByDefault(Return(true));   // Default action #1
-  ON_CALL(foo_, Bar2(1, _))
-      .WillByDefault(Return(false));  // Default action #2
+  ON_CALL(foo_, Bar2(_, _)).WillByDefault(Return(true));   // Default action #1
+  ON_CALL(foo_, Bar2(1, _)).WillByDefault(Return(false));  // Default action #2
 
   EXPECT_CALL(foo_, Bar2(2, 2));
   foo_.Bar2(1, 0);  // Unexpected call, takes default action #2.
@@ -222,10 +208,8 @@ TEST_F(GMockOutputTest, UnexpectedCallWithDefaultAction) {
 }
 
 TEST_F(GMockOutputTest, ExcessiveCallWithDefaultAction) {
-  ON_CALL(foo_, Bar2(_, _))
-      .WillByDefault(Return(true));   // Default action #1
-  ON_CALL(foo_, Bar2(1, _))
-      .WillByDefault(Return(false));  // Default action #2
+  ON_CALL(foo_, Bar2(_, _)).WillByDefault(Return(true));   // Default action #1
+  ON_CALL(foo_, Bar2(1, _)).WillByDefault(Return(false));  // Default action #2
 
   EXPECT_CALL(foo_, Bar2(2, 2));
   EXPECT_CALL(foo_, Bar2(1, 1));
@@ -237,22 +221,17 @@ TEST_F(GMockOutputTest, ExcessiveCallWithDefaultAction) {
 }
 
 TEST_F(GMockOutputTest, UninterestingCallWithDefaultAction) {
-  ON_CALL(foo_, Bar2(_, _))
-      .WillByDefault(Return(true));   // Default action #1
-  ON_CALL(foo_, Bar2(1, _))
-      .WillByDefault(Return(false));  // Default action #2
+  ON_CALL(foo_, Bar2(_, _)).WillByDefault(Return(true));   // Default action #1
+  ON_CALL(foo_, Bar2(1, _)).WillByDefault(Return(false));  // Default action #2
 
   foo_.Bar2(2, 2);  // Uninteresting call, takes default action #1.
   foo_.Bar2(1, 1);  // Uninteresting call, takes default action #2.
 }
 
 TEST_F(GMockOutputTest, ExplicitActionsRunOutWithDefaultAction) {
-  ON_CALL(foo_, Bar2(_, _))
-      .WillByDefault(Return(true));   // Default action #1
+  ON_CALL(foo_, Bar2(_, _)).WillByDefault(Return(true));  // Default action #1
 
-  EXPECT_CALL(foo_, Bar2(_, _))
-      .Times(2)
-      .WillOnce(Return(false));
+  EXPECT_CALL(foo_, Bar2(_, _)).Times(2).WillOnce(Return(false));
   foo_.Bar2(2, 2);
   foo_.Bar2(1, 1);  // Explicit actions in EXPECT_CALL run out.
 }
@@ -293,17 +272,15 @@ void TestCatchesLeakedMocksInAdHocTests() {
   // foo is deliberately leaked.
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
   testing::InitGoogleMock(&argc, argv);
   // Ensures that the tests pass no matter what value of
   // --gmock_catch_leaked_mocks and --gmock_verbose the user specifies.
-  testing::GMOCK_FLAG(catch_leaked_mocks) = true;
-  testing::GMOCK_FLAG(verbose) = "warning";
+  GMOCK_FLAG_SET(catch_leaked_mocks, true);
+  GMOCK_FLAG_SET(verbose, "warning");
 
   TestCatchesLeakedMocksInAdHocTests();
   return RUN_ALL_TESTS();
 }
 
-#ifdef _MSC_VER
-# pragma warning(pop)
-#endif
+GTEST_DISABLE_MSC_WARNINGS_POP_()  // 4100

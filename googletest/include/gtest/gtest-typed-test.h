@@ -27,10 +27,12 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-// GOOGLETEST_CM0001 DO NOT DELETE
+// IWYU pragma: private, include "gtest/gtest.h"
+// IWYU pragma: friend gtest/.*
+// IWYU pragma: friend gmock/.*
 
-#ifndef GTEST_INCLUDE_GTEST_GTEST_TYPED_TEST_H_
-#define GTEST_INCLUDE_GTEST_GTEST_TYPED_TEST_H_
+#ifndef GOOGLETEST_INCLUDE_GTEST_GTEST_TYPED_TEST_H_
+#define GOOGLETEST_INCLUDE_GTEST_GTEST_TYPED_TEST_H_
 
 // This header implements typed tests and type-parameterized tests.
 
@@ -175,8 +177,6 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes);
 
 // Implements typed tests.
 
-#if GTEST_HAS_TYPED_TEST
-
 // INTERNAL IMPLEMENTATION - DO NOT USE IN USER CODE.
 //
 // Expands to the name of the typedef for the type parameters of the
@@ -192,7 +192,7 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes);
   typedef ::testing::internal::GenerateTypeList<Types>::type            \
       GTEST_TYPE_PARAMS_(CaseName);                                     \
   typedef ::testing::internal::NameGeneratorSelector<__VA_ARGS__>::type \
-      GTEST_NAME_GENERATOR_(CaseName)
+  GTEST_NAME_GENERATOR_(CaseName)
 
 #define TYPED_TEST(CaseName, TestName)                                        \
   static_assert(sizeof(GTEST_STRINGIFY_(TestName)) > 1,                       \
@@ -230,11 +230,7 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes);
   TYPED_TEST_SUITE
 #endif  // GTEST_REMOVE_LEGACY_TEST_CASEAPI_
 
-#endif  // GTEST_HAS_TYPED_TEST
-
 // Implements type-parameterized tests.
-
-#if GTEST_HAS_TYPED_TEST_P
 
 // INTERNAL IMPLEMENTATION - DO NOT USE IN USER CODE.
 //
@@ -262,7 +258,7 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes);
 // #included in multiple translation units linked together.
 #define TYPED_TEST_SUITE_P(SuiteName)              \
   static ::testing::internal::TypedTestSuitePState \
-      GTEST_TYPED_TEST_SUITE_P_STATE_(SuiteName)
+  GTEST_TYPED_TEST_SUITE_P_STATE_(SuiteName)
 
 // Legacy API is deprecated but still available
 #ifndef GTEST_REMOVE_LEGACY_TEST_CASEAPI_
@@ -271,28 +267,28 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes);
   TYPED_TEST_SUITE_P
 #endif  // GTEST_REMOVE_LEGACY_TEST_CASEAPI_
 
-#define TYPED_TEST_P(SuiteName, TestName)                             \
-  namespace GTEST_SUITE_NAMESPACE_(SuiteName) {                       \
-    template <typename gtest_TypeParam_>                              \
-    class TestName : public SuiteName<gtest_TypeParam_> {             \
-     private:                                                         \
-      typedef SuiteName<gtest_TypeParam_> TestFixture;                \
-      typedef gtest_TypeParam_ TypeParam;                             \
-      void TestBody() override;                                       \
-    };                                                                \
-    static bool gtest_##TestName##_defined_ GTEST_ATTRIBUTE_UNUSED_ = \
-        GTEST_TYPED_TEST_SUITE_P_STATE_(SuiteName).AddTestName(       \
-            __FILE__, __LINE__, GTEST_STRINGIFY_(SuiteName),          \
-            GTEST_STRINGIFY_(TestName));                              \
-  }                                                                   \
-  template <typename gtest_TypeParam_>                                \
-  void GTEST_SUITE_NAMESPACE_(                                        \
+#define TYPED_TEST_P(SuiteName, TestName)                           \
+  namespace GTEST_SUITE_NAMESPACE_(SuiteName) {                     \
+  template <typename gtest_TypeParam_>                              \
+  class TestName : public SuiteName<gtest_TypeParam_> {             \
+   private:                                                         \
+    typedef SuiteName<gtest_TypeParam_> TestFixture;                \
+    typedef gtest_TypeParam_ TypeParam;                             \
+    void TestBody() override;                                       \
+  };                                                                \
+  static bool gtest_##TestName##_defined_ GTEST_ATTRIBUTE_UNUSED_ = \
+      GTEST_TYPED_TEST_SUITE_P_STATE_(SuiteName).AddTestName(       \
+          __FILE__, __LINE__, GTEST_STRINGIFY_(SuiteName),          \
+          GTEST_STRINGIFY_(TestName));                              \
+  }                                                                 \
+  template <typename gtest_TypeParam_>                              \
+  void GTEST_SUITE_NAMESPACE_(                                      \
       SuiteName)::TestName<gtest_TypeParam_>::TestBody()
 
 // Note: this won't work correctly if the trailing arguments are macros.
 #define REGISTER_TYPED_TEST_SUITE_P(SuiteName, ...)                         \
   namespace GTEST_SUITE_NAMESPACE_(SuiteName) {                             \
-    typedef ::testing::internal::Templates<__VA_ARGS__> gtest_AllTests_;    \
+  typedef ::testing::internal::Templates<__VA_ARGS__> gtest_AllTests_;      \
   }                                                                         \
   static const char* const GTEST_REGISTERED_TEST_NAMES_(                    \
       SuiteName) GTEST_ATTRIBUTE_UNUSED_ =                                  \
@@ -307,21 +303,21 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes);
   REGISTER_TYPED_TEST_SUITE_P
 #endif  // GTEST_REMOVE_LEGACY_TEST_CASEAPI_
 
-#define INSTANTIATE_TYPED_TEST_SUITE_P(Prefix, SuiteName, Types, ...)       \
-  static_assert(sizeof(GTEST_STRINGIFY_(Prefix)) > 1,                       \
-                "test-suit-prefix must not be empty");                      \
-  static bool gtest_##Prefix##_##SuiteName GTEST_ATTRIBUTE_UNUSED_ =        \
-      ::testing::internal::TypeParameterizedTestSuite<                      \
-          SuiteName, GTEST_SUITE_NAMESPACE_(SuiteName)::gtest_AllTests_,    \
-          ::testing::internal::GenerateTypeList<Types>::type>::             \
-          Register(GTEST_STRINGIFY_(Prefix),                                \
-                   ::testing::internal::CodeLocation(__FILE__, __LINE__),   \
-                   &GTEST_TYPED_TEST_SUITE_P_STATE_(SuiteName),             \
-                   GTEST_STRINGIFY_(SuiteName),                             \
-                   GTEST_REGISTERED_TEST_NAMES_(SuiteName),                 \
-                   ::testing::internal::GenerateNames<                      \
-                       ::testing::internal::NameGeneratorSelector<          \
-                           __VA_ARGS__>::type,                              \
+#define INSTANTIATE_TYPED_TEST_SUITE_P(Prefix, SuiteName, Types, ...)     \
+  static_assert(sizeof(GTEST_STRINGIFY_(Prefix)) > 1,                     \
+                "test-suit-prefix must not be empty");                    \
+  static bool gtest_##Prefix##_##SuiteName GTEST_ATTRIBUTE_UNUSED_ =      \
+      ::testing::internal::TypeParameterizedTestSuite<                    \
+          SuiteName, GTEST_SUITE_NAMESPACE_(SuiteName)::gtest_AllTests_,  \
+          ::testing::internal::GenerateTypeList<Types>::type>::           \
+          Register(GTEST_STRINGIFY_(Prefix),                              \
+                   ::testing::internal::CodeLocation(__FILE__, __LINE__), \
+                   &GTEST_TYPED_TEST_SUITE_P_STATE_(SuiteName),           \
+                   GTEST_STRINGIFY_(SuiteName),                           \
+                   GTEST_REGISTERED_TEST_NAMES_(SuiteName),               \
+                   ::testing::internal::GenerateNames<                    \
+                       ::testing::internal::NameGeneratorSelector<        \
+                           __VA_ARGS__>::type,                            \
                        ::testing::internal::GenerateTypeList<Types>::type>())
 
 // Legacy API is deprecated but still available
@@ -332,6 +328,4 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes);
   INSTANTIATE_TYPED_TEST_SUITE_P
 #endif  // GTEST_REMOVE_LEGACY_TEST_CASEAPI_
 
-#endif  // GTEST_HAS_TYPED_TEST_P
-
-#endif  // GTEST_INCLUDE_GTEST_GTEST_TYPED_TEST_H_
+#endif  // GOOGLETEST_INCLUDE_GTEST_GTEST_TYPED_TEST_H_

@@ -21,14 +21,14 @@ accept your pull requests.
 
 ## Are you a Googler?
 
-If you are a Googler, please make an attempt to submit an internal change rather
-than a GitHub Pull Request. If you are not able to submit an internal change a
+If you are a Googler, please make an attempt to submit an internal contribution
+rather than a GitHub Pull Request. If you are not able to submit internally, a
 PR is acceptable as an alternative.
 
 ## Contributing A Patch
 
 1.  Submit an issue describing your proposed change to the
-    [issue tracker](https://github.com/google/googletest).
+    [issue tracker](https://github.com/google/googletest/issues).
 2.  Please don't mix more than one logical change per submittal, because it
     makes the history hard to follow. If you want to make a change that doesn't
     have a corresponding issue in the issue tracker, please create one.
@@ -36,7 +36,8 @@ PR is acceptable as an alternative.
     This ensures that work isn't being duplicated and communicating your plan
     early also generally leads to better patches.
 4.  If your proposed change is accepted, and you haven't already done so, sign a
-    Contributor License Agreement (see details above).
+    Contributor License Agreement
+    ([see details above](#contributor-license-agreements)).
 5.  Fork the desired repo, develop and test your code changes.
 6.  Ensure that your code adheres to the existing style in the sample to which
     you are contributing.
@@ -46,11 +47,11 @@ PR is acceptable as an alternative.
 ## The Google Test and Google Mock Communities
 
 The Google Test community exists primarily through the
-[discussion group](http://groups.google.com/group/googletestframework) and the
+[discussion group](https://groups.google.com/group/googletestframework) and the
 GitHub repository. Likewise, the Google Mock community exists primarily through
-their own [discussion group](http://groups.google.com/group/googlemock). You are
-definitely encouraged to contribute to the discussion and you can also help us
-to keep the effectiveness of the group high by following and promoting the
+their own [discussion group](https://groups.google.com/group/googlemock). You
+are definitely encouraged to contribute to the discussion and you can also help
+us to keep the effectiveness of the group high by following and promoting the
 guidelines listed here.
 
 ### Please Be Friendly
@@ -79,17 +80,17 @@ fairly rigid coding style, as defined by the
 [google-styleguide](https://github.com/google/styleguide) project. All patches
 will be expected to conform to the style outlined
 [here](https://google.github.io/styleguide/cppguide.html). Use
-[.clang-format](https://github.com/google/googletest/blob/master/.clang-format)
-to check your formatting.
+[.clang-format](https://github.com/google/googletest/blob/main/.clang-format) to
+check your formatting.
 
 ## Requirements for Contributors
 
 If you plan to contribute a patch, you need to build Google Test, Google Mock,
 and their own tests from a git checkout, which has further requirements:
 
-*   [Python](https://www.python.org/) v2.3 or newer (for running some of the
+*   [Python](https://www.python.org/) v3.6 or newer (for running some of the
     tests and re-generating certain source files from templates)
-*   [CMake](https://cmake.org/) v2.6.4 or newer
+*   [CMake](https://cmake.org/) v2.8.12 or newer
 
 ## Developing Google Test and Google Mock
 
@@ -101,42 +102,40 @@ To make sure your changes work as intended and don't break existing
 functionality, you'll want to compile and run Google Test and GoogleMock's own
 tests. For that you can use CMake:
 
-    mkdir mybuild
-    cd mybuild
-    cmake -Dgtest_build_tests=ON -Dgmock_build_tests=ON ${GTEST_REPO_DIR}
+```
+mkdir mybuild
+cd mybuild
+cmake -Dgtest_build_tests=ON -Dgmock_build_tests=ON ${GTEST_REPO_DIR}
+```
 
 To choose between building only Google Test or Google Mock, you may modify your
 cmake command to be one of each
 
-    cmake -Dgtest_build_tests=ON ${GTEST_DIR} # sets up Google Test tests
-    cmake -Dgmock_build_tests=ON ${GMOCK_DIR} # sets up Google Mock tests
+```
+cmake -Dgtest_build_tests=ON ${GTEST_DIR} # sets up Google Test tests
+cmake -Dgmock_build_tests=ON ${GMOCK_DIR} # sets up Google Mock tests
+```
 
 Make sure you have Python installed, as some of Google Test's tests are written
 in Python. If the cmake command complains about not being able to find Python
 (`Could NOT find PythonInterp (missing: PYTHON_EXECUTABLE)`), try telling it
 explicitly where your Python executable can be found:
 
-    cmake -DPYTHON_EXECUTABLE=path/to/python ...
+```
+cmake -DPYTHON_EXECUTABLE=path/to/python ...
+```
 
 Next, you can build Google Test and / or Google Mock and all desired tests. On
 \*nix, this is usually done by
 
-    make
+```
+make
+```
 
 To run the tests, do
 
-    make test
+```
+make test
+```
 
 All tests should pass.
-
-### Regenerating Source Files
-
-Some of Google Test's source files are generated from templates (not in the C++
-sense) using a script. For example, the file
-*googlemock/include/gmock/gmock-generated-actions.h.pump* is used to generate
-*gmock-generated-actions.h* in the same directory.
-
-You don't need to worry about regenerating the source files unless you need to
-modify them. You would then modify the corresponding `.pump` files and run the
-'[pump.py](googlemock/scripts/pump.py)' generator script. See the
-[Pump Manual](googlemock/docs/pump_manual.md).

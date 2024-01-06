@@ -32,19 +32,14 @@
 // This file verifies Google Test event listeners receive events at the
 // right times.
 
+#include <string>
 #include <vector>
 
 #include "gtest/gtest.h"
 #include "gtest/internal/custom/gtest.h"
 
 using ::testing::AddGlobalTestEnvironment;
-using ::testing::Environment;
 using ::testing::InitGoogleTest;
-using ::testing::Test;
-using ::testing::TestSuite;
-using ::testing::TestEventListener;
-using ::testing::TestInfo;
-using ::testing::TestPartResult;
 using ::testing::UnitTest;
 
 // Used by tests to register their events.
@@ -65,8 +60,8 @@ class EventRecordingListener : public TestEventListener {
   void OnTestIterationStart(const UnitTest& /*unit_test*/,
                             int iteration) override {
     Message message;
-    message << GetFullMethodName("OnTestIterationStart")
-            << "(" << iteration << ")";
+    message << GetFullMethodName("OnTestIterationStart") << "(" << iteration
+            << ")";
     g_events->push_back(message.GetString());
   }
 
@@ -112,8 +107,8 @@ class EventRecordingListener : public TestEventListener {
   void OnTestIterationEnd(const UnitTest& /*unit_test*/,
                           int iteration) override {
     Message message;
-    message << GetFullMethodName("OnTestIterationEnd")
-            << "("  << iteration << ")";
+    message << GetFullMethodName("OnTestIterationEnd") << "(" << iteration
+            << ")";
     g_events->push_back(message.GetString());
   }
 
@@ -122,9 +117,7 @@ class EventRecordingListener : public TestEventListener {
   }
 
  private:
-  std::string GetFullMethodName(const char* name) {
-    return name_ + "." + name;
-  }
+  std::string GetFullMethodName(const char* name) { return name_ + "." + name; }
 
   std::string name_;
 };
@@ -252,22 +245,21 @@ void VerifyResults(const std::vector<std::string>& data,
   EXPECT_EQ(expected_data_size, actual_size);
 
   // Compares the common prefix.
-  const size_t shorter_size = expected_data_size <= actual_size ?
-      expected_data_size : actual_size;
+  const size_t shorter_size =
+      expected_data_size <= actual_size ? expected_data_size : actual_size;
   size_t i = 0;
   for (; i < shorter_size; ++i) {
-    ASSERT_STREQ(expected_data[i], data[i].c_str())
-        << "at position " << i;
+    ASSERT_STREQ(expected_data[i], data[i].c_str()) << "at position " << i;
   }
 
   // Prints extra elements in the actual data.
   for (; i < actual_size; ++i) {
-    printf("  Actual event #%lu: %s\n",
-        static_cast<unsigned long>(i), data[i].c_str());
+    printf("  Actual event #%lu: %s\n", static_cast<unsigned long>(i),
+           data[i].c_str());
   }
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
   std::vector<std::string> events;
   g_events = &events;
   InitGoogleTest(&argc, argv);
@@ -281,10 +273,11 @@ int main(int argc, char **argv) {
 
   AddGlobalTestEnvironment(new EnvironmentInvocationCatcher);
 
-  GTEST_CHECK_(events.size() == 0)
+  GTEST_CHECK_(events.empty())
       << "AddGlobalTestEnvironment should not generate any events itself.";
 
-  ::testing::GTEST_FLAG(repeat) = 2;
+  GTEST_FLAG_SET(repeat, 2);
+  GTEST_FLAG_SET(recreate_environments_when_repeating, true);
   int ret_val = RUN_ALL_TESTS();
 
 #ifndef GTEST_REMOVE_LEGACY_TEST_CASEAPI_
@@ -505,14 +498,12 @@ int main(int argc, char **argv) {
                                          "1st.OnTestProgramEnd"};
 #endif  // GTEST_REMOVE_LEGACY_TEST_CASEAPI_
 
-  VerifyResults(events,
-                expected_events,
-                sizeof(expected_events)/sizeof(expected_events[0]));
+  VerifyResults(events, expected_events,
+                sizeof(expected_events) / sizeof(expected_events[0]));
 
   // We need to check manually for ad hoc test failures that happen after
   // RUN_ALL_TESTS finishes.
-  if (UnitTest::GetInstance()->Failed())
-    ret_val = 1;
+  if (UnitTest::GetInstance()->Failed()) ret_val = 1;
 
   return ret_val;
 }
