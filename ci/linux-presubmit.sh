@@ -31,7 +31,7 @@
 
 set -euox pipefail
 
-readonly LINUX_LATEST_CONTAINER="gcr.io/google.com/absl-177019/linux_hybrid-latest:20230816"
+readonly LINUX_LATEST_CONTAINER="gcr.io/google.com/absl-177019/linux_hybrid-latest:20231218"
 readonly LINUX_GCC_FLOOR_CONTAINER="gcr.io/google.com/absl-177019/linux_gcc-floor:20230120"
 
 if [[ -z ${GTEST_ROOT:-} ]]; then
@@ -80,7 +80,6 @@ time docker run \
       --copt="-Wuninitialized" \
       --copt="-Wundef" \
       --copt="-Wno-error=pragmas" \
-      --distdir="/bazel-distdir" \
       --features=external_include_paths \
       --keep_going \
       --show_timestamps \
@@ -102,7 +101,7 @@ for std in ${STD}; do
         --copt="-Wuninitialized" \
         --copt="-Wundef" \
         --define="absl=${absl}" \
-        --distdir="/bazel-distdir" \
+        --enable_bzlmod=false \
         --features=external_include_paths \
         --keep_going \
         --show_timestamps \
@@ -127,7 +126,7 @@ for std in ${STD}; do
         --copt="-Wuninitialized" \
         --copt="-Wundef" \
         --define="absl=${absl}" \
-        --distdir="/bazel-distdir" \
+        --enable_bzlmod=false \
         --features=external_include_paths \
         --keep_going \
         --linkopt="--gcc-toolchain=/usr/local" \
