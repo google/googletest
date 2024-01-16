@@ -459,7 +459,12 @@ void AssertHelper::operator=(const Message& message) const {
   UnitTest::GetInstance()->AddTestPartResult(
       data_->type, data_->file, data_->line,
       AppendUserMessage(data_->message, message),
-      UnitTest::GetInstance()->impl()->CurrentOsStackTraceExceptTop(1)
+      // Suppress emission of the stack trace for GTEST_SKIP() since skipping is
+      // an intentional act by the developer rather than a failure requiring
+      // investigation.
+      data_->type != TestPartResult::kSkip
+          ? UnitTest::GetInstance()->impl()->CurrentOsStackTraceExceptTop(1)
+          : ""
       // Skips the stack frame for this function itself.
   );  // NOLINT
 }

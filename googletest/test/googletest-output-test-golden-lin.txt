@@ -970,7 +970,6 @@ googletest-output-test_.cc:#: Skipped
 [0;32m[----------] [m1 test from TestSuiteThatSkipsInSetUp
 googletest-output-test_.cc:#: Skipped
 Skip entire test suite
-Stack trace: (omitted)
 
 [0;32m[ RUN      ] [mTestSuiteThatSkipsInSetUp.ShouldNotRun
 googletest-output-test_.cc:#: Skipped

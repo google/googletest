@@ -112,20 +112,23 @@ Invalid characters in brackets []%(stack)s]]></failure>
   </testsuite>
   <testsuite name="SkippedTest" tests="3" failures="1" disabled="0" skipped="2" errors="0" time="*" timestamp="*">
     <testcase name="Skipped" status="run" file="gtest_xml_output_unittest_.cc" line="75" result="skipped" time="*" timestamp="*" classname="SkippedTest">
-      <skipped message="gtest_xml_output_unittest_.cc:*&#x0A;%(stack_entity)s"><![CDATA[gtest_xml_output_unittest_.cc:*
-%(stack)s]]></skipped>
+      <skipped message="gtest_xml_output_unittest_.cc:*&#x0A;&#x0A;"><![CDATA[gtest_xml_output_unittest_.cc:*
+
+]]></skipped>
     </testcase>
     <testcase name="SkippedWithMessage" file="gtest_xml_output_unittest_.cc" line="79" status="run" result="skipped" time="*" timestamp="*" classname="SkippedTest">
-      <skipped message="gtest_xml_output_unittest_.cc:*&#x0A;It is good practice to tell why you skip a test.%(stack_entity)s"><![CDATA[gtest_xml_output_unittest_.cc:*
-It is good practice to tell why you skip a test.%(stack)s]]></skipped>
+      <skipped message="gtest_xml_output_unittest_.cc:*&#x0A;It is good practice to tell why you skip a test.&#x0A;"><![CDATA[gtest_xml_output_unittest_.cc:*
+It is good practice to tell why you skip a test.
+]]></skipped>
     </testcase>
     <testcase name="SkippedAfterFailure" file="gtest_xml_output_unittest_.cc" line="83" status="run" result="completed" time="*" timestamp="*" classname="SkippedTest">
       <failure message="gtest_xml_output_unittest_.cc:*&#x0A;Expected equality of these values:&#x0A;  1&#x0A;  2%(stack_entity)s" type=""><![CDATA[gtest_xml_output_unittest_.cc:*
 Expected equality of these values:
   1
   2%(stack)s]]></failure>
-      <skipped message="gtest_xml_output_unittest_.cc:*&#x0A;It is good practice to tell why you skip a test.%(stack_entity)s"><![CDATA[gtest_xml_output_unittest_.cc:*
-It is good practice to tell why you skip a test.%(stack)s]]></skipped>
+      <skipped message="gtest_xml_output_unittest_.cc:*&#x0A;It is good practice to tell why you skip a test.&#x0A;"><![CDATA[gtest_xml_output_unittest_.cc:*
+It is good practice to tell why you skip a test.
+]]></skipped>
     </testcase>
 
   </testsuite>
