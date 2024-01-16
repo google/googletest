@@ -3288,11 +3288,9 @@ static void ColoredPrintf(GTestColor color, const char* fmt, ...) {
   va_start(args, fmt);
 
   static const bool in_color_mode =
-#if GTEST_HAS_FILE_SYSTEM
+      // We don't condition this on GTEST_HAS_FILE_SYSTEM because we still need
+      // to be able to detect terminal I/O regardless.
       ShouldUseColor(posix::IsATTY(posix::FileNo(stdout)) != 0);
-#else
-      false;
-#endif  // GTEST_HAS_FILE_SYSTEM
 
   const bool use_color = in_color_mode && (color != GTestColor::kDefault);
 
