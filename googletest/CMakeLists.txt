@@ -147,7 +147,7 @@ target_include_directories(gtest SYSTEM INTERFACE
 target_include_directories(gtest_main SYSTEM INTERFACE
   "$<BUILD_INTERFACE:${dirs}>"
   "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
-if(CMAKE_SYSTEM_NAME MATCHES "QNX")
+if(CMAKE_SYSTEM_NAME MATCHES "QNX" AND NOT (CMAKE_SYSTEM_VERSION VERSION_LESS 7.1.0))
   target_link_libraries(gtest PUBLIC regex)
 endif()
 target_link_libraries(gtest_main PUBLIC gtest)
