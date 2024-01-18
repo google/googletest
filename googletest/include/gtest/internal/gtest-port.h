@@ -338,9 +338,10 @@
 #define GTEST_HAS_NOTIFICATION_ 0
 #endif
 
-#ifdef GTEST_HAS_ABSL
-#include "absl/flags/declare.h"
+#if defined(GTEST_HAS_ABSL) && !defined(GTEST_NO_ABSL_FLAGS)
+#define GTEST_INTERNAL_HAS_ABSL_FLAGS  // Used only in this file.
 #include "absl/flags/flag.h"
+#include "absl/flags/declare.h"
 #include "absl/flags/reflection.h"
 #endif
 
@@ -2252,7 +2253,7 @@ using TimeInMillis = int64_t;  // Represents time in milliseconds.
 #endif  // !defined(GTEST_FLAG)
 
 // Pick a command line flags implementation.
-#ifdef GTEST_HAS_ABSL
+#ifdef GTEST_INTERNAL_HAS_ABSL_FLAGS
 
 // Macros for defining flags.
 #define GTEST_DEFINE_bool_(name, default_val, doc) \
@@ -2277,7 +2278,8 @@ using TimeInMillis = int64_t;  // Represents time in milliseconds.
   (void)(::absl::SetFlag(&GTEST_FLAG(name), value))
 #define GTEST_USE_OWN_FLAGFILE_FLAG_ 0
 
-#else  // GTEST_HAS_ABSL
+#undef GTEST_INTERNAL_HAS_ABSL_FLAGS
+#else  // ndef GTEST_INTERNAL_HAS_ABSL_FLAGS
 
 // Macros for defining flags.
 #define GTEST_DEFINE_bool_(name, default_val, doc)  \
@@ -2319,7 +2321,7 @@ using TimeInMillis = int64_t;  // Represents time in milliseconds.
 #define GTEST_FLAG_SET(name, value) (void)(::testing::GTEST_FLAG(name) = value)
 #define GTEST_USE_OWN_FLAGFILE_FLAG_ 1
 
-#endif  // GTEST_HAS_ABSL
+#endif  // GTEST_INTERNAL_HAS_ABSL_FLAGS
 
 // Thread annotations
 #if !defined(GTEST_EXCLUSIVE_LOCK_REQUIRED_)
