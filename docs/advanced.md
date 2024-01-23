@@ -1004,18 +1004,20 @@ calling the `::testing::AddGlobalTestEnvironment()` function:
 Environment* AddGlobalTestEnvironment(Environment* env);
 ```
 
-Now, when RUN_ALL_TESTS() is invoked, it first calls the SetUp() method. 
+Now, when `RUN_ALL_TESTS()` is invoked, it first calls the `SetUp()` method. 
 The tests are then executed, provided that none of the environments have reported
-fatal failures and GTEST_SKIP() has not been invoked. Finally, TearDown() is called.
+fatal failures and `GTEST_SKIP()` has not been invoked. Finally, `TearDown()` is called.
 
-Note that SetUp() and TearDown() are only invoked if there is at least one test
-to be performed. Importantly, TearDown() is executed even if the test itself
-is not run due to exception handling (e.g., fatal failures or if GTEST_SKIP() is invoked).
+Note that `SetUp()` and `TearDown()` are only invoked if there is at least one test
+to be performed. Importantly, `TearDown()` is executed even if the test is not
+run due to a fatal failure or `GTEST_SKIP()`.
 
-SetUp() and TearDown() are also called for each environment object when they are
-recreated for each iteration. However, if the test environments are not recreated
-for each iteration, SetUp() is called only on the first iteration, and TearDown()
-is called only on the last iteration.
+Calling `SetUp()` and `TearDown()` for each iteration depends on the 
+`gtest_recreate_environments_when_repeating variable`. `SetUp()` and `TearDown()`
+are called for each environment object when they are recreated for each iteration.
+However, if the test environments are not recreated for each iteration, 
+`SetUp()` is called only on the first iteration, and `TearDown()` is called only 
+on the last iteration.
 
 It's OK to register multiple environment objects. In this suite, their `SetUp()`
 will be called in the order they are registered, and their `TearDown()` will be
