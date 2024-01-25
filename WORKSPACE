@@ -6,22 +6,24 @@ googletest_deps()
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 http_archive(
-  name = "rules_python",  # 2023-07-31T20:39:27Z
-  sha256 = "1250b59a33c591a1c4ba68c62e95fc88a84c334ec35a2e23f46cbc1b9a5a8b55",
-  strip_prefix = "rules_python-e355becc30275939d87116a4ec83dad4bb50d9e1",
-  urls = ["https://github.com/bazelbuild/rules_python/archive/e355becc30275939d87116a4ec83dad4bb50d9e1.zip"],
+  name = "rules_python",
+  sha256 = "d71d2c67e0bce986e1c5a7731b4693226867c45bfe0b7c5e0067228a536fc580",
+  strip_prefix = "rules_python-0.29.0",
+  urls = ["https://github.com/bazelbuild/rules_python/releases/download/0.29.0/rules_python-0.29.0.tar.gz"],
+)
+
+# https://github.com/bazelbuild/rules_python/releases/tag/0.29.0
+load("@rules_python//python:repositories.bzl", "py_repositories")
+py_repositories()
+
+http_archive(
+  name = "bazel_skylib",
+  sha256 = "cd55a062e763b9349921f0f5db8c3933288dc8ba4f76dd9416aac68acee3cb94",
+  urls = ["https://github.com/bazelbuild/bazel-skylib/releases/download/1.5.0/bazel-skylib-1.5.0.tar.gz"],
 )
 
 http_archive(
-  name = "bazel_skylib",  # 2023-05-31T19:24:07Z
-  sha256 = "08c0386f45821ce246bbbf77503c973246ed6ee5c3463e41efc197fa9bc3a7f4",
-  strip_prefix = "bazel-skylib-288731ef9f7f688932bd50e704a91a45ec185f9b",
-  urls = ["https://github.com/bazelbuild/bazel-skylib/archive/288731ef9f7f688932bd50e704a91a45ec185f9b.zip"],
-)
-
-http_archive(
-  name = "platforms",  # 2023-07-28T19:44:27Z
-  sha256 = "40eb313613ff00a5c03eed20aba58890046f4d38dec7344f00bb9a8867853526",
-  strip_prefix = "platforms-4ad40ef271da8176d4fc0194d2089b8a76e19d7b",
-  urls = ["https://github.com/bazelbuild/platforms/archive/4ad40ef271da8176d4fc0194d2089b8a76e19d7b.zip"],
+    name = "platforms",
+    sha256 = "8150406605389ececb6da07cbcb509d5637a3ab9a24bc69b1101531367d89d74",
+    urls = ["https://github.com/bazelbuild/platforms/releases/download/0.0.8/platforms-0.0.8.tar.gz"],
 )

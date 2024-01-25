@@ -1,7 +1,6 @@
-#!/bin/bash
+# Copyright 2024 Google Inc.
+# All Rights Reserved.
 #
-# Copyright 2020, Google Inc.
-# All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
@@ -29,49 +28,30 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-set -euox pipefail
+# https://bazel.build/external/overview#bzlmod
 
-if [[ -z ${GTEST_ROOT:-} ]]; then
-  GTEST_ROOT="$(realpath $(dirname ${0})/..)"
-fi
+module(
+    name = "googletest",
+    version = "head",
+    compatibility_level = 1,
+)
 
-# Test the CMake build
-for cmake_off_on in OFF ON; do
-  BUILD_DIR=$(mktemp -d build_dir.XXXXXXXX)
-  cd ${BUILD_DIR}
-  time cmake ${GTEST_ROOT} \
-    -DCMAKE_CXX_STANDARD=14 \
-    -Dgtest_build_samples=ON \
-    -Dgtest_build_tests=ON \
-    -Dgmock_build_tests=ON \
-    -Dcxx_no_exception=${cmake_off_on} \
-    -Dcxx_no_rtti=${cmake_off_on}
-  time make
-  time ctest -j$(nproc) --output-on-failure
-done
+# Only direct dependencies need to be listed below.
+# Please keep the versions in sync with the versions in the WORKSPACE file.
 
-# Test the Bazel build
+bazel_dep(name = "abseil-cpp",
+          version = "20240116.0",
+          repo_name = "com_google_absl")
 
-# If we are running on Kokoro, check for a versioned Bazel binary.
-KOKORO_GFILE_BAZEL_BIN="bazel-7.0.0-darwin-x86_64"
-if [[ ${KOKORO_GFILE_DIR:-} ]] && [[ -f ${KOKORO_GFILE_DIR}/${KOKORO_GFILE_BAZEL_BIN} ]]; then
-  BAZEL_BIN="${KOKORO_GFILE_DIR}/${KOKORO_GFILE_BAZEL_BIN}"
-  chmod +x ${BAZEL_BIN}
-else
-  BAZEL_BIN="bazel"
-fi
+bazel_dep(name = "platforms",
+          version = "0.0.8")
 
-cd ${GTEST_ROOT}
-for absl in 0 1; do
-  ${BAZEL_BIN} test ... \
-    --copt="-Wall" \
-    --copt="-Werror" \
-    --copt="-Wundef" \
-    --cxxopt="-std=c++14" \
-    --define="absl=${absl}" \
-    --enable_bzlmod=true \
-    --features=external_include_paths \
-    --keep_going \
-    --show_timestamps \
-    --test_output=errors
-done
+bazel_dep(name = "re2",
+          repo_name = "com_googlesource_code_re2",
+          version = "2023-11-01")
+
+bazel_dep(name = "rules_python",
+          version = "0.29.0")
+
+# https://github.com/bazelbuild/rules_python/blob/main/BZLMOD_SUPPORT.md#default-toolchain-is-not-the-local-system-python
+register_toolchains("@bazel_tools//tools/python:autodetecting_toolchain")

@@ -51,6 +51,7 @@ SET BAZEL_VS=C:\Program Files\Microsoft Visual Studio\2022\Community
   --compilation_mode=dbg ^
   --copt=/std:c++14 ^
   --copt=/WX ^
+  --enable_bzlmod=true ^
   --keep_going ^
   --test_output=errors ^
   --test_tag_filters=-no_test_msvc2017

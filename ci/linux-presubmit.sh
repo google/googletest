@@ -67,6 +67,9 @@ for cc in /usr/local/bin/gcc /opt/llvm/clang/bin/clang; do
 done
 
 # Do one test with an older version of GCC
+# TODO(googletest-team): This currently uses Bazel 5. When upgrading to a
+# version of Bazel that supports Bzlmod, add --enable_bzlmod=false to keep test
+# coverage for the old WORKSPACE dependency management.
 time docker run \
   --volume="${GTEST_ROOT}:/src:ro" \
   --workdir="/src" \
@@ -101,7 +104,7 @@ for std in ${STD}; do
         --copt="-Wuninitialized" \
         --copt="-Wundef" \
         --define="absl=${absl}" \
-        --enable_bzlmod=false \
+        --enable_bzlmod=true \
         --features=external_include_paths \
         --keep_going \
         --show_timestamps \
@@ -126,7 +129,7 @@ for std in ${STD}; do
         --copt="-Wuninitialized" \
         --copt="-Wundef" \
         --define="absl=${absl}" \
-        --enable_bzlmod=false \
+        --enable_bzlmod=true \
         --features=external_include_paths \
         --keep_going \
         --linkopt="--gcc-toolchain=/usr/local" \
