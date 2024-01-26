@@ -2581,7 +2581,17 @@ static std::string FormatCxxExceptionMessage(const char* description,
                                              const char* location) {
   Message message;
   if (description != nullptr) {
-    message << "C++ exception with description \"" << description << "\"";
+    std::string desc;
+    const char *ch;
+    for(ch=description;*ch!='\0';ch++)
+    {
+        if(*ch=='\n')
+        desc+="\n>";
+        else
+        desc+=*ch;
+    }
+    description=desc.c_str();
+    message << "C++ exception with description \n" << description << "\n";
   } else {
     message << "Unknown C++ exception";
   }
