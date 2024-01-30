@@ -696,7 +696,6 @@ Expected: 1 fatal failure
   Actual:
 googletest-output-test_.cc:#: Success:
 Succeeded
-Stack trace: (omitted)
 
 
 Stack trace: (omitted)
@@ -733,7 +732,6 @@ Expected: 1 non-fatal failure
   Actual:
 googletest-output-test_.cc:#: Success:
 Succeeded
-Stack trace: (omitted)
 
 
 Stack trace: (omitted)
@@ -770,7 +768,6 @@ Expected: 1 fatal failure
   Actual:
 googletest-output-test_.cc:#: Success:
 Succeeded
-Stack trace: (omitted)
 
 
 Stack trace: (omitted)
@@ -807,7 +804,6 @@ Expected: 1 non-fatal failure
   Actual:
 googletest-output-test_.cc:#: Success:
 Succeeded
-Stack trace: (omitted)
 
 
 Stack trace: (omitted)
