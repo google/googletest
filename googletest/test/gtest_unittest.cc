@@ -422,11 +422,14 @@ TEST(FormatTimeInMillisAsSecondsTest, FormatsNegativeNumber) {
   EXPECT_EQ("-1234567.89", FormatTimeInMillisAsSeconds(-1234567890));
 }
 
+// TODO: b/287046337 - In emscripten, local time zone modification is not
+// supported.
+#if !defined(__EMSCRIPTEN__)
 // Tests FormatEpochTimeInMillisAsIso8601().  The correctness of conversion
 // for particular dates below was verified in Python using
 // datetime.datetime.fromutctimestamp(<timestamp>/1000).
 
-// FormatEpochTimeInMillisAsIso8601 depends on the current timezone, so we
+// FormatEpochTimeInMillisAsIso8601 depends on the local timezone, so we
 // have to set up a particular timezone to obtain predictable results.
 class FormatEpochTimeInMillisAsIso8601Test : public Test {
  public:
@@ -445,9 +448,8 @@ class FormatEpochTimeInMillisAsIso8601Test : public Test {
     }
     GTEST_DISABLE_MSC_DEPRECATED_POP_()
 
-    // Set up the time zone for FormatEpochTimeInMillisAsIso8601 to use.  We
-    // cannot use the local time zone because the function's output depends
-    // on the time zone.
+    // Set the local time zone for FormatEpochTimeInMillisAsIso8601 to be
+    // a fixed time zone for reproducibility purposes.
     SetTimeZone("UTC+00");
   }
 
@@ -513,6 +515,8 @@ TEST_F(FormatEpochTimeInMillisAsIso8601Test, Prints24HourTime) {
 TEST_F(FormatEpochTimeInMillisAsIso8601Test, PrintsEpochStart) {
   EXPECT_EQ("1970-01-01T00:00:00.000", FormatEpochTimeInMillisAsIso8601(0));
 }
+
+#endif  // __EMSCRIPTEN__
 
 #ifdef __BORLANDC__
 // Silences warnings: "Condition is always true", "Unreachable code"
