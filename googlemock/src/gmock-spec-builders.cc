@@ -531,7 +531,7 @@ class MockObjectRegistry {
 #ifdef GTEST_OS_QURT
       qurt_exception_raise_fatal();
 #else
-      _exit(1);  // We cannot call exit() as it is not reentrant and
+      _Exit(1);  // We cannot call exit() as it is not reentrant and
                  // may already have been called.
 #endif
     }
