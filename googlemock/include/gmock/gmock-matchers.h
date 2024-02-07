@@ -2920,26 +2920,27 @@ class EachMatcher {
   const M inner_matcher_;
 };
 
-struct Rank1 {};
-struct Rank0 : Rank1 {};
+// Use go/ranked-overloads for dispatching.
+struct Rank0 {};
+struct Rank1 : Rank0 {};
 
 namespace pair_getters {
 using std::get;
 template <typename T>
-auto First(T& x, Rank1) -> decltype(get<0>(x)) {  // NOLINT
+auto First(T& x, Rank0) -> decltype(get<0>(x)) {  // NOLINT
   return get<0>(x);
 }
 template <typename T>
-auto First(T& x, Rank0) -> decltype((x.first)) {  // NOLINT
+auto First(T& x, Rank1) -> decltype((x.first)) {  // NOLINT
   return x.first;
 }
 
 template <typename T>
-auto Second(T& x, Rank1) -> decltype(get<1>(x)) {  // NOLINT
+auto Second(T& x, Rank0) -> decltype(get<1>(x)) {  // NOLINT
   return get<1>(x);
 }
 template <typename T>
-auto Second(T& x, Rank0) -> decltype((x.second)) {  // NOLINT
+auto Second(T& x, Rank1) -> decltype((x.second)) {  // NOLINT
   return x.second;
 }
 }  // namespace pair_getters
@@ -2965,7 +2966,7 @@ class KeyMatcherImpl : public MatcherInterface<PairType> {
                        MatchResultListener* listener) const override {
     StringMatchResultListener inner_listener;
     const bool match = inner_matcher_.MatchAndExplain(
-        pair_getters::First(key_value, Rank0()), &inner_listener);
+        pair_getters::First(key_value, Rank1()), &inner_listener);
     const std::string explanation = inner_listener.str();
     if (!explanation.empty()) {
       *listener << "whose first field is a value " << explanation;
@@ -3087,18 +3088,18 @@ class PairMatcherImpl : public MatcherInterface<PairType> {
     if (!listener->IsInterested()) {
       // If the listener is not interested, we don't need to construct the
       // explanation.
-      return first_matcher_.Matches(pair_getters::First(a_pair, Rank0())) &&
-             second_matcher_.Matches(pair_getters::Second(a_pair, Rank0()));
+      return first_matcher_.Matches(pair_getters::First(a_pair, Rank1())) &&
+             second_matcher_.Matches(pair_getters::Second(a_pair, Rank1()));
     }
     StringMatchResultListener first_inner_listener;
-    if (!first_matcher_.MatchAndExplain(pair_getters::First(a_pair, Rank0()),
+    if (!first_matcher_.MatchAndExplain(pair_getters::First(a_pair, Rank1()),
                                         &first_inner_listener)) {
       *listener << "whose first field does not match";
       PrintIfNotEmpty(first_inner_listener.str(), listener->stream());
       return false;
     }
     StringMatchResultListener second_inner_listener;
-    if (!second_matcher_.MatchAndExplain(pair_getters::Second(a_pair, Rank0()),
+    if (!second_matcher_.MatchAndExplain(pair_getters::Second(a_pair, Rank1()),
                                          &second_inner_listener)) {
       *listener << "whose second field does not match";
       PrintIfNotEmpty(second_inner_listener.str(), listener->stream());
