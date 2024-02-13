@@ -261,6 +261,8 @@ happen. Therefore it's a good idea to turn on the heap checker in your tests
 when you allocate mocks on the heap. You get that automatically if you use the
 `gtest_main` library already.
 
+###### Expectation Ordering
+
 **Important note:** gMock requires expectations to be set **before** the mock
 functions are called, otherwise the behavior is **undefined**. Do not alternate
 between calls to `EXPECT_CALL()` and calls to the mock functions, and do not set
