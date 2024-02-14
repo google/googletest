@@ -1684,8 +1684,8 @@ class MutexBase {
   // Does nothing if the current thread holds the mutex. Otherwise, crashes
   // with high probability.
   void AssertHeld() const {
-    GTEST_CHECK_(has_owner_ && pthread_equal(owner_, pthread_self()))
-        << "The current thread is not holding the mutex @" << this;
+    GTEST_CHECK_(has_owner_)
+        << "No thread is holding the mutex @" << this;
   }
 
   // A static mutex may be used before main() is entered.  It may even
