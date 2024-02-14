@@ -5,7 +5,7 @@ Cotest is an extension of Google Test which adds direct and fully integrated sup
  - and to execute the code under test.
 
 Cotest allows for a linear test case layout, in which the test coroutine launches the code under test, and then accepts and returns mock calls in a single sequence 
-of C++ statements. Cotest can do this without needing to set up expectation objects ahead of starting the test. The user directly implements the test coroutine 
+of C++ statements. Cotest can do this without needing a data structure populated with expected future events. The user directly implements the test coroutine 
 and can insert arbitrary logic to decide how to respond to mock calls and results from code under test, without needing to split the code into multiple lambda actions.
 
 Cotest supports matching on both _watches_ (similar to GMock expectations but with additional wildcard categories) and the coroutine body 
