@@ -49,7 +49,7 @@ endif (POLICY CMP0063)
 # targets to the current scope.  We are placing Google Mock's binary
 # directory in a subdirectory of our own as VC compilation may break
 # if they are the same (the default).
-add_subdirectory("${gmock_dir}" "${coro_BINARY_DIR}/${gmock_dir}")
+add_subdirectory("${gmock_dir}" "${cotest_BINARY_DIR}/${gmock_dir}")
 
 # Define helper functions and macros used by Google Test.
 include(${gtest_dir}/cmake/internal_utils.cmake)
@@ -58,8 +58,8 @@ config_compiler_and_linker()  # Defined in internal_utils.cmake.
 
 # Adds coroutines header directories to the search path.
 set(coro_build_include_dirs
-  "${coro_SOURCE_DIR}/include"
-  "${coro_SOURCE_DIR}"
+  "${cotest_SOURCE_DIR}/include"
+  "${cotest_SOURCE_DIR}"
   "${gmock_SOURCE_DIR}/include"
   # This directory is needed to build directly from Google Mock sources.
   "${gmock_SOURCE_DIR}")
