@@ -205,6 +205,22 @@ using internal::FunctionMocker;
         .gmock_##_MethodName(GMOCK_PP_REPEAT(                                  \
             GMOCK_INTERNAL_A_MATCHER_ARGUMENT, _Signature, _N));               \
   }                                                                            \
+  ::testing::MockSpec<GMOCK_PP_REMOVE_PARENS(_Signature)> gmockq_##_MethodName(\
+      GMOCK_PP_REPEAT(GMOCK_INTERNAL_MATCHER_PARAMETER, _Signature, _N))       \
+      GMOCK_PP_IF(_Constness, const, ) _RefSpec {                              \
+    GMOCK_MOCKER_(_N, _Constness, _MethodName).RegisterOwner(this, false);     \
+    return GMOCK_MOCKER_(_N, _Constness, _MethodName)                          \
+        .With(GMOCK_PP_REPEAT(GMOCK_INTERNAL_MATCHER_ARGUMENT, , _N));         \
+  }                                                                            \
+  ::testing::MockSpec<GMOCK_PP_REMOVE_PARENS(_Signature)> gmockq_##_MethodName(\
+      const ::testing::internal::WithoutMatchers&,                             \
+      GMOCK_PP_IF(_Constness, const, )::testing::internal::Function<           \
+          GMOCK_PP_REMOVE_PARENS(_Signature)>*) const _RefSpec _NoexceptSpec { \
+    return ::testing::internal::ThisRefAdjuster<GMOCK_PP_IF(                   \
+        _Constness, const, ) int _RefSpec>::Adjust(*this)                      \
+        .gmockq_##_MethodName(GMOCK_PP_REPEAT(                                 \
+            GMOCK_INTERNAL_A_MATCHER_ARGUMENT, _Signature, _N));               \
+  }                                                                            \
   mutable ::testing::FunctionMocker<GMOCK_PP_REMOVE_PARENS(_Signature)>        \
   GMOCK_MOCKER_(_N, _Constness, _MethodName)
 
