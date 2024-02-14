@@ -8,7 +8,7 @@ Cotest allows for a linear test case layout, in which the test coroutine launche
 of C++ statements. Cotest can do this without needing a data structure populated with expected future events. The user directly implements the test coroutine 
 and can insert arbitrary logic to decide how to respond to mock calls and results from code under test, without needing to split the code into multiple lambda actions.
 
-Cotest supports matching on both _watches_ (similar to GMock expectations but with additional wildcard categories) and inside the coroutine body 
+Cotest supports matching on both _watches_ (similar to GMock expectations) and inside the coroutine body 
 (a test coroutine can _drop_ a mock call and GMock's matching search will continue). Cotest actions are simply coded directly into the coroutine body by the user. 
 Cardinality is inferred from the execution state of the coroutine.
   
