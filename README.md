@@ -14,7 +14,7 @@ Cardinality is inferred from the execution state of the coroutine.
   
 Cotest supports multiple test coroutines: these will _see_ mock calls with priority established by their watches, which may be interleaved with GMock expectations.
 Cotest permits multiple overlapping launches of code under test: in the coroutine model there is no freely concurrent execution, 
-but a test coroutine can control the order in which overlapping mock calls return.
+but a test coroutine can control the order in which mock calls are allowed to return.
  
 This project is a fork of Google Test, and changes to gtest/gmock source code have been kept minimal. C++14.
 
