@@ -97,6 +97,9 @@ class GTEST_API_ Cardinality {
   // Constructs a Cardinality from its implementation.
   explicit Cardinality(const CardinalityInterface* impl) : impl_(impl) {}
 
+  // Constructs a Cardinality from shared_ptr.
+  explicit Cardinality(std::shared_ptr<const CardinalityInterface> impl) : impl_(impl) {}
+
   // Conservative estimate on the lower/upper bound of the number of
   // calls allowed.
   int ConservativeLowerBound() const { return impl_->ConservativeLowerBound(); }
