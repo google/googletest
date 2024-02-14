@@ -102,13 +102,11 @@ COTEST(ServerisedTest, Example1) {
 
         if (auto e1 = e.IS_CALL(mock_object, Mock1)) {
             // Mock1() is accepted, checked and returned
-            e1.ACCEPT();
             EXPECT_EQ(e1.GetArg<0>(), 1);
             e1.RETURN();
         } else if (auto e2 = e.IS_CALL(mock_object, Mock2)) {
             // Mock2() is accepted, checked and returned, but we require
             // it to be followed by a call to MockExtra()
-            e2.ACCEPT();
             EXPECT_EQ(e2.GetArg<0>(), 2);
             e2.RETURN();
             WAIT_FOR_CALL(mock_object, MockExtra).RETURN();
