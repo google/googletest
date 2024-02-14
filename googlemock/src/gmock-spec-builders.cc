@@ -93,7 +93,8 @@ ExpectationBase::ExpectationBase(const char* a_file, int a_line,
       repeated_action_specified_(false),
       retires_on_saturation_(false),
       last_clause_(kNone),
-      action_count_checked_(false) {}
+      action_count_checked_(false),
+      priority_(AlternateMockCallManager::GetNextPriority()) {}
 
 // Destructs an ExpectationBase object.
 ExpectationBase::~ExpectationBase() = default;
@@ -275,6 +276,37 @@ void ExpectationBase::UntypedTimes(const Cardinality& a_cardinality) {
   SpecifyCardinality(a_cardinality);
 }
 
+bool ExpectationBase::VerifyExpectationLocked()
+  GTEST_EXCLUSIVE_LOCK_REQUIRED_(g_gmock_mutex) {
+  bool expectation_met = true;
+  if (IsOverSaturated()) {
+    // There was an upper-bound violation.  Since the error was
+    // already reported when it occurred, there is no need to do
+    // anything here.
+    expectation_met = false;
+  } else if (!IsSatisfied()) {
+    expectation_met = false;
+    ::std::stringstream ss;
+
+    const ::std::string& expectation_name =
+        GetDescription();
+    ss << "Actual function ";
+    if (!expectation_name.empty()) {
+      ss << "\"" << expectation_name << "\" ";
+    }
+    ss << "call count doesn't match " << source_text()
+       << "...\n";
+    // No need to show the source file location of the expectation
+    // in the description, as the Expect() call that follows already
+    // takes care of it.
+    MaybeDescribeExtraMatcherTo(&ss);
+    DescribeCallCountTo(&ss);
+    Expect(false, file(), line(),
+           ss.str());
+  }
+  return expectation_met; 
+}
+
 // Points to the implicit sequence introduced by a living InSequence
 // object (if any) in the current thread or NULL.
 GTEST_API_ ThreadLocal<Sequence*> g_gmock_implicit_sequence;
@@ -315,13 +347,25 @@ UntypedFunctionMockerBase::~UntypedFunctionMockerBase() = default;
 // this information in the global mock registry.  Will be called
 // whenever an EXPECT_CALL() or ON_CALL() is executed on this mock
 // method.
-void UntypedFunctionMockerBase::RegisterOwner(const void* mock_obj)
-    GTEST_LOCK_EXCLUDED_(g_gmock_mutex) {
+void UntypedFunctionMockerBase::RegisterOwner(const void* mock_obj, 
+                                              bool to_reg) {
+  // If mock_obj_ is NULL then "this" is probably corrupt (offset from NULL) but
+  // the constructor defaults mock_obj_ to NULL, so we can check for that later.   
+  if( !mock_obj )
+	  return; 
+
+  // If not registering, we still want to store the mock object pointer
+  if( !to_reg ) {
+	  mock_obj_ = mock_obj;
+	  return;
+  }  
+
   {
     MutexLock l(&g_gmock_mutex);
     mock_obj_ = mock_obj;
   }
   Mock::Register(mock_obj, this);
+  registered = true; // Ensure we un-register
 }
 
 // Sets the mock object this mock method belongs to, and sets the name
@@ -330,6 +374,12 @@ void UntypedFunctionMockerBase::RegisterOwner(const void* mock_obj)
 void UntypedFunctionMockerBase::SetOwnerAndName(const void* mock_obj,
                                                 const char* name)
     GTEST_LOCK_EXCLUDED_(g_gmock_mutex) {
+
+  // This is our hook for pre-mocks. We must invoke cotest before
+  // locking the gmock mutex.
+  if( auto aem = AlternateMockCallManager::TryGetInstance() )
+    aem->PreMockUnlocked(this, mock_obj, name);		
+
   // We protect name_ under g_gmock_mutex in case this mock function
   // is called from two threads concurrently.
   MutexLock l(&g_gmock_mutex);
@@ -349,9 +399,14 @@ const void* UntypedFunctionMockerBase::MockObject() const
     Assert(mock_obj_ != nullptr, __FILE__, __LINE__,
            "MockObject() must not be called before RegisterOwner() or "
            "SetOwnerAndName() has been called.");
-    mock_obj = mock_obj_;
+    mock_obj = MockObjectLocked();
   }
   return mock_obj;
+}
+
+const void* UntypedFunctionMockerBase::MockObjectLocked() const
+    GTEST_LOCK_EXCLUDED_(g_gmock_mutex) {
+  return mock_obj_;
 }
 
 // Returns the name of this mock method.  Must be called after
@@ -366,9 +421,17 @@ const char* UntypedFunctionMockerBase::Name() const
     Assert(name_ != nullptr, __FILE__, __LINE__,
            "Name() must not be called before SetOwnerAndName() has "
            "been called.");
-    name = name_;
+    name = NameLocked();
   }
   return name;
+}
+
+const char* UntypedFunctionMockerBase::NameLocked() const
+    GTEST_EXCLUSIVE_LOCK_REQUIRED_(g_gmock_mutex) {
+  Assert(name_ != nullptr, __FILE__, __LINE__,
+         "Name() must not be called before SetOwnerAndName() has "
+         "been called.");
+  return name_;
 }
 
 // Returns an Expectation object that references and co-owns exp,
@@ -442,6 +505,20 @@ bool UntypedFunctionMockerBase::VerifyAndClearExpectationsLocked()
 
   return expectations_met;
 }
+
+AlternateMockCallManager::Priority AlternateMockCallManager::GetNextPriority()
+{
+	return next_global_priority;
+}
+
+AlternateMockCallManager *AlternateMockCallManager::TryGetInstance()
+{
+	return instance;
+}
+
+AlternateMockCallManager::Priority AlternateMockCallManager::next_global_priority = 0;
+
+AlternateMockCallManager *AlternateMockCallManager::instance = nullptr;
 
 static CallReaction intToCallReaction(int mock_behavior) {
   if (mock_behavior >= kAllow && mock_behavior <= kFail) {
