@@ -29,3 +29,10 @@ make
 ctest
 ```
 This will run the googletest tests as well as the cotest tests. Use `-R ^co` for just the cotest tests.
+
+## Selected examples
+
+ - [Unit tests](coroutines/test/cotest-mutex.cc) for a code sample that (mis-)uses a mutex.
+ - [Examples](coroutines/test/cotest-serverised.cc) of _serverised_ testing style.
+
+There are many more cotest scripts in [`test/`](coroutines/test/)
