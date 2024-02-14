@@ -1,4 +1,4 @@
-# CoTest
+# Cotest
 
 Cotest is an extension of Google Test which adds direct and fully integrated support for coroutines:
  - as contexts within which to run checking code and actions, 
