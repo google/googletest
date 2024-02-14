@@ -16,7 +16,7 @@ Cotest supports multiple test coroutines: these will _see_ mock calls with prior
 Cotest permits multiple overlapping launches of code under test: in the coroutine model there is no freely concurrent execution, 
 but a test coroutine can control the order in which overlapping mock calls return.
  
-This project is a fork of Google Test, and changes to gtest/gmock source code have been kept minimal. 
+This project is a fork of Google Test, and changes to gtest/gmock source code have been kept minimal. C++14.
 
 ## To build and run the tests
 
