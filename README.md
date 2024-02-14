@@ -8,14 +8,14 @@ Cotest allows for a linear test case layout, in which the test coroutine launche
 of C++ statements. Cotest can do this without needing to set up expectation objects ahead of starting the test. The user directly implements the test coroutine 
 and can insert arbitrary logic to decide how to respond to mock calls and results from code under test, without needing to split the code into multiple lambda actions.
 
-Cotest supports multiple test coroutines: these will "see" mock calls with a decreasing priority, interleaved with GMock expectations as required.
+Cotest supports matching on both _watches_ (similar to GMock expectations but with additional wildcard categories) and the coroutine body 
+(a test coroutine can _drop_ a mock call and GMock's matching search will continue). Cotest actions are simply coded directly into the coroutine body by the user. 
+Cardinality is inferred from the execution state of the coroutine, plus APIs for retiring and becoming satisfied.
+  
+Cotest supports multiple test coroutines: these will _see_ mock calls with priority established by their watches, interleaved with GMock expectations.
 Cotest permits multiple overlapping launches of code under test: in the coroutine model there is no freely concurrent execution, 
 but a test coroutine can control the order in which overlapping mock calls return.
  
-Cotest supports matching on both the exterior of the coroutine (similar to GMock expectations but with additional wildcard categories) and the interior 
-(a test coroutine can "drop" a mock call and GMock's matching search will continue). Cotest actions are simply coded directly into the coroutine body by the user. 
-Cardinality is inferred from the execution state of the coroutine, plus APIs for retiring and becoming satisfied.
-  
 This project is a fork of Google Test, and changes to gtest/gmock source code have been kept minimal. 
 
 ## To build and run the tests
