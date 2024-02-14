@@ -1,6 +1,6 @@
 # Cotest
 
-Cotest is an extension of Google Test which adds direct and fully integrated support for coroutines:
+Cotest is an extension of Google Test with fully integrated support for coroutines:
  - as contexts within which to run checking code and actions, 
  - and to execute the code under test.
 
@@ -9,7 +9,7 @@ of C++ statements. Cotest can do this without needing a data structure populated
 and can insert arbitrary logic to decide how to respond to mock calls and results from code under test, without needing to split the code into multiple lambda actions.
 
 Cotest supports matching on both _watches_ (similar to GMock expectations) and inside the coroutine body 
-(a test coroutine can _drop_ a mock call and GMock's matching search will continue). Cotest actions are simply coded directly into the coroutine body by the user. 
+(a test coroutine can _drop_ a mock call and GMock's matching search will continue). Cotest actions are coded directly into the coroutine body by the user. 
 Cardinality is inferred from the execution state of the coroutine.
   
 Cotest supports multiple test coroutines: these will _see_ mock calls with priority established by their watches, which may be interleaved with GMock expectations.
