@@ -12,7 +12,7 @@ Cotest supports matching on both _watches_ (similar to GMock expectations but wi
 (a test coroutine can _drop_ a mock call and GMock's matching search will continue). Cotest actions are simply coded directly into the coroutine body by the user. 
 Cardinality is inferred from the execution state of the coroutine, plus APIs for retiring and becoming satisfied.
   
-Cotest supports multiple test coroutines: these will _see_ mock calls with priority established by their watches, interleaved with GMock expectations.
+Cotest supports multiple test coroutines: these will _see_ mock calls with priority established by their watches, which may be interleaved with GMock expectations.
 Cotest permits multiple overlapping launches of code under test: in the coroutine model there is no freely concurrent execution, 
 but a test coroutine can control the order in which overlapping mock calls return.
  
