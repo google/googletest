@@ -1,7 +1,7 @@
 # CoTest
 
-Cotest is an extension of Google Test (including GMock) which adds direct and fully integrated support for coroutines:
- - as contexts within which to run checking code, including checking of mock calls,
+Cotest is an extension of Google Test which adds direct and fully integrated support for coroutines:
+ - as contexts within which to run checking code and actions, 
  - and to execute the code under test.
 
 Cotest allows for a linear test case layout, in which the test coroutine launches the code under test, and then accepts and returns mock calls in a single sequence 
