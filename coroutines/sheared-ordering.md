@@ -1,6 +1,6 @@
 ## Notes on hyper-flexible ordering
 
-This analysis is of a version of cotest that allows test corotuines more
+This analysis is of a deprecated version of cotest that allows test corotuines more
 flexibility, so that they can queue up incoming events and then 
 pull them from the queue out of order. 
 
