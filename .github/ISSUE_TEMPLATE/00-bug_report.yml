@@ -19,7 +19,7 @@ body:
   - type: textarea
     id: version
     attributes:
-      label: What version of CoTest are you using?
+      label: What version of Cotest are you using?
       description: Please include the output of `git rev-parse HEAD` or the GoogleTest release version number that you are using.
     validations:
       required: true
