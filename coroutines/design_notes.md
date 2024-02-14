@@ -1,6 +1,6 @@
 ## Design Notes
 
- - A "corouine" is officially a class or factory object bound to a coro body. 
+ - A "coroutine" is officially a class or factory object bound to a coro body. 
    It creates an RAII object, so an instance must be created and should be in 
    a local scope (i.e. of the test case). Coroutines are implemented as lambdas
    because a lambda can be a C++20 coroutine, and we can capture the mock objects.
