@@ -51,4 +51,4 @@ pull them from the queue out of order.
    we need to intervene and change the global ordering as seen
    by GMock search. This should be explicit, since it will have side
    effects on other coroutines. 
- - Leads to the PreMockSynchroniser and CRF constraint #5
+ - Leads to the PreMockSynchroniser and CRF constraint #6
