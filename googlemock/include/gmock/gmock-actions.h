@@ -770,9 +770,13 @@ class Action<R(Args...)> {
     Init(::std::forward<G>(fun), IsCompatibleFunctor<G>());
   }
 
-  // Constructs an Action from its implementation.
+  // Constructs an Action from shared pointer.
+  explicit Action(::std::shared_ptr<ActionInterface<F>> impl)
+      : fun_(ActionAdapter{impl}) {}
+      
+  // Constructs an Action from its implementation (now delegating).
   explicit Action(ActionInterface<F>* impl)
-      : fun_(ActionAdapter{::std::shared_ptr<ActionInterface<F>>(impl)}) {}
+      : Action{::std::shared_ptr<ActionInterface<F>>(impl)} {}
 
   // This constructor allows us to turn an Action<Func> object into an
   // Action<F>, as long as F's arguments can be implicitly converted
