@@ -1,6 +1,5 @@
 name: Bug Report
 description: Let us know that something does not work as expected.
-title: "[Bug]: Please title this bug report"
 body:
   - type: textarea
     id: what-happened
@@ -19,15 +18,8 @@ body:
   - type: textarea
     id: version
     attributes:
-      label: What version of GoogleTest are you using?
+      label: What version of CoTest are you using?
       description: Please include the output of `git rev-parse HEAD` or the GoogleTest release version number that you are using.
-    validations:
-      required: true
-  - type: textarea
-    id: os
-    attributes:
-      label: What operating system and version are you using?
-      description: If you are using a Linux distribution please include the name and version of the distribution as well.
     validations:
       required: true
   - type: textarea
@@ -36,18 +28,11 @@ body:
       label: What compiler and version are you using?
       description: Please include the output of `gcc -v` or `clang -v`, or the equivalent for your compiler.
     validations:
-      required: true
+      required: false
   - type: textarea
     id: buildsystem
     attributes:
       label: What build system are you using?
       description: Please include the output of `bazel --version` or `cmake --version`, or the equivalent for your build system.
-    validations:
-      required: true
-  - type: textarea
-    id: additional
-    attributes:
-      label: Additional context
-      description: Add any other context about the problem here.
     validations:
       required: false
