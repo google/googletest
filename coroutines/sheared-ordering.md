@@ -1,8 +1,7 @@
 ## Notes on hyper-flexible ordering
 
-This analysis is of a deprecated version of cotest that allows test corotuines more
-flexibility, so that they can queue up incoming events and then 
-pull them from the queue out of order. 
+This analysis is of a deprecated version of cotest that allowed test corotuines more
+flexibility, so that they could queue up incoming events and then pull them from the queue out of order. 
 
 ### NEXT_EVENT_ONLY_FROM(DC) or BLOCK_EVENT()
  - Consider launches A() and B() invoking mockA() and mockB() respectively. Suppose the
