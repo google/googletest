@@ -16,7 +16,7 @@ It is natural for the checklist to also contain an action to be taken and the re
 We will assume that the code-under-test now completes after making one call to us. The function call we made earlier on to start the code-under-test now returns, and we can check the return value using free-running code. We are also free to begin another test.
 ![The code-under-test has completed and I check its output. Test passed!](/coroutines/docs/images/current_5.png)
 ### Alternative method
-An alternative approach taken in the industry is to restrict the checklist to instructions on how to respond to calls. Then, while the copde-under-test is running we build up a record of what calls were made. This record is then checked at the end of the test by the test case. This method has advantages and disadvantages.
+An alternative approach taken in the industry is to restrict the checklist to instructions on how to respond to calls. Then, while the code-under-test is running we build up a record of what calls were made. This record is then checked at the end of the test by the test case. This method has advantages and disadvantages.
 ## The same test, using two computers
 For this exercise, we imagine that we have two computers similar to the one we began with, and that they have the ability to communicate. We will say that the first computer (shown on the left) has the responsibility of running the test case. The other computer, on the right, has the responsibility of running the code-under-test. 
 
@@ -40,7 +40,7 @@ We have not needed to build a checklist in advance of the test, nor (in the alte
 
 While the process of routing messages may require global variables, we no longer require them within the logic of the test case. The test case can itself be entirely contained within a single function, including the parts that deal with calls coming out of the code-under-test. Even in cases of highly complex tests (especially where the same outgoing function is called from multuple places within the code-under-test) we are usually able to avoid having to construct a _state machine_ that programmatically maintains a correct answer to the question "where did we get to so far"; this information is now identified with the state of execution of the test coroutine. In other words, we have avoided the need for a _meta-programmed_ test case.
 
-## How do we get to coroutines
+## How we get to coroutines
 It's wasteful to require two computers. Can we do better? 
 
 First, we should fix some terminology. When we have discussed computers and "programs", we really mean _contexts of execution_. It is a context of execution which is kept on-hold, or _blocked_ by an outgoing function call, and must wait for it to return before continuing to exceute in a natural way. 
