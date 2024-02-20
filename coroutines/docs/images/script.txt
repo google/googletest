@@ -1,0 +1,28 @@
+My test case makes a checklist of events that I will expect during the test
+
+I am starting the code-under-test, with an injected dependancy back to me
+
+I received a call on the injected dependency
+Thinks: I can't just let my test case continue here
+I will use the checklist to find out whether it is correct
+
+The call was correct! :-)
+Now the checklist tells me how to respond to the call
+
+The code-under-test has completed and I check its output
+Test passed! :-)
+
+
+I say "please start the code-under-test"
+I start the code and inject dependency back to me
+
+I say "I received this mock call"
+Inside my test case, I check that the call is correct
+
+The call was correct! :-)
+I say "please return this value"
+I return the mock call
+
+I say "the code-under-test has completed and here is its output"
+I check the output
+Test passed! :-)
