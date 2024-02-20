@@ -1,7 +1,7 @@
 # Testing With Two Computers
 _This is a simplified overview of conventional and coroutine-based unit testing. We explore the steps taken by a convnetional test and then present the same test in a coroutine model. We use an analogy with computers that can "only do one thing at a time" and then discuss how coroutines fit in at the end._
 ## Conventional testing, using one computer
-For this exercise, we will assume that the computers illustrated can only run a single "program" at a time (but see [footnote](##Footnote)).
+For this exercise, we will assume that the computers illustrated can only run a single "program" at a time (but see [footnote](#Footnote)).
 ![My test case makes a checklist of events that I will expect during the test.](/coroutines/docs/images/current_1.png)
 Text after
 ![I am starting the code-under-test, with an injected dependancy back to me.](/coroutines/docs/images/current_2.png)
