@@ -81,8 +81,8 @@ EXPECT_CALL(mock_object, method_name(matchers...))
     .Times(cardinality)            // Can be used at most once
     .InSequence(sequences...)      // Can be used any number of times
     .After(expectations...)        // Can be used any number of times
-    .WillRepeatedly(action)        // Can be used any number of times
-    .WillOnce(action)              // Can be used at most once
+    .WillOnce(action)              // Can be used any number of times
+    .WillRepeatedly(action)        // Can be used at most once
     .RetiresOnSaturation();        // Can be used at most once
 ```
 
