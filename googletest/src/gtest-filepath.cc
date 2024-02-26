@@ -312,12 +312,20 @@ bool FilePath::IsAbsolutePath() const { return CalculateRootLength() > 0; }
 FilePath FilePath::GenerateUniqueFileName(const FilePath& directory,
                                           const FilePath& base_name,
                                           const char* extension) {
+  // Make sure the directory does exist
+  directory.CreateDirectoriesRecursively();
+
   FilePath full_pathname;
   int number = 0;
-  do {
+  for (;;) {
     full_pathname.Set(MakeFileName(directory, base_name, number++, extension));
-  } while (full_pathname.FileOrDirectoryExists());
-  return full_pathname;
+    int fd = posix::Open(full_pathname.c_str(),
+                         posix::CREAT | posix::EXCL | posix::WRONLY, 0644);
+    if (fd != -1) {
+      posix::Close(fd);
+      return full_pathname;
+    }
+  }
 }
 
 // Returns true if FilePath ends with a path separator, which indicates that
