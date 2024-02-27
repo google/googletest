@@ -53,5 +53,9 @@ bazel_dep(name = "re2",
 bazel_dep(name = "rules_python",
           version = "0.29.0")
 
+
+fake_fuchsia_sdk = use_repo_rule("//:fake_fuchsia_sdk.bzl", "fake_fuchsia_sdk")
+fake_fuchsia_sdk(name = "fuchsia_sdk")
+
 # https://github.com/bazelbuild/rules_python/blob/main/BZLMOD_SUPPORT.md#default-toolchain-is-not-the-local-system-python
 register_toolchains("@bazel_tools//tools/python:autodetecting_toolchain")
