@@ -91,6 +91,10 @@ struct UnaryMoveOnlyFunctor : UnaryFunctor {
   UnaryMoveOnlyFunctor(UnaryMoveOnlyFunctor&&) = default;
 };
 
+struct OneShotUnaryFunctor {
+  int operator()(bool x) && { return x ? 1 : -1; }
+};
+
 const char* Binary(const char* input, short n) { return input + n; }  // NOLINT
 
 int Ternary(int x, char y, short z) { return x + y + z; }  // NOLINT
@@ -714,6 +718,12 @@ TEST(InvokeArgumentTest, Functor1) {
 TEST(InvokeArgumentTest, Functor1MoveOnly) {
   Action<int(UnaryMoveOnlyFunctor)> a = InvokeArgument<0>(true);  // NOLINT
   EXPECT_EQ(1, a.Perform(std::make_tuple(UnaryMoveOnlyFunctor())));
+}
+
+// Tests using InvokeArgument with a one-shot unary functor.
+TEST(InvokeArgumentTest, OneShotFunctor1) {
+  Action<int(OneShotUnaryFunctor)> a = InvokeArgument<0>(true);  // NOLINT
+  EXPECT_EQ(1, a.Perform(std::make_tuple(OneShotUnaryFunctor())));
 }
 
 // Tests using InvokeArgument with a 5-ary function.
