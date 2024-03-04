@@ -750,6 +750,14 @@ class GTEST_API_ TestSuite {
   // execution of SetUpTestSuite and TearDownTestSuite.
   const TestResult& ad_hoc_test_result() const { return ad_hoc_test_result_; }
 
+  // Pointer to the function that sets up the test suite.
+  internal::SetUpTestSuiteFunc getSetupTestSuiteFunc() const { return  set_up_tc_; }
+  const void setSetupTestSuiteFunc(internal::SetUpTestSuiteFunc func)  {set_up_tc_ = func;}
+  
+  // Pointer to the function that tears down the test suite.
+  internal::TearDownTestSuiteFunc getTearDownTestSuiteFunc() const { return  tear_down_tc_; }
+  void setTearDownTestSuiteFunc(internal::TearDownTestSuiteFunc func) {tear_down_tc_ = func;}
+
  private:
   friend class Test;
   friend class internal::UnitTestImpl;
