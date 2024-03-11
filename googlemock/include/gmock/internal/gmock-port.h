@@ -56,7 +56,7 @@
 #include "gmock/internal/custom/gmock-port.h"
 #include "gtest/internal/gtest-port.h"
 
-#ifdef GTEST_HAS_ABSL
+#if defined(GTEST_HAS_ABSL) && !defined(GTEST_NO_ABSL_FLAGS)
 #include "absl/flags/declare.h"
 #include "absl/flags/flag.h"
 #endif
@@ -73,7 +73,7 @@
 #define GMOCK_FLAG(name) FLAGS_gmock_##name
 
 // Pick a command line flags implementation.
-#ifdef GTEST_HAS_ABSL
+#if defined(GTEST_HAS_ABSL) && !defined(GTEST_NO_ABSL_FLAGS)
 
 // Macros for defining flags.
 #define GMOCK_DEFINE_bool_(name, default_val, doc) \
@@ -95,7 +95,7 @@
 #define GMOCK_FLAG_SET(name, value) \
   (void)(::absl::SetFlag(&GMOCK_FLAG(name), value))
 
-#else  // GTEST_HAS_ABSL
+#else  // defined(GTEST_HAS_ABSL) && !defined(GTEST_NO_ABSL_FLAGS)
 
 // Macros for defining flags.
 #define GMOCK_DEFINE_bool_(name, default_val, doc)  \
@@ -134,6 +134,6 @@
 #define GMOCK_FLAG_GET(name) ::testing::GMOCK_FLAG(name)
 #define GMOCK_FLAG_SET(name, value) (void)(::testing::GMOCK_FLAG(name) = value)
 
-#endif  // GTEST_HAS_ABSL
+#endif  // defined(GTEST_HAS_ABSL) && !defined(GTEST_NO_ABSL_FLAGS)
 
 #endif  // GOOGLEMOCK_INCLUDE_GMOCK_INTERNAL_GMOCK_PORT_H_
