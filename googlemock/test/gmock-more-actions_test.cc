@@ -828,6 +828,22 @@ TEST(InvokeArgumentTest, ByExplicitConstReferenceFunction) {
   EXPECT_FALSE(a.Perform(std::make_tuple(&ReferencesGlobalDouble)));
 }
 
+TEST(InvokeArgumentTest, MoveOnlyType) {
+  struct Marker {};
+  struct {
+    // Method takes a unique_ptr (to a type we don't care about), and an
+    // invocable type.
+    MOCK_METHOD(bool, MockMethod,
+                (std::unique_ptr<Marker>, std::function<int()>), ());
+  } mock;
+
+  ON_CALL(mock, MockMethod(_, _)).WillByDefault(InvokeArgument<1>());
+
+  // This compiles, but is a little opaque as a workaround:
+  ON_CALL(mock, MockMethod(_, _))
+      .WillByDefault(WithArg<1>(InvokeArgument<0>()));
+}
+
 // Tests DoAll(a1, a2).
 TEST(DoAllTest, TwoActions) {
   int n = 0;
