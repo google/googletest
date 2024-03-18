@@ -591,12 +591,34 @@ class ThreadLocalRegistryImpl {
   // StartWatcherThreadFor to WatcherThreadFunc.
   typedef std::pair<DWORD, HANDLE> ThreadIdAndHandle;
 
+  class WatcherThreadParams
+  {
+    public:
+    WatcherThreadParams(
+        DWORD threadId,
+        HANDLE threadHandle,
+        std::atomic<bool>* hasWatcherInitialized) : 
+            threadIdAndHandle(threadId, threadHandle),
+            hasInitialized(hasWatcherInitialized) {
+    }
+
+    ThreadIdAndHandle threadIdAndHandle;
+    std::atomic<bool>* hasInitialized;
+  };
+
   static void StartWatcherThreadFor(DWORD thread_id) {
     // The returned handle will be kept in thread_map and closed by
     // watcher_thread in WatcherThreadFunc.
     HANDLE thread =
         ::OpenThread(SYNCHRONIZE | THREAD_QUERY_INFORMATION, FALSE, thread_id);
     GTEST_CHECK_(thread != nullptr);
+
+    std::atomic<bool> hasWatcherInitialized = false;
+    WatcherThreadParams* pThreadParams = new WatcherThreadParams(
+        thread_id,
+        thread,
+        &hasWatcherInitialized);
+	
     // We need to pass a valid thread ID pointer into CreateThread for it
     // to work correctly under Win98.
     DWORD watcher_thread_id;
@@ -604,7 +626,7 @@ class ThreadLocalRegistryImpl {
         nullptr,  // Default security.
         0,        // Default stack size
         &ThreadLocalRegistryImpl::WatcherThreadFunc,
-        reinterpret_cast<LPVOID>(new ThreadIdAndHandle(thread_id, thread)),
+        reinterpret_cast<LPVOID>(pThreadParams),
         CREATE_SUSPENDED, &watcher_thread_id);
     GTEST_CHECK_(watcher_thread != nullptr)
         << "CreateThread failed with error " << ::GetLastError() << ".";
@@ -614,17 +636,32 @@ class ThreadLocalRegistryImpl {
                         ::GetThreadPriority(::GetCurrentThread()));
     ::ResumeThread(watcher_thread);
     ::CloseHandle(watcher_thread);
+
+    // Wait for the watcher thread to start to avoid race conditions.
+    // One specific race condition that can happen is that we have returned
+    // from main and have started to tear down, the newly spawned watcher
+    // thread may access already-freed variables, like global shared_ptrs.
+    while (hasWatcherInitialized.load() == false) {
+      std::this_thread::yield();
+    }
   }
 
   // Monitors exit from a given thread and notifies those
   // ThreadIdToThreadLocals about thread termination.
   static DWORD WINAPI WatcherThreadFunc(LPVOID param) {
-    const ThreadIdAndHandle* tah =
-        reinterpret_cast<const ThreadIdAndHandle*>(param);
-    GTEST_CHECK_(::WaitForSingleObject(tah->second, INFINITE) == WAIT_OBJECT_0);
-    OnThreadExit(tah->first);
-    ::CloseHandle(tah->second);
-    delete tah;
+    WatcherThreadParams* pThreadParams =
+      reinterpret_cast<WatcherThreadParams*>(param);
+
+    const ThreadIdAndHandle tah = pThreadParams->threadIdAndHandle;
+
+    // Inform the thread that started us that we have completed initialization
+    (*pThreadParams->hasInitialized) = true;
+
+    delete pThreadParams;
+
+    GTEST_CHECK_(::WaitForSingleObject(tah.second, INFINITE) == WAIT_OBJECT_0);
+    OnThreadExit(tah.first);
+    ::CloseHandle(tah.second);
     return 0;
   }
 
