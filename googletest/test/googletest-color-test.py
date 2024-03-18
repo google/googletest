@@ -80,6 +80,7 @@ class GTestColorTest(gtest_test_utils.TestCase):
     self.assertTrue(UsesColor('xterm', None, None))
     self.assertTrue(UsesColor('xterm-color', None, None))
     self.assertTrue(UsesColor('xterm-kitty', None, None))
+    self.assertTrue(UsesColor('alacritty', None, None))
     self.assertTrue(UsesColor('xterm-256color', None, None))
 
   def testFlagOnly(self):
