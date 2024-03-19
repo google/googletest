@@ -52,11 +52,22 @@
 #include "gtest/internal/gtest-port.h"
 
 #if GTEST_CAN_STREAM_RESULTS_
+#if GTEST_OS_WINDOWS
+#include <WinSock2.h>   // NOLINT
+#pragma comment(lib, "Ws2_32.lib")
+#else
 #include <arpa/inet.h>  // NOLINT
 #include <netdb.h>      // NOLINT
 #endif
+#endif
 
 #ifdef GTEST_OS_WINDOWS
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
 #include <windows.h>  // NOLINT
 #endif                // GTEST_OS_WINDOWS
 
@@ -1071,7 +1082,7 @@ class TestResultAccessor {
 #if GTEST_CAN_STREAM_RESULTS_
 
 // Streams test results to the given port on the given host machine.
-class StreamingListener : public EmptyTestEventListener {
+class GTEST_API_ StreamingListener : public EmptyTestEventListener {
  public:
   // Abstract base class for writing strings to a socket.
   class AbstractSocketWriter {
@@ -1092,24 +1103,44 @@ class StreamingListener : public EmptyTestEventListener {
   class SocketWriter : public AbstractSocketWriter {
    public:
     SocketWriter(const std::string& host, const std::string& port)
+#if GTEST_OS_WINDOWS
+        : sockfd_(INVALID_SOCKET), host_name_(host), port_num_(port) {
+#else
         : sockfd_(-1), host_name_(host), port_num_(port) {
+#endif
       MakeConnection();
     }
 
     ~SocketWriter() override {
+#if GTEST_OS_WINDOWS
+      if (sockfd_ != INVALID_SOCKET) CloseConnection();
+#else
       if (sockfd_ != -1) CloseConnection();
+#endif
     }
 
     // Sends a string to the socket.
     void Send(const std::string& message) override {
+#if GTEST_OS_WINDOWS
+      GTEST_CHECK_(sockfd_ != INVALID_SOCKET)
+#else
       GTEST_CHECK_(sockfd_ != -1)
+#endif
           << "Send() can be called only when there is a connection.";
 
+#if GTEST_OS_WINDOWS
+      const auto len = static_cast<int>(message.length());
+      if (send(sockfd_, message.c_str(), len, 0) != len) {
+        GTEST_LOG_(WARNING) << "stream_result_to: failed to stream to "
+                            << host_name_ << ":" << port_num_;
+      }
+#else
       const auto len = static_cast<size_t>(message.length());
       if (write(sockfd_, message.c_str(), len) != static_cast<ssize_t>(len)) {
         GTEST_LOG_(WARNING) << "stream_result_to: failed to stream to "
                             << host_name_ << ":" << port_num_;
       }
+#endif
     }
 
    private:
@@ -1118,14 +1149,27 @@ class StreamingListener : public EmptyTestEventListener {
 
     // Closes the socket.
     void CloseConnection() override {
+#if GTEST_OS_WINDOWS
+      GTEST_CHECK_(sockfd_ != INVALID_SOCKET)
+#else
       GTEST_CHECK_(sockfd_ != -1)
+#endif
           << "CloseConnection() can be called only when there is a connection.";
 
+#if GTEST_OS_WINDOWS
+      closesocket(sockfd_);
+      sockfd_ = INVALID_SOCKET;
+#else
       close(sockfd_);
       sockfd_ = -1;
+#endif
     }
 
-    int sockfd_;  // socket file descriptor
+#if GTEST_OS_WINDOWS
+    SOCKET sockfd_;  // socket file descriptor
+#else
+    int sockfd_;     // socket file descriptor
+#endif
     const std::string host_name_;
     const std::string port_num_;
 
