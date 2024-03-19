@@ -302,6 +302,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <fcntl.h>
 
 #include <cerrno>
 // #include <condition_variable>  // Guarded by GTEST_IS_THREADSAFE below
@@ -2112,6 +2113,24 @@ GTEST_DISABLE_MSC_DEPRECATED_PUSH_()
     !defined(GTEST_OS_XTENSA) && !defined(GTEST_OS_QURT)
 inline int ChDir(const char* dir) { return chdir(dir); }
 #endif
+#if defined(GTEST_OS_WINDOWS) && !defined(GTEST_OS_WINDOWS_MINGW)
+const int CREAT = _O_CREAT;
+const int EXCL = _O_EXCL;
+const int WRONLY = _O_WRONLY;
+#else   // GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_MINGW
+const int CREAT = O_CREAT;
+const int EXCL = O_EXCL;
+const int WRONLY = O_WRONLY;
+#endif  // GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_MINGW
+inline int Open(const char* path, int flags, int mode) {
+#if defined(GTEST_OS_WINDOWS) && !defined(GTEST_OS_WINDOWS_MINGW)
+  std::wstring_convert<wchar_codecvt> converter;
+  std::wstring wide_path = converter.from_bytes(path);
+  return _wopen(wide_path.c_str(), flags, mode);
+#else   // GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_MINGW
+  return open(path, flags, mode);
+#endif  // GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_MINGW
+}
 inline FILE* FOpen(const char* path, const char* mode) {
 #if defined(GTEST_OS_WINDOWS) && !defined(GTEST_OS_WINDOWS_MINGW)
   struct wchar_codecvt : public std::codecvt<wchar_t, char, std::mbstate_t> {};
