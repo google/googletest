@@ -216,9 +216,10 @@ static FILE* OpenFileForWriting(const std::string& output_file) {
   FilePath output_file_path(output_file);
   FilePath output_dir(output_file_path.RemoveFileName());
 
-  if (output_dir.CreateDirectoriesRecursively()) {
-    fileout = posix::FOpen(output_file.c_str(), "w");
+  if (!output_dir.CreateDirectoriesRecursively()) {
+    GTEST_LOG_(WARNING) << "Unable to create path to file \"" << output_file << "\"";
   }
+  fileout = posix::FOpen(output_file.c_str(), "w");
   if (fileout == nullptr) {
     GTEST_LOG_(FATAL) << "Unable to open file \"" << output_file << "\"";
   }
