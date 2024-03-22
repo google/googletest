@@ -868,6 +868,8 @@ class GTEST_API_ Random {
 #define GTEST_REMOVE_REFERENCE_AND_CONST_(T) \
   typename std::remove_const<typename std::remove_reference<T>::type>::type
 
+
+
 // HasDebugStringAndShortDebugString<T>::value is a compile-time bool constant
 // that's true if and only if T has methods DebugString() and ShortDebugString()
 // that return std::string.
@@ -939,6 +941,38 @@ template <class C>
 IsNotContainer IsContainerTest(long /* dummy */) {
   return '\0';
 }
+
+namespace implementation {
+
+template <class...>
+using VoidType = void;
+
+template <class Default, class AlwaysVoid, template <class...> class Op,
+          class... Args>
+struct Detector {
+  using ValueType = std::false_type;
+  using Type = Default;
+};
+
+template <class Default, template <class...> class Op, class... Args>
+struct Detector<Default, VoidType<Op<Args...>>, Op, Args...> {
+  using ValueType = std::true_type;
+  using Type = Op<Args...>;
+};
+
+}  // namespace implementation
+
+struct NotDetected;
+template <template <class...> class Op, class... Args>
+using IsDetected = typename implementation::Detector<NotDetected, void, Op,
+                                                     Args...>::ValueType;
+
+template <template <class...> class Op, class... Args>
+using DetectedType =
+    typename implementation::Detector<NotDetected, void, Op, Args...>::Type;
+
+template <class Default, template <class...> class Op, class... Args>
+using DetectedOr = implementation::Detector<Default, void, Op, Args...>;
 
 // Trait to detect whether a type T is a hash table.
 // The heuristic used is that the type contains an inner type `hasher` and does
