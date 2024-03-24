@@ -1199,12 +1199,27 @@ class StreamingListener : public EmptyTestEventListener {
   void OnTestPartResult(const TestPartResult& test_part_result) override {
     const char* file_name = test_part_result.file_name();
     if (file_name == nullptr) file_name = "";
-    SendLn("event=TestPartResult&file=" + UrlEncode(file_name) +
+    SendLn("event=TestPartResult&type=" + FormatType(test_part_result.type()) +
+           "&file=" + UrlEncode(file_name) +
            "&line=" + StreamableToString(test_part_result.line_number()) +
            "&message=" + UrlEncode(test_part_result.message()));
   }
 
  private:
+  static const char* FormatType(TestPartResult::Type type) {
+    switch (type) {
+      case TestPartResult::kSkip:
+        return "skip";
+      case TestPartResult::kSuccess:
+        return "success";
+      case TestPartResult::kNonFatalFailure:
+      case TestPartResult::kFatalFailure:
+        return "failure";
+      default:
+        return "unknown";
+    }
+  }
+
   // Sends the given message and a newline to the socket.
   void SendLn(const std::string& message) { socket_writer_->SendLn(message); }
 
