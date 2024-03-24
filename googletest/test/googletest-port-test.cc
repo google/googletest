@@ -918,7 +918,7 @@ TEST(RETest, PartialMatchWorks) {
 
 #endif  // GTEST_USES_POSIX_RE
 
-#ifndef GTEST_OS_WINDOWS_MOBILE
+#if GTEST_HAS_STREAM_REDIRECTION
 
 TEST(CaptureTest, CapturesStdout) {
   CaptureStdout();
@@ -960,7 +960,7 @@ TEST(CaptureDeathTest, CannotReenterStdoutCapture) {
   // themselves.
 }
 
-#endif  // !GTEST_OS_WINDOWS_MOBILE
+#endif  // GTEST_HAS_STREAM_REDIRECTION
 
 TEST(ThreadLocalTest, DefaultConstructorInitializesToDefaultValues) {
   ThreadLocal<int> t1;

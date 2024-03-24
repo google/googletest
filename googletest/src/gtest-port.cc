@@ -1033,11 +1033,11 @@ GTestLog::~GTestLog() {
   }
 }
 
+#if GTEST_HAS_STREAM_REDIRECTION
+
 // Disable Microsoft deprecation warnings for POSIX functions called from
 // this class (creat, dup, dup2, and close)
 GTEST_DISABLE_MSC_DEPRECATED_PUSH_()
-
-#if GTEST_HAS_STREAM_REDIRECTION
 
 namespace {
 
