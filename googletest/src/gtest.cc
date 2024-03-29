@@ -2340,7 +2340,7 @@ static const char* const kReservedTestCaseAttributes[] = {
     "type_param", "value_param", "file",   "line"};
 
 // Use a slightly different set for allowed output to ensure existing tests can
-// still RecordProperty("result") or "RecordProperty(timestamp")
+// still RecordProperty("result") or RecordProperty("timestamp")
 static const char* const kReservedOutputTestCaseAttributes[] = {
     "classname",   "name", "status", "time",   "type_param",
     "value_param", "file", "line",   "result", "timestamp"};
