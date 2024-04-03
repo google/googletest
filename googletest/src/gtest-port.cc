@@ -607,12 +607,12 @@ class ThreadLocalRegistryImpl {
     // We need to pass a valid thread ID pointer into CreateThread for it
     // to work correctly under Win98.
     DWORD watcher_thread_id;
-    HANDLE watcher_thread = ::CreateThread(
-        nullptr,  // Default security.
-        0,        // Default stack size
-        &ThreadLocalRegistryImpl::WatcherThreadFunc,
-        reinterpret_cast<LPVOID>(watcher_thread_params),
-        CREATE_SUSPENDED, &watcher_thread_id);
+    HANDLE watcher_thread =
+        ::CreateThread(nullptr,  // Default security.
+                       0,        // Default stack size
+                       &ThreadLocalRegistryImpl::WatcherThreadFunc,
+                       reinterpret_cast<LPVOID>(watcher_thread_params),
+                       CREATE_SUSPENDED, &watcher_thread_id);
     GTEST_CHECK_(watcher_thread != nullptr)
         << "CreateThread failed with error " << ::GetLastError() << ".";
     // Give the watcher thread the same priority as ours to avoid being
@@ -1048,11 +1048,11 @@ GTestLog::~GTestLog() {
   }
 }
 
+#if GTEST_HAS_STREAM_REDIRECTION
+
 // Disable Microsoft deprecation warnings for POSIX functions called from
 // this class (creat, dup, dup2, and close)
 GTEST_DISABLE_MSC_DEPRECATED_PUSH_()
-
-#if GTEST_HAS_STREAM_REDIRECTION
 
 namespace {
 
@@ -1348,8 +1348,8 @@ bool ParseInt32(const Message& src_text, const char* str, int32_t* value) {
   ) {
     Message msg;
     msg << "WARNING: " << src_text
-        << " is expected to be a 32-bit integer, but actually"
-        << " has value " << str << ", which overflows.\n";
+        << " is expected to be a 32-bit integer, but actually" << " has value "
+        << str << ", which overflows.\n";
     printf("%s", msg.GetString().c_str());
     fflush(stdout);
     return false;
