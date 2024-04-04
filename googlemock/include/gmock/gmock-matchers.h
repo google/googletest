@@ -490,12 +490,12 @@ class MatcherBaseImpl<Derived<Ts...>> {
 
   template <typename F>
   operator ::testing::Matcher<F>() const {  // NOLINT(runtime/explicit)
-    return Apply<F>(MakeIndexSequence<sizeof...(Ts)>{});
+    return Apply<F>(std::make_index_sequence<sizeof...(Ts)>{});
   }
 
  private:
   template <typename F, std::size_t... tuple_ids>
-  ::testing::Matcher<F> Apply(IndexSequence<tuple_ids...>) const {
+  ::testing::Matcher<F> Apply(std::index_sequence<tuple_ids...>) const {
     return ::testing::Matcher<F>(
         new typename Derived<Ts...>::template gmock_Impl<F>(
             std::get<tuple_ids>(params_)...));
@@ -3152,8 +3152,8 @@ class PairMatcher {
 };
 
 template <typename T, size_t... I>
-auto UnpackStructImpl(const T& t, IndexSequence<I...>, int)
-    -> decltype(std::tie(get<I>(t)...)) {
+auto UnpackStructImpl(const T& t, std::index_sequence<I...>,
+                      int) -> decltype(std::tie(get<I>(t)...)) {
   static_assert(std::tuple_size<T>::value == sizeof...(I),
                 "Number of arguments doesn't match the number of fields.");
   return std::tie(get<I>(t)...);
@@ -3161,97 +3161,97 @@ auto UnpackStructImpl(const T& t, IndexSequence<I...>, int)
 
 #if defined(__cpp_structured_bindings) && __cpp_structured_bindings >= 201606
 template <typename T>
-auto UnpackStructImpl(const T& t, MakeIndexSequence<1>, char) {
+auto UnpackStructImpl(const T& t, std::make_index_sequence<1>, char) {
   const auto& [a] = t;
   return std::tie(a);
 }
 template <typename T>
-auto UnpackStructImpl(const T& t, MakeIndexSequence<2>, char) {
+auto UnpackStructImpl(const T& t, std::make_index_sequence<2>, char) {
   const auto& [a, b] = t;
   return std::tie(a, b);
 }
 template <typename T>
-auto UnpackStructImpl(const T& t, MakeIndexSequence<3>, char) {
+auto UnpackStructImpl(const T& t, std::make_index_sequence<3>, char) {
   const auto& [a, b, c] = t;
   return std::tie(a, b, c);
 }
 template <typename T>
-auto UnpackStructImpl(const T& t, MakeIndexSequence<4>, char) {
+auto UnpackStructImpl(const T& t, std::make_index_sequence<4>, char) {
   const auto& [a, b, c, d] = t;
   return std::tie(a, b, c, d);
 }
 template <typename T>
-auto UnpackStructImpl(const T& t, MakeIndexSequence<5>, char) {
+auto UnpackStructImpl(const T& t, std::make_index_sequence<5>, char) {
   const auto& [a, b, c, d, e] = t;
   return std::tie(a, b, c, d, e);
 }
 template <typename T>
-auto UnpackStructImpl(const T& t, MakeIndexSequence<6>, char) {
+auto UnpackStructImpl(const T& t, std::make_index_sequence<6>, char) {
   const auto& [a, b, c, d, e, f] = t;
   return std::tie(a, b, c, d, e, f);
 }
 template <typename T>
-auto UnpackStructImpl(const T& t, MakeIndexSequence<7>, char) {
+auto UnpackStructImpl(const T& t, std::make_index_sequence<7>, char) {
   const auto& [a, b, c, d, e, f, g] = t;
   return std::tie(a, b, c, d, e, f, g);
 }
 template <typename T>
-auto UnpackStructImpl(const T& t, MakeIndexSequence<8>, char) {
+auto UnpackStructImpl(const T& t, std::make_index_sequence<8>, char) {
   const auto& [a, b, c, d, e, f, g, h] = t;
   return std::tie(a, b, c, d, e, f, g, h);
 }
 template <typename T>
-auto UnpackStructImpl(const T& t, MakeIndexSequence<9>, char) {
+auto UnpackStructImpl(const T& t, std::make_index_sequence<9>, char) {
   const auto& [a, b, c, d, e, f, g, h, i] = t;
   return std::tie(a, b, c, d, e, f, g, h, i);
 }
 template <typename T>
-auto UnpackStructImpl(const T& t, MakeIndexSequence<10>, char) {
+auto UnpackStructImpl(const T& t, std::make_index_sequence<10>, char) {
   const auto& [a, b, c, d, e, f, g, h, i, j] = t;
   return std::tie(a, b, c, d, e, f, g, h, i, j);
 }
 template <typename T>
-auto UnpackStructImpl(const T& t, MakeIndexSequence<11>, char) {
+auto UnpackStructImpl(const T& t, std::make_index_sequence<11>, char) {
   const auto& [a, b, c, d, e, f, g, h, i, j, k] = t;
   return std::tie(a, b, c, d, e, f, g, h, i, j, k);
 }
 template <typename T>
-auto UnpackStructImpl(const T& t, MakeIndexSequence<12>, char) {
+auto UnpackStructImpl(const T& t, std::make_index_sequence<12>, char) {
   const auto& [a, b, c, d, e, f, g, h, i, j, k, l] = t;
   return std::tie(a, b, c, d, e, f, g, h, i, j, k, l);
 }
 template <typename T>
-auto UnpackStructImpl(const T& t, MakeIndexSequence<13>, char) {
+auto UnpackStructImpl(const T& t, std::make_index_sequence<13>, char) {
   const auto& [a, b, c, d, e, f, g, h, i, j, k, l, m] = t;
   return std::tie(a, b, c, d, e, f, g, h, i, j, k, l, m);
 }
 template <typename T>
-auto UnpackStructImpl(const T& t, MakeIndexSequence<14>, char) {
+auto UnpackStructImpl(const T& t, std::make_index_sequence<14>, char) {
   const auto& [a, b, c, d, e, f, g, h, i, j, k, l, m, n] = t;
   return std::tie(a, b, c, d, e, f, g, h, i, j, k, l, m, n);
 }
 template <typename T>
-auto UnpackStructImpl(const T& t, MakeIndexSequence<15>, char) {
+auto UnpackStructImpl(const T& t, std::make_index_sequence<15>, char) {
   const auto& [a, b, c, d, e, f, g, h, i, j, k, l, m, n, o] = t;
   return std::tie(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o);
 }
 template <typename T>
-auto UnpackStructImpl(const T& t, MakeIndexSequence<16>, char) {
+auto UnpackStructImpl(const T& t, std::make_index_sequence<16>, char) {
   const auto& [a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p] = t;
   return std::tie(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p);
 }
 template <typename T>
-auto UnpackStructImpl(const T& t, MakeIndexSequence<17>, char) {
+auto UnpackStructImpl(const T& t, std::make_index_sequence<17>, char) {
   const auto& [a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q] = t;
   return std::tie(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q);
 }
 template <typename T>
-auto UnpackStructImpl(const T& t, MakeIndexSequence<18>, char) {
+auto UnpackStructImpl(const T& t, std::make_index_sequence<18>, char) {
   const auto& [a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r] = t;
   return std::tie(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r);
 }
 template <typename T>
-auto UnpackStructImpl(const T& t, MakeIndexSequence<19>, char) {
+auto UnpackStructImpl(const T& t, std::make_index_sequence<19>, char) {
   const auto& [a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s] = t;
   return std::tie(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s);
 }
@@ -3259,8 +3259,8 @@ auto UnpackStructImpl(const T& t, MakeIndexSequence<19>, char) {
 
 template <size_t I, typename T>
 auto UnpackStruct(const T& t)
-    -> decltype((UnpackStructImpl)(t, MakeIndexSequence<I>{}, 0)) {
-  return (UnpackStructImpl)(t, MakeIndexSequence<I>{}, 0);
+    -> decltype((UnpackStructImpl)(t, std::make_index_sequence<I>{}, 0)) {
+  return (UnpackStructImpl)(t, std::make_index_sequence<I>{}, 0);
 }
 
 // Helper function to do comma folding in C++11.
@@ -3273,7 +3273,7 @@ template <typename Struct, typename StructSize>
 class FieldsAreMatcherImpl;
 
 template <typename Struct, size_t... I>
-class FieldsAreMatcherImpl<Struct, IndexSequence<I...>>
+class FieldsAreMatcherImpl<Struct, std::index_sequence<I...>>
     : public MatcherInterface<Struct> {
   using UnpackedType =
       decltype(UnpackStruct<sizeof...(I)>(std::declval<const Struct&>()));
@@ -3355,8 +3355,8 @@ class FieldsAreMatcher {
   template <typename Struct>
   operator Matcher<Struct>() const {  // NOLINT
     return Matcher<Struct>(
-        new FieldsAreMatcherImpl<const Struct&, IndexSequenceFor<Inner...>>(
-            matchers_));
+        new FieldsAreMatcherImpl<const Struct&,
+                                 std::index_sequence_for<Inner...>>(matchers_));
   }
 
  private:

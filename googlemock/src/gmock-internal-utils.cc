@@ -44,6 +44,7 @@
 #include <iostream>
 #include <ostream>  // NOLINT
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "gmock/gmock.h"
@@ -211,14 +212,14 @@ constexpr char UnBase64Impl(char c, const char* const base64, char carry) {
 }
 
 template <size_t... I>
-constexpr std::array<char, 256> UnBase64Impl(IndexSequence<I...>,
+constexpr std::array<char, 256> UnBase64Impl(std::index_sequence<I...>,
                                              const char* const base64) {
   return {
       {UnBase64Impl(UndoWebSafeEncoding(static_cast<char>(I)), base64, 0)...}};
 }
 
 constexpr std::array<char, 256> UnBase64(const char* const base64) {
-  return UnBase64Impl(MakeIndexSequence<256>{}, base64);
+  return UnBase64Impl(std::make_index_sequence<256>{}, base64);
 }
 
 static constexpr char kBase64[] =
