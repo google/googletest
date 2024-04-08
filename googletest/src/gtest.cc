@@ -4743,26 +4743,53 @@ void JsonUnitTestResultPrinter::OutputJsonTestResult(::std::ostream* stream,
                                                      const TestResult& result) {
   const std::string kIndent = Indent(10);
 
-  int failures = 0;
-  for (int i = 0; i < result.total_part_count(); ++i) {
-    const TestPartResult& part = result.GetTestPartResult(i);
-    if (part.failed()) {
-      *stream << ",\n";
-      if (++failures == 1) {
-        *stream << kIndent << "\"" << "failures" << "\": [\n";
+  {
+    int failures = 0;
+    for (int i = 0; i < result.total_part_count(); ++i) {
+      const TestPartResult& part = result.GetTestPartResult(i);
+      if (part.failed()) {
+        *stream << ",\n";
+        if (++failures == 1) {
+          *stream << kIndent << "\"" << "failures" << "\": [\n";
+        }
+        const std::string location =
+            internal::FormatCompilerIndependentFileLocation(part.file_name(),
+                                                            part.line_number());
+        const std::string message =
+            EscapeJson(location + "\n" + part.message());
+        *stream << kIndent << "  {\n"
+                << kIndent << "    \"failure\": \"" << message << "\",\n"
+                << kIndent << "    \"type\": \"\"\n"
+                << kIndent << "  }";
       }
-      const std::string location =
-          internal::FormatCompilerIndependentFileLocation(part.file_name(),
-                                                          part.line_number());
-      const std::string message = EscapeJson(location + "\n" + part.message());
-      *stream << kIndent << "  {\n"
-              << kIndent << "    \"failure\": \"" << message << "\",\n"
-              << kIndent << "    \"type\": \"\"\n"
-              << kIndent << "  }";
     }
+
+    if (failures > 0) *stream << "\n" << kIndent << "]";
   }
 
-  if (failures > 0) *stream << "\n" << kIndent << "]";
+  {
+    int skipped = 0;
+    for (int i = 0; i < result.total_part_count(); ++i) {
+      const TestPartResult& part = result.GetTestPartResult(i);
+      if (part.skipped()) {
+        *stream << ",\n";
+        if (++skipped == 1) {
+          *stream << kIndent << "\"" << "skipped" << "\": [\n";
+        }
+        const std::string location =
+            internal::FormatCompilerIndependentFileLocation(part.file_name(),
+                                                            part.line_number());
+        const std::string message =
+            EscapeJson(location + "\n" + part.message());
+        *stream << kIndent << "  {\n"
+                << kIndent << "    \"message\": \"" << message << "\"\n"
+                << kIndent << "  }";
+      }
+    }
+
+    if (skipped > 0) *stream << "\n" << kIndent << "]";
+  }
+
   *stream << "\n" << Indent(8) << "}";
 }
 

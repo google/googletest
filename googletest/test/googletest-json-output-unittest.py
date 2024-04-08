@@ -150,6 +150,9 @@ EXPECTED_NON_EMPTY = {
                     'time': '*',
                     'timestamp': '*',
                     'classname': 'SkippedTest',
+                    'skipped': [
+                        {'message': 'gtest_xml_output_unittest_.cc:*\n\n'}
+                    ],
                 },
                 {
                     'name': 'SkippedWithMessage',
@@ -160,6 +163,12 @@ EXPECTED_NON_EMPTY = {
                     'time': '*',
                     'timestamp': '*',
                     'classname': 'SkippedTest',
+                    'skipped': [{
+                        'message': (
+                            'gtest_xml_output_unittest_.cc:*\n'
+                            'It is good practice to tell why you skip a test.\n'
+                        )
+                    }],
                 },
                 {
                     'name': 'SkippedAfterFailure',
@@ -178,6 +187,12 @@ EXPECTED_NON_EMPTY = {
                             + STACK_TRACE_TEMPLATE
                         ),
                         'type': '',
+                    }],
+                    'skipped': [{
+                        'message': (
+                            'gtest_xml_output_unittest_.cc:*\n'
+                            'It is good practice to tell why you skip a test.\n'
+                        )
                     }],
                 },
             ],
