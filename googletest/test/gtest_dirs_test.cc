@@ -23,8 +23,14 @@ class SetEnv {
       have_saved_value_ = true;
     }
     if (value == nullptr) {
+      if (name == nullptr || strlen(name) == 0) {
+        throw std::invalid_argument("Environment variable name is null or empty.");
+      }
       GTEST_CHECK_POSIX_SUCCESS_(unsetenv(name));
     } else {
+      if (name == nullptr || strlen(name) == 0) {
+        throw std::invalid_argument("Environment variable name is null or empty.");
+      }
       GTEST_CHECK_POSIX_SUCCESS_(setenv(name, value, 1 /*overwrite*/));
     }
   }
@@ -34,6 +40,9 @@ class SetEnv {
       GTEST_CHECK_POSIX_SUCCESS_(
           setenv(name_.c_str(), saved_value_.c_str(), 1 /*overwrite*/));
     } else {
+      if (name_.empty()) {
+        throw std::invalid_argument("Environment variable name is null or empty.");
+      }
       GTEST_CHECK_POSIX_SUCCESS_(unsetenv(name_.c_str()));
     }
   }
