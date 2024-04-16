@@ -5445,47 +5445,47 @@ PolymorphicMatcher<internal::ExceptionMatcherImpl<Err>> ThrowsMessage(
       ::testing::internal::MakePredicateFormatterFromMatcher(matcher), value)
 
 // MATCHER* macros itself are listed below.
-#define MATCHER(name, description)                                             \
-  class name##Matcher                                                          \
-      : public ::testing::internal::MatcherBaseImpl<name##Matcher> {           \
-   public:                                                                     \
-    template <typename arg_type>                                               \
-    class gmock_Impl : public ::testing::MatcherInterface<const arg_type&> {   \
-     public:                                                                   \
-      gmock_Impl() {}                                                          \
-      bool MatchAndExplain(                                                    \
-          const arg_type& arg,                                                 \
-          ::testing::MatchResultListener* result_listener) const override;     \
-      void DescribeTo(::std::ostream* gmock_os) const override {               \
-        *gmock_os << FormatDescription(false);                                 \
-      }                                                                        \
-      void DescribeNegationTo(::std::ostream* gmock_os) const override {       \
-        *gmock_os << FormatDescription(true);                                  \
-      }                                                                        \
-                                                                               \
-     private:                                                                  \
-      ::std::string FormatDescription(bool negation) const {                   \
-        /* NOLINTNEXTLINE readability-redundant-string-init */                 \
-        ::std::string gmock_description = (description);                       \
-        if (!gmock_description.empty()) {                                      \
-          return gmock_description;                                            \
-        }                                                                      \
-        return ::testing::internal::FormatMatcherDescription(negation, #name,  \
-                                                             {}, {});          \
-      }                                                                        \
-    };                                                                         \
-  };                                                                           \
-  inline name##Matcher GMOCK_INTERNAL_WARNING_PUSH()                           \
-      GMOCK_INTERNAL_WARNING_CLANG(ignored, "-Wunused-function")               \
-          GMOCK_INTERNAL_WARNING_CLANG(ignored, "-Wunused-member-function")    \
-              name GMOCK_INTERNAL_WARNING_POP()() {                            \
-    return {};                                                                 \
-  }                                                                            \
-  template <typename arg_type>                                                 \
-  bool name##Matcher::gmock_Impl<arg_type>::MatchAndExplain(                   \
-      const arg_type& arg,                                                     \
-      ::testing::MatchResultListener* result_listener GTEST_ATTRIBUTE_UNUSED_) \
-      const
+#define MATCHER(name, description)                                            \
+  class name##Matcher                                                         \
+      : public ::testing::internal::MatcherBaseImpl<name##Matcher> {          \
+   public:                                                                    \
+    template <typename arg_type>                                              \
+    class gmock_Impl : public ::testing::MatcherInterface<const arg_type&> {  \
+     public:                                                                  \
+      gmock_Impl() {}                                                         \
+      bool MatchAndExplain(                                                   \
+          const arg_type& arg,                                                \
+          ::testing::MatchResultListener* result_listener) const override;    \
+      void DescribeTo(::std::ostream* gmock_os) const override {              \
+        *gmock_os << FormatDescription(false);                                \
+      }                                                                       \
+      void DescribeNegationTo(::std::ostream* gmock_os) const override {      \
+        *gmock_os << FormatDescription(true);                                 \
+      }                                                                       \
+                                                                              \
+     private:                                                                 \
+      ::std::string FormatDescription(bool negation) const {                  \
+        /* NOLINTNEXTLINE readability-redundant-string-init */                \
+        ::std::string gmock_description = (description);                      \
+        if (!gmock_description.empty()) {                                     \
+          return gmock_description;                                           \
+        }                                                                     \
+        return ::testing::internal::FormatMatcherDescription(negation, #name, \
+                                                             {}, {});         \
+      }                                                                       \
+    };                                                                        \
+  };                                                                          \
+  inline name##Matcher GMOCK_INTERNAL_WARNING_PUSH()                          \
+      GMOCK_INTERNAL_WARNING_CLANG(ignored, "-Wunused-function")              \
+          GMOCK_INTERNAL_WARNING_CLANG(ignored, "-Wunused-member-function")   \
+              name GMOCK_INTERNAL_WARNING_POP()() {                           \
+    return {};                                                                \
+  }                                                                           \
+  template <typename arg_type>                                                \
+  bool name##Matcher::gmock_Impl<arg_type>::MatchAndExplain(                  \
+      const arg_type& arg,                                                    \
+      GTEST_INTERNAL_ATTRIBUTE_MAYBE_UNUSED ::testing::MatchResultListener*   \
+          result_listener) const
 
 #define MATCHER_P(name, p0, description) \
   GMOCK_INTERNAL_MATCHER(name, name##MatcherP, description, (#p0), (p0))
@@ -5567,11 +5567,11 @@ PolymorphicMatcher<internal::ExceptionMatcherImpl<Err>> ThrowsMessage(
   }                                                                            \
   template <GMOCK_INTERNAL_MATCHER_TEMPLATE_PARAMS(args)>                      \
   template <typename arg_type>                                                 \
-  bool full_name<GMOCK_INTERNAL_MATCHER_TYPE_PARAMS(args)>::gmock_Impl<        \
-      arg_type>::MatchAndExplain(const arg_type& arg,                          \
-                                 ::testing::MatchResultListener*               \
-                                     result_listener GTEST_ATTRIBUTE_UNUSED_)  \
-      const
+  bool full_name<GMOCK_INTERNAL_MATCHER_TYPE_PARAMS(args)>::                   \
+      gmock_Impl<arg_type>::MatchAndExplain(                                   \
+          const arg_type& arg,                                                 \
+          GTEST_INTERNAL_ATTRIBUTE_MAYBE_UNUSED ::testing::                    \
+              MatchResultListener* result_listener) const
 
 #define GMOCK_INTERNAL_MATCHER_TEMPLATE_PARAMS(args) \
   GMOCK_PP_TAIL(                                     \

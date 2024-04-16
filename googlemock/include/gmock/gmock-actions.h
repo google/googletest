@@ -2174,9 +2174,9 @@ template <typename F, typename Impl>
 }
 
 #define GMOCK_INTERNAL_ARG_UNUSED(i, data, el) \
-  , const arg##i##_type& arg##i GTEST_ATTRIBUTE_UNUSED_
-#define GMOCK_ACTION_ARG_TYPES_AND_NAMES_UNUSED_                 \
-  const args_type& args GTEST_ATTRIBUTE_UNUSED_ GMOCK_PP_REPEAT( \
+  , GTEST_INTERNAL_ATTRIBUTE_MAYBE_UNUSED const arg##i##_type& arg##i
+#define GMOCK_ACTION_ARG_TYPES_AND_NAMES_UNUSED_                               \
+  GTEST_INTERNAL_ATTRIBUTE_MAYBE_UNUSED const args_type& args GMOCK_PP_REPEAT( \
       GMOCK_INTERNAL_ARG_UNUSED, , 10)
 
 #define GMOCK_INTERNAL_ARG(i, data, el) , const arg##i##_type& arg##i
