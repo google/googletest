@@ -8,6 +8,7 @@ bazel-genfiles
 bazel-googletest
 bazel-out
 bazel-testlogs
+MODULE.bazel.lock
 # python
 *.pyc
 
@@ -23,6 +24,10 @@ Win32-Debug/
 Win32-Release/
 x64-Debug/
 x64-Release/
+
+# VSCode files
+.cache/
+cmake-variants.yaml
 
 # Ignore autoconf / automake files
 Makefile.in

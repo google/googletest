@@ -31,21 +31,22 @@
 //
 // This file tests the built-in actions in gmock-actions.h.
 
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4577)
-#endif
-
 #include "gmock/gmock-more-actions.h"
 
+#include <algorithm>
 #include <functional>
+#include <iterator>
 #include <memory>
 #include <sstream>
 #include <string>
+#include <tuple>
+#include <vector>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest-spi.h"
 #include "gtest/gtest.h"
+
+GTEST_DISABLE_MSC_WARNINGS_PUSH_(4577)
 
 namespace testing {
 namespace gmock_more_actions_test {
@@ -82,6 +83,16 @@ bool ReferencesGlobalDouble(const double& x) { return &x == &g_double; }
 
 struct UnaryFunctor {
   int operator()(bool x) { return x ? 1 : -1; }
+};
+
+struct UnaryMoveOnlyFunctor : UnaryFunctor {
+  UnaryMoveOnlyFunctor() = default;
+  UnaryMoveOnlyFunctor(const UnaryMoveOnlyFunctor&) = delete;
+  UnaryMoveOnlyFunctor(UnaryMoveOnlyFunctor&&) = default;
+};
+
+struct OneShotUnaryFunctor {
+  int operator()(bool x) && { return x ? 1 : -1; }
 };
 
 const char* Binary(const char* input, short n) { return input + n; }  // NOLINT
@@ -676,7 +687,7 @@ TEST(SetArrayArgumentTest, SetsTheNthArrayWithIteratorArgument) {
   Action<MyFunction> a = SetArrayArgument<1>(letters.begin(), letters.end());
 
   std::string s;
-  a.Perform(std::make_tuple(true, back_inserter(s)));
+  a.Perform(std::make_tuple(true, std::back_inserter(s)));
   EXPECT_EQ(letters, s);
 }
 
@@ -697,10 +708,22 @@ TEST(InvokeArgumentTest, Function0) {
   EXPECT_EQ(1, a.Perform(std::make_tuple(2, &Nullary)));
 }
 
-// Tests using InvokeArgument with a unary function.
+// Tests using InvokeArgument with a unary functor.
 TEST(InvokeArgumentTest, Functor1) {
   Action<int(UnaryFunctor)> a = InvokeArgument<0>(true);  // NOLINT
   EXPECT_EQ(1, a.Perform(std::make_tuple(UnaryFunctor())));
+}
+
+// Tests using InvokeArgument with a unary move-only functor.
+TEST(InvokeArgumentTest, Functor1MoveOnly) {
+  Action<int(UnaryMoveOnlyFunctor)> a = InvokeArgument<0>(true);  // NOLINT
+  EXPECT_EQ(1, a.Perform(std::make_tuple(UnaryMoveOnlyFunctor())));
+}
+
+// Tests using InvokeArgument with a one-shot unary functor.
+TEST(InvokeArgumentTest, OneShotFunctor1) {
+  Action<int(OneShotUnaryFunctor)> a = InvokeArgument<0>(true);  // NOLINT
+  EXPECT_EQ(1, a.Perform(std::make_tuple(OneShotUnaryFunctor())));
 }
 
 // Tests using InvokeArgument with a 5-ary function.
@@ -803,6 +826,22 @@ TEST(InvokeArgumentTest, ByExplicitConstReferenceFunction) {
   double x = 0;
   a = InvokeArgument<0>(ByRef(x));  // This calls ByRef() on a non-const.
   EXPECT_FALSE(a.Perform(std::make_tuple(&ReferencesGlobalDouble)));
+}
+
+TEST(InvokeArgumentTest, MoveOnlyType) {
+  struct Marker {};
+  struct {
+    // Method takes a unique_ptr (to a type we don't care about), and an
+    // invocable type.
+    MOCK_METHOD(bool, MockMethod,
+                (std::unique_ptr<Marker>, std::function<int()>), ());
+  } mock;
+
+  ON_CALL(mock, MockMethod(_, _)).WillByDefault(InvokeArgument<1>());
+
+  // This compiles, but is a little opaque as a workaround:
+  ON_CALL(mock, MockMethod(_, _))
+      .WillByDefault(WithArg<1>(InvokeArgument<0>()));
 }
 
 // Tests DoAll(a1, a2).
@@ -982,11 +1021,7 @@ TEST(DoAllTest, ImplicitlyConvertsActionArguments) {
 // is expanded and macro expansion cannot contain #pragma.  Therefore
 // we suppress them here.
 // Also suppress C4503 decorated name length exceeded, name was truncated
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4100)
-#pragma warning(disable : 4503)
-#endif
+GTEST_DISABLE_MSC_WARNINGS_PUSH_(4100 4503)
 // Tests the ACTION*() macro family.
 
 // Tests that ACTION() can define an action that doesn't reference the
@@ -1548,3 +1583,6 @@ TEST(ActionTemplateTest, CanBeOverloadedOnNumberOfValueParameters) {
 
 }  // namespace gmock_more_actions_test
 }  // namespace testing
+
+GTEST_DISABLE_MSC_WARNINGS_POP_()  // 4100 4503
+GTEST_DISABLE_MSC_WARNINGS_POP_()  // 4577

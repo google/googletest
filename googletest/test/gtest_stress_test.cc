@@ -30,12 +30,15 @@
 // Tests that SCOPED_TRACE() and various Google Test assertions can be
 // used in a large number of threads concurrently.
 
+#include <algorithm>
+#include <memory>
+#include <string>
 #include <vector>
 
 #include "gtest/gtest.h"
 #include "src/gtest-internal-inl.h"
 
-#if GTEST_IS_THREADSAFE
+#ifdef GTEST_IS_THREADSAFE
 
 namespace testing {
 namespace {
@@ -118,8 +121,8 @@ TEST(StressTest, CanUseScopedTraceAndAssertionsInManyThreads) {
     std::unique_ptr<ThreadWithParam<int> > threads[kThreadCount];
     Notification threads_can_start;
     for (int i = 0; i != kThreadCount; i++)
-      threads[i].reset(
-          new ThreadWithParam<int>(&ManyAsserts, i, &threads_can_start));
+      threads[i] = std::make_unique<ThreadWithParam<int>>(&ManyAsserts, i,
+                                                          &threads_can_start);
 
     threads_can_start.Notify();
 

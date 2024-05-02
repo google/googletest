@@ -30,6 +30,8 @@
 //
 // Tests for death tests.
 
+#include <stdlib.h>
+
 #include "gtest/gtest-death-test.h"
 #include "gtest/gtest.h"
 #include "gtest/internal/gtest-filepath.h"
@@ -37,9 +39,9 @@
 using testing::internal::AlwaysFalse;
 using testing::internal::AlwaysTrue;
 
-#if GTEST_HAS_DEATH_TEST
+#ifdef GTEST_HAS_DEATH_TEST
 
-#if GTEST_OS_WINDOWS
+#ifdef GTEST_OS_WINDOWS
 #include <direct.h>  // For chdir().
 #include <fcntl.h>   // For O_BINARY
 #include <io.h>
@@ -52,7 +54,10 @@ using testing::internal::AlwaysTrue;
 #include <signal.h>
 #include <stdio.h>
 
-#if GTEST_OS_LINUX
+#include <string>
+#include <vector>
+
+#ifdef GTEST_OS_LINUX
 #include <sys/time.h>
 #endif  // GTEST_OS_LINUX
 
@@ -108,15 +113,15 @@ void DieWithMessage(const ::std::string& message) {
   fprintf(stderr, "%s", message.c_str());
   fflush(stderr);  // Make sure the text is printed before the process exits.
 
-  // We call _exit() instead of exit(), as the former is a direct
+  // We call _Exit() instead of exit(), as the former is a direct
   // system call and thus safer in the presence of threads.  exit()
   // will invoke user-defined exit-hooks, which may do dangerous
   // things that conflict with death tests.
   //
-  // Some compilers can recognize that _exit() never returns and issue the
+  // Some compilers can recognize that _Exit() never returns and issue the
   // 'unreachable code' warning for code following this function, unless
   // fooled by a fake condition.
-  if (AlwaysTrue()) _exit(1);
+  if (AlwaysTrue()) _Exit(1);
 }
 
 void DieInside(const ::std::string& function) {
@@ -200,7 +205,7 @@ int DieInDebugElse12(int* sideeffect) {
   return 12;
 }
 
-#if GTEST_OS_WINDOWS
+#ifdef GTEST_OS_WINDOWS
 
 // Death in dbg due to Windows CRT assertion failure, not opt.
 int DieInCRTDebugElse12(int* sideeffect) {
@@ -220,7 +225,7 @@ int DieInCRTDebugElse12(int* sideeffect) {
 
 #endif  // GTEST_OS_WINDOWS
 
-#if GTEST_OS_WINDOWS || GTEST_OS_FUCHSIA
+#if defined(GTEST_OS_WINDOWS) || defined(GTEST_OS_FUCHSIA)
 
 // Tests the ExitedWithCode predicate.
 TEST(ExitStatusPredicateTest, ExitedWithCode) {
@@ -235,13 +240,13 @@ TEST(ExitStatusPredicateTest, ExitedWithCode) {
 
 #else
 
-// Returns the exit status of a process that calls _exit(2) with a
+// Returns the exit status of a process that calls _Exit(2) with a
 // given exit code.  This is a helper function for the
 // ExitStatusPredicateTest test suite.
 static int NormalExitStatus(int exit_code) {
   pid_t child_pid = fork();
   if (child_pid == 0) {
-    _exit(exit_code);
+    _Exit(exit_code);
   }
   int status;
   waitpid(child_pid, &status, 0);
@@ -257,7 +262,7 @@ static int KilledExitStatus(int signum) {
   pid_t child_pid = fork();
   if (child_pid == 0) {
     raise(signum);
-    _exit(1);
+    _Exit(1);
   }
   int status;
   waitpid(child_pid, &status, 0);
@@ -310,7 +315,7 @@ TEST_F(TestForDeathTest, SingleStatement) {
     ASSERT_DEATH(return, "");
 
   if (AlwaysTrue())
-    EXPECT_DEATH(_exit(1), "");
+    EXPECT_DEATH(_Exit(1), "");
   else
     // This empty "else" branch is meant to ensure that EXPECT_DEATH
     // doesn't expand into an "if" statement without an "else"
@@ -321,28 +326,11 @@ TEST_F(TestForDeathTest, SingleStatement) {
   if (AlwaysFalse())
     ;
   else
-    EXPECT_DEATH(_exit(1), "") << 1 << 2 << 3;
+    EXPECT_DEATH(_Exit(1), "") << 1 << 2 << 3;
 }
 #ifdef __GNUC__
 #pragma GCC diagnostic pop
 #endif
-
-#if GTEST_USES_PCRE
-
-void DieWithEmbeddedNul() {
-  fprintf(stderr, "Hello%cmy null world.\n", '\0');
-  fflush(stderr);
-  _exit(1);
-}
-
-// Tests that EXPECT_DEATH and ASSERT_DEATH work when the error
-// message has a NUL character in it.
-TEST_F(TestForDeathTest, EmbeddedNulInMessage) {
-  EXPECT_DEATH(DieWithEmbeddedNul(), "my null world");
-  ASSERT_DEATH(DieWithEmbeddedNul(), "my null world");
-}
-
-#endif  // GTEST_USES_PCRE
 
 // Tests that death test macros expand to code which interacts well with switch
 // statements.
@@ -353,11 +341,11 @@ TEST_F(TestForDeathTest, SwitchStatement) {
 
   switch (0)
   default:
-    ASSERT_DEATH(_exit(1), "") << "exit in default switch handler";
+    ASSERT_DEATH(_Exit(1), "") << "exit in default switch handler";
 
   switch (0)
   case 0:
-    EXPECT_DEATH(_exit(1), "") << "exit in switch case";
+    EXPECT_DEATH(_Exit(1), "") << "exit in switch case";
 
   GTEST_DISABLE_MSC_WARNINGS_POP_()
 }
@@ -385,13 +373,13 @@ TEST_F(TestForDeathTest, FastDeathTestInChangedDir) {
   GTEST_FLAG_SET(death_test_style, "fast");
 
   ChangeToRootDir();
-  EXPECT_EXIT(_exit(1), testing::ExitedWithCode(1), "");
+  EXPECT_EXIT(_Exit(1), testing::ExitedWithCode(1), "");
 
   ChangeToRootDir();
-  ASSERT_DEATH(_exit(1), "");
+  ASSERT_DEATH(_Exit(1), "");
 }
 
-#if GTEST_OS_LINUX
+#ifdef GTEST_OS_LINUX
 void SigprofAction(int, siginfo_t*, void*) { /* no op */
 }
 
@@ -430,7 +418,7 @@ void DisableSigprofActionAndTimer(struct sigaction* old_signal_action) {
 TEST_F(TestForDeathTest, FastSigprofActionSet) {
   GTEST_FLAG_SET(death_test_style, "fast");
   SetSigprofActionAndTimer();
-  EXPECT_DEATH(_exit(1), "");
+  EXPECT_DEATH(_Exit(1), "");
   struct sigaction old_signal_action;
   DisableSigprofActionAndTimer(&old_signal_action);
   EXPECT_TRUE(old_signal_action.sa_sigaction == SigprofAction);
@@ -439,7 +427,7 @@ TEST_F(TestForDeathTest, FastSigprofActionSet) {
 TEST_F(TestForDeathTest, ThreadSafeSigprofActionSet) {
   GTEST_FLAG_SET(death_test_style, "threadsafe");
   SetSigprofActionAndTimer();
-  EXPECT_DEATH(_exit(1), "");
+  EXPECT_DEATH(_Exit(1), "");
   struct sigaction old_signal_action;
   DisableSigprofActionAndTimer(&old_signal_action);
   EXPECT_TRUE(old_signal_action.sa_sigaction == SigprofAction);
@@ -463,24 +451,24 @@ TEST_F(TestForDeathTest, ThreadsafeDeathTestInLoop) {
   GTEST_FLAG_SET(death_test_style, "threadsafe");
 
   for (int i = 0; i < 3; ++i)
-    EXPECT_EXIT(_exit(i), testing::ExitedWithCode(i), "") << ": i = " << i;
+    EXPECT_EXIT(_Exit(i), testing::ExitedWithCode(i), "") << ": i = " << i;
 }
 
 TEST_F(TestForDeathTest, ThreadsafeDeathTestInChangedDir) {
   GTEST_FLAG_SET(death_test_style, "threadsafe");
 
   ChangeToRootDir();
-  EXPECT_EXIT(_exit(1), testing::ExitedWithCode(1), "");
+  EXPECT_EXIT(_Exit(1), testing::ExitedWithCode(1), "");
 
   ChangeToRootDir();
-  ASSERT_DEATH(_exit(1), "");
+  ASSERT_DEATH(_Exit(1), "");
 }
 
 TEST_F(TestForDeathTest, MixedStyles) {
   GTEST_FLAG_SET(death_test_style, "threadsafe");
-  EXPECT_DEATH(_exit(1), "");
+  EXPECT_DEATH(_Exit(1), "");
   GTEST_FLAG_SET(death_test_style, "fast");
-  EXPECT_DEATH(_exit(1), "");
+  EXPECT_DEATH(_Exit(1), "");
 }
 
 #if GTEST_HAS_CLONE && GTEST_HAS_PTHREAD
@@ -494,7 +482,7 @@ TEST_F(TestForDeathTest, DoesNotExecuteAtforkHooks) {
     GTEST_FLAG_SET(death_test_style, "threadsafe");
     pthread_flag = false;
     ASSERT_EQ(0, pthread_atfork(&SetPthreadFlag, nullptr, nullptr));
-    ASSERT_DEATH(_exit(1), "");
+    ASSERT_DEATH(_Exit(1), "");
     ASSERT_FALSE(pthread_flag);
   }
 }
@@ -521,16 +509,12 @@ TEST_F(TestForDeathTest, AcceptsAnythingConvertibleToRE) {
   const testing::internal::RE regex(regex_c_str);
   EXPECT_DEATH(GlobalFunction(), regex);
 
-#if !GTEST_USES_PCRE
-
   const ::std::string regex_std_str(regex_c_str);
   EXPECT_DEATH(GlobalFunction(), regex_std_str);
 
   // This one is tricky; a temporary pointer into another temporary.  Reference
   // lifetime extension of the pointer is not sufficient.
   EXPECT_DEATH(GlobalFunction(), ::std::string(regex_c_str).c_str());
-
-#endif  // !GTEST_USES_PCRE
 }
 
 // Tests that a non-void function can be used in a death test.
@@ -662,7 +646,7 @@ TEST_F(TestForDeathTest, TestExpectDebugDeath) {
 #endif
 }
 
-#if GTEST_OS_WINDOWS
+#ifdef GTEST_OS_WINDOWS
 
 // https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/crtsetreportmode
 // In debug mode, the calls to _CrtSetReportMode and _CrtSetReportFile enable
@@ -714,7 +698,7 @@ void ExpectDebugDeathHelper(bool* aborted) {
   *aborted = false;
 }
 
-#if GTEST_OS_WINDOWS
+#ifdef GTEST_OS_WINDOWS
 TEST(PopUpDeathTest, DoesNotShowPopUpOnAbort) {
   printf(
       "This test should be considered failing if it shows "
@@ -823,17 +807,17 @@ TEST_F(TestForDeathTest, AssertDebugDeathAborts10) {
 
 // Tests the *_EXIT family of macros, using a variety of predicates.
 static void TestExitMacros() {
-  EXPECT_EXIT(_exit(1), testing::ExitedWithCode(1), "");
-  ASSERT_EXIT(_exit(42), testing::ExitedWithCode(42), "");
+  EXPECT_EXIT(_Exit(1), testing::ExitedWithCode(1), "");
+  ASSERT_EXIT(_Exit(42), testing::ExitedWithCode(42), "");
 
-#if GTEST_OS_WINDOWS
+#ifdef GTEST_OS_WINDOWS
 
   // Of all signals effects on the process exit code, only those of SIGABRT
   // are documented on Windows.
   // See https://msdn.microsoft.com/en-us/query-bi/m/dwwzkt4c.
   EXPECT_EXIT(raise(SIGABRT), testing::ExitedWithCode(3), "") << "b_ar";
 
-#elif !GTEST_OS_FUCHSIA
+#elif !defined(GTEST_OS_FUCHSIA)
 
   // Fuchsia has no unix signals.
   EXPECT_EXIT(raise(SIGKILL), testing::KilledBySignal(SIGKILL), "") << "foo";
@@ -841,7 +825,7 @@ static void TestExitMacros() {
 
   EXPECT_FATAL_FAILURE(
       {  // NOLINT
-        ASSERT_EXIT(_exit(0), testing::KilledBySignal(SIGSEGV), "")
+        ASSERT_EXIT(_Exit(0), testing::KilledBySignal(SIGSEGV), "")
             << "This failure is expected, too.";
       },
       "This failure is expected, too.");
@@ -867,7 +851,7 @@ TEST_F(TestForDeathTest, InvalidStyle) {
   GTEST_FLAG_SET(death_test_style, "rococo");
   EXPECT_NONFATAL_FAILURE(
       {  // NOLINT
-        EXPECT_DEATH(_exit(0), "") << "This failure is expected.";
+        EXPECT_DEATH(_Exit(0), "") << "This failure is expected.";
       },
       "This failure is expected.");
 }
@@ -1158,7 +1142,7 @@ TEST_F(MacroLogicDeathTest, ChildDoesNotDie) {
   // This time there are two calls to Abort: one since the test didn't
   // die, and another from the ReturnSentinel when it's destroyed.  The
   // sentinel normally isn't destroyed if a test doesn't die, since
-  // _exit(2) is called in that case by ForkingDeathTest, but not by
+  // _Exit(2) is called in that case by ForkingDeathTest, but not by
   // our MockDeathTest.
   ASSERT_EQ(2U, factory_->AbortCalls());
   EXPECT_EQ(DeathTest::TEST_DID_NOT_DIE, factory_->AbortArgument(0));
@@ -1170,21 +1154,21 @@ TEST_F(MacroLogicDeathTest, ChildDoesNotDie) {
 // Tests that a successful death test does not register a successful
 // test part.
 TEST(SuccessRegistrationDeathTest, NoSuccessPart) {
-  EXPECT_DEATH(_exit(1), "");
+  EXPECT_DEATH(_Exit(1), "");
   EXPECT_EQ(0, GetUnitTestImpl()->current_test_result()->total_part_count());
 }
 
 TEST(StreamingAssertionsDeathTest, DeathTest) {
-  EXPECT_DEATH(_exit(1), "") << "unexpected failure";
-  ASSERT_DEATH(_exit(1), "") << "unexpected failure";
+  EXPECT_DEATH(_Exit(1), "") << "unexpected failure";
+  ASSERT_DEATH(_Exit(1), "") << "unexpected failure";
   EXPECT_NONFATAL_FAILURE(
       {  // NOLINT
-        EXPECT_DEATH(_exit(0), "") << "expected failure";
+        EXPECT_DEATH(_Exit(0), "") << "expected failure";
       },
       "expected failure");
   EXPECT_FATAL_FAILURE(
       {  // NOLINT
-        ASSERT_DEATH(_exit(0), "") << "expected failure";
+        ASSERT_DEATH(_Exit(0), "") << "expected failure";
       },
       "expected failure");
 }
@@ -1198,7 +1182,7 @@ TEST(GetLastErrnoDescription, GetLastErrnoDescriptionWorks) {
   EXPECT_STREQ("", GetLastErrnoDescription().c_str());
 }
 
-#if GTEST_OS_WINDOWS
+#ifdef GTEST_OS_WINDOWS
 TEST(AutoHandleTest, AutoHandleWorks) {
   HANDLE handle = ::CreateEvent(NULL, FALSE, FALSE, NULL);
   ASSERT_NE(INVALID_HANDLE_VALUE, handle);
@@ -1225,7 +1209,7 @@ TEST(AutoHandleTest, AutoHandleWorks) {
 }
 #endif  // GTEST_OS_WINDOWS
 
-#if GTEST_OS_WINDOWS
+#ifdef GTEST_OS_WINDOWS
 typedef unsigned __int64 BiggestParsable;
 typedef signed __int64 BiggestSignedParsable;
 #else
@@ -1322,7 +1306,7 @@ TEST(ParseNaturalNumberTest, WorksForShorterIntegers) {
   EXPECT_EQ(123, char_result);
 }
 
-#if GTEST_OS_WINDOWS
+#ifdef GTEST_OS_WINDOWS
 TEST(EnvironmentTest, HandleFitsIntoSizeT) {
   ASSERT_TRUE(sizeof(HANDLE) <= sizeof(size_t));
 }
@@ -1348,7 +1332,7 @@ TEST(InDeathTestChildDeathTest, ReportsDeathTestCorrectlyInFastStyle) {
       {
         fprintf(stderr, InDeathTestChild() ? "Inside" : "Outside");
         fflush(stderr);
-        _exit(1);
+        _Exit(1);
       },
       "Inside");
 }
@@ -1360,7 +1344,7 @@ TEST(InDeathTestChildDeathTest, ReportsDeathTestCorrectlyInThreadSafeStyle) {
       {
         fprintf(stderr, InDeathTestChild() ? "Inside" : "Outside");
         fflush(stderr);
-        _exit(1);
+        _Exit(1);
       },
       "Inside");
 }
@@ -1368,13 +1352,13 @@ TEST(InDeathTestChildDeathTest, ReportsDeathTestCorrectlyInThreadSafeStyle) {
 void DieWithMessage(const char* message) {
   fputs(message, stderr);
   fflush(stderr);  // Make sure the text is printed before the process exits.
-  _exit(1);
+  _Exit(1);
 }
 
 TEST(MatcherDeathTest, DoesNotBreakBareRegexMatching) {
   // googletest tests this, of course; here we ensure that including googlemock
   // has not broken it.
-#if GTEST_USES_POSIX_RE
+#ifdef GTEST_USES_POSIX_RE
   EXPECT_DEATH(DieWithMessage("O, I die, Horatio."), "I d[aeiou]e");
 #else
   EXPECT_DEATH(DieWithMessage("O, I die, Horatio."), "I di?e");
@@ -1484,7 +1468,7 @@ TEST(ConditionalDeathMacrosSyntaxDeathTest, SingleStatement) {
     ASSERT_DEATH_IF_SUPPORTED(return, "");
 
   if (AlwaysTrue())
-    EXPECT_DEATH_IF_SUPPORTED(_exit(1), "");
+    EXPECT_DEATH_IF_SUPPORTED(_Exit(1), "");
   else
     // This empty "else" branch is meant to ensure that EXPECT_DEATH
     // doesn't expand into an "if" statement without an "else"
@@ -1495,7 +1479,7 @@ TEST(ConditionalDeathMacrosSyntaxDeathTest, SingleStatement) {
   if (AlwaysFalse())
     ;  // NOLINT
   else
-    EXPECT_DEATH_IF_SUPPORTED(_exit(1), "") << 1 << 2 << 3;
+    EXPECT_DEATH_IF_SUPPORTED(_Exit(1), "") << 1 << 2 << 3;
 }
 #ifdef __GNUC__
 #pragma GCC diagnostic pop
@@ -1510,11 +1494,11 @@ TEST(ConditionalDeathMacrosSyntaxDeathTest, SwitchStatement) {
 
   switch (0)
   default:
-    ASSERT_DEATH_IF_SUPPORTED(_exit(1), "") << "exit in default switch handler";
+    ASSERT_DEATH_IF_SUPPORTED(_Exit(1), "") << "exit in default switch handler";
 
   switch (0)
   case 0:
-    EXPECT_DEATH_IF_SUPPORTED(_exit(1), "") << "exit in switch case";
+    EXPECT_DEATH_IF_SUPPORTED(_Exit(1), "") << "exit in switch case";
 
   GTEST_DISABLE_MSC_WARNINGS_POP_()
 }

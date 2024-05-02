@@ -8,6 +8,8 @@ GoogleTest now follows the
 [Abseil Live at Head philosophy](https://abseil.io/about/philosophy#upgrade-support).
 We recommend
 [updating to the latest commit in the `main` branch as often as possible](https://github.com/abseil/abseil-cpp/blob/master/FAQ.md#what-is-live-at-head-and-how-do-i-do-it).
+We do publish occasional semantic versions, tagged with
+`v${major}.${minor}.${patch}` (e.g. `v1.14.0`).
 
 #### Documentation Updates
 
@@ -15,13 +17,19 @@ Our documentation is now live on GitHub Pages at
 https://google.github.io/googletest/. We recommend browsing the documentation on
 GitHub Pages rather than directly in the repository.
 
-#### Release 1.12.1
+#### Release 1.14.0
 
-[Release 1.12.1](https://github.com/google/googletest/releases/tag/release-1.12.1)
-is now available.
+[Release 1.14.0](https://github.com/google/googletest/releases/tag/v1.14.0) is
+now available.
 
-The 1.12.x branch will be the last to support C++11. Future releases will
-require at least C++14.
+The 1.14.x branch requires at least C++14.
+
+#### Continuous Integration
+
+We use Google's internal systems for continuous integration. \
+GitHub Actions were added for the convenience of open-source contributors. They
+are exclusively maintained by the open-source community and not used by the
+GoogleTest team.
 
 #### Coming Soon
 
@@ -46,16 +54,37 @@ More information about building GoogleTest can be found at
 
 ## Features
 
-*   An [xUnit](https://en.wikipedia.org/wiki/XUnit) test framework.
-*   Test discovery.
-*   A rich set of assertions.
-*   User-defined assertions.
-*   Death tests.
-*   Fatal and non-fatal failures.
-*   Value-parameterized tests.
-*   Type-parameterized tests.
-*   Various options for running the tests.
-*   XML test report generation.
+*   xUnit test framework: \
+    Googletest is based on the [xUnit](https://en.wikipedia.org/wiki/XUnit)
+    testing framework, a popular architecture for unit testing
+*   Test discovery: \
+    Googletest automatically discovers and runs your tests, eliminating the need
+    to manually register your tests
+*   Rich set of assertions: \
+    Googletest provides a variety of assertions, such as equality, inequality,
+    exceptions, and more, making it easy to test your code
+*   User-defined assertions: \
+    You can define your own assertions with Googletest, making it simple to
+    write tests that are specific to your code
+*   Death tests: \
+    Googletest supports death tests, which verify that your code exits in a
+    certain way, making it useful for testing error-handling code
+*   Fatal and non-fatal failures: \
+    You can specify whether a test failure should be treated as fatal or
+    non-fatal with Googletest, allowing tests to continue running even if a
+    failure occurs
+*   Value-parameterized tests: \
+    Googletest supports value-parameterized tests, which run multiple times with
+    different input values, making it useful for testing functions that take
+    different inputs
+*   Type-parameterized tests: \
+    Googletest also supports type-parameterized tests, which run with different
+    data types, making it useful for testing functions that work with different
+    data types
+*   Various options for running tests: \
+    Googletest provides many options for running tests including running
+    individual tests, running tests in a specific order and running tests in
+    parallel
 
 ## Supported Platforms
 
@@ -63,7 +92,7 @@ GoogleTest follows Google's
 [Foundational C++ Support Policy](https://opensource.google/documentation/policies/cplusplus-support).
 See
 [this table](https://github.com/google/oss-policies-info/blob/main/foundational-cxx-support-matrix.md)
-for a list of currently supported versions compilers, platforms, and build
+for a list of currently supported versions of compilers, platforms, and build
 tools.
 
 ## Who Is Using GoogleTest?
@@ -71,12 +100,12 @@ tools.
 In addition to many internal projects at Google, GoogleTest is also used by the
 following notable projects:
 
-*   The [Chromium projects](http://www.chromium.org/) (behind the Chrome browser
-    and Chrome OS).
-*   The [LLVM](http://llvm.org/) compiler.
+*   The [Chromium projects](https://www.chromium.org/) (behind the Chrome
+    browser and Chrome OS).
+*   The [LLVM](https://llvm.org/) compiler.
 *   [Protocol Buffers](https://github.com/google/protobuf), Google's data
     interchange format.
-*   The [OpenCV](http://opencv.org/) computer vision library.
+*   The [OpenCV](https://opencv.org/) computer vision library.
 
 ## Related Open Source Projects
 

@@ -135,6 +135,7 @@
 #endif
 
 #include <algorithm>
+#include <exception>
 #include <functional>
 #include <memory>
 #include <string>
@@ -146,10 +147,7 @@
 #include "gmock/internal/gmock-port.h"
 #include "gmock/internal/gmock-pp.h"
 
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4100)
-#endif
+GTEST_DISABLE_MSC_WARNINGS_PUSH_(4100)
 
 namespace testing {
 
@@ -178,9 +176,15 @@ struct BuiltInDefaultValueGetter<T, false> {
   static T Get() {
     Assert(false, __FILE__, __LINE__,
            "Default action undefined for the function return type.");
-    return internal::Invalid<T>();
+#if defined(__GNUC__) || defined(__clang__)
+    __builtin_unreachable();
+#elif defined(_MSC_VER)
+    __assume(0);
+#else
+    return Invalid<T>();
     // The above statement will never be reached, but is required in
     // order for this function to compile.
+#endif
   }
 };
 
@@ -614,7 +618,7 @@ class DefaultValue {
  private:
   class ValueProducer {
    public:
-    virtual ~ValueProducer() {}
+    virtual ~ValueProducer() = default;
     virtual T Produce() = 0;
   };
 
@@ -702,8 +706,8 @@ class ActionInterface {
   typedef typename internal::Function<F>::Result Result;
   typedef typename internal::Function<F>::ArgumentTuple ArgumentTuple;
 
-  ActionInterface() {}
-  virtual ~ActionInterface() {}
+  ActionInterface() = default;
+  virtual ~ActionInterface() = default;
 
   // Performs the action.  This method is not const, as in general an
   // action can have side effects and be stateful.  For example, a
@@ -752,7 +756,7 @@ class Action<R(Args...)> {
 
   // Constructs a null Action.  Needed for storing Action objects in
   // STL containers.
-  Action() {}
+  Action() = default;
 
   // Construct an Action from a specified callable.
   // This cannot take std::function directly, because then Action would not be
@@ -1276,7 +1280,7 @@ class AssignAction {
   const T2 value_;
 };
 
-#if !GTEST_OS_WINDOWS_MOBILE
+#ifndef GTEST_OS_WINDOWS_MOBILE
 
 // Implements the SetErrnoAndReturn action to simulate return from
 // various system calls and libc functions.
@@ -1420,17 +1424,19 @@ struct WithArgsAction {
   // providing a call operator because even with a particular set of arguments
   // they don't have a fixed return type.
 
-  template <typename R, typename... Args,
-            typename std::enable_if<
-                std::is_convertible<
-                    InnerAction,
-                    // Unfortunately we can't use the InnerSignature alias here;
-                    // MSVC complains about the I parameter pack not being
-                    // expanded (error C3520) despite it being expanded in the
-                    // type alias.
-                    OnceAction<R(typename std::tuple_element<
-                                 I, std::tuple<Args...>>::type...)>>::value,
-                int>::type = 0>
+  template <
+      typename R, typename... Args,
+      typename std::enable_if<
+          std::is_convertible<InnerAction,
+                              // Unfortunately we can't use the InnerSignature
+                              // alias here; MSVC complains about the I
+                              // parameter pack not being expanded (error C3520)
+                              // despite it being expanded in the type alias.
+                              // TupleElement is also an MSVC workaround.
+                              // See its definition for details.
+                              OnceAction<R(internal::TupleElement<
+                                           I, std::tuple<Args...>>...)>>::value,
+          int>::type = 0>
   operator OnceAction<R(Args...)>() && {  // NOLINT
     struct OA {
       OnceAction<InnerSignature<R, Args...>> inner_action;
@@ -1445,17 +1451,19 @@ struct WithArgsAction {
     return OA{std::move(inner_action)};
   }
 
-  template <typename R, typename... Args,
-            typename std::enable_if<
-                std::is_convertible<
-                    const InnerAction&,
-                    // Unfortunately we can't use the InnerSignature alias here;
-                    // MSVC complains about the I parameter pack not being
-                    // expanded (error C3520) despite it being expanded in the
-                    // type alias.
-                    Action<R(typename std::tuple_element<
-                             I, std::tuple<Args...>>::type...)>>::value,
-                int>::type = 0>
+  template <
+      typename R, typename... Args,
+      typename std::enable_if<
+          std::is_convertible<const InnerAction&,
+                              // Unfortunately we can't use the InnerSignature
+                              // alias here; MSVC complains about the I
+                              // parameter pack not being expanded (error C3520)
+                              // despite it being expanded in the type alias.
+                              // TupleElement is also an MSVC workaround.
+                              // See its definition for details.
+                              Action<R(internal::TupleElement<
+                                       I, std::tuple<Args...>>...)>>::value,
+          int>::type = 0>
   operator Action<R(Args...)>() const {  // NOLINT
     Action<InnerSignature<R, Args...>> converted(inner_action);
 
@@ -1739,6 +1747,13 @@ struct ThrowAction {
     return [copy](Args...) -> R { throw copy; };
   }
 };
+struct RethrowAction {
+  std::exception_ptr exception;
+  template <typename R, typename... Args>
+  operator Action<R(Args...)>() const {  // NOLINT
+    return [ex = exception](Args...) -> R { std::rethrow_exception(ex); };
+  }
+};
 #endif  // GTEST_HAS_EXCEPTIONS
 
 }  // namespace internal
@@ -1925,7 +1940,7 @@ PolymorphicAction<internal::AssignAction<T1, T2>> Assign(T1* ptr, T2 val) {
   return MakePolymorphicAction(internal::AssignAction<T1, T2>(ptr, val));
 }
 
-#if !GTEST_OS_WINDOWS_MOBILE
+#ifndef GTEST_OS_WINDOWS_MOBILE
 
 // Creates an action that sets errno and returns the appropriate error.
 template <typename T>
@@ -2055,12 +2070,22 @@ internal::ReturnPointeeAction<Ptr> ReturnPointee(Ptr pointer) {
   return {pointer};
 }
 
-// Action Throw(exception) can be used in a mock function of any type
-// to throw the given exception.  Any copyable value can be thrown.
 #if GTEST_HAS_EXCEPTIONS
+// Action Throw(exception) can be used in a mock function of any type
+// to throw the given exception.  Any copyable value can be thrown,
+// except for std::exception_ptr, which is likely a mistake if
+// thrown directly.
 template <typename T>
-internal::ThrowAction<typename std::decay<T>::type> Throw(T&& exception) {
+typename std::enable_if<
+    !std::is_base_of<std::exception_ptr, typename std::decay<T>::type>::value,
+    internal::ThrowAction<typename std::decay<T>::type>>::type
+Throw(T&& exception) {
   return {std::forward<T>(exception)};
+}
+// Action Rethrow(exception_ptr) can be used in a mock function of any type
+// to rethrow any exception_ptr. Note that the same object is thrown each time.
+inline internal::RethrowAction Rethrow(std::exception_ptr exception) {
+  return {std::move(exception)};
 }
 #endif  // GTEST_HAS_EXCEPTIONS
 
@@ -2110,13 +2135,13 @@ struct ActionImpl<R(Args...), Impl> : ImplBase<Impl>::type {
   R operator()(Args&&... arg) const {
     static constexpr size_t kMaxArgs =
         sizeof...(Args) <= 10 ? sizeof...(Args) : 10;
-    return Apply(MakeIndexSequence<kMaxArgs>{},
-                 MakeIndexSequence<10 - kMaxArgs>{},
+    return Apply(std::make_index_sequence<kMaxArgs>{},
+                 std::make_index_sequence<10 - kMaxArgs>{},
                  args_type{std::forward<Args>(arg)...});
   }
 
   template <std::size_t... arg_id, std::size_t... excess_id>
-  R Apply(IndexSequence<arg_id...>, IndexSequence<excess_id...>,
+  R Apply(std::index_sequence<arg_id...>, std::index_sequence<excess_id...>,
           const args_type& args) const {
     // Impl need not be specific to the signature of action being implemented;
     // only the implementing function body needs to have all of the specific
@@ -2149,9 +2174,9 @@ template <typename F, typename Impl>
 }
 
 #define GMOCK_INTERNAL_ARG_UNUSED(i, data, el) \
-  , const arg##i##_type& arg##i GTEST_ATTRIBUTE_UNUSED_
-#define GMOCK_ACTION_ARG_TYPES_AND_NAMES_UNUSED_                 \
-  const args_type& args GTEST_ATTRIBUTE_UNUSED_ GMOCK_PP_REPEAT( \
+  , GTEST_INTERNAL_ATTRIBUTE_MAYBE_UNUSED const arg##i##_type& arg##i
+#define GMOCK_ACTION_ARG_TYPES_AND_NAMES_UNUSED_                               \
+  GTEST_INTERNAL_ATTRIBUTE_MAYBE_UNUSED const args_type& args GMOCK_PP_REPEAT( \
       GMOCK_INTERNAL_ARG_UNUSED, , 10)
 
 #define GMOCK_INTERNAL_ARG(i, data, el) , const arg##i##_type& arg##i
@@ -2291,8 +2316,6 @@ template <typename F, typename Impl>
 
 }  // namespace testing
 
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
+GTEST_DISABLE_MSC_WARNINGS_POP_()  // 4100
 
 #endif  // GOOGLEMOCK_INCLUDE_GMOCK_GMOCK_ACTIONS_H_

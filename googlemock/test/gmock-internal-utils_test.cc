@@ -40,6 +40,7 @@
 #include <memory>
 #include <sstream>
 #include <string>
+#include <tuple>
 #include <vector>
 
 #include "gmock/gmock.h"
@@ -56,7 +57,7 @@
 #include "src/gtest-internal-inl.h"
 #undef GTEST_IMPLEMENTATION_
 
-#if GTEST_OS_CYGWIN
+#ifdef GTEST_OS_CYGWIN
 #include <sys/types.h>  // For ssize_t. NOLINT
 #endif
 
@@ -167,7 +168,7 @@ TEST(KindOfTest, Integer) {
   EXPECT_EQ(kInteger, GMOCK_KIND_OF_(unsigned long long));  // NOLINT
   EXPECT_EQ(kInteger, GMOCK_KIND_OF_(wchar_t));             // NOLINT
   EXPECT_EQ(kInteger, GMOCK_KIND_OF_(size_t));              // NOLINT
-#if GTEST_OS_LINUX || GTEST_OS_MAC || GTEST_OS_CYGWIN
+#if defined(GTEST_OS_LINUX) || defined(GTEST_OS_MAC) || defined(GTEST_OS_CYGWIN)
   // ssize_t is not defined on Windows and possibly some other OSes.
   EXPECT_EQ(kInteger, GMOCK_KIND_OF_(ssize_t));  // NOLINT
 #endif

@@ -39,7 +39,7 @@ gmock_output_test.py
 
 """
 
-from io import open    # pylint: disable=redefined-builtin, g-importing-member
+from io import open  # pylint: disable=redefined-builtin, g-importing-member
 import os
 import re
 import sys
@@ -159,15 +159,22 @@ class GMockOutputTest(gmock_test_utils.TestCase):
     golden_file = open(GOLDEN_PATH, 'rb')
     golden = golden_file.read().decode('utf-8')
     golden_file.close()
+    # On Windows the repository might have been checked out with \r\n line
+    # endings, so normalize it here.
+    golden = ToUnixLineEnding(golden)
 
     # The normalized output should match the golden file.
     self.assertEqual(golden, output)
 
     # The raw output should contain 2 leaked mock object errors for
     # test GMockOutputTest.CatchesLeakedMocks.
-    self.assertEqual(['GMockOutputTest.CatchesLeakedMocks',
-                      'GMockOutputTest.CatchesLeakedMocks'],
-                     leaky_tests)
+    self.assertEqual(
+        [
+            'GMockOutputTest.CatchesLeakedMocks',
+            'GMockOutputTest.CatchesLeakedMocks',
+        ],
+        leaky_tests,
+    )
 
 
 if __name__ == '__main__':

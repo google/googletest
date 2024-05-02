@@ -42,6 +42,7 @@ def normalize(obj):
      Normalized output without any references to transient information that may
      change from run to run.
   """
+
   def _normalize(key, value):
     if key == 'time':
       return re.sub(r'^\d+(\.\d+)?s$', '*', value)
@@ -50,10 +51,14 @@ def normalize(obj):
     elif key == 'failure':
       value = re.sub(r'^.*[/\\](.*:)\d+\n', '\\1*\n', value)
       return re.sub(r'Stack trace:\n(.|\n)*', 'Stack trace:\n*', value)
+    elif key == 'message':
+      value = re.sub(r'^.*[/\\](.*:)\d+\n', '\\1*\n', value)
+      return re.sub(r'Stack trace:\n(.|\n)*', 'Stack trace:\n*', value)
     elif key == 'file':
       return re.sub(r'^.*[/\\](.*)', '\\1', value)
     else:
       return normalize(value)
+
   if isinstance(obj, dict):
     return {k: _normalize(k, v) for k, v in obj.items()}
   if isinstance(obj, list):

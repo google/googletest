@@ -40,93 +40,74 @@ GTEST_OUTPUT_1_TEST = 'gtest_xml_outfile1_test_'
 GTEST_OUTPUT_2_TEST = 'gtest_xml_outfile2_test_'
 
 EXPECTED_1 = {
-    u'tests':
-        1,
-    u'failures':
-        0,
-    u'disabled':
-        0,
-    u'errors':
-        0,
-    u'time':
-        u'*',
-    u'timestamp':
-        u'*',
-    u'name':
-        u'AllTests',
-    u'testsuites': [{
-        u'name':
-            u'PropertyOne',
-        u'tests':
-            1,
-        u'failures':
-            0,
-        u'disabled':
-            0,
-        u'errors':
-            0,
-        u'time':
-            u'*',
-        u'timestamp':
-            u'*',
-        u'testsuite': [{
-            u'name': u'TestSomeProperties',
-            u'file': u'gtest_xml_outfile1_test_.cc',
-            u'line': 41,
-            u'status': u'RUN',
-            u'result': u'COMPLETED',
-            u'time': u'*',
-            u'timestamp': u'*',
-            u'classname': u'PropertyOne',
-            u'SetUpProp': u'1',
-            u'TestSomeProperty': u'1',
-            u'TearDownProp': u'1',
+    'tests': 1,
+    'failures': 0,
+    'disabled': 0,
+    'errors': 0,
+    'time': '*',
+    'timestamp': '*',
+    'name': 'AllTests',
+    'testsuites': [{
+        'name': 'PropertyOne',
+        'tests': 1,
+        'failures': 0,
+        'disabled': 0,
+        'errors': 0,
+        'time': '*',
+        'timestamp': '*',
+        'testsuite': [{
+            'name': 'TestSomeProperties',
+            'file': 'gtest_xml_outfile1_test_.cc',
+            'line': 41,
+            'status': 'RUN',
+            'result': 'COMPLETED',
+            'time': '*',
+            'timestamp': '*',
+            'classname': 'PropertyOne',
+            'SetUpProp': '1',
+            'TestSomeProperty': '1',
+            'TearDownProp': '1',
         }],
     }],
 }
 
 EXPECTED_2 = {
-    u'tests':
-        1,
-    u'failures':
-        0,
-    u'disabled':
-        0,
-    u'errors':
-        0,
-    u'time':
-        u'*',
-    u'timestamp':
-        u'*',
-    u'name':
-        u'AllTests',
-    u'testsuites': [{
-        u'name':
-            u'PropertyTwo',
-        u'tests':
-            1,
-        u'failures':
-            0,
-        u'disabled':
-            0,
-        u'errors':
-            0,
-        u'time':
-            u'*',
-        u'timestamp':
-            u'*',
-        u'testsuite': [{
-            u'name': u'TestSomeProperties',
-            u'file': u'gtest_xml_outfile2_test_.cc',
-            u'line': 41,
-            u'status': u'RUN',
-            u'result': u'COMPLETED',
-            u'timestamp': u'*',
-            u'time': u'*',
-            u'classname': u'PropertyTwo',
-            u'SetUpProp': u'2',
-            u'TestSomeProperty': u'2',
-            u'TearDownProp': u'2',
+    'tests': 1,
+    'failures': 0,
+    'disabled': 0,
+    'errors': 0,
+    'time': '*',
+    'timestamp': '*',
+    'name': 'AllTests',
+    'testsuites': [{
+        'name': 'PropertyTwo',
+        'tests': 1,
+        'failures': 0,
+        'disabled': 0,
+        'errors': 0,
+        'time': '*',
+        'timestamp': '*',
+        'testsuite': [{
+            'name': 'TestInt64ConvertibleProperties',
+            'file': 'gtest_xml_outfile2_test_.cc',
+            'line': 43,
+            'status': 'RUN',
+            'result': 'COMPLETED',
+            'timestamp': '*',
+            'time': '*',
+            'classname': 'PropertyTwo',
+            'SetUpProp': '2',
+            'TestFloatProperty': '3.25',
+            'TestDoubleProperty': '4.75',
+            'TestSizetProperty': '5',
+            'TestBoolProperty': 'true',
+            'TestCharProperty': 'A',
+            'TestInt16Property': '6',
+            'TestInt32Property': '7',
+            'TestInt64Property': '8',
+            'TestEnumProperty': '9',
+            'TestAtomicIntProperty': '10',
+            'TearDownProp': '2',
         }],
     }],
 }
@@ -139,8 +120,9 @@ class GTestJsonOutFilesTest(gtest_test_utils.TestCase):
     # We want the trailing '/' that the last "" provides in os.path.join, for
     # telling Google Test to create an output directory instead of a single file
     # for xml output.
-    self.output_dir_ = os.path.join(gtest_test_utils.GetTempDir(),
-                                    GTEST_OUTPUT_SUBDIR, '')
+    self.output_dir_ = os.path.join(
+        gtest_test_utils.GetTempDir(), GTEST_OUTPUT_SUBDIR, ''
+    )
     self.DeleteFilesAndDir()
 
   def tearDown(self):
@@ -169,17 +151,20 @@ class GTestJsonOutFilesTest(gtest_test_utils.TestCase):
   def _TestOutFile(self, test_name, expected):
     gtest_prog_path = gtest_test_utils.GetTestExecutablePath(test_name)
     command = [gtest_prog_path, '--gtest_output=json:%s' % self.output_dir_]
-    p = gtest_test_utils.Subprocess(command,
-                                    working_dir=gtest_test_utils.GetTempDir())
-    self.assert_(p.exited)
-    self.assertEquals(0, p.exit_code)
+    p = gtest_test_utils.Subprocess(
+        command, working_dir=gtest_test_utils.GetTempDir()
+    )
+    self.assertTrue(p.exited)
+    self.assertEqual(0, p.exit_code)
 
     output_file_name1 = test_name + '.json'
     output_file1 = os.path.join(self.output_dir_, output_file_name1)
     output_file_name2 = 'lt-' + output_file_name1
     output_file2 = os.path.join(self.output_dir_, output_file_name2)
-    self.assert_(os.path.isfile(output_file1) or os.path.isfile(output_file2),
-                 output_file1)
+    self.assertTrue(
+        os.path.isfile(output_file1) or os.path.isfile(output_file2),
+        output_file1,
+    )
 
     if os.path.isfile(output_file1):
       with open(output_file1) as f:

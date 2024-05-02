@@ -32,19 +32,14 @@
 // This file verifies Google Test event listeners receive events at the
 // right times.
 
+#include <string>
 #include <vector>
 
 #include "gtest/gtest.h"
 #include "gtest/internal/custom/gtest.h"
 
 using ::testing::AddGlobalTestEnvironment;
-using ::testing::Environment;
 using ::testing::InitGoogleTest;
-using ::testing::Test;
-using ::testing::TestEventListener;
-using ::testing::TestInfo;
-using ::testing::TestPartResult;
-using ::testing::TestSuite;
 using ::testing::UnitTest;
 
 // Used by tests to register their events.
@@ -278,7 +273,7 @@ int main(int argc, char** argv) {
 
   AddGlobalTestEnvironment(new EnvironmentInvocationCatcher);
 
-  GTEST_CHECK_(events.size() == 0)
+  GTEST_CHECK_(events.empty())
       << "AddGlobalTestEnvironment should not generate any events itself.";
 
   GTEST_FLAG_SET(repeat, 2);

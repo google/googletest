@@ -40,7 +40,7 @@
 // clash with ::testing::Mock.
 class Mock {
  public:
-  Mock() {}
+  Mock() = default;
 
   MOCK_METHOD0(DoThis, void());
 
@@ -78,7 +78,7 @@ class CallsMockMethodInDestructor {
 
 class Foo {
  public:
-  virtual ~Foo() {}
+  virtual ~Foo() = default;
 
   virtual void DoThis() = 0;
   virtual int DoThat(bool flag) = 0;
@@ -86,7 +86,7 @@ class Foo {
 
 class MockFoo : public Foo {
  public:
-  MockFoo() {}
+  MockFoo() = default;
   void Delete() { delete this; }
 
   MOCK_METHOD0(DoThis, void());
@@ -109,7 +109,7 @@ class MockBar {
            (a10 ? 'T' : 'F');
   }
 
-  virtual ~MockBar() {}
+  virtual ~MockBar() = default;
 
   const std::string& str() const { return str_; }
 

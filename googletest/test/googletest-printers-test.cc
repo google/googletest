@@ -37,13 +37,16 @@
 #include <cstring>
 #include <deque>
 #include <forward_list>
+#include <functional>
 #include <limits>
 #include <list>
 #include <map>
 #include <memory>
+#include <ostream>
 #include <set>
 #include <sstream>
 #include <string>
+#include <tuple>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
@@ -51,6 +54,15 @@
 
 #include "gtest/gtest-printers.h"
 #include "gtest/gtest.h"
+#include "gtest/internal/gtest-port.h"
+
+#ifdef GTEST_HAS_ABSL
+#include "absl/strings/str_format.h"
+#endif
+
+#if GTEST_INTERNAL_HAS_STD_SPAN
+#include <span>  // NOLINT
+#endif  // GTEST_INTERNAL_HAS_STD_SPAN
 
 // Some user-defined types for testing the universal value printer.
 
@@ -105,7 +117,7 @@ class UnprintableTemplateInGlobal {
 // A user-defined streamable type in the global namespace.
 class StreamableInGlobal {
  public:
-  virtual ~StreamableInGlobal() {}
+  virtual ~StreamableInGlobal() = default;
 };
 
 inline void operator<<(::std::ostream& os, const StreamableInGlobal& /* x */) {
@@ -115,6 +127,19 @@ inline void operator<<(::std::ostream& os, const StreamableInGlobal& /* x */) {
 void operator<<(::std::ostream& os, const StreamableInGlobal* /* x */) {
   os << "StreamableInGlobal*";
 }
+
+#ifdef GTEST_HAS_ABSL
+// A user-defined type with AbslStringify
+struct Point {
+  template <typename Sink>
+  friend void AbslStringify(Sink& sink, const Point& p) {
+    absl::Format(&sink, "(%d, %d)", p.x, p.y);
+  }
+
+  int x = 10;
+  int y = 20;
+};
+#endif
 
 namespace foo {
 
@@ -193,6 +218,11 @@ OutputStream& operator<<(OutputStream& os,
   return os;
 }
 
+struct StreamableInLocal {};
+void operator<<(::std::ostream& os, const StreamableInLocal& /* x */) {
+  os << "StreamableInLocal";
+}
+
 // A user-defined streamable but recursively-defined container type in
 // a user namespace, it mimics therefore std::filesystem::path or
 // boost::filesystem::path.
@@ -208,7 +238,7 @@ class PathLike {
   using value_type = char;
   using const_iterator = iterator;
 
-  PathLike() {}
+  PathLike() = default;
 
   iterator begin() const { return iterator(); }
   iterator end() const { return iterator(); }
@@ -260,7 +290,6 @@ using ::std::set;
 using ::std::vector;
 using ::testing::PrintToString;
 using ::testing::internal::FormatForComparisonFailureMessage;
-using ::testing::internal::ImplicitCast_;
 using ::testing::internal::NativeArray;
 using ::testing::internal::RelationToSourceReference;
 using ::testing::internal::Strings;
@@ -310,6 +339,11 @@ TEST(PrintEnumTest, EnumWithPrintTo) {
   EXPECT_EQ("invalid", Print(static_cast<EnumWithPrintTo>(0)));
 }
 
+#ifdef GTEST_HAS_ABSL
+// Tests printing a class that defines AbslStringify
+TEST(PrintClassTest, AbslStringify) { EXPECT_EQ("(10, 20)", Print(Point())); }
+#endif
+
 // Tests printing a class implicitly convertible to BiggestInt.
 
 TEST(PrintClassTest, BiggestIntConvertible) {
@@ -354,7 +388,7 @@ TEST(PrintCharTest, Char16) { EXPECT_EQ("U+0041", Print(u'A')); }
 
 TEST(PrintCharTest, Char32) { EXPECT_EQ("U+0041", Print(U'A')); }
 
-#ifdef __cpp_char8_t
+#ifdef __cpp_lib_char8_t
 TEST(PrintCharTest, Char8) { EXPECT_EQ("U+0041", Print(u8'A')); }
 #endif
 
@@ -407,7 +441,7 @@ TEST(PrintBuiltInTypeTest, Integer) {
             Print(std::numeric_limits<uint64_t>::max()));  // uint64
   EXPECT_EQ("-9223372036854775808",
             Print(std::numeric_limits<int64_t>::min()));  // int64
-#ifdef __cpp_char8_t
+#ifdef __cpp_lib_char8_t
   EXPECT_EQ("U+0000",
             Print(std::numeric_limits<char8_t>::min()));  // char8_t
   EXPECT_EQ("U+00FF",
@@ -426,7 +460,7 @@ TEST(PrintBuiltInTypeTest, Integer) {
 // Size types.
 TEST(PrintBuiltInTypeTest, Size_t) {
   EXPECT_EQ("1", Print(sizeof('a')));  // size_t.
-#if !GTEST_OS_WINDOWS
+#ifndef GTEST_OS_WINDOWS
   // Windows has no ssize_t type.
   EXPECT_EQ("-2", Print(static_cast<ssize_t>(-2)));  // ssize_t.
 #endif                                               // !GTEST_OS_WINDOWS
@@ -452,7 +486,15 @@ TEST(PrintBuiltInTypeTest, Int128) {
 
 // Floating-points.
 TEST(PrintBuiltInTypeTest, FloatingPoints) {
-  EXPECT_EQ("1.5", Print(1.5f));   // float
+  // float (32-bit precision)
+  EXPECT_EQ("1.5", Print(1.5f));
+
+  EXPECT_EQ("1.0999999", Print(1.09999990f));
+  EXPECT_EQ("1.1", Print(1.10000002f));
+  EXPECT_EQ("1.10000014", Print(1.10000014f));
+  EXPECT_EQ("9e+09", Print(9e9f));
+
+  // double
   EXPECT_EQ("-2.5", Print(-2.5));  // double
 }
 
@@ -505,7 +547,7 @@ TEST(PrintCStringTest, EscapesProperly) {
             Print(p));
 }
 
-#ifdef __cpp_char8_t
+#ifdef __cpp_lib_char8_t
 // const char8_t*.
 TEST(PrintU8StringTest, Const) {
   const char8_t* p = u8"界";
@@ -734,7 +776,7 @@ AssertionResult HasPrefix(const StringType& str, const StringType& prefix) {
 
 struct Foo {
  public:
-  virtual ~Foo() {}
+  virtual ~Foo() = default;
   int MyMethod(char x) { return x + 1; }
   virtual char MyVirtualMethod(int /* n */) { return 'a'; }
 
@@ -802,7 +844,7 @@ TEST(PrintArrayTest, CharArrayWithTerminatingNul) {
   EXPECT_EQ("\"\\0Hi\"", PrintArrayHelper(a));
 }
 
-#ifdef __cpp_char8_t
+#ifdef __cpp_lib_char8_t
 // char_t array without terminating NUL.
 TEST(PrintArrayTest, Char8ArrayWithNoTerminatingNul) {
   // Array a contains '\0' in the middle and doesn't end with '\0'.
@@ -922,7 +964,7 @@ TEST(PrintWideStringTest, StringAmbiguousHex) {
 }
 #endif  // GTEST_HAS_STD_WSTRING
 
-#ifdef __cpp_char8_t
+#ifdef __cpp_lib_char8_t
 TEST(PrintStringTest, U8String) {
   std::u8string str = u8"Hello, 世界";
   EXPECT_EQ(str, str);  // Verify EXPECT_EQ compiles with this type.
@@ -1140,6 +1182,17 @@ TEST(PrintStlContainerTest, Vector) {
   v.push_back(1);
   v.push_back(2);
   EXPECT_EQ("{ 1, 2 }", Print(v));
+}
+
+TEST(PrintStlContainerTest, StdSpan) {
+#if GTEST_INTERNAL_HAS_STD_SPAN
+  int a[] = {3, 6, 5};
+  std::span<int> s = a;
+
+  EXPECT_EQ("{ 3, 6, 5 }", Print(s));
+#else
+  GTEST_SKIP() << "Does not have std::span.";
+#endif  // GTEST_INTERNAL_HAS_STD_SPAN
 }
 
 TEST(PrintStlContainerTest, LongSequence) {
@@ -1604,6 +1657,29 @@ TEST(PrintToStringTest, ContainsNonLatin) {
                           "\n    As Text: \"From ä — ẑ\"");
 }
 
+TEST(PrintToStringTest, PrintStreamableInLocal) {
+  EXPECT_STREQ("StreamableInLocal",
+               PrintToString(foo::StreamableInLocal()).c_str());
+}
+
+TEST(PrintToStringTest, PrintReferenceToStreamableInLocal) {
+  foo::StreamableInLocal s;
+  std::reference_wrapper<foo::StreamableInLocal> r(s);
+  EXPECT_STREQ("StreamableInLocal", PrintToString(r).c_str());
+}
+
+TEST(PrintToStringTest, PrintReferenceToStreamableInGlobal) {
+  StreamableInGlobal s;
+  std::reference_wrapper<StreamableInGlobal> r(s);
+  EXPECT_STREQ("StreamableInGlobal", PrintToString(r).c_str());
+}
+
+#ifdef GTEST_HAS_ABSL
+TEST(PrintToStringTest, AbslStringify) {
+  EXPECT_PRINT_TO_STRING_(Point(), "(10, 20)");
+}
+#endif
+
 TEST(IsValidUTF8Test, IllFormedUTF8) {
   // The following test strings are ill-formed UTF-8 and are printed
   // as hex only (or ASCII, in case of ASCII bytes) because IsValidUTF8() is
@@ -1765,7 +1841,8 @@ TEST(UniversalPrintTest, SmartPointers) {
   std::shared_ptr<int> p3(new int(1979));
   EXPECT_EQ("(ptr = " + PrintPointer(p3.get()) + ", value = 1979)",
             PrintToString(p3));
-#if __cpp_lib_shared_ptr_arrays >= 201611L
+#if defined(__cpp_lib_shared_ptr_arrays) && \
+    (__cpp_lib_shared_ptr_arrays >= 201611L)
   std::shared_ptr<int[]> p4(new int[2]);
   EXPECT_EQ("(" + PrintPointer(p4.get()) + ")", PrintToString(p4));
 #endif
@@ -1784,7 +1861,8 @@ TEST(UniversalPrintTest, SmartPointers) {
   EXPECT_EQ("(nullptr)", PrintToString(std::shared_ptr<const int>()));
   EXPECT_EQ("(nullptr)", PrintToString(std::shared_ptr<volatile int>()));
   EXPECT_EQ("(nullptr)", PrintToString(std::shared_ptr<volatile const int>()));
-#if __cpp_lib_shared_ptr_arrays >= 201611L
+#if defined(__cpp_lib_shared_ptr_arrays) && \
+    (__cpp_lib_shared_ptr_arrays >= 201611L)
   EXPECT_EQ("(nullptr)", PrintToString(std::shared_ptr<int[]>()));
   EXPECT_EQ("(nullptr)", PrintToString(std::shared_ptr<const int[]>()));
   EXPECT_EQ("(nullptr)", PrintToString(std::shared_ptr<volatile int[]>()));

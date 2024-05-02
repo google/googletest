@@ -1,8 +1,7 @@
 # Mocking Reference
 
 This page lists the facilities provided by GoogleTest for creating and working
-with mock objects. To use them, include the header
-`gmock/gmock.h`.
+with mock objects. To use them, add `#include <gmock/gmock.h>`.
 
 ## Macros {#macros}
 

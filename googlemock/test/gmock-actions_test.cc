@@ -31,33 +31,33 @@
 //
 // This file tests the built-in actions.
 
-// Silence C4100 (unreferenced formal parameter) and C4503 (decorated name
-// length exceeded) for MSVC.
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4100)
-#pragma warning(disable : 4503)
-#if _MSC_VER == 1900
-// and silence C4800 (C4800: 'int *const ': forcing value
-// to bool 'true' or 'false') for MSVC 15
-#pragma warning(disable : 4800)
-#endif
-#endif
-
 #include "gmock/gmock-actions.h"
 
 #include <algorithm>
 #include <functional>
 #include <iterator>
 #include <memory>
+#include <sstream>
 #include <string>
+#include <tuple>
 #include <type_traits>
+#include <utility>
 #include <vector>
 
 #include "gmock/gmock.h"
 #include "gmock/internal/gmock-port.h"
 #include "gtest/gtest-spi.h"
 #include "gtest/gtest.h"
+#include "gtest/internal/gtest-port.h"
+
+// Silence C4100 (unreferenced formal parameter) and C4503 (decorated name
+// length exceeded) for MSVC.
+GTEST_DISABLE_MSC_WARNINGS_PUSH_(4100 4503)
+#if defined(_MSC_VER) && (_MSC_VER == 1900)
+// and silence C4800 (C4800: 'int *const ': forcing value
+// to bool 'true' or 'false') for MSVC 15
+GTEST_DISABLE_MSC_WARNINGS_PUSH_(4800)
+#endif
 
 namespace testing {
 namespace {
@@ -222,7 +222,8 @@ TEST(TypeTraits, IsInvocableRV) {
   // In C++17 and above, where it's guaranteed that functions can return
   // non-moveable objects, everything should work fine for non-moveable rsult
   // types too.
-#if defined(__cplusplus) && __cplusplus >= 201703L
+#if defined(GTEST_INTERNAL_CPLUSPLUS_LANG) && \
+    GTEST_INTERNAL_CPLUSPLUS_LANG >= 201703L
   {
     struct NonMoveable {
       NonMoveable() = default;
@@ -448,7 +449,7 @@ TEST(DefaultValueTest, GetWorksForMoveOnlyIfSet) {
   EXPECT_TRUE(DefaultValue<std::unique_ptr<int>>::Exists());
   EXPECT_TRUE(DefaultValue<std::unique_ptr<int>>::Get() == nullptr);
   DefaultValue<std::unique_ptr<int>>::SetFactory(
-      [] { return std::unique_ptr<int>(new int(42)); });
+      [] { return std::make_unique<int>(42); });
   EXPECT_TRUE(DefaultValue<std::unique_ptr<int>>::Exists());
   std::unique_ptr<int> i = DefaultValue<std::unique_ptr<int>>::Get();
   EXPECT_EQ(42, *i);
@@ -684,7 +685,7 @@ TEST(ReturnTest, SupportsReferenceLikeReturnType) {
   // A reference wrapper for std::vector<int>, implicitly convertible from it.
   struct Result {
     const std::vector<int>* v;
-    Result(const std::vector<int>& v) : v(&v) {}  // NOLINT
+    Result(const std::vector<int>& vec) : v(&vec) {}  // NOLINT
   };
 
   // Set up an action for a mock function that returns the reference wrapper
@@ -717,7 +718,7 @@ TEST(ReturnTest, PrefersConversionOperator) {
   struct Out {
     int x;
 
-    explicit Out(const int x) : x(x) {}
+    explicit Out(const int val) : x(val) {}
     explicit Out(const In&) : x(0) {}
   };
 
@@ -986,7 +987,7 @@ TEST(ReturnRoundRobinTest, WorksForVector) {
 
 class MockClass {
  public:
-  MockClass() {}
+  MockClass() = default;
 
   MOCK_METHOD1(IntFunc, int(bool flag));  // NOLINT
   MOCK_METHOD0(Foo, MyNonDefaultConstructible());
@@ -1410,7 +1411,7 @@ TEST(DoAll, ProvidesLvalueReferencesToInitialActions) {
       void operator()(Obj&&) const { FAIL() << "Unexpected call"; }
     };
 
-    MockFunction<void(Obj &&)> mock;
+    MockFunction<void(Obj&&)> mock;
     EXPECT_CALL(mock, Call)
         .WillOnce(DoAll(InitialAction{}, InitialAction{}, [](Obj&&) {}))
         .WillRepeatedly(DoAll(InitialAction{}, InitialAction{}, [](Obj&&) {}));
@@ -1438,7 +1439,7 @@ TEST(DoAll, ProvidesLvalueReferencesToInitialActions) {
       void operator()(Obj&) && {}
     };
 
-    MockFunction<void(Obj &&)> mock;
+    MockFunction<void(Obj&&)> mock;
     EXPECT_CALL(mock, Call)
         .WillOnce(DoAll(InitialAction{}, InitialAction{}, [](Obj&&) {}));
 
@@ -1596,7 +1597,7 @@ TEST(WithArgsTest, RefQualifiedInnerAction) {
   EXPECT_EQ(19, mock.AsStdFunction()(0, 17));
 }
 
-#if !GTEST_OS_WINDOWS_MOBILE
+#ifndef GTEST_OS_WINDOWS_MOBILE
 
 class SetErrnoAndReturnTest : public testing::Test {
  protected:
@@ -1755,9 +1756,7 @@ TEST(ReturnNewTest, ConstructorThatTakes10Arguments) {
   delete c;
 }
 
-std::unique_ptr<int> UniquePtrSource() {
-  return std::unique_ptr<int>(new int(19));
-}
+std::unique_ptr<int> UniquePtrSource() { return std::make_unique<int>(19); }
 
 std::vector<std::unique_ptr<int>> VectorUniquePtrSource() {
   std::vector<std::unique_ptr<int>> out;
@@ -1806,7 +1805,7 @@ TEST(MockMethodTest, CanReturnMoveOnlyValue_Invoke) {
 
   // Check default value
   DefaultValue<std::unique_ptr<int>>::SetFactory(
-      [] { return std::unique_ptr<int>(new int(42)); });
+      [] { return std::make_unique<int>(42); });
   EXPECT_EQ(42, *mock.MakeUnique());
 
   EXPECT_CALL(mock, MakeUnique()).WillRepeatedly(Invoke(UniquePtrSource));
@@ -1826,7 +1825,7 @@ TEST(MockMethodTest, CanReturnMoveOnlyValue_Invoke) {
 
 TEST(MockMethodTest, CanTakeMoveOnlyValue) {
   MockClass mock;
-  auto make = [](int i) { return std::unique_ptr<int>(new int(i)); };
+  auto make = [](int i) { return std::make_unique<int>(i); };
 
   EXPECT_CALL(mock, TakeUnique(_)).WillRepeatedly([](std::unique_ptr<int> i) {
     return *i;
@@ -2057,9 +2056,7 @@ struct Double {
   }
 };
 
-std::unique_ptr<int> UniqueInt(int i) {
-  return std::unique_ptr<int>(new int(i));
-}
+std::unique_ptr<int> UniqueInt(int i) { return std::make_unique<int>(i); }
 
 TEST(FunctorActionTest, ActionFromFunction) {
   Action<int(int, int&, int*)> a = &Add;
@@ -2165,3 +2162,8 @@ TEST(ActionMacro, LargeArity) {
 
 }  // namespace
 }  // namespace testing
+
+#if defined(_MSC_VER) && (_MSC_VER == 1900)
+GTEST_DISABLE_MSC_WARNINGS_POP_()  // 4800
+#endif
+GTEST_DISABLE_MSC_WARNINGS_POP_()  // 4100 4503

@@ -64,6 +64,7 @@ cc_test(
             "googletest-global-environment-unittest_.cc",
             "googletest-break-on-failure-unittest_.cc",
             "googletest-listener-test.cc",
+            "googletest-message-test.cc",
             "googletest-output-test_.cc",
             "googletest-list-tests-unittest_.cc",
             "googletest-shuffle-test_.cc",

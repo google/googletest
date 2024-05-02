@@ -39,7 +39,7 @@
 // The prime table interface.
 class PrimeTable {
  public:
-  virtual ~PrimeTable() {}
+  virtual ~PrimeTable() = default;
 
   // Returns true if and only if n is a prime number.
   virtual bool IsPrime(int n) const = 0;
@@ -78,8 +78,9 @@ class PreCalculatedPrimeTable : public PrimeTable {
  public:
   // 'max' specifies the maximum number the prime table holds.
   explicit PreCalculatedPrimeTable(int max)
-      : is_prime_size_(max + 1), is_prime_(new bool[max + 1]) {
-    CalculatePrimesUpTo(max);
+      : is_prime_size_(std::max(1, max + 1)),
+        is_prime_(new bool[static_cast<size_t>(is_prime_size_)]) {
+    CalculatePrimesUpTo(is_prime_size_ - 1);
   }
   ~PreCalculatedPrimeTable() override { delete[] is_prime_; }
 

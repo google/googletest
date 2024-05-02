@@ -1,7 +1,7 @@
 # Assertions Reference
 
 This page lists the assertion macros provided by GoogleTest for verifying code
-behavior. To use them, include the header `gtest/gtest.h`.
+behavior. To use them, add `#include <gtest/gtest.h>`.
 
 The majority of the macros listed below come as a pair with an `EXPECT_` variant
 and an `ASSERT_` variant. Upon failure, `EXPECT_` macros generate nonfatal
@@ -88,7 +88,7 @@ For example, the following code verifies that the string `value1` starts with
 10:
 
 ```cpp
-#include "gmock/gmock.h"
+#include <gmock/gmock.h>
 
 using ::testing::AllOf;
 using ::testing::Gt;
@@ -515,7 +515,7 @@ Verifies that *`expression`* is a success `HRESULT`.
 ### EXPECT_HRESULT_FAILED {#EXPECT_HRESULT_FAILED}
 
 `EXPECT_HRESULT_FAILED(`*`expression`*`)` \
-`EXPECT_HRESULT_FAILED(`*`expression`*`)`
+`ASSERT_HRESULT_FAILED(`*`expression`*`)`
 
 Verifies that *`expression`* is a failure `HRESULT`.
 

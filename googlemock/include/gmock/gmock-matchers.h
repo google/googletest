@@ -257,7 +257,10 @@
 
 #include <algorithm>
 #include <cmath>
+#include <exception>
+#include <functional>
 #include <initializer_list>
+#include <ios>
 #include <iterator>
 #include <limits>
 #include <memory>
@@ -487,12 +490,12 @@ class MatcherBaseImpl<Derived<Ts...>> {
 
   template <typename F>
   operator ::testing::Matcher<F>() const {  // NOLINT(runtime/explicit)
-    return Apply<F>(MakeIndexSequence<sizeof...(Ts)>{});
+    return Apply<F>(std::make_index_sequence<sizeof...(Ts)>{});
   }
 
  private:
   template <typename F, std::size_t... tuple_ids>
-  ::testing::Matcher<F> Apply(IndexSequence<tuple_ids...>) const {
+  ::testing::Matcher<F> Apply(std::index_sequence<tuple_ids...>) const {
     return ::testing::Matcher<F>(
         new typename Derived<Ts...>::template gmock_Impl<F>(
             std::get<tuple_ids>(params_)...));
@@ -561,7 +564,7 @@ namespace internal {
 // If the explanation is not empty, prints it to the ostream.
 inline void PrintIfNotEmpty(const std::string& explanation,
                             ::std::ostream* os) {
-  if (explanation != "" && os != nullptr) {
+  if (!explanation.empty() && os != nullptr) {
     *os << ", " << explanation;
   }
 }
@@ -1045,7 +1048,7 @@ class StartsWithMatcher {
   template <typename MatcheeStringType>
   bool MatchAndExplain(const MatcheeStringType& s,
                        MatchResultListener* /* listener */) const {
-    const StringType& s2(s);
+    const StringType s2(s);
     return s2.length() >= prefix_.length() &&
            s2.substr(0, prefix_.length()) == prefix_;
   }
@@ -1099,7 +1102,7 @@ class EndsWithMatcher {
   template <typename MatcheeStringType>
   bool MatchAndExplain(const MatcheeStringType& s,
                        MatchResultListener* /* listener */) const {
-    const StringType& s2(s);
+    const StringType s2(s);
     return s2.length() >= suffix_.length() &&
            s2.substr(s2.length() - suffix_.length()) == suffix_;
   }
@@ -1198,27 +1201,27 @@ class PairMatchBase {
   };
 };
 
-class Eq2Matcher : public PairMatchBase<Eq2Matcher, AnyEq> {
+class Eq2Matcher : public PairMatchBase<Eq2Matcher, std::equal_to<>> {
  public:
   static const char* Desc() { return "an equal pair"; }
 };
-class Ne2Matcher : public PairMatchBase<Ne2Matcher, AnyNe> {
+class Ne2Matcher : public PairMatchBase<Ne2Matcher, std::not_equal_to<>> {
  public:
   static const char* Desc() { return "an unequal pair"; }
 };
-class Lt2Matcher : public PairMatchBase<Lt2Matcher, AnyLt> {
+class Lt2Matcher : public PairMatchBase<Lt2Matcher, std::less<>> {
  public:
   static const char* Desc() { return "a pair where the first < the second"; }
 };
-class Gt2Matcher : public PairMatchBase<Gt2Matcher, AnyGt> {
+class Gt2Matcher : public PairMatchBase<Gt2Matcher, std::greater<>> {
  public:
   static const char* Desc() { return "a pair where the first > the second"; }
 };
-class Le2Matcher : public PairMatchBase<Le2Matcher, AnyLe> {
+class Le2Matcher : public PairMatchBase<Le2Matcher, std::less_equal<>> {
  public:
   static const char* Desc() { return "a pair where the first <= the second"; }
 };
-class Ge2Matcher : public PairMatchBase<Ge2Matcher, AnyGe> {
+class Ge2Matcher : public PairMatchBase<Ge2Matcher, std::greater_equal<>> {
  public:
   static const char* Desc() { return "a pair where the first >= the second"; }
 };
@@ -1472,6 +1475,7 @@ class SomeOfArrayMatcher {
   operator Matcher<U>() const {  // NOLINT
     using RawU = typename std::decay<U>::type;
     std::vector<Matcher<RawU>> matchers;
+    matchers.reserve(matchers_.size());
     for (const auto& matcher : matchers_) {
       matchers.push_back(MatcherCast<RawU>(matcher));
     }
@@ -2309,11 +2313,11 @@ class SizeIsMatcher {
         : size_matcher_(MatcherCast<SizeType>(size_matcher)) {}
 
     void DescribeTo(::std::ostream* os) const override {
-      *os << "size ";
+      *os << "has a size that ";
       size_matcher_.DescribeTo(os);
     }
     void DescribeNegationTo(::std::ostream* os) const override {
-      *os << "size ";
+      *os << "has a size that ";
       size_matcher_.DescribeNegationTo(os);
     }
 
@@ -2916,26 +2920,27 @@ class EachMatcher {
   const M inner_matcher_;
 };
 
-struct Rank1 {};
-struct Rank0 : Rank1 {};
+// Use go/ranked-overloads for dispatching.
+struct Rank0 {};
+struct Rank1 : Rank0 {};
 
 namespace pair_getters {
 using std::get;
 template <typename T>
-auto First(T& x, Rank1) -> decltype(get<0>(x)) {  // NOLINT
+auto First(T& x, Rank0) -> decltype(get<0>(x)) {  // NOLINT
   return get<0>(x);
 }
 template <typename T>
-auto First(T& x, Rank0) -> decltype((x.first)) {  // NOLINT
+auto First(T& x, Rank1) -> decltype((x.first)) {  // NOLINT
   return x.first;
 }
 
 template <typename T>
-auto Second(T& x, Rank1) -> decltype(get<1>(x)) {  // NOLINT
+auto Second(T& x, Rank0) -> decltype(get<1>(x)) {  // NOLINT
   return get<1>(x);
 }
 template <typename T>
-auto Second(T& x, Rank0) -> decltype((x.second)) {  // NOLINT
+auto Second(T& x, Rank1) -> decltype((x.second)) {  // NOLINT
   return x.second;
 }
 }  // namespace pair_getters
@@ -2961,9 +2966,9 @@ class KeyMatcherImpl : public MatcherInterface<PairType> {
                        MatchResultListener* listener) const override {
     StringMatchResultListener inner_listener;
     const bool match = inner_matcher_.MatchAndExplain(
-        pair_getters::First(key_value, Rank0()), &inner_listener);
+        pair_getters::First(key_value, Rank1()), &inner_listener);
     const std::string explanation = inner_listener.str();
-    if (explanation != "") {
+    if (!explanation.empty()) {
       *listener << "whose first field is a value " << explanation;
     }
     return match;
@@ -3083,18 +3088,18 @@ class PairMatcherImpl : public MatcherInterface<PairType> {
     if (!listener->IsInterested()) {
       // If the listener is not interested, we don't need to construct the
       // explanation.
-      return first_matcher_.Matches(pair_getters::First(a_pair, Rank0())) &&
-             second_matcher_.Matches(pair_getters::Second(a_pair, Rank0()));
+      return first_matcher_.Matches(pair_getters::First(a_pair, Rank1())) &&
+             second_matcher_.Matches(pair_getters::Second(a_pair, Rank1()));
     }
     StringMatchResultListener first_inner_listener;
-    if (!first_matcher_.MatchAndExplain(pair_getters::First(a_pair, Rank0()),
+    if (!first_matcher_.MatchAndExplain(pair_getters::First(a_pair, Rank1()),
                                         &first_inner_listener)) {
       *listener << "whose first field does not match";
       PrintIfNotEmpty(first_inner_listener.str(), listener->stream());
       return false;
     }
     StringMatchResultListener second_inner_listener;
-    if (!second_matcher_.MatchAndExplain(pair_getters::Second(a_pair, Rank0()),
+    if (!second_matcher_.MatchAndExplain(pair_getters::Second(a_pair, Rank1()),
                                          &second_inner_listener)) {
       *listener << "whose second field does not match";
       PrintIfNotEmpty(second_inner_listener.str(), listener->stream());
@@ -3110,12 +3115,12 @@ class PairMatcherImpl : public MatcherInterface<PairType> {
                       const std::string& second_explanation,
                       MatchResultListener* listener) const {
     *listener << "whose both fields match";
-    if (first_explanation != "") {
+    if (!first_explanation.empty()) {
       *listener << ", where the first field is a value " << first_explanation;
     }
-    if (second_explanation != "") {
+    if (!second_explanation.empty()) {
       *listener << ", ";
-      if (first_explanation != "") {
+      if (!first_explanation.empty()) {
         *listener << "and ";
       } else {
         *listener << "where ";
@@ -3147,8 +3152,8 @@ class PairMatcher {
 };
 
 template <typename T, size_t... I>
-auto UnpackStructImpl(const T& t, IndexSequence<I...>, int)
-    -> decltype(std::tie(get<I>(t)...)) {
+auto UnpackStructImpl(const T& t, std::index_sequence<I...>,
+                      int) -> decltype(std::tie(get<I>(t)...)) {
   static_assert(std::tuple_size<T>::value == sizeof...(I),
                 "Number of arguments doesn't match the number of fields.");
   return std::tie(get<I>(t)...);
@@ -3156,97 +3161,97 @@ auto UnpackStructImpl(const T& t, IndexSequence<I...>, int)
 
 #if defined(__cpp_structured_bindings) && __cpp_structured_bindings >= 201606
 template <typename T>
-auto UnpackStructImpl(const T& t, MakeIndexSequence<1>, char) {
+auto UnpackStructImpl(const T& t, std::make_index_sequence<1>, char) {
   const auto& [a] = t;
   return std::tie(a);
 }
 template <typename T>
-auto UnpackStructImpl(const T& t, MakeIndexSequence<2>, char) {
+auto UnpackStructImpl(const T& t, std::make_index_sequence<2>, char) {
   const auto& [a, b] = t;
   return std::tie(a, b);
 }
 template <typename T>
-auto UnpackStructImpl(const T& t, MakeIndexSequence<3>, char) {
+auto UnpackStructImpl(const T& t, std::make_index_sequence<3>, char) {
   const auto& [a, b, c] = t;
   return std::tie(a, b, c);
 }
 template <typename T>
-auto UnpackStructImpl(const T& t, MakeIndexSequence<4>, char) {
+auto UnpackStructImpl(const T& t, std::make_index_sequence<4>, char) {
   const auto& [a, b, c, d] = t;
   return std::tie(a, b, c, d);
 }
 template <typename T>
-auto UnpackStructImpl(const T& t, MakeIndexSequence<5>, char) {
+auto UnpackStructImpl(const T& t, std::make_index_sequence<5>, char) {
   const auto& [a, b, c, d, e] = t;
   return std::tie(a, b, c, d, e);
 }
 template <typename T>
-auto UnpackStructImpl(const T& t, MakeIndexSequence<6>, char) {
+auto UnpackStructImpl(const T& t, std::make_index_sequence<6>, char) {
   const auto& [a, b, c, d, e, f] = t;
   return std::tie(a, b, c, d, e, f);
 }
 template <typename T>
-auto UnpackStructImpl(const T& t, MakeIndexSequence<7>, char) {
+auto UnpackStructImpl(const T& t, std::make_index_sequence<7>, char) {
   const auto& [a, b, c, d, e, f, g] = t;
   return std::tie(a, b, c, d, e, f, g);
 }
 template <typename T>
-auto UnpackStructImpl(const T& t, MakeIndexSequence<8>, char) {
+auto UnpackStructImpl(const T& t, std::make_index_sequence<8>, char) {
   const auto& [a, b, c, d, e, f, g, h] = t;
   return std::tie(a, b, c, d, e, f, g, h);
 }
 template <typename T>
-auto UnpackStructImpl(const T& t, MakeIndexSequence<9>, char) {
+auto UnpackStructImpl(const T& t, std::make_index_sequence<9>, char) {
   const auto& [a, b, c, d, e, f, g, h, i] = t;
   return std::tie(a, b, c, d, e, f, g, h, i);
 }
 template <typename T>
-auto UnpackStructImpl(const T& t, MakeIndexSequence<10>, char) {
+auto UnpackStructImpl(const T& t, std::make_index_sequence<10>, char) {
   const auto& [a, b, c, d, e, f, g, h, i, j] = t;
   return std::tie(a, b, c, d, e, f, g, h, i, j);
 }
 template <typename T>
-auto UnpackStructImpl(const T& t, MakeIndexSequence<11>, char) {
+auto UnpackStructImpl(const T& t, std::make_index_sequence<11>, char) {
   const auto& [a, b, c, d, e, f, g, h, i, j, k] = t;
   return std::tie(a, b, c, d, e, f, g, h, i, j, k);
 }
 template <typename T>
-auto UnpackStructImpl(const T& t, MakeIndexSequence<12>, char) {
+auto UnpackStructImpl(const T& t, std::make_index_sequence<12>, char) {
   const auto& [a, b, c, d, e, f, g, h, i, j, k, l] = t;
   return std::tie(a, b, c, d, e, f, g, h, i, j, k, l);
 }
 template <typename T>
-auto UnpackStructImpl(const T& t, MakeIndexSequence<13>, char) {
+auto UnpackStructImpl(const T& t, std::make_index_sequence<13>, char) {
   const auto& [a, b, c, d, e, f, g, h, i, j, k, l, m] = t;
   return std::tie(a, b, c, d, e, f, g, h, i, j, k, l, m);
 }
 template <typename T>
-auto UnpackStructImpl(const T& t, MakeIndexSequence<14>, char) {
+auto UnpackStructImpl(const T& t, std::make_index_sequence<14>, char) {
   const auto& [a, b, c, d, e, f, g, h, i, j, k, l, m, n] = t;
   return std::tie(a, b, c, d, e, f, g, h, i, j, k, l, m, n);
 }
 template <typename T>
-auto UnpackStructImpl(const T& t, MakeIndexSequence<15>, char) {
+auto UnpackStructImpl(const T& t, std::make_index_sequence<15>, char) {
   const auto& [a, b, c, d, e, f, g, h, i, j, k, l, m, n, o] = t;
   return std::tie(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o);
 }
 template <typename T>
-auto UnpackStructImpl(const T& t, MakeIndexSequence<16>, char) {
+auto UnpackStructImpl(const T& t, std::make_index_sequence<16>, char) {
   const auto& [a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p] = t;
   return std::tie(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p);
 }
 template <typename T>
-auto UnpackStructImpl(const T& t, MakeIndexSequence<17>, char) {
+auto UnpackStructImpl(const T& t, std::make_index_sequence<17>, char) {
   const auto& [a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q] = t;
   return std::tie(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q);
 }
 template <typename T>
-auto UnpackStructImpl(const T& t, MakeIndexSequence<18>, char) {
+auto UnpackStructImpl(const T& t, std::make_index_sequence<18>, char) {
   const auto& [a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r] = t;
   return std::tie(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r);
 }
 template <typename T>
-auto UnpackStructImpl(const T& t, MakeIndexSequence<19>, char) {
+auto UnpackStructImpl(const T& t, std::make_index_sequence<19>, char) {
   const auto& [a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s] = t;
   return std::tie(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s);
 }
@@ -3254,8 +3259,8 @@ auto UnpackStructImpl(const T& t, MakeIndexSequence<19>, char) {
 
 template <size_t I, typename T>
 auto UnpackStruct(const T& t)
-    -> decltype((UnpackStructImpl)(t, MakeIndexSequence<I>{}, 0)) {
-  return (UnpackStructImpl)(t, MakeIndexSequence<I>{}, 0);
+    -> decltype((UnpackStructImpl)(t, std::make_index_sequence<I>{}, 0)) {
+  return (UnpackStructImpl)(t, std::make_index_sequence<I>{}, 0);
 }
 
 // Helper function to do comma folding in C++11.
@@ -3268,7 +3273,7 @@ template <typename Struct, typename StructSize>
 class FieldsAreMatcherImpl;
 
 template <typename Struct, size_t... I>
-class FieldsAreMatcherImpl<Struct, IndexSequence<I...>>
+class FieldsAreMatcherImpl<Struct, std::index_sequence<I...>>
     : public MatcherInterface<Struct> {
   using UnpackedType =
       decltype(UnpackStruct<sizeof...(I)>(std::declval<const Struct&>()));
@@ -3316,8 +3321,8 @@ class FieldsAreMatcherImpl<Struct, IndexSequence<I...>>
     std::vector<StringMatchResultListener> inner_listener(sizeof...(I));
 
     VariadicExpand(
-        {failed_pos == ~size_t{}&& !std::get<I>(matchers_).MatchAndExplain(
-                           std::get<I>(tuple), &inner_listener[I])
+        {failed_pos == ~size_t{} && !std::get<I>(matchers_).MatchAndExplain(
+                                        std::get<I>(tuple), &inner_listener[I])
              ? failed_pos = I
              : 0 ...});
     if (failed_pos != ~size_t{}) {
@@ -3350,8 +3355,8 @@ class FieldsAreMatcher {
   template <typename Struct>
   operator Matcher<Struct>() const {  // NOLINT
     return Matcher<Struct>(
-        new FieldsAreMatcherImpl<const Struct&, IndexSequenceFor<Inner...>>(
-            matchers_));
+        new FieldsAreMatcherImpl<const Struct&,
+                                 std::index_sequence_for<Inner...>>(matchers_));
   }
 
  private:
@@ -3643,23 +3648,6 @@ class UnorderedElementsAreMatcherImpl
     MatchMatrix matrix =
         AnalyzeElements(stl_container.begin(), stl_container.end(),
                         &element_printouts, listener);
-
-    if (matrix.LhsSize() == 0 && matrix.RhsSize() == 0) {
-      return true;
-    }
-
-    if (match_flags() == UnorderedMatcherRequire::ExactMatch) {
-      if (matrix.LhsSize() != matrix.RhsSize()) {
-        // The element count doesn't match.  If the container is empty,
-        // there's no need to explain anything as Google Mock already
-        // prints the empty container. Otherwise we just need to show
-        // how many elements there actually are.
-        if (matrix.LhsSize() != 0 && listener->IsInterested()) {
-          *listener << "which has " << Elements(matrix.LhsSize());
-        }
-        return false;
-      }
-    }
 
     return VerifyMatchMatrix(element_printouts, matrix, listener) &&
            FindPairing(matrix, listener);
@@ -4115,7 +4103,12 @@ class ArgsMatcherImpl : public MatcherInterface<ArgsTuple> {
     const char* sep = "";
     // Workaround spurious C4189 on MSVC<=15.7 when k is empty.
     (void)sep;
-    const char* dummy[] = {"", (*os << sep << "#" << k, sep = ", ")...};
+    // The static_cast to void is needed to silence Clang's -Wcomma warning.
+    // This pattern looks suspiciously like we may have mismatched parentheses
+    // and may have been trying to use the first operation of the comma operator
+    // as a member of the array, so Clang warns that we may have made a mistake.
+    const char* dummy[] = {
+        "", (static_cast<void>(*os << sep << "#" << k), sep = ", ")...};
     (void)dummy;
     *os << ") ";
   }
@@ -5452,42 +5445,47 @@ PolymorphicMatcher<internal::ExceptionMatcherImpl<Err>> ThrowsMessage(
       ::testing::internal::MakePredicateFormatterFromMatcher(matcher), value)
 
 // MATCHER* macros itself are listed below.
-#define MATCHER(name, description)                                             \
-  class name##Matcher                                                          \
-      : public ::testing::internal::MatcherBaseImpl<name##Matcher> {           \
-   public:                                                                     \
-    template <typename arg_type>                                               \
-    class gmock_Impl : public ::testing::MatcherInterface<const arg_type&> {   \
-     public:                                                                   \
-      gmock_Impl() {}                                                          \
-      bool MatchAndExplain(                                                    \
-          const arg_type& arg,                                                 \
-          ::testing::MatchResultListener* result_listener) const override;     \
-      void DescribeTo(::std::ostream* gmock_os) const override {               \
-        *gmock_os << FormatDescription(false);                                 \
-      }                                                                        \
-      void DescribeNegationTo(::std::ostream* gmock_os) const override {       \
-        *gmock_os << FormatDescription(true);                                  \
-      }                                                                        \
-                                                                               \
-     private:                                                                  \
-      ::std::string FormatDescription(bool negation) const {                   \
-        /* NOLINTNEXTLINE readability-redundant-string-init */                 \
-        ::std::string gmock_description = (description);                       \
-        if (!gmock_description.empty()) {                                      \
-          return gmock_description;                                            \
-        }                                                                      \
-        return ::testing::internal::FormatMatcherDescription(negation, #name,  \
-                                                             {}, {});          \
-      }                                                                        \
-    };                                                                         \
-  };                                                                           \
-  GTEST_ATTRIBUTE_UNUSED_ inline name##Matcher name() { return {}; }           \
-  template <typename arg_type>                                                 \
-  bool name##Matcher::gmock_Impl<arg_type>::MatchAndExplain(                   \
-      const arg_type& arg,                                                     \
-      ::testing::MatchResultListener* result_listener GTEST_ATTRIBUTE_UNUSED_) \
-      const
+#define MATCHER(name, description)                                            \
+  class name##Matcher                                                         \
+      : public ::testing::internal::MatcherBaseImpl<name##Matcher> {          \
+   public:                                                                    \
+    template <typename arg_type>                                              \
+    class gmock_Impl : public ::testing::MatcherInterface<const arg_type&> {  \
+     public:                                                                  \
+      gmock_Impl() {}                                                         \
+      bool MatchAndExplain(                                                   \
+          const arg_type& arg,                                                \
+          ::testing::MatchResultListener* result_listener) const override;    \
+      void DescribeTo(::std::ostream* gmock_os) const override {              \
+        *gmock_os << FormatDescription(false);                                \
+      }                                                                       \
+      void DescribeNegationTo(::std::ostream* gmock_os) const override {      \
+        *gmock_os << FormatDescription(true);                                 \
+      }                                                                       \
+                                                                              \
+     private:                                                                 \
+      ::std::string FormatDescription(bool negation) const {                  \
+        /* NOLINTNEXTLINE readability-redundant-string-init */                \
+        ::std::string gmock_description = (description);                      \
+        if (!gmock_description.empty()) {                                     \
+          return gmock_description;                                           \
+        }                                                                     \
+        return ::testing::internal::FormatMatcherDescription(negation, #name, \
+                                                             {}, {});         \
+      }                                                                       \
+    };                                                                        \
+  };                                                                          \
+  inline name##Matcher GMOCK_INTERNAL_WARNING_PUSH()                          \
+      GMOCK_INTERNAL_WARNING_CLANG(ignored, "-Wunused-function")              \
+          GMOCK_INTERNAL_WARNING_CLANG(ignored, "-Wunused-member-function")   \
+              name GMOCK_INTERNAL_WARNING_POP()() {                           \
+    return {};                                                                \
+  }                                                                           \
+  template <typename arg_type>                                                \
+  bool name##Matcher::gmock_Impl<arg_type>::MatchAndExplain(                  \
+      const arg_type& arg,                                                    \
+      GTEST_INTERNAL_ATTRIBUTE_MAYBE_UNUSED ::testing::MatchResultListener*   \
+          result_listener) const
 
 #define MATCHER_P(name, p0, description) \
   GMOCK_INTERNAL_MATCHER(name, name##MatcherP, description, (#p0), (p0))
@@ -5548,7 +5546,8 @@ PolymorphicMatcher<internal::ExceptionMatcherImpl<Err>> ThrowsMessage(
                                                                                \
      private:                                                                  \
       ::std::string FormatDescription(bool negation) const {                   \
-        ::std::string gmock_description = (description);                       \
+        ::std::string gmock_description;                                       \
+        gmock_description = (description);                                     \
         if (!gmock_description.empty()) {                                      \
           return gmock_description;                                            \
         }                                                                      \
@@ -5568,11 +5567,11 @@ PolymorphicMatcher<internal::ExceptionMatcherImpl<Err>> ThrowsMessage(
   }                                                                            \
   template <GMOCK_INTERNAL_MATCHER_TEMPLATE_PARAMS(args)>                      \
   template <typename arg_type>                                                 \
-  bool full_name<GMOCK_INTERNAL_MATCHER_TYPE_PARAMS(args)>::gmock_Impl<        \
-      arg_type>::MatchAndExplain(const arg_type& arg,                          \
-                                 ::testing::MatchResultListener*               \
-                                     result_listener GTEST_ATTRIBUTE_UNUSED_)  \
-      const
+  bool full_name<GMOCK_INTERNAL_MATCHER_TYPE_PARAMS(args)>::                   \
+      gmock_Impl<arg_type>::MatchAndExplain(                                   \
+          const arg_type& arg,                                                 \
+          GTEST_INTERNAL_ATTRIBUTE_MAYBE_UNUSED ::testing::                    \
+              MatchResultListener* result_listener) const
 
 #define GMOCK_INTERNAL_MATCHER_TEMPLATE_PARAMS(args) \
   GMOCK_PP_TAIL(                                     \

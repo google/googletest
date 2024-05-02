@@ -31,13 +31,23 @@
 //
 // This file tests some commonly used argument matchers.
 
+#include <algorithm>
+#include <array>
+#include <deque>
+#include <forward_list>
+#include <iterator>
+#include <list>
+#include <memory>
+#include <ostream>
+#include <string>
+#include <tuple>
+#include <vector>
+
+#include "gtest/gtest.h"
+
 // Silence warning C4244: 'initializing': conversion from 'int' to 'short',
 // possible loss of data and C4100, unreferenced local parameter
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4244)
-#pragma warning(disable : 4100)
-#endif
+GTEST_DISABLE_MSC_WARNINGS_PUSH_(4244 4100)
 
 #include "test/gmock-matchers_test.h"
 
@@ -1182,8 +1192,8 @@ TEST(SizeIsTest, WorksWithMinimalistCustomType) {
 
 TEST(SizeIsTest, CanDescribeSelf) {
   Matcher<vector<int>> m = SizeIs(2);
-  EXPECT_EQ("size is equal to 2", Describe(m));
-  EXPECT_EQ("size isn't equal to 2", DescribeNegation(m));
+  EXPECT_EQ("has a size that is equal to 2", Describe(m));
+  EXPECT_EQ("has a size that isn't equal to 2", DescribeNegation(m));
 }
 
 TEST(SizeIsTest, ExplainsResult) {
@@ -1826,8 +1836,8 @@ TEST(UnorderedElementsAreArrayTest, SucceedsWhenExpected) {
 }
 
 TEST(UnorderedElementsAreArrayTest, VectorBool) {
-  const bool a[] = {0, 1, 0, 1, 1};
-  const bool b[] = {1, 0, 1, 1, 0};
+  const bool a[] = {false, true, false, true, true};
+  const bool b[] = {true, false, true, true, false};
   std::vector<bool> expected(std::begin(a), std::end(a));
   std::vector<bool> actual(std::begin(b), std::end(b));
   StringMatchResultListener listener;
@@ -2778,7 +2788,7 @@ TEST(ElementsAreTest, WorksWithNativeArrayPassedByReference) {
 
 class NativeArrayPassedAsPointerAndSize {
  public:
-  NativeArrayPassedAsPointerAndSize() {}
+  NativeArrayPassedAsPointerAndSize() = default;
 
   MOCK_METHOD(void, Helper, (int* array, int size));
 
@@ -3124,6 +3134,4 @@ TEST(ContainsTest, WorksForTwoDimensionalNativeArray) {
 }  // namespace gmock_matchers_test
 }  // namespace testing
 
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
+GTEST_DISABLE_MSC_WARNINGS_POP_()  // 4244 4100

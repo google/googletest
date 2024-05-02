@@ -54,692 +54,588 @@ SUPPORTS_STACK_TRACES = NO_STACKTRACE_SUPPORT_FLAG not in sys.argv
 if SUPPORTS_STACK_TRACES:
   STACK_TRACE_TEMPLATE = '\nStack trace:\n*'
 else:
-  STACK_TRACE_TEMPLATE = ''
+  STACK_TRACE_TEMPLATE = '\n'
 
 EXPECTED_NON_EMPTY = {
-    u'tests':
-        26,
-    u'failures':
-        5,
-    u'disabled':
-        2,
-    u'errors':
-        0,
-    u'timestamp':
-        u'*',
-    u'time':
-        u'*',
-    u'ad_hoc_property':
-        u'42',
-    u'name':
-        u'AllTests',
-    u'testsuites': [{
-        u'name':
-            u'SuccessfulTest',
-        u'tests':
-            1,
-        u'failures':
-            0,
-        u'disabled':
-            0,
-        u'errors':
-            0,
-        u'time':
-            u'*',
-        u'timestamp':
-            u'*',
-        u'testsuite': [{
-            u'name': u'Succeeds',
-            u'file': u'gtest_xml_output_unittest_.cc',
-            u'line': 51,
-            u'status': u'RUN',
-            u'result': u'COMPLETED',
-            u'time': u'*',
-            u'timestamp': u'*',
-            u'classname': u'SuccessfulTest'
-        }]
-    }, {
-        u'name':
-            u'FailedTest',
-        u'tests':
-            1,
-        u'failures':
-            1,
-        u'disabled':
-            0,
-        u'errors':
-            0,
-        u'time':
-            u'*',
-        u'timestamp':
-            u'*',
-        u'testsuite': [{
-            u'name':
-                u'Fails',
-            u'file':
-                u'gtest_xml_output_unittest_.cc',
-            u'line':
-                59,
-            u'status':
-                u'RUN',
-            u'result':
-                u'COMPLETED',
-            u'time':
-                u'*',
-            u'timestamp':
-                u'*',
-            u'classname':
-                u'FailedTest',
-            u'failures': [{
-                u'failure': u'gtest_xml_output_unittest_.cc:*\n'
-                            u'Expected equality of these values:\n'
-                            u'  1\n  2' + STACK_TRACE_TEMPLATE,
-                u'type': u''
-            }]
-        }]
-    }, {
-        u'name':
-            u'DisabledTest',
-        u'tests':
-            1,
-        u'failures':
-            0,
-        u'disabled':
-            1,
-        u'errors':
-            0,
-        u'time':
-            u'*',
-        u'timestamp':
-            u'*',
-        u'testsuite': [{
-            u'name': u'DISABLED_test_not_run',
-            u'file': u'gtest_xml_output_unittest_.cc',
-            u'line': 66,
-            u'status': u'NOTRUN',
-            u'result': u'SUPPRESSED',
-            u'time': u'*',
-            u'timestamp': u'*',
-            u'classname': u'DisabledTest'
-        }]
-    }, {
-        u'name':
-            u'SkippedTest',
-        u'tests':
-            3,
-        u'failures':
-            1,
-        u'disabled':
-            0,
-        u'errors':
-            0,
-        u'time':
-            u'*',
-        u'timestamp':
-            u'*',
-        u'testsuite': [{
-            u'name': u'Skipped',
-            u'file': 'gtest_xml_output_unittest_.cc',
-            u'line': 73,
-            u'status': u'RUN',
-            u'result': u'SKIPPED',
-            u'time': u'*',
-            u'timestamp': u'*',
-            u'classname': u'SkippedTest'
-        }, {
-            u'name': u'SkippedWithMessage',
-            u'file': 'gtest_xml_output_unittest_.cc',
-            u'line': 77,
-            u'status': u'RUN',
-            u'result': u'SKIPPED',
-            u'time': u'*',
-            u'timestamp': u'*',
-            u'classname': u'SkippedTest'
-        }, {
-            u'name':
-                u'SkippedAfterFailure',
-            u'file':
-                'gtest_xml_output_unittest_.cc',
-            u'line':
-                81,
-            u'status':
-                u'RUN',
-            u'result':
-                u'COMPLETED',
-            u'time':
-                u'*',
-            u'timestamp':
-                u'*',
-            u'classname':
-                u'SkippedTest',
-            u'failures': [{
-                u'failure': u'gtest_xml_output_unittest_.cc:*\n'
-                            u'Expected equality of these values:\n'
-                            u'  1\n  2' + STACK_TRACE_TEMPLATE,
-                u'type': u''
-            }]
-        }]
-    }, {
-        u'name':
-            u'MixedResultTest',
-        u'tests':
-            3,
-        u'failures':
-            1,
-        u'disabled':
-            1,
-        u'errors':
-            0,
-        u'time':
-            u'*',
-        u'timestamp':
-            u'*',
-        u'testsuite': [{
-            u'name': u'Succeeds',
-            u'file': 'gtest_xml_output_unittest_.cc',
-            u'line': 86,
-            u'status': u'RUN',
-            u'result': u'COMPLETED',
-            u'time': u'*',
-            u'timestamp': u'*',
-            u'classname': u'MixedResultTest'
-        }, {
-            u'name':
-                u'Fails',
-            u'file':
-                u'gtest_xml_output_unittest_.cc',
-            u'line':
-                91,
-            u'status':
-                u'RUN',
-            u'result':
-                u'COMPLETED',
-            u'time':
-                u'*',
-            u'timestamp':
-                u'*',
-            u'classname':
-                u'MixedResultTest',
-            u'failures': [{
-                u'failure': u'gtest_xml_output_unittest_.cc:*\n'
-                            u'Expected equality of these values:\n'
-                            u'  1\n  2' + STACK_TRACE_TEMPLATE,
-                u'type': u''
-            }, {
-                u'failure': u'gtest_xml_output_unittest_.cc:*\n'
-                            u'Expected equality of these values:\n'
-                            u'  2\n  3' + STACK_TRACE_TEMPLATE,
-                u'type': u''
-            }]
-        }, {
-            u'name': u'DISABLED_test',
-            u'file': u'gtest_xml_output_unittest_.cc',
-            u'line': 96,
-            u'status': u'NOTRUN',
-            u'result': u'SUPPRESSED',
-            u'time': u'*',
-            u'timestamp': u'*',
-            u'classname': u'MixedResultTest'
-        }]
-    }, {
-        u'name':
-            u'XmlQuotingTest',
-        u'tests':
-            1,
-        u'failures':
-            1,
-        u'disabled':
-            0,
-        u'errors':
-            0,
-        u'time':
-            u'*',
-        u'timestamp':
-            u'*',
-        u'testsuite': [{
-            u'name':
-                u'OutputsCData',
-            u'file':
-                u'gtest_xml_output_unittest_.cc',
-            u'line':
-                100,
-            u'status':
-                u'RUN',
-            u'result':
-                u'COMPLETED',
-            u'time':
-                u'*',
-            u'timestamp':
-                u'*',
-            u'classname':
-                u'XmlQuotingTest',
-            u'failures': [{
-                u'failure': u'gtest_xml_output_unittest_.cc:*\n'
-                            u'Failed\nXML output: <?xml encoding="utf-8">'
-                            u'<top><![CDATA[cdata text]]></top>' +
-                            STACK_TRACE_TEMPLATE,
-                u'type': u''
-            }]
-        }]
-    }, {
-        u'name':
-            u'InvalidCharactersTest',
-        u'tests':
-            1,
-        u'failures':
-            1,
-        u'disabled':
-            0,
-        u'errors':
-            0,
-        u'time':
-            u'*',
-        u'timestamp':
-            u'*',
-        u'testsuite': [{
-            u'name':
-                u'InvalidCharactersInMessage',
-            u'file':
-                u'gtest_xml_output_unittest_.cc',
-            u'line':
-                107,
-            u'status':
-                u'RUN',
-            u'result':
-                u'COMPLETED',
-            u'time':
-                u'*',
-            u'timestamp':
-                u'*',
-            u'classname':
-                u'InvalidCharactersTest',
-            u'failures': [{
-                u'failure': u'gtest_xml_output_unittest_.cc:*\n'
-                            u'Failed\nInvalid characters in brackets'
-                            u' [\x01\x02]' + STACK_TRACE_TEMPLATE,
-                u'type': u''
-            }]
-        }]
-    }, {
-        u'name':
-            u'PropertyRecordingTest',
-        u'tests':
-            4,
-        u'failures':
-            0,
-        u'disabled':
-            0,
-        u'errors':
-            0,
-        u'time':
-            u'*',
-        u'timestamp':
-            u'*',
-        u'SetUpTestSuite':
-            u'yes',
-        u'TearDownTestSuite':
-            u'aye',
-        u'testsuite': [{
-            u'name': u'OneProperty',
-            u'file': u'gtest_xml_output_unittest_.cc',
-            u'line': 119,
-            u'status': u'RUN',
-            u'result': u'COMPLETED',
-            u'time': u'*',
-            u'timestamp': u'*',
-            u'classname': u'PropertyRecordingTest',
-            u'key_1': u'1'
-        }, {
-            u'name': u'IntValuedProperty',
-            u'file': u'gtest_xml_output_unittest_.cc',
-            u'line': 123,
-            u'status': u'RUN',
-            u'result': u'COMPLETED',
-            u'time': u'*',
-            u'timestamp': u'*',
-            u'classname': u'PropertyRecordingTest',
-            u'key_int': u'1'
-        }, {
-            u'name': u'ThreeProperties',
-            u'file': u'gtest_xml_output_unittest_.cc',
-            u'line': 127,
-            u'status': u'RUN',
-            u'result': u'COMPLETED',
-            u'time': u'*',
-            u'timestamp': u'*',
-            u'classname': u'PropertyRecordingTest',
-            u'key_1': u'1',
-            u'key_2': u'2',
-            u'key_3': u'3'
-        }, {
-            u'name': u'TwoValuesForOneKeyUsesLastValue',
-            u'file': u'gtest_xml_output_unittest_.cc',
-            u'line': 133,
-            u'status': u'RUN',
-            u'result': u'COMPLETED',
-            u'time': u'*',
-            u'timestamp': u'*',
-            u'classname': u'PropertyRecordingTest',
-            u'key_1': u'2'
-        }]
-    }, {
-        u'name':
-            u'NoFixtureTest',
-        u'tests':
-            3,
-        u'failures':
-            0,
-        u'disabled':
-            0,
-        u'errors':
-            0,
-        u'time':
-            u'*',
-        u'timestamp':
-            u'*',
-        u'testsuite': [{
-            u'name': u'RecordProperty',
-            u'file': u'gtest_xml_output_unittest_.cc',
-            u'line': 138,
-            u'status': u'RUN',
-            u'result': u'COMPLETED',
-            u'time': u'*',
-            u'timestamp': u'*',
-            u'classname': u'NoFixtureTest',
-            u'key': u'1'
-        }, {
-            u'name': u'ExternalUtilityThatCallsRecordIntValuedProperty',
-            u'file': u'gtest_xml_output_unittest_.cc',
-            u'line': 151,
-            u'status': u'RUN',
-            u'result': u'COMPLETED',
-            u'time': u'*',
-            u'timestamp': u'*',
-            u'classname': u'NoFixtureTest',
-            u'key_for_utility_int': u'1'
-        }, {
-            u'name': u'ExternalUtilityThatCallsRecordStringValuedProperty',
-            u'file': u'gtest_xml_output_unittest_.cc',
-            u'line': 155,
-            u'status': u'RUN',
-            u'result': u'COMPLETED',
-            u'time': u'*',
-            u'timestamp': u'*',
-            u'classname': u'NoFixtureTest',
-            u'key_for_utility_string': u'1'
-        }]
-    }, {
-        u'name':
-            u'TypedTest/0',
-        u'tests':
-            1,
-        u'failures':
-            0,
-        u'disabled':
-            0,
-        u'errors':
-            0,
-        u'time':
-            u'*',
-        u'timestamp':
-            u'*',
-        u'testsuite': [{
-            u'name': u'HasTypeParamAttribute',
-            u'type_param': u'int',
-            u'file': u'gtest_xml_output_unittest_.cc',
-            u'line': 171,
-            u'status': u'RUN',
-            u'result': u'COMPLETED',
-            u'time': u'*',
-            u'timestamp': u'*',
-            u'classname': u'TypedTest/0'
-        }]
-    }, {
-        u'name':
-            u'TypedTest/1',
-        u'tests':
-            1,
-        u'failures':
-            0,
-        u'disabled':
-            0,
-        u'errors':
-            0,
-        u'time':
-            u'*',
-        u'timestamp':
-            u'*',
-        u'testsuite': [{
-            u'name': u'HasTypeParamAttribute',
-            u'type_param': u'long',
-            u'file': u'gtest_xml_output_unittest_.cc',
-            u'line': 171,
-            u'status': u'RUN',
-            u'result': u'COMPLETED',
-            u'time': u'*',
-            u'timestamp': u'*',
-            u'classname': u'TypedTest/1'
-        }]
-    }, {
-        u'name':
-            u'Single/TypeParameterizedTestSuite/0',
-        u'tests':
-            1,
-        u'failures':
-            0,
-        u'disabled':
-            0,
-        u'errors':
-            0,
-        u'time':
-            u'*',
-        u'timestamp':
-            u'*',
-        u'testsuite': [{
-            u'name': u'HasTypeParamAttribute',
-            u'type_param': u'int',
-            u'file': u'gtest_xml_output_unittest_.cc',
-            u'line': 178,
-            u'status': u'RUN',
-            u'result': u'COMPLETED',
-            u'time': u'*',
-            u'timestamp': u'*',
-            u'classname': u'Single/TypeParameterizedTestSuite/0'
-        }]
-    }, {
-        u'name':
-            u'Single/TypeParameterizedTestSuite/1',
-        u'tests':
-            1,
-        u'failures':
-            0,
-        u'disabled':
-            0,
-        u'errors':
-            0,
-        u'time':
-            u'*',
-        u'timestamp':
-            u'*',
-        u'testsuite': [{
-            u'name': u'HasTypeParamAttribute',
-            u'type_param': u'long',
-            u'file': u'gtest_xml_output_unittest_.cc',
-            u'line': 178,
-            u'status': u'RUN',
-            u'result': u'COMPLETED',
-            u'time': u'*',
-            u'timestamp': u'*',
-            u'classname': u'Single/TypeParameterizedTestSuite/1'
-        }]
-    }, {
-        u'name':
-            u'Single/ValueParamTest',
-        u'tests':
-            4,
-        u'failures':
-            0,
-        u'disabled':
-            0,
-        u'errors':
-            0,
-        u'time':
-            u'*',
-        u'timestamp':
-            u'*',
-        u'testsuite': [{
-            u'name': u'HasValueParamAttribute/0',
-            u'value_param': u'33',
-            u'file': u'gtest_xml_output_unittest_.cc',
-            u'line': 162,
-            u'status': u'RUN',
-            u'result': u'COMPLETED',
-            u'time': u'*',
-            u'timestamp': u'*',
-            u'classname': u'Single/ValueParamTest'
-        }, {
-            u'name': u'HasValueParamAttribute/1',
-            u'value_param': u'42',
-            u'file': u'gtest_xml_output_unittest_.cc',
-            u'line': 162,
-            u'status': u'RUN',
-            u'result': u'COMPLETED',
-            u'time': u'*',
-            u'timestamp': u'*',
-            u'classname': u'Single/ValueParamTest'
-        }, {
-            u'name': u'AnotherTestThatHasValueParamAttribute/0',
-            u'value_param': u'33',
-            u'file': u'gtest_xml_output_unittest_.cc',
-            u'line': 163,
-            u'status': u'RUN',
-            u'result': u'COMPLETED',
-            u'time': u'*',
-            u'timestamp': u'*',
-            u'classname': u'Single/ValueParamTest'
-        }, {
-            u'name': u'AnotherTestThatHasValueParamAttribute/1',
-            u'value_param': u'42',
-            u'file': u'gtest_xml_output_unittest_.cc',
-            u'line': 163,
-            u'status': u'RUN',
-            u'result': u'COMPLETED',
-            u'time': u'*',
-            u'timestamp': u'*',
-            u'classname': u'Single/ValueParamTest'
-        }]
-    }]
+    'tests': 26,
+    'failures': 5,
+    'disabled': 2,
+    'errors': 0,
+    'timestamp': '*',
+    'time': '*',
+    'ad_hoc_property': '42',
+    'name': 'AllTests',
+    'testsuites': [
+        {
+            'name': 'SuccessfulTest',
+            'tests': 1,
+            'failures': 0,
+            'disabled': 0,
+            'errors': 0,
+            'time': '*',
+            'timestamp': '*',
+            'testsuite': [{
+                'name': 'Succeeds',
+                'file': 'gtest_xml_output_unittest_.cc',
+                'line': 53,
+                'status': 'RUN',
+                'result': 'COMPLETED',
+                'time': '*',
+                'timestamp': '*',
+                'classname': 'SuccessfulTest',
+            }],
+        },
+        {
+            'name': 'FailedTest',
+            'tests': 1,
+            'failures': 1,
+            'disabled': 0,
+            'errors': 0,
+            'time': '*',
+            'timestamp': '*',
+            'testsuite': [{
+                'name': 'Fails',
+                'file': 'gtest_xml_output_unittest_.cc',
+                'line': 61,
+                'status': 'RUN',
+                'result': 'COMPLETED',
+                'time': '*',
+                'timestamp': '*',
+                'classname': 'FailedTest',
+                'failures': [{
+                    'failure': (
+                        'gtest_xml_output_unittest_.cc:*\n'
+                        'Expected equality of these values:\n'
+                        '  1\n  2'
+                        + STACK_TRACE_TEMPLATE
+                    ),
+                    'type': '',
+                }],
+            }],
+        },
+        {
+            'name': 'DisabledTest',
+            'tests': 1,
+            'failures': 0,
+            'disabled': 1,
+            'errors': 0,
+            'time': '*',
+            'timestamp': '*',
+            'testsuite': [{
+                'name': 'DISABLED_test_not_run',
+                'file': 'gtest_xml_output_unittest_.cc',
+                'line': 68,
+                'status': 'NOTRUN',
+                'result': 'SUPPRESSED',
+                'time': '*',
+                'timestamp': '*',
+                'classname': 'DisabledTest',
+            }],
+        },
+        {
+            'name': 'SkippedTest',
+            'tests': 3,
+            'failures': 1,
+            'disabled': 0,
+            'errors': 0,
+            'time': '*',
+            'timestamp': '*',
+            'testsuite': [
+                {
+                    'name': 'Skipped',
+                    'file': 'gtest_xml_output_unittest_.cc',
+                    'line': 75,
+                    'status': 'RUN',
+                    'result': 'SKIPPED',
+                    'time': '*',
+                    'timestamp': '*',
+                    'classname': 'SkippedTest',
+                    'skipped': [
+                        {'message': 'gtest_xml_output_unittest_.cc:*\n\n'}
+                    ],
+                },
+                {
+                    'name': 'SkippedWithMessage',
+                    'file': 'gtest_xml_output_unittest_.cc',
+                    'line': 79,
+                    'status': 'RUN',
+                    'result': 'SKIPPED',
+                    'time': '*',
+                    'timestamp': '*',
+                    'classname': 'SkippedTest',
+                    'skipped': [{
+                        'message': (
+                            'gtest_xml_output_unittest_.cc:*\n'
+                            'It is good practice to tell why you skip a test.\n'
+                        )
+                    }],
+                },
+                {
+                    'name': 'SkippedAfterFailure',
+                    'file': 'gtest_xml_output_unittest_.cc',
+                    'line': 83,
+                    'status': 'RUN',
+                    'result': 'COMPLETED',
+                    'time': '*',
+                    'timestamp': '*',
+                    'classname': 'SkippedTest',
+                    'failures': [{
+                        'failure': (
+                            'gtest_xml_output_unittest_.cc:*\n'
+                            'Expected equality of these values:\n'
+                            '  1\n  2'
+                            + STACK_TRACE_TEMPLATE
+                        ),
+                        'type': '',
+                    }],
+                    'skipped': [{
+                        'message': (
+                            'gtest_xml_output_unittest_.cc:*\n'
+                            'It is good practice to tell why you skip a test.\n'
+                        )
+                    }],
+                },
+            ],
+        },
+        {
+            'name': 'MixedResultTest',
+            'tests': 3,
+            'failures': 1,
+            'disabled': 1,
+            'errors': 0,
+            'time': '*',
+            'timestamp': '*',
+            'testsuite': [
+                {
+                    'name': 'Succeeds',
+                    'file': 'gtest_xml_output_unittest_.cc',
+                    'line': 88,
+                    'status': 'RUN',
+                    'result': 'COMPLETED',
+                    'time': '*',
+                    'timestamp': '*',
+                    'classname': 'MixedResultTest',
+                },
+                {
+                    'name': 'Fails',
+                    'file': 'gtest_xml_output_unittest_.cc',
+                    'line': 93,
+                    'status': 'RUN',
+                    'result': 'COMPLETED',
+                    'time': '*',
+                    'timestamp': '*',
+                    'classname': 'MixedResultTest',
+                    'failures': [
+                        {
+                            'failure': (
+                                'gtest_xml_output_unittest_.cc:*\n'
+                                'Expected equality of these values:\n'
+                                '  1\n  2'
+                                + STACK_TRACE_TEMPLATE
+                            ),
+                            'type': '',
+                        },
+                        {
+                            'failure': (
+                                'gtest_xml_output_unittest_.cc:*\n'
+                                'Expected equality of these values:\n'
+                                '  2\n  3'
+                                + STACK_TRACE_TEMPLATE
+                            ),
+                            'type': '',
+                        },
+                    ],
+                },
+                {
+                    'name': 'DISABLED_test',
+                    'file': 'gtest_xml_output_unittest_.cc',
+                    'line': 98,
+                    'status': 'NOTRUN',
+                    'result': 'SUPPRESSED',
+                    'time': '*',
+                    'timestamp': '*',
+                    'classname': 'MixedResultTest',
+                },
+            ],
+        },
+        {
+            'name': 'XmlQuotingTest',
+            'tests': 1,
+            'failures': 1,
+            'disabled': 0,
+            'errors': 0,
+            'time': '*',
+            'timestamp': '*',
+            'testsuite': [{
+                'name': 'OutputsCData',
+                'file': 'gtest_xml_output_unittest_.cc',
+                'line': 102,
+                'status': 'RUN',
+                'result': 'COMPLETED',
+                'time': '*',
+                'timestamp': '*',
+                'classname': 'XmlQuotingTest',
+                'failures': [{
+                    'failure': (
+                        'gtest_xml_output_unittest_.cc:*\n'
+                        'Failed\nXML output: <?xml encoding="utf-8">'
+                        '<top><![CDATA[cdata text]]></top>'
+                        + STACK_TRACE_TEMPLATE
+                    ),
+                    'type': '',
+                }],
+            }],
+        },
+        {
+            'name': 'InvalidCharactersTest',
+            'tests': 1,
+            'failures': 1,
+            'disabled': 0,
+            'errors': 0,
+            'time': '*',
+            'timestamp': '*',
+            'testsuite': [{
+                'name': 'InvalidCharactersInMessage',
+                'file': 'gtest_xml_output_unittest_.cc',
+                'line': 109,
+                'status': 'RUN',
+                'result': 'COMPLETED',
+                'time': '*',
+                'timestamp': '*',
+                'classname': 'InvalidCharactersTest',
+                'failures': [{
+                    'failure': (
+                        'gtest_xml_output_unittest_.cc:*\n'
+                        'Failed\nInvalid characters in brackets'
+                        ' [\x01\x02]'
+                        + STACK_TRACE_TEMPLATE
+                    ),
+                    'type': '',
+                }],
+            }],
+        },
+        {
+            'name': 'PropertyRecordingTest',
+            'tests': 4,
+            'failures': 0,
+            'disabled': 0,
+            'errors': 0,
+            'time': '*',
+            'timestamp': '*',
+            'SetUpTestSuite': 'yes',
+            'TearDownTestSuite': 'aye',
+            'testsuite': [
+                {
+                    'name': 'OneProperty',
+                    'file': 'gtest_xml_output_unittest_.cc',
+                    'line': 121,
+                    'status': 'RUN',
+                    'result': 'COMPLETED',
+                    'time': '*',
+                    'timestamp': '*',
+                    'classname': 'PropertyRecordingTest',
+                    'key_1': '1',
+                },
+                {
+                    'name': 'IntValuedProperty',
+                    'file': 'gtest_xml_output_unittest_.cc',
+                    'line': 125,
+                    'status': 'RUN',
+                    'result': 'COMPLETED',
+                    'time': '*',
+                    'timestamp': '*',
+                    'classname': 'PropertyRecordingTest',
+                    'key_int': '1',
+                },
+                {
+                    'name': 'ThreeProperties',
+                    'file': 'gtest_xml_output_unittest_.cc',
+                    'line': 129,
+                    'status': 'RUN',
+                    'result': 'COMPLETED',
+                    'time': '*',
+                    'timestamp': '*',
+                    'classname': 'PropertyRecordingTest',
+                    'key_1': '1',
+                    'key_2': '2',
+                    'key_3': '3',
+                },
+                {
+                    'name': 'TwoValuesForOneKeyUsesLastValue',
+                    'file': 'gtest_xml_output_unittest_.cc',
+                    'line': 135,
+                    'status': 'RUN',
+                    'result': 'COMPLETED',
+                    'time': '*',
+                    'timestamp': '*',
+                    'classname': 'PropertyRecordingTest',
+                    'key_1': '2',
+                },
+            ],
+        },
+        {
+            'name': 'NoFixtureTest',
+            'tests': 3,
+            'failures': 0,
+            'disabled': 0,
+            'errors': 0,
+            'time': '*',
+            'timestamp': '*',
+            'testsuite': [
+                {
+                    'name': 'RecordProperty',
+                    'file': 'gtest_xml_output_unittest_.cc',
+                    'line': 140,
+                    'status': 'RUN',
+                    'result': 'COMPLETED',
+                    'time': '*',
+                    'timestamp': '*',
+                    'classname': 'NoFixtureTest',
+                    'key': '1',
+                },
+                {
+                    'name': 'ExternalUtilityThatCallsRecordIntValuedProperty',
+                    'file': 'gtest_xml_output_unittest_.cc',
+                    'line': 153,
+                    'status': 'RUN',
+                    'result': 'COMPLETED',
+                    'time': '*',
+                    'timestamp': '*',
+                    'classname': 'NoFixtureTest',
+                    'key_for_utility_int': '1',
+                },
+                {
+                    'name': (
+                        'ExternalUtilityThatCallsRecordStringValuedProperty'
+                    ),
+                    'file': 'gtest_xml_output_unittest_.cc',
+                    'line': 157,
+                    'status': 'RUN',
+                    'result': 'COMPLETED',
+                    'time': '*',
+                    'timestamp': '*',
+                    'classname': 'NoFixtureTest',
+                    'key_for_utility_string': '1',
+                },
+            ],
+        },
+        {
+            'name': 'TypedTest/0',
+            'tests': 1,
+            'failures': 0,
+            'disabled': 0,
+            'errors': 0,
+            'time': '*',
+            'timestamp': '*',
+            'testsuite': [{
+                'name': 'HasTypeParamAttribute',
+                'type_param': 'int',
+                'file': 'gtest_xml_output_unittest_.cc',
+                'line': 173,
+                'status': 'RUN',
+                'result': 'COMPLETED',
+                'time': '*',
+                'timestamp': '*',
+                'classname': 'TypedTest/0',
+            }],
+        },
+        {
+            'name': 'TypedTest/1',
+            'tests': 1,
+            'failures': 0,
+            'disabled': 0,
+            'errors': 0,
+            'time': '*',
+            'timestamp': '*',
+            'testsuite': [{
+                'name': 'HasTypeParamAttribute',
+                'type_param': 'long',
+                'file': 'gtest_xml_output_unittest_.cc',
+                'line': 173,
+                'status': 'RUN',
+                'result': 'COMPLETED',
+                'time': '*',
+                'timestamp': '*',
+                'classname': 'TypedTest/1',
+            }],
+        },
+        {
+            'name': 'Single/TypeParameterizedTestSuite/0',
+            'tests': 1,
+            'failures': 0,
+            'disabled': 0,
+            'errors': 0,
+            'time': '*',
+            'timestamp': '*',
+            'testsuite': [{
+                'name': 'HasTypeParamAttribute',
+                'type_param': 'int',
+                'file': 'gtest_xml_output_unittest_.cc',
+                'line': 180,
+                'status': 'RUN',
+                'result': 'COMPLETED',
+                'time': '*',
+                'timestamp': '*',
+                'classname': 'Single/TypeParameterizedTestSuite/0',
+            }],
+        },
+        {
+            'name': 'Single/TypeParameterizedTestSuite/1',
+            'tests': 1,
+            'failures': 0,
+            'disabled': 0,
+            'errors': 0,
+            'time': '*',
+            'timestamp': '*',
+            'testsuite': [{
+                'name': 'HasTypeParamAttribute',
+                'type_param': 'long',
+                'file': 'gtest_xml_output_unittest_.cc',
+                'line': 180,
+                'status': 'RUN',
+                'result': 'COMPLETED',
+                'time': '*',
+                'timestamp': '*',
+                'classname': 'Single/TypeParameterizedTestSuite/1',
+            }],
+        },
+        {
+            'name': 'Single/ValueParamTest',
+            'tests': 4,
+            'failures': 0,
+            'disabled': 0,
+            'errors': 0,
+            'time': '*',
+            'timestamp': '*',
+            'testsuite': [
+                {
+                    'name': 'HasValueParamAttribute/0',
+                    'value_param': '33',
+                    'file': 'gtest_xml_output_unittest_.cc',
+                    'line': 164,
+                    'status': 'RUN',
+                    'result': 'COMPLETED',
+                    'time': '*',
+                    'timestamp': '*',
+                    'classname': 'Single/ValueParamTest',
+                },
+                {
+                    'name': 'HasValueParamAttribute/1',
+                    'value_param': '42',
+                    'file': 'gtest_xml_output_unittest_.cc',
+                    'line': 164,
+                    'status': 'RUN',
+                    'result': 'COMPLETED',
+                    'time': '*',
+                    'timestamp': '*',
+                    'classname': 'Single/ValueParamTest',
+                },
+                {
+                    'name': 'AnotherTestThatHasValueParamAttribute/0',
+                    'value_param': '33',
+                    'file': 'gtest_xml_output_unittest_.cc',
+                    'line': 165,
+                    'status': 'RUN',
+                    'result': 'COMPLETED',
+                    'time': '*',
+                    'timestamp': '*',
+                    'classname': 'Single/ValueParamTest',
+                },
+                {
+                    'name': 'AnotherTestThatHasValueParamAttribute/1',
+                    'value_param': '42',
+                    'file': 'gtest_xml_output_unittest_.cc',
+                    'line': 165,
+                    'status': 'RUN',
+                    'result': 'COMPLETED',
+                    'time': '*',
+                    'timestamp': '*',
+                    'classname': 'Single/ValueParamTest',
+                },
+            ],
+        },
+    ],
 }
 
 EXPECTED_FILTERED = {
-    u'tests':
-        1,
-    u'failures':
-        0,
-    u'disabled':
-        0,
-    u'errors':
-        0,
-    u'time':
-        u'*',
-    u'timestamp':
-        u'*',
-    u'name':
-        u'AllTests',
-    u'ad_hoc_property':
-        u'42',
-    u'testsuites': [{
-        u'name':
-            u'SuccessfulTest',
-        u'tests':
-            1,
-        u'failures':
-            0,
-        u'disabled':
-            0,
-        u'errors':
-            0,
-        u'time':
-            u'*',
-        u'timestamp':
-            u'*',
-        u'testsuite': [{
-            u'name': u'Succeeds',
-            u'file': u'gtest_xml_output_unittest_.cc',
-            u'line': 51,
-            u'status': u'RUN',
-            u'result': u'COMPLETED',
-            u'time': u'*',
-            u'timestamp': u'*',
-            u'classname': u'SuccessfulTest',
-        }]
+    'tests': 1,
+    'failures': 0,
+    'disabled': 0,
+    'errors': 0,
+    'time': '*',
+    'timestamp': '*',
+    'name': 'AllTests',
+    'ad_hoc_property': '42',
+    'testsuites': [{
+        'name': 'SuccessfulTest',
+        'tests': 1,
+        'failures': 0,
+        'disabled': 0,
+        'errors': 0,
+        'time': '*',
+        'timestamp': '*',
+        'testsuite': [{
+            'name': 'Succeeds',
+            'file': 'gtest_xml_output_unittest_.cc',
+            'line': 53,
+            'status': 'RUN',
+            'result': 'COMPLETED',
+            'time': '*',
+            'timestamp': '*',
+            'classname': 'SuccessfulTest',
+        }],
     }],
 }
 
 EXPECTED_NO_TEST = {
-    u'tests':
-        0,
-    u'failures':
-        0,
-    u'disabled':
-        0,
-    u'errors':
-        0,
-    u'time':
-        u'*',
-    u'timestamp':
-        u'*',
-    u'name':
-        u'AllTests',
-    u'testsuites': [{
-        u'name':
-            u'NonTestSuiteFailure',
-        u'tests':
-            1,
-        u'failures':
-            1,
-        u'disabled':
-            0,
-        u'skipped':
-            0,
-        u'errors':
-            0,
-        u'time':
-            u'*',
-        u'timestamp':
-            u'*',
-        u'testsuite': [{
-            u'name':
-                u'',
-            u'status':
-                u'RUN',
-            u'result':
-                u'COMPLETED',
-            u'time':
-                u'*',
-            u'timestamp':
-                u'*',
-            u'classname':
-                u'',
-            u'failures': [{
-                u'failure': u'gtest_no_test_unittest.cc:*\n'
-                            u'Expected equality of these values:\n'
-                            u'  1\n  2' + STACK_TRACE_TEMPLATE,
-                u'type': u'',
-            }]
-        }]
+    'tests': 0,
+    'failures': 0,
+    'disabled': 0,
+    'errors': 0,
+    'time': '*',
+    'timestamp': '*',
+    'name': 'AllTests',
+    'testsuites': [{
+        'name': 'NonTestSuiteFailure',
+        'tests': 1,
+        'failures': 1,
+        'disabled': 0,
+        'skipped': 0,
+        'errors': 0,
+        'time': '*',
+        'timestamp': '*',
+        'testsuite': [{
+            'name': '',
+            'status': 'RUN',
+            'result': 'COMPLETED',
+            'time': '*',
+            'timestamp': '*',
+            'classname': '',
+            'failures': [{
+                'failure': (
+                    'gtest_no_test_unittest.cc:*\n'
+                    'Expected equality of these values:\n'
+                    '  1\n  2'
+                    + STACK_TRACE_TEMPLATE
+                ),
+                'type': '',
+            }],
+        }],
     }],
 }
 
 GTEST_PROGRAM_PATH = gtest_test_utils.GetTestExecutablePath(GTEST_PROGRAM_NAME)
 
-SUPPORTS_TYPED_TESTS = 'TypedTest' in gtest_test_utils.Subprocess(
-    [GTEST_PROGRAM_PATH, GTEST_LIST_TESTS_FLAG], capture_stderr=False).output
+SUPPORTS_TYPED_TESTS = (
+    'TypedTest'
+    in gtest_test_utils.Subprocess(
+        [GTEST_PROGRAM_PATH, GTEST_LIST_TESTS_FLAG], capture_stderr=False
+    ).output
+)
 
 
 class GTestJsonOutputUnitTest(gtest_test_utils.TestCase):
-  """Unit test for Google Test's JSON output functionality.
-  """
+  """Unit test for Google Test's JSON output functionality."""
 
   # This test currently breaks on platforms that do not support typed and
   # type-parameterized tests, so we don't run it under them.
@@ -775,16 +671,23 @@ class GTestJsonOutputUnitTest(gtest_test_utils.TestCase):
     match = re.match(r'(\d+)-(\d\d)-(\d\d)T(\d\d):(\d\d):(\d\d)', date_time_str)
     self.assertTrue(
         re.match,
-        'JSON datettime string %s has incorrect format' % date_time_str)
+        'JSON datettime string %s has incorrect format' % date_time_str,
+    )
     date_time_from_json = datetime.datetime(
-        year=int(match.group(1)), month=int(match.group(2)),
-        day=int(match.group(3)), hour=int(match.group(4)),
-        minute=int(match.group(5)), second=int(match.group(6)))
+        year=int(match.group(1)),
+        month=int(match.group(2)),
+        day=int(match.group(3)),
+        hour=int(match.group(4)),
+        minute=int(match.group(5)),
+        second=int(match.group(6)),
+    )
 
     time_delta = abs(datetime.datetime.now() - date_time_from_json)
     # timestamp value should be near the current local time
-    self.assertTrue(time_delta < datetime.timedelta(seconds=600),
-                    'time_delta is %s' % time_delta)
+    self.assertTrue(
+        time_delta < datetime.timedelta(seconds=600),
+        'time_delta is %s' % time_delta,
+    )
 
   def testDefaultOutputFile(self):
     """Verifies the default output file name.
@@ -792,10 +695,12 @@ class GTestJsonOutputUnitTest(gtest_test_utils.TestCase):
     Confirms that Google Test produces an JSON output file with the expected
     default name if no name is explicitly specified.
     """
-    output_file = os.path.join(gtest_test_utils.GetTempDir(),
-                               GTEST_DEFAULT_OUTPUT_FILE)
+    output_file = os.path.join(
+        gtest_test_utils.GetTempDir(), GTEST_DEFAULT_OUTPUT_FILE
+    )
     gtest_prog_path = gtest_test_utils.GetTestExecutablePath(
-        'gtest_no_test_unittest')
+        'gtest_no_test_unittest'
+    )
     try:
       os.remove(output_file)
     except OSError:
@@ -805,10 +710,11 @@ class GTestJsonOutputUnitTest(gtest_test_utils.TestCase):
 
     p = gtest_test_utils.Subprocess(
         [gtest_prog_path, '%s=json' % GTEST_OUTPUT_FLAG],
-        working_dir=gtest_test_utils.GetTempDir())
-    self.assert_(p.exited)
-    self.assertEquals(0, p.exit_code)
-    self.assert_(os.path.isfile(output_file))
+        working_dir=gtest_test_utils.GetTempDir(),
+    )
+    self.assertTrue(p.exited)
+    self.assertEqual(0, p.exit_code)
+    self.assertTrue(os.path.isfile(output_file))
 
   def testSuppressedJsonOutput(self):
     """Verifies that no JSON output is generated.
@@ -817,28 +723,34 @@ class GTestJsonOutputUnitTest(gtest_test_utils.TestCase):
     shut down before RUN_ALL_TESTS is invoked.
     """
 
-    json_path = os.path.join(gtest_test_utils.GetTempDir(),
-                             GTEST_PROGRAM_NAME + 'out.json')
+    json_path = os.path.join(
+        gtest_test_utils.GetTempDir(), GTEST_PROGRAM_NAME + 'out.json'
+    )
     if os.path.isfile(json_path):
       os.remove(json_path)
 
-    command = [GTEST_PROGRAM_PATH,
-               '%s=json:%s' % (GTEST_OUTPUT_FLAG, json_path),
-               '--shut_down_xml']
+    command = [
+        GTEST_PROGRAM_PATH,
+        '%s=json:%s' % (GTEST_OUTPUT_FLAG, json_path),
+        '--shut_down_xml',
+    ]
     p = gtest_test_utils.Subprocess(command)
     if p.terminated_by_signal:
       # p.signal is available only if p.terminated_by_signal is True.
       self.assertFalse(
           p.terminated_by_signal,
-          '%s was killed by signal %d' % (GTEST_PROGRAM_NAME, p.signal))
+          '%s was killed by signal %d' % (GTEST_PROGRAM_NAME, p.signal),
+      )
     else:
-      self.assert_(p.exited)
-      self.assertEquals(1, p.exit_code,
-                        "'%s' exited with code %s, which doesn't match "
-                        'the expected exit code %s.'
-                        % (command, p.exit_code, 1))
+      self.assertTrue(p.exited)
+      self.assertEqual(
+          1,
+          p.exit_code,
+          "'%s' exited with code %s, which doesn't match "
+          'the expected exit code %s.' % (command, p.exit_code, 1),
+      )
 
-    self.assert_(not os.path.isfile(json_path))
+    self.assertTrue(not os.path.isfile(json_path))
 
   def testFilteredTestJsonOutput(self):
     """Verifies JSON output when a filter is applied.
@@ -847,8 +759,12 @@ class GTestJsonOutputUnitTest(gtest_test_utils.TestCase):
     non-selected tests do not show up in the JSON output.
     """
 
-    self._TestJsonOutput(GTEST_PROGRAM_NAME, EXPECTED_FILTERED, 0,
-                         extra_args=['%s=SuccessfulTest.*' % GTEST_FILTER_FLAG])
+    self._TestJsonOutput(
+        GTEST_PROGRAM_NAME,
+        EXPECTED_FILTERED,
+        0,
+        extra_args=['%s=SuccessfulTest.*' % GTEST_FILTER_FLAG],
+    )
 
   def _GetJsonOutput(self, gtest_prog_name, extra_args, expected_exit_code):
     """Returns the JSON output generated by running the program gtest_prog_name.
@@ -860,30 +776,36 @@ class GTestJsonOutputUnitTest(gtest_test_utils.TestCase):
       extra_args: extra arguments to binary invocation.
       expected_exit_code: program's exit code.
     """
-    json_path = os.path.join(gtest_test_utils.GetTempDir(),
-                             gtest_prog_name + 'out.json')
+    json_path = os.path.join(
+        gtest_test_utils.GetTempDir(), gtest_prog_name + 'out.json'
+    )
     gtest_prog_path = gtest_test_utils.GetTestExecutablePath(gtest_prog_name)
 
-    command = (
-        [gtest_prog_path, '%s=json:%s' % (GTEST_OUTPUT_FLAG, json_path)] +
-        extra_args
-    )
+    command = [
+        gtest_prog_path,
+        '%s=json:%s' % (GTEST_OUTPUT_FLAG, json_path),
+    ] + extra_args
     p = gtest_test_utils.Subprocess(command)
     if p.terminated_by_signal:
-      self.assert_(False,
-                   '%s was killed by signal %d' % (gtest_prog_name, p.signal))
+      self.assertTrue(
+          False, '%s was killed by signal %d' % (gtest_prog_name, p.signal)
+      )
     else:
-      self.assert_(p.exited)
-      self.assertEquals(expected_exit_code, p.exit_code,
-                        "'%s' exited with code %s, which doesn't match "
-                        'the expected exit code %s.'
-                        % (command, p.exit_code, expected_exit_code))
+      self.assertTrue(p.exited)
+      self.assertEqual(
+          expected_exit_code,
+          p.exit_code,
+          "'%s' exited with code %s, which doesn't match "
+          'the expected exit code %s.'
+          % (command, p.exit_code, expected_exit_code),
+      )
     with open(json_path) as f:
       actual = json.load(f)
     return actual
 
-  def _TestJsonOutput(self, gtest_prog_name, expected,
-                      expected_exit_code, extra_args=None):
+  def _TestJsonOutput(
+      self, gtest_prog_name, expected, expected_exit_code, extra_args=None
+  ):
     """Checks the JSON output generated by the Google Test binary.
 
     Asserts that the JSON document generated by running the program
@@ -898,8 +820,9 @@ class GTestJsonOutputUnitTest(gtest_test_utils.TestCase):
       extra_args: extra arguments to binary invocation.
     """
 
-    actual = self._GetJsonOutput(gtest_prog_name, extra_args or [],
-                                 expected_exit_code)
+    actual = self._GetJsonOutput(
+        gtest_prog_name, extra_args or [], expected_exit_code
+    )
     self.assertEqual(expected, gtest_json_test_utils.normalize(actual))
 
 
