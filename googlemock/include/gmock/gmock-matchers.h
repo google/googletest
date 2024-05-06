@@ -5606,8 +5606,8 @@ PolymorphicMatcher<internal::ExceptionMatcherImpl<Err>> ThrowsMessage(
 
 #define GMOCK_INTERNAL_MATCHER_ARGS_USAGE(args) \
   GMOCK_PP_TAIL(GMOCK_PP_FOR_EACH(GMOCK_INTERNAL_MATCHER_ARG_USAGE, , args))
-#define GMOCK_INTERNAL_MATCHER_ARG_USAGE(i, data_unused, arg_unused) \
-  , gmock_p##i
+#define GMOCK_INTERNAL_MATCHER_ARG_USAGE(i, data_unused, arg) \
+  , ::std::forward<arg##_type>(gmock_p##i)
 
 // To prevent ADL on certain functions we put them on a separate namespace.
 using namespace no_adl;  // NOLINT
