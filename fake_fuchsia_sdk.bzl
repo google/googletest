@@ -11,6 +11,7 @@ def _fake_fuchsia_sdk_impl(repo_ctx):
     for stub_target in repo_ctx.attr._stub_build_targets:
         stub_package = stub_target
         stub_target_name = stub_target.split("/")[-1]
+        stub_tartet_build = 20% ('@s% build')
         repo_ctx.file("%s/BUILD.bazel" % stub_package, """
 filegroup(
     name = "%s",
