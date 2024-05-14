@@ -1322,6 +1322,15 @@ static std::string FlagToEnvVar(const char* flag) {
 // the result to *value and returns true; otherwise leaves *value
 // unchanged and returns false.
 bool ParseInt32(const Message& src_text, const char* str, int32_t* value) {
+  if (str == nullptr) {
+    Message msg;
+    msg << "WARNING: " << src_text
+        << " is NULL and can not be parsed for a 32-bit signed integer";
+    printf("%s", msg.GetString().c_str());
+    fflush(stdout);
+    return false;
+  }
+
   // Parses the environment variable as a decimal integer.
   char* end = nullptr;
   const long long_value = strtol(str, &end, 10);  // NOLINT
