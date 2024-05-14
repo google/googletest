@@ -96,10 +96,23 @@ macro(config_compiler_and_linker)
     set(cxx_no_exception_flags "-fno-exceptions")
     set(cxx_strict_flags "-W -Wpointer-arith -Wreturn-type -Wcast-qual -Wwrite-strings -Wswitch -Wunused-parameter -Wcast-align -Winline -Wredundant-decls")
     set(cxx_no_rtti_flags "-fno-rtti")
-    if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+
+    # CMake versions less than 3.20 will erroneously report
+    # IntelLLVM compilers as clang. Therefore we check if
+    # we're really dealing with IntelLLVM as compiler.
+    # See https://github.com/google/googletest/issues/4315
+    set(compiler_is_really_intel_llvm FALSE)
+    if (${CMAKE_VERSION} VERSION_LESS 3.20)
+      string(FIND "${CMAKE_CXX_COMPILER}" "icpx" icpx_position)
+      if (icpx_position GREATER -1)
+        set(compiler_is_really_intel_llvm TRUE)
+      endif()
+    endif()
+
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT compiler_is_really_intel_llvm)
       set(cxx_strict_flags "${cxx_strict_flags} -Wchar-subscripts")
     endif()
-    if (CMAKE_CXX_COMPILER_ID STREQUAL "IntelLLVM")
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "IntelLLVM" OR compiler_is_really_intel_llvm)
       set(cxx_base_flags "${cxx_base_flags} -Wno-implicit-float-size-conversion -ffp-model=precise")
     endif()
   elseif (CMAKE_COMPILER_IS_GNUCXX)
