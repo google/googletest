@@ -10,6 +10,10 @@
 
 # When other libraries are using a shared version of runtime libraries,
 # Google Test also has to use one.
+
+# Import googletest version
+include(../cmake/googletest-version.cmake)
+
 option(
   gtest_force_shared_crt
   "Use shared (DLL) run-time lib even when Google Test is built as static lib."
