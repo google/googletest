@@ -2014,7 +2014,14 @@ TEST_F(UnorderedElementsAreTest, FailMessageCountWrong) {
   StringMatchResultListener listener;
   EXPECT_FALSE(ExplainMatchResult(UnorderedElementsAre(1, 2, 3), v, &listener))
       << listener.str();
-  EXPECT_THAT(listener.str(), Eq("which has 1 element"));
+  EXPECT_THAT(listener.str(),
+              Eq("which has 1 element\n"
+                 "where the following matchers don't match any elements:\n"
+                 "matcher #0: is equal to 1,\n"
+                 "matcher #1: is equal to 2,\n"
+                 "matcher #2: is equal to 3\n"
+                 "and where the following elements don't match any matchers:\n"
+                 "element #0: 4"));
 }
 
 TEST_F(UnorderedElementsAreTest, FailMessageCountWrongZero) {
@@ -2022,7 +2029,11 @@ TEST_F(UnorderedElementsAreTest, FailMessageCountWrongZero) {
   StringMatchResultListener listener;
   EXPECT_FALSE(ExplainMatchResult(UnorderedElementsAre(1, 2, 3), v, &listener))
       << listener.str();
-  EXPECT_THAT(listener.str(), Eq(""));
+  EXPECT_THAT(listener.str(),
+              Eq("where the following matchers don't match any elements:\n"
+                 "matcher #0: is equal to 1,\n"
+                 "matcher #1: is equal to 2,\n"
+                 "matcher #2: is equal to 3"));
 }
 
 TEST_F(UnorderedElementsAreTest, FailMessageUnmatchedMatchers) {
@@ -2438,7 +2449,7 @@ TEST(UnorderedPointwiseTest, RejectsWrongSize) {
   const double lhs[2] = {1, 2};
   const int rhs[1] = {0};
   EXPECT_THAT(lhs, Not(UnorderedPointwise(Gt(), rhs)));
-  EXPECT_EQ("which has 2 elements",
+  EXPECT_EQ("which has 2 elements\n",
             Explain(UnorderedPointwise(Gt(), rhs), lhs));
 
   const int rhs2[3] = {0, 1, 2};

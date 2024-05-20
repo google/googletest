@@ -236,9 +236,8 @@ static void LogElementMatcherPairVec(const ElementMatcherPairs& pairs,
   os << "{";
   const char* sep = "";
   for (Iter it = pairs.begin(); it != pairs.end(); ++it) {
-    os << sep << "\n  ("
-       << "element #" << it->first << ", "
-       << "matcher #" << it->second << ")";
+    os << sep << "\n  (" << "element #" << it->first << ", " << "matcher #"
+       << it->second << ")";
     sep = ",";
   }
   os << "\n}";
@@ -374,20 +373,20 @@ bool UnorderedElementsAreMatcherImplBase::VerifyMatchMatrix(
     return true;
   }
 
-  if (match_flags() == UnorderedMatcherRequire::ExactMatch) {
-    if (matrix.LhsSize() != matrix.RhsSize()) {
-      // The element count doesn't match.  If the container is empty,
-      // there's no need to explain anything as Google Mock already
-      // prints the empty container. Otherwise we just need to show
-      // how many elements there actually are.
-      if (matrix.LhsSize() != 0 && listener->IsInterested()) {
-        *listener << "which has " << Elements(matrix.LhsSize());
-      }
-      return false;
+  const bool is_exact_match_with_size_discrepency =
+      match_flags() == UnorderedMatcherRequire::ExactMatch &&
+      matrix.LhsSize() != matrix.RhsSize();
+  if (is_exact_match_with_size_discrepency) {
+    // The element count doesn't match.  If the container is empty,
+    // there's no need to explain anything as Google Mock already
+    // prints the empty container. Otherwise we just need to show
+    // how many elements there actually are.
+    if (matrix.LhsSize() != 0 && listener->IsInterested()) {
+      *listener << "which has " << Elements(matrix.LhsSize()) << "\n";
     }
   }
 
-  bool result = true;
+  bool result = !is_exact_match_with_size_discrepency;
   ::std::vector<char> element_matched(matrix.LhsSize(), 0);
   ::std::vector<char> matcher_matched(matrix.RhsSize(), 0);
 
