@@ -140,6 +140,7 @@ See also
 ### TYPED_TEST_SUITE {#TYPED_TEST_SUITE}
 
 `TYPED_TEST_SUITE(`*`TestFixtureName`*`,`*`Types`*`)`
+`TYPED_TEST_SUITE(`*`TestFixtureName`*`,`*`Types`*`,`*`NameGenerator`*`)`
 
 Defines a typed test suite based on the test fixture *`TestFixtureName`*. The
 test suite name is *`TestFixtureName`*.
@@ -168,6 +169,22 @@ TYPED_TEST_SUITE(MyFixture, MyTypes);
 
 The type alias (`using` or `typedef`) is necessary for the `TYPED_TEST_SUITE`
 macro to parse correctly.
+
+The optional third argument *`NameGenerator`* allows specifying a class that
+exposes a templated static function `GetName(int)`. For example:
+
+```cpp
+class NameGenerator {
+ public:
+  template <typename T>
+  static std::string GetName(int) {
+    if constexpr (std::is_same_v<T, char>) return "char";
+    if constexpr (std::is_same_v<T, int>) return "int";
+    if constexpr (std::is_same_v<T, unsigned int>) return "unsignedInt";
+  }
+};
+TYPED_TEST_SUITE(MyFixture, MyTypes, NameGenerator);
+```
 
 See also [`TYPED_TEST`](#TYPED_TEST) and
 [Typed Tests](../advanced.md#typed-tests) for more information.
