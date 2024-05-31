@@ -1508,3 +1508,12 @@ TEST(ConditionalDeathMacrosSyntaxDeathTest, SwitchStatement) {
 TEST(NotADeathTest, Test) { SUCCEED(); }
 
 }  // namespace
+
+int main(int argc, char** argv) {
+  ::testing::InitGoogleTest(&argc, argv);
+
+  // This test has deliberately un-executed assertions in it.
+  GTEST_FLAG_SET(treat_rotten_as_pass, true);
+
+  return RUN_ALL_TESTS();
+}

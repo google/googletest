@@ -388,6 +388,21 @@ GTEST_DEFINE_bool_(
     "if exceptions are enabled or exit the program with a non-zero code "
     "otherwise. For use with an external test framework.");
 
+GTEST_DEFINE_bool_(
+    treat_rotten_as_pass,
+    testing::internal::BoolFromGTestEnv("treat_rotten_as_pass",
+                                        GTEST_DEFAULT_RGT_PASS),
+    "This flag controls whether un-executed assertions within an executed "
+    "test are treated as if they had passed.");
+
+#if GTEST_DEBUG_RGT
+GTEST_DEFINE_string_(
+    dump_assertions_to,
+    testing::internal::StringFromGTestEnv("assertionlog", ""),
+    "This flag specifies the log file to dump a list of all known "
+    "assertion locations to.");
+#endif // GTEST_DEBUG_RGT
+
 #if GTEST_USE_OWN_FLAGFILE_FLAG_
 GTEST_DEFINE_string_(
     flagfile, testing::internal::StringFromGTestEnv("flagfile", ""),
@@ -438,6 +453,11 @@ static int SumOverTestSuiteList(const std::vector<TestSuite*>& case_list,
 // Returns true if and only if the test suite passed.
 static bool TestSuitePassed(const TestSuite* test_suite) {
   return test_suite->should_run() && test_suite->Passed();
+}
+
+// Returns true if and only if the test suite had rotten assertions.
+static bool TestSuiteRotten(const TestSuite* test_suite) {
+  return test_suite->should_run() && test_suite->Rotten();
 }
 
 // Returns true if and only if the test suite failed.
@@ -1093,6 +1113,11 @@ int UnitTestImpl::successful_test_suite_count() const {
   return CountIf(test_suites_, TestSuitePassed);
 }
 
+// Gets the number of rotten test suites.
+int UnitTestImpl::rotten_test_suite_count() const {
+  return CountIf(test_suites_, TestSuiteRotten);
+}
+
 // Gets the number of failed test suites.
 int UnitTestImpl::failed_test_suite_count() const {
   return CountIf(test_suites_, TestSuiteFailed);
@@ -1117,6 +1142,11 @@ int UnitTestImpl::successful_test_count() const {
 // Gets the number of skipped tests.
 int UnitTestImpl::skipped_test_count() const {
   return SumOverTestSuiteList(test_suites_, &TestSuite::skipped_test_count);
+}
+
+// Gets the number of rotten tests.
+int UnitTestImpl::rotten_test_count() const {
+  return SumOverTestSuiteList(test_suites_, &TestSuite::rotten_test_count);
 }
 
 // Gets the number of failed tests.
@@ -2437,6 +2467,17 @@ bool TestResult::Skipped() const {
   return !Failed() && CountIf(test_part_results_, TestPartSkipped) > 0;
 }
 
+// Returns true if and only if the test part is rotten.
+static bool TestPartRotten(const TestPartResult& result) {
+  return result.rotten();
+}
+
+// Returns true if and only if the test was passed but had a rotten assertion.
+bool TestResult::Rotten() const {
+  return !Skipped() && !Failed() &&
+      CountIf(test_part_results_, TestPartRotten) > 0;
+}
+
 // Returns true if and only if the test failed.
 bool TestResult::Failed() const {
   for (int i = 0; i < total_part_count(); ++i) {
@@ -2755,6 +2796,7 @@ TestInfo::TestInfo(std::string a_test_suite_name, std::string a_name,
       is_disabled_(false),
       matches_filter_(false),
       is_in_another_shard_(false),
+      uses_expect_failure_(false),
       factory_(factory),
       result_() {}
 
@@ -2905,6 +2947,11 @@ int TestSuite::successful_test_count() const {
 // Gets the number of successful tests in this test suite.
 int TestSuite::skipped_test_count() const {
   return CountIf(test_info_list_, TestSkipped);
+}
+
+// Gets the number of rotten tests in this test suite.
+int TestSuite::rotten_test_count() const {
+  return CountIf(test_info_list_, TestRotten);
 }
 
 // Gets the number of failed tests in this test suite.
@@ -3135,6 +3182,8 @@ static const char* TestPartResultTypeToString(TestPartResult::Type type) {
       return "Skipped\n";
     case TestPartResult::kSuccess:
       return "Success";
+    case TestPartResult::kRotten:
+      return "Rotten";
 
     case TestPartResult::kNonFatalFailure:
     case TestPartResult::kFatalFailure:
@@ -3405,6 +3454,7 @@ class PrettyUnitTestResultPrinter : public TestEventListener {
   static void PrintFailedTests(const UnitTest& unit_test);
   static void PrintFailedTestSuites(const UnitTest& unit_test);
   static void PrintSkippedTests(const UnitTest& unit_test);
+  static void PrintRottenTests(const UnitTest& unit_test);
 };
 
 // Fired before each iteration of tests starts.
@@ -3509,7 +3559,10 @@ void PrettyUnitTestResultPrinter::OnTestPartResult(
 }
 
 void PrettyUnitTestResultPrinter::OnTestEnd(const TestInfo& test_info) {
-  if (test_info.result()->Passed()) {
+  // Rotten is a subset of Passed so check it first.
+  if (test_info.result()->Rotten()) {
+    ColoredPrintf(GTestColor::kYellow, "[  ROTTEN  ] ");
+  } else if (test_info.result()->Passed()) {
     ColoredPrintf(GTestColor::kGreen, "[       OK ] ");
   } else if (test_info.result()->Skipped()) {
     ColoredPrintf(GTestColor::kGreen, "[  SKIPPED ] ");
@@ -3632,6 +3685,29 @@ void PrettyUnitTestResultPrinter::PrintSkippedTests(const UnitTest& unit_test) {
   }
 }
 
+// Internal helper for printing the list of tests with rotten assertion.
+void PrettyUnitTestResultPrinter::PrintRottenTests(const UnitTest& unit_test) {
+  const int rotten_test_count = unit_test.rotten_test_count();
+  if (rotten_test_count == 0) {
+    return;
+  }
+
+  for (int i = 0; i < unit_test.total_test_suite_count(); ++i) {
+    const TestSuite& test_suite = *unit_test.GetTestSuite(i);
+    if (!test_suite.should_run() || (test_suite.rotten_test_count() == 0)) {
+      continue;
+    }
+    for (int j = 0; j < test_suite.total_test_count(); ++j) {
+      const TestInfo& test_info = *test_suite.GetTestInfo(j);
+      if (!test_info.should_run() || !test_info.result()->Rotten()) {
+        continue;
+      }
+      ColoredPrintf(GTestColor::kYellow, "[  ROTTEN  ] ");
+      printf("%s.%s\n", test_suite.name(), test_info.name());
+    }
+  }
+}
+
 void PrettyUnitTestResultPrinter::OnTestIterationEnd(const UnitTest& unit_test,
                                                      int /*iteration*/) {
   ColoredPrintf(GTestColor::kGreen, "[==========] ");
@@ -3658,10 +3734,19 @@ void PrettyUnitTestResultPrinter::OnTestIterationEnd(const UnitTest& unit_test,
     PrintFailedTestSuites(unit_test);
   }
 
+  int rotten_test_count = unit_test.rotten_test_count();
+  if (unit_test.Passed() && rotten_test_count) {
+    ColoredPrintf(GTestColor::kYellow, "[  ROTTEN  ] ");
+    printf("%s, listed below:\n", FormatTestCount(rotten_test_count).c_str());
+    PrintRottenTests(unit_test);
+    ColoredPrintf(GTestColor::kYellow, "  YOU HAVE %d ROTTEN %s\n\n",
+                  rotten_test_count, rotten_test_count == 1 ? "TEST" : "TESTS");
+  }
+
   int num_disabled = unit_test.reportable_disabled_test_count();
   if (num_disabled && !GTEST_FLAG_GET(also_run_disabled_tests)) {
-    if (unit_test.Passed()) {
-      printf("\n");  // Add a spacer if no FAILURE banner is displayed.
+    if (unit_test.Passed() && !rotten_test_count) {
+      printf("\n");  // Add a spacer if no FAILURE or ROTTEN banner is displayed.
     }
     ColoredPrintf(GTestColor::kYellow, "  YOU HAVE %d DISABLED %s\n\n",
                   num_disabled, num_disabled == 1 ? "TEST" : "TESTS");
@@ -3776,6 +3861,57 @@ void BriefUnitTestResultPrinter::OnTestIterationEnd(const UnitTest& unit_test,
 }
 
 // End BriefUnitTestResultPrinter
+
+#if GTEST_HAS_RGT
+
+// This class implements the TestEventListener interface.
+//
+// Class RgtListener is not copyable.
+class RgtListener : public EmptyTestEventListener {
+ public:
+  RgtListener() {}
+  void OnTestProgramStart(const UnitTest& unit_test) override;
+  void OnTestEnd(const TestInfo& test_info) override;
+  void OnEnvironmentsTearDownStart(const UnitTest& unit_test) override;
+ private:
+  size_t item_count_ = 0;
+};
+
+void RgtListener::OnTestProgramStart(const UnitTest& /*unit_test*/) {
+  this->item_count_ = internal::RgtInit();
+}
+
+void RgtListener::OnTestEnd(const TestInfo& test_info) {
+  // Skip this unless the test would be reported as passed.
+  if (!test_info.result()->Passed())
+    return;
+  // Also skip if this test uses an EXPECT_[NON]FATAL_FAILURE macro,
+  // which makes reporting rotten green tests unreliable.
+  if (test_info.uses_expect_failure())
+    return;
+
+  // Report rotten assertions for this Test.
+  RgtReportRotten(&test_info.asserts());
+}
+
+void RgtListener::OnEnvironmentsTearDownStart(const UnitTest& unit_test) {
+  // Report rotten assertions for helper methods, unless we are in a
+  // situation that is very likely to report false positives:
+  // sharding, filtering, or the overall result is not Pass.
+  // (We'll also get false positives if helpers are used by
+  // disabled or skipped tests, but we can probably live with that.)
+  if (testing::internal::ShouldShard(kTestTotalShards, kTestShardIndex, false))
+    return;
+  const char* const filter = GTEST_FLAG(filter).c_str();
+  if (!String::CStringEquals(filter, kUniversalFilter))
+    return;
+  if (unit_test.Passed())
+    (void)RgtReportRotten(nullptr);
+}
+
+// End RgtListener
+
+#endif // GTEST_HAS_RGT
 
 // class TestEventRepeater
 //
@@ -5257,6 +5393,9 @@ int UnitTest::skipped_test_count() const {
   return impl()->skipped_test_count();
 }
 
+// Gets the number of rotten tests.
+int UnitTest::rotten_test_count() const { return impl()->rotten_test_count(); }
+
 // Gets the number of failed tests.
 int UnitTest::failed_test_count() const { return impl()->failed_test_count(); }
 
@@ -5295,6 +5434,10 @@ internal::TimeInMillis UnitTest::elapsed_time() const {
 // Returns true if and only if the unit test passed (i.e. all test suites
 // passed).
 bool UnitTest::Passed() const { return impl()->Passed(); }
+
+// Returns true if and only if the unit test passed but had at least one
+// rotten test.
+bool UnitTest::Rotten() const { return impl()->Rotten(); }
 
 // Returns true if and only if the unit test failed (i.e. some test suite
 // failed or something outside of all tests failed).
@@ -5761,6 +5904,10 @@ void UnitTestImpl::PostFlagParsingInit() {
     ConfigureStreamingOutput();
 #endif  // GTEST_CAN_STREAM_RESULTS_
 
+#if GTEST_HAS_RGT
+    listeners()->Append(new RgtListener);
+#endif // GTEST_HAS_RGT
+
 #ifdef GTEST_HAS_ABSL
     if (GTEST_FLAG_GET(install_failure_signal_handler)) {
       absl::FailureSignalHandlerOptions options;
@@ -5997,7 +6144,7 @@ bool UnitTestImpl::RunAllTests() {
     repeater->OnTestIterationEnd(*parent_, i);
 
     // Gets the result and clears it.
-    if (!Passed()) {
+    if (!Passed() || (!GTEST_FLAG_GET(treat_rotten_as_pass) && Rotten())) {
       failed = true;
     }
 
@@ -6032,6 +6179,12 @@ bool UnitTestImpl::RunAllTests() {
         " will start to enforce the valid usage. "
         "Please fix it ASAP, or IT WILL START TO FAIL.\n");  // NOLINT
   }
+
+#if GTEST_DEBUG_RGT
+  if (!in_subprocess_for_death_test &&
+      !GTEST_FLAG_GET(dump_assertions_to).empty())
+    RgtDumpAllAssertionsTo(GTEST_FLAG_GET(dump_assertions_to));
+#endif // GTEST_DEBUG_RGT
 
   return !failed;
 }
@@ -6578,6 +6731,9 @@ static const char kColorEncodedHelpMessage[] =
     "      Generate a JSON or XML report in the given directory or with the "
     "given\n"
     "      file name. @YFILE_PATH@D defaults to @Gtest_detail.xml@D.\n"
+    "  @G--" GTEST_FLAG_PREFIX_
+    "treat_rotten_as_pass@D\n"
+    "      Treat un-executed assertions within a passing test as passing.\n"
 #if GTEST_CAN_STREAM_RESULTS_
     "  @G--" GTEST_FLAG_PREFIX_
     "stream_result_to=@YHOST@G:@YPORT@D\n"
@@ -6651,6 +6807,10 @@ static bool ParseGoogleTestFlag(const char* const arg) {
   GTEST_INTERNAL_PARSE_FLAG(stack_trace_depth);
   GTEST_INTERNAL_PARSE_FLAG(stream_result_to);
   GTEST_INTERNAL_PARSE_FLAG(throw_on_failure);
+  GTEST_INTERNAL_PARSE_FLAG(treat_rotten_as_pass);
+#if GTEST_DEBUG_RGT
+  GTEST_INTERNAL_PARSE_FLAG(dump_assertions_to);
+#endif // GTEST_DEBUG_RGT
   return false;
 }
 

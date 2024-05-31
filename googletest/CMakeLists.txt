@@ -319,6 +319,9 @@ if (gtest_build_tests)
   cxx_executable(gtest_list_output_unittest_ test gtest)
   py_test(gtest_list_output_unittest)
 
+  cxx_executable(gtest_rgt_output_test_ test gtest_main)
+  py_test(gtest_rgt_output_test)
+
   cxx_executable(gtest_xml_outfile1_test_ test gtest_main)
   cxx_executable(gtest_xml_outfile2_test_ test gtest_main)
   py_test(gtest_xml_outfiles_test)

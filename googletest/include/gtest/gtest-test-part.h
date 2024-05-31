@@ -59,7 +59,8 @@ class GTEST_API_ TestPartResult {
     kSuccess,          // Succeeded.
     kNonFatalFailure,  // Failed but the test can continue.
     kFatalFailure,     // Failed and the test should be terminated.
-    kSkip              // Skipped.
+    kSkip,             // Skipped.
+    kRotten            // Not executed but should have.
   };
 
   // C'tor.  TestPartResult does NOT have a default constructor.
@@ -94,6 +95,9 @@ class GTEST_API_ TestPartResult {
 
   // Returns true if and only if the test part was skipped.
   bool skipped() const { return type_ == kSkip; }
+
+  // Returns true if and only if the test part didn't execute but should have.
+  bool rotten() const { return type_ == kRotten; }
 
   // Returns true if and only if the test part passed.
   bool passed() const { return type_ == kSuccess; }

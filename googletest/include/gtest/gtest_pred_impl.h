@@ -77,7 +77,7 @@ namespace testing {
 #define GTEST_ASSERT_(expression, on_failure)                   \
   GTEST_AMBIGUOUS_ELSE_BLOCKER_                                 \
   if (const ::testing::AssertionResult gtest_ar = (expression)) \
-    ;                                                           \
+    { GTEST_RGT_DECLARE }                                       \
   else                                                          \
     on_failure(gtest_ar.failure_message())
 

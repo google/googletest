@@ -1,0 +1,256 @@
+main.cc
+[0;32m[==========] [mRunning 24 tests from 6 test suites.
+[0;32m[----------] [mGlobal test environment set-up.
+[0;32m[----------] [m8 tests from NotRotten
+[0;32m[ RUN      ] [mNotRotten.EmptyIsntRotten
+[0;32m[       OK ] [mNotRotten.EmptyIsntRotten (? ms)
+[0;33m[ DISABLED ] [mNotRotten.DISABLED_DisabledIsntRotten
+[0;32m[ RUN      ] [mNotRotten.SkippedIsntRotten
+gtest_rgt_output_test_.cc:#: Skipped
+
+
+[0;32m[  SKIPPED ] [mNotRotten.SkippedIsntRotten (? ms)
+[0;32m[ RUN      ] [mNotRotten.AllPass
+[0;32m[       OK ] [mNotRotten.AllPass (? ms)
+[0;32m[ RUN      ] [mNotRotten.ExpectNonfatalFailureIsntRotten
+[0;32m[       OK ] [mNotRotten.ExpectNonfatalFailureIsntRotten (? ms)
+[0;32m[ RUN      ] [mNotRotten.ExpectFatalFailureIsntRotten
+[0;32m[       OK ] [mNotRotten.ExpectFatalFailureIsntRotten (? ms)
+[0;32m[ RUN      ] [mNotRotten.ExpectNoFatalFailurePasses
+[0;32m[       OK ] [mNotRotten.ExpectNoFatalFailurePasses (? ms)
+[0;32m[ RUN      ] [mNotRotten.ExpectNonfatalFailureSadlyDisablesRotten
+[0;32m[       OK ] [mNotRotten.ExpectNonfatalFailureSadlyDisablesRotten (? ms)
+[0;32m[ RUN      ] [mNotRotten.ExpectFatalFailureSadlyDisablesRotten
+[0;32m[       OK ] [mNotRotten.ExpectFatalFailureSadlyDisablesRotten (? ms)
+[0;32m[----------] [m8 tests from NotRotten (? ms total)
+
+[0;32m[----------] [m5 tests from IsRotten
+[0;32m[ RUN      ] [mIsRotten.SimpleExpect
+gtest_rgt_output_test_.cc:117: Rotten
+
+[0;33m[  ROTTEN  ] [mIsRotten.SimpleExpect (? ms)
+[0;32m[ RUN      ] [mIsRotten.SimpleAssert
+gtest_rgt_output_test_.cc:123: Rotten
+
+[0;33m[  ROTTEN  ] [mIsRotten.SimpleAssert (? ms)
+[0;32m[ RUN      ] [mIsRotten.OneIsEnough
+gtest_rgt_output_test_.cc:130: Rotten
+
+[0;33m[  ROTTEN  ] [mIsRotten.OneIsEnough (? ms)
+[0;32m[ RUN      ] [mIsRotten.MissedExpectFailure
+gtest_rgt_output_test_.cc:137: Rotten
+
+gtest_rgt_output_test_.cc:138: Rotten
+
+[0;33m[  ROTTEN  ] [mIsRotten.MissedExpectFailure (? ms)
+[0;32m[ RUN      ] [mIsRotten.ExpectNoFatalFailure
+gtest_rgt_output_test_.cc:144: Rotten
+
+gtest_rgt_output_test_.cc:145: Rotten
+
+[0;33m[  ROTTEN  ] [mIsRotten.ExpectNoFatalFailure (? ms)
+[0;32m[----------] [m5 tests from IsRotten (? ms total)
+
+[0;32m[----------] [m2 tests from NotRottenFixture
+[0;32m[ RUN      ] [mNotRottenFixture.AllPass
+[0;32m[       OK ] [mNotRottenFixture.AllPass (? ms)
+[0;32m[ RUN      ] [mNotRottenFixture.SkippedIsntRotten
+gtest_rgt_output_test_.cc:#: Skipped
+
+
+[0;32m[  SKIPPED ] [mNotRottenFixture.SkippedIsntRotten (? ms)
+[0;32m[----------] [m2 tests from NotRottenFixture (? ms total)
+
+[0;32m[----------] [m1 test from IsRottenFixture
+[0;32m[ RUN      ] [mIsRottenFixture.SingleExpect
+gtest_rgt_output_test_.cc:173: Rotten
+
+[0;33m[  ROTTEN  ] [mIsRottenFixture.SingleExpect (? ms)
+[0;32m[----------] [m1 test from IsRottenFixture (? ms total)
+
+[0;32m[----------] [m4 tests from NotRottenParamTest
+[0;32m[ RUN      ] [mNotRottenParamTest.Passes/0
+[0;32m[       OK ] [mNotRottenParamTest.Passes/0 (? ms)
+[0;32m[ RUN      ] [mNotRottenParamTest.Passes/1
+[0;32m[       OK ] [mNotRottenParamTest.Passes/1 (? ms)
+[0;32m[ RUN      ] [mNotRottenParamTest.ConditionalOnParam/0
+[0;32m[       OK ] [mNotRottenParamTest.ConditionalOnParam/0 (? ms)
+[0;32m[ RUN      ] [mNotRottenParamTest.ConditionalOnParam/1
+[0;32m[       OK ] [mNotRottenParamTest.ConditionalOnParam/1 (? ms)
+[0;32m[----------] [m4 tests from NotRottenParamTest (? ms total)
+
+[0;32m[----------] [m4 tests from IsRottenParamTest
+[0;32m[ RUN      ] [mIsRottenParamTest.SkippedIsSadlyRotten/0
+gtest_rgt_output_test_.cc:#: Skipped
+
+
+[0;32m[  SKIPPED ] [mIsRottenParamTest.SkippedIsSadlyRotten/0 (? ms)
+[0;32m[ RUN      ] [mIsRottenParamTest.SkippedIsSadlyRotten/1
+gtest_rgt_output_test_.cc:#: Skipped
+
+
+[0;32m[  SKIPPED ] [mIsRottenParamTest.SkippedIsSadlyRotten/1 (? ms)
+[0;33m[ DISABLED ] [mIsRottenParamTest.DISABLED_DisabledIsSadlyRotten/0
+[0;33m[ DISABLED ] [mIsRottenParamTest.DISABLED_DisabledIsSadlyRotten/1
+[0;32m[ RUN      ] [mIsRottenParamTest.ActuallyRotten/0
+[0;32m[       OK ] [mIsRottenParamTest.ActuallyRotten/0 (? ms)
+[0;32m[ RUN      ] [mIsRottenParamTest.ActuallyRotten/1
+[0;32m[       OK ] [mIsRottenParamTest.ActuallyRotten/1 (? ms)
+[0;32m[----------] [m4 tests from IsRottenParamTest (? ms total)
+
+[0;32m[----------] [mGlobal test environment tear-down
+gtest_rgt_output_test_.cc:150: Rotten
+
+gtest_rgt_output_test_.cc:217: Rotten
+
+gtest_rgt_output_test_.cc:221: Rotten
+
+gtest_rgt_output_test_.cc:227: Rotten
+
+[0;32m[==========] [m24 tests from 6 test suites ran. (? ms total)
+[0;32m[  PASSED  ] [m20 tests.
+[0;32m[  SKIPPED ] [m4 tests, listed below:
+[0;32m[  SKIPPED ] [mNotRotten.SkippedIsntRotten
+[0;32m[  SKIPPED ] [mNotRottenFixture.SkippedIsntRotten
+[0;32m[  SKIPPED ] [mIsRottenParamTest.SkippedIsSadlyRotten/0
+[0;32m[  SKIPPED ] [mIsRottenParamTest.SkippedIsSadlyRotten/1
+[0;33m[  ROTTEN  ] [m6 tests, listed below:
+[0;33m[  ROTTEN  ] [mIsRotten.SimpleExpect
+[0;33m[  ROTTEN  ] [mIsRotten.SimpleAssert
+[0;33m[  ROTTEN  ] [mIsRotten.OneIsEnough
+[0;33m[  ROTTEN  ] [mIsRotten.MissedExpectFailure
+[0;33m[  ROTTEN  ] [mIsRotten.ExpectNoFatalFailure
+[0;33m[  ROTTEN  ] [mIsRottenFixture.SingleExpect
+[0;33m  YOU HAVE 6 ROTTEN TESTS
+
+[m[0;33m  YOU HAVE 3 DISABLED TESTS
+
+[mFail
+main.cc
+[==========] Running 24 tests from 6 test suites.
+[----------] Global test environment set-up.
+[----------] 8 tests from NotRotten
+[ RUN      ] NotRotten.EmptyIsntRotten
+[       OK ] NotRotten.EmptyIsntRotten (? ms)
+[ DISABLED ] NotRotten.DISABLED_DisabledIsntRotten
+[ RUN      ] NotRotten.SkippedIsntRotten
+gtest_rgt_output_test_.cc:#: Skipped
+
+
+[  SKIPPED ] NotRotten.SkippedIsntRotten (? ms)
+[ RUN      ] NotRotten.AllPass
+[       OK ] NotRotten.AllPass (? ms)
+[ RUN      ] NotRotten.ExpectNonfatalFailureIsntRotten
+[       OK ] NotRotten.ExpectNonfatalFailureIsntRotten (? ms)
+[ RUN      ] NotRotten.ExpectFatalFailureIsntRotten
+[       OK ] NotRotten.ExpectFatalFailureIsntRotten (? ms)
+[ RUN      ] NotRotten.ExpectNoFatalFailurePasses
+[       OK ] NotRotten.ExpectNoFatalFailurePasses (? ms)
+[ RUN      ] NotRotten.ExpectNonfatalFailureSadlyDisablesRotten
+[       OK ] NotRotten.ExpectNonfatalFailureSadlyDisablesRotten (? ms)
+[ RUN      ] NotRotten.ExpectFatalFailureSadlyDisablesRotten
+[       OK ] NotRotten.ExpectFatalFailureSadlyDisablesRotten (? ms)
+[----------] 8 tests from NotRotten (? ms total)
+
+[----------] 5 tests from IsRotten
+[ RUN      ] IsRotten.SimpleExpect
+gtest_rgt_output_test_.cc:117: Rotten
+
+[  ROTTEN  ] IsRotten.SimpleExpect (? ms)
+[ RUN      ] IsRotten.SimpleAssert
+gtest_rgt_output_test_.cc:123: Rotten
+
+[  ROTTEN  ] IsRotten.SimpleAssert (? ms)
+[ RUN      ] IsRotten.OneIsEnough
+gtest_rgt_output_test_.cc:130: Rotten
+
+[  ROTTEN  ] IsRotten.OneIsEnough (? ms)
+[ RUN      ] IsRotten.MissedExpectFailure
+gtest_rgt_output_test_.cc:137: Rotten
+
+gtest_rgt_output_test_.cc:138: Rotten
+
+[  ROTTEN  ] IsRotten.MissedExpectFailure (? ms)
+[ RUN      ] IsRotten.ExpectNoFatalFailure
+gtest_rgt_output_test_.cc:144: Rotten
+
+gtest_rgt_output_test_.cc:145: Rotten
+
+[  ROTTEN  ] IsRotten.ExpectNoFatalFailure (? ms)
+[----------] 5 tests from IsRotten (? ms total)
+
+[----------] 2 tests from NotRottenFixture
+[ RUN      ] NotRottenFixture.AllPass
+[       OK ] NotRottenFixture.AllPass (? ms)
+[ RUN      ] NotRottenFixture.SkippedIsntRotten
+gtest_rgt_output_test_.cc:#: Skipped
+
+
+[  SKIPPED ] NotRottenFixture.SkippedIsntRotten (? ms)
+[----------] 2 tests from NotRottenFixture (? ms total)
+
+[----------] 1 test from IsRottenFixture
+[ RUN      ] IsRottenFixture.SingleExpect
+gtest_rgt_output_test_.cc:173: Rotten
+
+[  ROTTEN  ] IsRottenFixture.SingleExpect (? ms)
+[----------] 1 test from IsRottenFixture (? ms total)
+
+[----------] 4 tests from NotRottenParamTest
+[ RUN      ] NotRottenParamTest.Passes/0
+[       OK ] NotRottenParamTest.Passes/0 (? ms)
+[ RUN      ] NotRottenParamTest.Passes/1
+[       OK ] NotRottenParamTest.Passes/1 (? ms)
+[ RUN      ] NotRottenParamTest.ConditionalOnParam/0
+[       OK ] NotRottenParamTest.ConditionalOnParam/0 (? ms)
+[ RUN      ] NotRottenParamTest.ConditionalOnParam/1
+[       OK ] NotRottenParamTest.ConditionalOnParam/1 (? ms)
+[----------] 4 tests from NotRottenParamTest (? ms total)
+
+[----------] 4 tests from IsRottenParamTest
+[ RUN      ] IsRottenParamTest.SkippedIsSadlyRotten/0
+gtest_rgt_output_test_.cc:#: Skipped
+
+
+[  SKIPPED ] IsRottenParamTest.SkippedIsSadlyRotten/0 (? ms)
+[ RUN      ] IsRottenParamTest.SkippedIsSadlyRotten/1
+gtest_rgt_output_test_.cc:#: Skipped
+
+
+[  SKIPPED ] IsRottenParamTest.SkippedIsSadlyRotten/1 (? ms)
+[ DISABLED ] IsRottenParamTest.DISABLED_DisabledIsSadlyRotten/0
+[ DISABLED ] IsRottenParamTest.DISABLED_DisabledIsSadlyRotten/1
+[ RUN      ] IsRottenParamTest.ActuallyRotten/0
+[       OK ] IsRottenParamTest.ActuallyRotten/0 (? ms)
+[ RUN      ] IsRottenParamTest.ActuallyRotten/1
+[       OK ] IsRottenParamTest.ActuallyRotten/1 (? ms)
+[----------] 4 tests from IsRottenParamTest (? ms total)
+
+[----------] Global test environment tear-down
+gtest_rgt_output_test_.cc:150: Rotten
+
+gtest_rgt_output_test_.cc:217: Rotten
+
+gtest_rgt_output_test_.cc:221: Rotten
+
+gtest_rgt_output_test_.cc:227: Rotten
+
+[==========] 24 tests from 6 test suites ran. (? ms total)
+[  PASSED  ] 20 tests.
+[  SKIPPED ] 4 tests, listed below:
+[  SKIPPED ] NotRotten.SkippedIsntRotten
+[  SKIPPED ] NotRottenFixture.SkippedIsntRotten
+[  SKIPPED ] IsRottenParamTest.SkippedIsSadlyRotten/0
+[  SKIPPED ] IsRottenParamTest.SkippedIsSadlyRotten/1
+[  ROTTEN  ] 6 tests, listed below:
+[  ROTTEN  ] IsRotten.SimpleExpect
+[  ROTTEN  ] IsRotten.SimpleAssert
+[  ROTTEN  ] IsRotten.OneIsEnough
+[  ROTTEN  ] IsRotten.MissedExpectFailure
+[  ROTTEN  ] IsRotten.ExpectNoFatalFailure
+[  ROTTEN  ] IsRottenFixture.SingleExpect
+  YOU HAVE 6 ROTTEN TESTS
+
+  YOU HAVE 3 DISABLED TESTS
+
+Pass

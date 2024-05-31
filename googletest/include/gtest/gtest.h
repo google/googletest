@@ -152,6 +152,15 @@ GTEST_DECLARE_int32_(stack_trace_depth);
 // non-zero code otherwise. For use with an external test framework.
 GTEST_DECLARE_bool_(throw_on_failure);
 
+// This flag controls whether an un-executed assertion within an otherwise
+// passing test is treated as pass or fail.
+GTEST_DECLARE_bool_(treat_rotten_as_pass);
+
+#if GTEST_DEBUG_RGT
+// Optionally dump all assertions locations, for debugging RGT.
+GTEST_DECLARE_string_(dump_assertions_to);
+#endif // GTEST_DEBUG_RGT
+
 // When this flag is set with a "host:port" string, on supported
 // platforms test results are streamed to the specified port on
 // the specified host machine.
@@ -417,6 +426,9 @@ class GTEST_API_ TestResult {
   // Returns true if and only if the test was skipped.
   bool Skipped() const;
 
+  // Returns true if and only if the test passed but had a rotten assertion.
+  bool Rotten() const;
+
   // Returns true if and only if the test failed.
   bool Failed() const;
 
@@ -595,6 +607,15 @@ class GTEST_API_ TestInfo {
     return matches_filter_ && !is_in_another_shard_;
   }
 
+#if GTEST_HAS_RGT
+  // Readonly access to the test assertion info.
+  const internal::RgtAssertInfo& asserts() const { return asserts_; }
+
+  // Track whether the test uses an EXPECT_*_FAILURE macro.
+  bool uses_expect_failure() const { return uses_expect_failure_; }
+  void set_uses_expect_failure() { uses_expect_failure_ = true; }
+#endif // GTEST_HAS_RGT
+
   // Returns the result of the test.
   const TestResult* result() const { return &result_; }
 
@@ -612,6 +633,9 @@ class GTEST_API_ TestInfo {
       internal::TypeId fixture_class_id, internal::SetUpTestSuiteFunc set_up_tc,
       internal::TearDownTestSuiteFunc tear_down_tc,
       internal::TestFactoryBase* factory);
+#if GTEST_HAS_RGT
+  friend size_t internal::RgtInit();
+#endif // GTEST_HAS_RGT
 
   // Constructs a TestInfo object. The newly constructed instance assumes
   // ownership of the factory object.
@@ -655,8 +679,13 @@ class GTEST_API_ TestInfo {
   bool matches_filter_;       // True if this test matches the
                               // user-specified filter.
   bool is_in_another_shard_;  // Will be run in another shard.
+  bool uses_expect_failure_;  // Uses an EXPECT_*_FAILURE macro.
   internal::TestFactoryBase* const factory_;  // The factory that creates
                                               // the test object
+#if GTEST_HAS_RGT
+  internal::RgtAssertInfo asserts_; // Info on each assertion macro contained
+                                    // within this test.
+#endif // GTEST_HAS_RGT
 
   // This field is mutable and needs to be reset before running the
   // test for the second time.
@@ -709,6 +738,9 @@ class GTEST_API_ TestSuite {
   // Gets the number of skipped tests in this test suite.
   int skipped_test_count() const;
 
+  // Gets the number of rotten tests in this test suite.
+  int rotten_test_count() const;
+
   // Gets the number of failed tests in this test suite.
   int failed_test_count() const;
 
@@ -729,6 +761,10 @@ class GTEST_API_ TestSuite {
 
   // Returns true if and only if the test suite passed.
   bool Passed() const { return !Failed(); }
+
+  // Returns true if and only if the test suite passed but there is at least
+  // one rotten assertion.
+  bool Rotten() const { return Passed() && rotten_test_count() > 0; }
 
   // Returns true if and only if the test suite failed.
   bool Failed() const {
@@ -811,6 +847,11 @@ class GTEST_API_ TestSuite {
   // Returns true if and only if test skipped.
   static bool TestSkipped(const TestInfo* test_info) {
     return test_info->should_run() && test_info->result()->Skipped();
+  }
+
+  // Returns true if and only if test was rotten.
+  static bool TestRotten(const TestInfo* test_info) {
+    return test_info->should_run() && test_info->result()->Rotten();
   }
 
   // Returns true if and only if test failed.
@@ -1155,6 +1196,9 @@ class GTEST_API_ UnitTest {
   // Gets the number of successful test suites.
   int successful_test_suite_count() const;
 
+  // Gets the number of test suites with rotten assertions.
+  int rotten_test_suite_count() const;
+
   // Gets the number of failed test suites.
   int failed_test_suite_count() const;
 
@@ -1178,6 +1222,9 @@ class GTEST_API_ UnitTest {
 
   // Gets the number of skipped tests.
   int skipped_test_count() const;
+
+  // Gets the number of rotten tests.
+  int rotten_test_count() const;
 
   // Gets the number of failed tests.
   int failed_test_count() const;
@@ -1207,6 +1254,10 @@ class GTEST_API_ UnitTest {
   // Returns true if and only if the unit test passed (i.e. all test suites
   // passed).
   bool Passed() const;
+
+  // Returns true if and only if the unit test passed but had at least one
+  // rotten assertion.
+  bool Rotten() const;
 
   // Returns true if and only if the unit test failed (i.e. some test suite
   // failed or something outside of all tests failed).
