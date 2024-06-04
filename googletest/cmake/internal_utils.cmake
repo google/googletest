@@ -154,7 +154,9 @@ macro(config_compiler_and_linker)
   set(cxx_no_rtti "${cxx_default} ${cxx_no_rtti_flags}")
 
   # For building the gtest libraries.
+  if(NOT DEFINED cxx_strict_flags)
   set(cxx_strict "${cxx_default} ${cxx_strict_flags}")
+  endif()
 endmacro()
 
 # Defines the gtest & gtest_main libraries. User tests should link
