@@ -291,7 +291,9 @@ TEST(ExitStatusPredicateTest, KilledBySignal) {
   const int status_kill = KilledExitStatus(SIGKILL);
   const testing::KilledBySignal pred_segv(SIGSEGV);
   const testing::KilledBySignal pred_kill(SIGKILL);
+#if !(defined(GTEST_OS_LINUX_ANDROID) && __ANDROID_API__ <= 21)
   EXPECT_PRED1(pred_segv, status_segv);
+#endif
   EXPECT_PRED1(pred_kill, status_kill);
   EXPECT_FALSE(pred_segv(status_kill));
   EXPECT_FALSE(pred_kill(status_segv));
