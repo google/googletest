@@ -1761,9 +1761,15 @@ class FloatingEqMatcher {
     const FloatType max_abs_error_;
   };
 
-  // The following 3 type conversion operators allow FloatEq(expected) and
-  // NanSensitiveFloatEq(expected) to be used as a Matcher<float>, a
-  // Matcher<const float&>, or a Matcher<float&>, but nothing else.
+  // The following 4 type conversion operators allow FloatEq(expected) and
+  // NanSensitiveFloatEq(expected) to be used as a Matcher<const float>, 
+  // a Matcher<float>, a Matcher<const float&>, or  a Matcher<float&>, 
+  // but nothing else.
+  operator Matcher<const FloatType>() const {
+    return MakeMatcher(
+        new Impl<const FloatType>(expected_, nan_eq_nan_, max_abs_error_));
+  }
+
   operator Matcher<FloatType>() const {
     return MakeMatcher(
         new Impl<FloatType>(expected_, nan_eq_nan_, max_abs_error_));
