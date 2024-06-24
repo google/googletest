@@ -6672,6 +6672,12 @@ static void LoadFlagsFromFile(const std::string& path) {
 }
 #endif  // GTEST_USE_OWN_FLAGFILE_FLAG_ && GTEST_HAS_FILE_SYSTEM
 
+// Checks if the given flag is a help flag.
+// Support all help flag variants mentioned in the documentation.
+static bool IsHelpFlag(const std::string& flag) {
+  return flag == "--help" || flag == "-h" || flag == "-?" || flag == "/?";
+}
+
 // Parses the command line for Google Test flags, without initializing
 // other parts of Google Test.  The type parameter CharType can be
 // instantiated to either char or wchar_t.
@@ -6693,7 +6699,7 @@ void ParseGoogleTestFlagsOnlyImpl(int* argc, CharType** argv) {
       LoadFlagsFromFile(flagfile_value);
       remove_flag = true;
 #endif  // GTEST_USE_OWN_FLAGFILE_FLAG_ && GTEST_HAS_FILE_SYSTEM
-    } else if (arg_string == "--help" || HasGoogleTestFlagPrefix(arg)) {
+    } else if (IsHelpFlag(arg_string) || HasGoogleTestFlagPrefix(arg)) {
       // Both help flag and unrecognized Google Test flags (excluding
       // internal ones) trigger help display.
       g_help_flag = true;
