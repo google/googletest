@@ -26,6 +26,8 @@ option(
   "Build gtest with internal symbols hidden in shared libraries."
   OFF)
 
+option(gtest_enable_system_include "Whether or not gtest should be considered a system include." ON)
+
 # Defines pre_project_set_up_hermetic_build() and set_up_hermetic_build().
 include(cmake/hermetic_build.cmake OPTIONAL)
 
@@ -141,10 +143,13 @@ endif()
 cxx_library(gtest_main "${cxx_strict}" src/gtest_main.cc)
 set_target_properties(gtest_main PROPERTIES VERSION ${GOOGLETEST_VERSION})
 string(REPLACE ";" "$<SEMICOLON>" dirs "${gtest_build_include_dirs}")
-target_include_directories(gtest SYSTEM INTERFACE
+if (gtest_enable_system_include)
+	set(gtest_system_include SYSTEM)
+endif()
+target_include_directories(gtest ${gtest_system_include} INTERFACE
   "$<BUILD_INTERFACE:${dirs}>"
   "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
-target_include_directories(gtest_main SYSTEM INTERFACE
+target_include_directories(gtest_main ${gtest_system_include} INTERFACE
   "$<BUILD_INTERFACE:${dirs}>"
   "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
 if(CMAKE_SYSTEM_NAME MATCHES "QNX" AND CMAKE_SYSTEM_VERSION VERSION_GREATER_EQUAL 7.1)
