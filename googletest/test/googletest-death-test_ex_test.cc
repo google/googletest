@@ -36,6 +36,12 @@
 #ifdef GTEST_HAS_DEATH_TEST
 
 #if GTEST_HAS_SEH
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
 #include <windows.h>  // For RaiseException().
 #endif
 

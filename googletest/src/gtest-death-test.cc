@@ -62,6 +62,12 @@
 
 #ifdef GTEST_OS_WINDOWS
 #include <windows.h>
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
 #else
 #include <sys/mman.h>
 #include <sys/wait.h>
