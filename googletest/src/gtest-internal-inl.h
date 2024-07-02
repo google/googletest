@@ -164,6 +164,10 @@ class GTestFlagSaver {
     stack_trace_depth_ = GTEST_FLAG_GET(stack_trace_depth);
     stream_result_to_ = GTEST_FLAG_GET(stream_result_to);
     throw_on_failure_ = GTEST_FLAG_GET(throw_on_failure);
+    treat_rotten_as_pass_ = GTEST_FLAG_GET(treat_rotten_as_pass);
+#if GTEST_DEBUG_RGT
+    dump_assertions_to_ = GTEST_FLAG_GET(dump_assertions_to);
+#endif // GTEST_DEBUG_RGT
   }
 
   // The d'tor is not virtual.  DO NOT INHERIT FROM THIS CLASS.
@@ -190,6 +194,10 @@ class GTestFlagSaver {
     GTEST_FLAG_SET(stack_trace_depth, stack_trace_depth_);
     GTEST_FLAG_SET(stream_result_to, stream_result_to_);
     GTEST_FLAG_SET(throw_on_failure, throw_on_failure_);
+    GTEST_FLAG_SET(treat_rotten_as_pass, treat_rotten_as_pass_);
+#if GTEST_DEBUG_RGT
+    GTEST_FLAG_SET(dump_assertions_to, dump_assertions_to_);
+#endif // GTEST_DEBUG_RGT
   }
 
  private:
@@ -215,6 +223,10 @@ class GTestFlagSaver {
   int32_t stack_trace_depth_;
   std::string stream_result_to_;
   bool throw_on_failure_;
+  bool treat_rotten_as_pass_;
+#if GTEST_DEBUG_RGT
+  std::string dump_assertions_to_;
+#endif // GTEST_DEBUG_RGT
 };
 
 // Converts a Unicode code point to a narrow string in UTF-8 encoding.
@@ -535,6 +547,9 @@ class GTEST_API_ UnitTestImpl {
   // Gets the number of successful test suites.
   int successful_test_suite_count() const;
 
+  // Gets the number of rotten test suites.
+  int rotten_test_suite_count() const;
+
   // Gets the number of failed test suites.
   int failed_test_suite_count() const;
 
@@ -550,6 +565,9 @@ class GTEST_API_ UnitTestImpl {
 
   // Gets the number of skipped tests.
   int skipped_test_count() const;
+
+  // Gets the number of rotten tests.
+  int rotten_test_count() const;
 
   // Gets the number of failed tests.
   int failed_test_count() const;
@@ -579,6 +597,12 @@ class GTEST_API_ UnitTestImpl {
   // Returns true if and only if the unit test passed (i.e. all test suites
   // passed).
   bool Passed() const { return !Failed(); }
+
+  // Returns true if and only if the unit test had at least one test suite
+  // with a rotten assertion.
+  bool Rotten() const {
+    return rotten_test_suite_count() > 0 || ad_hoc_test_result()->Rotten();
+  }
 
   // Returns true if and only if the unit test failed (i.e. some test suite
   // failed or something outside of all tests failed).

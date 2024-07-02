@@ -155,6 +155,15 @@ TEST(LoggingTest, InterleavingLoggingAndAssertions) {
   }
 }
 
+// A test that fails isn't reported as rotten, even if it actually
+// contains rotten assertions. Only passing (green) tests can be rotten.
+TEST(NotRotten, ExpectFailingWithUnexecutedIsntRotten) {
+  EXPECT_EQ(1, 2);
+  if (testing::internal::AlwaysFalse()) {
+    EXPECT_EQ(3, 3);
+  }
+}
+
 // Tests the SCOPED_TRACE macro.
 
 // A helper function for testing SCOPED_TRACE.

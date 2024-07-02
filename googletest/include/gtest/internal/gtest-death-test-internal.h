@@ -221,6 +221,7 @@ GTEST_API_ bool ExitedUnsuccessfully(int exit_status);
 #define GTEST_DEATH_TEST_(statement, predicate, regex_or_matcher, fail)        \
   GTEST_AMBIGUOUS_ELSE_BLOCKER_                                                \
   if (::testing::internal::AlwaysTrue()) {                                     \
+    { GTEST_RGT_DECLARE }                                                      \
     ::testing::internal::DeathTest* gtest_dt;                                  \
     if (!::testing::internal::DeathTest::Create(                               \
             #statement,                                                        \
@@ -259,6 +260,7 @@ GTEST_API_ bool ExitedUnsuccessfully(int exit_status);
 #define GTEST_EXECUTE_STATEMENT_(statement, regex_or_matcher)    \
   GTEST_AMBIGUOUS_ELSE_BLOCKER_                                  \
   if (::testing::internal::AlwaysTrue()) {                       \
+    { GTEST_RGT_DECLARE }                                        \
     GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement);   \
   } else if (!::testing::internal::AlwaysTrue()) {               \
     ::testing::internal::MakeDeathTestMatcher(regex_or_matcher); \

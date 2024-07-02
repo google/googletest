@@ -133,6 +133,10 @@ int main(int argc, char** argv) {
     // We don't need to worry about deleting the new listener later, as
     // Google Test will do it.
     listeners.Append(new LeakChecker);
+  } else {
+    // If the leak checker isn't installed, it will be reported rotten.
+    // Keep that from causing the test to fail.
+    GTEST_FLAG_SET(treat_rotten_as_pass, true);
   }
   return RUN_ALL_TESTS();
 }

@@ -68,6 +68,7 @@
 
 #include "gtest/gtest-message.h"
 #include "gtest/internal/gtest-filepath.h"
+#include "gtest/internal/gtest-rgt.h"
 #include "gtest/internal/gtest-string.h"
 #include "gtest/internal/gtest-type-util.h"
 
@@ -1368,6 +1369,7 @@ class NeverThrown {
   GTEST_AMBIGUOUS_ELSE_BLOCKER_                                             \
   if (::testing::internal::TrueWithString gtest_msg{}) {                    \
     bool gtest_caught_expected = false;                                     \
+    { GTEST_RGT_DECLARE }                                                   \
     try {                                                                   \
       GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement);            \
     } catch (expected_exception const&) {                                   \
@@ -1411,6 +1413,7 @@ class NeverThrown {
 #define GTEST_TEST_NO_THROW_(statement, fail)                            \
   GTEST_AMBIGUOUS_ELSE_BLOCKER_                                          \
   if (::testing::internal::TrueWithString gtest_msg{}) {                 \
+    { GTEST_RGT_DECLARE }                                                \
     try {                                                                \
       GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement);         \
     }                                                                    \
@@ -1430,6 +1433,7 @@ class NeverThrown {
   GTEST_AMBIGUOUS_ELSE_BLOCKER_                                      \
   if (::testing::internal::AlwaysTrue()) {                           \
     bool gtest_caught_any = false;                                   \
+    { GTEST_RGT_DECLARE }                                            \
     try {                                                            \
       GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement);     \
     } catch (...) {                                                  \
@@ -1451,7 +1455,7 @@ class NeverThrown {
   GTEST_AMBIGUOUS_ELSE_BLOCKER_                                       \
   if (const ::testing::AssertionResult gtest_ar_ =                    \
           ::testing::AssertionResult(expression))                     \
-    ;                                                                 \
+    { GTEST_RGT_DECLARE }                                             \
   else                                                                \
     fail(::testing::internal::GetBoolAssertionFailureMessage(         \
              gtest_ar_, text, #actual, #expected)                     \
@@ -1462,6 +1466,7 @@ class NeverThrown {
   if (::testing::internal::AlwaysTrue()) {                          \
     const ::testing::internal::HasNewFatalFailureHelper             \
         gtest_fatal_failure_checker;                                \
+    { GTEST_RGT_DECLARE }                                           \
     GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement);      \
     if (gtest_fatal_failure_checker.has_new_fatal_failure()) {      \
       goto GTEST_CONCAT_TOKEN_(gtest_label_testnofatal_, __LINE__); \
@@ -1502,11 +1507,11 @@ class NeverThrown {
    private:                                                                    \
     void TestBody() override;                                                  \
     GTEST_INTERNAL_ATTRIBUTE_MAYBE_UNUSED static ::testing::TestInfo* const    \
-        test_info_;                                                            \
+        gtest_test_info_;                                                      \
   };                                                                           \
                                                                                \
-  ::testing::TestInfo* const GTEST_TEST_CLASS_NAME_(test_suite_name,           \
-                                                    test_name)::test_info_ =   \
+  ::testing::TestInfo* const GTEST_TEST_CLASS_NAME_(                           \
+          test_suite_name, test_name)::gtest_test_info_ =                      \
       ::testing::internal::MakeAndRegisterTestInfo(                            \
           #test_suite_name, #test_name, nullptr, nullptr,                      \
           ::testing::internal::CodeLocation(__FILE__, __LINE__), (parent_id),  \

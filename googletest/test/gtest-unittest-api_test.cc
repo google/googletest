@@ -324,5 +324,9 @@ int main(int argc, char** argv) {
 
   AddGlobalTestEnvironment(new testing::internal::FinalSuccessChecker());
 
+  // This test has assertions in the environment TearDown(), which
+  // doesn't play nicely with rotten-test detection.
+  GTEST_FLAG_SET(treat_rotten_as_pass, true);
+
   return RUN_ALL_TESTS();
 }

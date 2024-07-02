@@ -278,6 +278,7 @@ int main(int argc, char** argv) {
 
   GTEST_FLAG_SET(repeat, 2);
   GTEST_FLAG_SET(recreate_environments_when_repeating, true);
+  GTEST_FLAG_SET(treat_rotten_as_pass, true);
   int ret_val = RUN_ALL_TESTS();
 
 #ifndef GTEST_REMOVE_LEGACY_TEST_CASEAPI_
@@ -328,6 +329,12 @@ int main(int argc, char** argv) {
                                          "3rd.OnTestSuiteEnd",
                                          "2nd.OnTestCaseEnd",
                                          "1st.OnTestCaseEnd",
+                                         "1st.OnTestPartResult",
+                                         "2nd.OnTestPartResult",
+                                         "3rd.OnTestPartResult",
+                                         "1st.OnTestPartResult",
+                                         "2nd.OnTestPartResult",
+                                         "3rd.OnTestPartResult",
                                          "1st.OnEnvironmentsTearDownStart",
                                          "2nd.OnEnvironmentsTearDownStart",
                                          "3rd.OnEnvironmentsTearDownStart",
@@ -380,6 +387,12 @@ int main(int argc, char** argv) {
                                          "3rd.OnTestSuiteEnd",
                                          "2nd.OnTestCaseEnd",
                                          "1st.OnTestCaseEnd",
+                                         "1st.OnTestPartResult",
+                                         "2nd.OnTestPartResult",
+                                         "3rd.OnTestPartResult",
+                                         "1st.OnTestPartResult",
+                                         "2nd.OnTestPartResult",
+                                         "3rd.OnTestPartResult",
                                          "1st.OnEnvironmentsTearDownStart",
                                          "2nd.OnEnvironmentsTearDownStart",
                                          "3rd.OnEnvironmentsTearDownStart",
@@ -435,6 +448,12 @@ int main(int argc, char** argv) {
                                          "1st.OnTestEnd",
                                          "ListenerTest::TearDownTestSuite",
                                          "3rd.OnTestSuiteEnd",
+                                         "1st.OnTestPartResult",
+                                         "2nd.OnTestPartResult",
+                                         "3rd.OnTestPartResult",
+                                         "1st.OnTestPartResult",
+                                         "2nd.OnTestPartResult",
+                                         "3rd.OnTestPartResult",
                                          "1st.OnEnvironmentsTearDownStart",
                                          "2nd.OnEnvironmentsTearDownStart",
                                          "3rd.OnEnvironmentsTearDownStart",
@@ -483,6 +502,12 @@ int main(int argc, char** argv) {
                                          "1st.OnTestEnd",
                                          "ListenerTest::TearDownTestSuite",
                                          "3rd.OnTestSuiteEnd",
+                                         "1st.OnTestPartResult",
+                                         "2nd.OnTestPartResult",
+                                         "3rd.OnTestPartResult",
+                                         "1st.OnTestPartResult",
+                                         "2nd.OnTestPartResult",
+                                         "3rd.OnTestPartResult",
                                          "1st.OnEnvironmentsTearDownStart",
                                          "2nd.OnEnvironmentsTearDownStart",
                                          "3rd.OnEnvironmentsTearDownStart",

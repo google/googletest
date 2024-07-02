@@ -1164,6 +1164,10 @@ int main(int argc, char** argv) {
 
   ::testing::InitGoogleTest(&argc, argv);
 
+  // This test has assertions in the environment TearDown(), which
+  // doesn't play nicely with rotten-test detection.
+  GTEST_FLAG_SET(treat_rotten_as_pass, true);
+
   // Used in GeneratorEvaluationTest test suite. Tests that value updated
   // here will NOT be used for instantiating tests in
   // GeneratorEvaluationTest.

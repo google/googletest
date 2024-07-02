@@ -44,6 +44,7 @@
 #include "src/gtest-matchers.cc"
 #include "src/gtest-port.cc"
 #include "src/gtest-printers.cc"
+#include "src/gtest-rgt.cc"
 #include "src/gtest-test-part.cc"
 #include "src/gtest-typed-test.cc"
 #include "src/gtest.cc"

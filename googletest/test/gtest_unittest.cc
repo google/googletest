@@ -49,7 +49,7 @@ TEST(CommandLineFlagsTest, CanBeAccessedInCodeOnceGTestHIsIncluded) {
       GTEST_FLAG_GET(show_internal_stack_frames) || GTEST_FLAG_GET(shuffle) ||
       GTEST_FLAG_GET(stack_trace_depth) > 0 ||
       GTEST_FLAG_GET(stream_result_to) != "unknown" ||
-      GTEST_FLAG_GET(throw_on_failure);
+      GTEST_FLAG_GET(throw_on_failure) || GTEST_FLAG_GET(treat_rotten_as_pass);
   EXPECT_TRUE(dummy || !dummy);  // Suppresses warning that dummy is unused.
 }
 
@@ -7772,4 +7772,13 @@ TEST(PatternGlobbingTest, MatchesFilterEdgeCases) {
   EXPECT_TRUE(testing::internal::UnitTestOptions::MatchesFilter("", "*"));
   EXPECT_FALSE(testing::internal::UnitTestOptions::MatchesFilter("a", ""));
   EXPECT_TRUE(testing::internal::UnitTestOptions::MatchesFilter("", ""));
+}
+
+int main(int argc, char** argv) {
+  ::testing::InitGoogleTest(&argc, argv);
+
+  // This test has deliberately un-executed assertions in it.
+  GTEST_FLAG_SET(treat_rotten_as_pass, true);
+
+  return RUN_ALL_TESTS();
 }
