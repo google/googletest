@@ -1814,7 +1814,7 @@ and/or command line flags. For the flags to work, your programs must call
 `::testing::InitGoogleTest()` before calling `RUN_ALL_TESTS()`.
 
 To see a list of supported flags and their usage, please run your test program
-with the `--help` flag. You can also use `-h`, `-?`, or `/?` for short.
+with the `--help` flag.
 
 If an option is specified both by an environment variable and by a flag, the
 latter takes precedence.
