@@ -26,16 +26,12 @@ The 1.14.x branch requires at least C++14.
 
 #### Continuous Integration
 
-We use Google's internal systems for continuous integration. \
-GitHub Actions were added for the convenience of open-source contributors. They
-are exclusively maintained by the open-source community and not used by the
-GoogleTest team.
+We use Google's internal systems for continuous integration.
 
 #### Coming Soon
 
 *   We are planning to take a dependency on
     [Abseil](https://github.com/abseil/abseil-cpp).
-*   More documentation improvements are planned.
 
 ## Welcome to **GoogleTest**, Google's C++ test framework!
 
