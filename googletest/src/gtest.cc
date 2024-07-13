@@ -5195,22 +5195,9 @@ void TestEventListeners::SuppressEventForwarding(bool suppress) {
 // Gets the singleton UnitTest object.  The first time this method is
 // called, a UnitTest object is constructed and returned.  Consecutive
 // calls will return the same object.
-//
-// We don't protect this under mutex_ as a user is not supposed to
-// call this before main() starts, from which point on the return
-// value will never change.
-UnitTest* UnitTest::GetInstance() {
-  // CodeGear C++Builder insists on a public destructor for the
-  // default implementation.  Use this implementation to keep good OO
-  // design with private destructor.
-
-#if defined(__BORLANDC__)
-  static UnitTest* const instance = new UnitTest;
+std::unique_ptr<UnitTest>& UnitTest::GetInstance() {
+  static std::unique_ptr<UnitTest> instance{ new UnitTest };
   return instance;
-#else
-  static UnitTest instance;
-  return &instance;
-#endif  // defined(__BORLANDC__)
 }
 
 // Gets the number of successful test suites.
