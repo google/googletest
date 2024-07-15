@@ -40,15 +40,15 @@ module(
 # Please keep the versions in sync with the versions in the WORKSPACE file.
 
 bazel_dep(name = "abseil-cpp",
-          version = "20240116.0",
+          version = "20240116.2",
           repo_name = "com_google_absl")
 
 bazel_dep(name = "platforms",
-          version = "0.0.8")
+          version = "0.0.10")
 
 bazel_dep(name = "re2",
           repo_name = "com_googlesource_code_re2",
-          version = "2023-11-01")
+          version = "2024-07-02")
 
 bazel_dep(name = "rules_python",
           version = "0.29.0")
