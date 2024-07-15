@@ -1300,34 +1300,48 @@ class AllOfMatcherImpl : public MatcherInterface<const T&> {
 
   bool MatchAndExplain(const T& x,
                        MatchResultListener* listener) const override {
-    // If either matcher1_ or matcher2_ doesn't match x, we only need
-    // to explain why one of them fails.
+    // This method uses matcher's explanation when explaining the result.
+    // However, if matcher doesn't provide one, this method uses matcher's
+    // description.
     std::string all_match_result;
-
-    for (size_t i = 0; i < matchers_.size(); ++i) {
+    for (const Matcher<T>& matcher : matchers_) {
       StringMatchResultListener slistener;
-      if (matchers_[i].MatchAndExplain(x, &slistener)) {
-        if (all_match_result.empty()) {
-          all_match_result = slistener.str();
+      // Return explanation for first failed matcher.
+      if (!matcher.MatchAndExplain(x, &slistener)) {
+        const std::string explanation = slistener.str();
+        if (!explanation.empty()) {
+          *listener << explanation;
         } else {
-          std::string result = slistener.str();
-          if (!result.empty()) {
-            all_match_result += ", and ";
-            all_match_result += result;
-          }
+          *listener << "which doesn't match (" << Describe(matcher) << ")";
         }
-      } else {
-        *listener << slistener.str();
         return false;
+      }
+      // Keep track of explanations in case all matchers succeed.
+      std::string explanation = slistener.str();
+      if (explanation.empty()) {
+        explanation = Describe(matcher);
+      }
+      if (all_match_result.empty()) {
+        all_match_result = explanation;
+      } else {
+        if (!explanation.empty()) {
+          all_match_result += ", and ";
+          all_match_result += explanation;
+        }
       }
     }
 
-    // Otherwise we need to explain why *both* of them match.
     *listener << all_match_result;
     return true;
   }
 
  private:
+  // Returns matcher description as a string.
+  std::string Describe(const Matcher<T>& matcher) const {
+    StringMatchResultListener listener;
+    matcher.DescribeTo(listener.stream());
+    return listener.str();
+  }
   const std::vector<Matcher<T>> matchers_;
 };
 

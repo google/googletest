@@ -2334,9 +2334,11 @@ TEST(ExplainMatchResultTest, AllOf_True_True) {
   EXPECT_EQ("which is 0 modulo 2, and which is 0 modulo 3", Explain(m, 6));
 }
 
+// Tests that when AllOf() succeeds, but matchers have no explanation,
+// the matcher description is used.
 TEST(ExplainMatchResultTest, AllOf_True_True_2) {
   const Matcher<int> m = AllOf(Ge(2), Le(3));
-  EXPECT_EQ("", Explain(m, 2));
+  EXPECT_EQ("is >= 2, and is <= 3", Explain(m, 2));
 }
 
 INSTANTIATE_GTEST_MATCHER_TEST_P(ExplainmatcherResultTest);
