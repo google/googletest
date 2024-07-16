@@ -559,9 +559,10 @@ TEST_P(AllOfTestP, ExplainsResult) {
   Matcher<int> m;
 
   // Successful match.  Both matchers need to explain.  The second
-  // matcher doesn't give an explanation, so the matcher description is used.
+  // matcher doesn't give an explanation, so only the first matcher's
+  // explanation is printed.
   m = AllOf(GreaterThan(10), Lt(30));
-  EXPECT_EQ("which is 15 more than 10, and is < 30", Explain(m, 25));
+  EXPECT_EQ("which is 15 more than 10", Explain(m, 25));
 
   // Successful match.  Both matchers need to explain.
   m = AllOf(GreaterThan(10), GreaterThan(20));
@@ -571,9 +572,8 @@ TEST_P(AllOfTestP, ExplainsResult) {
   // Successful match.  All matchers need to explain.  The second
   // matcher doesn't given an explanation.
   m = AllOf(GreaterThan(10), Lt(30), GreaterThan(20));
-  EXPECT_EQ(
-      "which is 15 more than 10, and is < 30, and which is 5 more than 20",
-      Explain(m, 25));
+  EXPECT_EQ("which is 15 more than 10, and which is 5 more than 20",
+            Explain(m, 25));
 
   // Successful match.  All matchers need to explain.
   m = AllOf(GreaterThan(10), GreaterThan(20), GreaterThan(30));
@@ -588,10 +588,10 @@ TEST_P(AllOfTestP, ExplainsResult) {
   EXPECT_EQ("which is 5 less than 10", Explain(m, 5));
 
   // Failed match.  The second matcher, which failed, needs to
-  // explain.  Since it doesn't given an explanation, the matcher text is
+  // explain.  Since it doesn't given an explanation, nothing is
   // printed.
   m = AllOf(GreaterThan(10), Lt(30));
-  EXPECT_EQ("which doesn't match (is < 30)", Explain(m, 40));
+  EXPECT_EQ("", Explain(m, 40));
 
   // Failed match.  The second matcher, which failed, needs to
   // explain.
