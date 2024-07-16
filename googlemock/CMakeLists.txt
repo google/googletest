@@ -8,6 +8,9 @@
 # ctest. You can select which tests to run using 'ctest -R regex'.
 # For more options, run 'ctest --help'.
 
+# Import googletest version
+include(../cmake/googletest-version.cmake)
+
 option(gmock_build_tests "Build all of Google Mock's own tests." OFF)
 
 # A directory to find Google Test sources.
