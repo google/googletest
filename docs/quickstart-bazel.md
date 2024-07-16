@@ -10,8 +10,8 @@ To complete this tutorial, you'll need:
 
 *   A compatible operating system (e.g. Linux, macOS, Windows).
 *   A compatible C++ compiler that supports at least C++14.
-*   [Bazel](https://bazel.build/), the preferred build system used by the
-    GoogleTest team.
+*   [Bazel](https://bazel.build/) 7.0 or higher, the preferred build system used
+    by the GoogleTest team.
 
 See [Supported Platforms](platforms.md) for more information about platforms
 compatible with GoogleTest.
@@ -28,7 +28,7 @@ A
 [Bazel workspace](https://docs.bazel.build/versions/main/build-ref.html#workspace)
 is a directory on your filesystem that you use to manage source files for the
 software you want to build. Each workspace directory has a text file named
-`WORKSPACE` which may be empty, or may contain references to external
+`MODULE.bazel` which may be empty, or may contain references to external
 dependencies required to build the outputs.
 
 First, create a directory for your workspace:
@@ -37,29 +37,19 @@ First, create a directory for your workspace:
 $ mkdir my_workspace && cd my_workspace
 ```
 
-Next, you’ll create the `WORKSPACE` file to specify dependencies. A common and
-recommended way to depend on GoogleTest is to use a
-[Bazel external dependency](https://docs.bazel.build/versions/main/external.html)
-via the
-[`http_archive` rule](https://docs.bazel.build/versions/main/repo/http.html#http_archive).
-To do this, in the root directory of your workspace (`my_workspace/`), create a
-file named `WORKSPACE` with the following contents:
+Next, you’ll create the `MODULE.bazel` file to specify dependencies. As of Bazel
+7.0, the recommended way to consume GoogleTest is through the
+[Bazel Central Registry](https://registry.bazel.build/modules/googletest). To do
+this, create a `MODULE.bazel` file in the root directory of your Bazel workspace
+with the following content:
 
 ```
-load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+# MODULE.bazel
 
-http_archive(
-  name = "com_google_googletest",
-  urls = ["https://github.com/google/googletest/archive/5ab508a01f9eb089207ee87fd547d290da39d015.zip"],
-  strip_prefix = "googletest-5ab508a01f9eb089207ee87fd547d290da39d015",
-)
+# Choose the most recent version available at
+# https://registry.bazel.build/modules/googletest
+bazel_dep(name = "googletest", version = "1.15.0")
 ```
-
-The above configuration declares a dependency on GoogleTest which is downloaded
-as a ZIP archive from GitHub. In the above example,
-`5ab508a01f9eb089207ee87fd547d290da39d015` is the Git commit hash of the
-GoogleTest version to use; we recommend updating the hash often to point to the
-latest version. Use a recent hash on the `main` branch.
 
 Now you're ready to build C++ code that uses GoogleTest.
 
@@ -92,17 +82,20 @@ following contents:
 
 ```
 cc_test(
-  name = "hello_test",
-  size = "small",
-  srcs = ["hello_test.cc"],
-  deps = ["@com_google_googletest//:gtest_main"],
+    name = "hello_test",
+    size = "small",
+    srcs = ["hello_test.cc"],
+    deps = [
+        "@googletest//:gtest",
+        "@googletest//:gtest_main",
+    ],
 )
 ```
 
 This `cc_test` rule declares the C++ test binary you want to build, and links to
-GoogleTest (`//:gtest_main`) using the prefix you specified in the `WORKSPACE`
-file (`@com_google_googletest`). For more information about Bazel `BUILD` files,
-see the
+the GoogleTest library (`@googletest//:gtest"`) and the GoogleTest `main()`
+function (`@googletest//:gtest_main`). For more information about Bazel `BUILD`
+files, see the
 [Bazel C++ Tutorial](https://docs.bazel.build/versions/main/tutorial/cpp.html).
 
 {: .callout .note}
@@ -115,7 +108,7 @@ on supported language versions.
 Now you can build and run your test:
 
 <pre>
-<strong>my_workspace$ bazel test --cxxopt=-std=c++14 --test_output=all //:hello_test</strong>
+<strong>$ bazel test --cxxopt=-std=c++14 --test_output=all //:hello_test</strong>
 INFO: Analyzed target //:hello_test (26 packages loaded, 362 targets configured).
 INFO: Found 1 test target...
 INFO: From Testing //:hello_test:
