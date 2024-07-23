@@ -43,7 +43,6 @@
 // possible loss of data and C4100, unreferenced local parameter
 GTEST_DISABLE_MSC_WARNINGS_PUSH_(4244 4100)
 
-
 namespace testing {
 namespace gmock_matchers_test {
 namespace {

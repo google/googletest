@@ -53,12 +53,12 @@ class BetweenCardinalityImpl : public CardinalityInterface {
       : min_(min >= 0 ? min : 0), max_(max >= min_ ? max : min_) {
     std::stringstream ss;
     if (min < 0) {
-      ss << "The invocation lower bound must be >= 0, "
-         << "but is actually " << min << ".";
+      ss << "The invocation lower bound must be >= 0, " << "but is actually "
+         << min << ".";
       internal::Expect(false, __FILE__, __LINE__, ss.str());
     } else if (max < 0) {
-      ss << "The invocation upper bound must be >= 0, "
-         << "but is actually " << max << ".";
+      ss << "The invocation upper bound must be >= 0, " << "but is actually "
+         << max << ".";
       internal::Expect(false, __FILE__, __LINE__, ss.str());
     } else if (min > max) {
       ss << "The invocation upper bound (" << max

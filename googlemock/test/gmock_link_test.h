@@ -186,8 +186,8 @@ using testing::SetErrnoAndReturn;
 #endif
 
 #if GTEST_HAS_EXCEPTIONS
-using testing::Throw;
 using testing::Rethrow;
+using testing::Throw;
 #endif
 
 using testing::ContainsRegex;

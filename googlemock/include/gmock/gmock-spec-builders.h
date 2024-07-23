@@ -868,7 +868,7 @@ class GTEST_API_ ExpectationBase {
   Clause last_clause_;
   mutable bool action_count_checked_;  // Under mutex_.
   mutable Mutex mutex_;                // Protects action_count_checked_.
-};                                     // class ExpectationBase
+};  // class ExpectationBase
 
 template <typename F>
 class TypedExpectation;
@@ -1838,9 +1838,8 @@ R FunctionMocker<R(Args...)>::InvokeWith(ArgumentTuple&& args)
     // Doing so slows down compilation dramatically because the *constructor* of
     // std::function<T> is re-instantiated with different template
     // parameters each time.
-    const UninterestingCallCleanupHandler report_uninteresting_call = {
-        reaction, ss
-    };
+    const UninterestingCallCleanupHandler report_uninteresting_call = {reaction,
+                                                                       ss};
 
     return PerformActionAndPrintResult(nullptr, std::move(args), ss.str(), ss);
   }
@@ -1890,8 +1889,7 @@ R FunctionMocker<R(Args...)>::InvokeWith(ArgumentTuple&& args)
   // std::function<T> is re-instantiated with different template
   // parameters each time.
   const FailureCleanupHandler handle_failures = {
-      ss, why, loc, untyped_expectation, found, is_excessive
-  };
+      ss, why, loc, untyped_expectation, found, is_excessive};
 
   return PerformActionAndPrintResult(untyped_action, std::move(args), ss.str(),
                                      ss);
