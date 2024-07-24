@@ -1493,6 +1493,7 @@ class DoAllAction<FinalAction> {
   // providing a call operator because even with a particular set of arguments
   // they don't have a fixed return type.
 
+  // We support conversion to OnceAction whenever the sub-action does.
   template <typename R, typename... Args,
             typename std::enable_if<
                 std::is_convertible<FinalAction, OnceAction<R(Args...)>>::value,
@@ -1501,6 +1502,21 @@ class DoAllAction<FinalAction> {
     return std::move(final_action_);
   }
 
+  // We also support conversion to OnceAction whenever the sub-action supports
+  // conversion to Action (since any Action can also be a OnceAction).
+  template <
+      typename R, typename... Args,
+      typename std::enable_if<
+          conjunction<
+              negation<
+                  std::is_convertible<FinalAction, OnceAction<R(Args...)>>>,
+              std::is_convertible<FinalAction, Action<R(Args...)>>>::value,
+          int>::type = 0>
+  operator OnceAction<R(Args...)>() && {  // NOLINT
+    return Action<R(Args...)>(std::move(final_action_));
+  }
+
+  // We support conversion to Action whenever the sub-action does.
   template <
       typename R, typename... Args,
       typename std::enable_if<
@@ -1580,16 +1596,16 @@ class DoAllAction<InitialAction, OtherActions...>
       : Base({}, std::forward<U>(other_actions)...),
         initial_action_(std::forward<T>(initial_action)) {}
 
-  template <typename R, typename... Args,
-            typename std::enable_if<
-                conjunction<
-                    // Both the initial action and the rest must support
-                    // conversion to OnceAction.
-                    std::is_convertible<
-                        InitialAction,
-                        OnceAction<void(InitialActionArgType<Args>...)>>,
-                    std::is_convertible<Base, OnceAction<R(Args...)>>>::value,
-                int>::type = 0>
+  // We support conversion to OnceAction whenever both the initial action and
+  // the rest support conversion to OnceAction.
+  template <
+      typename R, typename... Args,
+      typename std::enable_if<
+          conjunction<std::is_convertible<
+                          InitialAction,
+                          OnceAction<void(InitialActionArgType<Args>...)>>,
+                      std::is_convertible<Base, OnceAction<R(Args...)>>>::value,
+          int>::type = 0>
   operator OnceAction<R(Args...)>() && {  // NOLINT
     // Return an action that first calls the initial action with arguments
     // filtered through InitialActionArgType, then forwards arguments directly
@@ -1612,12 +1628,34 @@ class DoAllAction<InitialAction, OtherActions...>
     };
   }
 
+  // We also support conversion to OnceAction whenever the initial action
+  // supports conversion to Action (since any Action can also be a OnceAction).
+  //
+  // The remaining sub-actions must also be compatible, but we don't need to
+  // special case them because the base class deals with them.
   template <
       typename R, typename... Args,
       typename std::enable_if<
           conjunction<
-              // Both the initial action and the rest must support conversion to
-              // Action.
+              negation<std::is_convertible<
+                  InitialAction,
+                  OnceAction<void(InitialActionArgType<Args>...)>>>,
+              std::is_convertible<InitialAction,
+                                  Action<void(InitialActionArgType<Args>...)>>,
+              std::is_convertible<Base, OnceAction<R(Args...)>>>::value,
+          int>::type = 0>
+  operator OnceAction<R(Args...)>() && {  // NOLINT
+    return DoAll(
+        Action<void(InitialActionArgType<Args>...)>(std::move(initial_action_)),
+        std::move(static_cast<Base&>(*this)));
+  }
+
+  // We support conversion to Action whenever both the initial action and the
+  // rest support conversion to Action.
+  template <
+      typename R, typename... Args,
+      typename std::enable_if<
+          conjunction<
               std::is_convertible<const InitialAction&,
                                   Action<void(InitialActionArgType<Args>...)>>,
               std::is_convertible<const Base&, Action<R(Args...)>>>::value,

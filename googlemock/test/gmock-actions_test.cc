@@ -1477,6 +1477,54 @@ TEST(DoAll, SupportsTypeErasedActions) {
   }
 }
 
+// A DoAll action should be convertible to a OnceAction, even when its component
+// sub-actions are user-provided types that define only an Action conversion
+// operator. If they supposed being called more than once then they also support
+// being called at most once.
+TEST(DoAll, ConvertibleToOnceActionWithUserProvidedActionConversion) {
+  // Simplest case: only one sub-action.
+  struct CustomFinal final {
+    operator Action<int()>() {  // NOLINT
+      return Return(17);
+    }
+
+    operator Action<int(int, char)>() {  // NOLINT
+      return Return(19);
+    }
+  };
+
+  {
+    OnceAction<int()> action = DoAll(CustomFinal{});
+    EXPECT_EQ(17, std::move(action).Call());
+  }
+
+  {
+    OnceAction<int(int, char)> action = DoAll(CustomFinal{});
+    EXPECT_EQ(19, std::move(action).Call(0, 0));
+  }
+
+  // It should also work with multiple sub-actions.
+  struct CustomInitial final {
+    operator Action<void()>() {  // NOLINT
+      return [] {};
+    }
+
+    operator Action<void(int, char)>() {  // NOLINT
+      return [] {};
+    }
+  };
+
+  {
+    OnceAction<int()> action = DoAll(CustomInitial{}, CustomFinal{});
+    EXPECT_EQ(17, std::move(action).Call());
+  }
+
+  {
+    OnceAction<int(int, char)> action = DoAll(CustomInitial{}, CustomFinal{});
+    EXPECT_EQ(19, std::move(action).Call(0, 0));
+  }
+}
+
 // Tests using WithArgs and with an action that takes 1 argument.
 TEST(WithArgsTest, OneArg) {
   Action<bool(double x, int n)> a = WithArgs<1>(Invoke(Unary));  // NOLINT
