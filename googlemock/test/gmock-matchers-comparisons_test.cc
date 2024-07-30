@@ -37,7 +37,9 @@
 #include <tuple>
 #include <vector>
 
+#include "gmock/gmock.h"
 #include "test/gmock-matchers_test.h"
+#include "gtest/gtest.h"
 
 // Silence warning C4244: 'initializing': conversion from 'int' to 'short',
 // possible loss of data and C4100, unreferenced local parameter
