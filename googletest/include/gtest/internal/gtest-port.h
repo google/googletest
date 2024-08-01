@@ -216,6 +216,7 @@
 //                                specializations. Always defined to 0 or 1.
 //   GTEST_USE_OWN_FLAGFILE_FLAG_ - Always defined to 0 or 1.
 //   GTEST_HAS_CXXABI_H_ - Always defined to 0 or 1.
+//   GTEST_HAS_STD_STACKTRACE_ - Always defined to 0 or 1.
 //   GTEST_CAN_STREAM_RESULTS_ - Always defined to 0 or 1.
 //   GTEST_HAS_ALT_PATH_SEP_ - Always defined to 0 or 1.
 //   GTEST_WIDE_STRING_USES_UTF16_ - Always defined to 0 or 1.
@@ -910,6 +911,14 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 #define GTEST_HAS_CXXABI_H_ 1
 #else
 #define GTEST_HAS_CXXABI_H_ 0
+#endif
+#endif
+
+#if !defined(GTEST_HAS_STD_STACKTRACE_)
+#if defined(__cpp_lib_stacktrace) && __cpp_lib_stacktrace >= 202011L
+#define GTEST_HAS_STD_STACKTRACE_ 1
+#else
+#define GTEST_HAS_STD_STACKTRACE_ 0
 #endif
 #endif
 
