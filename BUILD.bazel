@@ -126,15 +126,10 @@ cc_library(
     linkopts = select({
         ":qnx": ["-lregex"],
         ":windows": [],
-        ":freebsd": [
+        "//conditions:default": [
             "-lm",
             "-pthread",
         ],
-        ":openbsd": [
-            "-lm",
-            "-pthread",
-        ],
-        "//conditions:default": ["-pthread"],
     }),
     deps = select({
         ":has_absl": [
