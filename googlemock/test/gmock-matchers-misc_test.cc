@@ -696,6 +696,11 @@ TEST(OptionalTest, DescribesSelf) {
   EXPECT_EQ("value is equal to 1", Describe(m));
 }
 
+TEST(OptionalTest, WorksWithConstDouble) {
+  const SampleOptional<const double> opt(3.14159);
+  EXPECT_THAT(opt, Optional(DoubleEq(3.14159)));
+}
+
 TEST(OptionalTest, ExplainsSelf) {
   const Matcher<SampleOptional<int>> m = Optional(Eq(1));
   EXPECT_EQ("whose value 1 matches", Explain(m, SampleOptional<int>(1)));
