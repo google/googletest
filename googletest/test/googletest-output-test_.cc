@@ -254,8 +254,8 @@ class MyScopedTraceTestListener : public ::testing::EmptyTestEventListener {
   void OnScopedTraceEnter(const testing::UnitTest& unit_test, const char* file,
                           int line, std::string message) override {
     const auto* test_info = unit_test.current_test_info();
-    printf("scoped trace enter test: %s trace: %s:%d message: %s.\n",
-           test_info->name(), file, line, message.c_str());
+    printf("scoped trace enter test: %s line: %d message: %s.\n",
+           test_info->name(), line, message.c_str());
   }
 
   void OnScopedTraceExit(const testing::UnitTest& unit_test) override {
