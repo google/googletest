@@ -172,6 +172,7 @@ class TypedTestNames {
     if (std::is_same<T, int>::value) {
       return std::string("int") + ::testing::PrintToString(i);
     }
+    return std::string("unknown");
   }
 };
 
@@ -320,6 +321,7 @@ class TypeParametrizedTestNames {
     if (std::is_same<T, int>::value) {
       return std::string("parInt") + ::testing::PrintToString(i);
     }
+    return std::string("unknown");
   }
 };
 
