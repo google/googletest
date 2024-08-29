@@ -70,7 +70,7 @@ static_assert(GMOCK_PP_INTERNAL_VAR_TEST(x, y) == 2, "");
 static_assert(GMOCK_PP_INTERNAL_VAR_TEST(silly) == 1, "");
 static_assert(GMOCK_PP_INTERNAL_VAR_TEST(x, y, z) == 3, "");
 
-// TODO(iserna): The following asserts fail in --config=lexan.
+// TODO(iserna): The following asserts fail in --config=windows.
 #define GMOCK_PP_INTERNAL_IS_EMPTY_TEST_1
 static_assert(GMOCK_PP_IS_EMPTY(GMOCK_PP_INTERNAL_IS_EMPTY_TEST_1), "");
 static_assert(GMOCK_PP_IS_EMPTY(), "");
