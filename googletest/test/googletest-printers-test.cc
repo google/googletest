@@ -86,6 +86,15 @@ void PrintTo(EnumWithPrintTo e, std::ostream* os) {
   *os << (e == kEWPT1 ? "kEWPT1" : "invalid");
 }
 
+struct StructWithSFINAETemplatePrintToInGlobal {};
+
+template <typename T,
+          typename = typename std::enable_if<std::is_same<
+              T, StructWithSFINAETemplatePrintToInGlobal>::value>::type>
+void PrintTo(const T& obj, std::ostream* os) {
+  *os << "StructWithSFINAETemplatePrintToInGlobal";
+}
+
 // A class implicitly convertible to BiggestInt.
 class BiggestIntConvertible {
  public:
@@ -187,6 +196,15 @@ class PrintableViaPrintToTemplate {
 template <typename T>
 void PrintTo(const PrintableViaPrintToTemplate<T>& x, ::std::ostream* os) {
   *os << "PrintableViaPrintToTemplate: " << x.value();
+}
+
+struct StructWithSFINAETemplatePrintToInFoo {};
+
+template <typename T,
+          typename = typename std::enable_if<std::is_same<
+              T, StructWithSFINAETemplatePrintToInFoo>::value>::type>
+void PrintTo(const T& obj, std::ostream* os) {
+  *os << "StructWithSFINAETemplatePrintToInFoo";
 }
 
 // A user-defined streamable class template in a user namespace.
@@ -1279,6 +1297,22 @@ TEST(PrintStdTupleTest, VariousSizes) {
             Print(t10));
 }
 
+// Tuple with various qualifiers
+TEST(PrintStdTupleTest, VariousQualifiers) {
+  ::std::tuple<int, const int> t0{1, 2};
+  EXPECT_EQ("(1, 2)", Print(t0));
+  int i1 = 3;
+  int i2 = 4;
+  ::std::tuple<int&, const int&> t1{i1, i2};
+  EXPECT_EQ("(@" + PrintPointer(&i1) + " 3, @" + PrintPointer(&i2) + " 4)",
+            Print(t1));
+  int i3 = 5;
+  int i4 = 6;
+  ::std::tuple<int&&, const int&&> t2{static_cast<int&&>(i3),
+                                      static_cast<const int&&>(i4)};
+  EXPECT_EQ("(5, 6)", Print(t2));
+}
+
 // Nested tuples.
 TEST(PrintStdTupleTest, NestedTuple) {
   ::std::tuple<::std::tuple<int, bool>, char> nested(::std::make_tuple(5, true),
@@ -1304,6 +1338,16 @@ TEST(PrintReferenceWrapper, Unprintable) {
       "@" + PrintPointer(&up) +
           " 16-byte object <EF-12 00-00 34-AB 00-00 00-00 00-00 00-00 00-00>",
       Print(std::cref(up)));
+}
+
+TEST(PrintPrintableTypeWithSfinaePrintTo, InGlobalNamespace) {
+  EXPECT_EQ("StructWithSFINAETemplatePrintToInGlobal",
+            Print(StructWithSFINAETemplatePrintToInGlobal()));
+}
+
+TEST(PrintPrintableTypeWithSfinaePrintTo, InFooNamespace) {
+  EXPECT_EQ("StructWithSFINAETemplatePrintToInFoo",
+            Print(foo::StructWithSFINAETemplatePrintToInFoo()));
 }
 
 // Tests printing user-defined unprintable types.
