@@ -1576,10 +1576,10 @@ TEST_P(AnyOfArrayTestP, ExplainsMatchResultCorrectly) {
   const Matcher<int> m1 = AnyOfArray(v1);
   const Matcher<int> m2 = AnyOfArray(v2);
   EXPECT_EQ("", Explain(m0, 0));
-  EXPECT_EQ("", Explain(m1, 1));
-  EXPECT_EQ("", Explain(m1, 2));
-  EXPECT_EQ("", Explain(m2, 3));
-  EXPECT_EQ("", Explain(m2, 4));
+  EXPECT_EQ("which matches (is equal to 1)", Explain(m1, 1));
+  EXPECT_EQ("isn't equal to 1", Explain(m1, 2));
+  EXPECT_EQ("which matches (is equal to 3)", Explain(m2, 3));
+  EXPECT_EQ("isn't equal to 2, and isn't equal to 3", Explain(m2, 4));
   EXPECT_EQ("()", Describe(m0));
   EXPECT_EQ("(is equal to 1)", Describe(m1));
   EXPECT_EQ("(is equal to 2) or (is equal to 3)", Describe(m2));
