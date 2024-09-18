@@ -1038,6 +1038,20 @@ int iteration)`
 
 Fired after each iteration of tests finishes.
 
+
+##### OnScopedTraceEnter {#TestEventListener::OnScopedTraceEnter}
+
+`virtual void TestEventListener::OnScopedTraceEnter(const UnitTest& unit_test, const char* file,
+int line, std::string message)`
+
+Fired before the test scope enter.
+
+##### OnScopedTraceExit {#TestEventListener::OnScopedTraceExit}
+
+`virtual void TestEventListener::OnScopedTraceExit(const UnitTest& unit_test)`
+
+Fired after the test scope exit.
+
 ##### OnTestProgramEnd {#TestEventListener::OnTestProgramEnd}
 
 `virtual void TestEventListener::OnTestProgramEnd(const UnitTest& unit_test)`
