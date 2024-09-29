@@ -3,8 +3,13 @@
 
 cmake_minimum_required(VERSION 3.16)
 
-project(googletest-distribution)
 set(GOOGLETEST_VERSION 1.16.0)
+project(googletest-distribution
+  VERSION ${GOOGLETEST_VERSION}
+  DESCRIPTION "Google's C++ test framework"
+  HOMEPAGE_URL "https://google.github.io/googletest"
+  LANGUAGES CXX
+)
 
 if(NOT CYGWIN AND NOT MSYS AND NOT ${CMAKE_SYSTEM_NAME} STREQUAL QNX)
   set(CMAKE_CXX_EXTENSIONS OFF)
@@ -33,4 +38,13 @@ if(BUILD_GMOCK)
   add_subdirectory( googlemock )
 else()
   add_subdirectory( googletest )
+endif()
+
+if(INSTALL_GTEST)
+  set(CPACK_PACKAGE_NAME "GTest") # same as the name in `find_package`
+  set(CPACK_PACKAGE_VENDOR "Google")
+  set(CPACK_GENERATOR "TGZ")
+  set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
+  set(CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
+  include(CPack)
 endif()
