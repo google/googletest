@@ -561,6 +561,11 @@ Matcher<T> A();
 // and MUST NOT BE USED IN USER CODE!!!
 namespace internal {
 
+// Used per go/ranked-overloads for dispatching.
+struct Rank0 {};
+struct Rank1 : Rank0 {};
+using HighestRank = Rank1;
+
 // If the explanation is not empty, prints it to the ostream.
 inline void PrintIfNotEmpty(const std::string& explanation,
                             ::std::ostream* os) {
@@ -2955,10 +2960,6 @@ class EachMatcher {
   const M inner_matcher_;
 };
 
-// Use go/ranked-overloads for dispatching.
-struct Rank0 {};
-struct Rank1 : Rank0 {};
-
 namespace pair_getters {
 using std::get;
 template <typename T>
@@ -3912,6 +3913,21 @@ GTEST_API_ std::string FormatMatcherDescription(
     bool negation, const char* matcher_name,
     const std::vector<const char*>& param_names, const Strings& param_values);
 
+// Overloads to support `OptionalMatcher` being used with a type that either
+// supports implicit conversion to bool or a `has_value()` method.
+template <typename Optional>
+auto IsOptionalEngaged(const Optional& optional,
+                       Rank1) -> decltype(!!optional) {
+  // The use of double-negation here is to preserve historical behavior where
+  // the matcher used `operator!` rather than directly using `operator bool`.
+  return !static_cast<bool>(!optional);
+}
+template <typename Optional>
+auto IsOptionalEngaged(const Optional& optional,
+                       Rank0) -> decltype(!optional.has_value()) {
+  return optional.has_value();
+}
+
 // Implements a matcher that checks the value of a optional<> type variable.
 template <typename ValueMatcher>
 class OptionalMatcher {
@@ -3944,7 +3960,7 @@ class OptionalMatcher {
 
     bool MatchAndExplain(Optional optional,
                          MatchResultListener* listener) const override {
-      if (!optional) {
+      if (!IsOptionalEngaged(optional, HighestRank())) {
         *listener << "which is not engaged";
         return false;
       }
@@ -5266,9 +5282,10 @@ inline InnerMatcher AllArgs(const InnerMatcher& matcher) {
 }
 
 // Returns a matcher that matches the value of an optional<> type variable.
-// The matcher implementation only uses '!arg' and requires that the optional<>
-// type has a 'value_type' member type and that '*arg' is of type 'value_type'
-// and is printable using 'PrintToString'. It is compatible with
+// The matcher implementation only uses '!arg' (or 'arg.has_value()' if '!arg`
+// isn't a valid expression) and requires that the optional<> type has a
+// 'value_type' member type and that '*arg' is of type 'value_type' and is
+// printable using 'PrintToString'. It is compatible with
 // std::optional/std::experimental::optional.
 // Note that to compare an optional type variable against nullopt you should
 // use Eq(nullopt) and not Eq(Optional(nullopt)). The latter implies that the

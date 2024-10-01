@@ -674,6 +674,8 @@ TEST_P(MatcherTupleTestP, ExplainsMatchFailure) {
                    // explanation.
 }
 
+#if GTEST_HAS_TYPED_TEST
+
 // Sample optional type implementation with minimal requirements for use with
 // Optional matcher.
 template <typename T>
@@ -691,37 +693,75 @@ class SampleOptional {
   bool has_value_;
 };
 
-TEST(OptionalTest, DescribesSelf) {
-  const Matcher<SampleOptional<int>> m = Optional(Eq(1));
+// Sample optional type implementation with alternative minimal requirements for
+// use with Optional matcher. In particular, while it doesn't have a bool
+// conversion operator, it does have a has_value() method.
+template <typename T>
+class SampleOptionalWithoutBoolConversion {
+ public:
+  using value_type = T;
+  explicit SampleOptionalWithoutBoolConversion(T value)
+      : value_(std::move(value)), has_value_(true) {}
+  SampleOptionalWithoutBoolConversion() : value_(), has_value_(false) {}
+  bool has_value() const { return has_value_; }
+  const T& operator*() const { return value_; }
+
+ private:
+  T value_;
+  bool has_value_;
+};
+
+template <typename T>
+class OptionalTest : public testing::Test {};
+
+using OptionalTestTypes =
+    testing::Types<SampleOptional<int>,
+                   SampleOptionalWithoutBoolConversion<int>>;
+
+TYPED_TEST_SUITE(OptionalTest, OptionalTestTypes);
+
+TYPED_TEST(OptionalTest, DescribesSelf) {
+  const Matcher<TypeParam> m = Optional(Eq(1));
   EXPECT_EQ("value is equal to 1", Describe(m));
 }
 
-TEST(OptionalTest, ExplainsSelf) {
-  const Matcher<SampleOptional<int>> m = Optional(Eq(1));
-  EXPECT_EQ("whose value 1 matches", Explain(m, SampleOptional<int>(1)));
-  EXPECT_EQ("whose value 2 doesn't match", Explain(m, SampleOptional<int>(2)));
+TYPED_TEST(OptionalTest, ExplainsSelf) {
+  const Matcher<TypeParam> m = Optional(Eq(1));
+  EXPECT_EQ("whose value 1 matches", Explain(m, TypeParam(1)));
+  EXPECT_EQ("whose value 2 doesn't match", Explain(m, TypeParam(2)));
 }
 
-TEST(OptionalTest, MatchesNonEmptyOptional) {
-  const Matcher<SampleOptional<int>> m1 = Optional(1);
-  const Matcher<SampleOptional<int>> m2 = Optional(Eq(2));
-  const Matcher<SampleOptional<int>> m3 = Optional(Lt(3));
-  SampleOptional<int> opt(1);
+TYPED_TEST(OptionalTest, MatchesNonEmptyOptional) {
+  const Matcher<TypeParam> m1 = Optional(1);
+  const Matcher<TypeParam> m2 = Optional(Eq(2));
+  const Matcher<TypeParam> m3 = Optional(Lt(3));
+  TypeParam opt(1);
   EXPECT_TRUE(m1.Matches(opt));
   EXPECT_FALSE(m2.Matches(opt));
   EXPECT_TRUE(m3.Matches(opt));
 }
 
-TEST(OptionalTest, DoesNotMatchNullopt) {
-  const Matcher<SampleOptional<int>> m = Optional(1);
-  SampleOptional<int> empty;
+TYPED_TEST(OptionalTest, DoesNotMatchNullopt) {
+  const Matcher<TypeParam> m = Optional(1);
+  TypeParam empty;
   EXPECT_FALSE(m.Matches(empty));
 }
 
-TEST(OptionalTest, WorksWithMoveOnly) {
-  Matcher<SampleOptional<std::unique_ptr<int>>> m = Optional(Eq(nullptr));
-  EXPECT_TRUE(m.Matches(SampleOptional<std::unique_ptr<int>>(nullptr)));
+template <typename T>
+class MoveOnlyOptionalTest : public testing::Test {};
+
+using MoveOnlyOptionalTestTypes =
+    testing::Types<SampleOptional<std::unique_ptr<int>>,
+                   SampleOptionalWithoutBoolConversion<std::unique_ptr<int>>>;
+
+TYPED_TEST_SUITE(MoveOnlyOptionalTest, MoveOnlyOptionalTestTypes);
+
+TYPED_TEST(MoveOnlyOptionalTest, WorksWithMoveOnly) {
+  Matcher<TypeParam> m = Optional(Eq(nullptr));
+  EXPECT_TRUE(m.Matches(TypeParam(nullptr)));
 }
+
+#endif  // GTEST_HAS_TYPED_TEST
 
 class SampleVariantIntString {
  public:
