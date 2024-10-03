@@ -725,6 +725,49 @@ inline void PrintTo(const ::std::wstring& s, ::std::ostream* os) {
 }
 #endif  // GTEST_HAS_STD_WSTRING
 
+#if defined(__cpp_lib_string_view) || GTEST_INTERNAL_CPLUSPLUS_LANG >= 201703L
+#include <string_view>
+
+// Overloads for ::std::string_view.
+#ifdef GTEST_HAS_ABSL
+// Otherwise internal::StringView is implemented using ::std::string_view
+// and has already overloaded PrintTo for it below.
+GTEST_API_ void PrintStringTo(const ::std::string_view& sv, ::std::ostream* os);
+inline void PrintTo(const ::std::string_view& sv, ::std::ostream* os) {
+  PrintStringTo(sv, os);
+}
+#endif  // GTEST_HAS_ABSL
+
+// Overloads for ::std::u8string_view
+#ifdef __cpp_lib_char8_t
+GTEST_API_ void PrintU8StringTo(const ::std::u8string_view& sv, ::std::ostream* os);
+inline void PrintTo(const ::std::u8string_view& sv, ::std::ostream* os) {
+  PrintU8StringTo(sv, os);
+}
+#endif
+
+// Overloads for ::std::u16string_view
+GTEST_API_ void PrintU16StringTo(const ::std::u16string_view& sv, ::std::ostream* os);
+inline void PrintTo(const ::std::u16string_view& sv, ::std::ostream* os) {
+  PrintU16StringTo(sv, os);
+}
+
+// Overloads for ::std::u32string_view
+GTEST_API_ void PrintU32StringTo(const ::std::u32string_view& sv, ::std::ostream* os);
+inline void PrintTo(const ::std::u32string_view& sv, ::std::ostream* os) {
+  PrintU32StringTo(sv, os);
+}
+
+// Overloads for ::std::wstring_view.
+#if GTEST_HAS_STD_WSTRING
+GTEST_API_ void PrintWideStringTo(const ::std::wstring_view& sv, ::std::ostream* os);
+inline void PrintTo(const ::std::wstring_view& sv, ::std::ostream* os) {
+  PrintWideStringTo(sv, os);
+}
+#endif  // GTEST_HAS_STD_WSTRING
+#endif  // __cpp_lib_string_view
+
+
 #if GTEST_INTERNAL_HAS_STRING_VIEW
 // Overload for internal::StringView.
 inline void PrintTo(internal::StringView sp, ::std::ostream* os) {

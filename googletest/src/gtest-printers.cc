@@ -550,6 +550,39 @@ void PrintWideStringTo(const ::std::wstring& s, ostream* os) {
 }
 #endif  // GTEST_HAS_STD_WSTRING
 
+#if defined(__cpp_lib_string_view) || GTEST_INTERNAL_CPLUSPLUS_LANG >= 201703L
+
+#ifdef GTEST_HAS_ABSL
+void PrintStringTo(const ::std::string_view& sv, ostream* os) {
+  if (PrintCharsAsStringTo(sv.data(), sv.size(), os) == kHexEscape) {
+    if (GTEST_FLAG_GET(print_utf8)) {
+      ConditionalPrintAsText(sv.data(), sv.size(), os);
+    }
+  }
+}
+#endif
+
+#ifdef __cpp_lib_char8_t
+void PrintU8StringTo(const ::std::u8string_view& sv, ostream* os) {
+  PrintCharsAsStringTo(sv.data(), sv.size(), os);
+}
+#endif
+
+void PrintU16StringTo(const ::std::u16string_view& sv, ostream* os) {
+  PrintCharsAsStringTo(sv.data(), sv.size(), os);
+}
+
+void PrintU32StringTo(const ::std::u32string_view& sv, ostream* os) {
+  PrintCharsAsStringTo(sv.data(), sv.size(), os);
+}
+
+#if GTEST_HAS_STD_WSTRING
+void PrintWideStringTo(const ::std::wstring_view& sv, ::std::ostream* os) {
+  PrintCharsAsStringTo(sv.data(), sv.size(), os);
+}
+#endif  // GTEST_HAS_STD_WSTRING
+#endif  // __cpp_lib_string_view
+
 }  // namespace internal
 
 }  // namespace testing
