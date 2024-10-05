@@ -984,6 +984,108 @@ TEST(PrintStringTest, U32String) {
   EXPECT_EQ("U\"Hello, \\x1F5FA\\xFE0F\"", Print(str));
 }
 
+#if GTEST_HAS_STD_WSTRING
+TEST(PrintStringTest, WString) {
+  std::wstring str = L"Hello, 世界";
+  EXPECT_EQ(str, str);  // Verify EXPECT_EQ compiles with this type.
+  EXPECT_EQ("L\"Hello, \\x4E16\\x754C\"", Print(str));
+}
+#endif
+
+
+// Tests printing ::std::basic_string_view's
+
+#if defined(__cpp_lib_string_view) || GTEST_INTERNAL_CPLUSPLUS_LANG >= 201703L
+#include <string_view>
+
+// Tests printing ::std::string_view
+#ifdef GTEST_HAS_ABSL
+
+TEST(PrintStringViewTest, StringViewInStdNamespace) {
+  const char s[] = "'\"?\\\a\b\f\n\0\r\t\v\x7F\xFF a";
+  const ::std::string_view str(s, sizeof(s));
+  EXPECT_EQ("\"'\\\"?\\\\\\a\\b\\f\\n\\0\\r\\t\\v\\x7F\\xFF a\\0\"",
+            Print(str));
+}
+#endif  // GTEST_HAS_ABSL
+
+// Tests printing ::std::u8string_view
+#ifdef __cpp_lib_char8_t
+TEST(PrintStringViewTest, U8StringViewInStdNamespace) {
+  const char8_t s[] = u8"'\"?\\\a\b\f\n\0\r\t\v\x7F\xFF a";
+  const ::std::u8string_view str(s, sizeof(s));
+  EXPECT_EQ("u8\"'\\\"?\\\\\\a\\b\\f\\n\\0\\r\\t\\v\\x7F\\xFF a\\0\"",
+            Print(str));
+}
+#endif
+
+// Tests printing ::std::u16string_view
+TEST(PrintStringViewTest, U16StringViewInStdNamespace) {
+  const char16_t s[] = u"'\"?\\\a\b\f\n\0\r\t\v\x7F\xFF a";
+  const ::std::u16string_view str(s, sizeof(s) / sizeof(char16_t));
+  EXPECT_EQ("u\"'\\\"?\\\\\\a\\b\\f\\n\\0\\r\\t\\v\\x7F\\xFF a\\0\"",
+            Print(str));
+}
+
+// Tests printing ::std::u32string_view
+TEST(PrintStringViewTest, U32StringViewInStdNamespace) {
+  const char32_t s[] = U"'\"?\\\a\b\f\n\0\r\t\v\x7F\xFF a";
+  const ::std::u32string_view str(s, sizeof(s) / sizeof(char32_t));
+  EXPECT_EQ("U\"'\\\"?\\\\\\a\\b\\f\\n\\0\\r\\t\\v\\x7F\\xFF a\\0\"",
+            Print(str));
+}
+
+// Tests printing ::std::wstring_view
+#if GTEST_HAS_STD_WSTRING
+TEST(PrintStringViewTest, WStringViewInStdNamespace) {
+  const wchar_t s[] = L"'\"?\\\a\b\f\n\0\r\t\v\x7F\xFF a";
+  const ::std::wstring_view str(s, sizeof(s) / sizeof(wchar_t));
+  EXPECT_EQ("L\"'\\\"?\\\\\\a\\b\\f\\n\\0\\r\\t\\v\\x7F\\xFF a\\0\"",
+            Print(str));
+}
+#endif  // GTEST_HAS_STD_WSTRING
+
+
+#ifdef GTEST_HAS_ABSL
+TEST(PrintStringViewTest, StringView) {
+  std::string_view sv = "Hello, world";
+  EXPECT_EQ(sv, sv);  // Verify EXPECT_EQ compiles with this type.
+  EXPECT_EQ("\"Hello, world\"", Print(sv));
+}
+#endif  // GTEST_HAS_ABSL
+
+#ifdef __cpp_lib_char8_t
+TEST(PrintStringViewTest, U8StringView) {
+  std::u8string_view sv = u8"Hello, 世界";
+  EXPECT_EQ(sv, sv);  // Verify EXPECT_EQ compiles with this type.
+  EXPECT_EQ("u8\"Hello, \\xE4\\xB8\\x96\\xE7\\x95\\x8C\"", Print(sv));
+}
+#endif
+
+TEST(PrintStringViewTest, U16StringView) {
+  std::u16string_view sv = u"Hello, 世界";
+  EXPECT_EQ(sv, sv);  // Verify EXPECT_EQ compiles with this type.
+  EXPECT_EQ("u\"Hello, \\x4E16\\x754C\"", Print(sv));
+}
+
+TEST(PrintStringViewTest, U32StringView) {
+  std::u32string_view sv = U"Hello, 🗺️";
+  EXPECT_EQ(sv, sv);  // Verify EXPECT_EQ compiles with this type
+  EXPECT_EQ("U\"Hello, \\x1F5FA\\xFE0F\"", Print(sv));
+}
+
+#if GTEST_HAS_STD_WSTRING
+TEST(PrintStringViewTest, WStringView) {
+  std::wstring_view sv = L"Hello, 世界";
+  EXPECT_EQ(sv, sv);  // Verify EXPECT_EQ compiles with this type.
+  EXPECT_EQ("L\"Hello, \\x4E16\\x754C\"", Print(sv));
+}
+#endif
+
+
+#endif  // __cpp_lib_string_view
+
+
 // Tests printing types that support generic streaming (i.e. streaming
 // to std::basic_ostream<Char, CharTraits> for any valid Char and
 // CharTraits types).
