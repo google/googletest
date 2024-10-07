@@ -191,6 +191,8 @@ function(cxx_library_with_type name type cxx_flags)
     target_compile_definitions(${name} INTERFACE
       $<INSTALL_INTERFACE:GTEST_LINKED_AS_SHARED_LIBRARY=1>)
   endif()
+  target_compile_definitions(${name} INTERFACE
+    $<INSTALL_INTERFACE:GTEST_HAS_PTHREAD=$<BOOL:${GTEST_HAS_PTHREAD}>>)
   if (DEFINED GTEST_HAS_PTHREAD)
     target_link_libraries(${name} PUBLIC Threads::Threads)
   endif()
