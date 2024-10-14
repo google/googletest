@@ -2870,6 +2870,8 @@ TEST_F(FloatTest, LargeDiff) {
 // This ensures that no overflow occurs when comparing numbers whose
 // absolute value is very large.
 TEST_F(FloatTest, Infinity) {
+  EXPECT_FLOAT_EQ(values_.infinity, values_.infinity);
+  EXPECT_FLOAT_EQ(-values_.infinity, -values_.infinity);
   EXPECT_FLOAT_EQ(values_.infinity, values_.close_to_infinity);
   EXPECT_FLOAT_EQ(-values_.infinity, -values_.close_to_infinity);
   EXPECT_NONFATAL_FAILURE(EXPECT_FLOAT_EQ(values_.infinity, -values_.infinity),
@@ -2894,6 +2896,11 @@ TEST_F(FloatTest, NaN) {
   EXPECT_NONFATAL_FAILURE(EXPECT_FLOAT_EQ(v.nan1, v.nan1), "v.nan1");
   EXPECT_NONFATAL_FAILURE(EXPECT_FLOAT_EQ(v.nan1, v.nan2), "v.nan2");
   EXPECT_NONFATAL_FAILURE(EXPECT_FLOAT_EQ(1.0, v.nan1), "v.nan1");
+  EXPECT_NONFATAL_FAILURE(EXPECT_NEAR(1.0f, v.nan1, 1.0f), "v.nan1");
+  EXPECT_NONFATAL_FAILURE(EXPECT_NEAR(1.0f, v.nan1, v.infinity), "v.nan1");
+  EXPECT_NONFATAL_FAILURE(EXPECT_NEAR(v.infinity, v.nan1, 1.0f), "v.nan1");
+  EXPECT_NONFATAL_FAILURE(EXPECT_NEAR(v.infinity, v.nan1, v.infinity),
+                          "v.nan1");
 
   EXPECT_FATAL_FAILURE(ASSERT_FLOAT_EQ(v.nan1, v.infinity), "v.infinity");
 }
@@ -2917,11 +2924,28 @@ TEST_F(FloatTest, Commutative) {
 
 // Tests EXPECT_NEAR.
 TEST_F(FloatTest, EXPECT_NEAR) {
+  static const FloatTest::TestValues& v = this->values_;
+
   EXPECT_NEAR(-1.0f, -1.1f, 0.2f);
   EXPECT_NEAR(2.0f, 3.0f, 1.0f);
+  EXPECT_NEAR(v.infinity, v.infinity, 0.0f);
+  EXPECT_NEAR(-v.infinity, -v.infinity, 0.0f);
+  EXPECT_NEAR(0.0f, 1.0f, v.infinity);
+  EXPECT_NEAR(v.infinity, -v.infinity, v.infinity);
+  EXPECT_NEAR(-v.infinity, v.infinity, v.infinity);
   EXPECT_NONFATAL_FAILURE(EXPECT_NEAR(1.0f, 1.5f, 0.25f),  // NOLINT
                           "The difference between 1.0f and 1.5f is 0.5, "
                           "which exceeds 0.25f");
+  EXPECT_NONFATAL_FAILURE(EXPECT_NEAR(v.infinity, -v.infinity, 0.0f),  // NOLINT
+                          "The difference between v.infinity and -v.infinity "
+                          "is inf, which exceeds 0.0f");
+  EXPECT_NONFATAL_FAILURE(EXPECT_NEAR(-v.infinity, v.infinity, 0.0f),  // NOLINT
+                          "The difference between -v.infinity and v.infinity "
+                          "is inf, which exceeds 0.0f");
+  EXPECT_NONFATAL_FAILURE(
+      EXPECT_NEAR(v.infinity, v.close_to_infinity, v.further_from_infinity),
+      "The difference between v.infinity and v.close_to_infinity is inf, which "
+      "exceeds v.further_from_infinity");
 }
 
 // Tests ASSERT_NEAR.
@@ -3028,6 +3052,8 @@ TEST_F(DoubleTest, LargeDiff) {
 // This ensures that no overflow occurs when comparing numbers whose
 // absolute value is very large.
 TEST_F(DoubleTest, Infinity) {
+  EXPECT_DOUBLE_EQ(values_.infinity, values_.infinity);
+  EXPECT_DOUBLE_EQ(-values_.infinity, -values_.infinity);
   EXPECT_DOUBLE_EQ(values_.infinity, values_.close_to_infinity);
   EXPECT_DOUBLE_EQ(-values_.infinity, -values_.close_to_infinity);
   EXPECT_NONFATAL_FAILURE(EXPECT_DOUBLE_EQ(values_.infinity, -values_.infinity),
@@ -3047,6 +3073,12 @@ TEST_F(DoubleTest, NaN) {
   EXPECT_NONFATAL_FAILURE(EXPECT_DOUBLE_EQ(v.nan1, v.nan1), "v.nan1");
   EXPECT_NONFATAL_FAILURE(EXPECT_DOUBLE_EQ(v.nan1, v.nan2), "v.nan2");
   EXPECT_NONFATAL_FAILURE(EXPECT_DOUBLE_EQ(1.0, v.nan1), "v.nan1");
+  EXPECT_NONFATAL_FAILURE(EXPECT_NEAR(1.0, v.nan1, 1.0), "v.nan1");
+  EXPECT_NONFATAL_FAILURE(EXPECT_NEAR(1.0, v.nan1, v.infinity), "v.nan1");
+  EXPECT_NONFATAL_FAILURE(EXPECT_NEAR(v.infinity, v.nan1, 1.0), "v.nan1");
+  EXPECT_NONFATAL_FAILURE(EXPECT_NEAR(v.infinity, v.nan1, v.infinity),
+                          "v.nan1");
+
   EXPECT_FATAL_FAILURE(ASSERT_DOUBLE_EQ(v.nan1, v.infinity), "v.infinity");
 }
 
@@ -3069,11 +3101,28 @@ TEST_F(DoubleTest, Commutative) {
 
 // Tests EXPECT_NEAR.
 TEST_F(DoubleTest, EXPECT_NEAR) {
+  static const DoubleTest::TestValues& v = this->values_;
+
   EXPECT_NEAR(-1.0, -1.1, 0.2);
   EXPECT_NEAR(2.0, 3.0, 1.0);
+  EXPECT_NEAR(v.infinity, v.infinity, 0.0);
+  EXPECT_NEAR(-v.infinity, -v.infinity, 0.0);
+  EXPECT_NEAR(0.0, 1.0, v.infinity);
+  EXPECT_NEAR(v.infinity, -v.infinity, v.infinity);
+  EXPECT_NEAR(-v.infinity, v.infinity, v.infinity);
   EXPECT_NONFATAL_FAILURE(EXPECT_NEAR(1.0, 1.5, 0.25),  // NOLINT
                           "The difference between 1.0 and 1.5 is 0.5, "
                           "which exceeds 0.25");
+  EXPECT_NONFATAL_FAILURE(EXPECT_NEAR(v.infinity, -v.infinity, 0.0),
+                          "The difference between v.infinity and -v.infinity "
+                          "is inf, which exceeds 0.0");
+  EXPECT_NONFATAL_FAILURE(EXPECT_NEAR(-v.infinity, v.infinity, 0.0),
+                          "The difference between -v.infinity and v.infinity "
+                          "is inf, which exceeds 0.0");
+  EXPECT_NONFATAL_FAILURE(
+      EXPECT_NEAR(v.infinity, v.close_to_infinity, v.further_from_infinity),
+      "The difference between v.infinity and v.close_to_infinity is inf, which "
+      "exceeds v.further_from_infinity");
   // At this magnitude adjacent doubles are 512.0 apart, so this triggers a
   // slightly different failure reporting path.
   EXPECT_NONFATAL_FAILURE(
