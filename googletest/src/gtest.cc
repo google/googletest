@@ -3832,6 +3832,9 @@ class TestEventRepeater : public TestEventListener {
   void OnEnvironmentsTearDownEnd(const UnitTest& parameter) override;
   void OnTestIterationEnd(const UnitTest& unit_test, int iteration) override;
   void OnTestProgramEnd(const UnitTest& parameter) override;
+  void OnScopedTraceEnter(const UnitTest& unit_test, const char* file, int line,
+                          std::string message) override;
+  void OnScopedTraceExit(const UnitTest& unit_test) override;
 
  private:
   // Controls whether events will be forwarded to listeners_. Set to false
@@ -3923,6 +3926,20 @@ void TestEventRepeater::OnTestIterationEnd(const UnitTest& unit_test,
     for (size_t i = listeners_.size(); i > 0; i--) {
       listeners_[i - 1]->OnTestIterationEnd(unit_test, iteration);
     }
+  }
+}
+
+void TestEventRepeater::OnScopedTraceEnter(const UnitTest& unit_test,
+                                           const char* file, int line,
+                                           std::string message) {
+  for (size_t i = 0; i < listeners_.size(); i++) {
+    listeners_[i]->OnScopedTraceEnter(unit_test, file, line, message);
+  }
+}
+
+void TestEventRepeater::OnScopedTraceExit(const UnitTest& unit_test) {
+  for (size_t i = listeners_.size(); i > 0; i--) {
+    listeners_[i - 1]->OnScopedTraceExit(unit_test);
   }
 }
 
@@ -5618,12 +5635,15 @@ UnitTest::~UnitTest() { delete impl_; }
 // Google Test trace stack.
 void UnitTest::PushGTestTrace(const internal::TraceInfo& trace)
     GTEST_LOCK_EXCLUDED_(mutex_) {
+  impl_->listeners()->repeater()->OnScopedTraceEnter(*this, trace.file,
+                                                     trace.line, trace.message);
   internal::MutexLock lock(&mutex_);
   impl_->gtest_trace_stack().push_back(trace);
 }
 
 // Pops a trace from the per-thread Google Test trace stack.
 void UnitTest::PopGTestTrace() GTEST_LOCK_EXCLUDED_(mutex_) {
+  impl_->listeners()->repeater()->OnScopedTraceExit(*this);
   internal::MutexLock lock(&mutex_);
   impl_->gtest_trace_stack().pop_back();
 }
