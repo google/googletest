@@ -49,6 +49,8 @@
 #ifndef GOOGLETEST_INCLUDE_GTEST_GTEST_H_
 #define GOOGLETEST_INCLUDE_GTEST_GTEST_H_
 
+#include <sys/resource.h>
+
 #include <cstddef>
 #include <cstdint>
 #include <limits>
@@ -359,6 +361,45 @@ class GTEST_API_ Test {
   Test(const Test&) = delete;
   Test& operator=(const Test&) = delete;
 };
+
+// The class is a helpler to implements a test suite without core file
+// generated.
+class ExceptionTest : public ::testing::Test {
+protected:
+  static void SetUpTestSuite() {
+    struct rlimit rl;
+    rl.rlim_cur = 0;
+    rl.rlim_max = 0;
+    // store old value of core dump file size
+    if (getrlimit(RLIMIT_CORE, &rl_old_) == -1) {
+      exit(EXIT_FAILURE);
+    }
+
+    // do not generate core dump file, we know it will fail
+    if (setrlimit(RLIMIT_CORE, &rl) == -1) {
+      exit(EXIT_FAILURE);
+    } else {
+      GTEST_LOG_(INFO) << "set RLIMIT_CORE success";
+      GTEST_LOG_(INFO) << "rl_old_ rlim_cur: " << rl_old_.rlim_cur;
+      GTEST_LOG_(INFO) << "rl_old_ rlim_max: " << rl_old_.rlim_max;
+    }
+  }
+  static void TearDownTestSuite() {
+    // do not generate core dump file, we know it will fail
+    if (setrlimit(RLIMIT_CORE, &rl_old_) == -1) {
+      exit(EXIT_FAILURE);
+    } else {
+      GTEST_LOG_(INFO) << "restore RLIMIT_CORE success";
+    }
+  }
+  void SetUp() override {}
+
+  void TearDown() override {}
+
+private:
+  static struct rlimit rl_old_;
+};
+struct rlimit ExceptionTest::rl_old_ = {0, 0};
 
 typedef internal::TimeInMillis TimeInMillis;
 
