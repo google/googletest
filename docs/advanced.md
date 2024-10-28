@@ -286,7 +286,7 @@ For example:
 ```c++
 TEST(SkipTest, DoesSkip) {
   GTEST_SKIP() << "Skipping single test";
-  EXPECT_EQ(0, 1);  // Won't fail; it won't be executed
+  FAIL();  // Won't fail; it won't be executed
 }
 
 class SkipFixture : public ::testing::Test {
@@ -298,7 +298,7 @@ class SkipFixture : public ::testing::Test {
 
 // Tests for SkipFixture won't be executed.
 TEST_F(SkipFixture, SkipsOneTest) {
-  EXPECT_EQ(5, 7);  // Won't fail
+  FAIL();  // Won't fail; it won't be executed
 }
 ```
 
