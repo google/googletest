@@ -3387,9 +3387,9 @@ With this definition, the above assertion will give a better message:
 
 #### Using EXPECT_ Statements in Matchers
 
-You can also use `EXPECT_...` (and `ASSERT_...`) statements inside custom
-matcher definitions. In many cases, this allows you to write your matcher more
-concisely while still providing an informative error message. For example:
+You can also use `EXPECT_...` statements inside custom matcher definitions. In
+many cases, this allows you to write your matcher more concisely while still
+providing an informative error message. For example:
 
 ```cpp
 MATCHER(IsDivisibleBy7, "") {
