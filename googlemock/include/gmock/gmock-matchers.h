@@ -4958,7 +4958,7 @@ inline internal::UnorderedElementsAreArrayMatcher<T> IsSupersetOf(
 // - {1} matches IsSubsetOf({Gt(0), Lt(0)}), as 1 matches Gt(0).
 // - {1, -1} matches IsSubsetOf({Lt(0), Gt(0)}), as 1 matches Gt(0) and -1
 //   matches Lt(0).
-// - {1, 2} doesn't matches IsSubsetOf({Gt(0), Lt(0)}), even though 1 and 2 both
+// - {1, 2} doesn't match IsSubsetOf({Gt(0), Lt(0)}), even though 1 and 2 both
 //   match Gt(0). The reason is that different matchers must be used for
 //   elements in different slots of the container.
 //
