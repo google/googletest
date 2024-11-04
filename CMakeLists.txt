@@ -1,6 +1,13 @@
 # Note: CMake support is community-based. The maintainers do not use CMake
 # internally.
 
+if(" ${CMAKE_SOURCE_DIR}" STREQUAL " ${CMAKE_BINARY_DIR}")
+  message(FATAL_ERROR "
+FATAL: In-source builds are not allowed.
+       You should create a separate directory for build files.
+")
+endif()
+
 cmake_minimum_required(VERSION 3.13)
 
 project(googletest-distribution)
