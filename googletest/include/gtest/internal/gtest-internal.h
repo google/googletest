@@ -1144,14 +1144,14 @@ struct Ignore {
 
 template <typename>
 struct ElemFromListImpl;
-template <size_t... I>
-struct ElemFromListImpl<std::index_sequence<I...>> {
+template <size_t... __I>
+struct ElemFromListImpl<std::index_sequence<__I...>> {
   // We make Ignore a template to solve a problem with MSVC.
   // A non-template Ignore would work fine with `decltype(Ignore(I))...`, but
   // MSVC doesn't understand how to deal with that pack expansion.
   // Use `0 * I` to have a single instantiation of Ignore.
   template <typename R>
-  static R Apply(Ignore<0 * I>..., R (*)(), ...);
+  static R Apply(Ignore<0 * __I>..., R (*)(), ...);
 };
 
 template <size_t N, typename... T>
@@ -1165,12 +1165,12 @@ struct FlatTupleConstructTag {};
 template <typename... T>
 class FlatTuple;
 
-template <typename Derived, size_t I>
+template <typename Derived, size_t __I>
 struct FlatTupleElemBase;
 
-template <typename... T, size_t I>
-struct FlatTupleElemBase<FlatTuple<T...>, I> {
-  using value_type = typename ElemFromList<I, T...>::type;
+template <typename... T, size_t __I>
+struct FlatTupleElemBase<FlatTuple<T...>, __I> {
+  using value_type = typename ElemFromList<__I, T...>::type;
   FlatTupleElemBase() = default;
   template <typename Arg>
   explicit FlatTupleElemBase(FlatTupleConstructTag, Arg&& t)
@@ -1191,14 +1191,14 @@ struct FlatTupleBase<FlatTuple<T...>, std::index_sequence<Idx...>>
       : FlatTupleElemBase<FlatTuple<T...>, Idx>(FlatTupleConstructTag{},
                                                 std::forward<Args>(args))... {}
 
-  template <size_t I>
-  const typename ElemFromList<I, T...>::type& Get() const {
-    return FlatTupleElemBase<FlatTuple<T...>, I>::value;
+  template <size_t __I>
+  const typename ElemFromList<__I, T...>::type& Get() const {
+    return FlatTupleElemBase<FlatTuple<T...>, __I>::value;
   }
 
-  template <size_t I>
-  typename ElemFromList<I, T...>::type& Get() {
-    return FlatTupleElemBase<FlatTuple<T...>, I>::value;
+  template <size_t __I>
+  typename ElemFromList<__I, T...>::type& Get() {
+    return FlatTupleElemBase<FlatTuple<T...>, __I>::value;
   }
 
   template <typename F>

@@ -811,9 +811,9 @@ class ValueArray {
   }
 
  private:
-  template <typename T, size_t... I>
-  std::vector<T> MakeVector(std::index_sequence<I...>) const {
-    return std::vector<T>{static_cast<T>(v_.template Get<I>())...};
+  template <typename T, size_t... __I>
+  std::vector<T> MakeVector(std::index_sequence<__I...>) const {
+    return std::vector<T>{static_cast<T>(v_.template Get<__I>())...};
   }
 
   FlatTuple<Ts...> v_;
@@ -838,19 +838,19 @@ class CartesianProductGenerator
     return new Iterator(this, generators_, true);
   }
 
- private:
-  template <class I>
+private:
+  template <class __I>
   class IteratorImpl;
-  template <size_t... I>
-  class IteratorImpl<std::index_sequence<I...>>
+  template <size_t... __I>
+  class IteratorImpl<std::index_sequence<__I...>>
       : public ParamIteratorInterface<ParamType> {
    public:
     IteratorImpl(const ParamGeneratorInterface<ParamType>* base,
                  const std::tuple<ParamGenerator<T>...>& generators,
                  bool is_end)
         : base_(base),
-          begin_(std::get<I>(generators).begin()...),
-          end_(std::get<I>(generators).end()...),
+          begin_(std::get<__I>(generators).begin()...),
+          end_(std::get<__I>(generators).end()...),
           current_(is_end ? end_ : begin_) {
       ComputeCurrentValue();
     }
@@ -891,8 +891,8 @@ class CartesianProductGenerator
 
       bool same = true;
       bool dummy[] = {
-          (same = same && std::get<I>(current_) ==
-                              std::get<I>(typed_other->current_))...};
+          (same = same && std::get<__I>(current_) ==
+                              std::get<__I>(typed_other->current_))...};
       (void)dummy;
       return same;
     }
@@ -916,12 +916,12 @@ class CartesianProductGenerator
 
     void ComputeCurrentValue() {
       if (!AtEnd())
-        current_value_ = std::make_shared<ParamType>(*std::get<I>(current_)...);
+        current_value_ = std::make_shared<ParamType>(*std::get<__I>(current_)...);
     }
     bool AtEnd() const {
       bool at_end = false;
       bool dummy[] = {
-          (at_end = at_end || std::get<I>(current_) == std::get<I>(end_))...};
+          (at_end = at_end || std::get<__I>(current_) == std::get<__I>(end_))...};
       (void)dummy;
       return at_end;
     }
