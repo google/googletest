@@ -1,0 +1,48 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.6",
+  "version": 1,
+  "metadata": {
+    "authors": [
+      {
+        "name": "@VCS_SBOM_AUTHORS@"
+      }
+    ]
+  },
+  "components": [
+    {
+      "type": "library",
+      "bom-ref": "pkg:github/google/googletest@@VCS_TAG@",
+      "cpe": "cpe:2.3:a:google:googletest:@VCS_TAG@:*:*:*:*:*:*:*",
+      "name": "GoogleTest",
+      "version": "@VCS_VERSION@",
+      "description": "A xUnit test framework",
+      "authors": [
+        {
+          "name": "@VCS_AUTHORS@",
+          "url": "https://raw.githubusercontent.com/google/googletest/refs/heads/main/CONTRIBUTORS"
+        }
+      ],
+      "supplier": {
+        "name": "Google"
+      },
+      "licenses": [
+        {
+          "license": {
+            "id": "BSD-3-Clause"
+          }
+        }
+      ],
+      "externalReferences": [
+        {
+          "type": "website",
+          "url": "https://google.github.io/googletest/"
+        },
+        {
+          "type": "vcs",
+          "url": "https://github.com/google/googletest"
+        }
+      ]
+    }
+  ]
+}
