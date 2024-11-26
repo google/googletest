@@ -1647,6 +1647,37 @@ AssertionResult EqFailure(const char* lhs_expression,
   return AssertionFailure() << msg;
 }
 
+AssertionResult NeFailure(const char* lhs_expression,
+                          const char* rhs_expression,
+                          const std::string& lhs_value,
+                          const std::string& rhs_value, bool ignoring_case) {
+  Message msg;
+  msg << "Expected inequality of these values:";
+  msg << "\n  " << lhs_expression;
+  if (lhs_value != lhs_expression) {
+    msg << "\n    Which is: " << lhs_value;
+  }
+  msg << "\n  " << rhs_expression;
+  if (rhs_value != rhs_expression) {
+    msg << "\n    Which is: " << rhs_value;
+  }
+
+  if (ignoring_case) {
+    msg << "\nIgnoring case";
+  }
+
+  if (!lhs_value.empty() && !rhs_value.empty()) {
+    const std::vector<std::string> lhs_lines = SplitEscapedString(lhs_value);
+    const std::vector<std::string> rhs_lines = SplitEscapedString(rhs_value);
+    if (lhs_lines.size() > 1 || rhs_lines.size() > 1) {
+      msg << "\nWith diff:\n"
+          << edit_distance::CreateUnifiedDiff(lhs_lines, rhs_lines);
+    }
+  }
+
+  return AssertionFailure() << msg;
+}
+
 // Constructs a failure message for Boolean assertions such as EXPECT_TRUE.
 std::string GetBoolAssertionFailureMessage(
     const AssertionResult& assertion_result, const char* expression_text,

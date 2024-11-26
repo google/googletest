@@ -1601,6 +1601,29 @@ AssertionResult CmpHelperFloatingPointEQ(const char* lhs_expression,
                    false);
 }
 
+template <typename RawType>
+AssertionResult CmpHelperFloatingPointNE(const char* lhs_expression,
+                                         const char* rhs_expression,
+                                         RawType lhs_value, RawType rhs_value) {
+  const FloatingPoint<RawType> lhs(lhs_value), rhs(rhs_value);
+
+  if (!lhs.AlmostEquals(rhs)) {
+    return AssertionSuccess();
+  }
+
+  ::std::stringstream lhs_ss;
+  lhs_ss.precision(std::numeric_limits<RawType>::digits10 + 2);
+  lhs_ss << lhs_value;
+
+  ::std::stringstream rhs_ss;
+  rhs_ss.precision(std::numeric_limits<RawType>::digits10 + 2);
+  rhs_ss << rhs_value;
+
+  return NeFailure(lhs_expression, rhs_expression,
+                   StringStreamToString(&lhs_ss), StringStreamToString(&rhs_ss),
+                   false);
+}
+
 // Helper function for implementing ASSERT_NEAR.
 //
 // INTERNAL IMPLEMENTATION - DO NOT USE IN A USER PROGRAM.
@@ -1996,6 +2019,22 @@ class TestWithParam : public Test, public WithParamInterface<T> {};
 
 #define ASSERT_DOUBLE_EQ(val1, val2)                                         \
   ASSERT_PRED_FORMAT2(::testing::internal::CmpHelperFloatingPointEQ<double>, \
+                      val1, val2)
+
+#define EXPECT_FLOAT_NE(val1, val2)                                         \
+  EXPECT_PRED_FORMAT2(::testing::internal::CmpHelperFloatingPointNE<float>, \
+                      val1, val2)
+
+#define EXPECT_DOUBLE_NE(val1, val2)                                         \
+  EXPECT_PRED_FORMAT2(::testing::internal::CmpHelperFloatingPointNE<double>, \
+                      val1, val2)
+
+#define ASSERT_FLOAT_NE(val1, val2)                                         \
+  ASSERT_PRED_FORMAT2(::testing::internal::CmpHelperFloatingPointNE<float>, \
+                      val1, val2)
+
+#define ASSERT_DOUBLE_NE(val1, val2)                                         \
+  ASSERT_PRED_FORMAT2(::testing::internal::CmpHelperFloatingPointNE<double>, \
                       val1, val2)
 
 #define EXPECT_NEAR(val1, val2, abs_error)                                   \
