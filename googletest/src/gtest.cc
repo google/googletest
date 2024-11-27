@@ -5729,6 +5729,12 @@ void UnitTestImpl::ConfigureXmlOutput() {
 #endif  // GTEST_HAS_FILE_SYSTEM
 }
 
+#if GTEST_HAS_TERMINAL
+void PrintToTerminal() {
+  // Unsure of whether to use listener system, or to try and print events directly to terminal
+}
+#endif // GTEST_HAS_TERMINAL
+
 #if GTEST_CAN_STREAM_RESULTS_
 // Initializes event listeners for streaming test results in string form.
 // Must not be called before InitGoogleTest.
