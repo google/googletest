@@ -325,7 +325,7 @@ You may still want to use `SetUp()/TearDown()` in the following cases:
     enabled in the compiler. Therefore you should prefer `TearDown()` if you
     want to write portable tests that work with or without exceptions.
 *   The GoogleTest team is considering making the assertion macros throw on
-    platforms where exceptions are enabled (e.g. Windows, Mac OS, and Linux
+    platforms where exceptions are enabled (e.g. Windows, macOS, and Linux
     client-side), which will eliminate the need for the user to propagate
     failures from a subroutine to its caller. Therefore, you shouldn't use
     GoogleTest assertions in a destructor if your code could run on such a
