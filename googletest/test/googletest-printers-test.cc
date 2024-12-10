@@ -64,6 +64,10 @@
 #include <span>  // NOLINT
 #endif  // GTEST_INTERNAL_HAS_STD_SPAN
 
+#if GTEST_INTERNAL_HAS_COMPARE_LIB
+#include <compare>  // NOLINT
+#endif              // GTEST_INTERNAL_HAS_COMPARE_LIB
+
 // Some user-defined types for testing the universal value printer.
 
 // An anonymous enum type.
@@ -1970,6 +1974,26 @@ TEST(PrintOneofTest, Basic) {
       PrintToString(Type(NonPrintable{})));
 }
 #endif  // GTEST_INTERNAL_HAS_VARIANT
+
+#if GTEST_INTERNAL_HAS_COMPARE_LIB
+TEST(PrintOrderingTest, Basic) {
+  EXPECT_EQ("(less)", PrintToString(std::strong_ordering::less));
+  EXPECT_EQ("(greater)", PrintToString(std::strong_ordering::greater));
+  // equal == equivalent for strong_ordering.
+  EXPECT_EQ("(equal)", PrintToString(std::strong_ordering::equivalent));
+  EXPECT_EQ("(equal)", PrintToString(std::strong_ordering::equal));
+
+  EXPECT_EQ("(less)", PrintToString(std::weak_ordering::less));
+  EXPECT_EQ("(greater)", PrintToString(std::weak_ordering::greater));
+  EXPECT_EQ("(equivalent)", PrintToString(std::weak_ordering::equivalent));
+
+  EXPECT_EQ("(less)", PrintToString(std::partial_ordering::less));
+  EXPECT_EQ("(greater)", PrintToString(std::partial_ordering::greater));
+  EXPECT_EQ("(equivalent)", PrintToString(std::partial_ordering::equivalent));
+  EXPECT_EQ("(unordered)", PrintToString(std::partial_ordering::unordered));
+}
+#endif
+
 namespace {
 class string_ref;
 
