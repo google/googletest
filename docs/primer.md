@@ -73,8 +73,8 @@ Meaning                                                                         
 Exercise a particular program path with specific input values and verify the results | [TEST()](#simple-tests) | [Test Case][istqb test case]
 
 
-[istqb test case]: https://glossary.istqb.org/en_US/term/test-case-2
-[istqb test suite]: https://glossary.istqb.org/en_US/term/test-suite-1-3
+[istqb test case]: https://glossary.istqb.org/en_US/term/test-case
+[istqb test suite]: https://glossary.istqb.org/en_US/term/test-suite
 
 ## Basic Concepts
 
