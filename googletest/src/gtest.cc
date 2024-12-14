@@ -2383,7 +2383,6 @@ static std::vector<std::string> GetReservedAttributesForElement(
   return std::vector<std::string>();
 }
 
-#if GTEST_HAS_FILE_SYSTEM
 // TODO(jdesprez): Merge the two getReserved attributes once skip is improved
 // This function is only used when file systems are enabled.
 static std::vector<std::string> GetReservedOutputAttributesForElement(
@@ -2400,7 +2399,6 @@ static std::vector<std::string> GetReservedOutputAttributesForElement(
   // This code is unreachable but some compilers may not realizes that.
   return std::vector<std::string>();
 }
-#endif
 
 static std::string FormatWordList(const std::vector<std::string>& words) {
   Message word_list;
@@ -3928,14 +3926,10 @@ void TestEventRepeater::OnTestIterationEnd(const UnitTest& unit_test,
 
 // End TestEventRepeater
 
-#if GTEST_HAS_FILE_SYSTEM
 // This class generates an XML output file.
 class XmlUnitTestResultPrinter : public EmptyTestEventListener {
  public:
-  explicit XmlUnitTestResultPrinter(const char* output_file);
-
-  void OnTestIterationEnd(const UnitTest& unit_test, int iteration) override;
-  void ListTestsMatchingFilter(const std::vector<TestSuite*>& test_suites);
+  XmlUnitTestResultPrinter() = delete;
 
   // Prints an XML summary of all unit tests.
   static void PrintXmlTestsList(std::ostream* stream,
@@ -4017,39 +4011,8 @@ class XmlUnitTestResultPrinter : public EmptyTestEventListener {
   static void OutputXmlTestProperties(std::ostream* stream,
                                       const TestResult& result);
 
-  // The output file.
-  const std::string output_file_;
-
-  XmlUnitTestResultPrinter(const XmlUnitTestResultPrinter&) = delete;
-  XmlUnitTestResultPrinter& operator=(const XmlUnitTestResultPrinter&) = delete;
+  friend ::testing::XmlUnitTestResultPrinter;
 };
-
-// Creates a new XmlUnitTestResultPrinter.
-XmlUnitTestResultPrinter::XmlUnitTestResultPrinter(const char* output_file)
-    : output_file_(output_file) {
-  if (output_file_.empty()) {
-    GTEST_LOG_(FATAL) << "XML output file may not be null";
-  }
-}
-
-// Called after the unit test ends.
-void XmlUnitTestResultPrinter::OnTestIterationEnd(const UnitTest& unit_test,
-                                                  int /*iteration*/) {
-  FILE* xmlout = OpenFileForWriting(output_file_);
-  std::stringstream stream;
-  PrintXmlUnitTest(&stream, unit_test);
-  fprintf(xmlout, "%s", StringStreamToString(&stream).c_str());
-  fclose(xmlout);
-}
-
-void XmlUnitTestResultPrinter::ListTestsMatchingFilter(
-    const std::vector<TestSuite*>& test_suites) {
-  FILE* xmlout = OpenFileForWriting(output_file_);
-  std::stringstream stream;
-  PrintXmlTestsList(&stream, test_suites);
-  fprintf(xmlout, "%s", StringStreamToString(&stream).c_str());
-  fclose(xmlout);
-}
 
 // Returns an XML-escaped copy of the input string str.  If is_attribute
 // is true, the text is meant to appear as an attribute value, and
@@ -4483,7 +4446,6 @@ void XmlUnitTestResultPrinter::OutputXmlTestProperties(
 }
 
 // End XmlUnitTestResultPrinter
-#endif  // GTEST_HAS_FILE_SYSTEM
 
 #if GTEST_HAS_FILE_SYSTEM
 // This class generates an JSON output file.
@@ -5205,6 +5167,69 @@ void TestEventListeners::SuppressEventForwarding(bool suppress) {
   repeater_->set_forwarding_enabled(!suppress);
 }
 
+#if GTEST_HAS_FILE_SYSTEM
+// Creates a new XmlUnitTestResultPrinter.
+XmlUnitTestResultPrinter::XmlUnitTestResultPrinter(const char* output_file)
+    : output_file_(output_file) {
+  if (output_file_.empty()) {
+    GTEST_LOG_(FATAL) << "XML output file may not be null";
+  }
+}
+#endif  // GTEST_HAS_FILE_SYSTEM
+
+// Creates a new XmlUnitTestResultPrinter.
+XmlUnitTestResultPrinter::XmlUnitTestResultPrinter(std::ostream* output_stream)
+    : output_stream_(output_stream) {
+  if (!output_stream->good()) {
+    GTEST_LOG_(FATAL) << "XML output is not good";
+  }
+}
+
+// Called after the unit test ends.
+void XmlUnitTestResultPrinter::OnTestIterationEnd(const UnitTest& unit_test,
+                                                  int /*iteration*/) {
+#if GTEST_HAS_FILE_SYSTEM
+  FILE* xmlout = 0;
+  if(!output_stream_) {
+      xmlout = internal::OpenFileForWriting(output_file_);
+      output_stream_ = new std::stringstream;
+  }
+#endif  // GTEST_HAS_FILE_SYSTEM
+
+  internal::XmlUnitTestResultPrinter::PrintXmlUnitTest(output_stream_, unit_test);
+
+#if GTEST_HAS_FILE_SYSTEM
+  if(xmlout) {
+      fprintf(xmlout, "%s", internal::StringStreamToString(static_cast<std::stringstream*>(output_stream_)).c_str());
+      fclose(xmlout);
+      delete output_stream_;
+      output_stream_ = 0;
+  }
+#endif  // GTEST_HAS_FILE_SYSTEM
+}
+
+void XmlUnitTestResultPrinter::ListTestsMatchingFilter(
+      const std::vector<TestSuite*>& test_suites) {
+#if GTEST_HAS_FILE_SYSTEM
+  FILE* xmlout = 0;
+  if(!output_stream_) {
+      xmlout = internal::OpenFileForWriting(output_file_);
+      output_stream_ = new std::stringstream;
+  }
+#endif  // GTEST_HAS_FILE_SYSTEM
+
+  internal::XmlUnitTestResultPrinter::PrintXmlTestsList(output_stream_, test_suites);
+
+#if GTEST_HAS_FILE_SYSTEM
+  if(xmlout) {
+      fprintf(xmlout, "%s", internal::StringStreamToString(static_cast<std::stringstream*>(output_stream_)).c_str());
+      fclose(xmlout);
+      delete output_stream_;
+      output_stream_ = 0;
+  }
+#endif  // GTEST_HAS_FILE_SYSTEM
+}
+
 // class UnitTest
 
 // Gets the singleton UnitTest object.  The first time this method is
@@ -5706,7 +5731,7 @@ void UnitTestImpl::ConfigureXmlOutput() {
   const std::string& output_format = UnitTestOptions::GetOutputFormat();
 #if GTEST_HAS_FILE_SYSTEM
   if (output_format == "xml") {
-    listeners()->SetDefaultXmlGenerator(new XmlUnitTestResultPrinter(
+    listeners()->SetDefaultXmlGenerator(new ::testing::XmlUnitTestResultPrinter(
         UnitTestOptions::GetAbsolutePathToOutputFile().c_str()));
   } else if (output_format == "json") {
     listeners()->SetDefaultXmlGenerator(new JsonUnitTestResultPrinter(
@@ -6272,9 +6297,7 @@ void UnitTestImpl::ListTestsMatchingFilter() {
         OpenFileForWriting(UnitTestOptions::GetAbsolutePathToOutputFile());
     std::stringstream stream;
     if (output_format == "xml") {
-      XmlUnitTestResultPrinter(
-          UnitTestOptions::GetAbsolutePathToOutputFile().c_str())
-          .PrintXmlTestsList(&stream, test_suites_);
+      XmlUnitTestResultPrinter::PrintXmlTestsList(&stream, test_suites_);
     } else if (output_format == "json") {
       JsonUnitTestResultPrinter(
           UnitTestOptions::GetAbsolutePathToOutputFile().c_str())
