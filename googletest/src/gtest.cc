@@ -905,7 +905,7 @@ int UnitTestOptions::GTestProcessSEH(DWORD seh_code, const char* location) {
   //      apparently).
   //
   // SEH exception code for C++ exceptions.
-  // (see https://support.microsoft.com/kb/185294 for more information).
+  // (see https://learn.microsoft.com/en-us/cpp/cpp/structured-exception-handling-c-cpp for more information).
   const DWORD kCxxExceptionCode = 0xe06d7363;
 
   if (!GTEST_FLAG_GET(catch_exceptions) || seh_code == kCxxExceptionCode ||
