@@ -11,8 +11,8 @@ To complete this tutorial, you'll need:
 
 *   A compatible operating system (e.g. Linux, macOS, Windows).
 *   A compatible C++ compiler that supports at least C++14.
-*   [CMake](https://cmake.org/) and a compatible build tool for building the
-    project.
+*   [CMake](https://cmake.org/) >= 3.14 and a compatible build tool for building
+    the project.
     *   Compatible build tools include
         [Make](https://www.gnu.org/software/make/),
         [Ninja](https://ninja-build.org/), and others - see
@@ -45,10 +45,10 @@ Next, you'll create the `CMakeLists.txt` file and declare a dependency on
 GoogleTest. There are many ways to express dependencies in the CMake ecosystem
 but the two most common methods are
 
-1. Using the [`find_package`](https://cmake.org/cmake/help/latest/command/find_package.html)
-   command
-2. Using the [`FetchContent`](https://cmake.org/cmake/help/latest/module/FetchContent.html)
-   CMake module
+1.  Using the [`find_package`](https://cmake.org/cmake/help/latest/command/find_package.html)
+    command
+2.  Using the [`FetchContent`](https://cmake.org/cmake/help/latest/module/FetchContent.html)
+    CMake module
 
 We will cover both methods in their [respective](#using-find_package)
 [subsections](#using-FetchContent) as each has their
