@@ -177,7 +177,7 @@ class StackInterface {
 template <typename Elem>
 class MockStack : public StackInterface<Elem> {
   ...
-  MOCK_METHOD(int, GetSize, (), (override));
+  MOCK_METHOD(int, GetSize, (), (const, override));
   MOCK_METHOD(void, Push, (const Elem& x), (override));
 };
 ```
@@ -3419,14 +3419,14 @@ itself, as gMock already prints it for you.
 
 #### Argument Types
 
-The type of the value being matched (`arg_type`) is determined by the
-context in which you use the matcher and is supplied to you by the compiler, so
-you don't need to worry about declaring it (nor can you). This allows the
-matcher to be polymorphic. For example, `IsDivisibleBy7()` can be used to match
-any type where the value of `(arg % 7) == 0` can be implicitly converted to a
-`bool`. In the `Bar(IsDivisibleBy7())` example above, if method `Bar()` takes an
-`int`, `arg_type` will be `int`; if it takes an `unsigned long`, `arg_type` will
-be `unsigned long`; and so on.
+The type of the value being matched (`arg_type`) is determined by the context in
+which you use the matcher and is supplied to you by the compiler, so you don't
+need to worry about declaring it (nor can you). This allows the matcher to be
+polymorphic. For example, `IsDivisibleBy7()` can be used to match any type where
+the value of `(arg % 7) == 0` can be implicitly converted to a `bool`. In the
+`Bar(IsDivisibleBy7())` example above, if method `Bar()` takes an `int`,
+`arg_type` will be `int`; if it takes an `unsigned long`, `arg_type` will be
+`unsigned long`; and so on.
 
 ### Writing New Parameterized Matchers Quickly
 
