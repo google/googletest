@@ -57,7 +57,8 @@ advantages and disadvantages.
 ### Using `find_package`
 
 One very common scenario is when you would like to consume a
-standalone GoogleTest installation, e.g. one built and installed from source
+standalone GoogleTest installation, e.g. one
+[built and installed from source](source-build-cmake.md)
 locally, or one provided by a system package manager (e.g. APT, etc. on
 Debian-like systems). In this case,
 [`find_package`](https://cmake.org/cmake/help/latest/command/find_package.html)
