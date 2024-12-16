@@ -76,7 +76,7 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Since CMake 3.20 CONFIG can be omitted as the FindGTest find module will
-# prefer the upstream (provided by Google Test) GTestConfig.cmake is available
+# prefer the upstream (provided by Google Test) GTestConfig.cmake if available
 find_package(GTest 1.15.0 REQUIRED CONFIG)
 ```
 
