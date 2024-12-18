@@ -2132,7 +2132,11 @@ GTEST_DISABLE_MSC_DEPRECATED_PUSH_()
     !defined(GTEST_OS_WINDOWS_RT) && !defined(GTEST_OS_WINDOWS_GAMES) &&     \
     !defined(GTEST_OS_ESP8266) && !defined(GTEST_OS_XTENSA) &&               \
     !defined(GTEST_OS_QURT)
+#ifdef GTEST_OS_WINDOWS
+inline int ChDir(const char* dir) { return _chdir(dir); }
+#else
 inline int ChDir(const char* dir) { return chdir(dir); }
+#endif  // GTEST_OS_WINDOWS
 #endif
 inline FILE* FOpen(const char* path, const char* mode) {
 #if defined(GTEST_OS_WINDOWS) && !defined(GTEST_OS_WINDOWS_MINGW)
@@ -2149,10 +2153,23 @@ inline FILE* FOpen(const char* path, const char* mode) {
 inline FILE* FReopen(const char* path, const char* mode, FILE* stream) {
   return freopen(path, mode, stream);
 }
+#ifdef GTEST_OS_WINDOWS
+inline FILE* FDOpen(int fd, const char* mode) { return _fdopen(fd, mode); }
+#else
 inline FILE* FDOpen(int fd, const char* mode) { return fdopen(fd, mode); }
+#endif  // GTEST_OS_WINDOWS
 #endif  // !GTEST_OS_WINDOWS_MOBILE && !GTEST_OS_QURT
 inline int FClose(FILE* fp) { return fclose(fp); }
 #if !defined(GTEST_OS_WINDOWS_MOBILE) && !defined(GTEST_OS_QURT)
+#ifdef GTEST_OS_WINDOWS
+inline int Read(int fd, void* buf, unsigned int count) {
+  return static_cast<int>(_read(fd, buf, count));
+}
+inline int Write(int fd, const void* buf, unsigned int count) {
+  return static_cast<int>(_write(fd, buf, count));
+}
+inline int Close(int fd) { return _close(fd); }
+#else
 inline int Read(int fd, void* buf, unsigned int count) {
   return static_cast<int>(read(fd, buf, count));
 }
@@ -2160,6 +2177,7 @@ inline int Write(int fd, const void* buf, unsigned int count) {
   return static_cast<int>(write(fd, buf, count));
 }
 inline int Close(int fd) { return close(fd); }
+#endif  // GTEST_OS_WINDOWS
 #endif  // !GTEST_OS_WINDOWS_MOBILE && !GTEST_OS_QURT
 #endif  // GTEST_HAS_FILE_SYSTEM
 
