@@ -31,3 +31,21 @@ fake_fuchsia_sdk = repository_rule(
         ),
     },
 )
+
+_create_fake = tag_class()
+
+def _fuchsia_sdk_impl(module_ctx):
+    create_fake_sdk = False
+    for mod in module_ctx.modules:
+        for _ in mod.tags.create_fake:
+            create_fake_sdk = True
+
+    if create_fake_sdk:
+        fake_fuchsia_sdk(name = "fuchsia_sdk")
+
+    return module_ctx.extension_metadata(reproducible = True)
+
+fuchsia_sdk = module_extension(
+    implementation = _fuchsia_sdk_impl,
+    tag_classes = {"create_fake": _create_fake},
+)
