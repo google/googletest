@@ -39,29 +39,38 @@ module(
 # Only direct dependencies need to be listed below.
 # Please keep the versions in sync with the versions in the WORKSPACE file.
 
-bazel_dep(name = "abseil-cpp",
-          version = "20240116.2")
+bazel_dep(
+    name = "abseil-cpp",
+    version = "20240116.2",
+)
+bazel_dep(
+    name = "platforms",
+    version = "0.0.10",
+)
+bazel_dep(
+    name = "re2",
+    version = "2024-07-02",
+)
 
-bazel_dep(name = "platforms",
-          version = "0.0.10")
-
-bazel_dep(name = "re2",
-          version = "2024-07-02")
-
-bazel_dep(name = "rules_python",
-          version = "0.34.0",
-          dev_dependency = True)
+bazel_dep(
+    name = "rules_python",
+    version = "0.34.0",
+    dev_dependency = True,
+)
 
 # https://rules-python.readthedocs.io/en/stable/toolchains.html#library-modules-with-dev-only-python-usage
 python = use_extension(
     "@rules_python//python/extensions:python.bzl",
     "python",
-    dev_dependency = True
+    dev_dependency = True,
+)
+python.toolchain(
+    ignore_root_user_error = True,
+    is_default = True,
+    python_version = "3.12",
 )
 
-python.toolchain(python_version = "3.12",
-                 is_default = True,
-                 ignore_root_user_error = True)
-
-fake_fuchsia_sdk = use_repo_rule("//:fake_fuchsia_sdk.bzl", "fake_fuchsia_sdk")
-fake_fuchsia_sdk(name = "fuchsia_sdk")
+# See fake_fuchsia_sdk.bzl for instructions on how to override this with a real SDK, if needed.
+fuchsia_sdk = use_extension("//:fake_fuchsia_sdk.bzl", "fuchsia_sdk")
+fuchsia_sdk.create_fake()
+use_repo(fuchsia_sdk, "fuchsia_sdk")
