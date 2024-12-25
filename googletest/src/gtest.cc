@@ -889,11 +889,68 @@ bool UnitTestOptions::FilterMatchesTest(const std::string& test_suite_name,
 }
 
 #if GTEST_HAS_SEH
+
+static std::string GetSEHExceptionName(const DWORD exception_code) {
+  static const std::unordered_map<DWORD, std::string> seh_messages = {
+      {EXCEPTION_ACCESS_VIOLATION, "Access violation (invalid memory access)"},
+      {EXCEPTION_ARRAY_BOUNDS_EXCEEDED, "Array bounds exceeded"},
+      {EXCEPTION_BREAKPOINT, "Breakpoint encountered"},
+      {EXCEPTION_DATATYPE_MISALIGNMENT, "Data misalignment"},
+      {EXCEPTION_FLT_DENORMAL_OPERAND, "Floating-point denormal operand"},
+      {EXCEPTION_FLT_DIVIDE_BY_ZERO, "Floating-point divide by zero"},
+      {EXCEPTION_FLT_INEXACT_RESULT, "Floating-point inexact result"},
+      {EXCEPTION_FLT_INVALID_OPERATION, "Floating-point invalid operation"},
+      {EXCEPTION_FLT_OVERFLOW, "Floating-point overflow"},
+      {EXCEPTION_FLT_STACK_CHECK, "Floating-point stack check"},
+      {EXCEPTION_FLT_UNDERFLOW, "Floating-point underflow"},
+      {EXCEPTION_ILLEGAL_INSTRUCTION, "Illegal instruction"},
+      {EXCEPTION_IN_PAGE_ERROR, "Page not found or access denied"},
+      {EXCEPTION_INT_DIVIDE_BY_ZERO, "Integer divide by zero"},
+      {EXCEPTION_INT_OVERFLOW, "Integer overflow"},
+      {EXCEPTION_INVALID_DISPOSITION, "Invalid disposition"},
+      {EXCEPTION_NONCONTINUABLE_EXCEPTION, "Noncontinuable exception"},
+      {EXCEPTION_PRIV_INSTRUCTION, "Privileged instruction"},
+      {EXCEPTION_SINGLE_STEP, "Single step"},
+      {EXCEPTION_STACK_OVERFLOW, "Stack overflow"}};
+
+  // Check if we have a custom message for the code
+  const auto it = seh_messages.find(exception_code);
+  if (it != seh_messages.end()) {
+    return it->second;
+  }
+
+  // Fallback to system message if available
+  LPVOID message_buffer;
+  const DWORD buffer_size = FormatMessage(
+      FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
+          FORMAT_MESSAGE_IGNORE_INSERTS,
+      nullptr, exception_code, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+      (LPTSTR)&message_buffer, 0, nullptr);
+
+  if (buffer_size) {
+    std::wstring message((LPTSTR)message_buffer, buffer_size);
+    LocalFree(message_buffer);
+
+    int size_needed =
+        WideCharToMultiByte(CP_UTF8, 0, message.c_str(), (int)message.size(),
+                            nullptr, 0, nullptr, nullptr);
+    std::string str(size_needed, 0);
+    WideCharToMultiByte(CP_UTF8, 0, message.c_str(), (int)message.size(),
+                        &str[0], size_needed, nullptr, nullptr);
+
+    return str;
+  }
+
+  return "Unknown SEH exception";
+}
+
 static std::string FormatSehExceptionMessage(DWORD exception_code,
                                              const char* location) {
+  const std::string messageText = GetSEHExceptionName(exception_code);
   Message message;
   message << "SEH exception with code 0x" << std::setbase(16) << exception_code
-          << std::setbase(10) << " thrown in " << location << ".";
+          << std::setbase(10) << " - " << messageText << " thrown in "
+          << location << ".";
   return message.GetString();
 }
 
