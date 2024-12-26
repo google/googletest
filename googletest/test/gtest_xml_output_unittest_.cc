@@ -158,6 +158,22 @@ TEST(NoFixtureTest, ExternalUtilityThatCallsRecordStringValuedProperty) {
   ExternalUtilityThatCallsRecordProperty("key_for_utility_string", "1");
 }
 
+// Ensures that SetUpTestSuite and TearDownTestSuite failures are reported in
+// the XML output.
+class SetupFailTest : public ::testing::Test {
+ protected:
+  static void SetUpTestSuite() { ASSERT_EQ(1, 2); }
+};
+
+TEST_F(SetupFailTest, NoopPassingTest) {}
+
+class TearDownFailTest : public ::testing::Test {
+ protected:
+  static void TearDownTestSuite() { ASSERT_EQ(1, 2); }
+};
+
+TEST_F(TearDownFailTest, NoopPassingTest) {}
+
 // Verifies that the test parameter value is output in the 'value_param'
 // XML attribute for value-parameterized tests.
 class ValueParamTest : public TestWithParam<int> {};

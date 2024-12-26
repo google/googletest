@@ -57,7 +57,7 @@ else:
   STACK_TRACE_TEMPLATE = '\n'
 
 EXPECTED_NON_EMPTY = {
-    'tests': 26,
+    'tests': 28,
     'failures': 5,
     'disabled': 2,
     'errors': 0,
@@ -420,6 +420,83 @@ EXPECTED_NON_EMPTY = {
             ],
         },
         {
+            'name': 'SetupFailTest',
+            'tests': 1,
+            'failures': 0,
+            'disabled': 0,
+            'errors': 0,
+            'time': '*',
+            'timestamp': '*',
+            'testsuite': [
+                {
+                    'name': 'NoopPassingTest',
+                    'file': 'gtest_xml_output_unittest_.cc',
+                    'line': 168,
+                    'status': 'RUN',
+                    'result': 'SKIPPED',
+                    'timestamp': '*',
+                    'time': '*',
+                    'classname': 'SetupFailTest',
+                    'skipped': [
+                        {'message': 'gtest_xml_output_unittest_.cc:*\n'}
+                    ],
+                },
+                {
+                    'name': '',
+                    'status': 'RUN',
+                    'result': 'COMPLETED',
+                    'timestamp': '*',
+                    'time': '*',
+                    'classname': '',
+                    'failures': [{
+                        'failure': (
+                            'gtest_xml_output_unittest_.cc:*\nExpected equality'
+                            ' of these values:\n  1\n  2'
+                            + STACK_TRACE_TEMPLATE
+                        ),
+                        'type': '',
+                    }],
+                },
+            ],
+        },
+        {
+            'name': 'TearDownFailTest',
+            'tests': 1,
+            'failures': 0,
+            'disabled': 0,
+            'errors': 0,
+            'timestamp': '*',
+            'time': '*',
+            'testsuite': [
+                {
+                    'name': 'NoopPassingTest',
+                    'file': 'gtest_xml_output_unittest_.cc',
+                    'line': 175,
+                    'status': 'RUN',
+                    'result': 'COMPLETED',
+                    'timestamp': '*',
+                    'time': '*',
+                    'classname': 'TearDownFailTest',
+                },
+                {
+                    'name': '',
+                    'status': 'RUN',
+                    'result': 'COMPLETED',
+                    'timestamp': '*',
+                    'time': '*',
+                    'classname': '',
+                    'failures': [{
+                        'failure': (
+                            'gtest_xml_output_unittest_.cc:*\nExpected equality'
+                            ' of these values:\n  1\n  2'
+                            + STACK_TRACE_TEMPLATE
+                        ),
+                        'type': '',
+                    }],
+                },
+            ],
+        },
+        {
             'name': 'TypedTest/0',
             'tests': 1,
             'failures': 0,
@@ -431,7 +508,7 @@ EXPECTED_NON_EMPTY = {
                 'name': 'HasTypeParamAttribute',
                 'type_param': 'int',
                 'file': 'gtest_xml_output_unittest_.cc',
-                'line': 173,
+                'line': 189,
                 'status': 'RUN',
                 'result': 'COMPLETED',
                 'time': '*',
@@ -451,7 +528,7 @@ EXPECTED_NON_EMPTY = {
                 'name': 'HasTypeParamAttribute',
                 'type_param': 'long',
                 'file': 'gtest_xml_output_unittest_.cc',
-                'line': 173,
+                'line': 189,
                 'status': 'RUN',
                 'result': 'COMPLETED',
                 'time': '*',
@@ -471,7 +548,7 @@ EXPECTED_NON_EMPTY = {
                 'name': 'HasTypeParamAttribute',
                 'type_param': 'int',
                 'file': 'gtest_xml_output_unittest_.cc',
-                'line': 180,
+                'line': 196,
                 'status': 'RUN',
                 'result': 'COMPLETED',
                 'time': '*',
@@ -491,7 +568,7 @@ EXPECTED_NON_EMPTY = {
                 'name': 'HasTypeParamAttribute',
                 'type_param': 'long',
                 'file': 'gtest_xml_output_unittest_.cc',
-                'line': 180,
+                'line': 196,
                 'status': 'RUN',
                 'result': 'COMPLETED',
                 'time': '*',
@@ -512,7 +589,7 @@ EXPECTED_NON_EMPTY = {
                     'name': 'HasValueParamAttribute/0',
                     'value_param': '33',
                     'file': 'gtest_xml_output_unittest_.cc',
-                    'line': 164,
+                    'line': 180,
                     'status': 'RUN',
                     'result': 'COMPLETED',
                     'time': '*',
@@ -523,7 +600,7 @@ EXPECTED_NON_EMPTY = {
                     'name': 'HasValueParamAttribute/1',
                     'value_param': '42',
                     'file': 'gtest_xml_output_unittest_.cc',
-                    'line': 164,
+                    'line': 180,
                     'status': 'RUN',
                     'result': 'COMPLETED',
                     'time': '*',
@@ -534,7 +611,7 @@ EXPECTED_NON_EMPTY = {
                     'name': 'AnotherTestThatHasValueParamAttribute/0',
                     'value_param': '33',
                     'file': 'gtest_xml_output_unittest_.cc',
-                    'line': 165,
+                    'line': 181,
                     'status': 'RUN',
                     'result': 'COMPLETED',
                     'time': '*',
@@ -545,7 +622,7 @@ EXPECTED_NON_EMPTY = {
                     'name': 'AnotherTestThatHasValueParamAttribute/1',
                     'value_param': '42',
                     'file': 'gtest_xml_output_unittest_.cc',
-                    'line': 165,
+                    'line': 181,
                     'status': 'RUN',
                     'result': 'COMPLETED',
                     'time': '*',
