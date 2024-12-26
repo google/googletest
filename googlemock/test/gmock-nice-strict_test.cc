@@ -139,6 +139,21 @@ class MockBaz {
   MockBaz(MoveOnly) {}
 };
 
+class NiceMockModifier : public NiceMockable<NiceMockModifier> {
+ public:
+  NiceMockModifier() = default;
+};
+
+class NaggyMockModifier : public NaggyMockable<NaggyMockModifier> {
+ public:
+  NaggyMockModifier() = default;
+};
+
+class StrictMockModifier : public StrictMockable<StrictMockModifier> {
+ public:
+  StrictMockModifier() = default;
+};
+
 #if GTEST_HAS_STREAM_REDIRECTION
 
 // Tests that a raw mock generates warnings for uninteresting calls.
@@ -324,6 +339,13 @@ TEST(NiceMockTest, IsNaggy_IsNice_IsStrict) {
   EXPECT_FALSE(Mock::IsStrict(&nice_foo));
 }
 
+TEST(NiceMockTest, IsNaggy_IsNice_IsStrict_Class) {
+  NiceMockModifier nice_foo;
+  EXPECT_FALSE(Mock::IsNaggy(&nice_foo));
+  EXPECT_TRUE(Mock::IsNice(&nice_foo));
+  EXPECT_FALSE(Mock::IsStrict(&nice_foo));
+}
+
 #if GTEST_HAS_STREAM_REDIRECTION
 
 // Tests that a naggy mock generates warnings for uninteresting calls.
@@ -443,6 +465,13 @@ TEST(NaggyMockTest, IsNaggy_IsNice_IsStrict) {
   EXPECT_FALSE(Mock::IsStrict(&naggy_foo));
 }
 
+TEST(NaggyMockTest, IsNaggy_IsNice_IsStrict_Class) {
+  NaggyMockModifier naggy_foo;
+  EXPECT_TRUE(Mock::IsNaggy(&naggy_foo));
+  EXPECT_FALSE(Mock::IsNice(&naggy_foo));
+  EXPECT_FALSE(Mock::IsStrict(&naggy_foo));
+}
+
 // Tests that a strict mock allows expected calls.
 TEST(StrictMockTest, AllowsExpectedCall) {
   StrictMock<MockFoo> strict_foo;
@@ -537,5 +566,11 @@ TEST(StrictMockTest, IsNaggy_IsNice_IsStrict) {
   EXPECT_TRUE(Mock::IsStrict(&strict_foo));
 }
 
+TEST(StrictMockTest, IsNaggy_IsNice_IsStrict_Class) {
+  StrictMockModifier strict_foo;
+  EXPECT_FALSE(Mock::IsNaggy(&strict_foo));
+  EXPECT_FALSE(Mock::IsNice(&strict_foo));
+  EXPECT_TRUE(Mock::IsStrict(&strict_foo));
+}
 }  // namespace gmock_nice_strict_test
 }  // namespace testing
