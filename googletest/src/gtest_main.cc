@@ -47,8 +47,13 @@ void loop() { RUN_ALL_TESTS(); }
 }
 #endif
 
-#elif defined(GTEST_OS_QURT)
-// QuRT: program entry point is main, but argc/argv are unusable.
+#elif defined(GTEST_OS_QURT) || defined(GTEST_OS_ZEPHYR)
+// Program entry point is main, but argc/argv are unusable.
+
+#if defined(GTEST_OS_ZEPHYR)
+#undef GTEST_API_
+#define GTEST_API_
+#endif
 
 GTEST_API_ int main() {
   printf("Running main() from %s\n", __FILE__);
