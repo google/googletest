@@ -141,6 +141,7 @@
 //     GTEST_OS_WINDOWS_PHONE    - Windows Phone
 //     GTEST_OS_WINDOWS_RT       - Windows Store App/WinRT
 //   GTEST_OS_ZOS      - z/OS
+//   GTEST_OS_ZEPHYR   - Zephyr OS
 //
 // Among the platforms, Cygwin, Linux, Mac OS X, and Windows have the
 // most stable support.  Since core members of the Google Test project
@@ -547,6 +548,10 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 // 3. Set final values if not explicitly overridden by user
 #if !defined(GTEST_HAS_STD_WSTRING)
 #define GTEST_HAS_STD_WSTRING GTEST_HAS_STD_WSTRING_DEFAULT
+#endif
+
+#ifdef GTEST_OS_ZEPHYR
+#define GTEST_HAS_FILE_SYSTEM 0
 #endif
 
 #ifndef GTEST_HAS_FILE_SYSTEM
@@ -2084,6 +2089,18 @@ inline int RmDir(const char* dir) { return rmdir(dir); }
 inline bool IsDir(const StatStruct& st) { return S_ISDIR(st.st_mode); }
 #endif
 
+#elif defined(GTEST_OS_ZEPHYR)
+static inline int FileNo(FILE* file) {
+  if (file == stdin)
+    return 1;
+  else if (file == stdout)
+    return 2;
+  else if (file == stderr)
+    return 3;
+  return -EINVAL;
+}
+
+static inline int isatty(int fd) { return true; }
 #else
 
 typedef struct stat StatStruct;
