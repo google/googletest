@@ -119,7 +119,7 @@ def GetTestCases(tests):
   test_cases = []
   for test in tests:
     test_case = test.split('.')[0]
-    if not test_case in test_cases:
+    if test_case not in test_cases:
       test_cases.append(test_case)
 
   return test_cases
