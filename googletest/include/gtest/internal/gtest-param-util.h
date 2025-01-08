@@ -771,7 +771,7 @@ class TypeParameterizedTestSuiteRegistry {
   // Add an instantiation of a suit.
   void RegisterInstantiation(const char* test_suite_name);
 
-  // For each suit repored as defined but not reported as instantiation,
+  // For each suit reported as defined but not reported as instantiation,
   // emit a test that reports that fact (configurably, as an error).
   void CheckForInstantiations();
 

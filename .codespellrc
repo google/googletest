@@ -1,2 +1,2 @@
 [codespell]
-ignore-words = .codespell.ignore
+ignore-words-list = afile,assertin,atleast,atmost,fo,rel,seh
