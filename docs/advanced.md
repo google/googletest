@@ -416,7 +416,7 @@ corruption, security holes, or worse. Hence it is vitally important to test that
 such assertion statements work as expected.
 
 Since these precondition checks cause the processes to die, we call such tests
-_death tests_. More generally, any test that checks that a program terminates
+*death tests*. More generally, any test that checks that a program terminates
 (except by throwing an exception) in an expected fashion is also a death test.
 
 Note that if a piece of code throws an exception, we don't consider it "death"
@@ -461,6 +461,12 @@ verifies that:
 *   calling `NormalExit()` causes the process to print `"Success"` to stderr and
     exit with exit code 0, and
 *   calling `KillProcess()` kills the process with signal `SIGKILL`.
+
+{: .callout .warning}
+Warning: If your death test contains mocks and is expecting a specific exit
+code, then you must allow the mock objects to be leaked via `Mock::AllowLeak`.
+This is because the mock leak detector will exit with its own error code if it
+detects a leak.
 
 The test function body may contain other assertions and statements as well, if
 necessary.
@@ -727,7 +733,7 @@ Some tips on using `SCOPED_TRACE`:
 ### Propagating Fatal Failures
 
 A common pitfall when using `ASSERT_*` and `FAIL*` is not understanding that
-when they fail they only abort the _current function_, not the entire test. For
+when they fail they only abort the *current function*, not the entire test. For
 example, the following test will segfault:
 
 ```c++
@@ -2382,7 +2388,7 @@ IMPORTANT: The exact format of the JSON document is subject to change.
 
 #### Detecting Test Premature Exit
 
-Google Test implements the _premature-exit-file_ protocol for test runners to
+Google Test implements the *premature-exit-file* protocol for test runners to
 catch any kind of unexpected exits of test programs. Upon start, Google Test
 creates the file which will be automatically deleted after all work has been
 finished. Then, the test runner can check if this file exists. In case the file
