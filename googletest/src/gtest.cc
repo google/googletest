@@ -3287,6 +3287,7 @@ bool ShouldUseColor(bool stdout_is_tty) {
     const bool term_supports_color =
         term != nullptr && (String::CStringEquals(term, "xterm") ||
                             String::CStringEquals(term, "xterm-color") ||
+                            String::CStringEquals(term, "xterm-ghostty") ||
                             String::CStringEquals(term, "xterm-kitty") ||
                             String::CStringEquals(term, "alacritty") ||
                             String::CStringEquals(term, "screen") ||
