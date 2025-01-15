@@ -936,8 +936,8 @@ casts a matcher `m` to type `Matcher<T>`. To ensure safety, gMock checks that
     floating-point numbers), the conversion from `T` to `U` is not lossy (in
     other words, any value representable by `T` can also be represented by `U`);
     and
-3.  When `U` is a reference, `T` must also be a reference (as the underlying
-    matcher may be interested in the address of the `U` value).
+3.  When `U` is a non-const reference, `T` must also be a reference (as the
+    underlying matcher may be interested in the address of the `U` value).
 
 The code won't compile if any of these conditions isn't met.
 

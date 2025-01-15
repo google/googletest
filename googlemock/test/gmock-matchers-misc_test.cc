@@ -32,6 +32,7 @@
 // This file tests some commonly used argument matchers.
 
 #include <array>
+#include <cstdint>
 #include <memory>
 #include <ostream>
 #include <string>
@@ -745,6 +746,24 @@ TYPED_TEST(OptionalTest, DoesNotMatchNullopt) {
   const Matcher<TypeParam> m = Optional(1);
   TypeParam empty;
   EXPECT_FALSE(m.Matches(empty));
+}
+
+TYPED_TEST(OptionalTest, ComposesWithMonomorphicMatchersTakingReferences) {
+  const Matcher<const int&> eq1 = Eq(1);
+  const Matcher<const int&> eq2 = Eq(2);
+  TypeParam opt(1);
+  EXPECT_THAT(opt, Optional(eq1));
+  EXPECT_THAT(opt, Optional(Not(eq2)));
+  EXPECT_THAT(opt, Optional(AllOf(eq1, Not(eq2))));
+}
+
+TYPED_TEST(OptionalTest, ComposesWithMonomorphicMatchersRequiringConversion) {
+  const Matcher<int64_t> eq1 = Eq(1);
+  const Matcher<int64_t> eq2 = Eq(2);
+  TypeParam opt(1);
+  EXPECT_THAT(opt, Optional(eq1));
+  EXPECT_THAT(opt, Optional(Not(eq2)));
+  EXPECT_THAT(opt, Optional(AllOf(eq1, Not(eq2))));
 }
 
 template <typename T>
