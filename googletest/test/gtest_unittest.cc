@@ -151,7 +151,7 @@ TEST_F(StreamingListenerTest, OnTestStart) {
 TEST_F(StreamingListenerTest, OnTestEnd) {
   *output() = "";
   streamer_.OnTestEnd(test_info_obj_);
-  EXPECT_EQ("event=TestEnd&passed=1&elapsed_time=0ms\n", *output());
+  EXPECT_EQ("event=TestEnd&passed=1&skipped=0&elapsed_time=0ms\n", *output());
 }
 
 TEST_F(StreamingListenerTest, OnTestPartResult) {

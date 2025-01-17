@@ -1192,7 +1192,8 @@ class StreamingListener : public EmptyTestEventListener {
 
   void OnTestEnd(const TestInfo& test_info) override {
     SendLn("event=TestEnd&passed=" +
-           FormatBool((test_info.result())->Passed()) + "&elapsed_time=" +
+           FormatBool((test_info.result())->Passed()) + "&skipped=" +
+           FormatBool((test_info.result())->Skipped()) + "&elapsed_time=" +
            StreamableToString((test_info.result())->elapsed_time()) + "ms");
   }
 
