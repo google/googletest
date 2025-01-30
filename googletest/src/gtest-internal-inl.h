@@ -1105,7 +1105,7 @@ class StreamingListener : public EmptyTestEventListener {
       GTEST_CHECK_(sockfd_ != -1)
           << "Send() can be called only when there is a connection.";
 
-      const auto len = static_cast<size_t>(message.length());
+      const auto len = message.length();
       if (write(sockfd_, message.c_str(), len) != static_cast<ssize_t>(len)) {
         GTEST_LOG_(WARNING) << "stream_result_to: failed to stream to "
                             << host_name_ << ":" << port_num_;
