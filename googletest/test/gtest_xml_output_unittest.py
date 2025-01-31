@@ -67,7 +67,10 @@ else:
   sys.argv.remove(NO_STACKTRACE_SUPPORT_FLAG)
 
 EXPECTED_NON_EMPTY_XML = """<?xml version="1.0" encoding="UTF-8"?>
-<testsuites tests="28" failures="5" disabled="2" errors="0" time="*" timestamp="*" name="AllTests" ad_hoc_property="42">
+<testsuites tests="28" failures="5" disabled="2" errors="0" time="*" timestamp="*" name="AllTests">
+  <properties>
+    <property name="ad_hoc_property" value="42"/>
+  </properties>
   <testsuite name="SuccessfulTest" tests="1" failures="0" disabled="0" skipped="0" errors="0" time="*" timestamp="*">
     <testcase name="Succeeds" file="gtest_xml_output_unittest_.cc" line="53" status="run" result="completed" time="*" timestamp="*" classname="SuccessfulTest"/>
   </testsuite>
@@ -132,49 +135,55 @@ It is good practice to tell why you skip a test.
     </testcase>
 
   </testsuite>
-  <testsuite name="PropertyRecordingTest" tests="4" failures="0" disabled="0" skipped="0" errors="0" time="*" timestamp="*" SetUpTestSuite="yes" TearDownTestSuite="aye">
-    <testcase name="OneProperty" file="gtest_xml_output_unittest_.cc" line="121" status="run" result="completed" time="*" timestamp="*" classname="PropertyRecordingTest">
+  <testsuite name="PropertyRecordingTest" tests="4" failures="0" disabled="0" skipped="0" errors="0" time="*" timestamp="*">
+    <properties>
+      <property name="SetUpTestSuite" value="yes"/>
+      <property name="SetUpTestSuite (with whitespace)" value="yes and yes"/>
+      <property name="TearDownTestSuite" value="aye"/>
+      <property name="TearDownTestSuite (with whitespace)" value="aye and aye"/>
+    </properties>
+    <testcase name="OneProperty" file="gtest_xml_output_unittest_.cc" line="125" status="run" result="completed" time="*" timestamp="*" classname="PropertyRecordingTest">
       <properties>
         <property name="key_1" value="1"/>
       </properties>
     </testcase>
-    <testcase name="IntValuedProperty" file="gtest_xml_output_unittest_.cc" line="125" status="run" result="completed" time="*" timestamp="*" classname="PropertyRecordingTest">
+    <testcase name="IntValuedProperty" file="gtest_xml_output_unittest_.cc" line="129" status="run" result="completed" time="*" timestamp="*" classname="PropertyRecordingTest">
       <properties>
         <property name="key_int" value="1"/>
       </properties>
     </testcase>
-    <testcase name="ThreeProperties" file="gtest_xml_output_unittest_.cc" line="129" status="run" result="completed" time="*" timestamp="*" classname="PropertyRecordingTest">
+    <testcase name="ThreeProperties" file="gtest_xml_output_unittest_.cc" line="133" status="run" result="completed" time="*" timestamp="*" classname="PropertyRecordingTest">
       <properties>
         <property name="key_1" value="1"/>
         <property name="key_2" value="2"/>
         <property name="key_3" value="3"/>
       </properties>
     </testcase>
-    <testcase name="TwoValuesForOneKeyUsesLastValue" file="gtest_xml_output_unittest_.cc" line="135" status="run" result="completed" time="*" timestamp="*" classname="PropertyRecordingTest">
+    <testcase name="TwoValuesForOneKeyUsesLastValue" file="gtest_xml_output_unittest_.cc" line="139" status="run" result="completed" time="*" timestamp="*" classname="PropertyRecordingTest">
       <properties>
         <property name="key_1" value="2"/>
       </properties>
     </testcase>
   </testsuite>
   <testsuite name="NoFixtureTest" tests="3" failures="0" disabled="0" skipped="0" errors="0" time="*" timestamp="*">
-     <testcase name="RecordProperty" file="gtest_xml_output_unittest_.cc" line="140" status="run" result="completed" time="*" timestamp="*" classname="NoFixtureTest">
+     <testcase name="RecordProperty" file="gtest_xml_output_unittest_.cc" line="144" status="run" result="completed" time="*" timestamp="*" classname="NoFixtureTest">
        <properties>
          <property name="key" value="1"/>
        </properties>
      </testcase>
-     <testcase name="ExternalUtilityThatCallsRecordIntValuedProperty" file="gtest_xml_output_unittest_.cc" line="153" status="run" result="completed" time="*" timestamp="*" classname="NoFixtureTest">
+     <testcase name="ExternalUtilityThatCallsRecordIntValuedProperty" file="gtest_xml_output_unittest_.cc" line="157" status="run" result="completed" time="*" timestamp="*" classname="NoFixtureTest">
        <properties>
          <property name="key_for_utility_int" value="1"/>
        </properties>
      </testcase>
-     <testcase name="ExternalUtilityThatCallsRecordStringValuedProperty" file="gtest_xml_output_unittest_.cc" line="157" status="run" result="completed" time="*" timestamp="*" classname="NoFixtureTest">
+     <testcase name="ExternalUtilityThatCallsRecordStringValuedProperty" file="gtest_xml_output_unittest_.cc" line="161" status="run" result="completed" time="*" timestamp="*" classname="NoFixtureTest">
        <properties>
          <property name="key_for_utility_string" value="1"/>
        </properties>
      </testcase>
   </testsuite>
   <testsuite name="SetupFailTest" tests="1" failures="0" disabled="0" skipped="1" errors="0" time="*" timestamp="*">
-    <testcase name="NoopPassingTest" file="gtest_xml_output_unittest_.cc" line="168" status="run" result="skipped" time="*" timestamp="*" classname="SetupFailTest">
+    <testcase name="NoopPassingTest" file="gtest_xml_output_unittest_.cc" line="172" status="run" result="skipped" time="*" timestamp="*" classname="SetupFailTest">
       <skipped message="gtest_xml_output_unittest_.cc:*&#x0A;"><![CDATA[gtest_xml_output_unittest_.cc:*
 ]]></skipped>
     </testcase>
@@ -186,7 +195,7 @@ Expected equality of these values:
     </testcase>
   </testsuite>
   <testsuite name="TearDownFailTest" tests="1" failures="0" disabled="0" skipped="0" errors="0" time="*" timestamp="*">
-    <testcase name="NoopPassingTest" file="gtest_xml_output_unittest_.cc" line="175" status="run" result="completed" time="*" timestamp="*" classname="TearDownFailTest"/>
+    <testcase name="NoopPassingTest" file="gtest_xml_output_unittest_.cc" line="179" status="run" result="completed" time="*" timestamp="*" classname="TearDownFailTest"/>
     <testcase name="" status="run" result="completed" classname="" time="*" timestamp="*">
       <failure message="gtest_xml_output_unittest_.cc:*&#x0A;Expected equality of these values:&#x0A;  1&#x0A;  2%(stack_entity)s" type=""><![CDATA[gtest_xml_output_unittest_.cc:*
 Expected equality of these values:
@@ -195,22 +204,22 @@ Expected equality of these values:
     </testcase>
   </testsuite>
   <testsuite name="Single/ValueParamTest" tests="4" failures="0" disabled="0" skipped="0" errors="0" time="*" timestamp="*">
-    <testcase name="HasValueParamAttribute/0" file="gtest_xml_output_unittest_.cc" line="180" value_param="33" status="run" result="completed" time="*" timestamp="*" classname="Single/ValueParamTest" />
-    <testcase name="HasValueParamAttribute/1" file="gtest_xml_output_unittest_.cc" line="180" value_param="42" status="run" result="completed" time="*" timestamp="*" classname="Single/ValueParamTest" />
-    <testcase name="AnotherTestThatHasValueParamAttribute/0" file="gtest_xml_output_unittest_.cc" line="181" value_param="33" status="run" result="completed" time="*" timestamp="*" classname="Single/ValueParamTest" />
-    <testcase name="AnotherTestThatHasValueParamAttribute/1" file="gtest_xml_output_unittest_.cc" line="181" value_param="42" status="run" result="completed" time="*" timestamp="*" classname="Single/ValueParamTest" />
+    <testcase name="HasValueParamAttribute/0" file="gtest_xml_output_unittest_.cc" line="184" value_param="33" status="run" result="completed" time="*" timestamp="*" classname="Single/ValueParamTest" />
+    <testcase name="HasValueParamAttribute/1" file="gtest_xml_output_unittest_.cc" line="184" value_param="42" status="run" result="completed" time="*" timestamp="*" classname="Single/ValueParamTest" />
+    <testcase name="AnotherTestThatHasValueParamAttribute/0" file="gtest_xml_output_unittest_.cc" line="185" value_param="33" status="run" result="completed" time="*" timestamp="*" classname="Single/ValueParamTest" />
+    <testcase name="AnotherTestThatHasValueParamAttribute/1" file="gtest_xml_output_unittest_.cc" line="185" value_param="42" status="run" result="completed" time="*" timestamp="*" classname="Single/ValueParamTest" />
   </testsuite>
   <testsuite name="TypedTest/0" tests="1" failures="0" disabled="0" skipped="0" errors="0" time="*" timestamp="*">
-    <testcase name="HasTypeParamAttribute" file="gtest_xml_output_unittest_.cc" line="189" type_param="*" status="run" result="completed" time="*" timestamp="*" classname="TypedTest/0" />
+    <testcase name="HasTypeParamAttribute" file="gtest_xml_output_unittest_.cc" line="193" type_param="*" status="run" result="completed" time="*" timestamp="*" classname="TypedTest/0" />
   </testsuite>
   <testsuite name="TypedTest/1" tests="1" failures="0" disabled="0" skipped="0" errors="0" time="*" timestamp="*">
-    <testcase name="HasTypeParamAttribute" file="gtest_xml_output_unittest_.cc" line="189" type_param="*" status="run" result="completed" time="*" timestamp="*" classname="TypedTest/1" />
+    <testcase name="HasTypeParamAttribute" file="gtest_xml_output_unittest_.cc" line="193" type_param="*" status="run" result="completed" time="*" timestamp="*" classname="TypedTest/1" />
   </testsuite>
   <testsuite name="Single/TypeParameterizedTestSuite/0" tests="1" failures="0" disabled="0" skipped="0" errors="0" time="*" timestamp="*">
-    <testcase name="HasTypeParamAttribute" file="gtest_xml_output_unittest_.cc" line="196" type_param="*" status="run" result="completed" time="*" timestamp="*" classname="Single/TypeParameterizedTestSuite/0" />
+    <testcase name="HasTypeParamAttribute" file="gtest_xml_output_unittest_.cc" line="200" type_param="*" status="run" result="completed" time="*" timestamp="*" classname="Single/TypeParameterizedTestSuite/0" />
   </testsuite>
   <testsuite name="Single/TypeParameterizedTestSuite/1" tests="1" failures="0" disabled="0" skipped="0" errors="0" time="*" timestamp="*">
-    <testcase name="HasTypeParamAttribute" file="gtest_xml_output_unittest_.cc" line="196" type_param="*" status="run" result="completed" time="*" timestamp="*" classname="Single/TypeParameterizedTestSuite/1" />
+    <testcase name="HasTypeParamAttribute" file="gtest_xml_output_unittest_.cc" line="200" type_param="*" status="run" result="completed" time="*" timestamp="*" classname="Single/TypeParameterizedTestSuite/1" />
   </testsuite>
 </testsuites>""" % {
     'stack': STACK_TRACE_TEMPLATE,
@@ -218,46 +227,39 @@ Expected equality of these values:
 }
 
 EXPECTED_FILTERED_TEST_XML = """<?xml version="1.0" encoding="UTF-8"?>
-<testsuites tests="1" failures="0" disabled="0" errors="0" time="*"
-            timestamp="*" name="AllTests" ad_hoc_property="42">
+<testsuites tests="1" failures="0" disabled="0" errors="0" time="*" timestamp="*" name="AllTests">
+  <properties>
+    <property name="ad_hoc_property" value="42"/>
+  </properties>
   <testsuite name="SuccessfulTest" tests="1" failures="0" disabled="0" skipped="0"
              errors="0" time="*" timestamp="*">
     <testcase name="Succeeds" file="gtest_xml_output_unittest_.cc" line="53" status="run" result="completed" time="*" timestamp="*" classname="SuccessfulTest"/>
   </testsuite>
 </testsuites>"""
 
-ACTUAL_OUTPUT = """<?xml version="1.0" encoding="UTF-8"?>
-<testsuites tests="3" failures="0" disabled="0" errors="0" time="*" timestamp="*" ad_hoc_property="42" name="AllTests">
-  <testsuite name="SuccessfulTest" tests="1" failures="0" disabled="0" skipped="0" errors="0" time="*" timestamp="*">
-    <testcase name="Succeeds" file="gtest_xml_output_unittest_.cc" line="53" status="run" result="completed" time="*" timestamp="*" classname="SuccessfulTest"/>
-  </testsuite>
-  <testsuite name="PropertyRecordingTest" tests="1" failures="0" disabled="0" skipped="0" errors="0" time="*" timestamp="*" SetUpTestSuite="yes" TearDownTestSuite="aye">
-    <testcase name="IntValuedProperty" file="gtest_xml_output_unittest_.cc" line="125" status="run" result="completed" time="*" timestamp="*" classname="PropertyRecordingTest">
-      <properties>
-        <property name="key_int" value="1"/>
-      </properties>
-    </testcase>
-  </testsuite>
-  <testsuite name="Single/TypeParameterizedTestSuite/0" tests="1" failures="0" disabled="0" skipped="0" errors="0" time="*" timestamp="*">
-    <testcase name="HasTypeParamAttribute" type_param="int" file="gtest_xml_output_unittest_.cc" line="196" status="run" result="completed" time="*" timestamp="*" classname="Single/TypeParameterizedTestSuite/0"/>
-  </testsuite>
-</testsuites>
-"""
-
 EXPECTED_SHARDED_TEST_XML = """<?xml version="1.0" encoding="UTF-8"?>
-<testsuites tests="3" failures="0" disabled="0" errors="0" time="*" timestamp="*" name="AllTests" ad_hoc_property="42">
+<testsuites tests="3" failures="0" disabled="0" errors="0" time="*" timestamp="*" name="AllTests">
+  <properties>
+    <property name="ad_hoc_property" value="42"/>
+  </properties>
   <testsuite name="SuccessfulTest" tests="1" failures="0" disabled="0" skipped="0" errors="0" time="*" timestamp="*">
     <testcase name="Succeeds" file="gtest_xml_output_unittest_.cc" line="53" status="run" result="completed" time="*" timestamp="*" classname="SuccessfulTest"/>
   </testsuite>
-  <testsuite name="PropertyRecordingTest" tests="1" failures="0" disabled="0" skipped="0" errors="0" time="*" timestamp="*" SetUpTestSuite="yes" TearDownTestSuite="aye">
-    <testcase name="IntValuedProperty" file="gtest_xml_output_unittest_.cc" line="125" status="run" result="completed" time="*" timestamp="*" classname="PropertyRecordingTest">
+  <testsuite name="PropertyRecordingTest" tests="1" failures="0" disabled="0" skipped="0" errors="0" time="*" timestamp="*">
+    <properties>
+      <property name="SetUpTestSuite" value="yes"/>
+      <property name="SetUpTestSuite (with whitespace)" value="yes and yes"/>
+      <property name="TearDownTestSuite" value="aye"/>
+      <property name="TearDownTestSuite (with whitespace)" value="aye and aye"/>
+    </properties>
+    <testcase name="IntValuedProperty" file="gtest_xml_output_unittest_.cc" line="129" status="run" result="completed" time="*" timestamp="*" classname="PropertyRecordingTest">
       <properties>
         <property name="key_int" value="1"/>
       </properties>
     </testcase>
   </testsuite>
   <testsuite name="Single/TypeParameterizedTestSuite/0" tests="1" failures="0" disabled="0" skipped="0" errors="0" time="*" timestamp="*">
-    <testcase name="HasTypeParamAttribute" type_param="*" file="gtest_xml_output_unittest_.cc" line="196" status="run" result="completed" time="*" timestamp="*" classname="Single/TypeParameterizedTestSuite/0" />
+    <testcase name="HasTypeParamAttribute" type_param="*" file="gtest_xml_output_unittest_.cc" line="200" status="run" result="completed" time="*" timestamp="*" classname="Single/TypeParameterizedTestSuite/0" />
   </testsuite>
 </testsuites>"""
 

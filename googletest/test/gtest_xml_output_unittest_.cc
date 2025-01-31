@@ -112,8 +112,12 @@ TEST(InvalidCharactersTest, InvalidCharactersInMessage) {
 
 class PropertyRecordingTest : public Test {
  public:
-  static void SetUpTestSuite() { RecordProperty("SetUpTestSuite", "yes"); }
+  static void SetUpTestSuite() {
+    RecordProperty("SetUpTestSuite (with whitespace)", "yes and yes");
+    RecordProperty("SetUpTestSuite", "yes");
+  }
   static void TearDownTestSuite() {
+    RecordProperty("TearDownTestSuite (with whitespace)", "aye and aye");
     RecordProperty("TearDownTestSuite", "aye");
   }
 };
