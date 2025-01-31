@@ -405,6 +405,51 @@ EXPECT_TRUE(IsCorrectPointIntVector(point_ints))
 For more details regarding `AbslStringify()` and its integration with other
 libraries, see go/abslstringify.
 
+## Regular Expression Syntax
+
+When built with Bazel and using Abseil, GoogleTest uses the
+[RE2](https://github.com/google/re2/wiki/Syntax) syntax. Otherwise, for POSIX
+systems (Linux, Cygwin, Mac), GoogleTest uses the
+[POSIX extended regular expression](https://pubs.opengroup.org/onlinepubs/009695399/basedefs/xbd_chap09.html#tag_09_04)
+syntax. To learn about POSIX syntax, you may want to read this
+[Wikipedia entry](https://en.wikipedia.org/wiki/Regular_expression#POSIX_extended).
+
+On Windows, GoogleTest uses its own simple regular expression implementation. It
+lacks many features. For example, we don't support union (`"x|y"`), grouping
+(`"(xy)"`), brackets (`"[xy]"`), and repetition count (`"x{5,7}"`), among
+others. Below is what we do support (`A` denotes a literal character, period
+(`.`), or a single `\\ ` escape sequence; `x` and `y` denote regular
+expressions.):
+
+Expression | Meaning
+---------- | --------------------------------------------------------------
+`c`        | matches any literal character `c`
+`\\d`      | matches any decimal digit
+`\\D`      | matches any character that's not a decimal digit
+`\\f`      | matches `\f`
+`\\n`      | matches `\n`
+`\\r`      | matches `\r`
+`\\s`      | matches any ASCII whitespace, including `\n`
+`\\S`      | matches any character that's not a whitespace
+`\\t`      | matches `\t`
+`\\v`      | matches `\v`
+`\\w`      | matches any letter, `_`, or decimal digit
+`\\W`      | matches any character that `\\w` doesn't match
+`\\c`      | matches any literal character `c`, which must be a punctuation
+`.`        | matches any single character except `\n`
+`A?`       | matches 0 or 1 occurrences of `A`
+`A*`       | matches 0 or many occurrences of `A`
+`A+`       | matches 1 or many occurrences of `A`
+`^`        | matches the beginning of a string (not that of each line)
+`$`        | matches the end of a string (not that of each line)
+`xy`       | matches `x` followed by `y`
+
+To help you determine which capability is available on your system, GoogleTest
+defines macros to govern which regular expression it is using. The macros are:
+`GTEST_USES_SIMPLE_RE=1` or `GTEST_USES_POSIX_RE=1`. If you want your death
+tests to work in all cases, you can either `#if` on these macros or use the more
+limited syntax only.
+
 ## Death Tests
 
 In many applications, there are assertions that can cause application failure if
@@ -508,51 +553,6 @@ TEST_F(FooDeathTest, DoesThat) {
   // death test
 }
 ```
-
-### Regular Expression Syntax
-
-When built with Bazel and using Abseil, GoogleTest uses the
-[RE2](https://github.com/google/re2/wiki/Syntax) syntax. Otherwise, for POSIX
-systems (Linux, Cygwin, Mac), GoogleTest uses the
-[POSIX extended regular expression](https://pubs.opengroup.org/onlinepubs/009695399/basedefs/xbd_chap09.html#tag_09_04)
-syntax. To learn about POSIX syntax, you may want to read this
-[Wikipedia entry](https://en.wikipedia.org/wiki/Regular_expression#POSIX_extended).
-
-On Windows, GoogleTest uses its own simple regular expression implementation. It
-lacks many features. For example, we don't support union (`"x|y"`), grouping
-(`"(xy)"`), brackets (`"[xy]"`), and repetition count (`"x{5,7}"`), among
-others. Below is what we do support (`A` denotes a literal character, period
-(`.`), or a single `\\ ` escape sequence; `x` and `y` denote regular
-expressions.):
-
-Expression | Meaning
----------- | --------------------------------------------------------------
-`c`        | matches any literal character `c`
-`\\d`      | matches any decimal digit
-`\\D`      | matches any character that's not a decimal digit
-`\\f`      | matches `\f`
-`\\n`      | matches `\n`
-`\\r`      | matches `\r`
-`\\s`      | matches any ASCII whitespace, including `\n`
-`\\S`      | matches any character that's not a whitespace
-`\\t`      | matches `\t`
-`\\v`      | matches `\v`
-`\\w`      | matches any letter, `_`, or decimal digit
-`\\W`      | matches any character that `\\w` doesn't match
-`\\c`      | matches any literal character `c`, which must be a punctuation
-`.`        | matches any single character except `\n`
-`A?`       | matches 0 or 1 occurrences of `A`
-`A*`       | matches 0 or many occurrences of `A`
-`A+`       | matches 1 or many occurrences of `A`
-`^`        | matches the beginning of a string (not that of each line)
-`$`        | matches the end of a string (not that of each line)
-`xy`       | matches `x` followed by `y`
-
-To help you determine which capability is available on your system, GoogleTest
-defines macros to govern which regular expression it is using. The macros are:
-`GTEST_USES_SIMPLE_RE=1` or `GTEST_USES_POSIX_RE=1`. If you want your death
-tests to work in all cases, you can either `#if` on these macros or use the more
-limited syntax only.
 
 ### How It Works
 
