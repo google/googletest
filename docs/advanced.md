@@ -514,7 +514,7 @@ TEST_F(FooDeathTest, DoesThat) {
 When built with Bazel and using Abseil, GoogleTest uses the
 [RE2](https://github.com/google/re2/wiki/Syntax) syntax. Otherwise, for POSIX
 systems (Linux, Cygwin, Mac), GoogleTest uses the
-[POSIX extended regular expression](https://www.opengroup.org/onlinepubs/009695399/basedefs/xbd_chap09.html#tag_09_04)
+[POSIX extended regular expression](https://pubs.opengroup.org/onlinepubs/009695399/basedefs/xbd_chap09.html#tag_09_04)
 syntax. To learn about POSIX syntax, you may want to read this
 [Wikipedia entry](https://en.wikipedia.org/wiki/Regular_expression#POSIX_extended).
 
