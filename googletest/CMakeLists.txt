@@ -121,7 +121,7 @@ include_directories(${gtest_build_include_dirs})
 # are used for other targets, to ensure that gtest can be compiled by a user
 # aggressive about warnings.
 cxx_library(gtest "${cxx_strict}" src/gtest-all.cc)
-set_target_properties(gtest PROPERTIES VERSION ${GOOGLETEST_VERSION})
+set_target_properties(gtest PROPERTIES VERSION "${GOOGLETEST_VERSION}")
 if(GTEST_HAS_ABSL)
   target_compile_definitions(gtest PUBLIC GTEST_HAS_ABSL=1)
   target_link_libraries(gtest PUBLIC
@@ -139,7 +139,7 @@ if(GTEST_HAS_ABSL)
   )
 endif()
 cxx_library(gtest_main "${cxx_strict}" src/gtest_main.cc)
-set_target_properties(gtest_main PROPERTIES VERSION ${GOOGLETEST_VERSION})
+set_target_properties(gtest_main PROPERTIES VERSION "${GOOGLETEST_VERSION}")
 string(REPLACE ";" "$<SEMICOLON>" dirs "${gtest_build_include_dirs}")
 target_include_directories(gtest SYSTEM INTERFACE
   "$<BUILD_INTERFACE:${dirs}>"
