@@ -2333,6 +2333,41 @@ TEST(WhenDynamicCastToTest, BadReference) {
 }
 #endif  // GTEST_HAS_RTTI
 
+TEST(WhenStaticCastToTest, VoidPointer) {
+  Derived derived;
+  derived.i = 4;
+  void* as_void_ptr = &derived;
+  EXPECT_THAT(as_void_ptr, WhenStaticCastTo<Derived*>(Pointee(FieldIIs(4))));
+  EXPECT_THAT(as_void_ptr,
+              WhenStaticCastTo<Derived*>(Pointee(Not(FieldIIs(5)))));
+}
+
+TEST(WhenStaticCastToTest, Inheritance) {
+  Derived derived;
+  EXPECT_THAT(derived, WhenStaticCastTo<const Base&>(_));
+  EXPECT_THAT(&derived, WhenStaticCastTo<Base*>(_));
+  EXPECT_THAT(derived, WhenStaticCastTo<const Derived&>(_));
+  EXPECT_THAT(&derived, WhenStaticCastTo<Derived*>(_));
+  // These will not compile because direct sidecasts are invalid
+  // EXPECT_THAT(derived, WhenStaticCastTo<const OtherDerived&>(_));
+  // EXPECT_THAT(&derived, WhenStaticCastTo<OtherDerived*>(_));
+
+  Base& as_base_ref = derived;
+  EXPECT_THAT(as_base_ref, WhenStaticCastTo<const Base&>(_));
+  EXPECT_THAT(&as_base_ref, WhenStaticCastTo<Base*>(_));
+  EXPECT_THAT(as_base_ref, WhenStaticCastTo<const Derived&>(_));
+  EXPECT_THAT(&as_base_ref, WhenStaticCastTo<Derived*>(_));
+  // These will compile and match, but are not safe
+  EXPECT_THAT(as_base_ref, WhenStaticCastTo<const OtherDerived&>(_));
+  EXPECT_THAT(&as_base_ref, WhenStaticCastTo<OtherDerived*>(_));
+}
+
+TEST(WhenStaticCastToTest, Punning) {
+  std::uint32_t u32 = 0xCCCCCCCC;
+  EXPECT_THAT(&u32, WhenStaticCastTo<void*>(
+                        WhenStaticCastTo<std::uint8_t*>(Pointee(Eq(0xCC)))));
+}
+
 class DivisibleByImpl {
  public:
   explicit DivisibleByImpl(int a_divider) : divider_(a_divider) {}
