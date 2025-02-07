@@ -17,9 +17,9 @@ def googletest_deps():
     if not native.existing_rule("abseil-cpp"):
         http_archive(
             name = "abseil-cpp",
-            sha256 = "733726b8c3a6d39a4120d7e45ea8b41a434cdacde401cba500f14236c49b39dc",
-            strip_prefix = "abseil-cpp-20240116.2",
-            urls = ["https://github.com/abseil/abseil-cpp/releases/download/20240116.2/abseil-cpp-20240116.2.tar.gz"],
+            sha256 = "16242f394245627e508ec6bb296b433c90f8d914f73b9c026fddb905e27276e8",
+            strip_prefix = "abseil-cpp-20250127.0",
+            urls = ["https://github.com/abseil/abseil-cpp/releases/download/20250127.0/abseil-cpp-20250127.0.tar.gz"],
         )
 
     if not native.existing_rule("fuchsia_sdk"):
