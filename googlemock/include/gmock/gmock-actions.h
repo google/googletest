@@ -1721,6 +1721,16 @@ struct SaveArgAction {
 };
 
 template <size_t k, typename Ptr>
+struct SaveArgByMoveAction {
+  Ptr pointer;
+
+  template <typename... Args>
+  void operator()(Args&&... args) const {
+    *pointer = std::move(std::get<k>(std::tie(args...)));
+  }
+};
+
+template <size_t k, typename Ptr>
 struct SaveArgPointeeAction {
   Ptr pointer;
 
@@ -2067,6 +2077,13 @@ internal::ReturnArgAction<k> ReturnArg() {
 // mock function to *pointer.
 template <size_t k, typename Ptr>
 internal::SaveArgAction<k, Ptr> SaveArg(Ptr pointer) {
+  return {pointer};
+}
+
+// Action SaveArgByMove<k>(pointer) moves the k-th (0-based) argument of the
+// mock function into *pointer.
+template <size_t k, typename Ptr>
+internal::SaveArgByMoveAction<k, Ptr> SaveArgByMove(Ptr pointer) {
   return {pointer};
 }
 

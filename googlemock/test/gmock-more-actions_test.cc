@@ -59,6 +59,7 @@ using testing::Invoke;
 using testing::ReturnArg;
 using testing::ReturnPointee;
 using testing::SaveArg;
+using testing::SaveArgByMove;
 using testing::SaveArgPointee;
 using testing::SetArgReferee;
 using testing::Unused;
@@ -492,6 +493,34 @@ TEST(SaveArgActionTest, WorksForCompatibleType) {
   EXPECT_EQ('a', result);
 }
 
+struct MoveOnly {
+  explicit MoveOnly(int v) : i(v) {}
+  MoveOnly(MoveOnly&& o) {
+    i = o.i;
+    o.i = -1;
+  }
+  MoveOnly& operator=(MoveOnly&& o) {
+    i = o.i;
+    o.i = -1;
+    return *this;
+  }
+  int i;
+};
+
+TEST(SaveArgByMoveActionTest, WorksForSameType) {
+  MoveOnly result{0};
+  const Action<void(MoveOnly v)> a1 = SaveArgByMove<0>(&result);
+  a1.Perform(std::make_tuple(MoveOnly{5}));
+  EXPECT_EQ(5, result.i);
+}
+
+TEST(SaveArgByMoveActionTest, WorksForCompatibleType) {
+  MoveOnly result{0};
+  const Action<void(bool, MoveOnly)> a1 = SaveArgByMove<1>(&result);
+  a1.Perform(std::make_tuple(true, MoveOnly{7}));
+  EXPECT_EQ(7, result.i);
+}
+
 TEST(SaveArgPointeeActionTest, WorksForSameType) {
   int result = 0;
   const int value = 5;
@@ -756,34 +785,34 @@ TEST(InvokeArgumentTest, Functor6) {
 
 // Tests using InvokeArgument with a 7-ary function.
 TEST(InvokeArgumentTest, Function7) {
-  Action<std::string(std::string(*)(const char*, const char*, const char*,
-                                    const char*, const char*, const char*,
-                                    const char*))>
+  Action<std::string(std::string (*)(const char*, const char*, const char*,
+                                     const char*, const char*, const char*,
+                                     const char*))>
       a = InvokeArgument<0>("1", "2", "3", "4", "5", "6", "7");
   EXPECT_EQ("1234567", a.Perform(std::make_tuple(&Concat7)));
 }
 
 // Tests using InvokeArgument with a 8-ary function.
 TEST(InvokeArgumentTest, Function8) {
-  Action<std::string(std::string(*)(const char*, const char*, const char*,
-                                    const char*, const char*, const char*,
-                                    const char*, const char*))>
+  Action<std::string(std::string (*)(const char*, const char*, const char*,
+                                     const char*, const char*, const char*,
+                                     const char*, const char*))>
       a = InvokeArgument<0>("1", "2", "3", "4", "5", "6", "7", "8");
   EXPECT_EQ("12345678", a.Perform(std::make_tuple(&Concat8)));
 }
 
 // Tests using InvokeArgument with a 9-ary function.
 TEST(InvokeArgumentTest, Function9) {
-  Action<std::string(std::string(*)(const char*, const char*, const char*,
-                                    const char*, const char*, const char*,
-                                    const char*, const char*, const char*))>
+  Action<std::string(std::string (*)(const char*, const char*, const char*,
+                                     const char*, const char*, const char*,
+                                     const char*, const char*, const char*))>
       a = InvokeArgument<0>("1", "2", "3", "4", "5", "6", "7", "8", "9");
   EXPECT_EQ("123456789", a.Perform(std::make_tuple(&Concat9)));
 }
 
 // Tests using InvokeArgument with a 10-ary function.
 TEST(InvokeArgumentTest, Function10) {
-  Action<std::string(std::string(*)(
+  Action<std::string(std::string (*)(
       const char*, const char*, const char*, const char*, const char*,
       const char*, const char*, const char*, const char*, const char*))>
       a = InvokeArgument<0>("1", "2", "3", "4", "5", "6", "7", "8", "9", "0");

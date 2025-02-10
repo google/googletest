@@ -24,7 +24,8 @@ provided by GoogleTest. All actions are defined in the `::testing` namespace.
 | :--------------------------------- | :-------------------------------------- |
 | `Assign(&variable, value)` | Assign `value` to variable. |
 | `DeleteArg<N>()` | Delete the `N`-th (0-based) argument, which must be a pointer. |
-| `SaveArg<N>(pointer)` | Save the `N`-th (0-based) argument to `*pointer`. |
+| `SaveArg<N>(pointer)` | Save the `N`-th (0-based) argument to `*pointer` by copy-assignment. |
+| `SaveArgByMove<N>(pointer)` | Save the `N`-th (0-based) argument to `*pointer` by move-assignment. |
 | `SaveArgPointee<N>(pointer)` | Save the value pointed to by the `N`-th (0-based) argument to `*pointer`. |
 | `SetArgReferee<N>(value)` | Assign `value` to the variable referenced by the `N`-th (0-based) argument. |
 | `SetArgPointee<N>(value)` | Assign `value` to the variable pointed by the `N`-th (0-based) argument. |
