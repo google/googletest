@@ -195,7 +195,7 @@ function(cxx_library_with_type name type cxx_flags)
     target_link_libraries(${name} PUBLIC Threads::Threads)
   endif()
 
-  target_compile_features(${name} PUBLIC cxx_std_14)
+  target_compile_features(${name} PUBLIC cxx_std_17)
 endfunction()
 
 ########################################################################

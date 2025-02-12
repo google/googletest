@@ -121,6 +121,9 @@ class UnprintableTemplateInGlobal {
 // A user-defined streamable type in the global namespace.
 class StreamableInGlobal {
  public:
+  StreamableInGlobal() = default;
+  StreamableInGlobal(const StreamableInGlobal&) = default;
+  StreamableInGlobal& operator=(const StreamableInGlobal&) = default;
   virtual ~StreamableInGlobal() = default;
 };
 
@@ -572,6 +575,8 @@ TEST(PrintU8StringTest, Null) {
 }
 
 // Tests that u8 strings are escaped properly.
+// TODO(b/396121064) - Fix this test under MSVC
+#ifndef _MSC_VER
 TEST(PrintU8StringTest, EscapesProperly) {
   const char8_t* p = u8"'\"?\\\a\b\f\n\r\t\v\x7F\xFF hello 世界";
   EXPECT_EQ(PrintPointer(p) +
@@ -579,7 +584,8 @@ TEST(PrintU8StringTest, EscapesProperly) {
                 "hello \\xE4\\xB8\\x96\\xE7\\x95\\x8C\"",
             Print(p));
 }
-#endif
+#endif  // _MSC_VER
+#endif  // __cpp_lib_char8_t
 
 // const char16_t*.
 TEST(PrintU16StringTest, Const) {

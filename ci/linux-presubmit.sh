@@ -39,43 +39,60 @@ if [[ -z ${GTEST_ROOT:-} ]]; then
 fi
 
 if [[ -z ${STD:-} ]]; then
-  STD="c++14 c++17 c++20"
+  STD="c++17 c++20"
 fi
 
-# Test the CMake build
-for cc in /usr/local/bin/gcc /opt/llvm/clang/bin/clang; do
-  for cmake_off_on in OFF ON; do
-    time docker run \
-      --volume="${GTEST_ROOT}:/src:ro" \
-      --tmpfs="/build:exec" \
-      --workdir="/build" \
-      --rm \
-      --env="CC=${cc}" \
-      --env=CXXFLAGS="-Werror -Wdeprecated" \
-      ${LINUX_LATEST_CONTAINER} \
-      /bin/bash -c "
-        cmake /src \
-          -DCMAKE_CXX_STANDARD=14 \
-          -Dgtest_build_samples=ON \
-          -Dgtest_build_tests=ON \
-          -Dgmock_build_tests=ON \
-          -Dcxx_no_exception=${cmake_off_on} \
-          -Dcxx_no_rtti=${cmake_off_on} && \
-        make -j$(nproc) && \
-        ctest -j$(nproc) --output-on-failure"
-  done
+# Test CMake + GCC
+for cmake_off_on in OFF ON; do
+  time docker run \
+    --volume="${GTEST_ROOT}:/src:ro" \
+    --tmpfs="/build:exec" \
+    --workdir="/build" \
+    --rm \
+    --env="CC=/usr/local/bin/gcc" \
+    --env=CXXFLAGS="-Werror -Wdeprecated" \
+    ${LINUX_LATEST_CONTAINER} \
+    /bin/bash -c "
+      cmake /src \
+        -DCMAKE_CXX_STANDARD=17 \
+        -Dgtest_build_samples=ON \
+        -Dgtest_build_tests=ON \
+        -Dgmock_build_tests=ON \
+        -Dcxx_no_exception=${cmake_off_on} \
+        -Dcxx_no_rtti=${cmake_off_on} && \
+      make -j$(nproc) && \
+      ctest -j$(nproc) --output-on-failure"
+done
+
+# Test CMake + Clang
+for cmake_off_on in OFF ON; do
+  time docker run \
+    --volume="${GTEST_ROOT}:/src:ro" \
+    --tmpfs="/build:exec" \
+    --workdir="/build" \
+    --rm \
+    --env="CC=/opt/llvm/clang/bin/clang" \
+    --env=CXXFLAGS="-Werror -Wdeprecated --gcc-toolchain=/usr/local" \
+    ${LINUX_LATEST_CONTAINER} \
+    /bin/bash -c "
+      cmake /src \
+        -DCMAKE_CXX_STANDARD=17 \
+        -Dgtest_build_samples=ON \
+        -Dgtest_build_tests=ON \
+        -Dgmock_build_tests=ON \
+        -Dcxx_no_exception=${cmake_off_on} \
+        -Dcxx_no_rtti=${cmake_off_on} && \
+      make -j$(nproc) && \
+      ctest -j$(nproc) --output-on-failure"
 done
 
 # Do one test with an older version of GCC
-# TODO(googletest-team): This currently uses Bazel 5. When upgrading to a
-# version of Bazel that supports Bzlmod, add --enable_bzlmod=false to keep test
-# coverage for the old WORKSPACE dependency management.
 time docker run \
   --volume="${GTEST_ROOT}:/src:ro" \
   --workdir="/src" \
   --rm \
   --env="CC=/usr/local/bin/gcc" \
-  --env="BAZEL_CXXOPTS=-std=c++14" \
+  --env="BAZEL_CXXOPTS=-std=c++17" \
   ${LINUX_GCC_FLOOR_CONTAINER} \
     /usr/local/bin/bazel test ... \
       --copt="-Wall" \
@@ -83,6 +100,7 @@ time docker run \
       --copt="-Wuninitialized" \
       --copt="-Wundef" \
       --copt="-Wno-error=pragmas" \
+      --enable_bzlmod=false \
       --features=external_include_paths \
       --keep_going \
       --show_timestamps \
