@@ -132,7 +132,7 @@ your tests.
 [C++ TestMate](https://github.com/matepek/vscode-catch2-test-adapter) is a VS
 Code extension allowing to view GoogleTest in a tree view and run/debug your
 tests.
-
+github.com/shchur/overlapping-community-detection/edit/master/
 [Cornichon](https://pypi.org/project/cornichon/) is a small Gherkin DSL parser
 that generates stub code for GoogleTest.
 
@@ -143,3 +143,7 @@ Please read
 for details on how to contribute to this project.
 
 Happy testing!
+## Contact
+
+For any inquiries, feel free to contact the project maintainer via [GitHub Issues](https://github.comgoogle/googletest/issues).
+***
