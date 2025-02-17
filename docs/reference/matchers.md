@@ -171,6 +171,11 @@ messages, you can use:
 | `Property(&class::property, m)` | `argument.property()` (or `argument->property()` when `argument` is a plain pointer) matches matcher `m`, where `argument` is an object of type _class_. The method `property()` must take no argument and be declared as `const`. |
 | `Property(property_name, &class::property, m)` | The same as the two-parameter version, but provides a better error message.
 
+{: .callout .warning}
+Warning: Don't use `Property()` against member functions that you do not own,
+because taking addresses of functions is fragile and generally not part of the
+contract of the function.
+
 **Notes:**
 
 *   You can use `FieldsAre()` to match any type that supports structured
@@ -188,10 +193,6 @@ messages, you can use:
     MyStruct s;
     EXPECT_THAT(s, FieldsAre(42, "aloha"));
     ```
-
-*   Don't use `Property()` against member functions that you do not own, because
-    taking addresses of functions is fragile and generally not part of the
-    contract of the function.
 
 ## Matching the Result of a Function, Functor, or Callback
 

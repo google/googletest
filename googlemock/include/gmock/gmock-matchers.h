@@ -4453,6 +4453,10 @@ inline PolymorphicMatcher<internal::FieldMatcher<Class, FieldType>> Field(
 // matches 'matcher'.  For example,
 //   Property(&Foo::str, StartsWith("hi"))
 // matches a Foo object x if and only if x.str() starts with "hi".
+//
+// Warning: Don't use `Property()` against member functions that you do not
+// own, because taking addresses of functions is fragile and generally not part
+// of the contract of the function.
 template <typename Class, typename PropertyType, typename PropertyMatcher>
 inline PolymorphicMatcher<internal::PropertyMatcher<
     Class, PropertyType, PropertyType (Class::*)() const>>
