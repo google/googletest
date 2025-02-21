@@ -467,11 +467,6 @@ struct Function<R(Args...)> {
   using MakeResultIgnoredValue = IgnoredValue(Args...);
 };
 
-#ifdef GTEST_INTERNAL_NEED_REDUNDANT_CONSTEXPR_DECL
-template <typename R, typename... Args>
-constexpr size_t Function<R(Args...)>::ArgumentCount;
-#endif
-
 // Workaround for MSVC error C2039: 'type': is not a member of 'std'
 // when std::tuple_element is used.
 // See: https://github.com/google/googletest/issues/3931

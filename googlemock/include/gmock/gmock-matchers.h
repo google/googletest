@@ -5555,8 +5555,7 @@ PolymorphicMatcher<internal::ExceptionMatcherImpl<Err>> ThrowsMessage(
   template <typename arg_type>                                                \
   bool name##Matcher::gmock_Impl<arg_type>::MatchAndExplain(                  \
       const arg_type& arg,                                                    \
-      GTEST_INTERNAL_ATTRIBUTE_MAYBE_UNUSED ::testing::MatchResultListener*   \
-          result_listener) const
+      [[maybe_unused]] ::testing::MatchResultListener* result_listener) const
 
 #define MATCHER_P(name, p0, description) \
   GMOCK_INTERNAL_MATCHER(name, name##MatcherP, description, (#p0), (p0))
@@ -5641,8 +5640,8 @@ PolymorphicMatcher<internal::ExceptionMatcherImpl<Err>> ThrowsMessage(
   bool full_name<GMOCK_INTERNAL_MATCHER_TYPE_PARAMS(args)>::                   \
       gmock_Impl<arg_type>::MatchAndExplain(                                   \
           const arg_type& arg,                                                 \
-          GTEST_INTERNAL_ATTRIBUTE_MAYBE_UNUSED ::testing::                    \
-              MatchResultListener* result_listener) const
+          [[maybe_unused]] ::testing::MatchResultListener* result_listener)    \
+          const
 
 #define GMOCK_INTERNAL_MATCHER_TEMPLATE_PARAMS(args) \
   GMOCK_PP_TAIL(                                     \

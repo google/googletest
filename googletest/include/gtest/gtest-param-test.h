@@ -469,7 +469,7 @@ internal::ParamConverterGenerator<T> ConvertGenerator(
               ::testing::internal::CodeLocation(__FILE__, __LINE__));          \
       return 0;                                                                \
     }                                                                          \
-    GTEST_INTERNAL_ATTRIBUTE_MAYBE_UNUSED static int gtest_registering_dummy_; \
+    [[maybe_unused]] static int gtest_registering_dummy_;                      \
   };                                                                           \
   int GTEST_TEST_CLASS_NAME_(test_suite_name,                                  \
                              test_name)::gtest_registering_dummy_ =            \
@@ -493,39 +493,38 @@ internal::ParamConverterGenerator<T> ConvertGenerator(
 #define GTEST_GET_FIRST_(first, ...) first
 #define GTEST_GET_SECOND_(first, second, ...) second
 
-#define INSTANTIATE_TEST_SUITE_P(prefix, test_suite_name, ...)               \
-  static ::testing::internal::ParamGenerator<test_suite_name::ParamType>     \
-      gtest_##prefix##test_suite_name##_EvalGenerator_() {                   \
-    return GTEST_EXPAND_(GTEST_GET_FIRST_(__VA_ARGS__, DUMMY_PARAM_));       \
-  }                                                                          \
-  static ::std::string gtest_##prefix##test_suite_name##_EvalGenerateName_(  \
-      const ::testing::TestParamInfo<test_suite_name::ParamType>& info) {    \
-    if (::testing::internal::AlwaysFalse()) {                                \
-      ::testing::internal::TestNotEmpty(GTEST_EXPAND_(GTEST_GET_SECOND_(     \
-          __VA_ARGS__,                                                       \
-          ::testing::internal::DefaultParamName<test_suite_name::ParamType>, \
-          DUMMY_PARAM_)));                                                   \
-      auto t = std::make_tuple(__VA_ARGS__);                                 \
-      static_assert(std::tuple_size<decltype(t)>::value <= 2,                \
-                    "Too Many Args!");                                       \
-    }                                                                        \
-    return ((GTEST_EXPAND_(GTEST_GET_SECOND_(                                \
-        __VA_ARGS__,                                                         \
-        ::testing::internal::DefaultParamName<test_suite_name::ParamType>,   \
-        DUMMY_PARAM_))))(info);                                              \
-  }                                                                          \
-  GTEST_INTERNAL_ATTRIBUTE_MAYBE_UNUSED static int                           \
-      gtest_##prefix##test_suite_name##_dummy_ =                             \
-          ::testing::UnitTest::GetInstance()                                 \
-              ->parameterized_test_registry()                                \
-              .GetTestSuitePatternHolder<test_suite_name>(                   \
-                  GTEST_STRINGIFY_(test_suite_name),                         \
-                  ::testing::internal::CodeLocation(__FILE__, __LINE__))     \
-              ->AddTestSuiteInstantiation(                                   \
-                  GTEST_STRINGIFY_(prefix),                                  \
-                  &gtest_##prefix##test_suite_name##_EvalGenerator_,         \
-                  &gtest_##prefix##test_suite_name##_EvalGenerateName_,      \
-                  __FILE__, __LINE__)
+#define INSTANTIATE_TEST_SUITE_P(prefix, test_suite_name, ...)                \
+  static ::testing::internal::ParamGenerator<test_suite_name::ParamType>      \
+      gtest_##prefix##test_suite_name##_EvalGenerator_() {                    \
+    return GTEST_EXPAND_(GTEST_GET_FIRST_(__VA_ARGS__, DUMMY_PARAM_));        \
+  }                                                                           \
+  static ::std::string gtest_##prefix##test_suite_name##_EvalGenerateName_(   \
+      const ::testing::TestParamInfo<test_suite_name::ParamType>& info) {     \
+    if (::testing::internal::AlwaysFalse()) {                                 \
+      ::testing::internal::TestNotEmpty(GTEST_EXPAND_(GTEST_GET_SECOND_(      \
+          __VA_ARGS__,                                                        \
+          ::testing::internal::DefaultParamName<test_suite_name::ParamType>,  \
+          DUMMY_PARAM_)));                                                    \
+      auto t = std::make_tuple(__VA_ARGS__);                                  \
+      static_assert(std::tuple_size<decltype(t)>::value <= 2,                 \
+                    "Too Many Args!");                                        \
+    }                                                                         \
+    return ((GTEST_EXPAND_(GTEST_GET_SECOND_(                                 \
+        __VA_ARGS__,                                                          \
+        ::testing::internal::DefaultParamName<test_suite_name::ParamType>,    \
+        DUMMY_PARAM_))))(info);                                               \
+  }                                                                           \
+  [[maybe_unused]] static int gtest_##prefix##test_suite_name##_dummy_ =      \
+      ::testing::UnitTest::GetInstance()                                      \
+          ->parameterized_test_registry()                                     \
+          .GetTestSuitePatternHolder<test_suite_name>(                        \
+              GTEST_STRINGIFY_(test_suite_name),                              \
+              ::testing::internal::CodeLocation(__FILE__, __LINE__))          \
+          ->AddTestSuiteInstantiation(                                        \
+              GTEST_STRINGIFY_(prefix),                                       \
+              &gtest_##prefix##test_suite_name##_EvalGenerator_,              \
+              &gtest_##prefix##test_suite_name##_EvalGenerateName_, __FILE__, \
+              __LINE__)
 
 // Allow Marking a Parameterized test class as not needing to be instantiated.
 #define GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(T)                  \

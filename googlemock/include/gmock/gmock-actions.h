@@ -2230,9 +2230,9 @@ template <typename F, typename Impl>
 }
 
 #define GMOCK_INTERNAL_ARG_UNUSED(i, data, el) \
-  , GTEST_INTERNAL_ATTRIBUTE_MAYBE_UNUSED const arg##i##_type& arg##i
-#define GMOCK_ACTION_ARG_TYPES_AND_NAMES_UNUSED_                               \
-  GTEST_INTERNAL_ATTRIBUTE_MAYBE_UNUSED const args_type& args GMOCK_PP_REPEAT( \
+  , [[maybe_unused]] const arg##i##_type& arg##i
+#define GMOCK_ACTION_ARG_TYPES_AND_NAMES_UNUSED_          \
+  [[maybe_unused]] const args_type& args GMOCK_PP_REPEAT( \
       GMOCK_INTERNAL_ARG_UNUSED, , 10)
 
 #define GMOCK_INTERNAL_ARG(i, data, el) , const arg##i##_type& arg##i
@@ -2297,8 +2297,8 @@ template <typename F, typename Impl>
     std::shared_ptr<const gmock_Impl> impl_;                                   \
   };                                                                           \
   template <GMOCK_ACTION_TYPENAME_PARAMS_(params)>                             \
-  inline full_name<GMOCK_ACTION_TYPE_PARAMS_(params)> name(                    \
-      GMOCK_ACTION_TYPE_GVALUE_PARAMS_(params)) GTEST_MUST_USE_RESULT_;        \
+  [[nodiscard]] inline full_name<GMOCK_ACTION_TYPE_PARAMS_(params)> name(      \
+      GMOCK_ACTION_TYPE_GVALUE_PARAMS_(params));                               \
   template <GMOCK_ACTION_TYPENAME_PARAMS_(params)>                             \
   inline full_name<GMOCK_ACTION_TYPE_PARAMS_(params)> name(                    \
       GMOCK_ACTION_TYPE_GVALUE_PARAMS_(params)) {                              \
@@ -2333,7 +2333,7 @@ template <typename F, typename Impl>
       return_type gmock_PerformImpl(GMOCK_ACTION_ARG_TYPES_AND_NAMES_) const; \
     };                                                                        \
   };                                                                          \
-  inline name##Action name() GTEST_MUST_USE_RESULT_;                          \
+  [[nodiscard]] inline name##Action name();                                   \
   inline name##Action name() { return name##Action(); }                       \
   template <typename function_type, typename return_type, typename args_type, \
             GMOCK_ACTION_TEMPLATE_ARGS_NAMES_>                                \
