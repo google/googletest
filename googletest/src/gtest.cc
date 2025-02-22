@@ -1165,7 +1165,7 @@ int UnitTestImpl::test_to_run_count() const {
 // trace but Bar() and CurrentOsStackTraceExceptTop() won't.
 std::string UnitTestImpl::CurrentOsStackTraceExceptTop(int skip_count) {
   return os_stack_trace_getter()->CurrentStackTrace(
-      static_cast<int>(GTEST_FLAG_GET(stack_trace_depth)), skip_count + 1
+      GTEST_FLAG_GET(stack_trace_depth), skip_count + 1
       // Skips the user-specified number of frames plus this function
       // itself.
   );  // NOLINT
@@ -4193,8 +4193,7 @@ void XmlUnitTestResultPrinter::OutputXmlCDataSection(::std::ostream* stream,
   for (;;) {
     const char* const next_segment = strstr(segment, "]]>");
     if (next_segment != nullptr) {
-      stream->write(segment,
-                    static_cast<std::streamsize>(next_segment - segment));
+      stream->write(segment, next_segment - segment);
       *stream << "]]>]]&gt;<![CDATA[";
       segment = next_segment + strlen("]]>");
     } else {
