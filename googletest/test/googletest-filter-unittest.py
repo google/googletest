@@ -695,7 +695,7 @@ class GTestFilterUnitTest(gtest_test_utils.TestCase):
 
   def testDisabledBanner(self):
     """Tests that the disabled banner prints only tests that match filter."""
-    make_filter = lambda s: ['--%s=%s' % (FILTER_FLAG, s)]
+    make_filter = lambda s: ['--%s=%s' % (FILTER_FLAG, s)]  # noqa: E731
 
     banners = RunAndExtractDisabledBannerList(make_filter('*'))
     self.AssertSetEqual(
