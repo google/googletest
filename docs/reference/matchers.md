@@ -1,6 +1,11 @@
 # Matchers Reference
 
-A **matcher** matches a *single* argument. You can use it inside `ON_CALL()` or
+A **matcher** matches a *single* argument.
+This page lists the built-in matchers provided by GoogleTest.
+To use them, add `#include <gtest/gtest.h>`.
+All matchers are defined in the `::testing` namespace unless otherwise noted.
+
+You can use a matcher inside `ON_CALL()` or
 `EXPECT_CALL()`, or use it to validate a value directly using two macros:
 
 | Macro                                | Description                           |
@@ -21,8 +26,7 @@ expected_value)`.
 Built-in matchers (where `argument` is the function argument, e.g.
 `actual_value` in the example above, or when used in the context of
 `EXPECT_CALL(mock_object, method(matchers))`, the arguments of `method`) are
-divided into several categories. All matchers are defined in the `::testing`
-namespace unless otherwise noted.
+divided into several categories.
 
 ## Wildcard
 
