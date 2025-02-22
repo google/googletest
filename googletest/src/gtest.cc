@@ -374,19 +374,25 @@ GTEST_DEFINE_int32_(
     "The maximum number of stack frames to print when an "
     "assertion fails.  The valid range is 0 through 100, inclusive.");
 
-GTEST_DEFINE_string_(
-    stream_result_to,
-    testing::internal::StringFromGTestEnv("stream_result_to", ""),
-    "This flag specifies the host name and the port number on which to stream "
-    "test results. Example: \"localhost:555\". The flag is effective only on "
-    "Linux and macOS.");
-
 GTEST_DEFINE_bool_(
     throw_on_failure,
     testing::internal::BoolFromGTestEnv("throw_on_failure", false),
     "When this flag is specified, a failed assertion will throw an exception "
     "if exceptions are enabled or exit the program with a non-zero code "
     "otherwise. For use with an external test framework.");
+
+GTEST_DEFINE_bool_(
+    machine_results,
+    testing::internal::BoolFromGTestEnv("machine_results", false),
+    "When this flag is specified, results are streamed to stdout "
+    "without pretty-printing. Uses the same format as stream_result_to");
+
+GTEST_DEFINE_string_(
+    stream_result_to,
+    testing::internal::StringFromGTestEnv("stream_result_to", ""),
+    "This flag specifies the host name and the port number on which to stream "
+    "test results. Example: \"localhost:555\". The flag is effective only on "
+    "Linux and macOS.");
 
 #if GTEST_USE_OWN_FLAGFILE_FLAG_
 GTEST_DEFINE_string_(
@@ -5745,6 +5751,12 @@ void UnitTestImpl::ConfigureXmlOutput() {
 #endif  // GTEST_HAS_FILE_SYSTEM
 }
 
+#if GTEST_HAS_TERMINAL
+void PrintToTerminal() {
+  // Unsure of whether to use listener system, or to try and print events directly to terminal
+}
+#endif // GTEST_HAS_TERMINAL
+
 #if GTEST_CAN_STREAM_RESULTS_
 // Initializes event listeners for streaming test results in string form.
 // Must not be called before InitGoogleTest.
@@ -6689,8 +6701,9 @@ static bool ParseGoogleTestFlag(const char* const arg) {
   GTEST_INTERNAL_PARSE_FLAG(recreate_environments_when_repeating);
   GTEST_INTERNAL_PARSE_FLAG(shuffle);
   GTEST_INTERNAL_PARSE_FLAG(stack_trace_depth);
-  GTEST_INTERNAL_PARSE_FLAG(stream_result_to);
   GTEST_INTERNAL_PARSE_FLAG(throw_on_failure);
+  GTEST_INTERNAL_PARSE_FLAG(machine_results);
+  GTEST_INTERNAL_PARSE_FLAG(stream_result_to);
   return false;
 }
 
