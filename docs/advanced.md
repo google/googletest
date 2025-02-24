@@ -1929,6 +1929,20 @@ the `--gtest_also_run_disabled_tests` flag or set the
 You can combine this with the `--gtest_filter` flag to further select which
 disabled tests to run.
 
+### Enforcing Having At Least One Test Case
+
+A not uncommon programmer mistake is to write a test program that has no test
+case linked in. This can happen, for example, when you put test case definitions
+in a library and the library is not marked as "always link".
+
+To catch such mistakes, run the test program with the
+`--gtest_fail_if_no_test_linked` flag or set the `GTEST_FAIL_IF_NO_TEST_LINKED`
+environment variable to a value other than `0`. Now the program will fail if no
+test case is linked in.
+
+Note that *any* test case linked in makes the program valid for the purpose of
+this check. In particular, even a disabled test case suffices.
+
 ### Repeating the Tests
 
 Once in a while you'll run into a test whose result is hit-or-miss. Perhaps it

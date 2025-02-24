@@ -259,6 +259,12 @@ GTEST_DEFINE_bool_(
     "True if and only if a test failure should stop further test execution.");
 
 GTEST_DEFINE_bool_(
+    fail_if_no_test_linked,
+    testing::internal::BoolFromGTestEnv("fail_if_no_test_linked", false),
+    "True if and only if the test should fail if no test case (including "
+    "disabled test cases) is linked.");
+
+GTEST_DEFINE_bool_(
     also_run_disabled_tests,
     testing::internal::BoolFromGTestEnv("also_run_disabled_tests", false),
     "Run disabled tests too, in addition to the tests normally being run.");
@@ -5890,6 +5896,14 @@ bool UnitTestImpl::RunAllTests() {
   // user didn't call InitGoogleTest.
   PostFlagParsingInit();
 
+  if (GTEST_FLAG_GET(fail_if_no_test_linked) && total_test_count() == 0) {
+    ColoredPrintf(
+        GTestColor::kRed,
+        "This test program does NOT link in any test case. This is INVALID. "
+        "Please make sure to link in at least one test case.\n");
+    return false;
+  }
+
 #if GTEST_HAS_FILE_SYSTEM
   // Even if sharding is not on, test runners may want to use the
   // GTEST_SHARD_STATUS_FILE to query whether the test supports the sharding
@@ -6677,6 +6691,7 @@ static bool ParseGoogleTestFlag(const char* const arg) {
   GTEST_INTERNAL_PARSE_FLAG(death_test_style);
   GTEST_INTERNAL_PARSE_FLAG(death_test_use_fork);
   GTEST_INTERNAL_PARSE_FLAG(fail_fast);
+  GTEST_INTERNAL_PARSE_FLAG(fail_if_no_test_linked);
   GTEST_INTERNAL_PARSE_FLAG(filter);
   GTEST_INTERNAL_PARSE_FLAG(internal_run_death_test);
   GTEST_INTERNAL_PARSE_FLAG(list_tests);

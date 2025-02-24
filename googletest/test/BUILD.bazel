@@ -47,33 +47,36 @@ cc_test(
             "*.h",
         ],
         exclude = [
-            "gtest-unittest-api_test.cc",
-            "googletest/src/gtest-all.cc",
-            "gtest_all_test.cc",
-            "gtest-death-test_ex_test.cc",
-            "gtest-listener_test.cc",
-            "gtest-unittest-api_test.cc",
-            "googletest-param-test-test.cc",
-            "googletest-param-test2-test.cc",
+            # go/keep-sorted start
+            "googletest-break-on-failure-unittest_.cc",
             "googletest-catch-exceptions-test_.cc",
             "googletest-color-test_.cc",
+            "googletest-death-test_ex_test.cc",
             "googletest-env-var-test_.cc",
+            "googletest-fail-if-no-test-linked-test-with-disabled-test_.cc",
+            "googletest-fail-if-no-test-linked-test-with-enabled-test_.cc",
             "googletest-failfast-unittest_.cc",
             "googletest-filter-unittest_.cc",
             "googletest-global-environment-unittest_.cc",
-            "googletest-break-on-failure-unittest_.cc",
+            "googletest-list-tests-unittest_.cc",
             "googletest-listener-test.cc",
             "googletest-message-test.cc",
             "googletest-output-test_.cc",
-            "googletest-list-tests-unittest_.cc",
-            "googletest-shuffle-test_.cc",
-            "googletest-setuptestsuite-test_.cc",
-            "googletest-uninitialized-test_.cc",
-            "googletest-death-test_ex_test.cc",
-            "googletest-param-test-test",
-            "googletest-throw-on-failure-test_.cc",
             "googletest-param-test-invalid-name1-test_.cc",
             "googletest-param-test-invalid-name2-test_.cc",
+            "googletest-param-test-test",
+            "googletest-param-test-test.cc",
+            "googletest-param-test2-test.cc",
+            "googletest-setuptestsuite-test_.cc",
+            "googletest-shuffle-test_.cc",
+            "googletest-throw-on-failure-test_.cc",
+            "googletest-uninitialized-test_.cc",
+            "googletest/src/gtest-all.cc",
+            "gtest-death-test_ex_test.cc",
+            "gtest-listener_test.cc",
+            "gtest-unittest-api_test.cc",
+            "gtest_all_test.cc",
+            # go/keep-sorted end
         ],
     ) + select({
         "//:windows": [],
@@ -323,6 +326,26 @@ cc_binary(
     deps = ["//:gtest"],
 )
 
+cc_binary(
+    name = "googletest-fail-if-no-test-linked-test-without-test_",
+    testonly = 1,
+    deps = ["//:gtest_main"],
+)
+
+cc_binary(
+    name = "googletest-fail-if-no-test-linked-test-with-disabled-test_",
+    testonly = 1,
+    srcs = ["googletest-fail-if-no-test-linked-test-with-disabled-test_.cc"],
+    deps = ["//:gtest_main"],
+)
+
+cc_binary(
+    name = "googletest-fail-if-no-test-linked-test-with-enabled-test_",
+    testonly = 1,
+    srcs = ["googletest-fail-if-no-test-linked-test-with-enabled-test_.cc"],
+    deps = ["//:gtest_main"],
+)
+
 cc_test(
     name = "gtest_skip_test",
     size = "small",
@@ -360,6 +383,18 @@ py_test(
     size = "small",
     srcs = ["googletest-list-tests-unittest.py"],
     data = [":googletest-list-tests-unittest_"],
+    deps = [":gtest_test_utils"],
+)
+
+py_test(
+    name = "googletest-fail-if-no-test-linked-test",
+    size = "small",
+    srcs = ["googletest-fail-if-no-test-linked-test.py"],
+    data = [
+        ":googletest-fail-if-no-test-linked-test-with-disabled-test_",
+        ":googletest-fail-if-no-test-linked-test-with-enabled-test_",
+        ":googletest-fail-if-no-test-linked-test-without-test_",
+    ],
     deps = [":gtest_test_utils"],
 )
 
