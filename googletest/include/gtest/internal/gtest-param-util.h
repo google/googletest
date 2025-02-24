@@ -902,7 +902,8 @@ class CartesianProductGenerator : public ParamGeneratorInterface<R> {
 
     void ComputeCurrentValue() {
       if (!AtEnd())
-        current_value_ = std::make_shared<ParamType>(*std::get<I>(current_)...);
+        current_value_ =
+            std::make_shared<ParamType>(ParamType{*std::get<I>(current_)...});
     }
     bool AtEnd() const {
       bool at_end = false;
