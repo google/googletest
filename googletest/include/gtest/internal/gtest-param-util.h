@@ -180,6 +180,11 @@ class ParamGeneratorInterface {
   virtual ParamIteratorInterface<T>* End() const = 0;
 };
 
+template <class GeneratedT,
+          typename StdFunction =
+              std::function<const GeneratedT&(const GeneratedT&)>>
+class ParamConverterGenerator;
+
 // Wraps ParamGeneratorInterface<T> and provides general generator syntax
 // compatible with the STL Container concept.
 // This class implements copy initialization semantics and the contained
@@ -200,6 +205,11 @@ class ParamGenerator {
 
   iterator begin() const { return iterator(impl_->Begin()); }
   iterator end() const { return iterator(impl_->End()); }
+
+  template <typename R>
+  operator ParamGenerator<R>() {
+    return ParamConverterGenerator<T>(*this);
+  }
 
  private:
   std::shared_ptr<const ParamGeneratorInterface<T>> impl_;
@@ -796,30 +806,6 @@ internal::ParamGenerator<typename Container::value_type> ValuesIn(
     const Container& container);
 
 namespace internal {
-// Used in the Values() function to provide polymorphic capabilities.
-
-GTEST_DISABLE_MSC_WARNINGS_PUSH_(4100)
-
-template <typename... Ts>
-class ValueArray {
- public:
-  explicit ValueArray(Ts... v) : v_(FlatTupleConstructTag{}, std::move(v)...) {}
-
-  template <typename T>
-  operator ParamGenerator<T>() const {  // NOLINT
-    return ValuesIn(MakeVector<T>(std::make_index_sequence<sizeof...(Ts)>()));
-  }
-
- private:
-  template <typename T, size_t... I>
-  std::vector<T> MakeVector(std::index_sequence<I...>) const {
-    return std::vector<T>{static_cast<T>(v_.template Get<I>())...};
-  }
-
-  FlatTuple<Ts...> v_;
-};
-
-GTEST_DISABLE_MSC_WARNINGS_POP_()  // 4100
 
 template <typename... T>
 class CartesianProductGenerator
@@ -1020,9 +1006,7 @@ class ParamGeneratorConverter : public ParamGeneratorInterface<To> {
   Func converter_;
 };  // class ParamGeneratorConverter
 
-template <class GeneratedT,
-          typename StdFunction =
-              std::function<const GeneratedT&(const GeneratedT&)>>
+template <class GeneratedT, typename StdFunction>
 class ParamConverterGenerator {
  public:
   ParamConverterGenerator(ParamGenerator<GeneratedT> g)  // NOLINT
