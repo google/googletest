@@ -809,14 +809,14 @@ internal::ParamGenerator<typename Container::value_type> ValuesIn(
 
 namespace internal {
 
-template <typename... T>
-class [[nodiscard]] CartesianProductGenerator
-    : public ParamGeneratorInterface<::std::tuple<T...>> {
+template <typename R, typename... T>
+class [[nodiscard]] CartesianProductGenerator : public ParamGeneratorInterface<R> {
  public:
-  typedef ::std::tuple<T...> ParamType;
+  using ParamType = R;
 
-  CartesianProductGenerator(const std::tuple<ParamGenerator<T>...>& g)
-      : generators_(g) {}
+  explicit CartesianProductGenerator(ParamGenerator<T>&&... g)
+      : generators_(std::forward<decltype(g)>(g)...) {}
+
   ~CartesianProductGenerator() override = default;
 
   ParamIteratorInterface<ParamType>* Begin() const override {
@@ -924,20 +924,6 @@ class [[nodiscard]] CartesianProductGenerator
   using Iterator = IteratorImpl<std::make_index_sequence<sizeof...(T)>>;
 
   std::tuple<ParamGenerator<T>...> generators_;
-};
-
-template <class... Gen>
-class [[nodiscard]] CartesianProductHolder {
- public:
-  CartesianProductHolder(const Gen&... g) : generators_(g...) {}
-  template <typename... T>
-  operator ParamGenerator<::std::tuple<T...>>() const {
-    return ParamGenerator<::std::tuple<T...>>(
-        new CartesianProductGenerator<T...>(generators_));
-  }
-
- private:
-  std::tuple<Gen...> generators_;
 };
 
 template <typename From, typename To, typename Func>

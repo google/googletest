@@ -404,9 +404,12 @@ inline internal::ParamGenerator<bool> Bool() { return Values(false, true); }
 // INSTANTIATE_TEST_SUITE_P(TwoBoolSequence, FlagDependentTest,
 //                          Combine(Bool(), Bool()));
 //
-template <typename... Generator>
-internal::CartesianProductHolder<Generator...> Combine(const Generator&... g) {
-  return internal::CartesianProductHolder<Generator...>(g...);
+template <typename... T>
+internal::ParamGenerator<std::tuple<T...>> Combine(
+    internal::ParamGenerator<T>&&... generators) {
+  return internal::ParamGenerator<std::tuple<T...>>(
+      new internal::CartesianProductGenerator<std::tuple<T...>, T...>(
+          std::forward<decltype(generators)>(generators)...));
 }
 
 // ConvertGenerator() wraps a parameter generator in order to cast each produced
