@@ -448,9 +448,8 @@ internal::ParamGenerator<R> CombineTo(
 template <typename... T>
 internal::ParamGenerator<std::tuple<T...>> Combine(
     internal::ParamGenerator<T>&&... generators) {
-  return internal::ParamGenerator<std::tuple<T...>>(
-      new internal::CartesianProductGenerator<std::tuple<T...>, T...>(
-          std::forward<decltype(generators)>(generators)...));
+  return CombineTo<std::tuple<T...>, T...>(
+      std::forward<decltype(generators)>(generators)...);
 }
 
 // ConvertGenerator() wraps a parameter generator in order to cast each produced
