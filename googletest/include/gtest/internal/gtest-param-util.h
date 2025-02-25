@@ -179,6 +179,9 @@ class ParamGeneratorInterface {
   virtual ParamIteratorInterface<T>* End() const = 0;
 };
 
+template <class Gen>
+class ParamConverterGenerator;
+
 // Wraps ParamGeneratorInterface<T> and provides general generator syntax
 // compatible with the STL Container concept.
 // This class implements copy initialization semantics and the contained
@@ -199,6 +202,11 @@ class ParamGenerator {
 
   iterator begin() const { return iterator(impl_->Begin()); }
   iterator end() const { return iterator(impl_->End()); }
+
+  template <typename R>
+  operator ParamGenerator<R>() {
+    return ParamConverterGenerator<T>(*this);
+  }
 
  private:
   std::shared_ptr<const ParamGeneratorInterface<T>> impl_;
@@ -796,39 +804,15 @@ internal::ParamGenerator<typename Container::value_type> ValuesIn(
     const Container& container);
 
 namespace internal {
-// Used in the Values() function to provide polymorphic capabilities.
 
-GTEST_DISABLE_MSC_WARNINGS_PUSH_(4100)
-
-template <typename... Ts>
-class ValueArray {
+template <typename R, typename... T>
+class CartesianProductGenerator : public ParamGeneratorInterface<R> {
  public:
-  explicit ValueArray(Ts... v) : v_(FlatTupleConstructTag{}, std::move(v)...) {}
+  using ParamType = R;
 
-  template <typename T>
-  operator ParamGenerator<T>() const {  // NOLINT
-    return ValuesIn(MakeVector<T>(std::make_index_sequence<sizeof...(Ts)>()));
-  }
+  explicit CartesianProductGenerator(ParamGenerator<T>&&... g)
+      : generators_(std::forward<decltype(g)>(g)...) {}
 
- private:
-  template <typename T, size_t... I>
-  std::vector<T> MakeVector(std::index_sequence<I...>) const {
-    return std::vector<T>{static_cast<T>(v_.template Get<I>())...};
-  }
-
-  FlatTuple<Ts...> v_;
-};
-
-GTEST_DISABLE_MSC_WARNINGS_POP_()  // 4100
-
-template <typename... T>
-class CartesianProductGenerator
-    : public ParamGeneratorInterface<::std::tuple<T...>> {
- public:
-  typedef ::std::tuple<T...> ParamType;
-
-  CartesianProductGenerator(const std::tuple<ParamGenerator<T>...>& g)
-      : generators_(g) {}
   ~CartesianProductGenerator() override = default;
 
   ParamIteratorInterface<ParamType>* Begin() const override {
@@ -916,7 +900,8 @@ class CartesianProductGenerator
 
     void ComputeCurrentValue() {
       if (!AtEnd())
-        current_value_ = std::make_shared<ParamType>(*std::get<I>(current_)...);
+        current_value_ =
+            std::make_shared<ParamType>(ParamType{*std::get<I>(current_)...});
     }
     bool AtEnd() const {
       bool at_end = false;
@@ -936,20 +921,6 @@ class CartesianProductGenerator
   using Iterator = IteratorImpl<std::make_index_sequence<sizeof...(T)>>;
 
   std::tuple<ParamGenerator<T>...> generators_;
-};
-
-template <class... Gen>
-class CartesianProductHolder {
- public:
-  CartesianProductHolder(const Gen&... g) : generators_(g...) {}
-  template <typename... T>
-  operator ParamGenerator<::std::tuple<T...>>() const {
-    return ParamGenerator<::std::tuple<T...>>(
-        new CartesianProductGenerator<T...>(generators_));
-  }
-
- private:
-  std::tuple<Gen...> generators_;
 };
 
 template <typename From, typename To>
