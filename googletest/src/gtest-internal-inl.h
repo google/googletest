@@ -51,11 +51,6 @@
 
 #include "gtest/internal/gtest-port.h"
 
-#if GTEST_CAN_STREAM_RESULTS_
-#include <arpa/inet.h>  // NOLINT
-#include <netdb.h>      // NOLINT
-#endif
-
 #ifdef GTEST_OS_WINDOWS
 #include <windows.h>  // NOLINT
 #endif                // GTEST_OS_WINDOWS
@@ -1071,7 +1066,7 @@ class TestResultAccessor {
 #if GTEST_CAN_STREAM_RESULTS_
 
 // Streams test results to the given port on the given host machine.
-class StreamingListener : public EmptyTestEventListener {
+class GTEST_API_ StreamingListener : public EmptyTestEventListener {
  public:
   // Abstract base class for writing strings to a socket.
   class AbstractSocketWriter {
@@ -1105,8 +1100,9 @@ class StreamingListener : public EmptyTestEventListener {
       GTEST_CHECK_(sockfd_ != -1)
           << "Send() can be called only when there is a connection.";
 
-      const auto len = static_cast<size_t>(message.length());
-      if (write(sockfd_, message.c_str(), len) != static_cast<ssize_t>(len)) {
+      const auto len = static_cast<unsigned int>(message.length());
+      if (posix::Write(sockfd_, message.c_str(), len) !=
+                       static_cast<int>(len)) {
         GTEST_LOG_(WARNING) << "stream_result_to: failed to stream to "
                             << host_name_ << ":" << port_num_;
       }
@@ -1121,7 +1117,7 @@ class StreamingListener : public EmptyTestEventListener {
       GTEST_CHECK_(sockfd_ != -1)
           << "CloseConnection() can be called only when there is a connection.";
 
-      close(sockfd_);
+      posix::Close(sockfd_);
       sockfd_ = -1;
     }
 
