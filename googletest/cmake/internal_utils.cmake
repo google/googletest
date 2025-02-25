@@ -324,6 +324,9 @@ function(install_project)
     # Configure and install pkgconfig files.
     foreach(t ${ARGN})
       set(configured_pc "${generated_dir}/${t}.pc")
+      if(CMAKE_BUILD_TYPE MATCHES Debug)
+        set(DEBUG_POSTFIX "d")
+      endif()
       configure_file("${PROJECT_SOURCE_DIR}/cmake/${t}.pc.in"
         "${configured_pc}" @ONLY)
       install(FILES "${configured_pc}"
