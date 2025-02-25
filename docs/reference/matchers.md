@@ -209,6 +209,15 @@ contract of the function.
 | `Pointee(m)`              | `argument` (either a smart pointer or a raw pointer) points to a value that matches matcher `m`. |
 | `Pointer(m)`              | `argument` (either a smart pointer or a raw pointer) contains a pointer that matches `m`. `m` will match against the raw pointer regardless of the type of `argument`. |
 | `WhenDynamicCastTo<T>(m)` | when `argument` is passed through `dynamic_cast<T>()`, it matches matcher `m`. |
+| `WhenStaticCastTo<T>(m)`  | when `argument` is passed through `static_cast<T>()`, it matches matcher `m`.  |
+
+`WhenDynamicCast` can be used for safely checking the dynamic type of an object
+and navigating the inheritance tree of an object.
+
+`WhenStaticCast` is primarily used to check and argument which was type-erased
+as `void*`. It can also be used as an unsafe replacement of `WhenDynamicCast`
+in environemnts without RTTI, or for pointer-based type punning by chaining
+a cast to `void*` and then another pointer (equivalent to `reinterpret_cast`).
 
 ## Multi-argument Matchers {#MultiArgMatchers}
 
