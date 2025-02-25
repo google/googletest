@@ -472,13 +472,10 @@ std::string FormatForComparisonFailureMessage(const T1& value,
 // We define UniversalPrinter as a class template (as opposed to a
 // function template), as we need to partially specialize it for
 // reference types, which cannot be done with function templates.
-template <typename T>
-class UniversalPrinter;
-
-// Prints the given value using the << operator if it has one;
-// otherwise prints the bytes in it.  This is what
-// UniversalPrinter<T>::Print() does when PrintTo() is not specialized
-// or overloaded for type T.
+//
+// When PrintTo() is not specialized or overloaded for a type T,
+// UniversalPrinter<T>::Print prints the given value using the
+// << operator if it has one; otherwise prints the bytes in it.
 //
 // A user can override this behavior for a class type Foo by defining
 // an overload of PrintTo() in the namespace where Foo is defined.  We
@@ -487,9 +484,7 @@ class UniversalPrinter;
 // or there is already a << operator but it doesn't do what the user
 // wants).
 template <typename T>
-void PrintTo(const T& value, ::std::ostream* os) {
-  internal::PrintWithFallback(value, os);
-}
+class UniversalPrinter;
 
 // The following list of PrintTo() overloads tells
 // UniversalPrinter<T>::Print() how to print standard types (built-in
@@ -502,7 +497,7 @@ inline void PrintTo(char c, ::std::ostream* os) {
   // When printing a plain char, we always treat it as unsigned.  This
   // way, the output won't be affected by whether the compiler thinks
   // char is signed or not.
-  PrintTo(static_cast<unsigned char>(c), os);
+  UniversalPrint(static_cast<unsigned char>(c), os);
 }
 
 // Overloads for other simple built-in types.
@@ -521,11 +516,11 @@ GTEST_API_ void PrintTo(wchar_t wc, ::std::ostream* os);
 
 GTEST_API_ void PrintTo(char32_t c, ::std::ostream* os);
 inline void PrintTo(char16_t c, ::std::ostream* os) {
-  PrintTo(ImplicitCast_<char32_t>(c), os);
+  UniversalPrint(ImplicitCast_<char32_t>(c), os);
 }
 #ifdef __cpp_lib_char8_t
 inline void PrintTo(char8_t c, ::std::ostream* os) {
-  PrintTo(ImplicitCast_<char32_t>(c), os);
+  UniversalPrint(ImplicitCast_<char32_t>(c), os);
 }
 #endif
 
@@ -633,39 +628,39 @@ inline void PrintTo(double d, ::std::ostream* os) {
 // Overloads for C strings.
 GTEST_API_ void PrintTo(const char* s, ::std::ostream* os);
 inline void PrintTo(char* s, ::std::ostream* os) {
-  PrintTo(ImplicitCast_<const char*>(s), os);
+  UniversalPrint(ImplicitCast_<const char*>(s), os);
 }
 
 // signed/unsigned char is often used for representing binary data, so
 // we print pointers to it as void* to be safe.
 inline void PrintTo(const signed char* s, ::std::ostream* os) {
-  PrintTo(ImplicitCast_<const void*>(s), os);
+  UniversalPrint(ImplicitCast_<const void*>(s), os);
 }
 inline void PrintTo(signed char* s, ::std::ostream* os) {
-  PrintTo(ImplicitCast_<const void*>(s), os);
+  UniversalPrint(ImplicitCast_<const void*>(s), os);
 }
 inline void PrintTo(const unsigned char* s, ::std::ostream* os) {
-  PrintTo(ImplicitCast_<const void*>(s), os);
+  UniversalPrint(ImplicitCast_<const void*>(s), os);
 }
 inline void PrintTo(unsigned char* s, ::std::ostream* os) {
-  PrintTo(ImplicitCast_<const void*>(s), os);
+  UniversalPrint(ImplicitCast_<const void*>(s), os);
 }
 #ifdef __cpp_lib_char8_t
 // Overloads for u8 strings.
 GTEST_API_ void PrintTo(const char8_t* s, ::std::ostream* os);
 inline void PrintTo(char8_t* s, ::std::ostream* os) {
-  PrintTo(ImplicitCast_<const char8_t*>(s), os);
+  UniversalPrint(ImplicitCast_<const char8_t*>(s), os);
 }
 #endif
 // Overloads for u16 strings.
 GTEST_API_ void PrintTo(const char16_t* s, ::std::ostream* os);
 inline void PrintTo(char16_t* s, ::std::ostream* os) {
-  PrintTo(ImplicitCast_<const char16_t*>(s), os);
+  UniversalPrint(ImplicitCast_<const char16_t*>(s), os);
 }
 // Overloads for u32 strings.
 GTEST_API_ void PrintTo(const char32_t* s, ::std::ostream* os);
 inline void PrintTo(char32_t* s, ::std::ostream* os) {
-  PrintTo(ImplicitCast_<const char32_t*>(s), os);
+  UniversalPrint(ImplicitCast_<const char32_t*>(s), os);
 }
 
 // MSVC can be configured to define wchar_t as a typedef of unsigned
@@ -677,7 +672,7 @@ inline void PrintTo(char32_t* s, ::std::ostream* os) {
 // Overloads for wide C strings
 GTEST_API_ void PrintTo(const wchar_t* s, ::std::ostream* os);
 inline void PrintTo(wchar_t* s, ::std::ostream* os) {
-  PrintTo(ImplicitCast_<const wchar_t*>(s), os);
+  UniversalPrint(ImplicitCast_<const wchar_t*>(s), os);
 }
 #endif
 
@@ -732,7 +727,7 @@ inline void PrintTo(const ::std::wstring& s, ::std::ostream* os) {
 #if GTEST_INTERNAL_HAS_STRING_VIEW
 // Overload for internal::StringView.
 inline void PrintTo(internal::StringView sp, ::std::ostream* os) {
-  PrintTo(::std::string(sp), os);
+  UniversalPrint(::std::string(sp), os);
 }
 #endif  // GTEST_INTERNAL_HAS_STRING_VIEW
 
@@ -859,28 +854,105 @@ void PrintTo(const ::std::pair<T1, T2>& value, ::std::ostream* os) {
   *os << ')';
 }
 
+namespace universal_printer_impl {
+
+namespace unconstrained_print_to {
+// Create a PrintTo which matches anything, and returns a type that
+// no other PrintTo overload can return
+struct SentinelType {};
+template <class T>
+SentinelType PrintTo(const T&, ::std::ostream* os);
+}  // namespace unconstrained_print_to
+
+namespace print_to_with_unconstrained_print {
+// Bring in all the PrintTo overloads in the same namespace
+// so they have the same priority (together with the ADL one)
+using internal::PrintTo;
+using unconstrained_print_to::PrintTo;
+
+// Detect the returned type of calling PrintTo in the current context.
+// It can result in 3 outcomes:
+//  1. There is a better match than the unconstrained PrintTo.
+//     It will evalute to whatever that returns, likely `void`.
+//  2. There isn't a better match than the unconstrained PrintTo we defined.
+//     It will evaluate to `SentinelType`.
+//  3. The call is ambiguous as since there are multiple valid overloads.
+//     This will trigger a template substitution failure
+template <class T>
+using PrintToOverloadResult = decltype(PrintTo(
+    ::std::declval<const T&>(), ::std::declval<::std::ostream*>()));
+
+}  // namespace print_to_with_unconstrained_print
+
+// This is going to be:
+//  1. True: when the unconstrained PrintTo would be the preferred one, if it
+//  existed
+//  2. False: when there is a PrintTo that is preferred over the unconstrained
+//  one, or if the call is ambiguous
+template <class T>
+using PrefersFallbackBehaviour = ::std::is_same<
+    DetectedType<print_to_with_unconstrained_print::PrintToOverloadResult, T>,
+    unconstrained_print_to::SentinelType>;
+
+}  // namespace universal_printer_impl
+
 // Implements printing a non-reference type T by letting the compiler
 // pick the right overload of PrintTo() for T.
-template <typename T>
+template <typename QualifiedT>
 class UniversalPrinter {
  public:
   // MSVC warns about adding const to a function type, so we want to
   // disable the warning.
   GTEST_DISABLE_MSC_WARNINGS_PUSH_(4180)
 
+  // const T& becomes U& when T = U&&.
+  // This creates an ambiguity in PrintImpl, so to avoid it we
+  // remove the qualifiers from the type.
+  using T = GTEST_REMOVE_REFERENCE_AND_CONST_(QualifiedT);
+
   // Note: we deliberately don't call this PrintTo(), as that name
   // conflicts with ::testing::internal::PrintTo in the body of the
   // function.
   static void Print(const T& value, ::std::ostream* os) {
-    // By default, ::testing::internal::PrintTo() is used for printing
-    // the value.
-    //
+    // Select the correct overload depending on whether PrintTo for
+    // type exists and it's valid.
+    PrintImpl(value, os, HigherPriorityTag());
+  }
+
+ private:
+  // Used to disambiguate between the 2 functions below, giving precedence
+  // to the one using PrintTo
+  struct LowerPriorityTag {};
+  struct HigherPriorityTag : LowerPriorityTag {};
+
+  // We want to use PrintTo if:
+  //  1. It exists and can be called unambiguously.
+  //     This is checked with the `decltype` in the return type, and
+  //  2. Before this change, the type was *not* using the fallback
+  //     behaviour. This is checked in the `enable_if`.
+  //     Note that the `enable_if` will be true even when the `PrintTo`
+  //     call is ambiguous.  If it's ambiguous when evaluated in the current
+  //     context, the first check will fail to compile, and the fallback
+  //     function will be used.
+  //     If it's ambiguous only when the unconstrained
+  //     `PrintTo` is added, then it means that a user defined an
+  //     unconstrained template, and we want to use that.
+  template <
+      class U = T,
+      class = typename std::enable_if<
+          !universal_printer_impl::PrefersFallbackBehaviour<U>::value>::type>
+  static auto PrintImpl(const U& value, ::std::ostream* os, HigherPriorityTag)
+      -> decltype((void)PrintTo(value, os)) {
     // Thanks to Koenig look-up, if T is a class and has its own
     // PrintTo() function defined in its namespace, that function will
-    // be visible here.  Since it is more specific than the generic ones
-    // in ::testing::internal, it will be picked by the compiler in the
-    // following statement - exactly what we want.
+    // be visible here.
     PrintTo(value, os);
+  }
+
+  static void PrintImpl(const T& value, ::std::ostream* os, LowerPriorityTag) {
+    // By default, ::testing::internal::PrintWithFallback() is used for
+    // printing the value.
+    internal::PrintWithFallback(value, os);
   }
 
   GTEST_DISABLE_MSC_WARNINGS_POP_()
