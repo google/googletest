@@ -83,6 +83,10 @@ cc_library(
 )
 
 # Google Test including Google Mock
+
+# For an actual test, use `gtest` and also `gtest_main` if you depend on gtest's
+# main(). For a library, use `gtest_for_library` instead if the library can be
+# testonly.
 cc_library(
     name = "gtest",
     srcs = glob(
@@ -167,6 +171,16 @@ cc_library(
     }),
 )
 
+# `gtest`, but testonly. See guidance on `gtest` for when to use this.
+alias(
+    name = "gtest_for_library",
+    actual = ":gtest",
+    testonly = True,
+)
+
+# Implements main() for tests using gtest. Prefer to depend on `gtest` as well
+# to ensure compliance with the layering_check Bazel feature where only the
+# direct hdrs values are available.
 cc_library(
     name = "gtest_main",
     srcs = ["googlemock/src/gmock_main.cc"],
