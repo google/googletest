@@ -6113,6 +6113,17 @@ bool UnitTestImpl::RunAllTests() {
     environments_.clear();
   }
 
+  // Try to warn the user if no tests matched the test filter.
+  if (ShouldWarnIfNoTestsMatchFilter()) {
+    const std::string filter_warning =
+        std::string("filter \"") + GTEST_FLAG_GET(filter) +
+        "\" did not match any test; no tests were run\n";
+    ColoredPrintf(GTestColor::kRed, "WARNING: %s", filter_warning.c_str());
+#if GTEST_HAS_FILE_SYSTEM
+    AppendToTestWarningsOutputFile(filter_warning);
+#endif  // GTEST_HAS_FILE_SYSTEM
+  }
+
   if (!gtest_is_initialized_before_run_all_tests) {
     ColoredPrintf(
         GTestColor::kRed,
@@ -6279,6 +6290,30 @@ int UnitTestImpl::FilterTests(ReactionToSharding shard_tests) {
     }
   }
   return num_selected_tests;
+}
+
+// Returns true if a warning should be issued if no tests match the test filter
+// flag. We can't simply count the number of tests that ran because, for
+// instance, test sharding and death tests might mean no tests are expected to
+// run in this process, but will run in another process.
+bool UnitTestImpl::ShouldWarnIfNoTestsMatchFilter() const {
+  if (total_test_count() == 0) {
+    // No tests were linked in to program.
+    // This case is handled by a different warning.
+    return false;
+  }
+  const PositiveAndNegativeUnitTestFilter gtest_flag_filter(
+      GTEST_FLAG_GET(filter));
+  for (auto* test_suite : test_suites_) {
+    const std::string& test_suite_name = test_suite->name_;
+    for (TestInfo* test_info : test_suite->test_info_list()) {
+      const std::string& test_name = test_info->name_;
+      if (gtest_flag_filter.MatchesTest(test_suite_name, test_name)) {
+        return false;
+      }
+    }
+  }
+  return true;
 }
 
 // Prints the given C-string on a single line by replacing all '\n'

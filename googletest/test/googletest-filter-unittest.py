@@ -97,6 +97,9 @@ TOTAL_SHARDS_ENV_VAR = 'GTEST_TOTAL_SHARDS'
 SHARD_INDEX_ENV_VAR = 'GTEST_SHARD_INDEX'
 SHARD_STATUS_FILE_ENV_VAR = 'GTEST_SHARD_STATUS_FILE'
 
+# The environment variable for the test warnings output file.
+TEST_WARNINGS_OUTPUT_FILE = 'TEST_WARNINGS_OUTPUT_FILE'
+
 # The command line flag for specifying the test filters.
 FILTER_FLAG = 'gtest_filter'
 
@@ -418,6 +421,22 @@ class GTestFilterUnitTest(gtest_test_utils.TestCase):
 
     self.RunAndVerify('BadFilter', [])
     self.RunAndVerifyAllowingDisabled('BadFilter', [])
+
+  def testBadFilterWithWarningFile(self):
+    """Tests the warning file when a filter that matches nothing."""
+
+    warning_file = os.path.join(
+        gtest_test_utils.GetTempDir(), 'testBadFilterWithWarningFile'
+    )
+    extra_env = {TEST_WARNINGS_OUTPUT_FILE: warning_file}
+    args = ['--%s=%s' % (FILTER_FLAG, 'BadFilter')]
+    InvokeWithModifiedEnv(extra_env, RunAndReturnOutput, args)
+    with open(warning_file, 'r') as f:
+      warning_file_contents = f.read()
+      self.assertEqual(
+          warning_file_contents,
+          'filter "BadFilter" did not match any test; no tests were run\n',
+      )
 
   def testFullName(self):
     """Tests filtering by full name."""
