@@ -35,12 +35,17 @@
 #include "test/googletest-param-test-test.h"
 
 #include <algorithm>
+#include <cstddef>
+#include <cstdint>
+#include <functional>
 #include <iostream>
 #include <list>
 #include <set>
 #include <sstream>
 #include <string>
+#include <string_view>
 #include <tuple>
+#include <type_traits>
 #include <vector>
 
 #include "gtest/gtest.h"
@@ -581,6 +586,71 @@ TEST(ConvertTest, NonDefaultConstructAssign) {
   ++it;
 
   EXPECT_TRUE(it == gen.end());
+}
+
+TEST(ConvertTest, WithConverterLambdaAndDeducedType) {
+  const ParamGenerator<ConstructFromT<int8_t>> gen =
+      ConvertGenerator(Values("0", std::string("1")), [](const std::string& s) {
+        size_t pos;
+        int64_t value = std::stoll(s, &pos);
+        EXPECT_EQ(pos, s.size());
+        return value;
+      });
+
+  ConstructFromT<int8_t> expected_values[] = {ConstructFromT<int8_t>(0),
+                                              ConstructFromT<int8_t>(1)};
+  VerifyGenerator(gen, expected_values);
+}
+
+TEST(ConvertTest, WithConverterLambdaAndExplicitType) {
+  auto convert_generator = ConvertGenerator<std::string>(
+      Values("0", std::string("1")), [](std::string_view s) {
+        size_t pos;
+        int64_t value = std::stoll(std::string(s), &pos);
+        EXPECT_EQ(pos, s.size());
+        return value;
+      });
+  constexpr bool is_correct_type = std::is_same_v<
+      decltype(convert_generator),
+      testing::internal::ParamConverterGenerator<
+          std::string, std::function<int64_t(std::string_view)>>>;
+  EXPECT_TRUE(is_correct_type);
+  const ParamGenerator<ConstructFromT<int8_t>> gen = convert_generator;
+
+  ConstructFromT<int8_t> expected_values[] = {ConstructFromT<int8_t>(0),
+                                              ConstructFromT<int8_t>(1)};
+  VerifyGenerator(gen, expected_values);
+}
+
+TEST(ConvertTest, WithConverterFunctionPointer) {
+  int64_t (*func_ptr)(const std::string&) = [](const std::string& s) {
+    size_t pos;
+    int64_t value = std::stoll(s, &pos);
+    EXPECT_EQ(pos, s.size());
+    return value;
+  };
+  const ParamGenerator<ConstructFromT<int8_t>> gen =
+      ConvertGenerator(Values("0", std::string("1")), func_ptr);
+
+  ConstructFromT<int8_t> expected_values[] = {ConstructFromT<int8_t>(0),
+                                              ConstructFromT<int8_t>(1)};
+  VerifyGenerator(gen, expected_values);
+}
+
+TEST(ConvertTest, WithConverterFunctionReference) {
+  int64_t (*func_ptr)(const std::string&) = [](const std::string& s) {
+    size_t pos;
+    int64_t value = std::stoll(s, &pos);
+    EXPECT_EQ(pos, s.size());
+    return value;
+  };
+  int64_t (&func_ref)(const std::string&) = *func_ptr;
+  const ParamGenerator<ConstructFromT<int8_t>> gen =
+      ConvertGenerator(Values("0", std::string("1")), func_ref);
+
+  ConstructFromT<int8_t> expected_values[] = {ConstructFromT<int8_t>(0),
+                                              ConstructFromT<int8_t>(1)};
+  VerifyGenerator(gen, expected_values);
 }
 
 // Tests that an generator produces correct sequence after being
