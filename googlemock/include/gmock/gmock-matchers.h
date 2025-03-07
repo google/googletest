@@ -2855,6 +2855,54 @@ class ContainsMatcherImpl : public QuantifierMatcherImpl<Container> {
   }
 };
 
+// Implements DistanceFrom(target, get_distance, distance_matcher) for the given
+// argument types:
+//   * V is the type of the value to be matched.
+//   * T is the type of the target value.
+//   * Distance is the type of the distance between V and T.
+//   * GetDistance is the type of the functor for computing the distance between
+//     V and T.
+template <typename V, typename T, typename Distance, typename GetDistance>
+class DistanceFromMatcherImpl : public MatcherInterface<V> {
+ public:
+  // Arguments:
+  //   * target: the target value.
+  //   * get_distance: the functor for computing the distance between the value
+  //   being matched and target.
+  //   * distance_matcher: the matcher for checking the distance.
+  DistanceFromMatcherImpl(T target, GetDistance get_distance,
+                          Matcher<const Distance&> distance_matcher)
+      : target_(std::move(target)),
+        get_distance_(std::move(get_distance)),
+        distance_matcher_(std::move(distance_matcher)) {}
+
+  // Describes what this matcher does.
+  void DescribeTo(::std::ostream* os) const override {
+    distance_matcher_.DescribeTo(os);
+    *os << " away from " << PrintToString(target_);
+  }
+
+  void DescribeNegationTo(::std::ostream* os) const override {
+    distance_matcher_.DescribeNegationTo(os);
+    *os << " away from " << PrintToString(target_);
+  }
+
+  bool MatchAndExplain(V value, MatchResultListener* listener) const override {
+    const auto distance = get_distance_(value, target_);
+    const bool match = distance_matcher_.Matches(distance);
+    if (!match && listener->IsInterested()) {
+      *listener << "which is " << PrintToString(distance) << " away from "
+                << PrintToString(target_);
+    }
+    return match;
+  }
+
+ private:
+  const T target_;
+  const GetDistance get_distance_;
+  const Matcher<const Distance&> distance_matcher_;
+};
+
 // Implements Each(element_matcher) for the given argument type Container.
 // Symmetric to ContainsMatcherImpl.
 template <typename Container>
@@ -2989,6 +3037,50 @@ auto Second(T& x, Rank1) -> decltype((x.second)) {  // NOLINT
   return x.second;
 }
 }  // namespace pair_getters
+
+// Default functor for computing the distance between two values.
+struct DefaultGetDistance {
+  template <typename T, typename U>
+  auto operator()(const T& lhs, const U& rhs) const {
+    return std::abs(lhs - rhs);
+  }
+};
+
+// Implements polymorphic DistanceFrom(target, get_distance, distance_matcher)
+// matcher. Template arguments:
+//   * T is the type of the target value.
+//   * GetDistance is the type of the functor for computing the distance between
+//     the value being matched and the target.
+//   * DistanceMatcher is the type of the matcher for checking the distance.
+template <typename T, typename GetDistance, typename DistanceMatcher>
+class DistanceFromMatcher {
+ public:
+  // Arguments:
+  //   * target: the target value.
+  //   * get_distance: the functor for computing the distance between the value
+  //     being matched and target.
+  //   * distance_matcher: the matcher for checking the distance.
+  DistanceFromMatcher(T target, GetDistance get_distance,
+                      DistanceMatcher distance_matcher)
+      : target_(std::move(target)),
+        get_distance_(std::move(get_distance)),
+        distance_matcher_(std::move(distance_matcher)) {}
+
+  DistanceFromMatcher(const DistanceFromMatcher& other) = default;
+
+  // Implicitly converts to a monomorphic matcher of the given type.
+  template <typename V>
+  operator Matcher<V>() const {  // NOLINT
+    using Distance = decltype(get_distance_(std::declval<V>(), target_));
+    return Matcher<V>(new DistanceFromMatcherImpl<V, T, Distance, GetDistance>(
+        target_, get_distance_, distance_matcher_));
+  }
+
+ private:
+  const T target_;
+  const GetDistance get_distance_;
+  const DistanceMatcher distance_matcher_;
+};
 
 // Implements Key(inner_matcher) for the given argument pair type.
 // Key(inner_matcher) matches an std::pair whose 'first' field matches
@@ -4370,6 +4462,42 @@ inline internal::FloatingEqMatcher<double> NanSensitiveDoubleEq(double rhs) {
 inline internal::FloatingEqMatcher<double> DoubleNear(double rhs,
                                                       double max_abs_error) {
   return internal::FloatingEqMatcher<double>(rhs, false, max_abs_error);
+}
+
+// The DistanceFrom(target, get_distance, m) and DistanceFrom(target, m)
+// matchers work on arbitrary types that have the "distance" concept. What they
+// do:
+//
+// 1. compute the distance between the value and the target using
+//    get_distance(value, target) if get_distance is provided; otherwise compute
+//    the distance as std::abs(value - target).
+// 2. match the distance against the user-provided matcher m; if the match
+//    succeeds, the DistanceFrom() match succeeds.
+//
+// Examples:
+//
+//   // 0.5's distance from 0.6 should be <= 0.2.
+//   EXPECT_THAT(0.5, DistanceFrom(0.6, Le(0.2)));
+//
+//   Vector2D v1(3.0, 4.0), v2(3.2, 6.0);
+//   // v1's distance from v2, as computed by EuclideanDistance(v1, v2),
+//   // should be >= 1.0.
+//   EXPECT_THAT(v1, DistanceFrom(v2, EuclideanDistance, Ge(1.0)));
+
+template <typename T, typename GetDistance, typename DistanceMatcher>
+inline internal::DistanceFromMatcher<T, GetDistance, DistanceMatcher>
+DistanceFrom(T target, GetDistance get_distance,
+             DistanceMatcher distance_matcher) {
+  return internal::DistanceFromMatcher<T, GetDistance, DistanceMatcher>(
+      std::move(target), std::move(get_distance), std::move(distance_matcher));
+}
+
+template <typename T, typename DistanceMatcher>
+inline internal::DistanceFromMatcher<T, internal::DefaultGetDistance,
+                                     DistanceMatcher>
+DistanceFrom(T target, DistanceMatcher distance_matcher) {
+  return DistanceFrom(std::move(target), internal::DefaultGetDistance(),
+                      std::move(distance_matcher));
 }
 
 // Creates a matcher that matches any double argument approximately equal to

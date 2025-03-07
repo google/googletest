@@ -42,6 +42,8 @@ Matcher                     | Description
 | `Lt(value)`            | `argument < value`                                  |
 | `Ne(value)`            | `argument != value`                                 |
 | `IsFalse()`            | `argument` evaluates to `false` in a Boolean context. |
+| `DistanceFrom(target, m)` | The distance between `argument` and `target` (computed by `std::abs(argument - target)`) matches `m`. |
+| `DistanceFrom(target, get_distance, m)` | The distance between `argument` and `target` (computed by `get_distance(argument, target)`) matches `m`. |
 | `IsTrue()`             | `argument` evaluates to `true` in a Boolean context. |
 | `IsNull()`             | `argument` is a `NULL` pointer (raw or smart).      |
 | `NotNull()`            | `argument` is a non-null pointer (raw or smart).    |

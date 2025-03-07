@@ -34,6 +34,7 @@
 #include <cmath>
 #include <limits>
 #include <memory>
+#include <ostream>
 #include <string>
 
 #include "gmock/gmock.h"
@@ -396,6 +397,151 @@ TEST(NanSensitiveDoubleNearTest, MatchesNearbyArgumentsWithNaN) {
 TEST(NanSensitiveDoubleNearTest, CanDescribeSelfWithNaNs) {
   Matcher<const ::std::tuple<double, double>&> m = NanSensitiveDoubleNear(0.5f);
   EXPECT_EQ("are an almost-equal pair", Describe(m));
+}
+
+// Tests that DistanceFrom() can describe itself properly.
+TEST(DistanceFrom, CanDescribeSelf) {
+  Matcher<double> m = DistanceFrom(1.5, Lt(0.1));
+  EXPECT_EQ(Describe(m), "is < 0.1 away from 1.5");
+
+  m = DistanceFrom(2.5, Gt(0.2));
+  EXPECT_EQ(Describe(m), "is > 0.2 away from 2.5");
+}
+
+// Tests that DistanceFrom() can explain match failure.
+TEST(DistanceFrom, CanExplainMatchFailure) {
+  Matcher<double> m = DistanceFrom(1.5, Lt(0.1));
+  EXPECT_EQ(Explain(m, 2.0), "which is 0.5 away from 1.5");
+}
+
+// Tests that DistanceFrom() matches a double that is within the given range of
+// the given value.
+TEST(DistanceFrom, MatchesDoubleWithinRange) {
+  const Matcher<double> m = DistanceFrom(0.5, Le(0.1));
+  EXPECT_TRUE(m.Matches(0.45));
+  EXPECT_TRUE(m.Matches(0.5));
+  EXPECT_TRUE(m.Matches(0.55));
+  EXPECT_FALSE(m.Matches(0.39));
+  EXPECT_FALSE(m.Matches(0.61));
+}
+
+// Tests that DistanceFrom() matches a double reference that is within the given
+// range of the given value.
+TEST(DistanceFrom, MatchesDoubleRefWithinRange) {
+  const Matcher<const double&> m = DistanceFrom(0.5, Le(0.1));
+  EXPECT_TRUE(m.Matches(0.45));
+  EXPECT_TRUE(m.Matches(0.5));
+  EXPECT_TRUE(m.Matches(0.55));
+  EXPECT_FALSE(m.Matches(0.39));
+  EXPECT_FALSE(m.Matches(0.61));
+}
+
+// Tests that DistanceFrom() can be implicitly converted to a matcher depending
+// on the type of the argument.
+TEST(DistanceFrom, CanBeImplicitlyConvertedToMatcher) {
+  EXPECT_THAT(0.58, DistanceFrom(0.5, Le(0.1)));
+  EXPECT_THAT(0.2, Not(DistanceFrom(0.5, Le(0.1))));
+
+  EXPECT_THAT(0.58f, DistanceFrom(0.5f, Le(0.1f)));
+  EXPECT_THAT(0.7f, Not(DistanceFrom(0.5f, Le(0.1f))));
+}
+
+// Tests that DistanceFrom() can be used on compatible types (i.e. not
+// everything has to be of the same type).
+TEST(DistanceFrom, CanBeUsedOnCompatibleTypes) {
+  EXPECT_THAT(0.58, DistanceFrom(0.5, Le(0.1f)));
+  EXPECT_THAT(0.2, Not(DistanceFrom(0.5, Le(0.1f))));
+
+  EXPECT_THAT(0.58, DistanceFrom(0.5f, Le(0.1)));
+  EXPECT_THAT(0.2, Not(DistanceFrom(0.5f, Le(0.1))));
+
+  EXPECT_THAT(0.58, DistanceFrom(0.5f, Le(0.1f)));
+  EXPECT_THAT(0.2, Not(DistanceFrom(0.5f, Le(0.1f))));
+
+  EXPECT_THAT(0.58f, DistanceFrom(0.5, Le(0.1)));
+  EXPECT_THAT(0.2f, Not(DistanceFrom(0.5, Le(0.1))));
+
+  EXPECT_THAT(0.58f, DistanceFrom(0.5, Le(0.1f)));
+  EXPECT_THAT(0.2f, Not(DistanceFrom(0.5, Le(0.1f))));
+
+  EXPECT_THAT(0.58f, DistanceFrom(0.5f, Le(0.1)));
+  EXPECT_THAT(0.2f, Not(DistanceFrom(0.5f, Le(0.1))));
+}
+
+// A 2-dimensional point. For testing using DistanceFrom() with a custom type
+// that doesn't have a built-in distance function.
+class Point {
+ public:
+  Point(double x, double y) : x_(x), y_(y) {}
+  double x() const { return x_; }
+  double y() const { return y_; }
+
+ private:
+  double x_;
+  double y_;
+};
+
+// Returns the distance between two points.
+double PointDistance(const Point& lhs, const Point& rhs) {
+  return std::sqrt(std::pow(lhs.x() - rhs.x(), 2) +
+                   std::pow(lhs.y() - rhs.y(), 2));
+}
+
+// Tests that DistanceFrom() can be used on a type with a custom distance
+// function.
+TEST(DistanceFrom, CanBeUsedOnTypeWithCustomDistanceFunction) {
+  const Matcher<Point> m =
+      DistanceFrom(Point(0.5, 0.5), PointDistance, Le(0.1));
+  EXPECT_THAT(Point(0.45, 0.45), m);
+  EXPECT_THAT(Point(0.2, 0.45), Not(m));
+}
+
+// A wrapper around a double value. For testing using DistanceFrom() with a
+// custom type that has neither a built-in distance function nor a built-in
+// distance comparator.
+class Double {
+ public:
+  explicit Double(double value) : value_(value) {}
+  Double(const Double& other) = default;
+  double value() const { return value_; }
+
+  // Defines how to print a Double value. We don't use the AbslStringify API
+  // because googletest doesn't require absl yet.
+  friend void PrintTo(const Double& value, std::ostream* os) {
+    *os << "Double(" << value.value() << ")";
+  }
+
+ private:
+  double value_;
+};
+
+// Returns the distance between two Double values.
+Double DoubleDistance(Double lhs, Double rhs) {
+  return Double(std::abs(lhs.value() - rhs.value()));
+}
+
+MATCHER_P(DoubleLe, rhs, (negation ? "is > " : "is <= ") + PrintToString(rhs)) {
+  return arg.value() <= rhs.value();
+}
+
+// Tests that DistanceFrom() can describe itself properly for a type with a
+// custom printer.
+TEST(DistanceFrom, CanDescribeWithCustomPrinter) {
+  const Matcher<Double> m =
+      DistanceFrom(Double(0.5), DoubleDistance, DoubleLe(Double(0.1)));
+  EXPECT_EQ(Describe(m), "is <= Double(0.1) away from Double(0.5)");
+  EXPECT_EQ(DescribeNegation(m), "is > Double(0.1) away from Double(0.5)");
+}
+
+// Tests that DistanceFrom() can be used with a custom distance function and
+// comparator.
+TEST(DistanceFrom, CanCustomizeDistanceAndComparator) {
+  const Matcher<Double> m =
+      DistanceFrom(Double(0.5), DoubleDistance, DoubleLe(Double(0.1)));
+  EXPECT_TRUE(m.Matches(Double(0.45)));
+  EXPECT_TRUE(m.Matches(Double(0.5)));
+  EXPECT_FALSE(m.Matches(Double(0.39)));
+  EXPECT_FALSE(m.Matches(Double(0.61)));
 }
 
 // Tests that Not(m) matches any value that doesn't match m.
