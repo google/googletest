@@ -751,7 +751,7 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 #if defined(__has_cpp_attribute)
 // NOTE: requiring __cplusplus above should not be necessary, but
 // works around https://bugs.llvm.org/show_bug.cgi?id=23435.
-#define GTEST_INTERNAL_HAVE_CPP_ATTRIBUTE(x) __has_cpp_attribute(x)
+#define GTEST_INTERNAL_HAVE_CPP_ATTRIBUTE(x) GTEST_INTERNAL_CPLUSPLUS_LANG >= __has_cpp_attribute(x)
 #else
 #define GTEST_INTERNAL_HAVE_CPP_ATTRIBUTE(x) 0
 #endif
