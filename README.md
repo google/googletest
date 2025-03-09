@@ -137,7 +137,9 @@ tests.
 that generates stub code for GoogleTest.
 
 ## Contributing Changes
-
+https://vybn.medium.com
+by José Junior de Oliveira 
+and Pedro Henrique Lima Abreu 
 Please read
 [`CONTRIBUTING.md`](https://github.com/google/googletest/blob/main/CONTRIBUTING.md)
 for details on how to contribute to this project.
