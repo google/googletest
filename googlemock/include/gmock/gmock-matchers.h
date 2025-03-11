@@ -3042,7 +3042,9 @@ auto Second(T& x, Rank1) -> decltype((x.second)) {  // NOLINT
 struct DefaultGetDistance {
   template <typename T, typename U>
   auto operator()(const T& lhs, const U& rhs) const {
-    return std::abs(lhs - rhs);
+    using std::abs;
+    // Allow finding abs() in the type's namespace via ADL.
+    return abs(lhs - rhs);
   }
 };
 
@@ -4470,7 +4472,7 @@ inline internal::FloatingEqMatcher<double> DoubleNear(double rhs,
 //
 // 1. compute the distance between the value and the target using
 //    get_distance(value, target) if get_distance is provided; otherwise compute
-//    the distance as std::abs(value - target).
+//    the distance as abs(value - target).
 // 2. match the distance against the user-provided matcher m; if the match
 //    succeeds, the DistanceFrom() match succeeds.
 //

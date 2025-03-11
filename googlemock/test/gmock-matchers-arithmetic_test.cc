@@ -544,6 +544,43 @@ TEST(DistanceFrom, CanCustomizeDistanceAndComparator) {
   EXPECT_FALSE(m.Matches(Double(0.61)));
 }
 
+// For testing using DistanceFrom() with a type that supports both - and abs.
+class Float {
+ public:
+  explicit Float(float value) : value_(value) {}
+  Float(const Float& other) = default;
+  float value() const { return value_; }
+
+ private:
+  float value_ = 0.0f;
+};
+
+// Returns the difference between two Float values. This must be defined in the
+// same namespace as Float.
+Float operator-(const Float& lhs, const Float& rhs) {
+  return Float(lhs.value() - rhs.value());
+}
+
+// Returns the absolute value of a Float value. This must be defined in the
+// same namespace as Float.
+Float abs(Float value) { return Float(std::abs(value.value())); }
+
+// Returns true if and only if the first Float value is less than the second
+// Float value. This must be defined in the same namespace as Float.
+bool operator<(const Float& lhs, const Float& rhs) {
+  return lhs.value() < rhs.value();
+}
+
+// Tests that DistanceFrom() can be used with a type that supports both - and
+// abs.
+TEST(DistanceFrom, CanBeUsedWithTypeThatSupportsBothMinusAndAbs) {
+  const Matcher<Float> m = DistanceFrom(Float(0.5f), Lt(Float(0.1f)));
+  EXPECT_TRUE(m.Matches(Float(0.45f)));
+  EXPECT_TRUE(m.Matches(Float(0.55f)));
+  EXPECT_FALSE(m.Matches(Float(0.39f)));
+  EXPECT_FALSE(m.Matches(Float(0.61f)));
+}
+
 // Tests that Not(m) matches any value that doesn't match m.
 TEST(NotTest, NegatesMatcher) {
   Matcher<int> m;
