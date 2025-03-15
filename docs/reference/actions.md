@@ -1,8 +1,10 @@
 # Actions Reference
 
 [**Actions**](../gmock_for_dummies.md#actions-what-should-it-do) specify what a
-mock function should do when invoked. This page lists the built-in actions
-provided by GoogleTest. All actions are defined in the `::testing` namespace.
+mock function should do when invoked.
+This page lists the built-in actions provided by GoogleTest.
+To use them, add #include <gmock/gmock.h>.
+All actions are defined in the `::testing` namespace.
 
 ## Returning a Value
 
