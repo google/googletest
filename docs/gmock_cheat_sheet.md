@@ -153,7 +153,7 @@ To customize the default action for functions with return type `T`, use
   EXPECT_NE(buzz1, buzz2);
 
   // Resets the default action for return type std::unique_ptr<Buzz>,
-  // to avoid interfere with other tests.
+  // to avoid interfering with other tests.
   DefaultValue<std::unique_ptr<Buzz>>::Clear();
 ```
 
