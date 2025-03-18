@@ -257,6 +257,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstddef>
 #include <exception>
 #include <functional>
 #include <initializer_list>
@@ -2097,11 +2098,11 @@ class WhenDynamicCastToMatcher<To&> : public WhenDynamicCastToMatcherBase<To&> {
 template <typename Class, typename FieldType>
 class FieldMatcher {
  public:
-  FieldMatcher(FieldType Class::*field,
+  FieldMatcher(FieldType Class::* field,
                const Matcher<const FieldType&>& matcher)
       : field_(field), matcher_(matcher), whose_field_("whose given field ") {}
 
-  FieldMatcher(const std::string& field_name, FieldType Class::*field,
+  FieldMatcher(const std::string& field_name, FieldType Class::* field,
                const Matcher<const FieldType&>& matcher)
       : field_(field),
         matcher_(matcher),
@@ -2145,7 +2146,7 @@ class FieldMatcher {
     return MatchAndExplainImpl(std::false_type(), *p, listener);
   }
 
-  const FieldType Class::*field_;
+  const FieldType Class::* field_;
   const Matcher<const FieldType&> matcher_;
 
   // Contains either "whose given field " if the name of the field is unknown
@@ -3291,8 +3292,8 @@ class PairMatcher {
 };
 
 template <typename T, size_t... I>
-auto UnpackStructImpl(const T& t, std::index_sequence<I...>,
-                      int) -> decltype(std::tie(get<I>(t)...)) {
+auto UnpackStructImpl(const T& t, std::index_sequence<I...>, int)
+    -> decltype(std::tie(get<I>(t)...)) {
   static_assert(std::tuple_size<T>::value == sizeof...(I),
                 "Number of arguments doesn't match the number of fields.");
   return std::tie(get<I>(t)...);
@@ -3581,7 +3582,7 @@ class ElementsAreMatcherImpl : public MatcherInterface<Container> {
     StlContainerReference stl_container = View::ConstReference(container);
     auto it = stl_container.begin();
     size_t exam_pos = 0;
-    bool mismatch_found = false;  // Have we found a mismatched element yet?
+    bool unmatched_found = false;
 
     // Go through the elements and matchers in pairs, until we reach
     // the end of either the elements or the matchers, or until we find a
@@ -3597,11 +3598,23 @@ class ElementsAreMatcherImpl : public MatcherInterface<Container> {
       }
 
       if (!match) {
-        mismatch_found = true;
+        unmatched_found = true;
+        // We cannot store the iterator for the unmatched element to be used
+        // later, as some users use ElementsAre() with a "container" whose
+        // iterator is not copy-constructible or copy-assignable.
+        //
+        // We cannot store a pointer to the element either, as some container's
+        // iterators return a temporary.
+        //
+        // We cannot store the element itself either, as the element may not be
+        // copyable.
+        //
+        // Therefore, we just remember the index of the unmatched element,
+        // and use it later to print the unmatched element.
         break;
       }
     }
-    // If mismatch_found is true, 'exam_pos' is the index of the mismatch.
+    // If unmatched_found is true, exam_pos is the index of the mismatch.
 
     // Find how many elements the actual container has.  We avoid
     // calling size() s.t. this code works for stream-like "containers"
@@ -3622,10 +3635,27 @@ class ElementsAreMatcherImpl : public MatcherInterface<Container> {
       return false;
     }
 
-    if (mismatch_found) {
+    if (unmatched_found) {
       // The element count matches, but the exam_pos-th element doesn't match.
       if (listener_interested) {
-        *listener << "whose element #" << exam_pos << " doesn't match";
+        // Find the unmatched element.
+        auto unmatched_it = stl_container.begin();
+        // We cannot call std::advance() on the iterator, as some users use
+        // ElementsAre() with a "container" whose iterator is incompatible with
+        // std::advance() (e.g. it may not have the difference_type member
+        // type).
+        for (size_t i = 0; i != exam_pos; ++i) {
+          ++unmatched_it;
+        }
+
+        // If the array is long or the elements' print-out is large, it may be
+        // hard for the user to find the mismatched element and its
+        // corresponding matcher description. Therefore we print the index, the
+        // value of the mismatched element, and the corresponding matcher
+        // description to ease debugging.
+        *listener << "whose element #" << exam_pos << " ("
+                  << PrintToString(*unmatched_it) << ") ";
+        matchers_[exam_pos].DescribeNegationTo(listener->stream());
         PrintIfNotEmpty(explanations[exam_pos], listener->stream());
       }
       return false;
@@ -4031,15 +4061,15 @@ GTEST_API_ std::string FormatMatcherDescription(
 // Overloads to support `OptionalMatcher` being used with a type that either
 // supports implicit conversion to bool or a `has_value()` method.
 template <typename Optional>
-auto IsOptionalEngaged(const Optional& optional,
-                       Rank1) -> decltype(!!optional) {
+auto IsOptionalEngaged(const Optional& optional, Rank1)
+    -> decltype(!!optional) {
   // The use of double-negation here is to preserve historical behavior where
   // the matcher used `operator!` rather than directly using `operator bool`.
   return !static_cast<bool>(!optional);
 }
 template <typename Optional>
-auto IsOptionalEngaged(const Optional& optional,
-                       Rank0) -> decltype(!optional.has_value()) {
+auto IsOptionalEngaged(const Optional& optional, Rank0)
+    -> decltype(!optional.has_value()) {
   return optional.has_value();
 }
 
@@ -4567,7 +4597,7 @@ WhenDynamicCastTo(const Matcher<To>& inner_matcher) {
 // matches a Foo object x if and only if x.number >= 5.
 template <typename Class, typename FieldType, typename FieldMatcher>
 inline PolymorphicMatcher<internal::FieldMatcher<Class, FieldType>> Field(
-    FieldType Class::*field, const FieldMatcher& matcher) {
+    FieldType Class::* field, const FieldMatcher& matcher) {
   return MakePolymorphicMatcher(internal::FieldMatcher<Class, FieldType>(
       field, MatcherCast<const FieldType&>(matcher)));
   // The call to MatcherCast() is required for supporting inner
@@ -4580,7 +4610,7 @@ inline PolymorphicMatcher<internal::FieldMatcher<Class, FieldType>> Field(
 // messages.
 template <typename Class, typename FieldType, typename FieldMatcher>
 inline PolymorphicMatcher<internal::FieldMatcher<Class, FieldType>> Field(
-    const std::string& field_name, FieldType Class::*field,
+    const std::string& field_name, FieldType Class::* field,
     const FieldMatcher& matcher) {
   return MakePolymorphicMatcher(internal::FieldMatcher<Class, FieldType>(
       field_name, field, MatcherCast<const FieldType&>(matcher)));
