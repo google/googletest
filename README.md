@@ -1,10 +1,10 @@
-# GoogleTest
+    # GoogleTest
 
-### Announcements
+    ### Announcements
 
-#### Live at Head
+    #### Live at Head
 
-GoogleTest now follows the
+    GoogleTest now follows the
 [Abseil Live at Head philosophy](https://abseil.io/about/philosophy#upgrade-support).
 We recommend
 [updating to the latest commit in the `main` branch as often as possible](https://github.com/abseil/abseil-cpp/blob/master/FAQ.md#what-is-live-at-head-and-how-do-i-do-it).
