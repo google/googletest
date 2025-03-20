@@ -835,6 +835,10 @@ class Action<R(Args...)> {
     Result operator()(const InArgs&...) const {
       return function_impl();
     }
+    template <typename... InArgs>
+    Result operator()(const InArgs&...) {
+      return function_impl();
+    }
 
     FunctionImpl function_impl;
   };
