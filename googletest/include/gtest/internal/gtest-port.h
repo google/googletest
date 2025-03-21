@@ -701,7 +701,8 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 #if defined(GTEST_OS_LINUX) || defined(GTEST_OS_GNU_KFREEBSD) || \
     defined(GTEST_OS_DRAGONFLY) || defined(GTEST_OS_FREEBSD) ||  \
     defined(GTEST_OS_NETBSD) || defined(GTEST_OS_OPENBSD) ||     \
-    defined(GTEST_OS_GNU_HURD) || defined(GTEST_OS_MAC)
+    defined(GTEST_OS_GNU_HURD) || defined(GTEST_OS_MAC) ||       \
+    defined(GTEST_OS_WINDOWS)
 #define GTEST_CAN_STREAM_RESULTS_ 1
 #else
 #define GTEST_CAN_STREAM_RESULTS_ 0
@@ -908,6 +909,18 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 #else
 #define GTEST_ATTRIBUTE_NO_SANITIZE_THREAD_
 #endif
+
+#if GTEST_CAN_STREAM_RESULTS_
+#if GTEST_OS_WINDOWS
+#define NOMINMAX
+#include <WinSock2.h>   // NOLINT
+#else  // GTEST_OS_WINDOWS
+
+#include <arpa/inet.h>  // NOLINT
+#include <netdb.h>      // NOLINT
+
+#endif  // GTEST_OS_WINDOWS
+#endif  // GTEST_CAN_STREAM_RESULTS_
 
 namespace testing {
 
@@ -2158,6 +2171,27 @@ GTEST_DISABLE_MSC_DEPRECATED_POP_()
 #else
 [[noreturn]] inline void Abort() { abort(); }
 #endif  // GTEST_OS_WINDOWS_MOBILE
+
+// Sockets porting.
+
+#if GTEST_CAN_STREAM_RESULTS_
+
+int SocketStartup();
+
+int Socket(int domain, int type, int protocol);
+
+int GetAddrInfo(const char* nodename,
+                const char* servname,
+                const struct addrinfo* hints,
+                struct addrinfo** res);
+
+void FreeAddrInfo(struct addrinfo* ai);
+
+int Connect(int sockfd, const struct sockaddr* addr, size_t addrlen);
+
+const char* GaiStrError(int errcode);
+
+#endif  // GTEST_CAN_STREAM_RESULTS_
 
 }  // namespace posix
 
