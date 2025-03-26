@@ -1,2 +1,2 @@
 # GoogleTest
-This is an update from the main branch.
+This is an update from both main and conflict-demo branches.
