@@ -511,19 +511,6 @@ However, there are cases where you have to define your own:
     list of the constructor. (Early versions of `gcc` doesn't force you to
     initialize the const member. It's a bug that has been fixed in `gcc 4`.)
 
-## Why does ASSERT_DEATH complain about previous threads that were already joined?
-
-With the Linux pthread library, there is no turning back once you cross the line
-from a single thread to multiple threads. The first time you create a thread, a
-manager thread is created in addition, so you get 3, not 2, threads. Later when
-the thread you create joins the main thread, the thread count decrements by 1,
-but the manager thread will never be killed, so you still have 2 threads, which
-means you cannot safely run a death test.
-
-The new NPTL thread library doesn't suffer from this problem, as it doesn't
-create a manager thread. However, if you don't control which machine your test
-runs on, you shouldn't depend on this.
-
 ## Why does GoogleTest require the entire test suite, instead of individual tests, to be named `*DeathTest` when it uses `ASSERT_DEATH`?
 
 GoogleTest does not interleave tests from different test suites. That is, it
