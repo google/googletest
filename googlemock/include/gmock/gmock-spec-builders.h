@@ -370,6 +370,11 @@ class GTEST_API_ Mock {
   static void AllowLeak(const void* mock_obj)
       GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex);
 
+  // Tells Google Mock to instantly check for leftover mock objects and report
+  // them if there are.
+  static void CheckLeakInstant(void)
+      GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex);
+
   // Verifies and clears all expectations on the given mock object.
   // If the expectations aren't satisfied, generates one or more
   // Google Test non-fatal failures and returns false.
