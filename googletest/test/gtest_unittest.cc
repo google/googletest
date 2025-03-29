@@ -154,7 +154,7 @@ TEST_F(StreamingListenerTest, OnTestEnd) {
   EXPECT_EQ("event=TestEnd&passed=1&elapsed_time=0ms\n", *output());
 }
 
-TEST_F(StreamingListenerTest, OnTestPartResult) {
+TEST_F(StreamingListenerTest, OnTestPartResultWithFatalFailure) {
   *output() = "";
   streamer_.OnTestPartResult(TestPartResult(TestPartResult::kFatalFailure,
                                             "foo.cc", 42, "failed=\n&%"));
@@ -165,6 +165,27 @@ TEST_F(StreamingListenerTest, OnTestPartResult) {
       *output());
 }
 
+TEST_F(StreamingListenerTest, OnTestPartResultWithNonFatalFailure) {
+  *output() = "";
+  streamer_.OnTestPartResult(TestPartResult(
+      TestPartResult::kNonFatalFailure, "foo.cc", 42, "failed=\n&%"));
+
+  // Meta characters in the failure message should be properly escaped.
+  EXPECT_EQ(
+      "event=TestPartResult&file=foo.cc&line=42&message=failed%3D%0A%26%25\n",
+      *output());
+}
+
+TEST_F(StreamingListenerTest, OnTestPartResultWithSkip) {
+  *output() = "";
+  streamer_.OnTestPartResult(TestPartResult(
+      TestPartResult::kSkip, "foo.cc", 42, "failed=\n&%"));
+
+  // Meta characters in the failure message should be properly escaped.
+  EXPECT_EQ(
+      "event=TestPartResult&file=foo.cc&line=42&message=failed%3D%0A%26%25\n",
+      *output());
+}
 #endif  // GTEST_CAN_STREAM_RESULTS_
 
 // Provides access to otherwise private parts of the TestEventListeners class
