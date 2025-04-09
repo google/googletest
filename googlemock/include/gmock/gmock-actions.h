@@ -1707,9 +1707,8 @@ template <size_t k>
 struct ReturnArgAction {
   template <typename... Args,
             typename = typename std::enable_if<(k < sizeof...(Args))>::type>
-  auto operator()(Args&&... args) const
-      -> decltype(std::get<k>(
-          std::forward_as_tuple(std::forward<Args>(args)...))) {
+  auto operator()(Args&&... args) const -> decltype(std::get<k>(
+      std::forward_as_tuple(std::forward<Args>(args)...))) {
     return std::get<k>(std::forward_as_tuple(std::forward<Args>(args)...));
   }
 };
