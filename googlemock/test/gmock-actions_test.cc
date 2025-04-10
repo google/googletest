@@ -1645,6 +1645,22 @@ TEST(WithArgsTest, RefQualifiedInnerAction) {
   EXPECT_EQ(19, mock.AsStdFunction()(0, 17));
 }
 
+// It should be fine to provide an lvalue WithArgsAction to WillOnce, even when
+// the inner action only wants to convert to OnceAction.
+TEST(WithArgsTest, ProvideAsLvalueToWillOnce) {
+  struct SomeAction {
+    operator OnceAction<int(int)>() const {  // NOLINT
+      return [](const int arg) { return arg + 2; };
+    }
+  };
+
+  const auto wa = WithArg<1>(SomeAction{});
+
+  MockFunction<int(int, int)> mock;
+  EXPECT_CALL(mock, Call).WillOnce(wa);
+  EXPECT_EQ(19, mock.AsStdFunction()(0, 17));
+}
+
 #ifndef GTEST_OS_WINDOWS_MOBILE
 
 class SetErrnoAndReturnTest : public testing::Test {
