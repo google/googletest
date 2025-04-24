@@ -276,6 +276,13 @@ class UntypedOnCallSpecBase {
   Clause last_clause_;
 };  // class UntypedOnCallSpecBase
 
+// Possible reactions on uninteresting calls.
+enum CallReaction {
+  kAllow,
+  kWarn,
+  kFail,
+};
+
 // This template class implements an ON_CALL spec.
 template <typename F>
 class OnCallSpec : public UntypedOnCallSpecBase {
@@ -332,6 +339,16 @@ class OnCallSpec : public UntypedOnCallSpecBase {
     return action_;
   }
 
+  OnCallSpec& Uninteresting() {
+    AssertSpecProperty(not call_reaction_,
+                       "Uninteresting() may only be called "
+                       "once in an ON_CALL().");
+    call_reaction_ = CallReaction::kAllow;
+    return *this;
+  }
+
+  std::optional<CallReaction> GetCallReaction() const { return call_reaction_; }
+
  private:
   // The information in statement
   //
@@ -346,17 +363,12 @@ class OnCallSpec : public UntypedOnCallSpecBase {
   //   matchers                                => matchers_
   //   multi-argument-matcher                  => extra_matcher_
   //   action                                  => action_
+  //   optional call reaction                  => call_reaction_
   ArgumentMatcherTuple matchers_;
   Matcher<const ArgumentTuple&> extra_matcher_;
   Action<F> action_;
+  std::optional<CallReaction> call_reaction_;
 };  // class OnCallSpec
-
-// Possible reactions on uninteresting calls.
-enum CallReaction {
-  kAllow,
-  kWarn,
-  kFail,
-};
 
 }  // namespace internal
 
@@ -1798,8 +1810,15 @@ R FunctionMocker<R(Args...)>::InvokeWith(ArgumentTuple&& args)
     // made on this mock object BEFORE performing the action,
     // because the action may DELETE the mock object and make the
     // following expression meaningless.
-    const CallReaction reaction =
+    CallReaction reaction =
         Mock::GetReactionOnUninterestingCalls(MockObject());
+
+    // Check if there is an OnCallSpec that marks this call as a
+    // 'known' uninteresting call that should be allowed regardless.
+    const OnCallSpec<F>* const spec = this->FindOnCallSpec(args);
+    if (spec && spec->GetCallReaction()) {
+      reaction = *spec->GetCallReaction();
+    }
 
     // True if and only if we need to print this call's arguments and return
     // value.  This definition must be kept in sync with
