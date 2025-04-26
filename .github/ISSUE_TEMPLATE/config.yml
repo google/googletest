@@ -1,5 +1,5 @@
-blank_issues_enabled: false
+blank_issues_enabled: true
 contact_links:
-    - name: Get Help
+    - name: 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
       url: https://github.com/google/googletest/discussions
-      about: Please ask and answer questions here.
+      about: 
