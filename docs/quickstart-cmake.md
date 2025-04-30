@@ -11,8 +11,8 @@ To complete this tutorial, you'll need:
 
 *   A compatible operating system (e.g. Linux, macOS, Windows).
 *   A compatible C++ compiler that supports at least C++14.
-*   [CMake](https://cmake.org/) and a compatible build tool for building the
-    project.
+*   [CMake](https://cmake.org/) >= 3.14 and a compatible build tool for building
+    the project.
     *   Compatible build tools include
         [Make](https://www.gnu.org/software/make/),
         [Ninja](https://ninja-build.org/), and others - see
@@ -42,10 +42,63 @@ $ mkdir my_project && cd my_project
 ```
 
 Next, you'll create the `CMakeLists.txt` file and declare a dependency on
-GoogleTest. There are many ways to express dependencies in the CMake ecosystem;
-in this quickstart, you'll use the
-[`FetchContent` CMake module](https://cmake.org/cmake/help/latest/module/FetchContent.html).
-To do this, in your project directory (`my_project`), create a file named
+GoogleTest. There are many ways to express dependencies in the CMake ecosystem
+but the two most common methods are
+
+1.  Using the [`find_package`](https://cmake.org/cmake/help/latest/command/find_package.html)
+    command
+2.  Using the [`FetchContent`](https://cmake.org/cmake/help/latest/module/FetchContent.html)
+    CMake module
+
+We will cover both methods in their [respective](#using-find_package)
+[subsections](#using-FetchContent) as each has their
+advantages and disadvantages.
+
+### Using `find_package`
+
+One very common scenario is when you would like to consume a
+standalone GoogleTest installation, e.g. one
+[built and installed from source](source-build-cmake.md)
+locally, or one provided by a system package manager (e.g. APT, etc. on
+Debian-like systems). In this case,
+[`find_package`](https://cmake.org/cmake/help/latest/command/find_package.html)
+is the better fit.
+
+We can write a simple `CMakeLists.txt` as follows, using `find_package` in
+[config mode](https://cmake.org/cmake/help/latest/command/find_package.html#search-modes):
+
+```cmake
+cmake_minimum_required(VERSION 3.14)
+project(my_project)
+
+# GoogleTest requires at least C++14
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Since CMake 3.20 CONFIG can be omitted as the FindGTest find module will
+# prefer the upstream (provided by Google Test) GTestConfig.cmake if available
+find_package(GTest 1.15.0 REQUIRED CONFIG)
+```
+
+A custom installation root can be specified using `GTEST_ROOT` as an environment
+or CMake cache variable as mentioned in the
+[`FindGTest` docs](https://cmake.org/cmake/help/latest/module/FindGTest.html#cache-variables).
+
+### Using `FetchContent`
+
+Another common scenario is when one wants to absolutely ensure all dependencies
+use the same compile and link flags by building all of them from source with
+the same settings used by the project. There may be additional requirements such
+as allowing tracking of upstream changes as they flow into these dependencies'
+source trees.
+
+In this case
+[`FetchContent`](https://cmake.org/cmake/help/latest/module/FetchContent.html)
+is the tool of choice, allowing one to download a specific source checkout into
+their project build tree and then build it as a vendored component within the
+project.
+
+So to do this, in your project directory (`my_project`), create a
 `CMakeLists.txt` with the following contents:
 
 ```cmake
@@ -61,8 +114,13 @@ FetchContent_Declare(
   googletest
   URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
 )
-# For Windows: Prevent overriding the parent project's compiler/linker settings
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+# Windows: Ensure C runtime linkage uses CMake defaults (shared C runtime).
+# This can be omitted if you would like to use Google Test's preference of
+# linking against static C runtime for static Google Test builds, shared C
+# runtime for shared Google Test library builds.
+if(MSVC)
+  set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+endif()
 FetchContent_MakeAvailable(googletest)
 ```
 
@@ -103,14 +161,8 @@ To build the code, add the following to the end of your `CMakeLists.txt` file:
 ```cmake
 enable_testing()
 
-add_executable(
-  hello_test
-  hello_test.cc
-)
-target_link_libraries(
-  hello_test
-  GTest::gtest_main
-)
+add_executable(hello_test hello_test.cc)
+target_link_libraries(hello_test PRIVATE GTest::gtest_main)
 
 include(GoogleTest)
 gtest_discover_tests(hello_test)

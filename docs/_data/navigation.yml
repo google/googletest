@@ -19,6 +19,8 @@ nav:
     url: "/gmock_cook_book.html"
   - title: "Mocking Cheat Sheet"
     url: "/gmock_cheat_sheet.html"
+  - title: "Building from Source: CMake"
+    url: "/source-build-cmake.html"
 - section: "References"
   items:
   - title: "Testing Reference"
