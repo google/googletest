@@ -25,7 +25,7 @@ When building GoogleTest as a standalone project, the typical workflow starts
 with
 
 ```
-git clone https://github.com/google/googletest.git -b v1.16.0
+git clone https://github.com/google/googletest.git -b v1.17.0
 cd googletest        # Main directory of the cloned repository.
 mkdir build          # Create a directory to hold the build output.
 cd build
@@ -124,9 +124,9 @@ match the project in which it is included.
 
 #### C++ Standard Version
 
-An environment that supports C++14 is required in order to successfully build
+An environment that supports C++17 is required in order to successfully build
 GoogleTest. One way to ensure this is to specify the standard in the top-level
-project, for example by using the `set(CMAKE_CXX_STANDARD 14)` command along
+project, for example by using the `set(CMAKE_CXX_STANDARD 17)` command along
 with `set(CMAKE_CXX_STANDARD_REQUIRED ON)`. If this is not feasible, for example
 in a C project using GoogleTest for validation, then it can be specified by
 adding it to the options for cmake via the`-DCMAKE_CXX_FLAGS` option.
