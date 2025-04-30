@@ -9,7 +9,7 @@ we recommend this tutorial as a starting point.
 To complete this tutorial, you'll need:
 
 *   A compatible operating system (e.g. Linux, macOS, Windows).
-*   A compatible C++ compiler that supports at least C++14.
+*   A compatible C++ compiler that supports at least C++17.
 *   [Bazel](https://bazel.build/) 7.0 or higher, the preferred build system used
     by the GoogleTest team.
 
@@ -48,7 +48,7 @@ with the following content:
 
 # Choose the most recent version available at
 # https://registry.bazel.build/modules/googletest
-bazel_dep(name = "googletest", version = "1.15.2")
+bazel_dep(name = "googletest", version = "1.17.0")
 ```
 
 Now you're ready to build C++ code that uses GoogleTest.
@@ -99,16 +99,16 @@ files, see the
 [Bazel C++ Tutorial](https://docs.bazel.build/versions/main/tutorial/cpp.html).
 
 {: .callout .note}
-NOTE: In the example below, we assume Clang or GCC and set `--cxxopt=-std=c++14`
-to ensure that GoogleTest is compiled as C++14 instead of the compiler's default
-setting (which could be C++11). For MSVC, the equivalent would be
-`--cxxopt=/std:c++14`. See [Supported Platforms](platforms.md) for more details
-on supported language versions.
+NOTE: In the example below, we assume Clang or GCC and set `--cxxopt=-std=c++17`
+to ensure that GoogleTest is compiled as C++17 instead of the compiler's default
+setting. For MSVC, the equivalent would be `--cxxopt=/std:c++17`. See
+[Supported Platforms](platforms.md) for more details on supported language
+versions.
 
 Now you can build and run your test:
 
 <pre>
-<strong>$ bazel test --cxxopt=-std=c++14 --test_output=all //:hello_test</strong>
+<strong>$ bazel test --cxxopt=-std=c++17 --test_output=all //:hello_test</strong>
 INFO: Analyzed target //:hello_test (26 packages loaded, 362 targets configured).
 INFO: Found 1 test target...
 INFO: From Testing //:hello_test:
