@@ -2217,7 +2217,8 @@ class PropertyMatcher {
     *listener << whose_property_ << "is ";
     // Cannot pass the return value (for example, int) to MatchPrintAndExplain,
     // which takes a non-const reference as argument.
-    RefToConstProperty result = (obj.*property_)();
+    // Use std::invoke to handle potential default arguments.
+    RefToConstProperty result = std::invoke(property_, obj);
     return MatchPrintAndExplain(result, matcher_, listener);
   }
 
@@ -2225,11 +2226,10 @@ class PropertyMatcher {
                            MatchResultListener* listener) const {
     if (p == nullptr) return false;
 
-    *listener << "which points to an object ";
-    // Since *p has a property method, it must be a class/struct/union
-    // type and thus cannot be a pointer.  Therefore we pass
-    // false_type() as the first argument.
-    return MatchAndExplainImpl(std::false_type(), *p, listener);
+    *listener << "which points to an object " << whose_property_ << "is ";
+    // Use std::invoke to handle potential default arguments with pointers.
+    RefToConstProperty result = std::invoke(property_, p);
+    return MatchPrintAndExplain(result, matcher_, listener);
   }
 
   Property property_;
