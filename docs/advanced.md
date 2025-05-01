@@ -1471,10 +1471,7 @@ To test them, we use the following special techniques:
 
     Another way to test private members is to refactor them into an
     implementation class, which is then declared in a `*-internal.h` file. Your
-    clients aren't allowed to include this header but your tests can. Such is
-    called the
-    [Pimpl](https://www.gamedev.net/articles/programming/general-and-gameplay-programming/the-c-pimpl-r1794/)
-    (Private Implementation) idiom.
+    clients aren't allowed to include this header but your tests can.
 
     Or, you can declare an individual test as a friend of your class by adding
     this line in the class body:
