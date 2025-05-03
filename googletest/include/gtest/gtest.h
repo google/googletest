@@ -1018,6 +1018,27 @@ class EmptyTestEventListener : public TestEventListener {
   void OnTestProgramEnd(const UnitTest& /*unit_test*/) override {}
 };
 
+class XmlUnitTestResultPrinter : public EmptyTestEventListener {
+ public:
+#if GTEST_HAS_FILE_SYSTEM
+  XmlUnitTestResultPrinter(const char* output_file);
+#endif  // GTEST_HAS_FILE_SYSTEM
+
+  XmlUnitTestResultPrinter(std::ostream* output_stream);
+
+  XmlUnitTestResultPrinter(const XmlUnitTestResultPrinter&) = delete;
+  XmlUnitTestResultPrinter& operator=(const XmlUnitTestResultPrinter&) = delete;
+
+  void OnTestIterationEnd(const UnitTest& unit_test, int iteration) override;
+  void ListTestsMatchingFilter(const std::vector<TestSuite*>& test_suites);
+
+ private:
+#if GTEST_HAS_FILE_SYSTEM
+  const std::string output_file_;
+#endif  // GTEST_HAS_FILE_SYSTEM
+  std::ostream* output_stream_;
+};
+
 // TestEventListeners lets users add listeners to track events in Google Test.
 class GTEST_API_ TestEventListeners {
  public:
