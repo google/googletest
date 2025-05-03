@@ -1,4 +1,5 @@
 # GoogleTest
+[![googletest version](https://img.shields.io/github/v/release/google/googletest?label=version&color=blue)](https://github.com/google/googletest/releases/latest)
 
 ### Announcements
 
