@@ -1852,11 +1852,11 @@ class TestWithParam : public Test, public WithParamInterface<T> {};
 // Note:
 //
 //   1. It is possible to make a user-defined type work with
-//   {ASSERT|EXPECT}_??(), but that requires overloading the
-//   comparison operators and is thus discouraged by the Google C++
-//   Usage Guide.  Therefore, you are advised to use the
-//   {ASSERT|EXPECT}_TRUE() macro to assert that two objects are
-//   equal.
+//   {ASSERT|EXPECT}_??() by overloading the comparison operators. Note
+//   that these macros rely on argument-dependent lookup to find the
+//   comparison operators, so the operators must be defined in the same
+//   namespace as the types being compared (or at least one of the
+//   types if they are from different namespaces).
 //
 //   2. The {ASSERT|EXPECT}_??() macros do pointer comparisons on
 //   pointers (in particular, C strings).  Therefore, if you use it
