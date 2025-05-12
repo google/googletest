@@ -48,8 +48,8 @@ functor, or lambda.
 | `InvokeWithoutArgs(object_pointer, &class::method)` | Invoke the method on the object, which takes no arguments. |
 | `InvokeArgument<N>(arg1, arg2, ..., argk)` | Invoke the mock function's `N`-th (0-based) argument, which must be a function or a functor, with the `k` arguments. |
 
-The return value of the invoked function is used as the return value of the
-action.
+The return value of the invoked function (except `InvokeArgument`) is used as
+the return value of the action.
 
 When defining a callable to be used with `Invoke*()`, you can declare any unused
 parameters as `Unused`:
