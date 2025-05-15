@@ -1,6 +1,6 @@
 SETLOCAL ENABLEDELAYEDEXPANSION
 
-SET BAZEL_EXE=%KOKORO_GFILE_DIR%\bazel-8.0.0-windows-x86_64.exe
+SET BAZEL_EXE=%KOKORO_GFILE_DIR%\bazel-8.2.1-windows-x86_64.exe
 
 SET PATH=C:\Python34;%PATH%
 SET BAZEL_PYTHON=C:\python34\python.exe
@@ -48,6 +48,14 @@ RMDIR /S /Q %CMAKE_BUILD_PATH%
 :: --output_user_root=C:\tmp causes Bazel to use a shorter path.
 SET BAZEL_VS=C:\Program Files\Microsoft Visual Studio\2022\Community
 
+:: Use Bazel Vendor mode to reduce reliance on external dependencies.
+IF EXIST "%KOKORO_GFILE_DIR%\distdir\googletest_vendor.tar.gz" (
+  tar --force-local -xf "%KOKORO_GFILE_DIR%\distdir\googletest_vendor.tar.gz" -C c:
+  SET VENDOR_FLAG=--vendor_dir=c:\googletest_vendor
+) ELSE (
+  SET VENDOR_FLAG=
+)
+
 :: C++17
 %BAZEL_EXE% ^
   --output_user_root=C:\tmp ^
@@ -58,7 +66,8 @@ SET BAZEL_VS=C:\Program Files\Microsoft Visual Studio\2022\Community
   --enable_bzlmod=true ^
   --keep_going ^
   --test_output=errors ^
-  --test_tag_filters=-no_test_msvc2017
+  --test_tag_filters=-no_test_msvc2017 ^
+  %VENDOR_FLAG%
 IF %errorlevel% neq 0 EXIT /B 1
 
 :: C++20
@@ -71,5 +80,6 @@ IF %errorlevel% neq 0 EXIT /B 1
   --enable_bzlmod=true ^
   --keep_going ^
   --test_output=errors ^
-  --test_tag_filters=-no_test_msvc2017
+  --test_tag_filters=-no_test_msvc2017 ^
+  %VENDOR_FLAG%
 IF %errorlevel% neq 0 EXIT /B 1

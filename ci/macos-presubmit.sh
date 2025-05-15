@@ -56,12 +56,18 @@ done
 # Test the Bazel build
 
 # If we are running on Kokoro, check for a versioned Bazel binary.
-KOKORO_GFILE_BAZEL_BIN="bazel-8.0.0-darwin-x86_64"
+KOKORO_GFILE_BAZEL_BIN="bazel-8.2.1-darwin-x86_64"
 if [[ ${KOKORO_GFILE_DIR:-} ]] && [[ -f ${KOKORO_GFILE_DIR}/${KOKORO_GFILE_BAZEL_BIN} ]]; then
   BAZEL_BIN="${KOKORO_GFILE_DIR}/${KOKORO_GFILE_BAZEL_BIN}"
   chmod +x ${BAZEL_BIN}
 else
   BAZEL_BIN="bazel"
+fi
+
+# Use Bazel Vendor mode to reduce reliance on external dependencies.
+if [[ ${KOKORO_GFILE_DIR:-} ]] && [[ -f "${KOKORO_GFILE_DIR}/distdir/googletest_vendor.tar.gz" ]]; then
+  tar -xf "${KOKORO_GFILE_DIR}/distdir/googletest_vendor.tar.gz" -C "${TMP}/"
+  BAZEL_EXTRA_ARGS="--vendor_dir=\"${TMP}/googletest_vendor\" ${BAZEL_EXTRA_ARGS:-}"
 fi
 
 cd ${GTEST_ROOT}
@@ -76,5 +82,6 @@ for absl in 0 1; do
     --features=external_include_paths \
     --keep_going \
     --show_timestamps \
-    --test_output=errors
+    --test_output=errors \
+    ${BAZEL_EXTRA_ARGS:-}
 done
