@@ -588,6 +588,70 @@ TEST(ConvertTest, NonDefaultConstructAssign) {
   EXPECT_TRUE(it == gen.end());
 }
 
+TEST(CombineToTest, DefaultConstructible) {
+  struct DefaultConstructible {
+    int x;
+    std::string s;
+
+    bool operator==(const DefaultConstructible& other) const {
+      return x == other.x && s == other.s;
+    }
+  };
+
+  static_assert(std::is_default_constructible_v<DefaultConstructible>);
+  ParamGenerator<DefaultConstructible> gen =
+      testing::CombineTo<DefaultConstructible>(Values(0, 1), Values("A", "B"));
+
+  DefaultConstructible expected_values[] = {
+      {0, "A"}, {0, "B"}, {1, "A"}, {1, "B"}};
+  VerifyGenerator(gen, expected_values);
+}
+
+TEST(CombineToTest, NonDefaultConstructible) {
+  class NonDefaultConstructible {
+   public:
+    NonDefaultConstructible(const int xArg, std::string sArg)
+        : x(xArg), s(std::move(sArg)) {}
+
+    bool operator==(const NonDefaultConstructible& other) const {
+      return x == other.x && s == other.s;
+    }
+
+   private:
+    int x;
+    std::string s;
+  };
+
+  static_assert(not std::is_default_constructible_v<NonDefaultConstructible>);
+  ParamGenerator<NonDefaultConstructible> gen =
+      testing::CombineTo<NonDefaultConstructible>(Values(0, 1),
+                                                  Values("A", "B"));
+
+  NonDefaultConstructible expected_values[] = {
+      {0, "A"}, {0, "B"}, {1, "A"}, {1, "B"}};
+  VerifyGenerator(gen, expected_values);
+}
+
+TEST(CombineToTest, CopyConstructible) {
+  struct CopyConstructible {
+    CopyConstructible(const CopyConstructible& other) = default;
+
+    bool operator==(const CopyConstructible& other) const {
+      return x == other.x && s == other.s;
+    }
+
+    int x;
+    std::string s;
+  };
+
+  static_assert(std::is_copy_constructible_v<CopyConstructible>);
+  ParamGenerator<CopyConstructible> gen = testing::CombineTo<CopyConstructible>(
+      Values(CopyConstructible{0, "A"}, CopyConstructible{1, "B"}));
+  CopyConstructible expected_values[] = {CopyConstructible{0, "A"},
+                                         CopyConstructible{1, "B"}};
+  VerifyGenerator(gen, expected_values);
+}
+
 TEST(ConvertTest, WithConverterLambdaAndDeducedType) {
   const ParamGenerator<ConstructFromT<int8_t>> gen =
       ConvertGenerator(Values("0", std::string("1")), [](const std::string& s) {
