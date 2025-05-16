@@ -388,3 +388,16 @@ an example.
 We've noticed that when the `/clr` compiler flag is used, Visual C++ uses 5~6
 times as much memory when compiling a mock class. We suggest to avoid `/clr`
 when compiling native C++ mocks.
+
+### I added a new argument to a function mocked by the MOCK_METHOD macro and I am facing an error. What can I do?
+
+This happens because the MOCK_METHOD macro has an argument limit of 15 and you crossed that limit. Here’s some work arounds for this issue:
+•	The best thing to do is to refactor your code - 15 is quite the enough number as for function arguments
+•	Other solution - if you have arguments that are irrelevant - always substituted by any matcher ::testing::_ - then your mocked function can just have subset of arguments:
+void func(int a1, ..., int a16) override { mocked_func(a1, ... , a15); }
+MOCK_METHOD(mocked_func, void, (int a1, .., int a15), ());
+•	Another solution - you can have MOCK_METHOD that takes std::tuple of its arguments:
+Ret func(T1 a1, ...., T19 a19) override { return mocked_func(std::tuple<T1, ..., T19>(a1, ..., a19)); }
+MOCK_METHOD(mocked_func, Ret, ((std::tuple<T1, ..., T19>)), ());
+And use FieldsAre to match this packed arguments - but here again - we have limit of 19 when using FieldsAre (as it appears in the code)
+
