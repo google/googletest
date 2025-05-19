@@ -521,11 +521,15 @@ GTEST_API_ void PrintTo(wchar_t wc, ::std::ostream* os);
 
 GTEST_API_ void PrintTo(char32_t c, ::std::ostream* os);
 inline void PrintTo(char16_t c, ::std::ostream* os) {
-  PrintTo(ImplicitCast_<char32_t>(c), os);
+  // TODO(b/418738869): Incorrect for values not representing valid codepoints.
+  // Also see https://github.com/google/googletest/issues/4762.
+  PrintTo(static_cast<char32_t>(c), os);
 }
 #ifdef __cpp_lib_char8_t
 inline void PrintTo(char8_t c, ::std::ostream* os) {
-  PrintTo(ImplicitCast_<char32_t>(c), os);
+  // TODO(b/418738869): Incorrect for values not representing valid codepoints.
+  // Also see https://github.com/google/googletest/issues/4762.
+  PrintTo(static_cast<char32_t>(c), os);
 }
 #endif
 
