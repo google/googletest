@@ -104,8 +104,10 @@
 #ifndef GOOGLETEST_INCLUDE_GTEST_GTEST_PRINTERS_H_
 #define GOOGLETEST_INCLUDE_GTEST_GTEST_PRINTERS_H_
 
+#include <any>
 #include <functional>
 #include <memory>
+#include <optional>
 #include <ostream>  // NOLINT
 #include <sstream>
 #include <string>
@@ -113,6 +115,7 @@
 #include <type_traits>
 #include <typeinfo>
 #include <utility>
+#include <variant>
 #include <vector>
 
 #ifdef GTEST_HAS_ABSL
@@ -894,14 +897,11 @@ class UniversalPrinter {
 template <typename T>
 class UniversalPrinter<const T> : public UniversalPrinter<T> {};
 
-#if GTEST_INTERNAL_HAS_ANY
-
-// Printer for std::any / absl::any
-
+// Printer for std::any
 template <>
-class UniversalPrinter<Any> {
+class UniversalPrinter<std::any> {
  public:
-  static void Print(const Any& value, ::std::ostream* os) {
+  static void Print(const std::any& value, ::std::ostream* os) {
     if (value.has_value()) {
       *os << "value of type " << GetTypeName(value);
     } else {
@@ -910,7 +910,7 @@ class UniversalPrinter<Any> {
   }
 
  private:
-  static std::string GetTypeName(const Any& value) {
+  static std::string GetTypeName(const std::any& value) {
 #if GTEST_HAS_RTTI
     return internal::GetTypeName(value.type());
 #else
@@ -920,16 +920,11 @@ class UniversalPrinter<Any> {
   }
 };
 
-#endif  // GTEST_INTERNAL_HAS_ANY
-
-#if GTEST_INTERNAL_HAS_OPTIONAL
-
-// Printer for std::optional / absl::optional
-
+// Printer for std::optional
 template <typename T>
-class UniversalPrinter<Optional<T>> {
+class UniversalPrinter<std::optional<T>> {
  public:
-  static void Print(const Optional<T>& value, ::std::ostream* os) {
+  static void Print(const std::optional<T>& value, ::std::ostream* os) {
     *os << '(';
     if (!value) {
       *os << "nullopt";
@@ -941,29 +936,18 @@ class UniversalPrinter<Optional<T>> {
 };
 
 template <>
-class UniversalPrinter<decltype(Nullopt())> {
+class UniversalPrinter<std::nullopt_t> {
  public:
-  static void Print(decltype(Nullopt()), ::std::ostream* os) {
-    *os << "(nullopt)";
-  }
+  static void Print(std::nullopt_t, ::std::ostream* os) { *os << "(nullopt)"; }
 };
 
-#endif  // GTEST_INTERNAL_HAS_OPTIONAL
-
-#if GTEST_INTERNAL_HAS_VARIANT
-
-// Printer for std::variant / absl::variant
-
+// Printer for std::variant
 template <typename... T>
-class UniversalPrinter<Variant<T...>> {
+class UniversalPrinter<std::variant<T...>> {
  public:
-  static void Print(const Variant<T...>& value, ::std::ostream* os) {
+  static void Print(const std::variant<T...>& value, ::std::ostream* os) {
     *os << '(';
-#ifdef GTEST_HAS_ABSL
-    absl::visit(Visitor{os, value.index()}, value);
-#else
     std::visit(Visitor{os, value.index()}, value);
-#endif  // GTEST_HAS_ABSL
     *os << ')';
   }
 
@@ -979,8 +963,6 @@ class UniversalPrinter<Variant<T...>> {
     std::size_t index;
   };
 };
-
-#endif  // GTEST_INTERNAL_HAS_VARIANT
 
 // UniversalPrintArray(begin, len, os) prints an array of 'len'
 // elements, starting at address 'begin'.

@@ -132,9 +132,6 @@ if(GTEST_HAS_ABSL)
     absl::flags_reflection
     absl::flags_usage
     absl::strings
-    absl::any
-    absl::optional
-    absl::variant
     re2::re2
   )
 endif()

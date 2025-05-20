@@ -151,10 +151,7 @@ cc_library(
             "@abseil-cpp//absl/flags:reflection",
             "@abseil-cpp//absl/flags:usage",
             "@abseil-cpp//absl/strings",
-            "@abseil-cpp//absl/types:any",
-            "@abseil-cpp//absl/types:optional",
-            "@abseil-cpp//absl/types:variant",
-            "@re2//:re2",
+            "@re2",
         ],
         "//conditions:default": [],
     }) + select({
@@ -174,8 +171,8 @@ cc_library(
 # `gtest`, but testonly. See guidance on `gtest` for when to use this.
 alias(
     name = "gtest_for_library",
-    actual = ":gtest",
     testonly = True,
+    actual = ":gtest",
 )
 
 # Implements main() for tests using gtest. Prefer to depend on `gtest` as well
