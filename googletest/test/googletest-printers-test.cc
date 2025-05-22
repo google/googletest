@@ -48,6 +48,7 @@
 #include <set>
 #include <sstream>
 #include <string>
+#include <string_view>
 #include <tuple>
 #include <unordered_map>
 #include <unordered_set>
@@ -65,7 +66,7 @@
 
 #if GTEST_INTERNAL_HAS_STD_SPAN
 #include <span>  // NOLINT
-#endif  // GTEST_INTERNAL_HAS_STD_SPAN
+#endif           // GTEST_INTERNAL_HAS_STD_SPAN
 
 #if GTEST_INTERNAL_HAS_COMPARE_LIB
 #include <compare>  // NOLINT
@@ -799,7 +800,7 @@ struct Foo {
 TEST(PrintPointerTest, MemberVariablePointer) {
   EXPECT_TRUE(HasPrefix(Print(&Foo::value),
                         Print(sizeof(&Foo::value)) + "-byte object "));
-  int Foo::*p = NULL;  // NOLINT
+  int Foo::* p = NULL;  // NOLINT
   EXPECT_TRUE(HasPrefix(Print(p), Print(sizeof(p)) + "-byte object "));
 }
 
@@ -926,12 +927,19 @@ TEST(PrintArrayTest, BigArray) {
             PrintArrayHelper(a));
 }
 
-// Tests printing ::string and ::std::string.
+// Tests printing ::std::string and ::string_view.
 
 // ::std::string.
 TEST(PrintStringTest, StringInStdNamespace) {
   const char s[] = "'\"?\\\a\b\f\n\0\r\t\v\x7F\xFF a";
   const ::std::string str(s, sizeof(s));
+  EXPECT_EQ("\"'\\\"?\\\\\\a\\b\\f\\n\\0\\r\\t\\v\\x7F\\xFF a\\0\"",
+            Print(str));
+}
+
+TEST(PrintStringTest, StringViewInStdNamespace) {
+  const char s[] = "'\"?\\\a\b\f\n\0\r\t\v\x7F\xFF a";
+  const ::std::string_view str(s, sizeof(s));
   EXPECT_EQ("\"'\\\"?\\\\\\a\\b\\f\\n\\0\\r\\t\\v\\x7F\\xFF a\\0\"",
             Print(str));
 }
@@ -953,12 +961,21 @@ TEST(PrintStringTest, StringAmbiguousHex) {
   EXPECT_EQ("\"!\\x5-!\"", Print(::std::string("!\x5-!")));
 }
 
-// Tests printing ::std::wstring.
+// Tests printing ::std::wstring and ::std::wstring_view.
 #if GTEST_HAS_STD_WSTRING
 // ::std::wstring.
 TEST(PrintWideStringTest, StringInStdNamespace) {
   const wchar_t s[] = L"'\"?\\\a\b\f\n\0\r\t\v\xD3\x576\x8D3\xC74D a";
   const ::std::wstring str(s, sizeof(s) / sizeof(wchar_t));
+  EXPECT_EQ(
+      "L\"'\\\"?\\\\\\a\\b\\f\\n\\0\\r\\t\\v"
+      "\\xD3\\x576\\x8D3\\xC74D a\\0\"",
+      Print(str));
+}
+
+TEST(PrintWideStringTest, StringViewInStdNamespace) {
+  const wchar_t s[] = L"'\"?\\\a\b\f\n\0\r\t\v\xD3\x576\x8D3\xC74D a";
+  const ::std::wstring_view str(s, sizeof(s) / sizeof(wchar_t));
   EXPECT_EQ(
       "L\"'\\\"?\\\\\\a\\b\\f\\n\\0\\r\\t\\v"
       "\\xD3\\x576\\x8D3\\xC74D a\\0\"",
@@ -983,6 +1000,12 @@ TEST(PrintStringTest, U8String) {
   EXPECT_EQ(str, str);  // Verify EXPECT_EQ compiles with this type.
   EXPECT_EQ("u8\"Hello, \\xE4\\xB8\\x96\\xE7\\x95\\x8C\"", Print(str));
 }
+
+TEST(PrintStringTest, U8StringView) {
+  std::u8string_view str = u8"Hello, 世界";
+  EXPECT_EQ(str, str);  // Verify EXPECT_EQ compiles with this type.
+  EXPECT_EQ("u8\"Hello, \\xE4\\xB8\\x96\\xE7\\x95\\x8C\"", Print(str));
+}
 #endif
 
 TEST(PrintStringTest, U16String) {
@@ -991,8 +1014,20 @@ TEST(PrintStringTest, U16String) {
   EXPECT_EQ("u\"Hello, \\x4E16\\x754C\"", Print(str));
 }
 
+TEST(PrintStringTest, U16StringView) {
+  std::u16string_view str = u"Hello, 世界";
+  EXPECT_EQ(str, str);  // Verify EXPECT_EQ compiles with this type.
+  EXPECT_EQ("u\"Hello, \\x4E16\\x754C\"", Print(str));
+}
+
 TEST(PrintStringTest, U32String) {
   std::u32string str = U"Hello, 🗺️";
+  EXPECT_EQ(str, str);  // Verify EXPECT_EQ compiles with this type
+  EXPECT_EQ("U\"Hello, \\x1F5FA\\xFE0F\"", Print(str));
+}
+
+TEST(PrintStringTest, U32StringView) {
+  std::u32string_view str = U"Hello, 🗺️";
   EXPECT_EQ(str, str);  // Verify EXPECT_EQ compiles with this type
   EXPECT_EQ("U\"Hello, \\x1F5FA\\xFE0F\"", Print(str));
 }
@@ -1456,7 +1491,7 @@ TEST(PrintReferenceTest, HandlesMemberFunctionPointer) {
 // Tests that the universal printer prints a member variable pointer
 // passed by reference.
 TEST(PrintReferenceTest, HandlesMemberVariablePointer) {
-  int Foo::*p = &Foo::value;  // NOLINT
+  int Foo::* p = &Foo::value;  // NOLINT
   EXPECT_TRUE(HasPrefix(PrintByRef(p), "@" + PrintPointer(&p) + " " +
                                            Print(sizeof(p)) + "-byte object "));
 }

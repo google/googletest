@@ -111,6 +111,7 @@
 #include <ostream>  // NOLINT
 #include <sstream>
 #include <string>
+#include <string_view>
 #include <tuple>
 #include <type_traits>
 #include <typeinfo>
@@ -248,8 +249,8 @@ struct StreamPrinter {
   // ADL (possibly involving implicit conversions).
   // (Use SFINAE via return type, because it seems GCC < 12 doesn't handle name
   // lookup properly when we do it in the template parameter list.)
-  static auto PrintValue(const T& value,
-                         ::std::ostream* os) -> decltype((void)(*os << value)) {
+  static auto PrintValue(const T& value, ::std::ostream* os)
+      -> decltype((void)(*os << value)) {
     // Call streaming operator found by ADL, possibly with implicit conversions
     // of the arguments.
     *os << value;
@@ -702,44 +703,63 @@ void PrintRawArrayTo(const T a[], size_t count, ::std::ostream* os) {
   }
 }
 
-// Overloads for ::std::string.
-GTEST_API_ void PrintStringTo(const ::std::string& s, ::std::ostream* os);
+// Overloads for ::std::string and ::std::string_view
+GTEST_API_ void PrintStringTo(::std::string_view s, ::std::ostream* os);
 inline void PrintTo(const ::std::string& s, ::std::ostream* os) {
   PrintStringTo(s, os);
 }
+inline void PrintTo(::std::string_view s, ::std::ostream* os) {
+  PrintStringTo(s, os);
+}
 
-// Overloads for ::std::u8string
+// Overloads for ::std::u8string and ::std::u8string_view
 #ifdef __cpp_lib_char8_t
-GTEST_API_ void PrintU8StringTo(const ::std::u8string& s, ::std::ostream* os);
+GTEST_API_ void PrintU8StringTo(::std::u8string_view s, ::std::ostream* os);
 inline void PrintTo(const ::std::u8string& s, ::std::ostream* os) {
+  PrintU8StringTo(s, os);
+}
+inline void PrintTo(::std::u8string_view s, ::std::ostream* os) {
   PrintU8StringTo(s, os);
 }
 #endif
 
-// Overloads for ::std::u16string
-GTEST_API_ void PrintU16StringTo(const ::std::u16string& s, ::std::ostream* os);
+// Overloads for ::std::u16string and ::std::u16string_view
+GTEST_API_ void PrintU16StringTo(::std::u16string_view s, ::std::ostream* os);
 inline void PrintTo(const ::std::u16string& s, ::std::ostream* os) {
   PrintU16StringTo(s, os);
 }
+inline void PrintTo(::std::u16string_view s, ::std::ostream* os) {
+  PrintU16StringTo(s, os);
+}
 
-// Overloads for ::std::u32string
-GTEST_API_ void PrintU32StringTo(const ::std::u32string& s, ::std::ostream* os);
+// Overloads for ::std::u32string and ::std::u32string_view
+GTEST_API_ void PrintU32StringTo(::std::u32string_view s, ::std::ostream* os);
 inline void PrintTo(const ::std::u32string& s, ::std::ostream* os) {
   PrintU32StringTo(s, os);
 }
+inline void PrintTo(::std::u32string_view s, ::std::ostream* os) {
+  PrintU32StringTo(s, os);
+}
 
-// Overloads for ::std::wstring.
+// Overloads for ::std::wstring and ::std::wstring_view
 #if GTEST_HAS_STD_WSTRING
-GTEST_API_ void PrintWideStringTo(const ::std::wstring& s, ::std::ostream* os);
+GTEST_API_ void PrintWideStringTo(::std::wstring_view s, ::std::ostream* os);
 inline void PrintTo(const ::std::wstring& s, ::std::ostream* os) {
+  PrintWideStringTo(s, os);
+}
+inline void PrintTo(::std::wstring_view s, ::std::ostream* os) {
   PrintWideStringTo(s, os);
 }
 #endif  // GTEST_HAS_STD_WSTRING
 
 #if GTEST_INTERNAL_HAS_STRING_VIEW
-// Overload for internal::StringView.
+// Overload for internal::StringView. Needed for build configurations where
+// internal::StringView is an alias for absl::string_view, but absl::string_view
+// is a distinct type from std::string_view.
+template <int&... ExplicitArgumentBarrier, typename T = internal::StringView,
+          std::enable_if_t<!std::is_same_v<T, ::std::string_view>, int> = 0>
 inline void PrintTo(internal::StringView sp, ::std::ostream* os) {
-  PrintTo(::std::string(sp), os);
+  PrintStringTo(sp, os);
 }
 #endif  // GTEST_INTERNAL_HAS_STRING_VIEW
 
