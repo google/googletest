@@ -7,15 +7,15 @@
 
 {% seo %}
     <link rel="stylesheet" href="{{ "/assets/css/style.css?v=" | append: site.github.build_revision | relative_url }}">
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-9PTP6FW1M5"></script>
     <script>
-      window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
-      ga('create', 'UA-197576187-1', { 'storage': 'none' });
-      ga('set', 'referrer', document.referrer.split('?')[0]);
-      ga('set', 'location', window.location.href.split('?')[0]);
-      ga('set', 'anonymizeIp', true);
-      ga('send', 'pageview');
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-9PTP6FW1M5');
     </script>
-    <script async src='https://www.google-analytics.com/analytics.js'></script>
   </head>
   <body>
     <div class="sidebar">
