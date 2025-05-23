@@ -152,6 +152,10 @@ GTEST_DECLARE_int32_(stack_trace_depth);
 // non-zero code otherwise. For use with an external test framework.
 GTEST_DECLARE_bool_(throw_on_failure);
 
+// When this flag is set, results are streamed to stdout
+// without pretty-print formatting
+GTEST_DECLARE_bool_(machine_results);
+
 // When this flag is set with a "host:port" string, on supported
 // platforms test results are streamed to the specified port on
 // the specified host machine.
