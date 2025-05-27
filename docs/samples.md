@@ -15,7 +15,7 @@ variety of googletest features.
     derived fixtures.
 *   Sample #6 demonstrates type-parameterized tests.
 *   Sample #7 teaches the basics of value-parameterized tests.
-*   Sample #8 shows using `Combine()` in value-parameterized tests.
+*   Sample #8 shows using `Combine()` and `CombineAs<R>()` in value-parameterized tests.
 *   Sample #9 shows use of the listener API to modify Google Test's console
     output and the use of its reflection API to inspect test results.
 *   Sample #10 shows use of the listener API to implement a primitive memory
