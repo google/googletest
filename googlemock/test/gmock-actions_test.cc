@@ -188,7 +188,7 @@ TEST(TypeTraits, IsInvocableRV) {
   struct C {
     int operator()() const { return 0; }
     void operator()(int) & {}
-    std::string operator()(int) && { return ""; };
+    std::string operator()(int) && { return ""; }
   };
 
   // The first overload is callable for const and non-const rvalues and lvalues.
