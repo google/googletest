@@ -57,6 +57,23 @@
 #include "gmock/internal/custom/gmock-port.h"
 #include "gtest/internal/gtest-port.h"
 
+namespace testing {
+namespace internal {
+
+// Returns the name of the environment variable corresponding to the
+// given flag. For example, FlagToEnvVar("foo") will return
+// "GMOCK_FOO".
+GTEST_API_ std::string FlagToEnvVar(const char* flag);
+
+// Reads and returns the string environment variable corresponding to
+// the given flag; if it's not set, returns default_value.
+GTEST_API_ const char* StringFromGMockEnv(
+    const char* flag,
+    const char* default_value);
+
+} // namespace internal
+} // namespace testing
+
 #if defined(GTEST_HAS_ABSL) && !defined(GTEST_NO_ABSL_FLAGS)
 #include "absl/flags/declare.h"
 #include "absl/flags/flag.h"
@@ -67,6 +84,9 @@
 #if defined(_MSC_VER) && _MSC_VER < 1900
 #error "At least Visual C++ 2015 (14.0) is required to compile Google Mock."
 #endif
+
+// Defines the flag prefixes for Google Mock.
+#define GMOCK_FLAG_PREFIX_ "gmock_"
 
 // Macro for referencing flags.  This is public as we want the user to
 // use this syntax to reference Google Mock flags.
