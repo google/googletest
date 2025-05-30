@@ -1929,6 +1929,22 @@ TEST(UniversalPrintTest, SmartPointers) {
             PrintToString(std::shared_ptr<void>(p.get(), [](void*) {})));
 }
 
+TEST(UniversalPrintTest, StringViewNonZeroTerminated) {
+  // Craft a non-ASCII UTF-8 input (to trigger a special path in
+  // `ConditionalPrintAsText`). Use array notation instead of the string
+  // literal syntax, to avoid placing a terminating 0 at the end of the input.
+  const char s[] = {'\357', '\243', '\242', 'X'};
+  // Only include the first 3 bytes in the `string_view` and leave the last one
+  // ('X') outside. This way, if the code tries to use `str.data()` with
+  // `strlen` instead of `str.size()`, it will include 'X' and cause a visible
+  // difference (in addition to ASAN tests detecting a buffer overflow due to
+  // the missing 0 at the end).
+  const ::std::string_view str(s, 3);
+  ::std::stringstream ss;
+  UniversalPrint(str, &ss);
+  EXPECT_EQ("\"\\xEF\\xA3\\xA2\"\n    As Text: \"\xEF\xA3\xA2\"", ss.str());
+}
+
 TEST(UniversalTersePrintTupleFieldsToStringsTestWithStd, PrintsEmptyTuple) {
   Strings result = UniversalTersePrintTupleFieldsToStrings(::std::make_tuple());
   EXPECT_EQ(0u, result.size());

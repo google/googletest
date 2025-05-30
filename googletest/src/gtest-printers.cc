@@ -516,7 +516,7 @@ bool IsValidUTF8(const char* str, size_t length) {
 void ConditionalPrintAsText(const char* str, size_t length, ostream* os) {
   if (!ContainsUnprintableControlCodes(str, length) &&
       IsValidUTF8(str, length)) {
-    *os << "\n    As Text: \"" << str << "\"";
+    *os << "\n    As Text: \"" << ::std::string_view(str, length) << "\"";
   }
 }
 
