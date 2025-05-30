@@ -62,7 +62,7 @@ Expected equality of these values:
     Which is: "\"Line\0 1\"\nLine 2"
   "Line 2"
 With diff:
-@@ -1,2 @@
+@@ -1,2 +1 @@
 -\"Line\0 1\"
  Line 2
 

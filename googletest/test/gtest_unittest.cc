@@ -3579,13 +3579,13 @@ TEST(EditDistance, TestSuites) {
       {__LINE__, "A", "A", " ", ""},
       {__LINE__, "ABCDE", "ABCDE", "     ", ""},
       // Simple adds.
-      {__LINE__, "X", "XA", " +", "@@ +1,2 @@\n X\n+A\n"},
-      {__LINE__, "X", "XABCD", " ++++", "@@ +1,5 @@\n X\n+A\n+B\n+C\n+D\n"},
+      {__LINE__, "X", "XA", " +", "@@ -1 +1,2 @@\n X\n+A\n"},
+      {__LINE__, "X", "XABCD", " ++++", "@@ -1 +1,5 @@\n X\n+A\n+B\n+C\n+D\n"},
       // Simple removes.
-      {__LINE__, "XA", "X", " -", "@@ -1,2 @@\n X\n-A\n"},
-      {__LINE__, "XABCD", "X", " ----", "@@ -1,5 @@\n X\n-A\n-B\n-C\n-D\n"},
+      {__LINE__, "XA", "X", " -", "@@ -1,2 +1 @@\n X\n-A\n"},
+      {__LINE__, "XABCD", "X", " ----", "@@ -1,5 +1 @@\n X\n-A\n-B\n-C\n-D\n"},
       // Simple replaces.
-      {__LINE__, "A", "a", "/", "@@ -1,1 +1,1 @@\n-A\n+a\n"},
+      {__LINE__, "A", "a", "/", "@@ -1 +1 @@\n-A\n+a\n"},
       {__LINE__, "ABCD", "abcd", "////",
        "@@ -1,4 +1,4 @@\n-A\n-B\n-C\n-D\n+a\n+b\n+c\n+d\n"},
       // Path finding.
