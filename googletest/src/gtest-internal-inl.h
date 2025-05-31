@@ -162,8 +162,9 @@ class GTestFlagSaver {
         GTEST_FLAG_GET(recreate_environments_when_repeating);
     shuffle_ = GTEST_FLAG_GET(shuffle);
     stack_trace_depth_ = GTEST_FLAG_GET(stack_trace_depth);
-    stream_result_to_ = GTEST_FLAG_GET(stream_result_to);
     throw_on_failure_ = GTEST_FLAG_GET(throw_on_failure);
+    machine_results_ = GTEST_FLAG_GET(machine_results);
+    stream_result_to_ = GTEST_FLAG_GET(stream_result_to);
   }
 
   // The d'tor is not virtual.  DO NOT INHERIT FROM THIS CLASS.
@@ -188,8 +189,9 @@ class GTestFlagSaver {
                    recreate_environments_when_repeating_);
     GTEST_FLAG_SET(shuffle, shuffle_);
     GTEST_FLAG_SET(stack_trace_depth, stack_trace_depth_);
-    GTEST_FLAG_SET(stream_result_to, stream_result_to_);
     GTEST_FLAG_SET(throw_on_failure, throw_on_failure_);
+    GTEST_FLAG_SET(machine_results, machine_results_);
+    GTEST_FLAG_SET(stream_result_to, stream_result_to_);
   }
 
  private:
@@ -213,8 +215,9 @@ class GTestFlagSaver {
   bool recreate_environments_when_repeating_;
   bool shuffle_;
   int32_t stack_trace_depth_;
-  std::string stream_result_to_;
   bool throw_on_failure_;
+  bool machine_results_;
+  std::string stream_result_to_;
 };
 
 // Converts a Unicode code point to a narrow string in UTF-8 encoding.

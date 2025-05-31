@@ -48,8 +48,9 @@ TEST(CommandLineFlagsTest, CanBeAccessedInCodeOnceGTestHIsIncluded) {
       GTEST_FLAG_GET(recreate_environments_when_repeating) ||
       GTEST_FLAG_GET(show_internal_stack_frames) || GTEST_FLAG_GET(shuffle) ||
       GTEST_FLAG_GET(stack_trace_depth) > 0 ||
-      GTEST_FLAG_GET(stream_result_to) != "unknown" ||
-      GTEST_FLAG_GET(throw_on_failure);
+      GTEST_FLAG_GET(throw_on_failure) ||
+      GTEST_FLAG_GET(machine_results) ||
+      GTEST_FLAG_GET(stream_result_to) != "unknown";
   EXPECT_TRUE(dummy || !dummy);  // Suppresses warning that dummy is unused.
 }
 
@@ -1618,8 +1619,9 @@ class GTestFlagSaverTest : public Test {
     GTEST_FLAG_SET(recreate_environments_when_repeating, true);
     GTEST_FLAG_SET(shuffle, false);
     GTEST_FLAG_SET(stack_trace_depth, kMaxStackTraceDepth);
-    GTEST_FLAG_SET(stream_result_to, "");
     GTEST_FLAG_SET(throw_on_failure, false);
+    GTEST_FLAG_SET(machine_results, false);
+    GTEST_FLAG_SET(stream_result_to, "");
   }
 
   // Restores the Google Test flags that the tests have modified.  This will
@@ -1648,8 +1650,9 @@ class GTestFlagSaverTest : public Test {
     EXPECT_TRUE(GTEST_FLAG_GET(recreate_environments_when_repeating));
     EXPECT_FALSE(GTEST_FLAG_GET(shuffle));
     EXPECT_EQ(kMaxStackTraceDepth, GTEST_FLAG_GET(stack_trace_depth));
-    EXPECT_STREQ("", GTEST_FLAG_GET(stream_result_to).c_str());
     EXPECT_FALSE(GTEST_FLAG_GET(throw_on_failure));
+    EXPECT_FALSE(GTEST_FLAG_GET(machine_results));
+    EXPECT_STREQ("", GTEST_FLAG_GET(stream_result_to).c_str());
 
     GTEST_FLAG_SET(also_run_disabled_tests, true);
     GTEST_FLAG_SET(break_on_failure, true);
@@ -1667,8 +1670,9 @@ class GTestFlagSaverTest : public Test {
     GTEST_FLAG_SET(recreate_environments_when_repeating, false);
     GTEST_FLAG_SET(shuffle, true);
     GTEST_FLAG_SET(stack_trace_depth, 1);
-    GTEST_FLAG_SET(stream_result_to, "localhost:1234");
     GTEST_FLAG_SET(throw_on_failure, true);
+    GTEST_FLAG_SET(machine_results, true);
+    GTEST_FLAG_SET(stream_result_to, "localhost:1234");
   }
 
  private:
@@ -5537,8 +5541,9 @@ struct Flags {
         recreate_environments_when_repeating(true),
         shuffle(false),
         stack_trace_depth(kMaxStackTraceDepth),
-        stream_result_to(""),
-        throw_on_failure(false) {}
+        throw_on_failure(false),
+        machine_results(false),
+        stream_result_to("") {}
 
   // Factory methods.
 
@@ -5664,6 +5669,22 @@ struct Flags {
     return flags;
   }
 
+  // Creates a Flags struct where the GTEST_FLAG(throw_on_failure) flag has
+  // the given value.
+  static Flags ThrowOnFailure(bool throw_on_failure) {
+    Flags flags;
+    flags.throw_on_failure = throw_on_failure;
+    return flags;
+  }
+
+  // Creates a Flags struct where GTEST_FLAG(machine_results) flag has
+  // the given value
+  static Flags MachineResults(bool machine_results) {
+    Flags flags;
+    flags.machine_results = machine_results;
+    return flags;
+  }
+
   // Creates a Flags struct where the GTEST_FLAG(stream_result_to) flag has
   // the given value.
   static Flags StreamResultTo(const char* stream_result_to) {
@@ -5672,13 +5693,6 @@ struct Flags {
     return flags;
   }
 
-  // Creates a Flags struct where the gtest_throw_on_failure flag has
-  // the given value.
-  static Flags ThrowOnFailure(bool throw_on_failure) {
-    Flags flags;
-    flags.throw_on_failure = throw_on_failure;
-    return flags;
-  }
 
   // These fields store the flag values.
   bool also_run_disabled_tests;
@@ -5696,8 +5710,9 @@ struct Flags {
   bool recreate_environments_when_repeating;
   bool shuffle;
   int32_t stack_trace_depth;
-  const char* stream_result_to;
   bool throw_on_failure;
+  bool machine_results;
+  const char* stream_result_to;
 };
 
 // Fixture for testing ParseGoogleTestFlagsOnly().
@@ -5720,8 +5735,9 @@ class ParseFlagsTest : public Test {
     GTEST_FLAG_SET(recreate_environments_when_repeating, true);
     GTEST_FLAG_SET(shuffle, false);
     GTEST_FLAG_SET(stack_trace_depth, kMaxStackTraceDepth);
-    GTEST_FLAG_SET(stream_result_to, "");
     GTEST_FLAG_SET(throw_on_failure, false);
+    GTEST_FLAG_SET(machine_results, false);
+    GTEST_FLAG_SET(stream_result_to, "");
   }
 
   // Asserts that two narrow or wide string arrays are equal.
@@ -5755,9 +5771,10 @@ class ParseFlagsTest : public Test {
               GTEST_FLAG_GET(recreate_environments_when_repeating));
     EXPECT_EQ(expected.shuffle, GTEST_FLAG_GET(shuffle));
     EXPECT_EQ(expected.stack_trace_depth, GTEST_FLAG_GET(stack_trace_depth));
+    EXPECT_EQ(expected.throw_on_failure, GTEST_FLAG_GET(throw_on_failure));
+    EXPECT_EQ(expected.machine_results, GTEST_FLAG_GET(machine_results));
     EXPECT_STREQ(expected.stream_result_to,
                  GTEST_FLAG_GET(stream_result_to).c_str());
-    EXPECT_EQ(expected.throw_on_failure, GTEST_FLAG_GET(throw_on_failure));
   }
 
   // Parses a command line (specified by argc1 and argv1), then
@@ -6195,16 +6212,6 @@ TEST_F(ParseFlagsTest, StackTraceDepth) {
   GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::StackTraceDepth(5), false);
 }
 
-TEST_F(ParseFlagsTest, StreamResultTo) {
-  const char* argv[] = {"foo.exe", "--gtest_stream_result_to=localhost:1234",
-                        nullptr};
-
-  const char* argv2[] = {"foo.exe", nullptr};
-
-  GTEST_TEST_PARSING_FLAGS_(argv, argv2,
-                            Flags::StreamResultTo("localhost:1234"), false);
-}
-
 // Tests parsing --gtest_throw_on_failure.
 TEST_F(ParseFlagsTest, ThrowOnFailureWithoutValue) {
   const char* argv[] = {"foo.exe", "--gtest_throw_on_failure", nullptr};
@@ -6231,6 +6238,22 @@ TEST_F(ParseFlagsTest, ThrowOnFailureTrue) {
   const char* argv2[] = {"foo.exe", nullptr};
 
   GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::ThrowOnFailure(true), false);
+}
+
+// Tests parsing --gtest_machine_results
+TEST_F(ParseFlagsTest, MachineResultsTrue) {
+  // TODO
+}
+
+// Tests parsing --gtest_stream_result_to flag that is set to localhost:1234
+TEST_F(ParseFlagsTest, StreamResultTo) {
+  const char* argv[] = {"foo.exe", "--gtest_stream_result_to=localhost:1234",
+                        nullptr};
+
+  const char* argv2[] = {"foo.exe", nullptr};
+
+  GTEST_TEST_PARSING_FLAGS_(argv, argv2,
+                            Flags::StreamResultTo("localhost:1234"), false);
 }
 
 // Tests parsing a bad --gtest_filter flag.
