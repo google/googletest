@@ -1949,25 +1949,50 @@ class TestWithParam : public Test, public WithParamInterface<T> {};
 // which is undefined.
 //
 // These macros evaluate their arguments exactly once.
+//
+// Define macro GTEST_DONT_DEFINE_{ASSERT|EXPECT}_STR* to 1 to omit the definition of
+// {EXPECT|ASSERT}_STR*, which clashes with some users' own code.
 
+#if !GTEST_DONT_DEFINE_EXPECT_STREQ
 #define EXPECT_STREQ(s1, s2) \
   EXPECT_PRED_FORMAT2(::testing::internal::CmpHelperSTREQ, s1, s2)
+#endif
+
+#if !GTEST_DONT_DEFINE_EXPECT_STRNE
 #define EXPECT_STRNE(s1, s2) \
   EXPECT_PRED_FORMAT2(::testing::internal::CmpHelperSTRNE, s1, s2)
+#endif  
+  
+#if !GTEST_DONT_DEFINE_EXPECT_STRCASEEQ
 #define EXPECT_STRCASEEQ(s1, s2) \
   EXPECT_PRED_FORMAT2(::testing::internal::CmpHelperSTRCASEEQ, s1, s2)
+#endif
+  
+#if !GTEST_DONT_DEFINE_EXPECT_STRCASENE
 #define EXPECT_STRCASENE(s1, s2) \
   EXPECT_PRED_FORMAT2(::testing::internal::CmpHelperSTRCASENE, s1, s2)
-
+#endif
+  
+#if !GTEST_DONT_DEFINE_ASSERT_STREQ
 #define ASSERT_STREQ(s1, s2) \
   ASSERT_PRED_FORMAT2(::testing::internal::CmpHelperSTREQ, s1, s2)
+#endif
+
+#if !GTEST_DONT_DEFINE_ASSERT_STRNE
 #define ASSERT_STRNE(s1, s2) \
   ASSERT_PRED_FORMAT2(::testing::internal::CmpHelperSTRNE, s1, s2)
+#endif
+
+#if !GTEST_DONT_DEFINE_ASSERT_STRCASEEQ
 #define ASSERT_STRCASEEQ(s1, s2) \
   ASSERT_PRED_FORMAT2(::testing::internal::CmpHelperSTRCASEEQ, s1, s2)
+#endif
+
+#if !GTEST_DONT_DEFINE_ASSERT_STRCASENE  
 #define ASSERT_STRCASENE(s1, s2) \
   ASSERT_PRED_FORMAT2(::testing::internal::CmpHelperSTRCASENE, s1, s2)
-
+#endif
+  
 // Macros for comparing floating-point numbers.
 //
 //    * {ASSERT|EXPECT}_FLOAT_EQ(val1, val2):
