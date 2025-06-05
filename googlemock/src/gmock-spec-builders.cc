@@ -293,7 +293,7 @@ void ReportUninterestingCall(CallReaction reaction, const std::string& msg) {
       Log(kWarning,
           msg +
               "\nNOTE: You can safely ignore the above warning unless this "
-              "call should not happen.  Do not suppress it by blindly adding "
+              "call should not happen.  Do not suppress it by adding "
               "an EXPECT_CALL() if you don't mean to enforce the call.  "
               "See "
               "https://github.com/google/googletest/blob/main/docs/"

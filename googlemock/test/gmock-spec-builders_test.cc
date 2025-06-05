@@ -2045,7 +2045,7 @@ class GMockVerboseFlagTest : public VerboseFlagPreservingFixture {
     NaggyMock<MockA> a;
     const std::string note =
         "NOTE: You can safely ignore the above warning unless this "
-        "call should not happen.  Do not suppress it by blindly adding "
+        "call should not happen.  Do not suppress it by adding "
         "an EXPECT_CALL() if you don't mean to enforce the call.  "
         "See "
         "https://github.com/google/googletest/blob/main/docs/"
