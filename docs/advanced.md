@@ -1940,6 +1940,21 @@ test case is linked in.
 Note that *any* test case linked in makes the program valid for the purpose of
 this check. In particular, even a disabled test case suffices.
 
+### Enforcing Running At Least One Test Case
+
+In addition to enforcing that tests are defined in the binary with
+`--gtest_fail_if_no_test_linked`, it is also possible to enforce that a test
+case was actually executed to ensure that resources are not consumed by tests
+that do nothing.
+
+To catch such optimization opportunities, run the test program with the
+`--gtest_fail_if_no_test_selected` flag or set the
+`GTEST_FAIL_IF_NO_TEST_SELECTED` environment variable to a value other than `0`.
+
+A test is considered selected if it begins to run, even if it is later skipped
+via `GTEST_SKIP`. Thus, `DISABLED` tests do not count as selected and neither do
+tests that are not matched by `--gtest_filter`.
+
 ### Repeating the Tests
 
 Once in a while you'll run into a test whose result is hit-or-miss. Perhaps it

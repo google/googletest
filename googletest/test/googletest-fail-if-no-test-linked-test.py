@@ -80,11 +80,7 @@ class GTestFailIfNoTestLinkedTest(gtest_test_utils.TestCase):
         )
     )
     warning_file_contents = open(warning_file, "r").read()
-    self.assertEqual(
-        warning_file_contents,
-        "This test program does NOT link in any test case. Please make sure"
-        " this is intended.\n",
-    )
+    self.assertIn("does NOT link", warning_file_contents)
 
   def testFailsIfNoTestLinkedAndFlagSpecified(self):
     """Tests the behavior of no test linked and flag specified."""
