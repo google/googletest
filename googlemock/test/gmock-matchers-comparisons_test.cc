@@ -622,15 +622,42 @@ struct IntReferenceWrapper {
   const int* value;
 };
 
+// Compared the contained values
 bool operator==(const IntReferenceWrapper& a, const IntReferenceWrapper& b) {
-  return a.value == b.value;
+  return *a.value == *b.value;
 }
 
-TEST(MatcherCastTest, ValueIsNotCopied) {
-  int n = 42;
-  Matcher<IntReferenceWrapper> m = MatcherCast<IntReferenceWrapper>(n);
-  // Verify that the matcher holds a reference to n, not to its temporary copy.
-  EXPECT_TRUE(m.Matches(n));
+TEST(MatcherCastTest, ValueIsCopied) {
+  {
+    // When an IntReferenceWrapper is passed.
+    int n = 42;
+    Matcher<IntReferenceWrapper> m =
+        MatcherCast<IntReferenceWrapper>(IntReferenceWrapper(n));
+    {
+      int value = 42;
+      EXPECT_TRUE(m.Matches(value));
+      value = 10;
+      EXPECT_FALSE(m.Matches(value));
+      // This changes the stored reference.
+      n = 10;
+      EXPECT_TRUE(m.Matches(value));
+    }
+  }
+
+  {
+    // When an int is passed.
+    int n = 42;
+    Matcher<IntReferenceWrapper> m = MatcherCast<IntReferenceWrapper>(n);
+    {
+      int value = 42;
+      EXPECT_TRUE(m.Matches(value));
+      value = 10;
+      EXPECT_FALSE(m.Matches(value));
+      // This does not change the stored int.
+      n = 10;
+      EXPECT_FALSE(m.Matches(value));
+    }
+  }
 }
 
 class Base {
