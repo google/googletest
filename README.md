@@ -14,7 +14,7 @@ GitHub Pages rather than directly in the repository.
 now available.
 
 The 1.17.x branch [requires at least
-C++17]((https://opensource.google/documentation/policies/cplusplus-support#c_language_standard).
+C++17](https://opensource.google/documentation/policies/cplusplus-support#c_language_standard).
 
 #### Continuous Integration
 
