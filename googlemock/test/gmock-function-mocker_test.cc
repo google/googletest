@@ -91,7 +91,7 @@ class FooInterface {
 
   virtual bool TakesNonConstReference(int& n) = 0;  // NOLINT
   virtual std::string TakesConstReference(const int& n) = 0;
-  virtual bool TakesConst(const int x) = 0;
+  virtual bool TakesConst(int x) = 0;
 
   virtual int OverloadedOnArgumentNumber() = 0;
   virtual int OverloadedOnArgumentNumber(int n) = 0;
