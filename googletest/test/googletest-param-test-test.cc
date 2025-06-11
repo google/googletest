@@ -633,22 +633,27 @@ TEST(CombineAsTest, NonDefaultConstructible) {
 }
 
 TEST(CombineAsTest, CopyConstructible) {
-  struct CopyConstructible {
+  class CopyConstructible {
+   public:
     CopyConstructible(const CopyConstructible& other) = default;
 
+    CopyConstructible(const int i_arg, std::string s_arg)
+        : i_(i_arg), s_(std::move(s_arg)) {}
+
     bool operator==(const CopyConstructible& other) const {
-      return x == other.x && s == other.s;
+      return i_ == other.i_ && s_ == other.s_;
     }
 
-    int x;
-    std::string s;
+   private:
+    int i_;
+    std::string s_;
   };
 
   static_assert(std::is_copy_constructible_v<CopyConstructible>);
   ParamGenerator<CopyConstructible> gen = testing::CombineAs<CopyConstructible>(
-      Values(CopyConstructible{0, "A"}, CopyConstructible{1, "B"}));
-  CopyConstructible expected_values[] = {CopyConstructible{0, "A"},
-                                         CopyConstructible{1, "B"}};
+      Values(CopyConstructible(0, "A"), CopyConstructible(1, "B")));
+  CopyConstructible expected_values[] = {CopyConstructible(0, "A"),
+                                         CopyConstructible(1, "B")};
   VerifyGenerator(gen, expected_values);
 }
 
