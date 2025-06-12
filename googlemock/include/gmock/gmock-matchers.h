@@ -3446,6 +3446,27 @@ auto UnpackStructImpl(const T& in, std::make_index_sequence<23>, char) {
   return std::tie(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u,
                   v, w);
 }
+template <typename T>
+auto UnpackStructImpl(const T& in, std::make_index_sequence<24>, char) {
+  const auto& [a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v,
+               w, x] = in;
+  return std::tie(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u,
+                  v, w, x);
+}
+template <typename T>
+auto UnpackStructImpl(const T& in, std::make_index_sequence<25>, char) {
+  const auto& [a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v,
+               w, x, y] = in;
+  return std::tie(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u,
+                  v, w, x, y);
+}
+template <typename T>
+auto UnpackStructImpl(const T& in, std::make_index_sequence<26>, char) {
+  const auto& [a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v,
+               w, x, y, z] = in;
+  return std::tie(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u,
+                  v, w, x, y, z);
+}
 #endif  // defined(__cpp_structured_bindings)
 
 template <size_t I, typename T>
