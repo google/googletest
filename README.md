@@ -13,8 +13,8 @@ GitHub Pages rather than directly in the repository.
 [Release 1.17.0](https://github.com/google/googletest/releases/tag/v1.17.0) is
 now available.
 
-The 1.17.x branch [requires at least
-C++17]((https://opensource.google/documentation/policies/cplusplus-support#c_language_standard).
+The 1.17.x branch
+[requires at least C++17](https://opensource.google/documentation/policies/cplusplus-support#c_language_standard).
 
 #### Continuous Integration
 
