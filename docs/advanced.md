@@ -1448,17 +1448,19 @@ are two cases to consider:
 To test them, we use the following special techniques:
 
 *   Both static functions and definitions/declarations in an unnamed namespace
-    are only visible within the same translation unit. To test them, you can
-    `#include` the entire `.cc` file being tested in your `*_test.cc` file.
-    (#including `.cc` files is not a good way to reuse code - you should not do
-    this in production code!)
+    are only visible within the same translation unit. To test them, move the
+    private code into the `foo::internal` namespace, where `foo` is the
+    namespace your project normally uses, and put the private declarations in a
+    `*-internal.h` file. Your production `.cc` files and your tests are allowed
+    to include this internal header, but your clients are not. This way, you can
+    fully test your internal implementation without leaking it to your clients.
 
-    However, a better approach is to move the private code into the
-    `foo::internal` namespace, where `foo` is the namespace your project
-    normally uses, and put the private declarations in a `*-internal.h` file.
-    Your production `.cc` files and your tests are allowed to include this
-    internal header, but your clients are not. This way, you can fully test your
-    internal implementation without leaking it to your clients.
+{: .callout .note}
+NOTE: It is also technically *possible* to `#include` the entire `.cc` file
+being tested in your `*_test.cc` file to test static functions and
+definitions/declarations in an unnamed namespace. However, this technique is
+**not recommended** by this documentation and it is only presented here for the
+sake of completeness.
 
 *   Private class members are only accessible from within the class or by
     friends. To access a class' private members, you can declare your test
