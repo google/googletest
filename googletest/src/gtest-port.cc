@@ -1078,7 +1078,7 @@ class CapturedStream {
                                             0,  // Generate unique file name.
                                             temp_file_path);
     GTEST_CHECK_(success != 0)
-        << "Unable to create a temporary file in " << temp_dir_path;
+        << "Unable to create a temporary file in " << temp_dir_path << ". Error Message: " << ::GetLastError();
     const int captured_fd = creat(temp_file_path, _S_IREAD | _S_IWRITE);
     GTEST_CHECK_(captured_fd != -1)
         << "Unable to open temporary file " << temp_file_path;
