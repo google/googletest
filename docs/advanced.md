@@ -1988,7 +1988,7 @@ If your test program contains
 [global set-up/tear-down](#global-set-up-and-tear-down) code, it will be
 repeated in each iteration as well, as the flakiness may be in it. To avoid
 repeating global set-up/tear-down, specify
-`--gtest_recreate_environments_when_repeating=false`{.nowrap}.
+`--gtest_recreate_environments_when_repeating=false`.
 
 You can also specify the repeat count by setting the `GTEST_REPEAT` environment
 variable.
