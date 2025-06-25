@@ -1,134 +1,119 @@
 # GoogleTest
 
-### Announcements
+**GoogleTest** is Google’s C++ test framework, designed for writing reliable and maintainable tests.
 
-#### Documentation Updates
+> 📄 **Documentation**: [https://google.github.io/googletest/](https://google.github.io/googletest/)  
+> 🚀 **Latest Release**: [v1.17.0](https://github.com/google/googletest/releases/tag/v1.17.0)  
+> ⚠️ **Minimum Requirement**: C++17  
+> ✅ **CI**: Built using Google’s internal systems  
+> 🔮 **Coming Soon**: Integration with [Abseil](https://github.com/abseil/abseil-cpp)
 
-Our documentation is now live on GitHub Pages at
-https://google.github.io/googletest/. We recommend browsing the documentation on
-GitHub Pages rather than directly in the repository.
+---
 
-#### Release 1.17.0
+## 📚 Table of Contents
 
-[Release 1.17.0](https://github.com/google/googletest/releases/tag/v1.17.0) is
-now available.
+- [Getting Started](#getting-started)
+- [Features](#features)
+- [Supported Platforms](#supported-platforms)
+- [Who’s Using GoogleTest?](#whos-using-googletest)
+- [Related Tools & Projects](#related-tools--projects)
+- [Contributing](#contributing)
 
-The 1.17.x branch
-[requires at least C++17](https://opensource.google/documentation/policies/cplusplus-support#c_language_standard).
+---
 
-#### Continuous Integration
+## Getting Started
 
-We use Google's internal systems for continuous integration.
+Visit the [GoogleTest User’s Guide](https://google.github.io/googletest/) for comprehensive documentation.
 
-#### Coming Soon
+We recommend starting with the [GoogleTest Primer](https://google.github.io/googletest/primer.html) to get a feel for writing your first tests.
 
-*   We are planning to take a dependency on
-    [Abseil](https://github.com/abseil/abseil-cpp).
+Instructions for building GoogleTest can be found in the [googletest/README.md](googletest/README.md) file.
 
-## Welcome to **GoogleTest**, Google's C++ test framework!
-
-This repository is a merger of the formerly separate GoogleTest and GoogleMock
-projects. These were so closely related that it makes sense to maintain and
-release them together.
-
-### Getting Started
-
-See the [GoogleTest User's Guide](https://google.github.io/googletest/) for
-documentation. We recommend starting with the
-[GoogleTest Primer](https://google.github.io/googletest/primer.html).
-
-More information about building GoogleTest can be found at
-[googletest/README.md](googletest/README.md).
+---
 
 ## Features
 
-*   xUnit test framework: \
-    Googletest is based on the [xUnit](https://en.wikipedia.org/wiki/XUnit)
-    testing framework, a popular architecture for unit testing
-*   Test discovery: \
-    Googletest automatically discovers and runs your tests, eliminating the need
-    to manually register your tests
-*   Rich set of assertions: \
-    Googletest provides a variety of assertions, such as equality, inequality,
-    exceptions, and more, making it easy to test your code
-*   User-defined assertions: \
-    You can define your own assertions with Googletest, making it simple to
-    write tests that are specific to your code
-*   Death tests: \
-    Googletest supports death tests, which verify that your code exits in a
-    certain way, making it useful for testing error-handling code
-*   Fatal and non-fatal failures: \
-    You can specify whether a test failure should be treated as fatal or
-    non-fatal with Googletest, allowing tests to continue running even if a
-    failure occurs
-*   Value-parameterized tests: \
-    Googletest supports value-parameterized tests, which run multiple times with
-    different input values, making it useful for testing functions that take
-    different inputs
-*   Type-parameterized tests: \
-    Googletest also supports type-parameterized tests, which run with different
-    data types, making it useful for testing functions that work with different
-    data types
-*   Various options for running tests: \
-    Googletest provides many options for running tests including running
-    individual tests, running tests in a specific order and running tests in
-    parallel
+GoogleTest offers a rich set of capabilities for testing C++ code:
+
+- **xUnit Framework**  
+  Follows the well-known [xUnit architecture](https://en.wikipedia.org/wiki/XUnit) for structuring tests.
+
+- **Automatic Test Discovery**  
+  Tests are automatically detected and executed—no manual registration required.
+
+- **Comprehensive Assertions**  
+  Includes a wide variety of assertions for testing equality, inequality, exceptions, boolean conditions, floating-point values, and more.
+
+- **Custom Assertions**  
+  Easily define your own assertions for application-specific checks.
+
+- **Death Tests**  
+  Validate that certain code paths cause the program to exit (useful for error handling).
+
+- **Fatal vs. Non-Fatal Failures**  
+  Choose whether a failure should abort the test or allow further execution.
+
+- **Value-Parameterized Tests**  
+  Run a test case multiple times with different input values.
+
+- **Type-Parameterized Tests**  
+  Run the same test logic over multiple data types.
+
+- **Flexible Execution**  
+  Run individual tests, filter tests by name, or run tests in parallel.
+
+---
 
 ## Supported Platforms
 
-GoogleTest follows Google's
-[Foundational C++ Support Policy](https://opensource.google/documentation/policies/cplusplus-support).
-See
-[this table](https://github.com/google/oss-policies-info/blob/main/foundational-cxx-support-matrix.md)
-for a list of currently supported versions of compilers, platforms, and build
-tools.
+GoogleTest adheres to Google’s [Foundational C++ Support Policy](https://opensource.google/documentation/policies/cplusplus-support).
 
-## Who Is Using GoogleTest?
+See the [support matrix](https://github.com/google/oss-policies-info/blob/main/foundational-cxx-support-matrix.md) for details on supported compilers, platforms, and tools.
 
-In addition to many internal projects at Google, GoogleTest is also used by the
-following notable projects:
+---
 
-*   The [Chromium projects](https://www.chromium.org/) (behind the Chrome
-    browser and Chrome OS).
-*   The [LLVM](https://llvm.org/) compiler.
-*   [Protocol Buffers](https://github.com/google/protobuf), Google's data
-    interchange format.
-*   The [OpenCV](https://opencv.org/) computer vision library.
+## Who’s Using GoogleTest?
 
-## Related Open Source Projects
+GoogleTest is widely adopted both inside and outside of Google. Notable users include:
 
-[GTest Runner](https://github.com/nholthaus/gtest-runner) is a Qt5 based
-automated test-runner and Graphical User Interface with powerful features for
-Windows and Linux platforms.
+- [Chromium Project](https://www.chromium.org/)
+- [LLVM](https://llvm.org/)
+- [Protocol Buffers](https://github.com/protocolbuffers/protobuf)
+- [OpenCV](https://opencv.org/)
 
-[GoogleTest UI](https://github.com/ospector/gtest-gbar) is a test runner that
-runs your test binary, allows you to track its progress via a progress bar, and
-displays a list of test failures. Clicking on one shows failure text. GoogleTest
-UI is written in C#.
+---
 
-[GTest TAP Listener](https://github.com/kinow/gtest-tap-listener) is an event
-listener for GoogleTest that implements the
-[TAP protocol](https://en.wikipedia.org/wiki/Test_Anything_Protocol) for test
-result output. If your test runner understands TAP, you may find it useful.
+## Related Tools & Projects
 
-[gtest-parallel](https://github.com/google/gtest-parallel) is a test runner that
-runs tests from your binary in parallel to provide significant speed-up.
+- 🎛 [GTest Runner](https://github.com/nholthaus/gtest-runner)  
+  Qt-based GUI for running tests on Windows and Linux.
 
-[GoogleTest Adapter](https://marketplace.visualstudio.com/items?itemName=DavidSchuldenfrei.gtest-adapter)
-is a VS Code extension allowing to view GoogleTest in a tree view and run/debug
-your tests.
+- 📊 [GoogleTest UI](https://github.com/ospector/gtest-gbar)  
+  C# GUI that runs tests, displays results, and shows failure details interactively.
 
-[C++ TestMate](https://github.com/matepek/vscode-catch2-test-adapter) is a VS
-Code extension allowing to view GoogleTest in a tree view and run/debug your
-tests.
+- 🧪 [GTest TAP Listener](https://github.com/kinow/gtest-tap-listener)  
+  Outputs test results in [TAP format](https://en.wikipedia.org/wiki/Test_Anything_Protocol) for integration with TAP-compatible tools.
 
-[Cornichon](https://pypi.org/project/cornichon/) is a small Gherkin DSL parser
-that generates stub code for GoogleTest.
+- ⚡ [gtest-parallel](https://github.com/google/gtest-parallel)  
+  A parallel test runner for speeding up test execution.
 
-## Contributing Changes
+- 🧩 [GoogleTest Adapter (VS Code)](https://marketplace.visualstudio.com/items?itemName=DavidSchuldenfrei.gtest-adapter)  
+  View and run tests in a tree view in Visual Studio Code.
 
-Please read
-[`CONTRIBUTING.md`](https://github.com/google/googletest/blob/main/CONTRIBUTING.md)
-for details on how to contribute to this project.
+- 🧪 [C++ TestMate (VS Code)](https://github.com/matepek/vscode-catch2-test-adapter)  
+  Advanced test runner extension with support for GoogleTest.
 
-Happy testing!
+- 🥒 [Cornichon](https://pypi.org/project/cornichon/)  
+  A Gherkin DSL parser that generates stub code for GoogleTest.
+
+---
+
+## Contributing
+
+We welcome contributions!
+
+Please read the [CONTRIBUTING.md](https://github.com/google/googletest/blob/main/CONTRIBUTING.md) guide for details on how to participate in development, report bugs, or submit pull requests.
+
+---
+
+**Happy testing!**
