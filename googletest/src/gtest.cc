@@ -6092,7 +6092,11 @@ bool UnitTestImpl::RunAllTests() {
       constexpr char kNoTestsSelectedMessage[] =
           "No tests were selected to run. Please make sure at least one test "
           "exists and is not disabled! If the test is sharded, you may have "
-          "defined more shards than test cases, which is wasteful.";
+          "defined more shards than test cases, which is wasteful. If you also "
+          "defined --gtest_filter, that filter is taken into account, so "
+          "shards with no matching test cases will hit this error. Either "
+          "disable sharding, set --gtest_fail_if_no_test_selected=false, or "
+          "remove the filter to resolve this error.";
       ColoredPrintf(GTestColor::kRed, "%s\n", kNoTestsSelectedMessage);
       return false;
     }
