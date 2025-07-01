@@ -653,14 +653,17 @@ class ParameterizedTestSuiteInfo : public ParameterizedTestSuiteInfoBase {
     int line;
   };
   typedef ::std::vector<InstantiationInfo> InstantiationContainer;
-
+  
   static bool IsValidParamName(const std::string& name) {
+  static constexpr validParamChars = "_-:/";
+
     // Check for empty string
     if (name.empty()) return false;
 
     // Check for invalid characters
     for (std::string::size_type index = 0; index < name.size(); ++index) {
-      if (!IsAlNum(name[index]) && name[index] != '_') return false;
+      if (!isalnum(name[index]) && validParamChars.find(name[index]) == std::string::npos)
+        return false;
     }
 
     return true;
