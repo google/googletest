@@ -2463,7 +2463,7 @@ void TestResult::Clear() {
   elapsed_time_ = 0;
 }
 
-// Returns true off the test part was skipped.
+// Returns true if the test part was skipped.
 static bool TestPartSkipped(const TestPartResult& result) {
   return result.skipped();
 }
@@ -3754,6 +3754,8 @@ void BriefUnitTestResultPrinter::OnTestPartResult(
   switch (result.type()) {
     // If the test part succeeded, we don't need to do anything.
     case TestPartResult::kSuccess:
+      return;
+    case TestPartResult::kSkip:
       return;
     default:
       // Print failure message from the assertion
