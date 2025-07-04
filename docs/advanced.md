@@ -349,7 +349,8 @@ void AbslStringify(Sink& sink, EnumWithStringify e) {
 {: .callout .note}
 Note: `AbslStringify()` utilizes a generic "sink" buffer to construct its
 string. For more information about supported operations on `AbslStringify()`'s
-sink, see go/abslstringify.
+sink, see
+[the `AbslStringify()` documentation](https://abseil.io/docs/cpp/guides/abslstringify).
 
 `AbslStringify()` can also use `absl::StrFormat`'s catch-all `%v` type specifier
 within its own format strings to perform type deduction. `Point` above could be
@@ -403,7 +404,8 @@ EXPECT_TRUE(IsCorrectPointIntVector(point_ints))
 ```
 
 For more details regarding `AbslStringify()` and its integration with other
-libraries, see go/abslstringify.
+libraries, see
+[the documentation](https://abseil.io/docs/cpp/guides/abslstringify).
 
 ## Regular Expression Syntax
 
