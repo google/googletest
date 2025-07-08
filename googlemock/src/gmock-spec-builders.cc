@@ -301,6 +301,8 @@ void ReportUninterestingCall(CallReaction reaction, const std::string& msg) {
               "knowing-when-to-expect-useoncall for details.\n",
           stack_frames_to_skip);
       break;
+    case kFail:
+      [[fallthrough]];
     default:  // FAIL
       Expect(false, nullptr, -1, msg);
   }
