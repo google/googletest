@@ -5477,10 +5477,13 @@ void UnitTest::AddTestPartResult(TestPartResult::Type result_type,
      (defined(__x86_64__) || defined(__i386__)))
       // with clang/gcc we can achieve the same effect on x86 by invoking int3
       asm("int3");
+#elif defined(__clang__) && __has_builtin(__builtin_debugtrap)
+  __builtin_debugtrap();
+#elif defined(__GNUC__)
+  raise(SIGTRAP);
 #elif GTEST_HAS_BUILTIN(__builtin_trap)
-      __builtin_trap();
-#elif defined(SIGTRAP)
-      raise(SIGTRAP);
+  __builtin_trap();
+
 #else
       // Dereference nullptr through a volatile pointer to prevent the compiler
       // from removing. We use this rather than abort() or __builtin_trap() for
