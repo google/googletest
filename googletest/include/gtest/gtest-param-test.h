@@ -174,6 +174,7 @@ TEST_P(DerivedTest, DoesBlah) {
 
 #endif  // 0
 
+#include <array>
 #include <functional>
 #include <iterator>
 #include <utility>
