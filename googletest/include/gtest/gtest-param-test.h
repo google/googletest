@@ -332,10 +332,11 @@ internal::ParamGenerator<typename Container::value_type> ValuesIn(
 // INSTANTIATE_TEST_SUITE_P(FloatingNumbers, BazTest, Values(1, 2, 3.5));
 //
 //
-template <typename... Ts>
-internal::ParamGenerator<std::common_type_t<Ts...>> Values(Ts... vs) {
-  return ValuesIn(
-      std::array<std::common_type_t<Ts...>, sizeof...(Ts)>{std::move(vs)...});
+template <typename... Ts,
+          typename TCommonType = std::common_type_t<std::decay_t<Ts>...>>
+internal::ParamGenerator<TCommonType> Values(Ts&&... vs) {
+  TCommonType values[sizeof...(Ts)] = {std::forward<Ts>(vs)...};
+  return ValuesIn(values);
 }
 
 // Bool() allows generating tests with parameters in a set of (false, true).
