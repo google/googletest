@@ -713,7 +713,7 @@ std::string UnitTestOptions::GetAbsolutePathToOutputFile() {
   const char* const gtest_output_flag = s.c_str();
 
   std::string format = GetOutputFormat();
-  if (format.empty()) format = std::string(kDefaultOutputFormat);
+  if (format.empty()) format = kDefaultOutputFormat;
 
   const char* const colon = strchr(gtest_output_flag, ':');
   if (colon == nullptr)
@@ -4355,8 +4355,8 @@ void XmlUnitTestResultPrinter::OutputXmlTestResult(::std::ostream* stream,
           internal::FormatCompilerIndependentFileLocation(part.file_name(),
                                                           part.line_number());
       const std::string summary = location + "\n" + part.summary();
-      *stream << "      <skipped message=\""
-              << EscapeXmlAttribute(summary.c_str()) << "\">";
+      *stream << "      <skipped message=\"" << EscapeXmlAttribute(summary)
+              << "\">";
       const std::string detail = location + "\n" + part.message();
       OutputXmlCDataSection(stream, RemoveInvalidXmlCharacters(detail).c_str());
       *stream << "</skipped>\n";
