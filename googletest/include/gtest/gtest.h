@@ -1626,7 +1626,7 @@ class GTEST_API_ AssertHelper {
  private:
   // We put our data in a struct so that the size of the AssertHelper class can
   // be as small as possible.  This is important because gcc is incapable of
-  // re-using stack space even for temporary variables, so every EXPECT_EQ
+  // reusing stack space even for temporary variables, so every EXPECT_EQ
   // reserves stack space for another AssertHelper.
   struct AssertHelperData {
     AssertHelperData(TestPartResult::Type t, const char* srcfile, int line_num,
