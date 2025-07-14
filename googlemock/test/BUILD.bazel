@@ -116,3 +116,10 @@ cc_test(
     srcs = ["gmock_test.cc"],
     deps = ["//:gtest_main"],
 )
+
+cc_test(
+    name = "gmock_env_test",
+    size = "small",
+    srcs = ["gmock_env_test.cc"],
+    deps = ["//:gtest_main"],
+)
