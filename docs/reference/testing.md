@@ -203,7 +203,7 @@ class MyParam {
 
 INSTANTIATE_TEST_SUITE_P(MyInstantiation, MyTestSuite,
     ConvertGenerator(Combine(Values(1, 1.2), Bool()),
-        [](const std::tuple<int i, bool>& t){
+        [](const std::tuple<int, bool>& t){
           const auto [i, b] = t;
           return MyParam(i, b);
         }));
