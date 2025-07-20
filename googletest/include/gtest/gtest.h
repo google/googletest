@@ -1597,7 +1597,7 @@ AssertionResult CmpHelperFloatingPointEQ(const char* lhs_expression,
   rhs_ss << rhs_value;
 
   return EqFailure(lhs_expression, rhs_expression,
-                   StringStreamToString(&lhs_ss), StringStreamToString(&rhs_ss),
+                   StringStreamToString(lhs_ss), StringStreamToString(rhs_ss),
                    false);
 }
 
