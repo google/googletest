@@ -61,15 +61,15 @@
 #include <vector>
 
 #include "gtest/gtest-assertion-result.h"  // IWYU pragma: export
-#include "gtest/gtest-death-test.h"  // IWYU pragma: export
-#include "gtest/gtest-matchers.h"  // IWYU pragma: export
-#include "gtest/gtest-message.h"  // IWYU pragma: export
-#include "gtest/gtest-param-test.h"  // IWYU pragma: export
-#include "gtest/gtest-printers.h"  // IWYU pragma: export
-#include "gtest/gtest-test-part.h"  // IWYU pragma: export
-#include "gtest/gtest-typed-test.h"  // IWYU pragma: export
-#include "gtest/gtest_pred_impl.h"  // IWYU pragma: export
-#include "gtest/gtest_prod.h"  // IWYU pragma: export
+#include "gtest/gtest-death-test.h"        // IWYU pragma: export
+#include "gtest/gtest-matchers.h"          // IWYU pragma: export
+#include "gtest/gtest-message.h"           // IWYU pragma: export
+#include "gtest/gtest-param-test.h"        // IWYU pragma: export
+#include "gtest/gtest-printers.h"          // IWYU pragma: export
+#include "gtest/gtest-test-part.h"         // IWYU pragma: export
+#include "gtest/gtest-typed-test.h"        // IWYU pragma: export
+#include "gtest/gtest_pred_impl.h"         // IWYU pragma: export
+#include "gtest/gtest_prod.h"              // IWYU pragma: export
 #include "gtest/internal/gtest-internal.h"
 #include "gtest/internal/gtest-string.h"
 
@@ -1661,7 +1661,8 @@ class GTEST_API_ AssertHelper {
 // the GetParam() method.
 //
 // Use it with one of the parameter generator defining functions, like Range(),
-// Values(), ValuesIn(), Bool(), Combine(), and ConvertGenerator<T>().
+// Values(), ValuesIn(), Bool(), Combine(), CombineAs<R>(), and
+// ConvertGenerator<T>().
 //
 // class FooTest : public ::testing::TestWithParam<int> {
 //  protected:
