@@ -1514,4 +1514,10 @@ class NeverThrown {
               test_suite_name, test_name)>);                                   \
   void GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)::TestBody()
 
+#ifdef __clang__
+#define GTEST_NODESTRUCTOR [[clang::no_destroy]]
+#else
+#define GTEST_NODESTRUCTOR
+#endif
+
 #endif  // GOOGLETEST_INCLUDE_GTEST_INTERNAL_GTEST_INTERNAL_H_
