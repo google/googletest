@@ -1,0 +1,22 @@
+name: OSSF Scorecard Weekly
+
+on:
+  schedule:
+    - cron: '0 0 * * 0' # Runs every Sunday at midnight UTC
+  workflow_dispatch:
+
+jobs:
+  ossf-scorecard:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Publish OSSF Scorecard badge to README
+        uses: ossf/scorecard-action@v2
+        with:
+          publish_results: true
+          badge: true
+          branch: main
+          readme_path: README.md
+          
