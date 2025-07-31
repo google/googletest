@@ -443,13 +443,6 @@ bool UntypedFunctionMockerBase::VerifyAndClearExpectationsLocked()
   return expectations_met;
 }
 
-static CallReaction intToCallReaction(int mock_behavior) {
-  if (mock_behavior >= kAllow && mock_behavior <= kFail) {
-    return static_cast<internal::CallReaction>(mock_behavior);
-  }
-  return kWarn;
-}
-
 }  // namespace internal
 
 // Class Mock.
@@ -546,6 +539,13 @@ class MockObjectRegistry {
 // Protected by g_gmock_mutex.
 MockObjectRegistry g_mock_object_registry;
 
+static internal::CallReaction intToCallReaction(int mock_behavior) {
+  if (mock_behavior >= internal::kAllow && mock_behavior <= internal::kFail) {
+    return static_cast<internal::CallReaction>(mock_behavior);
+  }
+  return internal::kWarn;
+}
+
 // Maps a mock object to the reaction Google Mock should have when an
 // uninteresting method is called.  Protected by g_gmock_mutex.
 std::unordered_map<uintptr_t, internal::CallReaction>&
@@ -601,8 +601,7 @@ internal::CallReaction Mock::GetReactionOnUninterestingCalls(
   internal::MutexLock l(&internal::g_gmock_mutex);
   return (UninterestingCallReactionMap().count(
               reinterpret_cast<uintptr_t>(mock_obj)) == 0)
-             ? internal::intToCallReaction(
-                   GMOCK_FLAG_GET(default_mock_behavior))
+             ? intToCallReaction(GMOCK_FLAG_GET(default_mock_behavior))
              : UninterestingCallReactionMap()[reinterpret_cast<uintptr_t>(
                    mock_obj)];
 }
