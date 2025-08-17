@@ -1866,6 +1866,13 @@ struct RethrowAction {
 //   EXPECT_CALL(mock, Bar(5, _, _)).WillOnce(Invoke(DistanceToOrigin));
 typedef internal::IgnoredValue Unused;
 
+// Deprecated single-argument DoAll.
+template <typename Action>
+GMOCK_DEPRECATE_AND_INLINE()
+typename std::decay<Action>::type DoAll(Action&& action) {
+  return std::forward<Action>(action);
+}
+
 // Creates an action that does actions a1, a2, ..., sequentially in
 // each invocation. All but the last action will have a readonly view of the
 // arguments.
@@ -2035,6 +2042,7 @@ PolymorphicAction<internal::SetErrnoAndReturnAction<T>> SetErrnoAndReturn(
 // wrapper objects.
 // This function exists for backwards compatibility.
 template <typename FunctionImpl>
+GMOCK_DEPRECATE_AND_INLINE()
 typename std::decay<FunctionImpl>::type Invoke(FunctionImpl&& function_impl) {
   return std::forward<FunctionImpl>(function_impl);
 }

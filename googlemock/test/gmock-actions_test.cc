@@ -1030,8 +1030,7 @@ void VoidFunc(bool /* flag */) {}
 
 TEST(DoDefaultDeathTest, DiesIfUsedInCompositeAction) {
   MockClass mock;
-  EXPECT_CALL(mock, IntFunc(_))
-      .WillRepeatedly(DoAll(Invoke(VoidFunc), DoDefault()));
+  EXPECT_CALL(mock, IntFunc(_)).WillRepeatedly(DoAll(VoidFunc, DoDefault()));
 
   // Ideally we should verify the error message as well.  Sadly,
   // EXPECT_DEATH() can only capture stderr, while Google Mock's
@@ -1282,7 +1281,7 @@ int ReturnOne() {
 
 TEST(IgnoreResultTest, MonomorphicAction) {
   g_done = false;
-  Action<void()> a = IgnoreResult(Invoke(ReturnOne));
+  Action<void()> a = IgnoreResult(&ReturnOne);
   a.Perform(std::make_tuple());
   EXPECT_TRUE(g_done);
 }
@@ -1297,7 +1296,7 @@ MyNonDefaultConstructible ReturnMyNonDefaultConstructible(double /* x */) {
 TEST(IgnoreResultTest, ActionReturningClass) {
   g_done = false;
   Action<void(int)> a =
-      IgnoreResult(Invoke(ReturnMyNonDefaultConstructible));  // NOLINT
+      IgnoreResult(&ReturnMyNonDefaultConstructible);  // NOLINT
   a.Perform(std::make_tuple(2));
   EXPECT_TRUE(g_done);
 }
@@ -1477,12 +1476,15 @@ TEST(DoAll, SupportsTypeErasedActions) {
   }
 }
 
-// A DoAll action should be convertible to a OnceAction, even when its component
-// sub-actions are user-provided types that define only an Action conversion
-// operator. If they supposed being called more than once then they also support
-// being called at most once.
+// A multi-action DoAll action should be convertible to a OnceAction, even when
+// its component sub-actions are user-provided types that define only an Action
+// conversion operator. If they supposed being called more than once then they
+// also support being called at most once.
+//
+// Single-arg DoAll just returns its argument, so will prefer the Action<F>
+// overload for WillOnce.
 TEST(DoAll, ConvertibleToOnceActionWithUserProvidedActionConversion) {
-  // Simplest case: only one sub-action.
+  // Final action.
   struct CustomFinal final {
     operator Action<int()>() {  // NOLINT
       return Return(17);
@@ -1493,17 +1495,7 @@ TEST(DoAll, ConvertibleToOnceActionWithUserProvidedActionConversion) {
     }
   };
 
-  {
-    OnceAction<int()> action = DoAll(CustomFinal{});
-    EXPECT_EQ(17, std::move(action).Call());
-  }
-
-  {
-    OnceAction<int(int, char)> action = DoAll(CustomFinal{});
-    EXPECT_EQ(19, std::move(action).Call(0, 0));
-  }
-
-  // It should also work with multiple sub-actions.
+  // Sub-actions.
   struct CustomInitial final {
     operator Action<void()>() {  // NOLINT
       return [] {};
@@ -1527,7 +1519,7 @@ TEST(DoAll, ConvertibleToOnceActionWithUserProvidedActionConversion) {
 
 // Tests using WithArgs and with an action that takes 1 argument.
 TEST(WithArgsTest, OneArg) {
-  Action<bool(double x, int n)> a = WithArgs<1>(Invoke(Unary));  // NOLINT
+  Action<bool(double x, int n)> a = WithArgs<1>(Unary);
   EXPECT_TRUE(a.Perform(std::make_tuple(1.5, -1)));
   EXPECT_FALSE(a.Perform(std::make_tuple(1.5, 1)));
 }
@@ -1535,7 +1527,7 @@ TEST(WithArgsTest, OneArg) {
 // Tests using WithArgs with an action that takes 2 arguments.
 TEST(WithArgsTest, TwoArgs) {
   Action<const char*(const char* s, double x, short n)> a =  // NOLINT
-      WithArgs<0, 2>(Invoke(Binary));
+      WithArgs<0, 2>(Binary);
   const char s[] = "Hello";
   EXPECT_EQ(s + 2, a.Perform(std::make_tuple(CharPtr(s), 0.5, Short(2))));
 }
@@ -1551,7 +1543,7 @@ struct ConcatAll {
 // Tests using WithArgs with an action that takes 10 arguments.
 TEST(WithArgsTest, TenArgs) {
   Action<std::string(const char*, const char*, const char*, const char*)> a =
-      WithArgs<0, 1, 2, 3, 2, 1, 0, 1, 2, 3>(Invoke(ConcatAll{}));
+      WithArgs<0, 1, 2, 3, 2, 1, 0, 1, 2, 3>(ConcatAll{});
   EXPECT_EQ("0123210123",
             a.Perform(std::make_tuple(CharPtr("0"), CharPtr("1"), CharPtr("2"),
                                       CharPtr("3"))));
@@ -1576,21 +1568,21 @@ TEST(WithArgsTest, NonInvokeAction) {
 // Tests using WithArgs to pass all original arguments in the original order.
 TEST(WithArgsTest, Identity) {
   Action<int(int x, char y, short z)> a =  // NOLINT
-      WithArgs<0, 1, 2>(Invoke(Ternary));
+      WithArgs<0, 1, 2>(Ternary);
   EXPECT_EQ(123, a.Perform(std::make_tuple(100, Char(20), Short(3))));
 }
 
 // Tests using WithArgs with repeated arguments.
 TEST(WithArgsTest, RepeatedArguments) {
   Action<int(bool, int m, int n)> a =  // NOLINT
-      WithArgs<1, 1, 1, 1>(Invoke(SumOf4));
+      WithArgs<1, 1, 1, 1>(SumOf4);
   EXPECT_EQ(4, a.Perform(std::make_tuple(false, 1, 10)));
 }
 
 // Tests using WithArgs with reversed argument order.
 TEST(WithArgsTest, ReversedArgumentOrder) {
   Action<const char*(short n, const char* input)> a =  // NOLINT
-      WithArgs<1, 0>(Invoke(Binary));
+      WithArgs<1, 0>(Binary);
   const char s[] = "Hello";
   EXPECT_EQ(s + 2, a.Perform(std::make_tuple(Short(2), CharPtr(s))));
 }
@@ -1598,14 +1590,14 @@ TEST(WithArgsTest, ReversedArgumentOrder) {
 // Tests using WithArgs with compatible, but not identical, argument types.
 TEST(WithArgsTest, ArgsOfCompatibleTypes) {
   Action<long(short x, char y, double z, char c)> a =  // NOLINT
-      WithArgs<0, 1, 3>(Invoke(Ternary));
+      WithArgs<0, 1, 3>(Ternary);
   EXPECT_EQ(123,
             a.Perform(std::make_tuple(Short(100), Char(20), 5.6, Char(3))));
 }
 
 // Tests using WithArgs with an action that returns void.
 TEST(WithArgsTest, VoidAction) {
-  Action<void(double x, char c, int n)> a = WithArgs<2, 1>(Invoke(VoidBinary));
+  Action<void(double x, char c, int n)> a = WithArgs<2, 1>(VoidBinary);
   g_done = false;
   a.Perform(std::make_tuple(1.5, 'a', 3));
   EXPECT_TRUE(g_done);
@@ -1872,9 +1864,8 @@ TEST(MockMethodTest, CanReturnMoveOnlyValue_Invoke) {
       [] { return std::make_unique<int>(42); });
   EXPECT_EQ(42, *mock.MakeUnique());
 
-  EXPECT_CALL(mock, MakeUnique()).WillRepeatedly(Invoke(UniquePtrSource));
-  EXPECT_CALL(mock, MakeVectorUnique())
-      .WillRepeatedly(Invoke(VectorUniquePtrSource));
+  EXPECT_CALL(mock, MakeUnique()).WillRepeatedly(UniquePtrSource);
+  EXPECT_CALL(mock, MakeVectorUnique()).WillRepeatedly(VectorUniquePtrSource);
   std::unique_ptr<int> result1 = mock.MakeUnique();
   EXPECT_EQ(19, *result1);
   std::unique_ptr<int> result2 = mock.MakeUnique();
@@ -1896,7 +1887,7 @@ TEST(MockMethodTest, CanTakeMoveOnlyValue) {
   });
   // DoAll() does not compile, since it would move from its arguments twice.
   // EXPECT_CALL(mock, TakeUnique(_, _))
-  //     .WillRepeatedly(DoAll(Invoke([](std::unique_ptr<int> j) {}),
+  //     .WillRepeatedly(DoAll([](std::unique_ptr<int> j) {})),
   //     Return(1)));
   EXPECT_CALL(mock, TakeUnique(testing::Pointee(7)))
       .WillOnce(Return(-7))

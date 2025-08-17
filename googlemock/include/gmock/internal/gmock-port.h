@@ -57,10 +57,19 @@
 #include "gmock/internal/custom/gmock-port.h"
 #include "gtest/internal/gtest-port.h"
 
-#if defined(GTEST_HAS_ABSL) && !defined(GTEST_NO_ABSL_FLAGS)
+#if defined(GTEST_HAS_ABSL)
+#include "absl/base/macros.h"
+
+#define GMOCK_DEPRECATE_AND_INLINE() ABSL_DEPRECATE_AND_INLINE()
+
+#if !defined(GTEST_NO_ABSL_FLAGS)
 #include "absl/flags/declare.h"
 #include "absl/flags/flag.h"
-#endif
+#endif  // !defined(GTEST_NO_ABSL_FLAGS)
+
+#else  // defined(GTEST_HAS_ABSL)
+#define GMOCK_DEPRECATE_AND_INLINE()
+#endif  // defined(GTEST_HAS_ABSL)
 
 // For MS Visual C++, check the compiler version. At least VS 2015 is
 // required to compile Google Mock.
