@@ -34,3 +34,8 @@ if(BUILD_GMOCK)
 else()
   add_subdirectory( googletest )
 endif()
+
+set(CPACK_VERBATIM_VARIABLES YES)
+set(CPACK_SOURCE_GENERATOR "TGZ")
+set(CPACK_SOURCE_IGNORE_FILES "build;/\\.git/;.*~")
+include(CPack)
