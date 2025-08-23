@@ -456,7 +456,8 @@ static CallReaction intToCallReaction(int mock_behavior) {
 
 namespace {
 
-typedef std::set<internal::UntypedFunctionMockerBase*> FunctionMockers;
+// Modern alias for FunctionMockers
+using FunctionMockers = std::set<internal::UntypedFunctionMockerBase*>;
 
 // The current state of a mock object.  Such information is needed for
 // detecting leaked mock objects and explicitly verifying a mock's
@@ -473,6 +474,8 @@ struct MockObjectState {
   ::std::string first_used_test;
   bool leakable;  // true if and only if it's OK to leak the object.
   FunctionMockers function_mockers;  // All registered methods of the object.
+
+  const std::type_info* mock_type;  // Dynamic mock type (if registered)
 };
 
 // A global registry holding the state of all mock objects that are
@@ -481,13 +484,22 @@ struct MockObjectState {
 // is removed from the registry in the mock object's destructor.
 class MockObjectRegistry {
  public:
-  // Maps a mock object (identified by its address) to its state.
-  typedef std::map<const void*, MockObjectState> StateMap;
+  // New alias for StateMap
+  using StateMap = std::map<const void*, MockObjectState>;
 
-  // This destructor will be called when a program exits, after all
-  // tests in it have been run.  By then, there should be no mock
-  // object alive.  Therefore we report any living object as test
-  // failure, unless the user explicitly asked us to ignore it.
+  // New method to register the type of mock
+  template <typename MockClass>
+  void RegisterMockType(const void* mock_obj) {
+    internal::MutexLock l(&internal::g_gmock_mutex);
+    StateMap::iterator it = states_.find(mock_obj);
+    if (it != states_.end()) {
+      it->second.mock_type = &typeid(*static_cast<const MockClass*>(mock_obj));
+    }
+  }
+
+  // This destructor will be called when the program exits, after all tests have run.
+  // At that point, there should be no live mock objects. Therefore, we report any still-live object as
+  // a test failure, unless the user has explicitly asked to ignore it.
   ~MockObjectRegistry() {
     if (!GMOCK_FLAG_GET(catch_leaked_mocks)) return;
     internal::MutexLock l(&internal::g_gmock_mutex);
@@ -498,9 +510,12 @@ class MockObjectRegistry {
       if (it->second.leakable)  // The user said it's fine to leak this object.
         continue;
 
-      // FIXME: Print the type of the leaked object.
-      // This can help the user identify the leaked object.
-      std::cout << "\n";
+      // Print the type of the leaked object, if available
+      std::string type_name = "<unknown>";
+      if (it->second.mock_type) {
+        type_name = it->second.mock_type->name();
+      }
+      ::std::cerr << "ERROR: Leaked mock object of type: " << type_name << "\n";
       const MockObjectState& state = it->second;
       std::cout << internal::FormatFileLocation(state.first_used_file,
                                                 state.first_used_line);
@@ -575,14 +590,14 @@ void Mock::AllowUninterestingCalls(uintptr_t mock_obj)
 // Tells Google Mock to warn the user about uninteresting calls on the
 // given mock object.
 void Mock::WarnUninterestingCalls(uintptr_t mock_obj)
-    GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex) {
+    GTEST_LOCK_EXCLUDED_(internal::gmock_mutex) {
   SetReactionOnUninterestingCalls(mock_obj, internal::kWarn);
 }
 
 // Tells Google Mock to fail uninteresting calls on the given mock
 // object.
 void Mock::FailUninterestingCalls(uintptr_t mock_obj)
-    GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex) {
+    GTEST_LOCK_EXCLUDED_(internal::gmock_mutex) {
   SetReactionOnUninterestingCalls(mock_obj, internal::kFail);
 }
 
