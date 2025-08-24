@@ -161,7 +161,6 @@ cc_library(
         # Otherwise, builds targeting Fuchsia would fail to compile.
         ":fuchsia": [
             "@fuchsia_sdk//pkg/fdio",
-            "@fuchsia_sdk//pkg/syslog",
             "@fuchsia_sdk//pkg/zx",
         ],
         "//conditions:default": [],
