@@ -2229,6 +2229,12 @@ using TimeInMillis = int64_t;  // Represents time in milliseconds.
 #define GTEST_FLAG(name) FLAGS_gtest_##name
 #endif  // !defined(GTEST_FLAG)
 
+#ifdef __clang__
+#define GMOCK_NODESTRUCTOR [[clang::no_destroy]]
+#else
+#define GMOCK_NODESTRUCTOR
+#endif
+
 // Pick a command line flags implementation.
 #ifdef GTEST_INTERNAL_HAS_ABSL_FLAGS
 
@@ -2271,7 +2277,8 @@ using TimeInMillis = int64_t;  // Represents time in milliseconds.
   static_assert(true, "no-op to require trailing semicolon")
 #define GTEST_DEFINE_string_(name, default_val, doc)         \
   namespace testing {                                        \
-  GTEST_API_ ::std::string GTEST_FLAG(name) = (default_val); \
+  GTEST_API_ GTEST_NODESTRUCTOR                              \
+  ::std::string GTEST_FLAG(name) = (default_val);            \
   }                                                          \
   static_assert(true, "no-op to require trailing semicolon")
 
