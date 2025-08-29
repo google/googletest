@@ -1112,10 +1112,11 @@ class GTEST_API_ TestEventListeners {
 // according to their specification.
 class GTEST_API_ UnitTest {
  public:
+  friend std::default_delete<UnitTest>;
   // Gets the singleton UnitTest object.  The first time this method
   // is called, a UnitTest object is constructed and returned.
   // Consecutive calls will return the same object.
-  static UnitTest* GetInstance();
+  static std::unique_ptr<UnitTest>& GetInstance();
 
   // Runs all tests in this UnitTest object and prints the result.
   // Returns 0 if successful, or 1 otherwise.
