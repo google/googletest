@@ -56,6 +56,16 @@ config_setting(
     constraint_values = ["@platforms//os:openbsd"],
 )
 
+config_setting(
+    name = "emscripten_without_threads",
+    constraint_values = [
+        "@platforms//os:emscripten",
+    ],
+    values = {
+        "features": "-use_pthreads",
+    },
+)
+
 # NOTE: Fuchsia is not an officially supported platform.
 config_setting(
     name = "fuchsia",
@@ -111,10 +121,12 @@ cc_library(
     copts = select({
         ":qnx": [],
         ":windows": [],
+        ":emscripten_without_threads": [],
         "//conditions:default": ["-pthread"],
     }),
     defines = select({
         ":has_absl": ["GTEST_HAS_ABSL=1"],
+        ":emscripten_without_threads": ["GTEST_HAS_PTHREAD=0"],
         "//conditions:default": [],
     }),
     features = select({
@@ -138,6 +150,7 @@ cc_library(
             "-lm",
             "-pthread",
         ],
+        ":emscripten_without_threads": [],
         "//conditions:default": ["-pthread"],
     }),
     deps = select({
