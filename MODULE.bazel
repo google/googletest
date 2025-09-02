@@ -41,7 +41,7 @@ module(
 
 bazel_dep(
     name = "abseil-cpp",
-    version = "20250512.0",
+    version = "20250814.0",
 )
 bazel_dep(
     name = "platforms",
