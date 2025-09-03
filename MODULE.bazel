@@ -58,6 +58,11 @@ bazel_dep(
     dev_dependency = True,
 )
 
+bazel_dep(
+    name = "rules_license",
+    version = "1.0.0",
+)
+
 # https://rules-python.readthedocs.io/en/stable/toolchains.html#library-modules-with-dev-only-python-usage
 python = use_extension(
     "@rules_python//python/extensions:python.bzl",
