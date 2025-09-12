@@ -288,8 +288,8 @@ TEST(FormatCompilerIndependentFileLocationTest, FormatsUknownFileAndLine) {
     defined(GTEST_OS_OPENBSD) || defined(GTEST_OS_GNU_HURD)
 void* ThreadFunc(void* data) {
   internal::Mutex* mutex = static_cast<internal::Mutex*>(data);
-  mutex->Lock();
-  mutex->Unlock();
+  mutex->lock();
+  mutex->unlock();
   return nullptr;
 }
 

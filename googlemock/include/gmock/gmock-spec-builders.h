@@ -1530,7 +1530,7 @@ class FunctionMocker<R(Args...)> final : public UntypedFunctionMockerBase {
     UntypedOnCallSpecs specs_to_delete;
     untyped_on_call_specs_.swap(specs_to_delete);
 
-    g_gmock_mutex.Unlock();
+    g_gmock_mutex.unlock();
     for (UntypedOnCallSpecs::const_iterator it = specs_to_delete.begin();
          it != specs_to_delete.end(); ++it) {
       delete static_cast<const OnCallSpec<F>*>(*it);
@@ -1538,7 +1538,7 @@ class FunctionMocker<R(Args...)> final : public UntypedFunctionMockerBase {
 
     // Lock the mutex again, since the caller expects it to be locked when we
     // return.
-    g_gmock_mutex.Lock();
+    g_gmock_mutex.lock();
   }
 
   // Returns the result of invoking this mock function with the given
