@@ -1076,13 +1076,7 @@ class CapturedStream {
 #else
     // There's no guarantee that a test has write access to the current
     // directory, so we create the temporary file in a temporary directory.
-    std::string name_template;
-
-#if defined(GTEST_OS_LINUX_ANDROID) || defined(GTEST_OS_IOS)
-    name_template = TempDir();
-#else
-    name_template = "/tmp/";
-#endif
+    std::string name_template = TempDir();
     name_template.append("gtest_captured_stream.XXXXXX");
 
     // mkstemp() modifies the string bytes in place, and does not go beyond the
