@@ -298,7 +298,7 @@ GTEST_API_ void Log(LogSeverity severity, const std::string& message,
 //
 class WithoutMatchers {
  private:
-  WithoutMatchers() {}
+  WithoutMatchers() = default;
   friend GTEST_API_ WithoutMatchers GetWithoutMatchers();
 };
 
