@@ -2144,7 +2144,7 @@ GTEST_DISABLE_MSC_DEPRECATED_POP_()
 #ifdef GTEST_OS_WINDOWS_MOBILE
 // Windows CE has no C library. The abort() function is used in
 // several places in Google Test. This implementation provides a reasonable
-// imitation of standard behaviour.
+// imitation of standard behavior.
 [[noreturn]] void Abort();
 #else
 [[noreturn]] inline void Abort() { abort(); }

@@ -49,8 +49,8 @@ for cmake_off_on in OFF ON; do
     -Dgmock_build_tests=ON \
     -Dcxx_no_exception=${cmake_off_on} \
     -Dcxx_no_rtti=${cmake_off_on}
-  time make -j$(nproc)
-  time ctest -j$(nproc) --output-on-failure
+  time make -j$(sysctl -n hw.ncpu)
+  time ctest -j$(sysctl -n hw.ncpu) --output-on-failure
 done
 
 # Test the Bazel build
