@@ -2,8 +2,8 @@ SETLOCAL ENABLEDELAYEDEXPANSION
 
 SET BAZEL_EXE=%KOKORO_GFILE_DIR%\bazel-8.2.1-windows-x86_64.exe
 
-SET PATH=C:\Python34;%PATH%
-SET BAZEL_PYTHON=C:\python34\python.exe
+SET PATH=C:\Python312;%PATH%
+SET BAZEL_PYTHON=C:\python312\python.exe
 SET BAZEL_SH=C:\tools\msys64\usr\bin\bash.exe
 SET CMAKE_BIN="cmake.exe"
 SET CTEST_BIN="ctest.exe"
@@ -23,9 +23,9 @@ CD %CMAKE_BUILD_PATH%
 %CMAKE_BIN% %GTEST_ROOT% ^
   -G "Visual Studio 17 2022" ^
   -DCMAKE_CXX_STANDARD=17 ^
-  -DPYTHON_EXECUTABLE:FILEPATH=c:\python37\python.exe ^
-  -DPYTHON_INCLUDE_DIR:PATH=c:\python37\include ^
-  -DPYTHON_LIBRARY:FILEPATH=c:\python37\lib\site-packages\pip ^
+  -DPYTHON_EXECUTABLE:FILEPATH=c:\python312\python.exe ^
+  -DPYTHON_INCLUDE_DIR:PATH=c:\python312\include ^
+  -DPYTHON_LIBRARY:FILEPATH=c:\python312\lib\site-packages\pip ^
   -Dgtest_build_samples=ON ^
   -Dgtest_build_tests=ON ^
   -Dgmock_build_tests=ON
