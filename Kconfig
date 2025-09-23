@@ -1,0 +1,11 @@
+mainmenu "Googletest"
+
+menu "Gtest configuration"
+
+  config GTEST
+    bool "Enable Gtest"
+    default n
+    help
+      Enables installation of googletest.
+
+endmenu
