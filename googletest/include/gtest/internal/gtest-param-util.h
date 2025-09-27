@@ -36,21 +36,25 @@
 #ifndef GOOGLETEST_INCLUDE_GTEST_INTERNAL_GTEST_PARAM_UTIL_H_
 #define GOOGLETEST_INCLUDE_GTEST_INTERNAL_GTEST_PARAM_UTIL_H_
 
-#include <ctype.h>
-
-#include <cassert>
-#include <functional>
-#include <iterator>
-#include <map>
-#include <memory>
-#include <ostream>
-#include <set>
-#include <string>
-#include <tuple>
-#include <type_traits>
-#include <unordered_map>
-#include <utility>
-#include <vector>
+#if defined(GTEST_BUILD_USING_STD_MODULE)
+    import std;
+#else
+    #include <ctype.h>
+    
+    #include <cassert>
+    #include <functional>
+    #include <iterator>
+    #include <map>
+    #include <memory>
+    #include <ostream>
+    #include <set>
+    #include <string>
+    #include <tuple>
+    #include <type_traits>
+    #include <unordered_map>
+    #include <utility>
+    #include <vector>
+#endif
 
 #include "gtest/gtest-printers.h"
 #include "gtest/gtest-test-part.h"

@@ -48,11 +48,15 @@
 #ifndef GOOGLETEST_INCLUDE_GTEST_GTEST_MESSAGE_H_
 #define GOOGLETEST_INCLUDE_GTEST_GTEST_MESSAGE_H_
 
-#include <limits>
-#include <memory>
-#include <ostream>
-#include <sstream>
-#include <string>
+#if defined(GTEST_BUILD_USING_STD_MODULE)
+    import std;
+#else
+    #include <limits>
+    #include <memory>
+    #include <ostream>
+    #include <sstream>
+    #include <string>
+#endif
 
 #include "gtest/internal/gtest-port.h"
 
