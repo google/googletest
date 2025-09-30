@@ -95,9 +95,9 @@ void ManyAsserts(int id) {
 
     // RecordProperty() should interact safely with other threads as well.
     // The shared_key forces property updates.
-    Test::RecordProperty(IdToKey(id, "string").c_str(), IdToString(id).c_str());
+    Test::RecordProperty(IdToKey(id, "string"), IdToString(id));
     Test::RecordProperty(IdToKey(id, "int").c_str(), id);
-    Test::RecordProperty("shared_key", IdToString(id).c_str());
+    Test::RecordProperty("shared_key", IdToString(id));
 
     // This assertion should fail kThreadCount times per thread.  It
     // is for testing whether Google Test can handle failed assertions in a

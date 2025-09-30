@@ -1699,7 +1699,7 @@ TEST(PrintToStringTest, ContainsNonLatin) {
   EXPECT_PRINT_TO_STRING_(non_ascii_str,
                           "\"\\xEC\\x98\\xA4\\xEC\\xA0\\x84 4:30\"\n"
                           "    As Text: \"오전 4:30\"");
-  non_ascii_str = ::std::string("From ä — ẑ");
+  non_ascii_str = "From ä — ẑ";
   EXPECT_PRINT_TO_STRING_(non_ascii_str,
                           "\"From \\xC3\\xA4 \\xE2\\x80\\x94 \\xE1\\xBA\\x91\""
                           "\n    As Text: \"From ä — ẑ\"");
