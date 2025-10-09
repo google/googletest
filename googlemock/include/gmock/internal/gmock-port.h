@@ -111,7 +111,8 @@
   static_assert(true, "no-op to require trailing semicolon")
 #define GMOCK_DEFINE_string_(name, default_val, doc)         \
   namespace testing {                                        \
-  GTEST_API_ ::std::string GMOCK_FLAG(name) = (default_val); \
+  GTEST_API_ GMOCK_NODESTRUCTOR                              \
+  ::std::string GMOCK_FLAG(name) = (default_val);            \
   }                                                          \
   static_assert(true, "no-op to require trailing semicolon")
 
