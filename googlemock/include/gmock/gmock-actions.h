@@ -1796,11 +1796,24 @@ struct SetArrayArgumentAction {
 };
 
 template <size_t k>
-struct DeleteArgAction {
+class DeleteArgAction {
+ public:
   template <typename... Args>
   void operator()(const Args&... args) const {
-    delete std::get<k>(std::tie(args...));
+    DoDelete(std::get<k>(std::tie(args...)));
   }
+
+ private:
+  template <typename T>
+  static void DoDelete(T* ptr) {
+    delete ptr;
+  }
+
+  template <typename T>
+  [[deprecated(
+      "DeleteArg<N> used for a non-pointer argument, it was likely migrated "
+      "to a smart pointer type. This action should be removed.")]]
+  static void DoDelete(T&) {}
 };
 
 template <typename Ptr>
