@@ -219,6 +219,13 @@ verified:
 Mock::AllowLeak(&mock_obj);
 ```
 
+Furthermore you can perform instant leak checks. This may help tracing down leaking
+mock objects when running a larger test suite:
+
+```cpp
+Mock::CheckLeakInstant();
+```
+
 ## Mock Classes
 
 gMock defines a convenient mock class template
