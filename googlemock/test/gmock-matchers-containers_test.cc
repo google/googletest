@@ -217,7 +217,7 @@ TEST(PointeeTest, ReferenceToNonConstRawPointer) {
 TEST(PointeeTest, SmartPointer) {
   const Matcher<std::unique_ptr<int>> m = Pointee(Ge(0));
 
-  std::unique_ptr<int> n(new int(1));
+  std::unique_ptr<int> n = std::make_unique<int>(1);
   EXPECT_TRUE(m.Matches(n));
 }
 
@@ -254,7 +254,7 @@ TEST(PointerTest, RawPointerToConst) {
 }
 
 TEST(PointerTest, SmartPointer) {
-  std::unique_ptr<int> n(new int(10));
+  std::unique_ptr<int> n = std::make_unique<int>(10);
   int* raw_n = n.get();
   const Matcher<std::unique_ptr<int>> m = Pointer(Eq(raw_n));
 
@@ -2796,7 +2796,7 @@ TEST(UnorderedPointwiseTest, WorksWithMoveOnly) {
 }
 
 TEST(PointeeTest, WorksOnMoveOnlyType) {
-  std::unique_ptr<int> p(new int(3));
+  std::unique_ptr<int> p = std::make_unique<int>(3);
   EXPECT_THAT(p, Pointee(Eq(3)));
   EXPECT_THAT(p, Not(Pointee(Eq(2))));
 }

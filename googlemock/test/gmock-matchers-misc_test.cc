@@ -79,7 +79,7 @@ TEST(AddressTest, Const) {
 }
 
 TEST(AddressTest, MatcherDoesntCopy) {
-  std::unique_ptr<int> n(new int(1));
+  std::unique_ptr<int> n = std::make_unique<int>(1);
   const Matcher<std::unique_ptr<int>> m = Address(Eq(&n));
 
   EXPECT_TRUE(m.Matches(n));
@@ -202,7 +202,7 @@ TEST(IsTrueTest, IsTrueIsFalse) {
   EXPECT_THAT(nullptr, Not(IsTrue()));
   EXPECT_THAT(nullptr, IsFalse());
   std::unique_ptr<int> null_unique;
-  std::unique_ptr<int> nonnull_unique(new int(0));
+  std::unique_ptr<int> nonnull_unique = std::make_unique<int>(0);
   EXPECT_THAT(null_unique, Not(IsTrue()));
   EXPECT_THAT(null_unique, IsFalse());
   EXPECT_THAT(nonnull_unique, IsTrue());
@@ -1665,7 +1665,7 @@ MATCHER(IsNotNull, "") { return arg != nullptr; }
 // Verifies that a matcher defined using MATCHER() can work on
 // move-only types.
 TEST(MatcherMacroTest, WorksOnMoveOnlyType) {
-  std::unique_ptr<int> p(new int(3));
+  std::unique_ptr<int> p = std::make_unique<int>(3);
   EXPECT_THAT(p, IsNotNull());
   EXPECT_THAT(std::unique_ptr<int>(), Not(IsNotNull()));
 }
@@ -1675,7 +1675,7 @@ MATCHER_P(UniquePointee, pointee, "") { return *arg == pointee; }
 // Verifies that a matcher defined using MATCHER_P*() can work on
 // move-only types.
 TEST(MatcherPMacroTest, WorksOnMoveOnlyType) {
-  std::unique_ptr<int> p(new int(3));
+  std::unique_ptr<int> p = std::make_unique<int>(3);
   EXPECT_THAT(p, UniquePointee(3));
   EXPECT_THAT(p, Not(UniquePointee(2)));
 }
