@@ -79,6 +79,11 @@ class IsEmptyMatcher {
     return MatchAndExplain(std::string(s), listener);
   }
 
+  // Matches C-style wide strings.
+  bool MatchAndExplain(const wchar_t* s, MatchResultListener* listener) const {
+    return MatchAndExplain(std::wstring(s), listener);
+  }
+
   // Describes what this matcher matches.
   void DescribeTo(std::ostream* os) const { *os << "is empty"; }
 
