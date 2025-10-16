@@ -33,7 +33,11 @@
 #ifndef GOOGLETEST_INCLUDE_GTEST_GTEST_SPI_H_
 #define GOOGLETEST_INCLUDE_GTEST_GTEST_SPI_H_
 
-#include <string>
+#if defined(GTEST_BUILD_USING_STD_MODULE)
+    import std;
+#else
+    #include <string>
+#endif
 
 #include "gtest/gtest.h"
 

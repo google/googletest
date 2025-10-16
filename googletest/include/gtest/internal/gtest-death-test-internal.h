@@ -41,8 +41,12 @@
 
 #include <stdio.h>
 
-#include <memory>
-#include <string>
+#if defined(GTEST_BUILD_USING_STD_MODULE)
+    import std;
+#else
+    #include <memory>
+    #include <string>
+#endif
 
 #include "gtest/gtest-matchers.h"
 #include "gtest/internal/gtest-internal.h"
