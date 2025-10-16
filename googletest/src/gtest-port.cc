@@ -1430,5 +1430,98 @@ const char* StringFromGTestEnv(const char* flag, const char* default_value) {
 #endif  // defined(GTEST_GET_STRING_FROM_ENV_)
 }
 
+#if GTEST_CAN_STREAM_RESULTS_
+
+namespace posix {
+
+#if GTEST_OS_WINDOWS
+
+#include <WinSock2.h>   // NOLINT
+#include <ws2tcpip.h>    // NOLINT
+#pragma comment(lib, "Ws2_32.lib")
+
+int SocketStartup() {
+  WSADATA winsockVersion{};
+
+  int startupError{ WSAStartup(MAKEWORD(2, 2), &winsockVersion) };
+
+  if (startupError)
+  {
+    return startupError;
+  }
+
+  if (LOBYTE(winsockVersion.wVersion) != 2 ||
+      HIBYTE(winsockVersion.wVersion) != 2)
+  {
+    return -1;
+  }
+
+  return 0;
+}
+
+int Socket(int domain, int type, int protocol)
+{
+  return static_cast<int>(socket(domain, type, protocol));
+}
+
+int GetAddrInfo(const char* nodename,
+                const char* servname,
+                const struct addrinfo* hints,
+                struct addrinfo** res)
+{
+  return getaddrinfo(nodename, servname, hints, res);
+}
+
+void FreeAddrInfo(struct addrinfo* ai)
+{
+  freeaddrinfo(ai);
+}
+
+int Connect(int sockfd, const struct sockaddr* addr, size_t addrlen)
+{
+  return connect(sockfd, addr, static_cast<int>(addrlen));
+}
+
+const char* GaiStrError(int errcode)
+{
+  return gai_strerrorA(errcode);
+}
+
+#else  // GTEST_OS_WINDOWS
+
+#include <arpa/inet.h>   // NOLINT
+#include <netdb.h>       // NOLINT
+#include <sys/socket.h>  // NOLINT
+#include <sys/types.h>   // NOLINT
+
+int SocketStartup() {
+  return 0;
+}
+
+int Socket(int domain, int type, int protocol) {
+  return socket(domain, type, protocol);
+}
+
+int GetAddrInfo(const char* nodename,
+                const char* servname,
+                const struct addrinfo* hints,
+                struct addrinfo** res) {
+  return getaddrinfo(nodename, servname, hints, res);
+}
+
+void FreeAddrInfo(struct addrinfo* ai) { freeaddrinfo(ai); }
+
+int Connect(int sockfd, const struct sockaddr* addr, size_t addrlen) {
+  return connect(sockfd, addr, static_cast<socklen_t>(addrlen));
+}
+
+const char* GaiStrError(int errcode) { return gai_strerror(errcode); }
+
+#endif  // GTEST_OS_WINDOWS
+
+}  // namespace posix
+
+#endif  // GTEST_CAN_STREAM_RESULTS_
+
 }  // namespace internal
 }  // namespace testing
