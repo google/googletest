@@ -346,7 +346,7 @@ TEST_F(TestForDeathTest, SwitchStatement) {
     ASSERT_DEATH(_Exit(1), "") << "exit in default switch handler";
 
   switch (0)
-  case 0:
+  default:
     EXPECT_DEATH(_Exit(1), "") << "exit in switch case";
 
   GTEST_DISABLE_MSC_WARNINGS_POP_()
@@ -1499,7 +1499,7 @@ TEST(ConditionalDeathMacrosSyntaxDeathTest, SwitchStatement) {
     ASSERT_DEATH_IF_SUPPORTED(_Exit(1), "") << "exit in default switch handler";
 
   switch (0)
-  case 0:
+  default:
     EXPECT_DEATH_IF_SUPPORTED(_Exit(1), "") << "exit in switch case";
 
   GTEST_DISABLE_MSC_WARNINGS_POP_()

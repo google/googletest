@@ -2829,6 +2829,8 @@ class PredicateFormatterFromMatcherTest : public ::testing::Test {
           // an "interested" listener; so this will return |true|, thus
           // simulating a flaky matcher.
           return listener->IsInterested();
+        default:
+          break;
       }
 
       GTEST_LOG_(FATAL) << "This should never be reached";

@@ -5777,7 +5777,7 @@ PolymorphicMatcher<internal::ExceptionMatcherImpl<Err>> ThrowsMessage(
   }                                                                           \
   template <typename arg_type>                                                \
   bool name##Matcher::gmock_Impl<arg_type>::MatchAndExplain(                  \
-      const arg_type& arg,                                                    \
+      [[maybe_unused]] const arg_type& arg,                                                    \
       [[maybe_unused]] ::testing::MatchResultListener* result_listener) const
 
 #define MATCHER_P(name, p0, description) \
@@ -5862,7 +5862,7 @@ PolymorphicMatcher<internal::ExceptionMatcherImpl<Err>> ThrowsMessage(
   template <typename arg_type>                                                 \
   bool full_name<GMOCK_INTERNAL_MATCHER_TYPE_PARAMS(args)>::                   \
       gmock_Impl<arg_type>::MatchAndExplain(                                   \
-          const arg_type& arg,                                                 \
+          [[maybe_unused]] const arg_type& arg,                                                 \
           [[maybe_unused]] ::testing::MatchResultListener* result_listener)    \
           const
 
