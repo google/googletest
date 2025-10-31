@@ -770,7 +770,8 @@ TEST_P(AllOfTestP, ExplainsResult) {
   // Failed match.  The first matcher, which failed, needs to
   // explain.
   m = AllOf(GreaterThan(10), GreaterThan(20));
-  EXPECT_EQ("which is 5 less than 10", Explain(m, 5));
+  EXPECT_EQ("which is 5 less than 10, and which is 15 less than 20",
+            Explain(m, 5));
 
   // Failed match.  The second matcher, which failed, needs to
   // explain.  Since it doesn't given an explanation, the matcher text is

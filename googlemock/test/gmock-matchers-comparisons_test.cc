@@ -2389,22 +2389,19 @@ PolymorphicMatcher<DivisibleByImpl> DivisibleBy(int n) {
   return MakePolymorphicMatcher(DivisibleByImpl(n));
 }
 
-// Tests that when AllOf() fails, only the first failing matcher is
-// asked to explain why.
+// Tests that when AllOf() fails, all failing matchers are asked to explain why.
 TEST(ExplainMatchResultTest, AllOf_False_False) {
   const Matcher<int> m = AllOf(DivisibleBy(4), DivisibleBy(3));
-  EXPECT_EQ("which is 1 modulo 4", Explain(m, 5));
+  EXPECT_EQ("which is 1 modulo 4, and which is 2 modulo 3", Explain(m, 5));
 }
 
-// Tests that when AllOf() fails, only the first failing matcher is
-// asked to explain why.
+// Tests that when AllOf() fails, all failing matchers are asked to explain why.
 TEST(ExplainMatchResultTest, AllOf_False_True) {
   const Matcher<int> m = AllOf(DivisibleBy(4), DivisibleBy(3));
   EXPECT_EQ("which is 2 modulo 4", Explain(m, 6));
 }
 
-// Tests that when AllOf() fails, only the first failing matcher is
-// asked to explain why.
+// Tests that when AllOf() fails, all failing matchers are asked to explain why.
 TEST(ExplainMatchResultTest, AllOf_True_False) {
   const Matcher<int> m = AllOf(Ge(1), DivisibleBy(3));
   EXPECT_EQ("which is 2 modulo 3", Explain(m, 5));
