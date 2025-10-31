@@ -900,15 +900,16 @@ using ::testing::Not;
 
 Matchers are function objects, and parametrized matchers can be composed just
 like any other function. However because their types can be long and rarely
-provide meaningful information, it can be easier to express them with C++14
-generic lambdas to avoid specifying types. For example,
+provide meaningful information, it can be easier to express them with template
+parameters and `auto`. For example,
 
 ```cpp
 using ::testing::Contains;
 using ::testing::Property;
 
-inline constexpr auto HasFoo = [](const auto& f) {
-  return Property("foo", &MyClass::foo, Contains(f));
+template <typename SubMatcher>
+inline constexpr auto HasFoo(const SubMatcher& sub_matcher) {
+  return Property("foo", &MyClass::foo, Contains(sub_matcher));
 };
 ...
   EXPECT_THAT(x, HasFoo("blah"));
