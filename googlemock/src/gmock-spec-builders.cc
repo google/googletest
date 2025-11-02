@@ -456,6 +456,10 @@ static CallReaction intToCallReaction(int mock_behavior) {
 
 namespace {
 
+class MockObjectRegistry;
+bool ReportMockObjectRegistryLeaks(MockObjectRegistry const& reg,
+                                   std::string& msg);
+
 typedef std::set<internal::UntypedFunctionMockerBase*> FunctionMockers;
 
 // The current state of a mock object.  Such information is needed for
@@ -485,49 +489,19 @@ class MockObjectRegistry {
   typedef std::map<const void*, MockObjectState> StateMap;
 
   // This destructor will be called when a program exits, after all
-  // tests in it have been run.  By then, there should be no mock
-  // object alive.  Therefore we report any living object as test
+  // tests in it have been run. By then, there should be no mock
+  // object alive. Therefore we report any living object as test
   // failure, unless the user explicitly asked us to ignore it.
   ~MockObjectRegistry() {
-    if (!GMOCK_FLAG_GET(catch_leaked_mocks)) return;
     internal::MutexLock l(&internal::g_gmock_mutex);
-
-    int leaked_count = 0;
-    for (StateMap::const_iterator it = states_.begin(); it != states_.end();
-         ++it) {
-      if (it->second.leakable)  // The user said it's fine to leak this object.
-        continue;
-
-      // FIXME: Print the type of the leaked object.
-      // This can help the user identify the leaked object.
-      std::cout << "\n";
-      const MockObjectState& state = it->second;
-      std::cout << internal::FormatFileLocation(state.first_used_file,
-                                                state.first_used_line);
-      std::cout << " ERROR: this mock object";
-      if (!state.first_used_test.empty()) {
-        std::cout << " (used in test " << state.first_used_test_suite << "."
-                  << state.first_used_test << ")";
-      }
-      std::cout << " should be deleted but never is. Its address is @"
-                << it->first << ".";
-      leaked_count++;
-    }
-    if (leaked_count > 0) {
-      std::cout << "\nERROR: " << leaked_count << " leaked mock "
-                << (leaked_count == 1 ? "object" : "objects")
-                << " found at program exit. Expectations on a mock object are "
-                   "verified when the object is destructed. Leaking a mock "
-                   "means that its expectations aren't verified, which is "
-                   "usually a test bug. If you really intend to leak a mock, "
-                   "you can suppress this error using "
-                   "testing::Mock::AllowLeak(mock_object), or you may use a "
-                   "fake or stub instead of a mock.\n";
-      std::cout.flush();
-      ::std::cerr.flush();
+    std::string msg{};
+    if (!ReportMockObjectRegistryLeaks(*this, msg)) {
       // RUN_ALL_TESTS() has already returned when this destructor is
       // called.  Therefore we cannot use the normal Google Test
       // failure reporting mechanism.
+      std::cout << msg;
+      std::cout.flush();
+      ::std::cerr.flush();
 #ifdef GTEST_OS_QURT
       qurt_exception_raise_fatal();
 #else
@@ -537,11 +511,67 @@ class MockObjectRegistry {
     }
   }
 
+  StateMap const& states() const { return states_; }
   StateMap& states() { return states_; }
 
  private:
   StateMap states_;
 };
+
+// Checks the given MockObjectRegistry for leaks (i.e. MockObjectStates objects
+// which are still in the given MockObjectRegistry and are not marked as
+// leakable) and returns a report in msg. Furthermore it returns false if leaks
+// were determined and true otherwise.
+// NOTE: It is the callers job to make calls
+// on "reg" safe, e.g. locking its mutex (if there is any).
+bool ReportMockObjectRegistryLeaks(MockObjectRegistry const& reg,
+                                   std::string& msg) {
+  // In case user specified to ignore leaks via a cl flag return true.
+  if (!GMOCK_FLAG_GET(catch_leaked_mocks)) return true;
+
+  typedef std::map<const void*, MockObjectState> StateMap;
+
+  int leaked_count = 0;
+  for (StateMap::const_iterator it = reg.states().begin();
+       it != reg.states().end(); ++it) {
+    if (it->second.leakable)  // The user said it's fine to leak this object.
+      continue;
+
+    // FIXME: Print the type of the leaked object.
+    // This can help the user identify the leaked object.
+    msg += "\n";
+    const MockObjectState& state = it->second;
+    msg += internal::FormatFileLocation(state.first_used_file,
+                                        state.first_used_line);
+    msg += " ERROR: this mock object";
+    if (!state.first_used_test.empty()) {
+      msg += " (used in test " + state.first_used_test_suite + "." +
+             state.first_used_test + ")";
+    }
+    msg += " should be deleted but never is. Its address is @";
+    std::ostringstream oss;
+    oss << it->first;
+    std::string address = oss.str();
+    msg += address + ".";
+
+    leaked_count++;
+  }
+  if (leaked_count > 0) {
+    msg += "\nERROR: " + std::to_string(leaked_count) + " leaked mock " +
+           (leaked_count == 1 ? "object" : "objects") +
+           " found at program exit. Expectations on a mock object are "
+           "verified when the object is destructed. Leaking a mock "
+           "means that its expectations aren't verified, which is "
+           "usually a test bug. If you really intend to leak a mock, "
+           "you can suppress this error using "
+           "testing::Mock::AllowLeak(mock_object), or you may use a "
+           "fake or stub instead of a mock.\n";
+
+    return false;
+  }
+
+  return true;
+}
 
 // Protected by g_gmock_mutex.
 MockObjectRegistry g_mock_object_registry;
@@ -613,6 +643,23 @@ void Mock::AllowLeak(const void* mock_obj)
     GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex) {
   internal::MutexLock l(&internal::g_gmock_mutex);
   g_mock_object_registry.states()[mock_obj].leakable = true;
+}
+
+// Tells Google Mock to instantly check for leftover mock objects and report
+// them if there are.
+void Mock::CheckLeakInstant(void)
+    GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex) {
+  internal::MutexLock l(&internal::g_gmock_mutex);
+
+  std::string msg{};
+  // Check for leftover mock objects at this point.
+  if (!ReportMockObjectRegistryLeaks(g_mock_object_registry, msg)) {
+    // If there are leftover (leaked) mock objects, fail the current test and
+    // report all leaks.
+    auto const& first_state = g_mock_object_registry.states().begin();
+    testing::internal::Expect(false, first_state->second.first_used_file,
+                              first_state->second.first_used_line, msg);
+  }
 }
 
 // Verifies and clears all expectations on the given mock object.  If

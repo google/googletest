@@ -96,4 +96,46 @@ TEST(LeakTest, CatchesMultipleLeakedMockObjects) {
   exit(0);
 }
 
+TEST(LeakTest, InstantNoLeak) {
+  MockFoo* foo = new MockFoo;
+
+  EXPECT_CALL(*foo, DoThis());
+  foo->DoThis();
+
+  delete foo;
+  // Since foo is properly deleted instant leak check should not see a leaked
+  // mock object and therefore not fail the test.
+  testing::Mock::CheckLeakInstant();
+}
+
+TEST(LeakTest, InstantLeak) {
+  MockFoo* foo = new MockFoo;
+
+  EXPECT_CALL(*foo, DoThis());
+  foo->DoThis();
+
+  // At this point foo is still allocated. Calling the instant leak check should
+  // detect it and fail the test.
+  testing::Mock::CheckLeakInstant();
+
+  // Free foo in order to not fail the end of program leak check.
+  delete foo;
+}
+
+TEST(LeakTest, InstantNoLeakAllowed) {
+  MockFoo* foo = new MockFoo;
+  testing::Mock::AllowLeak(foo);
+
+  EXPECT_CALL(*foo, DoThis());
+  foo->DoThis();
+
+  // At this point foo is still allocated However since we made foo a leakable
+  // mock object with AllowLeak() the instant leak check should ignore it and
+  // pass the test.
+  testing::Mock::CheckLeakInstant();
+
+  // Free foo in order to not fail the end of program leak check.
+  delete foo;
+}
+
 }  // namespace
