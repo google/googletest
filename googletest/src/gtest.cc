@@ -6088,15 +6088,17 @@ bool UnitTestImpl::RunAllTests() {
         repeater->OnEnvironmentsTearDownEnd(*parent_);
       }
     } else if (GTEST_FLAG_GET(fail_if_no_test_selected)) {
-      // If there were no tests to run, bail if we were requested to be strict.
+      // If there were no tests to run, bail if we were requested to be
+      // strict.
       constexpr char kNoTestsSelectedMessage[] =
-          "No tests were selected to run. Please make sure at least one test "
-          "exists and is not disabled! If the test is sharded, you may have "
-          "defined more shards than test cases, which is wasteful. If you also "
-          "defined --gtest_filter, that filter is taken into account, so "
-          "shards with no matching test cases will hit this error. Either "
-          "disable sharding, set --gtest_fail_if_no_test_selected=false, or "
-          "remove the filter to resolve this error.";
+          "No tests ran. Check that tests exist and are not disabled or "
+          "filtered out.\n\n"
+          "For sharded runs, this error indicates an empty shard. This can "
+          "happen if you have more shards than tests, or if --gtest_filter "
+          "leaves a shard with no tests.\n\n"
+          "To permit empty shards (e.g., when debugging with a filter), "
+          "specify \n"
+          "--gtest_fail_if_no_test_selected=false.";
       ColoredPrintf(GTestColor::kRed, "%s\n", kNoTestsSelectedMessage);
       return false;
     }
