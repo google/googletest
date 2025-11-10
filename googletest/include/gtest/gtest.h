@@ -982,6 +982,14 @@ class TestEventListener {
 
   // Fired after all test activities have ended.
   virtual void OnTestProgramEnd(const UnitTest& unit_test) = 0;
+
+  // Fired before the test scope enter.
+  virtual void OnScopedTraceEnter(const UnitTest& /*unit_test*/,
+                                  const char* /*file*/, int /*line*/,
+                                  std::string /*message*/) {}
+
+  // Fired after the test scope exit.
+  virtual void OnScopedTraceExit(const UnitTest& /*unit_test*/) {}
 };
 
 // The convenience class for users who need to override just one or two
@@ -1061,6 +1069,7 @@ class GTEST_API_ TestEventListeners {
  private:
   friend class TestSuite;
   friend class TestInfo;
+  friend class UnitTest;
   friend class internal::DefaultGlobalTestPartResultReporter;
   friend class internal::NoExecDeathTest;
   friend class internal::TestEventListenersAccessor;

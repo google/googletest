@@ -250,6 +250,48 @@ TEST(SCOPED_TRACETest, CanBeRepeated) {
                 << "contain trace point A, B, and D.";
 }
 
+class MyScopedTraceTestListener : public ::testing::EmptyTestEventListener {
+  void OnScopedTraceEnter(const testing::UnitTest& unit_test, const char* file,
+                          int line, std::string message) override {
+    const auto* test_info = unit_test.current_test_info();
+    printf("scoped trace enter test: %s line: %d message: %s.\n",
+           test_info->name(), line, message.c_str());
+  }
+
+  void OnScopedTraceExit(const testing::UnitTest& unit_test) override {
+    printf("scoped trace exit test: %s.\n",
+           unit_test.current_test_info()->name());
+  }
+};
+
+// Tests that multiple SCOPED_TRACEs can be used in the same scope.
+TEST(SCOPED_TRACEWithListenerTest, CanBeRepeated) {
+  MyScopedTraceTestListener* listener = new MyScopedTraceTestListener;
+  ::testing::UnitTest::GetInstance()->listeners().Append(listener);
+  {
+    printf("(expected to fail)\n");
+    SCOPED_TRACE("A");
+    ADD_FAILURE()
+        << "This failure is expected, and should contain trace point A.";
+
+    SCOPED_TRACE("B");
+    ADD_FAILURE()
+        << "This failure is expected, and should contain trace point A and B.";
+
+    {
+      SCOPED_TRACE("C");
+      ADD_FAILURE() << "This failure is expected, and should "
+                    << "contain trace point A, B, and C.";
+    }
+
+    SCOPED_TRACE("D");
+    ADD_FAILURE() << "This failure is expected, and should "
+                  << "contain trace point A, B, and D.";
+  };
+  ::testing::UnitTest::GetInstance()->listeners().Release(listener);
+  delete listener;
+}
+
 #ifdef GTEST_IS_THREADSAFE
 // Tests that SCOPED_TRACE()s can be used concurrently from multiple
 // threads.  Namely, an assertion should be affected by
