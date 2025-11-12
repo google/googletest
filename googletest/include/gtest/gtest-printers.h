@@ -104,20 +104,24 @@
 #ifndef GOOGLETEST_INCLUDE_GTEST_GTEST_PRINTERS_H_
 #define GOOGLETEST_INCLUDE_GTEST_GTEST_PRINTERS_H_
 
-#include <any>
-#include <functional>
-#include <memory>
-#include <optional>
-#include <ostream>  // NOLINT
-#include <sstream>
-#include <string>
-#include <string_view>
-#include <tuple>
-#include <type_traits>
-#include <typeinfo>
-#include <utility>
-#include <variant>
-#include <vector>
+#if defined(GTEST_BUILD_USING_STD_MODULE)
+    import std;
+#else
+    #include <any>
+    #include <functional>
+    #include <memory>
+    #include <optional>
+    #include <ostream>  // NOLINT
+    #include <sstream>
+    #include <string>
+    #include <string_view>
+    #include <tuple>
+    #include <type_traits>
+    #include <typeinfo>
+    #include <utility>
+    #include <variant>
+    #include <vector>
+#endif
 
 #ifdef GTEST_HAS_ABSL
 #include "absl/strings/has_absl_stringify.h"
@@ -127,11 +131,15 @@
 #include "gtest/internal/gtest-port.h"
 
 #if GTEST_INTERNAL_HAS_STD_SPAN
-#include <span>  // NOLINT
+#if !defined(GTEST_BUILD_USING_STD_MODULE)
+    #include <span>  // NOLINT
+#endif
 #endif           // GTEST_INTERNAL_HAS_STD_SPAN
 
 #if GTEST_INTERNAL_HAS_COMPARE_LIB
-#include <compare>  // NOLINT
+#if !defined(GTEST_BUILD_USING_STD_MODULE)
+    #include <compare>  // NOLINT
+#endif
 #endif              // GTEST_INTERNAL_HAS_COMPARE_LIB
 
 namespace testing {
