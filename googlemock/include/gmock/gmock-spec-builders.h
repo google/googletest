@@ -1467,7 +1467,7 @@ class FunctionMocker<R(Args...)> final : public UntypedFunctionMockerBase {
   // function have been satisfied.  If not, it will report Google Test
   // non-fatal failures for the violations.
   ~FunctionMocker() override GTEST_LOCK_EXCLUDED_(g_gmock_mutex) {
-    MutexLock l(&g_gmock_mutex);
+    MutexLock l(g_gmock_mutex);
     VerifyAndClearExpectationsLocked();
     Mock::UnregisterLocked(this);
     ClearDefaultActionsLocked();
@@ -1646,7 +1646,7 @@ class FunctionMocker<R(Args...)> final : public UntypedFunctionMockerBase {
       GTEST_LOCK_EXCLUDED_(g_gmock_mutex) {
     const ArgumentTuple& args =
         *static_cast<const ArgumentTuple*>(untyped_args);
-    MutexLock l(&g_gmock_mutex);
+    MutexLock l(g_gmock_mutex);
     TypedExpectation<F>* exp = this->FindMatchingExpectationLocked(args);
     if (exp == nullptr) {  // A match wasn't found.
       this->FormatUnexpectedCallMessageLocked(args, what, why);

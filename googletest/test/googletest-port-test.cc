@@ -308,7 +308,7 @@ TEST(GetThreadCountTest, ReturnsCorrectValue) {
 
     internal::Mutex mutex;
     {
-      internal::MutexLock lock(&mutex);
+      internal::MutexLock lock(mutex);
       pthread_attr_t attr;
       ASSERT_EQ(0, pthread_attr_init(&attr));
       ASSERT_EQ(0, pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE));
@@ -1028,7 +1028,9 @@ TEST(MutexDeathTest, AssertHeldShouldAssertWhenNotLocked) {
   EXPECT_DEATH_IF_SUPPORTED(
       {
         Mutex m;
-        { MutexLock lock(&m); }
+        {
+          MutexLock lock(m);
+        }
         m.AssertHeld();
       },
       "thread .*hold");
@@ -1036,13 +1038,13 @@ TEST(MutexDeathTest, AssertHeldShouldAssertWhenNotLocked) {
 
 TEST(MutexTest, AssertHeldShouldNotAssertWhenLocked) {
   Mutex m;
-  MutexLock lock(&m);
+  MutexLock lock(m);
   m.AssertHeld();
 }
 
 class AtomicCounterWithMutex {
  public:
-  explicit AtomicCounterWithMutex(Mutex* mutex)
+  explicit AtomicCounterWithMutex(Mutex& mutex)
       : value_(0), mutex_(mutex), random_(42) {}
 
   void Increment() {
@@ -1083,7 +1085,7 @@ class AtomicCounterWithMutex {
 
  private:
   volatile int value_;
-  Mutex* const mutex_;  // Protects value_.
+  Mutex& mutex_;  // Protects value_.
   Random random_;
 };
 
@@ -1094,7 +1096,7 @@ void CountingThreadFunc(pair<AtomicCounterWithMutex*, int> param) {
 // Tests that the mutex only lets one thread at a time to lock it.
 TEST(MutexTest, OnlyOneThreadCanLockAtATime) {
   Mutex mutex;
-  AtomicCounterWithMutex locked_counter(&mutex);
+  AtomicCounterWithMutex locked_counter(mutex);
 
   typedef ThreadWithParam<pair<AtomicCounterWithMutex*, int> > ThreadType;
   const int kCycleCount = 20;

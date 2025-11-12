@@ -1086,14 +1086,14 @@ void DefaultPerThreadTestPartResultReporter::ReportTestPartResult(
 // Returns the global test part result reporter.
 TestPartResultReporterInterface*
 UnitTestImpl::GetGlobalTestPartResultReporter() {
-  internal::MutexLock lock(&global_test_part_result_reporter_mutex_);
+  internal::MutexLock lock(global_test_part_result_reporter_mutex_);
   return global_test_part_result_reporter_;
 }
 
 // Sets the global test part result reporter.
 void UnitTestImpl::SetGlobalTestPartResultReporter(
     TestPartResultReporterInterface* reporter) {
-  internal::MutexLock lock(&global_test_part_result_reporter_mutex_);
+  internal::MutexLock lock(global_test_part_result_reporter_mutex_);
   global_test_part_result_reporter_ = reporter;
 }
 
@@ -2347,7 +2347,7 @@ void TestResult::RecordProperty(const std::string& xml_element,
   if (!ValidateTestProperty(xml_element, test_property)) {
     return;
   }
-  internal::MutexLock lock(&test_properties_mutex_);
+  internal::MutexLock lock(test_properties_mutex_);
   const std::vector<TestProperty>::iterator property_with_matching_key =
       std::find_if(test_properties_.begin(), test_properties_.end(),
                    internal::TestPropertyKeyIs(test_property.key()));
@@ -5088,7 +5088,7 @@ std::string OsStackTraceGetter::CurrentStackTrace(int max_depth, int skip_count)
 
   void* caller_frame = nullptr;
   {
-    MutexLock lock(&mutex_);
+    MutexLock lock(mutex_);
     caller_frame = caller_frame_;
   }
 
@@ -5127,7 +5127,7 @@ void OsStackTraceGetter::UponLeavingGTest() GTEST_LOCK_EXCLUDED_(mutex_) {
     caller_frame = nullptr;
   }
 
-  MutexLock lock(&mutex_);
+  MutexLock lock(mutex_);
   caller_frame_ = caller_frame;
 #endif  // GTEST_HAS_ABSL
 }
@@ -5390,13 +5390,13 @@ void UnitTest::UponLeavingGTest() {
 
 // Sets the TestSuite object for the test that's currently running.
 void UnitTest::set_current_test_suite(TestSuite* a_current_test_suite) {
-  internal::MutexLock lock(&mutex_);
+  internal::MutexLock lock(mutex_);
   impl_->set_current_test_suite(a_current_test_suite);
 }
 
 // Sets the TestInfo object for the test that's currently running.
 void UnitTest::set_current_test_info(TestInfo* a_current_test_info) {
-  internal::MutexLock lock(&mutex_);
+  internal::MutexLock lock(mutex_);
   impl_->set_current_test_info(a_current_test_info);
 }
 
@@ -5435,7 +5435,7 @@ void UnitTest::AddTestPartResult(TestPartResult::Type result_type,
   Message msg;
   msg << message;
 
-  internal::MutexLock lock(&mutex_);
+  internal::MutexLock lock(mutex_);
   if (!impl_->gtest_trace_stack().empty()) {
     msg << "\n" << GTEST_NAME_ << " trace:";
 
@@ -5618,7 +5618,7 @@ const char* UnitTest::original_working_dir() const {
 // or NULL if no test is running.
 const TestSuite* UnitTest::current_test_suite() const
     GTEST_LOCK_EXCLUDED_(mutex_) {
-  internal::MutexLock lock(&mutex_);
+  internal::MutexLock lock(mutex_);
   return impl_->current_test_suite();
 }
 
@@ -5626,7 +5626,7 @@ const TestSuite* UnitTest::current_test_suite() const
 #ifndef GTEST_REMOVE_LEGACY_TEST_CASEAPI_
 const TestCase* UnitTest::current_test_case() const
     GTEST_LOCK_EXCLUDED_(mutex_) {
-  internal::MutexLock lock(&mutex_);
+  internal::MutexLock lock(mutex_);
   return impl_->current_test_suite();
 }
 #endif
@@ -5635,7 +5635,7 @@ const TestCase* UnitTest::current_test_case() const
 // or NULL if no test is running.
 const TestInfo* UnitTest::current_test_info() const
     GTEST_LOCK_EXCLUDED_(mutex_) {
-  internal::MutexLock lock(&mutex_);
+  internal::MutexLock lock(mutex_);
   return impl_->current_test_info();
 }
 
@@ -5659,13 +5659,13 @@ UnitTest::~UnitTest() { delete impl_; }
 // Google Test trace stack.
 void UnitTest::PushGTestTrace(const internal::TraceInfo& trace)
     GTEST_LOCK_EXCLUDED_(mutex_) {
-  internal::MutexLock lock(&mutex_);
+  internal::MutexLock lock(mutex_);
   impl_->gtest_trace_stack().push_back(trace);
 }
 
 // Pops a trace from the per-thread Google Test trace stack.
 void UnitTest::PopGTestTrace() GTEST_LOCK_EXCLUDED_(mutex_) {
-  internal::MutexLock lock(&mutex_);
+  internal::MutexLock lock(mutex_);
   impl_->gtest_trace_stack().pop_back();
 }
 
