@@ -73,7 +73,7 @@ class TemplatedCopyable {
   TemplatedCopyable() = default;
 
   template <typename U>
-  TemplatedCopyable(const U& other) {}  // NOLINT
+  TemplatedCopyable(const U&) {}  // NOLINT
 };
 
 class FooInterface {
