@@ -66,8 +66,8 @@ fi
 
 # Use Bazel Vendor mode to reduce reliance on external dependencies.
 if [[ ${KOKORO_GFILE_DIR:-} ]] && [[ -f "${KOKORO_GFILE_DIR}/distdir/googletest_vendor.tar.gz" ]]; then
-  tar -xf "${KOKORO_GFILE_DIR}/distdir/googletest_vendor.tar.gz" -C "${TMP}/"
-  BAZEL_EXTRA_ARGS="--vendor_dir=\"${TMP}/googletest_vendor\" ${BAZEL_EXTRA_ARGS:-}"
+  tar -xf "${KOKORO_GFILE_DIR}/distdir/googletest_vendor.tar.gz" -C "${HOME}/"
+  BAZEL_EXTRA_ARGS="--vendor_dir=${HOME}/googletest_vendor ${BAZEL_EXTRA_ARGS:-}"
 fi
 
 cd ${GTEST_ROOT}

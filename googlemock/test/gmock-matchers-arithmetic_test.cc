@@ -770,7 +770,8 @@ TEST_P(AllOfTestP, ExplainsResult) {
   // Failed match.  The first matcher, which failed, needs to
   // explain.
   m = AllOf(GreaterThan(10), GreaterThan(20));
-  EXPECT_EQ("which is 5 less than 10", Explain(m, 5));
+  EXPECT_EQ("which is 5 less than 10, and which is 15 less than 20",
+            Explain(m, 5));
 
   // Failed match.  The second matcher, which failed, needs to
   // explain.  Since it doesn't given an explanation, the matcher text is
@@ -1625,7 +1626,7 @@ TEST_F(DoubleNearTest, NanSensitiveDoubleNearCanMatchNaN) {
 }
 
 TEST(NotTest, WorksOnMoveOnlyType) {
-  std::unique_ptr<int> p(new int(3));
+  std::unique_ptr<int> p = std::make_unique<int>(3);
   EXPECT_THAT(p, Pointee(Eq(3)));
   EXPECT_THAT(p, Not(Pointee(Eq(2))));
 }
@@ -1681,13 +1682,13 @@ TEST(AnyOfTest, DoesNotCallAnyOfUnqualified) {
 }  // namespace adl_test
 
 TEST(AllOfTest, WorksOnMoveOnlyType) {
-  std::unique_ptr<int> p(new int(3));
+  std::unique_ptr<int> p = std::make_unique<int>(3);
   EXPECT_THAT(p, AllOf(Pointee(Eq(3)), Pointee(Gt(0)), Pointee(Lt(5))));
   EXPECT_THAT(p, Not(AllOf(Pointee(Eq(3)), Pointee(Gt(0)), Pointee(Lt(3)))));
 }
 
 TEST(AnyOfTest, WorksOnMoveOnlyType) {
-  std::unique_ptr<int> p(new int(3));
+  std::unique_ptr<int> p = std::make_unique<int>(3);
   EXPECT_THAT(p, AnyOf(Pointee(Eq(5)), Pointee(Lt(0)), Pointee(Lt(5))));
   EXPECT_THAT(p, Not(AnyOf(Pointee(Eq(5)), Pointee(Lt(0)), Pointee(Gt(5)))));
 }

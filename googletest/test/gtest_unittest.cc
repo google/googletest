@@ -2649,8 +2649,8 @@ TEST(IsSubstringTest, GeneratesCorrectMessageForCString) {
 // Tests that IsSubstring returns the correct result when the input
 // argument type is ::std::string.
 TEST(IsSubstringTest, ReturnsCorrectResultsForStdString) {
-  EXPECT_TRUE(IsSubstring("", "", std::string("hello"), "ahellob"));
-  EXPECT_FALSE(IsSubstring("", "", "hello", std::string("world")));
+  EXPECT_TRUE(IsSubstring("", "", "hello", "ahellob"));
+  EXPECT_FALSE(IsSubstring("", "", "hello", "world"));
 }
 
 #if GTEST_HAS_STD_WSTRING
@@ -2707,8 +2707,8 @@ TEST(IsNotSubstringTest, GeneratesCorrectMessageForWideCString) {
 // Tests that IsNotSubstring returns the correct result when the input
 // argument type is ::std::string.
 TEST(IsNotSubstringTest, ReturnsCorrectResultsForStdString) {
-  EXPECT_FALSE(IsNotSubstring("", "", std::string("hello"), "ahellob"));
-  EXPECT_TRUE(IsNotSubstring("", "", "hello", std::string("world")));
+  EXPECT_FALSE(IsNotSubstring("", "", "hello", "ahellob"));
+  EXPECT_TRUE(IsNotSubstring("", "", "hello", "world"));
 }
 
 // Tests that IsNotSubstring() generates the correct message when the input
@@ -2719,8 +2719,7 @@ TEST(IsNotSubstringTest, GeneratesCorrectMessageForStdString) {
       "  Actual: \"needle\"\n"
       "Expected: not a substring of haystack_expr\n"
       "Which is: \"two needles\"",
-      IsNotSubstring("needle_expr", "haystack_expr", ::std::string("needle"),
-                     "two needles")
+      IsNotSubstring("needle_expr", "haystack_expr", "needle", "two needles")
           .failure_message());
 }
 
@@ -3655,8 +3654,7 @@ TEST(AssertionTest, EqFailure) {
       msg4.c_str());
 
   const std::string msg5(
-      EqFailure("foo", "bar", std::string("\"x\""), std::string("\"y\""), true)
-          .failure_message());
+      EqFailure("foo", "bar", "\"x\"", "\"y\"", true).failure_message());
   EXPECT_STREQ(
       "Expected equality of these values:\n"
       "  foo\n"

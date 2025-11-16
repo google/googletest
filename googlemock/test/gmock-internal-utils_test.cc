@@ -545,7 +545,7 @@ TEST(ExpectCallTest, DoesNotLogWhenVerbosityIsError) {
 
 void OnCallLogger() {
   DummyMock mock;
-  ON_CALL(mock, TestMethod());
+  (void)ON_CALL(mock, TestMethod());
 }
 
 // Verifies that ON_CALL logs if the --gmock_verbose flag is set to "info".
@@ -568,7 +568,7 @@ TEST(OnCallTest, DoesNotLogWhenVerbosityIsError) {
 
 void OnCallAnyArgumentLogger() {
   DummyMock mock;
-  ON_CALL(mock, TestMethodArg(_));
+  (void)ON_CALL(mock, TestMethodArg(_));
 }
 
 // Verifies that ON_CALL prints provided _ argument.

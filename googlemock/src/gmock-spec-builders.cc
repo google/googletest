@@ -212,7 +212,7 @@ void ExpectationBase::CheckActionCountIfNotDone() const
     GTEST_LOCK_EXCLUDED_(mutex_) {
   bool should_check = false;
   {
-    MutexLock l(&mutex_);
+    MutexLock l(mutex_);
     if (!action_count_checked_) {
       action_count_checked_ = true;
       should_check = true;
@@ -318,7 +318,7 @@ UntypedFunctionMockerBase::~UntypedFunctionMockerBase() = default;
 void UntypedFunctionMockerBase::RegisterOwner(const void* mock_obj)
     GTEST_LOCK_EXCLUDED_(g_gmock_mutex) {
   {
-    MutexLock l(&g_gmock_mutex);
+    MutexLock l(g_gmock_mutex);
     mock_obj_ = mock_obj;
   }
   Mock::Register(mock_obj, this);
@@ -332,7 +332,7 @@ void UntypedFunctionMockerBase::SetOwnerAndName(const void* mock_obj,
     GTEST_LOCK_EXCLUDED_(g_gmock_mutex) {
   // We protect name_ under g_gmock_mutex in case this mock function
   // is called from two threads concurrently.
-  MutexLock l(&g_gmock_mutex);
+  MutexLock l(g_gmock_mutex);
   mock_obj_ = mock_obj;
   name_ = name;
 }
@@ -345,7 +345,7 @@ const void* UntypedFunctionMockerBase::MockObject() const
   {
     // We protect mock_obj_ under g_gmock_mutex in case this mock
     // function is called from two threads concurrently.
-    MutexLock l(&g_gmock_mutex);
+    MutexLock l(g_gmock_mutex);
     Assert(mock_obj_ != nullptr, __FILE__, __LINE__,
            "MockObject() must not be called before RegisterOwner() or "
            "SetOwnerAndName() has been called.");
@@ -362,7 +362,7 @@ const char* UntypedFunctionMockerBase::Name() const
   {
     // We protect name_ under g_gmock_mutex in case this mock
     // function is called from two threads concurrently.
-    MutexLock l(&g_gmock_mutex);
+    MutexLock l(g_gmock_mutex);
     Assert(name_ != nullptr, __FILE__, __LINE__,
            "Name() must not be called before SetOwnerAndName() has "
            "been called.");
@@ -436,9 +436,9 @@ bool UntypedFunctionMockerBase::VerifyAndClearExpectationsLocked()
   UntypedExpectations expectations_to_delete;
   untyped_expectations_.swap(expectations_to_delete);
 
-  g_gmock_mutex.Unlock();
+  g_gmock_mutex.unlock();
   expectations_to_delete.clear();
-  g_gmock_mutex.Lock();
+  g_gmock_mutex.lock();
 
   return expectations_met;
 }
@@ -502,7 +502,7 @@ class MockObjectRegistry {
   // a test failure, unless the user has explicitly asked to ignore it.
   ~MockObjectRegistry() {
     if (!GMOCK_FLAG_GET(catch_leaked_mocks)) return;
-    internal::MutexLock l(&internal::g_gmock_mutex);
+    internal::MutexLock l(internal::g_gmock_mutex);
 
     int leaked_count = 0;
     for (StateMap::const_iterator it = states_.begin(); it != states_.end();
@@ -574,7 +574,7 @@ UninterestingCallReactionMap() {
 void SetReactionOnUninterestingCalls(uintptr_t mock_obj,
                                      internal::CallReaction reaction)
     GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex) {
-  internal::MutexLock l(&internal::g_gmock_mutex);
+  internal::MutexLock l(internal::g_gmock_mutex);
   UninterestingCallReactionMap()[mock_obj] = reaction;
 }
 
@@ -605,7 +605,7 @@ void Mock::FailUninterestingCalls(uintptr_t mock_obj)
 // entry in the call-reaction table should be removed.
 void Mock::UnregisterCallReaction(uintptr_t mock_obj)
     GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex) {
-  internal::MutexLock l(&internal::g_gmock_mutex);
+  internal::MutexLock l(internal::g_gmock_mutex);
   UninterestingCallReactionMap().erase(static_cast<uintptr_t>(mock_obj));
 }
 
@@ -613,7 +613,7 @@ void Mock::UnregisterCallReaction(uintptr_t mock_obj)
 // made on the given mock object.
 internal::CallReaction Mock::GetReactionOnUninterestingCalls(
     const void* mock_obj) GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex) {
-  internal::MutexLock l(&internal::g_gmock_mutex);
+  internal::MutexLock l(internal::g_gmock_mutex);
   return (UninterestingCallReactionMap().count(
               reinterpret_cast<uintptr_t>(mock_obj)) == 0)
              ? internal::intToCallReaction(
@@ -626,7 +626,7 @@ internal::CallReaction Mock::GetReactionOnUninterestingCalls(
 // objects.
 void Mock::AllowLeak(const void* mock_obj)
     GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex) {
-  internal::MutexLock l(&internal::g_gmock_mutex);
+  internal::MutexLock l(internal::g_gmock_mutex);
   g_mock_object_registry.states()[mock_obj].leakable = true;
 }
 
@@ -635,7 +635,7 @@ void Mock::AllowLeak(const void* mock_obj)
 // Test non-fatal failures and returns false.
 bool Mock::VerifyAndClearExpectations(void* mock_obj)
     GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex) {
-  internal::MutexLock l(&internal::g_gmock_mutex);
+  internal::MutexLock l(internal::g_gmock_mutex);
   return VerifyAndClearExpectationsLocked(mock_obj);
 }
 
@@ -644,7 +644,7 @@ bool Mock::VerifyAndClearExpectations(void* mock_obj)
 // verification was successful.
 bool Mock::VerifyAndClear(void* mock_obj)
     GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex) {
-  internal::MutexLock l(&internal::g_gmock_mutex);
+  internal::MutexLock l(internal::g_gmock_mutex);
   ClearDefaultActionsLocked(mock_obj);
   return VerifyAndClearExpectationsLocked(mock_obj);
 }
@@ -694,7 +694,7 @@ bool Mock::IsStrict(void* mock_obj)
 void Mock::Register(const void* mock_obj,
                     internal::UntypedFunctionMockerBase* mocker)
     GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex) {
-  internal::MutexLock l(&internal::g_gmock_mutex);
+  internal::MutexLock l(internal::g_gmock_mutex);
   g_mock_object_registry.states()[mock_obj].function_mockers.insert(mocker);
 }
 
@@ -704,7 +704,7 @@ void Mock::Register(const void* mock_obj,
 void Mock::RegisterUseByOnCallOrExpectCall(const void* mock_obj,
                                            const char* file, int line)
     GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex) {
-  internal::MutexLock l(&internal::g_gmock_mutex);
+  internal::MutexLock l(internal::g_gmock_mutex);
   MockObjectState& state = g_mock_object_registry.states()[mock_obj];
   if (state.first_used_file == nullptr) {
     state.first_used_file = file;

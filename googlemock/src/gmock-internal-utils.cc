@@ -156,7 +156,7 @@ GTEST_API_ void Log(LogSeverity severity, const std::string& message,
   if (!LogIsVisible(severity)) return;
 
   // Ensures that logs from different threads don't interleave.
-  MutexLock l(&g_log_mutex);
+  MutexLock l(g_log_mutex);
 
   if (severity == kWarning) {
     // Prints a GMOCK WARNING marker to make the warnings easily searchable.
