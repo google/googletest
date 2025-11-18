@@ -40,7 +40,7 @@ fi
 
 # Use Bazel Vendor mode to reduce reliance on external dependencies.
 # See https://bazel.build/external/vendor and the Dockerfile for
-# an explaination of how this works.
+# an explanation of how this works.
 if [[ ${KOKORO_GFILE_DIR:-} ]] && [[ -f "${KOKORO_GFILE_DIR}/distdir/googletest_vendor.tar.gz" ]]; then
   DOCKER_EXTRA_ARGS="--mount type=bind,source=${KOKORO_GFILE_DIR}/distdir,target=/distdir,readonly --env=BAZEL_VENDOR_ARCHIVE=/distdir/googletest_vendor.tar.gz ${DOCKER_EXTRA_ARGS:-}"
   BAZEL_EXTRA_ARGS="--vendor_dir=/googletest_vendor ${BAZEL_EXTRA_ARGS:-}"
