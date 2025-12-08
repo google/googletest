@@ -133,7 +133,7 @@ TEST(AnyNumberTest, HasCorrectBounds) {
 TEST(AtLeastTest, OnNegativeNumber) {
   EXPECT_NONFATAL_FAILURE(
       {  // NOLINT
-        AtLeast(-1);
+        (void)AtLeast(-1);
       },
       "The invocation lower bound must be >= 0");
 }
@@ -186,7 +186,7 @@ TEST(AtLeastTest, HasCorrectBounds) {
 TEST(AtMostTest, OnNegativeNumber) {
   EXPECT_NONFATAL_FAILURE(
       {  // NOLINT
-        AtMost(-1);
+        (void)AtMost(-1);
       },
       "The invocation upper bound must be >= 0");
 }
@@ -239,7 +239,7 @@ TEST(AtMostTest, HasCorrectBounds) {
 TEST(BetweenTest, OnNegativeStart) {
   EXPECT_NONFATAL_FAILURE(
       {  // NOLINT
-        Between(-1, 2);
+        (void)Between(-1, 2);
       },
       "The invocation lower bound must be >= 0, but is actually -1");
 }
@@ -247,7 +247,7 @@ TEST(BetweenTest, OnNegativeStart) {
 TEST(BetweenTest, OnNegativeEnd) {
   EXPECT_NONFATAL_FAILURE(
       {  // NOLINT
-        Between(1, -2);
+        (void)Between(1, -2);
       },
       "The invocation upper bound must be >= 0, but is actually -2");
 }
@@ -255,7 +255,7 @@ TEST(BetweenTest, OnNegativeEnd) {
 TEST(BetweenTest, OnStartBiggerThanEnd) {
   EXPECT_NONFATAL_FAILURE(
       {  // NOLINT
-        Between(2, 1);
+        (void)Between(2, 1);
       },
       "The invocation upper bound (1) must be >= "
       "the invocation lower bound (2)");
@@ -340,7 +340,7 @@ TEST(BetweenTest, HasCorrectBounds) {
 TEST(ExactlyTest, OnNegativeNumber) {
   EXPECT_NONFATAL_FAILURE(
       {  // NOLINT
-        Exactly(-1);
+        (void)Exactly(-1);
       },
       "The invocation lower bound must be >= 0");
 }

@@ -720,7 +720,6 @@ TEST(AllOfTest, CanDescribeNegation) {
 
   m = AllOf(Ne(1), Ne(2), Ne(3), Ne(4), Ne(5), Ne(6), Ne(7), Ne(8), Ne(9),
             Ne(10), Ne(11));
-  AllOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11);
   EXPECT_THAT(Describe(m), EndsWith("and (isn't equal to 11)"));
   AllOfMatches(11, m);
 }

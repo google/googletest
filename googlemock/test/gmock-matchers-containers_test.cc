@@ -1047,8 +1047,8 @@ TEST(ResultOfTest, WorksForCompatibleMatcherTypes) {
 // a NULL function pointer.
 TEST(ResultOfDeathTest, DiesOnNullFunctionPointers) {
   EXPECT_DEATH_IF_SUPPORTED(
-      ResultOf(static_cast<std::string (*)(int dummy)>(nullptr),
-               Eq(std::string("foo"))),
+      (void)ResultOf(static_cast<std::string (*)(int dummy)>(nullptr),
+                     Eq(std::string("foo"))),
       "NULL function pointer is passed into ResultOf\\(\\)\\.");
 }
 

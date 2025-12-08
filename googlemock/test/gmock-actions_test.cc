@@ -2170,7 +2170,7 @@ TEST(FunctorActionTest, TypeConversion) {
   EXPECT_EQ(7, d.Perform(std::make_tuple(1)));
 
   // Ensure creation of an empty action succeeds.
-  Action<void(int)>(nullptr);
+  (void)Action<void(int)>(nullptr);
 }
 
 TEST(FunctorActionTest, UnusedArguments) {
