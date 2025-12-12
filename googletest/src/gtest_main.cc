@@ -58,7 +58,12 @@ void loop() { RUN_ALL_TESTS(); }
 GTEST_API_ int main() {
   printf("Running main() from %s\n", __FILE__);
   testing::InitGoogleTest();
-  return RUN_ALL_TESTS();
+
+  int ret = RUN_ALL_TESTS();
+#if defined(GTEST_OS_ZEPHYR)
+  _exit( ret );
+#endif
+  return ret;
 }
 #else
 // Normal platforms: program entry point is main, argc/argv are initialized.
