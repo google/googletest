@@ -247,6 +247,10 @@
 //   Int32FromGTestEnv()  - parses an int32_t environment variable.
 //   StringFromGTestEnv() - parses a string environment variable.
 
+#if defined(GTEST_BUILD_USING_STD_MODULE)
+    import std;
+#endif
+
 // The definition of GTEST_INTERNAL_CPLUSPLUS_LANG comes first because it can
 // potentially be used as an #include guard.
 #if defined(_MSVC_LANG)
@@ -285,20 +289,22 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include <cerrno>
-// #include <condition_variable>  // Guarded by GTEST_IS_THREADSAFE below
-#include <cstdint>
-#include <iostream>
-#include <limits>
-#include <locale>
-#include <memory>
-#include <ostream>
-#include <string>
-// #include <mutex>  // Guarded by GTEST_IS_THREADSAFE below
-#include <tuple>
-#include <type_traits>
-#include <vector>
+    
+#if !defined(GTEST_BUILD_USING_STD_MODULE)
+    #include <cerrno>
+    // #include <condition_variable>  // Guarded by GTEST_IS_THREADSAFE below
+    #include <cstdint>
+    #include <iostream>
+    #include <limits>
+    #include <locale>
+    #include <memory>
+    #include <ostream>
+    #include <string>
+    // #include <mutex>  // Guarded by GTEST_IS_THREADSAFE below
+    #include <tuple>
+    #include <type_traits>
+    #include <vector>
+#endif
 
 #ifndef _WIN32_WCE
 #include <sys/stat.h>
@@ -575,8 +581,10 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 
 // It's this header's responsibility to #include <typeinfo> when RTTI
 // is enabled.
+#if !defined(GTEST_BUILD_USING_STD_MODULE)
 #if GTEST_HAS_RTTI
 #include <typeinfo>
+#endif
 #endif
 
 // Determines whether Google Test can use the pthreads library.
@@ -810,11 +818,13 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 
 #endif  // GTEST_IS_THREADSAFE
 
+#if !defined(GTEST_BUILD_USING_STD_MODULE)
 #ifdef GTEST_IS_THREADSAFE
 // Some platforms don't support including these threading related headers.
 #include <condition_variable>  // NOLINT
 #include <mutex>               // NOLINT
 #endif                         // GTEST_IS_THREADSAFE
+#endif
 
 // GTEST_API_ qualifies all symbols that must be exported. The definitions below
 // are guarded by #ifndef to give embedders a chance to define GTEST_API_ in
@@ -2355,7 +2365,9 @@ using StringView = ::absl::string_view;
 // Otherwise for C++17 and higher use std::string_view for Matcher<>
 // specializations.
 #define GTEST_INTERNAL_HAS_STRING_VIEW 1
+#if !defined(GTEST_BUILD_USING_STD_MODULE)
 #include <string_view>
+#endif
 namespace testing {
 namespace internal {
 using StringView = ::std::string_view;

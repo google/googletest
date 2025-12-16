@@ -38,10 +38,14 @@
 #ifndef GOOGLETEST_INCLUDE_GTEST_GTEST_ASSERTION_RESULT_H_
 #define GOOGLETEST_INCLUDE_GTEST_GTEST_ASSERTION_RESULT_H_
 
-#include <memory>
-#include <ostream>
-#include <string>
-#include <type_traits>
+#if defined(GTEST_BUILD_USING_STD_MODULE)
+    import std;
+#else
+    #include <memory>
+    #include <ostream>
+    #include <string>
+    #include <type_traits>
+#endif
 
 #include "gtest/gtest-message.h"
 #include "gtest/internal/gtest-port.h"

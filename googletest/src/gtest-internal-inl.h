@@ -41,13 +41,17 @@
 #include <stdlib.h>  // For strtoll/_strtoul64/malloc/free.
 #include <string.h>  // For memmove.
 
-#include <algorithm>
-#include <cstdint>
-#include <memory>
-#include <set>
-#include <string>
-#include <unordered_map>
-#include <vector>
+#if defined(GTEST_BUILD_USING_STD_MODULE)
+    import std;
+#else
+    #include <algorithm>
+    #include <cstdint>
+    #include <memory>
+    #include <set>
+    #include <string>
+    #include <unordered_map>
+    #include <vector>
+#endif
 
 #include "gtest/internal/gtest-port.h"
 

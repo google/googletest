@@ -48,23 +48,28 @@
 #include <unistd.h>
 #endif  // GTEST_OS_LINUX
 
-#if GTEST_HAS_EXCEPTIONS
-#include <stdexcept>
-#endif
-
 #include <ctype.h>
 #include <float.h>
 #include <string.h>
 
-#include <cstdint>
-#include <functional>
-#include <limits>
-#include <map>
-#include <set>
-#include <string>
-#include <type_traits>
-#include <utility>
-#include <vector>
+#if defined(GTEST_BUILD_USING_STD_MODULE)
+    import std;
+#else
+    #if GTEST_HAS_EXCEPTIONS
+    #include <stdexcept>
+    #endif
+
+    #include <cstdint>
+    #include <functional>
+    #include <limits>
+    #include <map>
+    #include <set>
+    #include <string>
+    #include <type_traits>
+    #include <utility>
+    #include <vector>
+#endif
+
 
 #include "gtest/gtest-message.h"
 #include "gtest/internal/gtest-filepath.h"
