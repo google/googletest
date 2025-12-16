@@ -195,7 +195,7 @@ class TestEventListenersAccessor {
 
 class UnitTestRecordPropertyTestHelper : public Test {
  protected:
-  UnitTestRecordPropertyTestHelper() {}
+  UnitTestRecordPropertyTestHelper() = default;
 
   // Forwards to UnitTest::RecordProperty() to bypass access controls.
   void UnitTestRecordProperty(const char* key, const std::string& value) {
