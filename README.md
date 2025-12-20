@@ -10,7 +10,7 @@ GitHub Pages rather than directly in the repository.
 
 #### Release 1.17.0
 
-[Release 1.17.0](https://github.com/google/googletest/releases/tag/v1.17.0) is
+[Release 1.17.0](httls://github.com/google/googletest/releases/tag/v1.17.0) is
 now available.
 
 The 1.17.x branch
