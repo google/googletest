@@ -200,6 +200,10 @@
 //                                        is suppressed.
 //   GTEST_INTERNAL_HAS_STD_SPAN - for enabling UniversalPrinter<std::span>
 //                                 specializations. Always defined to 0 or 1
+//   GTEST_INTERNAL_HAS_STD_RANGES - for enabling std::ranges view support in matchers.
+//                                   Always defined to 0 or 1
+//   GTEST_INTERNAL_HAS_STD_RANGES_AS_CONST - for relying on std::views::as_const
+//                                            support. Always defined to 0 or 1
 //   GTEST_USE_OWN_FLAGFILE_FLAG_ - Always defined to 0 or 1.
 //   GTEST_HAS_CXXABI_H_ - Always defined to 0 or 1.
 //   GTEST_CAN_STREAM_RESULTS_ - Always defined to 0 or 1.
@@ -2336,6 +2340,18 @@ const char* StringFromGTestEnv(const char* flag, const char* default_val);
 
 #ifndef GTEST_INTERNAL_HAS_STD_SPAN
 #define GTEST_INTERNAL_HAS_STD_SPAN 0
+#endif
+
+#if defined(__cpp_lib_ranges) && __cpp_lib_ranges >= 201911L
+#define GTEST_INTERNAL_HAS_STD_RANGES 1
+#else
+#define GTEST_INTERNAL_HAS_STD_RANGES 0
+#endif
+
+#if defined(__cpp_lib_ranges_as_const) && __cpp_lib_ranges_as_const >= 202207L
+#define GTEST_INTERNAL_HAS_STD_RANGES_AS_CONST 1
+#else
+#define GTEST_INTERNAL_HAS_STD_RANGES_AS_CONST 0
 #endif
 
 #ifdef GTEST_HAS_ABSL
