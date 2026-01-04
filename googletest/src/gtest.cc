@@ -263,6 +263,7 @@ GTEST_DEFINE_bool_(
                                         testing::GetDefaultFailFast()),
     "True if and only if a test failure should stop further test execution.");
 
+GTEST_DECLARE_bool_(fail_if_no_test_linked);
 GTEST_DEFINE_bool_(
     fail_if_no_test_linked,
     testing::internal::BoolFromGTestEnv("fail_if_no_test_linked", false),
