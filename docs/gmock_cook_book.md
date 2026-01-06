@@ -3566,7 +3566,7 @@ general leads to better compiler error messages that pay off in the long run.
 They also allow overloading matchers based on parameter types (as opposed to
 just based on the number of parameters).
 
-### Writing New Monomorphic Matchers
+### Writing New Monomorphic Matchers {#MonomorphicMatchers}
 
 A matcher of type `testing::Matcher<T>` implements the matcher interface for `T`
 and does two things: it tests whether a value of type `T` matches the matcher,
@@ -3666,11 +3666,11 @@ Expected: is divisible by 7
 Tip: for convenience, `MatchAndExplain()` can take a `MatchResultListener*`
 instead of `std::ostream*`.
 
-### Writing New Polymorphic Matchers
+### Writing New Polymorphic Matchers {#PolymorphicMatchers}
 
 Unlike a monomorphic matcher, which can only be used to match a value of a
 particular type, a *polymorphic* matcher is one that can be used to match values
-of multiple types. For example, `Eq(5)` is a polymorhpic matcher as it can be
+of multiple types. For example, `Eq(5)` is a polymorphic matcher as it can be
 used to match an `int`, a `double`, a `float`, and so on. You should think of a
 polymorphic matcher as a *matcher factory* as opposed to a
 `testing::Matcher<SomeType>` - itself is not an actual matcher, but can be

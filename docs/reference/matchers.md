@@ -1,5 +1,7 @@
 # Matchers Reference
 
+<!-- disableFinding(LINK_RELATIVE_G3DOC) -->
+
 A **matcher** matches a *single* argument. You can use it inside `ON_CALL()` or
 `EXPECT_CALL()`, or use it to validate a value directly using two macros:
 
@@ -296,6 +298,13 @@ which must be a permanent callback.
 | `Value(value, m)` | evaluates to `true` if `value` matches `m`. |
 
 ## Defining Matchers
+
+{: .callout .note}
+Note: full details about defining new matchers are in the
+[cookbook](../gmock_cook_book.md#NewMatchers). In particular, if `MATCHER`
+macros are not sufficient, you can directly implement
+[monomorphic](../gmock_cook_book.md#MonomorphicMatchers) or
+[polymorphic](../gmock_cook_book.md#PolymorphicMatchers) matchers.
 
 | Macro                                | Description                           |
 | :----------------------------------- | :------------------------------------ |
