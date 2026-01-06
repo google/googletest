@@ -299,15 +299,10 @@ GTEST_API_ void Log(LogSeverity severity, const std::string& message,
 class [[nodiscard]] WithoutMatchers {
  private:
   WithoutMatchers() = default;
-  friend
-#ifdef GTEST_OS_WINDOWS
-      GTEST_API_
-#endif
-          WithoutMatchers GetWithoutMatchers();
-};
 
-// Internal use only: access the singleton instance of WithoutMatchers.
-GTEST_API_ WithoutMatchers GetWithoutMatchers();
+ public:
+  GTEST_API_ static WithoutMatchers Get();
+};
 
 // Invalid<T>() is usable as an expression of type T, but will terminate
 // the program with an assertion failure if actually run.  This is useful
