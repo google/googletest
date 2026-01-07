@@ -153,10 +153,10 @@ GTEST_DISABLE_MSC_WARNINGS_POP_()  //  4251
       static void Execute() { statement; }                                    \
     };                                                                        \
     ::testing::TestPartResultArray gtest_failures;                            \
-    ::testing::internal::SingleFailureChecker gtest_checker(                  \
+    const ::testing::internal::SingleFailureChecker gtest_checker(            \
         &gtest_failures, ::testing::TestPartResult::kFatalFailure, (substr)); \
     {                                                                         \
-      ::testing::ScopedFakeTestPartResultReporter gtest_reporter(             \
+      const ::testing::ScopedFakeTestPartResultReporter gtest_reporter(       \
           ::testing::ScopedFakeTestPartResultReporter::                       \
               INTERCEPT_ONLY_CURRENT_THREAD,                                  \
           &gtest_failures);                                                   \
@@ -171,10 +171,10 @@ GTEST_DISABLE_MSC_WARNINGS_POP_()  //  4251
       static void Execute() { statement; }                                    \
     };                                                                        \
     ::testing::TestPartResultArray gtest_failures;                            \
-    ::testing::internal::SingleFailureChecker gtest_checker(                  \
+    const ::testing::internal::SingleFailureChecker gtest_checker(            \
         &gtest_failures, ::testing::TestPartResult::kFatalFailure, (substr)); \
     {                                                                         \
-      ::testing::ScopedFakeTestPartResultReporter gtest_reporter(             \
+      const ::testing::ScopedFakeTestPartResultReporter gtest_reporter(       \
           ::testing::ScopedFakeTestPartResultReporter::INTERCEPT_ALL_THREADS, \
           &gtest_failures);                                                   \
       GTestExpectFatalFailureHelper::Execute();                               \
@@ -214,31 +214,31 @@ GTEST_DISABLE_MSC_WARNINGS_POP_()  //  4251
 // instead of
 //   GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement)
 // to avoid an MSVC warning on unreachable code.
-#define EXPECT_NONFATAL_FAILURE(statement, substr)                    \
-  do {                                                                \
-    ::testing::TestPartResultArray gtest_failures;                    \
-    ::testing::internal::SingleFailureChecker gtest_checker(          \
-        &gtest_failures, ::testing::TestPartResult::kNonFatalFailure, \
-        (substr));                                                    \
-    {                                                                 \
-      ::testing::ScopedFakeTestPartResultReporter gtest_reporter(     \
-          ::testing::ScopedFakeTestPartResultReporter::               \
-              INTERCEPT_ONLY_CURRENT_THREAD,                          \
-          &gtest_failures);                                           \
-      if (::testing::internal::AlwaysTrue()) {                        \
-        statement;                                                    \
-      }                                                               \
-    }                                                                 \
+#define EXPECT_NONFATAL_FAILURE(statement, substr)                      \
+  do {                                                                  \
+    ::testing::TestPartResultArray gtest_failures;                      \
+    const ::testing::internal::SingleFailureChecker gtest_checker(      \
+        &gtest_failures, ::testing::TestPartResult::kNonFatalFailure,   \
+        (substr));                                                      \
+    {                                                                   \
+      const ::testing::ScopedFakeTestPartResultReporter gtest_reporter( \
+          ::testing::ScopedFakeTestPartResultReporter::                 \
+              INTERCEPT_ONLY_CURRENT_THREAD,                            \
+          &gtest_failures);                                             \
+      if (::testing::internal::AlwaysTrue()) {                          \
+        statement;                                                      \
+      }                                                                 \
+    }                                                                   \
   } while (::testing::internal::AlwaysFalse())
 
 #define EXPECT_NONFATAL_FAILURE_ON_ALL_THREADS(statement, substr)             \
   do {                                                                        \
     ::testing::TestPartResultArray gtest_failures;                            \
-    ::testing::internal::SingleFailureChecker gtest_checker(                  \
+    const ::testing::internal::SingleFailureChecker gtest_checker(            \
         &gtest_failures, ::testing::TestPartResult::kNonFatalFailure,         \
         (substr));                                                            \
     {                                                                         \
-      ::testing::ScopedFakeTestPartResultReporter gtest_reporter(             \
+      const ::testing::ScopedFakeTestPartResultReporter gtest_reporter(       \
           ::testing::ScopedFakeTestPartResultReporter::INTERCEPT_ALL_THREADS, \
           &gtest_failures);                                                   \
       if (::testing::internal::AlwaysTrue()) {                                \
