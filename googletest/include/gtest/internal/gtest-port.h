@@ -664,10 +664,20 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
      defined(GTEST_OS_NETBSD) || defined(GTEST_OS_FUCHSIA) ||         \
      defined(GTEST_OS_DRAGONFLY) || defined(GTEST_OS_GNU_KFREEBSD) || \
      defined(GTEST_OS_HAIKU) || defined(GTEST_OS_GNU_HURD))
+
 // Death tests require a file system to work properly.
 #if GTEST_HAS_FILE_SYSTEM
 #define GTEST_HAS_DEATH_TEST 1
 #endif  // GTEST_HAS_FILE_SYSTEM
+#endif
+
+// Determines whether the Premature Exit file can be created.
+// Created by default when Death tests are supported, but other platforms can
+// use the Premature exit file without Death test support (e.g. for detecting
+// crashes).
+#if GTEST_HAS_DEATH_TEST || \
+    (defined(GTEST_OS_EMSCRIPTEN) && GTEST_HAS_FILE_SYSTEM)
+#define GTEST_INTERNAL_HAS_PREMATURE_EXIT_FILE 1
 #endif
 
 // Determines whether to support type-driven tests.
