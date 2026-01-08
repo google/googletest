@@ -81,6 +81,7 @@ for absl in 0 1; do
     --enable_bzlmod=true \
     --features=external_include_paths \
     --keep_going \
+    --per_file_copt="external/.*@-w" \
     --show_timestamps \
     --test_output=errors \
     ${BAZEL_EXTRA_ARGS:-}

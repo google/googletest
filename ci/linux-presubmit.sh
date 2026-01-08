@@ -113,6 +113,7 @@ time docker run \
       --enable_bzlmod=false \
       --features=external_include_paths \
       --keep_going \
+      --per_file_copt=\"external/.*@-w\" \
       --show_timestamps \
       --test_output=errors \
       ${BAZEL_EXTRA_ARGS:-}"
@@ -138,6 +139,7 @@ for std in ${STD}; do
           --enable_bzlmod=true \
           --features=external_include_paths \
           --keep_going \
+          --per_file_copt=\"external/.*@-w\" \
           --show_timestamps \
           --test_output=errors \
           ${BAZEL_EXTRA_ARGS:-}"
@@ -167,6 +169,7 @@ for std in ${STD}; do
           --features=external_include_paths \
           --keep_going \
           --linkopt=\"--gcc-toolchain=/usr/local\" \
+          --per_file_copt=\"external/.*@-w\" \
           --show_timestamps \
           --test_output=errors \
           ${BAZEL_EXTRA_ARGS:-}"
