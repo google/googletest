@@ -47,6 +47,11 @@
 #include "gmock/gmock.h"
 #include "test/gmock-matchers_test.h"
 #include "gtest/gtest.h"
+#include "gtest/internal/gtest-port.h"
+
+#if GTEST_INTERNAL_HAS_STD_RANGES
+#include <ranges>
+#endif
 
 // Silence warning C4244: 'initializing': conversion from 'int' to 'short',
 // possible loss of data and C4100, unreferenced local parameter
@@ -3438,6 +3443,61 @@ TEST(ContainsTest, WorksForTwoDimensionalNativeArray) {
   EXPECT_THAT(a, Not(Contains(ElementsAre(3, 4, 5))));
   EXPECT_THAT(a, Contains(Not(Contains(5))));
 }
+
+#if GTEST_INTERNAL_HAS_STD_RANGES
+
+TEST(StdRangesTest, ElementsAreWorksWithStdRanges) {
+  namespace rv = std::ranges::views;
+  std::vector<int> vec = {1, 2, 3};
+  EXPECT_THAT(rv::all(vec), ElementsAre(1, 2, 3));
+  EXPECT_THAT(rv::all(vec), Not(ElementsAre(2, 3, 4)));
+  EXPECT_THAT(rv::reverse(vec), ElementsAre(3, 2, 1));
+}
+
+TEST(StdRangesTest, ElementsAreArrayWorksWithStdRanges) {
+  namespace rv = std::ranges::views;
+  std::vector<int> vec = {1, 2, 3};
+  const int expected[] = {1, 2, 3};
+  EXPECT_THAT(rv::all(vec), ElementsAreArray(expected));
+  EXPECT_THAT(rv::all(vec), Not(ElementsAreArray({1, 2, 4})));
+}
+
+TEST(StdRangesTest, ContainsWorksWithStdRanges) {
+  namespace rv = std::ranges::views;
+  std::vector<std::string> my_set = {"apple", "banana", "cherry"};
+  EXPECT_THAT(rv::all(my_set), Contains("banana"));
+  EXPECT_THAT(rv::all(my_set), Not(Contains("date")));
+  EXPECT_THAT(
+      rv::filter(my_set, [](const std::string& s) { return s.size() == 6; }),
+      Contains("banana"));
+}
+
+TEST(StdRangesTest, PointwiseWorksWithStdRanges) {
+  namespace rv = std::ranges::views;
+  std::vector<int> lhs = {1, 2, 3};
+  std::vector<int> rhs = {2, 4, 6};
+  EXPECT_THAT(rv::all(lhs), Pointwise(IsHalfOf(), rhs));
+}
+
+TEST(StdRangesTest, UnorderedPointwiseWorksWithStdRanges) {
+  namespace rv = std::ranges::views;
+  std::vector<int> lhs = {1, 2, 3};
+  std::vector<int> rhs = {6, 4, 2};
+  EXPECT_THAT(rv::all(lhs), UnorderedPointwise(IsHalfOf(), rhs));
+  EXPECT_THAT(rv::all(lhs), Not(UnorderedPointwise(Gt(), rhs)));
+}
+
+TEST(StdRangesTest, PointeeWorksWithStdRanges) {
+  namespace rv = std::ranges::views;
+  std::vector<std::unique_ptr<int>> vec;
+  vec.push_back(std::make_unique<int>(1));
+  vec.push_back(std::make_unique<int>(2));
+  vec.push_back(std::make_unique<int>(3));
+  EXPECT_THAT(rv::all(vec),
+              ElementsAre(Pointee(Eq(1)), Pointee(Eq(2)), Pointee(Eq(3))));
+}
+
+#endif
 
 }  // namespace
 }  // namespace gmock_matchers_test
