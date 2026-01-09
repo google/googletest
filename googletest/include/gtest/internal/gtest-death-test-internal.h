@@ -243,6 +243,8 @@ GTEST_API_ bool ExitedUnsuccessfully(int exit_status);
           gtest_dt->Abort(::testing::internal::DeathTest::TEST_DID_NOT_DIE);   \
           break;                                                               \
         }                                                                      \
+        default:                                                               \
+          break;                                                               \
       }                                                                        \
     }                                                                          \
   } else                                                                       \
