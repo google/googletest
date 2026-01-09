@@ -562,6 +562,15 @@ GTEST_API_ TestInfo* MakeAndRegisterTestInfo(
     TypeId fixture_class_id, SetUpTestSuiteFunc set_up_tc,
     TearDownTestSuiteFunc tear_down_tc, TestFactoryBase* factory);
 
+// Backward-compatible overload for ABI compatibility with v1.14.0 and earlier.
+// This version takes const char* instead of std::string to avoid ABI issues
+// when passing std::string by value across library boundaries.
+GTEST_API_ TestInfo* MakeAndRegisterTestInfo(
+    const char* test_suite_name, const char* name, const char* type_param,
+    const char* value_param, CodeLocation code_location,
+    TypeId fixture_class_id, SetUpTestSuiteFunc set_up_tc,
+    TearDownTestSuiteFunc tear_down_tc, TestFactoryBase* factory);
+
 // If *pstr starts with the given prefix, modifies *pstr to be right
 // past the prefix and returns true; otherwise leaves *pstr unchanged
 // and returns false.  None of pstr, *pstr, and prefix can be NULL.

@@ -2829,6 +2829,19 @@ TestInfo* MakeAndRegisterTestInfo(
   return test_info;
 }
 
+// Backward-compatible overload for ABI compatibility with v1.14.0 and earlier.
+TestInfo* MakeAndRegisterTestInfo(
+    const char* test_suite_name, const char* name, const char* type_param,
+    const char* value_param, CodeLocation code_location,
+    TypeId fixture_class_id, SetUpTestSuiteFunc set_up_tc,
+    TearDownTestSuiteFunc tear_down_tc, TestFactoryBase* factory) {
+  // Forward to the std::string version
+  return MakeAndRegisterTestInfo(std::string(test_suite_name), name, type_param,
+                                  value_param, std::move(code_location),
+                                  fixture_class_id, set_up_tc, tear_down_tc,
+                                  factory);
+}
+
 void ReportInvalidTestSuiteType(const char* test_suite_name,
                                 const CodeLocation& code_location) {
   Message errors;
