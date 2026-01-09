@@ -86,11 +86,11 @@
 
 // Macros for declaring flags.
 #define GMOCK_DECLARE_bool_(name) \
-  ABSL_DECLARE_FLAG(bool, GMOCK_FLAG_NAME_(name))
+  GTEST_API_ ABSL_DECLARE_FLAG(bool, GMOCK_FLAG_NAME_(name))
 #define GMOCK_DECLARE_int32_(name) \
-  ABSL_DECLARE_FLAG(int32_t, GMOCK_FLAG_NAME_(name))
+  GTEST_API_ ABSL_DECLARE_FLAG(int32_t, GMOCK_FLAG_NAME_(name))
 #define GMOCK_DECLARE_string_(name) \
-  ABSL_DECLARE_FLAG(std::string, GMOCK_FLAG_NAME_(name))
+  GTEST_API_ ABSL_DECLARE_FLAG(std::string, GMOCK_FLAG_NAME_(name))
 
 #define GMOCK_FLAG_GET(name) ::absl::GetFlag(GMOCK_FLAG(name))
 #define GMOCK_FLAG_SET(name, value) \

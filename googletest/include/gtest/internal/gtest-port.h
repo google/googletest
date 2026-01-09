@@ -832,10 +832,10 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 #ifndef GTEST_API_
 
 #ifdef _MSC_VER
-#if defined(GTEST_LINKED_AS_SHARED_LIBRARY) && GTEST_LINKED_AS_SHARED_LIBRARY
-#define GTEST_API_ __declspec(dllimport)
-#elif defined(GTEST_CREATE_SHARED_LIBRARY) && GTEST_CREATE_SHARED_LIBRARY
+#if defined(GTEST_CREATE_SHARED_LIBRARY) && GTEST_CREATE_SHARED_LIBRARY
 #define GTEST_API_ __declspec(dllexport)
+#elif defined(GTEST_LINKED_AS_SHARED_LIBRARY) && GTEST_LINKED_AS_SHARED_LIBRARY
+#define GTEST_API_ __declspec(dllimport)
 #endif
 #elif GTEST_INTERNAL_HAVE_CPP_ATTRIBUTE(gnu::visibility)
 #define GTEST_API_ [[gnu::visibility("default")]]
@@ -2252,11 +2252,11 @@ using TimeInMillis = int64_t;  // Represents time in milliseconds.
 
 // Macros for declaring flags.
 #define GTEST_DECLARE_bool_(name) \
-  ABSL_DECLARE_FLAG(bool, GTEST_FLAG_NAME_(name))
+  GTEST_API_ ABSL_DECLARE_FLAG(bool, GTEST_FLAG_NAME_(name))
 #define GTEST_DECLARE_int32_(name) \
-  ABSL_DECLARE_FLAG(int32_t, GTEST_FLAG_NAME_(name))
+  GTEST_API_ ABSL_DECLARE_FLAG(int32_t, GTEST_FLAG_NAME_(name))
 #define GTEST_DECLARE_string_(name) \
-  ABSL_DECLARE_FLAG(std::string, GTEST_FLAG_NAME_(name))
+  GTEST_API_ ABSL_DECLARE_FLAG(std::string, GTEST_FLAG_NAME_(name))
 
 #define GTEST_FLAG_SAVER_ ::absl::FlagSaver
 
