@@ -614,13 +614,13 @@ TEST(ThrowActionTest, ThrowsGivenExceptionInNullaryFunction) {
 
 class Object {
  public:
-  virtual ~Object() {}
+  virtual ~Object() = default;
   virtual void Func() {}
 };
 
 class MockObject : public Object {
  public:
-  ~MockObject() override {}
+  ~MockObject() override = default;
   MOCK_METHOD(void, Func, (), (override));
 };
 
