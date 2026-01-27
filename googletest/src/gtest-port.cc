@@ -29,6 +29,7 @@
 
 #include "gtest/internal/gtest-port.h"
 
+#include <errno.h>
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -1062,6 +1063,24 @@ bool EndsWithPathSeparator(const std::string& path) {
 }
 #endif
 
+#ifdef GTEST_OS_WINDOWS
+std::string DescribeWindowsError(DWORD error) {
+  const std::string error_number = StreamableToString(error);
+  char buffer[4096] = {'\0'};
+  const DWORD flags =
+      FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS;
+  DWORD length = ::FormatMessageA(flags, nullptr, error, 0, buffer,
+                                  static_cast<DWORD>(sizeof(buffer)), nullptr);
+  if (length == 0) {
+    return "error " + error_number + " (unknown error)";
+  }
+  for (; length && IsSpace(buffer[length - 1]); --length) {
+    buffer[length - 1] = '\0';
+  }
+  return "error " + error_number + " (" + std::string(buffer, length) + ")";
+}
+#endif  // GTEST_OS_WINDOWS
+
 }  // namespace
 
 // Object that captures an output stream (stdout/stderr).
@@ -1073,15 +1092,32 @@ class CapturedStream {
     char temp_dir_path[MAX_PATH + 1] = {'\0'};   // NOLINT
     char temp_file_path[MAX_PATH + 1] = {'\0'};  // NOLINT
 
-    ::GetTempPathA(sizeof(temp_dir_path), temp_dir_path);
+    const DWORD temp_dir_capacity =
+        static_cast<DWORD>(sizeof(temp_dir_path));
+    const DWORD temp_path_len =
+        ::GetTempPathA(temp_dir_capacity, temp_dir_path);
+    const DWORD temp_path_error =
+        (temp_path_len == 0) ? ::GetLastError() : 0;
+    GTEST_CHECK_(temp_path_len != 0)
+        << "GetTempPathA failed with " << DescribeWindowsError(temp_path_error)
+        << ".";
+    GTEST_CHECK_(temp_path_len < temp_dir_capacity)
+        << "GetTempPathA returned a path length of " << temp_path_len
+        << ", which does not fit into buffer size " << temp_dir_capacity
+        << ".";
+
     const UINT success = ::GetTempFileNameA(temp_dir_path, "gtest_redir",
                                             0,  // Generate unique file name.
                                             temp_file_path);
+    const DWORD temp_file_error = (success == 0) ? ::GetLastError() : 0;
     GTEST_CHECK_(success != 0)
-        << "Unable to create a temporary file in " << temp_dir_path;
+        << "GetTempFileNameA failed in temp dir " << temp_dir_path
+        << " with " << DescribeWindowsError(temp_file_error) << ".";
     const int captured_fd = creat(temp_file_path, _S_IREAD | _S_IWRITE);
+    const int captured_errno = (captured_fd == -1) ? errno : 0;
     GTEST_CHECK_(captured_fd != -1)
-        << "Unable to open temporary file " << temp_file_path;
+        << "Unable to open temporary file " << temp_file_path << " (errno "
+        << captured_errno << ": " << posix::StrError(captured_errno) << ").";
     filename_ = temp_file_path;
 #else
     // There's no guarantee that a test has write access to the current
