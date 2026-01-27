@@ -798,6 +798,7 @@ TEST(ExpectThat, TakesLiterals) {
   EXPECT_THAT(1, 1);
   EXPECT_THAT(1.0, 1.0);
   EXPECT_THAT(std::string(), "");
+  EXPECT_THAT(std::shared_ptr<int>(), nullptr);
 }
 
 TEST(ExpectThat, TakesFunctions) {
@@ -1124,6 +1125,16 @@ TEST(IsNullTest, CanDescribeSelf) {
   Matcher<int*> m = IsNull();
   EXPECT_EQ("is NULL", Describe(m));
   EXPECT_EQ("isn't NULL", DescribeNegation(m));
+}
+
+struct SmartPtrHelper {
+  MOCK_METHOD(void, Call, (std::shared_ptr<int>));
+};
+
+TEST(IsNullTest, WorksWithSmartPtr) {
+  SmartPtrHelper helper;
+  EXPECT_CALL(helper, Call(nullptr));
+  helper.Call(nullptr);
 }
 
 // Tests that NotNull() matches any non-NULL pointer of any type.
