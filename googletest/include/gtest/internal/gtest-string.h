@@ -50,9 +50,13 @@
 
 #include <string.h>
 
-#include <cstdint>
-#include <sstream>
-#include <string>
+#if defined(GTEST_BUILD_USING_STD_MODULE)
+    import std;
+#else
+    #include <cstdint>
+    #include <sstream>
+    #include <string>
+#endif
 
 #include "gtest/internal/gtest-port.h"
 

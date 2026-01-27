@@ -26,6 +26,13 @@ option(
   "Build gtest with internal symbols hidden in shared libraries."
   OFF)
 
+# set(GTEST_BUILD_USING_STD_MODULE ON)
+# set(CMAKE_CXX_STANDARD 23)
+# set(CMAKE_CXX_EXTENSIONS OFF)
+# set(CMAKE_CXX_STANDARD_REQUIRED ON)
+# set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD ON)
+# set(CMAKE_CXX_SCAN_FOR_MODULES ON)
+
 # Defines pre_project_set_up_hermetic_build() and set_up_hermetic_build().
 include(cmake/hermetic_build.cmake OPTIONAL)
 
@@ -120,7 +127,44 @@ include_directories(${gtest_build_include_dirs})
 # Google Test libraries. We build them using more strict warnings than what
 # are used for other targets, to ensure that gtest can be compiled by a user
 # aggressive about warnings.
-cxx_library(gtest "${cxx_strict}" src/gtest-all.cc)
+
+cxx_library(gtest "${cxx_strict}" 
+    src/gtest-all.cc
+    # src/gtest.cc
+    # src/gtest-port.cc
+    # src/gtest-assertion-result.cc
+    # src/gtest-death-test.cc
+    # src/gtest-filepath.cc
+    # src/gtest-internal-inl.h
+    # src/gtest-matchers.cc
+    # src/gtest-port.cc
+    # src/gtest-printers.cc
+    # src/gtest-test-part.cc
+    # src/gtest-typed-test.cc 
+    include/gtest/gtest.h
+    include/gtest/gtest_pred_impl.h
+    include/gtest/gtest_prod.h
+    include/gtest/gtest-assertion-result.h
+    include/gtest/gtest-death-test.h
+    include/gtest/gtest-matchers.h
+    include/gtest/gtest-message.h
+    include/gtest/gtest-param-test.h
+    include/gtest/gtest-printers.h
+    include/gtest/gtest-spi.h
+    include/gtest/gtest-test-part.h
+    include/gtest/gtest-typed-test.h
+    include/gtest/internal/gtest-death-test-internal.h                                                                                 
+    include/gtest/internal/gtest-filepath.h                                                                                            
+    include/gtest/internal/gtest-internal.h                                                                                            
+    include/gtest/internal/gtest-param-util.h                                                                                          
+    include/gtest/internal/gtest-port-arch.h                                                                                           
+    include/gtest/internal/gtest-port.h                                                                                                
+    include/gtest/internal/gtest-string.h                                                                                              
+    include/gtest/internal/gtest-type-util.h 
+    include/gtest/internal/custom/gtest.h 
+    include/gtest/internal/custom/gtest-port.h 
+    include/gtest/internal/custom/gtest-printers.h 
+  )
 set_target_properties(gtest PROPERTIES VERSION ${GOOGLETEST_VERSION})
 if(GTEST_HAS_ABSL)
   target_compile_definitions(gtest PUBLIC GTEST_HAS_ABSL=1)
@@ -135,6 +179,11 @@ if(GTEST_HAS_ABSL)
     re2::re2
   )
 endif()
+if(GTEST_BUILD_USING_STD_MODULE)
+  message(STATUS GTEST_BUILD_USING_STD_MODULE=${GTEST_BUILD_USING_STD_MODULE})
+  target_compile_definitions(gtest PRIVATE GTEST_BUILD_USING_STD_MODULE)
+endif()
+
 cxx_library(gtest_main "${cxx_strict}" src/gtest_main.cc)
 set_target_properties(gtest_main PROPERTIES VERSION ${GOOGLETEST_VERSION})
 string(REPLACE ";" "$<SEMICOLON>" dirs "${gtest_build_include_dirs}")
