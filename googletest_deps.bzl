@@ -31,12 +31,21 @@ def googletest_deps():
         )
 
     if not native.existing_rule("rules_cc"):
+        # Currently using rules_cc 0.2.8. To bump to 0.2.16, update strip_prefix and url below
+        # and replace the sha256 with the correct checksum for rules_cc-0.2.16.tar.gz.
         http_archive(
             name = "rules_cc",
             sha256 = "207ea073dd20a705f9e8bc5ac02f5203e9621fc672774bb1a0935aefab7aebfa",
             strip_prefix = "rules_cc-0.2.8",
             url = "https://github.com/bazelbuild/rules_cc/releases/download/0.2.8/rules_cc-0.2.8.tar.gz",
         )
+        # Example for 0.2.16 (UNCOMMENT and update sha256 to enable):
+        # http_archive(
+        #     name = "rules_cc",
+        #     sha256 = "<SHA256_FOR_0.2.16>",
+        #     strip_prefix = "rules_cc-0.2.16",
+        #     url = "https://github.com/bazelbuild/rules_cc/releases/download/0.2.16/rules_cc-0.2.16.tar.gz",
+        # )
 
     if not native.existing_rule("fuchsia_sdk"):
         fake_fuchsia_sdk(
