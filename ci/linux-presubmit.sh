@@ -31,8 +31,7 @@
 
 set -euox pipefail
 
-readonly LINUX_LATEST_CONTAINER="gcr.io/google.com/absl-177019/linux_hybrid-latest:20250430"
-readonly LINUX_GCC_FLOOR_CONTAINER="gcr.io/google.com/absl-177019/linux_gcc-floor:20250430"
+readonly LINUX_LATEST_CONTAINER="gcr.io/google.com/absl-177019/linux_hybrid-latest:20260131"
 
 if [[ -z ${GTEST_ROOT:-} ]]; then
   GTEST_ROOT="$(realpath $(dirname ${0})/..)"
@@ -79,7 +78,7 @@ for cmake_off_on in OFF ON; do
     --tmpfs="/build:exec" \
     --workdir="/build" \
     --rm \
-    --env="CC=/opt/llvm/clang/bin/clang" \
+    --env="CC=/opt/llvm/bin/clang" \
     --env=CXXFLAGS="-Werror -Wdeprecated --gcc-toolchain=/usr/local" \
     ${LINUX_LATEST_CONTAINER} \
     /bin/bash -c "
@@ -99,10 +98,12 @@ time docker run \
   --volume="${GTEST_ROOT}:/src:ro" \
   --workdir="/src" \
   --rm \
-  --env="CC=/usr/local/bin/gcc" \
+  --env="CC=/opt/gcc-9/bin/gcc" \
   --env="BAZEL_CXXOPTS=-std=c++17" \
+  --env="BAZEL_LINKOPTS=-L/opt/gcc-9/lib64:-Wl,-rpath=/opt/gcc-9/lib64" \
+  --env="USE_BAZEL_VERSION=8.5.1" \
   ${DOCKER_EXTRA_ARGS:-} \
-  ${LINUX_GCC_FLOOR_CONTAINER} \
+  ${LINUX_LATEST_CONTAINER} \
   /bin/bash --login -c "
     /usr/local/bin/bazel test ... \
       --copt=\"-Wall\" \
@@ -111,6 +112,7 @@ time docker run \
       --copt=\"-Wundef\" \
       --copt=\"-Wno-error=pragmas\" \
       --enable_bzlmod=false \
+      --enable_workspace=true \
       --features=external_include_paths \
       --keep_going \
       --per_file_copt=\"external/.*@-w\" \
@@ -127,6 +129,7 @@ for std in ${STD}; do
       --rm \
       --env="CC=/usr/local/bin/gcc" \
       --env="BAZEL_CXXOPTS=-std=${std}" \
+      --env="USE_BAZEL_VERSION=8.5.1" \
       ${DOCKER_EXTRA_ARGS:-} \
       ${LINUX_LATEST_CONTAINER} \
       /bin/bash --login -c "
@@ -153,8 +156,9 @@ for std in ${STD}; do
       --volume="${GTEST_ROOT}:/src:ro" \
       --workdir="/src" \
       --rm \
-      --env="CC=/opt/llvm/clang/bin/clang" \
+      --env="CC=/opt/llvm/bin/clang" \
       --env="BAZEL_CXXOPTS=-std=${std}" \
+      --env="USE_BAZEL_VERSION=8.5.1" \
       ${DOCKER_EXTRA_ARGS:-} \
       ${LINUX_LATEST_CONTAINER} \
       /bin/bash --login -c "
