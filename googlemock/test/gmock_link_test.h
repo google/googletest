@@ -327,7 +327,7 @@ TEST(LinkTest, TestInvoke) {
   InvokeHelper test_invoke_helper;
 
   EXPECT_CALL(mock, VoidFromString(_))
-      .WillOnce(Invoke(&InvokeHelper::StaticVoidFromString))
+      .WillOnce(&InvokeHelper::StaticVoidFromString)
       .WillOnce(Invoke(&test_invoke_helper, &InvokeHelper::VoidFromString));
   mock.VoidFromString(nullptr);
   mock.VoidFromString(nullptr);
@@ -360,7 +360,7 @@ TEST(LinkTest, TestWithArg) {
   Mock mock;
 
   EXPECT_CALL(mock, VoidFromString(_))
-      .WillOnce(WithArg<0>(Invoke(&InvokeHelper::StaticVoidFromString)));
+      .WillOnce(WithArg<0>(&InvokeHelper::StaticVoidFromString));
   mock.VoidFromString(nullptr);
 }
 
@@ -369,7 +369,7 @@ TEST(LinkTest, TestWithArgs) {
   Mock mock;
 
   EXPECT_CALL(mock, VoidFromString(_))
-      .WillOnce(WithArgs<0>(Invoke(&InvokeHelper::StaticVoidFromString)));
+      .WillOnce(WithArgs<0>(&InvokeHelper::StaticVoidFromString));
   mock.VoidFromString(nullptr);
 }
 

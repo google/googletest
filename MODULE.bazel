@@ -49,7 +49,7 @@ bazel_dep(
 )
 bazel_dep(
     name = "re2",
-    version = "2024-07-02.bcr.1",
+    version = "2025-11-05.bcr.1",
 )
 
 bazel_dep(

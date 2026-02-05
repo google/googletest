@@ -129,7 +129,7 @@ for std in ${STD}; do
       --rm \
       --env="CC=/usr/local/bin/gcc" \
       --env="BAZEL_CXXOPTS=-std=${std}" \
-      --env="USE_BAZEL_VERSION=8.5.1" \
+      --env="USE_BAZEL_VERSION=9.0.0" \
       ${DOCKER_EXTRA_ARGS:-} \
       ${LINUX_LATEST_CONTAINER} \
       /bin/bash --login -c "
@@ -158,7 +158,7 @@ for std in ${STD}; do
       --rm \
       --env="CC=/opt/llvm/bin/clang" \
       --env="BAZEL_CXXOPTS=-std=${std}" \
-      --env="USE_BAZEL_VERSION=8.5.1" \
+      --env="USE_BAZEL_VERSION=9.0.0" \
       ${DOCKER_EXTRA_ARGS:-} \
       ${LINUX_LATEST_CONTAINER} \
       /bin/bash --login -c "
