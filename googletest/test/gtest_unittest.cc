@@ -375,7 +375,7 @@ TEST(CanonicalizeForStdLibVersioning, LeavesUnversionedNamesUnchanged) {
   EXPECT_EQ("std::bind", CanonicalizeForStdLibVersioning("std::bind"));
   EXPECT_EQ("std::_", CanonicalizeForStdLibVersioning("std::_"));
   EXPECT_EQ("std::__foo", CanonicalizeForStdLibVersioning("std::__foo"));
-  EXPECT_EQ("gtl::__1::x", CanonicalizeForStdLibVersioning("gtl::__1::x"));
+  EXPECT_EQ("absl::__1::x", CanonicalizeForStdLibVersioning("absl::__1::x"));
   EXPECT_EQ("__1::x", CanonicalizeForStdLibVersioning("__1::x"));
   EXPECT_EQ("::__1::x", CanonicalizeForStdLibVersioning("::__1::x"));
 }
