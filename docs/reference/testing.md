@@ -20,9 +20,17 @@ TEST(<em>TestSuiteName</em>, <em>TestName</em>) {
 Defines an individual test named *`TestName`* in the test suite
 *`TestSuiteName`*, consisting of the given statements.
 
-Both arguments *`TestSuiteName`* and *`TestName`* must be valid C++ identifiers
-and must not contain underscores (`_`). Tests in different test suites can have
-the same individual name.
+Both arguments *`TestSuiteName`* and *`TestName`* must be valid C++ identifiers.
+
+Underscores (`_`) are allowed, but identifiers must not:
+
+- start with an underscore followed by an upper-case letter, or
+- contain two consecutive underscores (`__`).
+
+These restrictions follow the C++ standard rules for reserved identifiers.
+
+Tests in different test suites can have the same individual name.
+
 
 The statements within the test body can be any code under test.
 [Assertions](assertions.md) used within the test body determine the outcome of
@@ -40,8 +48,17 @@ Defines an individual test named *`TestName`* that uses the test fixture class
 *`TestFixtureName`*. The test suite name is *`TestFixtureName`*.
 
 Both arguments *`TestFixtureName`* and *`TestName`* must be valid C++
-identifiers and must not contain underscores (`_`). *`TestFixtureName`* must be
-the name of a test fixture class—see
+identifiers.
+
+Underscores (`_`) are allowed, but identifiers must not:
+
+- start with an underscore followed by an upper-case letter, or
+- contain two consecutive underscores (`__`).
+
+These restrictions follow the C++ standard rules for reserved identifiers.
+
+*`TestFixtureName`* must be the name of a test fixture class—see
+
 [Test Fixtures](../primer.md#same-data-multiple-tests).
 
 The statements within the test body can be any code under test.
@@ -61,8 +78,17 @@ test fixture class *`TestFixtureName`*. The test suite name is
 *`TestFixtureName`*.
 
 Both arguments *`TestFixtureName`* and *`TestName`* must be valid C++
-identifiers and must not contain underscores (`_`). *`TestFixtureName`* must be
-the name of a value-parameterized test fixture class—see
+identifiers.
+
+Underscores (`_`) are allowed, but identifiers must not:
+
+- start with an underscore followed by an upper-case letter, or
+- contain two consecutive underscores (`__`).
+
+These restrictions follow the C++ standard rules for reserved identifiers.
+
+*`TestFixtureName`* must be the name of a value-parameterized test fixture class—see
+
 [Value-Parameterized Tests](../advanced.md#value-parameterized-tests).
 
 The statements within the test body can be any code under test. Within the test
