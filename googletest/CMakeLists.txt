@@ -42,12 +42,11 @@ endif()
 # CMake files in this project can refer to the root source directory
 # as ${gtest_SOURCE_DIR} and to the root binary directory as
 # ${gtest_BINARY_DIR}.
-# Language "C" is required for find_package(Threads).
 
 # Project version.
 
 cmake_minimum_required(VERSION 3.13)
-project(gtest VERSION ${GOOGLETEST_VERSION} LANGUAGES CXX C)
+project(gtest VERSION ${GOOGLETEST_VERSION} LANGUAGES CXX)
 
 if (COMMAND set_up_hermetic_build)
   set_up_hermetic_build()
