@@ -5146,8 +5146,10 @@ class ScopedPrematureExitFile {
       // errors are ignored as there's nothing better we can do and we
       // don't want to fail the test because of this.
       FILE* pfile = posix::FOpen(premature_exit_filepath_.c_str(), "w");
-      fwrite("0", 1, 1, pfile);
-      fclose(pfile);
+      if (pfile != nullptr) {
+        fwrite("0", 1, 1, pfile);
+        fclose(pfile);
+      }
     }
   }
 
