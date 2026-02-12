@@ -8,9 +8,9 @@ Our documentation is now live on GitHub Pages at
 https://google.github.io/googletest/. We recommend browsing the documentation on
 GitHub Pages rather than directly in the repository.
 
-#### Release 1.17.0
+#### Release 1.17.1
 
-[Release 1.17.0](https://github.com/google/googletest/releases/tag/v1.17.0) is
+[Release 1.17.1](https://github.com/google/googletest/releases/tag/v1.17.1) is
 now available.
 
 The 1.17.x branch
