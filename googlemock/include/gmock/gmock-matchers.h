@@ -2603,7 +2603,7 @@ class [[nodiscard]] WhenSortedByMatcher {
     // Transforms std::pair<const Key, Value> into std::pair<Key, Value>
     // so that we can match associative containers.
     typedef
-        typename RemoveConstFromKey<typename LhsStlContainer::value_type>::type
+        typename RemoveConstFromKey<internal::ValueType<LhsStlContainer>>::type
             LhsValue;
 
     Impl(const Comparator& comparator, const ContainerMatcher& matcher)
@@ -2670,7 +2670,7 @@ class [[nodiscard]] PointwiseMatcher {
  public:
   typedef internal::StlContainerView<RhsContainer> RhsView;
   typedef typename RhsView::type RhsStlContainer;
-  typedef typename RhsStlContainer::value_type RhsValue;
+  typedef internal::ValueType<RhsStlContainer> RhsValue;
 
   static_assert(!std::is_const<RhsContainer>::value,
                 "RhsContainer type must not be const");
@@ -2700,7 +2700,7 @@ class [[nodiscard]] PointwiseMatcher {
         LhsView;
     typedef typename LhsView::type LhsStlContainer;
     typedef typename LhsView::const_reference LhsStlContainerReference;
-    typedef typename LhsStlContainer::value_type LhsValue;
+    typedef internal::ValueType<LhsStlContainer> LhsValue;
     // We pass the LHS value and the RHS value to the inner matcher by
     // reference, as they may be expensive to copy.  We must use tuple
     // instead of pair here, as a pair cannot hold references (C++ 98,
@@ -2786,7 +2786,7 @@ class [[nodiscard]] QuantifierMatcherImpl : public MatcherInterface<Container> {
   typedef StlContainerView<RawContainer> View;
   typedef typename View::type StlContainer;
   typedef typename View::const_reference StlContainerReference;
-  typedef typename StlContainer::value_type Element;
+  typedef internal::ValueType<StlContainer> Element;
 
   template <typename InnerMatcher>
   explicit QuantifierMatcherImpl(InnerMatcher inner_matcher)
@@ -3600,7 +3600,7 @@ class [[nodiscard]] ElementsAreMatcherImpl
   typedef internal::StlContainerView<RawContainer> View;
   typedef typename View::type StlContainer;
   typedef typename View::const_reference StlContainerReference;
-  typedef typename StlContainer::value_type Element;
+  typedef internal::ValueType<StlContainer> Element;
 
   // Constructs the matcher from a sequence of element values or
   // element matchers.
@@ -3875,7 +3875,7 @@ class [[nodiscard]] UnorderedElementsAreMatcherImpl
   typedef internal::StlContainerView<RawContainer> View;
   typedef typename View::type StlContainer;
   typedef typename View::const_reference StlContainerReference;
-  typedef typename StlContainer::value_type Element;
+  typedef internal::ValueType<StlContainer> Element;
 
   template <typename InputIter>
   UnorderedElementsAreMatcherImpl(UnorderedMatcherRequire::Flags matcher_flags,
@@ -3964,7 +3964,7 @@ class [[nodiscard]] UnorderedElementsAreMatcher {
   operator Matcher<Container>() const {
     typedef GTEST_REMOVE_REFERENCE_AND_CONST_(Container) RawContainer;
     typedef typename internal::StlContainerView<RawContainer>::type View;
-    typedef typename View::value_type Element;
+    typedef internal::ValueType<View> Element;
     typedef ::std::vector<Matcher<const Element&>> MatcherVec;
     MatcherVec matchers;
     matchers.reserve(::std::tuple_size<MatcherTuple>::value);
@@ -3995,7 +3995,7 @@ class [[nodiscard]] ElementsAreMatcher {
 
     typedef GTEST_REMOVE_REFERENCE_AND_CONST_(Container) RawContainer;
     typedef typename internal::StlContainerView<RawContainer>::type View;
-    typedef typename View::value_type Element;
+    typedef internal::ValueType<View> Element;
     typedef ::std::vector<Matcher<const Element&>> MatcherVec;
     MatcherVec matchers;
     matchers.reserve(::std::tuple_size<MatcherTuple>::value);
@@ -4166,7 +4166,7 @@ class [[nodiscard]] OptionalMatcher {
   class Impl : public MatcherInterface<Optional> {
    public:
     typedef GTEST_REMOVE_REFERENCE_AND_CONST_(Optional) OptionalView;
-    typedef typename OptionalView::value_type ValueType;
+    typedef internal::ValueType<OptionalView> ValueType;
     explicit Impl(const ValueMatcher& value_matcher)
         : value_matcher_(MatcherCast<ValueType>(value_matcher)) {}
 
@@ -4493,7 +4493,7 @@ inline internal::UnorderedElementsAreArrayMatcher<T> UnorderedElementsAreArray(
 
 template <typename Container>
 inline internal::UnorderedElementsAreArrayMatcher<
-    typename Container::value_type>
+    internal::ValueType<Container>>
 UnorderedElementsAreArray(const Container& container) {
   return UnorderedElementsAreArray(container.begin(), container.end());
 }
@@ -5073,15 +5073,15 @@ template <typename Tuple2Matcher, typename RhsContainer>
 inline internal::UnorderedElementsAreArrayMatcher<
     typename internal::BoundSecondMatcher<
         Tuple2Matcher,
-        typename internal::StlContainerView<
-            typename std::remove_const<RhsContainer>::type>::type::value_type>>
+        internal::ValueType<typename internal::StlContainerView<
+            typename std::remove_const<RhsContainer>::type>::type>>>
 UnorderedPointwise(const Tuple2Matcher& tuple2_matcher,
                    const RhsContainer& rhs_container) {
   // RhsView allows the same code to handle RhsContainer being a
   // STL-style container and it being a native C-style array.
   typedef typename internal::StlContainerView<RhsContainer> RhsView;
   typedef typename RhsView::type RhsStlContainer;
-  typedef typename RhsStlContainer::value_type Second;
+  typedef internal::ValueType<RhsStlContainer> Second;
   const RhsStlContainer& rhs_stl_container =
       RhsView::ConstReference(rhs_container);
 
@@ -5191,7 +5191,7 @@ inline internal::UnorderedElementsAreArrayMatcher<T> IsSupersetOf(
 
 template <typename Container>
 inline internal::UnorderedElementsAreArrayMatcher<
-    typename Container::value_type>
+    internal::ValueType<Container>>
 IsSupersetOf(const Container& container) {
   return IsSupersetOf(container.begin(), container.end());
 }
@@ -5248,7 +5248,7 @@ inline internal::UnorderedElementsAreArrayMatcher<T> IsSubsetOf(
 
 template <typename Container>
 inline internal::UnorderedElementsAreArrayMatcher<
-    typename Container::value_type>
+    internal::ValueType<Container>>
 IsSubsetOf(const Container& container) {
   return IsSubsetOf(container.begin(), container.end());
 }
@@ -5496,13 +5496,13 @@ inline internal::AllOfArrayMatcher<T> AllOfArray(const T (&array)[N]) {
 }
 
 template <typename Container>
-inline internal::AnyOfArrayMatcher<typename Container::value_type> AnyOfArray(
+inline internal::AnyOfArrayMatcher<internal::ValueType<Container>> AnyOfArray(
     const Container& container) {
   return AnyOfArray(container.begin(), container.end());
 }
 
 template <typename Container>
-inline internal::AllOfArrayMatcher<typename Container::value_type> AllOfArray(
+inline internal::AllOfArrayMatcher<internal::ValueType<Container>> AllOfArray(
     const Container& container) {
   return AllOfArray(container.begin(), container.end());
 }

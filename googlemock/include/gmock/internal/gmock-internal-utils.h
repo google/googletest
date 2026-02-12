@@ -47,8 +47,13 @@
 #include <utility>
 #include <vector>
 
+
 #include "gmock/internal/gmock-port.h"
 #include "gtest/gtest.h"
+
+#if GTEST_INTERNAL_HAS_STD_RANGES
+#include <ranges>
+#endif
 
 namespace testing {
 
@@ -352,6 +357,45 @@ class [[nodiscard]] StlContainerView {
   static type Copy(const RawContainer& container) { return container; }
 };
 
+#if GTEST_INTERNAL_HAS_STD_RANGES
+
+// This specialization is used when RawContainer models a C++20 range view.
+template <std::ranges::view View>
+class [[nodiscard]] StlContainerView<View> {
+ public:
+  using type = View;
+
+#if GTEST_INTERNAL_HAS_STD_RANGES_AS_CONST
+
+  // Use std::ranges::views::as_const from C++23 if that's available.
+  using const_reference = decltype(std::ranges::views::as_const(std::declval<View&>()));
+
+  static const_reference ConstReference(View view) {
+    return std::ranges::views::as_const(view);
+  }
+
+#else
+
+  // Implement const conversion behavior using transform.
+  struct AsConst {
+    const auto& operator()(std::ranges::range_reference_t<View> elm) const {
+      return std::as_const(elm);
+    }
+  };
+
+  using const_reference = std::ranges::transform_view<View, AsConst>;
+
+  static const_reference ConstReference(View view) {
+    return std::ranges::views::transform(view, AsConst());
+  }
+
+#endif
+
+  static type Copy(View view) { return view; }
+};
+
+#endif
+
 // This specialization is used when RawContainer is a native array type.
 template <typename Element, size_t N>
 class [[nodiscard]] StlContainerView<Element[N]> {
@@ -474,6 +518,40 @@ template <size_t I, typename T>
 using TupleElement = typename std::tuple_element<I, T>::type;
 
 bool Base64Unescape(const std::string& encoded, std::string* decoded);
+
+#if GTEST_INTERNAL_HAS_STD_RANGES
+
+// This is a helper to cause substitution failure in `ValueType<T>`, consistent
+// with the original behavior.
+struct ValueTypeIllFormed {};
+
+// Modern implementation: Try several strategies to deduce the value type.
+//
+// 1) If `T` has a nested `value_type`, use that.
+// 2) If `T` satisfies `std::ranges::range`, use `std::ranges::range_value_t<T>`.
+// 3) Ill-formed otherwise.
+template <typename T>
+using ValueType = typename decltype([] {
+  if constexpr (requires { typename T::value_type; }) {
+    return std::type_identity<typename T::value_type>{};
+  } else if constexpr (std::ranges::range<T>) {
+    return std::type_identity<std::ranges::range_value_t<T>>{};
+  } else {
+    // Other branches returning `std::type_identity<...>` allows checking
+    // `[...]::type` on the return value, which in turn allows us to fallback to
+    // ill-formedness neatly in this branch since `ValueTypeIllFormed`
+    // doesn't have a member `type`.
+    return ValueTypeIllFormed{};
+  }
+}())::type;
+
+#else
+
+// Legacy implementation: Assume T has a nested `value_type`. Ill-formed otherwise.
+template <typename T>
+using ValueType = typename T::value_type;
+
+#endif
 
 GTEST_DISABLE_MSC_WARNINGS_POP_()  // 4100 4805
 
