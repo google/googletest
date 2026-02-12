@@ -125,7 +125,7 @@ cc_test(
     name = "googletest-listener-test",
     size = "small",
     srcs = ["googletest-listener-test.cc"],
-    deps = ["//:gtest_main"],
+    deps = ["//:gtest"],
 )
 
 cc_test(
@@ -358,7 +358,7 @@ cc_test(
     name = "gtest_skip_in_environment_setup_test",
     size = "small",
     srcs = ["gtest_skip_in_environment_setup_test.cc"],
-    deps = ["//:gtest_main"],
+    deps = ["//:gtest"],
 )
 
 py_test(
@@ -417,7 +417,7 @@ cc_binary(
     name = "googletest-catch-exceptions-no-ex-test_",
     testonly = 1,
     srcs = ["googletest-catch-exceptions-test_.cc"],
-    deps = ["//:gtest_main"],
+    deps = ["//:gtest"],
 )
 
 cc_binary(
@@ -425,7 +425,7 @@ cc_binary(
     testonly = 1,
     srcs = ["googletest-catch-exceptions-test_.cc"],
     copts = ["-fexceptions"],
-    deps = ["//:gtest_main"],
+    deps = ["//:gtest"],
 )
 
 py_test(
