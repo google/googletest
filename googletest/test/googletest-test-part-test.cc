@@ -45,7 +45,7 @@ class TestPartResultTest : public Test {
   TestPartResultTest()
       : r1_(TestPartResult::kSuccess, "foo/bar.cc", 10, "Success!"),
         r2_(TestPartResult::kNonFatalFailure, "foo/bar.cc", -1, "Failure!"),
-        r3_(TestPartResult::kFatalFailure, nullptr, -1, "Failure!"),
+        r3_(TestPartResult::kFatalFailure, "", -1, "Failure!"),
         r4_(TestPartResult::kSkip, "foo/bar.cc", 2, "Skipped!") {}
 
   TestPartResult r1_, r2_, r3_, r4_;
