@@ -189,6 +189,17 @@ GTEST_API_ bool InDeathTestChild();
 #define EXPECT_DEATH(statement, matcher) \
   EXPECT_EXIT(statement, ::testing::internal::ExitedUnsuccessfully, matcher)
 
+// check if it is a child of ExceptionTest
+#define EXPECT_NO_COREFILE_DEATH(statement, matcher)                           \
+  do {                                                                         \
+    if (dynamic_cast<::testing::ExceptionTest *>(this)) {                      \
+      EXPECT_DEATH(statement, matcher);                                        \
+    } else {                                                                   \
+      EXPECT_TRUE(false) << "EXPECT_NO_COREFILE_DEATH can only be used in "    \
+                            "::testing::ExceptionTest and its subclass";       \
+    }                                                                          \
+  } while (0)
+
 // Two predicate classes that can be used in {ASSERT,EXPECT}_EXIT*:
 
 // Tests that an exit code describes a normal exit with a given exit code.
