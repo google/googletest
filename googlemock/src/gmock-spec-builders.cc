@@ -471,6 +471,7 @@ struct MockObjectState {
   int first_used_line;
   ::std::string first_used_test_suite;
   ::std::string first_used_test;
+  ::std::string name;
   bool leakable;  // true if and only if it's OK to leak the object.
   FunctionMockers function_mockers;  // All registered methods of the object.
 };
@@ -634,6 +635,22 @@ bool Mock::VerifyAndClear(void* mock_obj)
   return VerifyAndClearExpectationsLocked(mock_obj);
 }
 
+// Set name for mock. Will be used in output.
+// Useful when multiple instances of same mock is required.
+void Mock::SetMockName(void* mock_obj, const std::string& mock_name)
+    GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex) {
+  internal::MutexLock l(&internal::g_gmock_mutex);
+  g_mock_object_registry.states()[mock_obj].name = mock_name;
+}
+
+// Returns mock name which was set using SetMockName
+std::string Mock::GetMockName(const void* mock_obj)
+    GTEST_LOCK_EXCLUDED_(internal::g_gmock_mutex) {
+  internal::MutexLock l(&internal::g_gmock_mutex);
+  if (g_mock_object_registry.states().count(mock_obj) == 0) return "";
+  return g_mock_object_registry.states()[mock_obj].name;
+}
+
 // Verifies and clears all expectations on the given mock object.  If
 // the expectations aren't satisfied, generates one or more Google
 // Test non-fatal failures and returns false.
@@ -712,14 +729,13 @@ void Mock::UnregisterLocked(internal::UntypedFunctionMockerBase* mocker)
   internal::g_gmock_mutex.AssertHeld();
   for (MockObjectRegistry::StateMap::iterator it =
            g_mock_object_registry.states().begin();
-       it != g_mock_object_registry.states().end(); ++it) {
+       it != g_mock_object_registry.states().end();) {
     FunctionMockers& mockers = it->second.function_mockers;
-    if (mockers.erase(mocker) > 0) {
-      // mocker was in mockers and has been just removed.
-      if (mockers.empty()) {
-        g_mock_object_registry.states().erase(it);
-      }
-      return;
+    mockers.erase(mocker);
+    if (mockers.empty()) {
+      it = g_mock_object_registry.states().erase(it);
+    } else {
+      ++it;
     }
   }
 }
