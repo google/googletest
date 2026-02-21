@@ -87,10 +87,10 @@ TEST(InitGoogleMockTest, ParsesSingleFlag) {
 
 TEST(InitGoogleMockTest, ParsesMultipleFlags) {
   int old_default_behavior = GMOCK_FLAG_GET(default_mock_behavior);
-  const wchar_t* argv[] = {L"foo.exe", L"--gmock_verbose=info",
-                           L"--gmock_default_mock_behavior=2", nullptr};
+  const char* argv[] = {"foo.exe", "--gmock_verbose=info",
+                        "--gmock_default_mock_behavior=2", nullptr};
 
-  const wchar_t* new_argv[] = {L"foo.exe", nullptr};
+  const char* new_argv[] = {"foo.exe", nullptr};
 
   TestInitGoogleMock(argv, new_argv, "info");
   EXPECT_EQ(2, GMOCK_FLAG_GET(default_mock_behavior));
