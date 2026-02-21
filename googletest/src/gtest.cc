@@ -4181,22 +4181,7 @@ std::string FormatTimeInMillisAsSeconds(TimeInMillis ms) {
 }
 
 static bool PortableLocaltime(time_t seconds, struct tm* out) {
-#if defined(_MSC_VER)
-  return localtime_s(out, &seconds) == 0;
-#elif defined(__MINGW32__) || defined(__MINGW64__)
-  // MINGW <time.h> provides neither localtime_r nor localtime_s, but uses
-  // Windows' localtime(), which has a thread-local tm buffer.
-  struct tm* tm_ptr = localtime(&seconds);  // NOLINT
-  if (tm_ptr == nullptr) return false;
-  *out = *tm_ptr;
-  return true;
-#elif defined(__STDC_LIB_EXT1__)
-  // Uses localtime_s when available as localtime_r is only available from
-  // C23 standard.
-  return localtime_s(&seconds, out) != nullptr;
-#else
-  return localtime_r(&seconds, out) != nullptr;
-#endif
+  return internal::LocalTime(seconds, out);
 }
 
 // Converts the given epoch time in milliseconds to a date string in the ISO
