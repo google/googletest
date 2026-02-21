@@ -199,6 +199,8 @@ function(cxx_library_with_type name type cxx_flags)
         INSTALL_RPATH "$ORIGIN")
     endif()
   endif()
+  target_compile_definitions(${name} INTERFACE
+    $<INSTALL_INTERFACE:GTEST_HAS_PTHREAD=$<BOOL:${GTEST_HAS_PTHREAD}>>)
   if (DEFINED GTEST_HAS_PTHREAD)
     target_link_libraries(${name} PUBLIC Threads::Threads)
   endif()
