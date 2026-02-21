@@ -286,6 +286,10 @@ using testing::internal::GetCapturedStdout;
 using testing::internal::ThreadWithParam;
 #endif
 
+#if GTEST_INTERNAL_HAS_STRING_VIEW
+using testing::internal::StringView;
+#endif
+
 class TestingVector : public std::vector<int> {};
 
 ::std::ostream& operator<<(::std::ostream& os, const TestingVector& vector) {
@@ -2553,6 +2557,17 @@ TEST(StringAssertionTest, ASSERT_STRCASENE) {
   EXPECT_FATAL_FAILURE(ASSERT_STRCASENE("Hi", "hi"), "(ignoring case)");
 }
 
+#if GTEST_INTERNAL_HAS_STRING_VIEW
+// Tests correct mapping to the C-String functions
+TEST(StringAssertionTest, StringView) {
+  ASSERT_STREQ(StringView("hi"), StringView("hi"));
+  ASSERT_STREQ(StringView("hi"), "hi");
+  ASSERT_STRNE("hi", StringView("hi2"));
+  ASSERT_STRCASEEQ(StringView("hi"), "Hi");
+  ASSERT_STRCASENE("hi1", StringView("Hi2"));
+}
+#endif  // GTEST_INTERNAL_HAS_STRING_VIEW
+
 // Tests *_STREQ on wide strings.
 TEST(StringAssertionTest, STREQ_Wide) {
   // NULL strings.
@@ -2608,6 +2623,16 @@ TEST(StringAssertionTest, STRNE_Wide) {
   // The streaming variation.
   ASSERT_STRNE(L"abc\x8119", L"abc\x8120") << "This shouldn't happen";
 }
+
+#if __cpp_lib_string_view >= 201803L
+// Tests correct mapping to the C-String functions
+TEST(StringAssertionTest, StringView_Wide) {
+  using std::wstring_view;
+  ASSERT_STREQ(wstring_view(L"hi"), wstring_view(L"hi"));
+  ASSERT_STREQ(wstring_view(L"hi"), L"hi");
+  ASSERT_STRNE(L"hi", wstring_view(L"hi2"));
+}
+#endif
 
 // Tests for ::testing::IsSubstring().
 
