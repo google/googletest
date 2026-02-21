@@ -3,6 +3,7 @@
 
 cmake_minimum_required(VERSION 3.16)
 
+cmake_policy(SET CMP0129 NEW)
 project(googletest-distribution)
 set(GOOGLETEST_VERSION 1.16.0)
 
