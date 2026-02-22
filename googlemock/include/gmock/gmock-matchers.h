@@ -913,8 +913,10 @@ struct ci_matcher_supported : std::false_type {};
 template<>
 struct ci_matcher_supported<char> : std::true_type {};
 
+#if GTEST_HAS_STD_WSTRING
 template<>
 struct ci_matcher_supported<wchar_t> : std::true_type {};
+#endif  // GTEST_HAS_STD_WSTRING
 
 // String matchers.
 
@@ -965,8 +967,14 @@ class [[nodiscard]] StrEqualityMatcher {
   bool MatchAndExplain(const MatcheeStringType& s,
                        MatchResultListener* /* listener */) const {
     const StringType s2(s);
-    const bool eq = MatchStrings(s2, ci_matcher_supported<typename StringType::value_type>{});
-    return expect_eq_ == eq;
+    if constexpr(ci_matcher_supported<typename StringType::value_type>::value) {
+      const bool eq = CaseSensitive::value ?
+          s2 == string_ : CaseInsensitiveStringEquals(s2, string_);
+      return expect_eq_ == eq;
+    } else {
+      const bool eq = s2 == string_;
+      return expect_eq_ == eq;
+    }
   }
 
   void DescribeTo(::std::ostream* os) const {
@@ -978,21 +986,10 @@ class [[nodiscard]] StrEqualityMatcher {
   }
 
  private:
-  template <typename S>
-  bool MatchStrings(const S& s2, std::true_type) const {
-    return CaseSensitive::value ? s2 == string_
-                           : CaseInsensitiveStringEquals(s2, string_);
-  }
-
-  template <typename S>
-  bool MatchStrings(const S& s2, std::false_type) const {
-    return s2 == string_;
-  }
-
   void DescribeToHelper(bool expect_eq, ::std::ostream* os) const {
     *os << (expect_eq ? "is " : "isn't ");
     *os << "equal to ";
-    if (!CaseSensitive::value) {
+    if constexpr(!CaseSensitive::value) {
       *os << "(ignoring case) ";
     }
     UniversalPrint(string_, os);
@@ -4808,7 +4805,7 @@ internal::ResultOfMatcher<Callable, InnerMatcher> ResultOf(
 
 // Matches a string equal to str.
 template <typename T = std::string,
-          typename CharT = internal::char_type_traits_t<T>>
+          typename CharT = internal::get_char_type_t<T>>
 PolymorphicMatcher<internal::StrEqualityMatcher<std::basic_string<CharT>>> StrEq(
     const internal::StringLike<T>& str) {
   return MakePolymorphicMatcher(
@@ -4817,7 +4814,7 @@ PolymorphicMatcher<internal::StrEqualityMatcher<std::basic_string<CharT>>> StrEq
 
 // Matches a string not equal to str.
 template <typename T = std::string,
-          typename CharT = internal::char_type_traits_t<T>>
+          typename CharT = internal::get_char_type_t<T>>
 PolymorphicMatcher<internal::StrEqualityMatcher<std::basic_string<CharT>>> StrNe(
     const internal::StringLike<T>& str) {
   return MakePolymorphicMatcher(
@@ -4826,7 +4823,7 @@ PolymorphicMatcher<internal::StrEqualityMatcher<std::basic_string<CharT>>> StrNe
 
 // Matches a string equal to str, ignoring case.
 template <typename T = std::string,
-          typename CharT = internal::char_type_traits_t<T>>
+          typename CharT = internal::get_char_type_t<T>>
 PolymorphicMatcher<internal::StrEqualityMatcher<std::basic_string<CharT>, std::false_type>> StrCaseEq(
     const internal::StringLike<T>& str) {
   return MakePolymorphicMatcher(
@@ -4836,7 +4833,7 @@ PolymorphicMatcher<internal::StrEqualityMatcher<std::basic_string<CharT>, std::f
 
 // Matches a string not equal to str, ignoring case.
 template <typename T = std::string,
-          typename CharT = internal::char_type_traits_t<T>>
+          typename CharT = internal::get_char_type_t<T>>
 PolymorphicMatcher<internal::StrEqualityMatcher<std::basic_string<CharT>, std::false_type>> StrCaseNe(
     const internal::StringLike<T>& str) {
   return MakePolymorphicMatcher(
@@ -4847,7 +4844,7 @@ PolymorphicMatcher<internal::StrEqualityMatcher<std::basic_string<CharT>, std::f
 // Creates a matcher that matches any string, std::string, or C string
 // that contains the given substring.
 template <typename T = std::string,
-          typename CharT = internal::char_type_traits_t<T>>
+          typename CharT = internal::get_char_type_t<T>>
 PolymorphicMatcher<internal::HasSubstrMatcher<std::basic_string<CharT>>> HasSubstr(
     const internal::StringLike<T>& substring) {
   return MakePolymorphicMatcher(
@@ -4856,7 +4853,7 @@ PolymorphicMatcher<internal::HasSubstrMatcher<std::basic_string<CharT>>> HasSubs
 
 // Matches a string that starts with 'prefix' (case-sensitive).
 template <typename T = std::string,
-          typename CharT = internal::char_type_traits_t<T>>
+          typename CharT = internal::get_char_type_t<T>>
 PolymorphicMatcher<internal::StartsWithMatcher<std::basic_string<CharT>>> StartsWith(
     const internal::StringLike<T>& prefix) {
   return MakePolymorphicMatcher(
@@ -4865,7 +4862,7 @@ PolymorphicMatcher<internal::StartsWithMatcher<std::basic_string<CharT>>> Starts
 
 // Matches a string that ends with 'suffix' (case-sensitive).
 template <typename T = std::string,
-          typename CharT = internal::char_type_traits_t<T>>
+          typename CharT = internal::get_char_type_t<T>>
 PolymorphicMatcher<internal::EndsWithMatcher<std::basic_string<CharT>>> EndsWith(
     const internal::StringLike<T>& suffix) {
   return MakePolymorphicMatcher(

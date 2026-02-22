@@ -815,64 +815,31 @@ class [[nodiscard]] ImplicitCastEqMatcher {
   StoredRhs stored_rhs_;
 };
 
-// Backported std::remove_cvref_t (since C++20)
-template<typename T>
-struct remove_cvref {
-  using type = std::remove_cv_t<std::remove_reference_t<T>>;
+template<typename T, typename CharT>
+struct maybe_stringish : std::bool_constant<std::is_constructible_v<std::basic_string<CharT>, T>> {
+  using type = CharT;
+};
+
+struct default_char_type : std::true_type
+{
+    using type = char;
 };
 
 template<typename T>
-using remove_cvref_t = typename remove_cvref<T>::type;
-
-// Character type detecting traits
-// It is used to deduct the CharT (Character Trait) out of
-// [const] char/wchar_t/char8_t/char16_t/char32_t *, basic_string<...>, basic_string_view<...>
-
-template <typename T>
-struct is_char_type : std::false_type {};
-
-template <> struct is_char_type<char>     : std::true_type {};
-template <> struct is_char_type<char16_t> : std::true_type {};
-template <> struct is_char_type<char32_t> : std::true_type {};
-
+using get_char_type_t = typename std::disjunction<
+    maybe_stringish<T, char>,
 #if GTEST_HAS_STD_WSTRING
-template <> struct is_char_type<wchar_t>  : std::true_type {};
+    maybe_stringish<T, wchar_t>,
 #endif  // GTEST_HAS_STD_WSTRING
-
+    maybe_stringish<T, char16_t>,
+    maybe_stringish<T, char32_t>,
 #ifdef __cpp_lib_char8_t
-template <> struct is_char_type<char8_t>  : std::true_type {};
+    maybe_stringish<T, char8_t>,
 #endif  // __cpp_lib_char8_t
+    default_char_type  // we will default to char anyway
+  >::type;
 
-template <typename T>
-struct type_identity { using type = T; };
-
-template <typename T, typename = void>
-struct char_type_traits_impl {};
-
-template <typename CharT, typename Traits, typename Alloc>
-struct char_type_traits_impl<std::basic_string<CharT, Traits, Alloc>,
-        std::void_t<std::enable_if_t<is_char_type<std::remove_cv_t<CharT>>::value>>> :
-    type_identity<CharT> {};
-
-template <typename CharT, typename Traits>
-struct char_type_traits_impl<std::basic_string_view<CharT, Traits>,
-        std::void_t<std::enable_if_t<is_char_type<std::remove_cv_t<CharT>>::value>>> :
-    type_identity<CharT> {};
-
-template <typename CharT>
-struct char_type_traits_impl<CharT*,
-        std::void_t<std::enable_if_t<is_char_type<std::remove_cv_t<CharT>>::value>>> :
-    type_identity<std::remove_cv_t<CharT>> {};
-
-template <typename T>
-struct char_type_traits : char_type_traits_impl<std::decay_t<remove_cvref_t<T>>> {};
-
-template<typename T>
-using char_type_traits_t = typename char_type_traits<T>::type;
-
-template <typename T,
-          typename = std::enable_if_t<
-                  std::is_constructible_v<std::basic_string<char_type_traits_t<T>>, T>>>
+template<typename T, typename = std::enable_if_t<std::is_constructible_v<std::basic_string<get_char_type_t<T>>, T>>>
 using StringLike = T;
 
 // Implements polymorphic matchers MatchesRegex(regex) and

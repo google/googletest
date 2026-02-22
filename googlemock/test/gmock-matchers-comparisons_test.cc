@@ -1364,6 +1364,57 @@ TEST(StrEqTest, AllowsWideChars) {
 #endif  // GTEST_HAS_STD_WSTRING
 }
 
+TEST(StrEqTest, AllowsCustomStringLikeType) {
+  struct MyString {
+    operator std::string() const { return std::string("Hello"); }
+  };
+
+  Matcher<const char*> m = StrEq(MyString{});
+  EXPECT_TRUE(m.Matches("Hello"));
+  EXPECT_FALSE(m.Matches("hello"));
+  EXPECT_FALSE(m.Matches(nullptr));
+
+#if GTEST_HAS_STD_WSTRING
+  struct MyWString {
+    operator std::wstring() const { return std::wstring(L"Hello"); }
+  };
+
+  Matcher<const wchar_t*> mw = StrEq(MyWString{});
+  EXPECT_TRUE(mw.Matches(L"Hello"));
+  EXPECT_FALSE(mw.Matches(L"hello"));
+  EXPECT_FALSE(mw.Matches(nullptr));
+#endif  // GTEST_HAS_STD_WSTRING
+
+  struct MyU16String {
+    operator std::u16string() const { return std::u16string(u"Hello"); }
+  };
+
+  Matcher<const char16_t*> m16 = StrEq(MyU16String{});
+  EXPECT_TRUE(m16.Matches(u"Hello"));
+  EXPECT_FALSE(m16.Matches(u"hello"));
+  EXPECT_FALSE(m16.Matches(nullptr));
+
+  struct MyU32String {
+    operator std::u32string() const { return std::u32string(U"Hello"); }
+  };
+
+  Matcher<const char32_t*> m32 = StrEq(MyU32String{});
+  EXPECT_TRUE(m32.Matches(U"Hello"));
+  EXPECT_FALSE(m32.Matches(U"hello"));
+  EXPECT_FALSE(m32.Matches(nullptr));
+
+#ifdef __cpp_lib_char8_t
+  struct MyU8String {
+    operator std::u8string() const { return std::u8string(u8"Hello"); }
+  };
+
+  Matcher<const char8_t*> m8 = StrEq(MyU8String{});
+  EXPECT_TRUE(m8.Matches(u8"Hello"));
+  EXPECT_FALSE(m8.Matches(u8"hello"));
+  EXPECT_FALSE(m8.Matches(nullptr));
+#endif  // __cpp_lib_char8_t
+}
+
 TEST(StrNeTest, MatchesUnequalString) {
   Matcher<const char*> m = StrNe("Hello");
   EXPECT_TRUE(m.Matches(""));
