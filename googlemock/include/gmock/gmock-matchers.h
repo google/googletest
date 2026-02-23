@@ -2821,6 +2821,7 @@ class [[nodiscard]] QuantifierMatcherImpl : public MatcherInterface<Container> {
     StlContainerReference stl_container = View::ConstReference(container);
     size_t i = 0;
     std::vector<size_t> match_elements;
+    match_elements.reserve(stl_container.size());
     for (auto it = stl_container.begin(); it != stl_container.end();
          ++it, ++i) {
       StringMatchResultListener inner_listener;
@@ -3591,6 +3592,18 @@ class [[nodiscard]] FieldsAreMatcher {
   std::tuple<Inner...> matchers_;
 };
 
+// Returns the distance between [first, last) if known, otherwise 0.
+template <typename Iter>
+size_t DistanceIfKnown(Iter first, Iter last) {
+  if constexpr (std::is_base_of_v<
+                    std::forward_iterator_tag,
+                    typename std::iterator_traits<Iter>::iterator_category>) {
+    return std::distance(first, last);
+  } else {
+    return 0;
+  }
+}
+
 // Implements ElementsAre() and ElementsAreArray().
 template <typename Container>
 class [[nodiscard]] ElementsAreMatcherImpl
@@ -3606,6 +3619,7 @@ class [[nodiscard]] ElementsAreMatcherImpl
   // element matchers.
   template <typename InputIter>
   ElementsAreMatcherImpl(InputIter first, InputIter last) {
+    matchers_.reserve(DistanceIfKnown(first, last));
     while (first != last) {
       matchers_.push_back(MatcherCast<const Element&>(*first++));
     }
@@ -3881,9 +3895,11 @@ class [[nodiscard]] UnorderedElementsAreMatcherImpl
   UnorderedElementsAreMatcherImpl(UnorderedMatcherRequire::Flags matcher_flags,
                                   InputIter first, InputIter last)
       : UnorderedElementsAreMatcherImplBase(matcher_flags) {
+    matchers_.reserve(DistanceIfKnown(first, last));
     for (; first != last; ++first) {
       matchers_.push_back(MatcherCast<const Element&>(*first));
     }
+    matcher_describers().reserve(matchers_.size());
     for (const auto& m : matchers_) {
       matcher_describers().push_back(m.GetDescriber());
     }
@@ -3917,6 +3933,7 @@ class [[nodiscard]] UnorderedElementsAreMatcherImpl
                               ::std::vector<std::string>* element_printouts,
                               MatchResultListener* listener) const {
     element_printouts->clear();
+    element_printouts->reserve(DistanceIfKnown(elem_first, elem_last));
     ::std::vector<char> did_match;
     size_t num_elements = 0;
     DummyMatchResultListener dummy;
@@ -5087,6 +5104,7 @@ UnorderedPointwise(const Tuple2Matcher& tuple2_matcher,
 
   // Create a matcher for each element in rhs_container.
   ::std::vector<internal::BoundSecondMatcher<Tuple2Matcher, Second>> matchers;
+  matchers.reserve(rhs_stl_container.size());
   for (auto it = rhs_stl_container.begin(); it != rhs_stl_container.end();
        ++it) {
     matchers.push_back(internal::MatcherBindSecond(tuple2_matcher, *it));
