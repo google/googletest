@@ -885,7 +885,11 @@ class PositiveAndNegativeUnitTestFilter {
   // and does not match the negative filter.
   bool MatchesTest(const std::string& test_suite_name,
                    const std::string& test_name) const {
+#ifdef GTEST_HAS_ABSL
+    return MatchesName(absl::StrCat(test_suite_name, ".", test_name));
+#else
     return MatchesName(test_suite_name + "." + test_name);
+#endif
   }
 
   // Returns true if and only if name matches the positive filter and does not
