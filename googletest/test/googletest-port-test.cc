@@ -239,7 +239,7 @@ TEST(GtestCheckSyntaxTest, WorksWithSwitch) {
   }
 
   switch (0)
-  case 0:
+  default:
     GTEST_CHECK_(true) << "Check failed in switch case";
 }
 

@@ -63,6 +63,7 @@ class MyEnvironment : public testing::Environment {
       case FATAL_FAILURE:
         FAIL() << "Expected fatal failure in global set-up.";
         break;
+      case NO_FAILURE:
       default:
         break;
     }
