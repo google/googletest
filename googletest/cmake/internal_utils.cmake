@@ -28,15 +28,6 @@ macro(fix_default_compiler_settings_)
              CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
              CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
       if (NOT BUILD_SHARED_LIBS AND NOT gtest_force_shared_crt)
-        # When Google Test is built as a shared library, it should also use
-        # shared runtime libraries. Otherwise, it may end up with multiple
-        # copies of runtime library data in different modules, resulting in
-        # hard-to-find crashes. When it is built as a static library, it is
-        # preferable to use CRT as static libraries, as we don't have to rely
-        # on CRT DLLs being available. CMake always defaults to using shared
-        # CRT libraries, so we override that default here.
-        string(REPLACE "/MD" "-MT" ${flag_var} "${${flag_var}}")
-
         # When using Ninja with Clang, static builds pass -D_DLL on Windows.
         # This is incorrect and should not happen, so we fix that here.
         string(REPLACE "-D_DLL" "" ${flag_var} "${${flag_var}}")
@@ -70,7 +61,19 @@ macro(config_compiler_and_linker)
   endif()
 
   fix_default_compiler_settings_()
+
   if (MSVC)
+    # When Google Test is built as a shared library, it should also use
+    # shared runtime libraries. Otherwise, it may end up with multiple
+    # copies of runtime library data in different modules, resulting in
+    # hard-to-find crashes. When it is built as a static library, it is
+    # preferable to use CRT as static libraries, as we don't have to rely
+    # on CRT DLLs being available. CMake defaults to using shared
+    # CRT libraries, so we change that here.
+    if (NOT BUILD_SHARED_LIBS AND NOT gtest_force_shared_crt AND NOT DEFINED CMAKE_MSVC_RUNTIME_LIBRARY)
+      set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    endif()
+
     # Newlines inside flags variables break CMake's NMake generator.
     # TODO(vladl@google.com): Add -RTCs and -RTCu to debug builds.
     set(cxx_base_flags "-GS -W4 -WX -wd4251 -wd4275 -nologo -J")
