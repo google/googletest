@@ -162,10 +162,17 @@ TEST(TestSuiteName, TestName) {
 
 `TEST()` arguments go from general to specific. The *first* argument is the name
 of the test suite, and the *second* argument is the test's name within the test
-suite. Both names must be valid C++ identifiers, and they should not contain any
-underscores (`_`). A test's *full name* consists of its containing test suite
-and its individual name. Tests from different test suites can have the same
-individual name.
+suite. Both names must be valid C++ identifiers.
+
+Underscores (`_`) are allowed, but certain patterns are prohibited by the C++
+standard, including identifiers that begin with an underscore followed by an
+upper-case letter or that contain consecutive underscores (`__`). In addition,
+some underscore combinations may cause internal name collisions in generated
+test class names.
+
+A test's *full name* consists of its containing test suite and its individual
+name. Tests from different test suites can have the same individual name.
+
 
 For example, let's take a simple integer function:
 
