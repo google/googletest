@@ -48,7 +48,7 @@ with the following content:
 
 # Choose the most recent version available at
 # https://registry.bazel.build/modules/googletest
-bazel_dep(name = "googletest", version = "1.17.0")
+bazel_dep(name = "googletest", version = "1.17.1")
 ```
 
 Now you're ready to build C++ code that uses GoogleTest.

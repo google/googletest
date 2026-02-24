@@ -32,7 +32,7 @@
 
 module(
     name = "googletest",
-    version = "head",
+    version = "1.17.1",
     compatibility_level = 1,
 )
 
@@ -54,7 +54,7 @@ bazel_dep(
 
 bazel_dep(
     name = "rules_cc",
-    version = "0.2.8"
+    version = "0.2.16"
 )
 
 bazel_dep(

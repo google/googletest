@@ -33,9 +33,9 @@ def googletest_deps():
     if not native.existing_rule("rules_cc"):
         http_archive(
             name = "rules_cc",
-            sha256 = "207ea073dd20a705f9e8bc5ac02f5203e9621fc672774bb1a0935aefab7aebfa",
-            strip_prefix = "rules_cc-0.2.8",
-            url = "https://github.com/bazelbuild/rules_cc/releases/download/0.2.8/rules_cc-0.2.8.tar.gz",
+            sha256 = "458B658277BA51B4730EA7A2020EFDF1C6DCADF7D30DE72E37F4308277FA8C01",
+            strip_prefix = "rules_cc-0.2.16",
+            url = "https://github.com/bazelbuild/rules_cc/releases/download/0.2.16/rules_cc-0.2.16.tar.gz",
         )
 
     if not native.existing_rule("fuchsia_sdk"):
