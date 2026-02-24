@@ -550,8 +550,8 @@ MockObjectRegistry g_mock_object_registry;
 // uninteresting method is called.  Protected by g_gmock_mutex.
 std::unordered_map<uintptr_t, internal::CallReaction>&
 UninterestingCallReactionMap() {
-  static auto* map = new std::unordered_map<uintptr_t, internal::CallReaction>;
-  return *map;
+  static std::unordered_map<uintptr_t, internal::CallReaction> map;
+  return map;
 }
 
 // Sets the reaction Google Mock should have when an uninteresting
