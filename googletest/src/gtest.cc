@@ -2611,7 +2611,7 @@ bool Test::HasSameFixtureClass() {
           << "test " << TEST_F_name << " is defined using TEST_F but\n"
           << "test " << TEST_name << " is defined using TEST.  You probably\n"
           << "want to change the TEST to TEST_F or move it to another test\n"
-          << "case.";
+          << "suite.";
     } else {
       // Two fixture classes with the same name appear in two different
       // namespaces, which is not allowed. Tell the user how to fix this.
