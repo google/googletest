@@ -302,6 +302,16 @@ struct disjunction<P1, Ps...>
 template <typename...>
 using void_t = void;
 
+template <template <class...> class Template, class T>
+struct is_specialization_of : std::false_type {};
+
+template <template <class...> class Template, class... Ts>
+struct is_specialization_of<Template, Template<Ts...>> : std::true_type {};
+
+template <typename T>
+using is_tuple_like = is_specialization_of<std::tuple,
+                                           typename std::decay<T>::type>;
+
 // Detects whether an expression of type `From` can be implicitly converted to
 // `To` according to [conv]. In C++17, [conv]/3 defines this as follows:
 //
@@ -456,6 +466,8 @@ class [[nodiscard]] OnceAction<Result(Args...)> final {
                     // traits above.
                     internal::negation<std::is_same<
                         OnceAction, typename std::decay<Callable>::type>>,
+                    // Never treat tuple wrappers as callables.
+                    internal::negation<internal::is_tuple_like<Callable>>,
                     IsDirectlyCompatible<Callable>>  //
                 ::value,
                 int>::type = 0>
@@ -473,6 +485,8 @@ class [[nodiscard]] OnceAction<Result(Args...)> final {
                     // traits above.
                     internal::negation<std::is_same<
                         OnceAction, typename std::decay<Callable>::type>>,
+                    // Never treat tuple wrappers as callables.
+                    internal::negation<internal::is_tuple_like<Callable>>,
                     // Exclude callables for which the overload above works.
                     // We'd rather provide the arguments if possible.
                     internal::negation<IsDirectlyCompatible<Callable>>,
