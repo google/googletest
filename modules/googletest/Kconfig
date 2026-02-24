@@ -1,0 +1,18 @@
+config GTEST
+    bool "GoogleTest test framework"
+    select TEST
+    select CPP
+    select REQUIRES_FULL_LIBCPP
+    select FPU
+
+config GMOCK
+    bool "GoogleMock mocking framework"
+    select GTEST
+
+choice STD_CPP
+	default STD_CPP14 if GTEST
+endchoice
+
+choice LIBC_IMPLEMENTATION
+	default NEWLIB_LIBC if GTEST
+endchoice
