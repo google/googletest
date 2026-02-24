@@ -1,0 +1,32 @@
+cmake_minimum_required(VERSION 3.20)
+project(SecureScanPro LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+include(CTest)
+enable_testing()
+
+include(FetchContent)
+FetchContent_Declare(
+googletest
+URL https://github.com/google/googletest/archive/refs/tags/v1.14.0.zip
+)
+set(gtest_force_shared_crt ON CACHE BOOL"" FORCE)
+FetchContent_MakeAvailable(googletest)
+
+add_executable(securescan_tests
+tests/tests_baseline.cpp
+tests/test_detector.cpp
+tests/test_pipeline_intergration.cpp
+)
+target_link_libraries(securescan_tests PRIVATE GTest::gtest_main)
+
+target_include_directories(securescan_tests PRIVATE ${CMAKE_SOURCE_DIR}/src)
+
+include(GoogleTest)
+gtest_discover_tests(securescan_tests)
+
+cmake -S . -B build
+cmake --build build
+ctest --test-dir build --output-on-failure
