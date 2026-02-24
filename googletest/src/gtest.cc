@@ -5489,7 +5489,7 @@ void UnitTest::AddTestPartResult(TestPartResult::Type result_type,
       // with clang/gcc we can achieve the same effect on x86 by invoking int3
       asm("int3");
 #elif GTEST_HAS_BUILTIN(__builtin_trap)
-      __builtin_trap();
+      __builtin_debugtrap();
 #elif defined(SIGTRAP)
       raise(SIGTRAP);
 #else
