@@ -45,8 +45,8 @@
 #include <vector>
 
 #include "gmock/gmock.h"
-#include "test/gmock-matchers_test.h"
 #include "gtest/gtest.h"
+#include "test/gmock-matchers_test.h"
 
 // Silence warning C4244: 'initializing': conversion from 'int' to 'short',
 // possible loss of data and C4100, unreferenced local parameter
@@ -3439,8 +3439,51 @@ TEST(ContainsTest, WorksForTwoDimensionalNativeArray) {
   EXPECT_THAT(a, Contains(Not(Contains(5))));
 }
 
+#if defined(__cpp_lib_source_location) && __cpp_lib_source_location >= 201907L
+
+#include <source_location>
+
+class SourceLocationClass {
+ public:
+  const std::source_location& GetLocation(
+      std::source_location sl = std::source_location::current()) const {
+    last_location_ = sl;  // Store it to check later
+    return last_location_;
+  }
+
+ private:
+  mutable std::source_location last_location_;
+};
+
+MATCHER_P(LocationFunctionName, expected_function_name, "") {
+  return std::string(arg.function_name()) == expected_function_name;
+}
+
+TEST(PropertyTest, WorksWithSourceLocationDefaultArgument) {
+  SourceLocationClass obj;
+  const char* expected_func = "";
+#if defined(__GNUC__) || defined(__clang__)
+  expected_func =
+      "testing::gmock_matchers_containers_test::"
+      "PropertyTest_WorksWithSourceLocationDefaultArgument_Test::TestBody()";
+#elif defined(_MSC_VER)
+  expected_func =
+      "testing::gmock_matchers_containers_test::"
+      "PropertyTest_WorksWithSourceLocationDefaultArgument_Test::TestBody";  // No parentheses usually
+#else
+  expected_func = "TestBody";
+#endif
+
+  Matcher<const SourceLocationClass&> m = Property(
+      &SourceLocationClass::GetLocation, LocationFunctionName(expected_func));
+
+  EXPECT_TRUE(m.Matches(obj));
+
+  const auto& loc = obj.GetLocation();
+  EXPECT_STREQ(expected_func, loc.function_name());
+}
+
+#endif  // __cpp_lib_source_location
 }  // namespace
 }  // namespace gmock_matchers_test
 }  // namespace testing
-
-GTEST_DISABLE_MSC_WARNINGS_POP_()  // 4244 4100
