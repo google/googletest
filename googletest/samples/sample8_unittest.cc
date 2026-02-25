@@ -81,6 +81,7 @@ class HybridPrimeTable : public PrimeTable {
 
 using ::testing::Bool;
 using ::testing::Combine;
+using ::testing::CombineAs;
 using ::testing::TestWithParam;
 using ::testing::Values;
 
@@ -150,5 +151,46 @@ TEST_P(PrimeTableTest, CanGetNextPrime) {
 // possible combinations.
 INSTANTIATE_TEST_SUITE_P(MeaningfulTestParameters, PrimeTableTest,
                          Combine(Bool(), Values(1, 10)));
+
+// But now you look at the PrimeTableTest and you think dealing with std::tuple
+// requires some boilerplate to unwrap it. You can use combined parameters of
+// custom types easily with help of CombineAs<R>().
+struct WellTypedPrimeTableTestParams {
+  bool force_on_the_fly;
+  int max_precalculated;
+};
+
+class WellTypedPrimeTableTest
+    : public TestWithParam<WellTypedPrimeTableTestParams> {
+ protected:
+  void SetUp() override {
+    // It is possible to avoid destructuring of the std::tuple if we use struct
+    // as the test parameter type.
+    table_ = new HybridPrimeTable(GetParam().force_on_the_fly,
+                                  GetParam().max_precalculated);
+  }
+  void TearDown() override {
+    delete table_;
+    table_ = nullptr;
+  }
+  HybridPrimeTable* table_ = nullptr;
+};
+
+// The tests are made the same way as above
+TEST_P(WellTypedPrimeTableTest, CanGetNextPrime) {
+  EXPECT_EQ(2, table_->GetNextPrime(0));
+  EXPECT_EQ(3, table_->GetNextPrime(2));
+  EXPECT_EQ(5, table_->GetNextPrime(3));
+  EXPECT_EQ(7, table_->GetNextPrime(5));
+  EXPECT_EQ(11, table_->GetNextPrime(7));
+  EXPECT_EQ(131, table_->GetNextPrime(128));
+}
+
+// Here we instantiate our tests with combined parameters and straightforward
+// typing. CombineAs<R>() allows you to generate all possible combinations of
+// values the same way as Combine() does, but also converts them to the desired
+// type.
+INSTANTIATE_TEST_SUITE_P(MeaningfulTestParameters, WellTypedPrimeTableTest,
+  CombineAs<WellTypedPrimeTableTestParams>(Bool(), Values(1, 10)));
 
 }  // namespace
