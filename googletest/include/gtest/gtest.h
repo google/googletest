@@ -52,7 +52,16 @@
 #include <cstddef>
 #include <cstdint>
 #include <limits>
+#ifdef __clang__
+#pragma clang diagnostic push 
+// Disable the deprecated-declarations warning before the clang bug
+// (https://github.com/llvm/llvm-project/issues/76515) has been fixed
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#endif
 #include <memory>
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 #include <ostream>
 #include <set>
 #include <sstream>
