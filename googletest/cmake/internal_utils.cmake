@@ -255,7 +255,12 @@ function(cxx_executable name dir libs)
 endfunction()
 
 if(gtest_build_tests)
-  find_package(Python3)
+  # Only the interpreter is needed for Python tests. Specifying the component
+  # explicitly avoids a crash in CMake <= 3.23's FindPython3 module when no
+  # Python installation is present (the module calls list(GET) on an empty
+  # list).  QUIET lets the build continue without Python tests instead of
+  # failing outright.
+  find_package(Python3 COMPONENTS Interpreter QUIET)
 endif()
 
 # cxx_test_with_flags(name cxx_flags libs srcs...)
