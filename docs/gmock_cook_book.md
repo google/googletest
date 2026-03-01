@@ -396,7 +396,8 @@ Old macros and their new equivalents:
 If a mock method has no `EXPECT_CALL` spec but is called, we say that it's an
 "uninteresting call", and the default action (which can be specified using
 `ON_CALL()`) of the method will be taken. Currently, an uninteresting call will
-also by default cause gMock to print a warning.
+also by default cause gMock to print a warning. This default behavior is called a
+"naggy" mock.
 
 However, sometimes you may want to ignore these uninteresting calls, and
 sometimes you may want to treat them as errors. gMock lets you make the decision
@@ -412,9 +413,23 @@ TEST(...) {
 }
 ```
 
-If a method of `mock_foo` other than `DoThis()` is called, you will get a
-warning. However, if you rewrite your test to use `NiceMock<MockFoo>` instead,
-you can suppress the warning:
+This is the same as using `NaggyMock<MockFoo>`, which makes the "naggy" behavior
+explicit:
+
+```cpp
+using ::testing::NaggyMock;
+
+TEST(...) {
+  NaggyMock<MockFoo> mock_foo;
+  EXPECT_CALL(mock_foo, DoThis());
+  ... code that uses mock_foo ...
+
+  // If a method of mock_foo other than DoThis() is called,
+  // a warning will be printed.
+}
+```
+
+If you prefer to suppress these warnings, you can use `NiceMock<MockFoo>`:
 
 ```cpp
 using ::testing::NiceMock;
@@ -459,23 +474,23 @@ TEST(...) {
 ```
 
 {: .callout .note}
-NOTE: `NiceMock` and `StrictMock` only affects *uninteresting* calls (calls of
-*methods* with no expectations); they do not affect *unexpected* calls (calls of
-methods with expectations, but they don't match). See
+NOTE: `NiceMock`, `NaggyMock`, and `StrictMock` only affect *uninteresting* calls
+(calls of *methods* with no expectations); they do not affect *unexpected* calls
+(calls of methods with expectations, but they don't match). See
 [Understanding Uninteresting vs Unexpected Calls](#uninteresting-vs-unexpected).
 
 There are some caveats though (sadly they are side effects of C++'s
 limitations):
 
-1.  `NiceMock<MockFoo>` and `StrictMock<MockFoo>` only work for mock methods
-    defined using the `MOCK_METHOD` macro **directly** in the `MockFoo` class.
-    If a mock method is defined in a **base class** of `MockFoo`, the "nice" or
-    "strict" modifier may not affect it, depending on the compiler. In
-    particular, nesting `NiceMock` and `StrictMock` (e.g.
+1.  `NiceMock<MockFoo>`, `NaggyMock<MockFoo>`, and `StrictMock<MockFoo>` only
+    work for mock methods defined using the `MOCK_METHOD` macro **directly** in the
+    `MockFoo` class. If a mock method is defined in a **base class** of `MockFoo`,
+    the "nice", "naggy", or "strict" modifier may not affect it, depending on the
+    compiler. In particular, nesting these mocks (e.g.
     `NiceMock<StrictMock<MockFoo> >`) is **not** supported.
-2.  `NiceMock<MockFoo>` and `StrictMock<MockFoo>` may not work correctly if the
-    destructor of `MockFoo` is not virtual. We would like to fix this, but it
-    requires cleaning up existing tests.
+2.  `NiceMock<MockFoo>`, `NaggyMock<MockFoo>`, and `StrictMock<MockFoo>` may not
+    work correctly if the destructor of `MockFoo` is not virtual. We would like to
+    fix this, but it requires cleaning up existing tests.
 
 Finally, you should be **very cautious** about when to use naggy or strict
 mocks, as they tend to make tests more brittle and harder to maintain. When you
