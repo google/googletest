@@ -1485,6 +1485,8 @@ class Hunk {
         ++adds_;
         hunk_adds_.push_back(std::make_pair('+', line));
         break;
+      default:
+        break;
     }
   }
 
@@ -3296,6 +3298,7 @@ static const char* GetAnsiColorCode(GTestColor color) {
       return "2";
     case GTestColor::kYellow:
       return "3";
+    case GTestColor::kDefault:
     default:
       assert(false);
       return "9";
@@ -3552,6 +3555,9 @@ void PrettyUnitTestResultPrinter::OnTestPartResult(
     // If the test part succeeded, we don't need to do anything.
     case TestPartResult::kSuccess:
       return;
+    case TestPartResult::kNonFatalFailure:
+    case TestPartResult::kFatalFailure:
+    case TestPartResult::kSkip:
     default:
       // Print failure message from the assertion
       // (e.g. expected this and got that).
@@ -3770,6 +3776,9 @@ void BriefUnitTestResultPrinter::OnTestPartResult(
     // If the test part succeeded, we don't need to do anything.
     case TestPartResult::kSuccess:
       return;
+    case TestPartResult::kNonFatalFailure:
+    case TestPartResult::kFatalFailure:
+    case TestPartResult::kSkip:
     default:
       // Print failure message from the assertion
       // (e.g. expected this and got that).
