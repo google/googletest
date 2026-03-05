@@ -41,6 +41,7 @@
 
 #include <stdio.h>
 
+#include <iterator>
 #include <ostream>  // NOLINT
 #include <string>
 #include <type_traits>
@@ -321,6 +322,24 @@ inline T Invalid() {
   return Invalid<T>();
 #endif
 }
+
+void GetValueType(const void*);
+
+template <class T>
+typename std::iterator_traits<
+    decltype(std::begin(std::declval<T&>()))>::value_type
+GetValueType(T*);
+
+template <class T, class = void>
+struct RangeTraits {
+  typedef decltype(internal::GetValueType(
+      static_cast<std::remove_reference_t<T>*>(nullptr))) value_type;
+};
+
+template <class T>
+struct RangeTraits<T, std::conditional_t<true, void, typename T::value_type>> {
+  typedef typename T::value_type value_type;
+};
 
 // Given a raw type (i.e. having no top-level reference or const
 // modifier) RawContainer that's either an STL-style container or a

@@ -2602,9 +2602,9 @@ class [[nodiscard]] WhenSortedByMatcher {
     typedef typename LhsView::const_reference LhsStlContainerReference;
     // Transforms std::pair<const Key, Value> into std::pair<Key, Value>
     // so that we can match associative containers.
-    typedef
-        typename RemoveConstFromKey<typename LhsStlContainer::value_type>::type
-            LhsValue;
+    typedef typename RemoveConstFromKey<
+        typename internal::RangeTraits<LhsStlContainer>::value_type>::type
+        LhsValue;
 
     Impl(const Comparator& comparator, const ContainerMatcher& matcher)
         : comparator_(comparator), matcher_(matcher) {}
@@ -2670,7 +2670,7 @@ class [[nodiscard]] PointwiseMatcher {
  public:
   typedef internal::StlContainerView<RhsContainer> RhsView;
   typedef typename RhsView::type RhsStlContainer;
-  typedef typename RhsStlContainer::value_type RhsValue;
+  typedef typename internal::RangeTraits<RhsStlContainer>::value_type RhsValue;
 
   static_assert(!std::is_const<RhsContainer>::value,
                 "RhsContainer type must not be const");
@@ -2700,7 +2700,8 @@ class [[nodiscard]] PointwiseMatcher {
         LhsView;
     typedef typename LhsView::type LhsStlContainer;
     typedef typename LhsView::const_reference LhsStlContainerReference;
-    typedef typename LhsStlContainer::value_type LhsValue;
+    typedef
+        typename internal::RangeTraits<LhsStlContainer>::value_type LhsValue;
     // We pass the LHS value and the RHS value to the inner matcher by
     // reference, as they may be expensive to copy.  We must use tuple
     // instead of pair here, as a pair cannot hold references (C++ 98,
@@ -2786,7 +2787,7 @@ class [[nodiscard]] QuantifierMatcherImpl : public MatcherInterface<Container> {
   typedef StlContainerView<RawContainer> View;
   typedef typename View::type StlContainer;
   typedef typename View::const_reference StlContainerReference;
-  typedef typename StlContainer::value_type Element;
+  typedef typename internal::RangeTraits<StlContainer>::value_type Element;
 
   template <typename InnerMatcher>
   explicit QuantifierMatcherImpl(InnerMatcher inner_matcher)
@@ -3600,7 +3601,7 @@ class [[nodiscard]] ElementsAreMatcherImpl
   typedef internal::StlContainerView<RawContainer> View;
   typedef typename View::type StlContainer;
   typedef typename View::const_reference StlContainerReference;
-  typedef typename StlContainer::value_type Element;
+  typedef typename internal::RangeTraits<StlContainer>::value_type Element;
 
   // Constructs the matcher from a sequence of element values or
   // element matchers.
@@ -3875,7 +3876,7 @@ class [[nodiscard]] UnorderedElementsAreMatcherImpl
   typedef internal::StlContainerView<RawContainer> View;
   typedef typename View::type StlContainer;
   typedef typename View::const_reference StlContainerReference;
-  typedef typename StlContainer::value_type Element;
+  typedef typename internal::RangeTraits<StlContainer>::value_type Element;
 
   template <typename InputIter>
   UnorderedElementsAreMatcherImpl(UnorderedMatcherRequire::Flags matcher_flags,
@@ -3963,8 +3964,7 @@ class [[nodiscard]] UnorderedElementsAreMatcher {
   template <typename Container>
   operator Matcher<Container>() const {
     typedef GTEST_REMOVE_REFERENCE_AND_CONST_(Container) RawContainer;
-    typedef typename internal::StlContainerView<RawContainer>::type View;
-    typedef typename View::value_type Element;
+    typedef typename internal::RangeTraits<RawContainer>::value_type Element;
     typedef ::std::vector<Matcher<const Element&>> MatcherVec;
     MatcherVec matchers;
     matchers.reserve(::std::tuple_size<MatcherTuple>::value);
@@ -3995,7 +3995,7 @@ class [[nodiscard]] ElementsAreMatcher {
 
     typedef GTEST_REMOVE_REFERENCE_AND_CONST_(Container) RawContainer;
     typedef typename internal::StlContainerView<RawContainer>::type View;
-    typedef typename View::value_type Element;
+    typedef typename internal::RangeTraits<View>::value_type Element;
     typedef ::std::vector<Matcher<const Element&>> MatcherVec;
     MatcherVec matchers;
     matchers.reserve(::std::tuple_size<MatcherTuple>::value);
@@ -5081,7 +5081,7 @@ UnorderedPointwise(const Tuple2Matcher& tuple2_matcher,
   // STL-style container and it being a native C-style array.
   typedef typename internal::StlContainerView<RhsContainer> RhsView;
   typedef typename RhsView::type RhsStlContainer;
-  typedef typename RhsStlContainer::value_type Second;
+  typedef typename internal::RangeTraits<RhsStlContainer>::value_type Second;
   const RhsStlContainer& rhs_stl_container =
       RhsView::ConstReference(rhs_container);
 
