@@ -13,7 +13,7 @@ So what makes a good test, and how does GoogleTest fit in? We believe:
 
 1.  Tests should be *independent* and *repeatable*. It's a pain to debug a test
     that succeeds or fails as a result of other tests. GoogleTest isolates the
-    tests by running each of them on a different object. When a test fails,
+    tests by running each of them on a different object. Each test is executed on a fresh instance of the test fixture, so state from one test cannot affect another.When a test fails,
     GoogleTest allows you to run it in isolation for quick debugging.
 2.  Tests should be well *organized* and reflect the structure of the tested
     code. GoogleTest groups related tests into test suites that can share data
