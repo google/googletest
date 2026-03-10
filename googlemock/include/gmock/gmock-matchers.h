@@ -905,16 +905,36 @@ bool CaseInsensitiveStringEquals(const StringType& s1, const StringType& s2) {
   return CaseInsensitiveStringEquals(s1.substr(i1 + 1), s2.substr(i2 + 1));
 }
 
+// Case insensitive comparison support based on the CharT
+
+template<typename CharT>
+struct ci_matcher_supported : std::false_type {};
+
+template<>
+struct ci_matcher_supported<char> : std::true_type {};
+
+#if GTEST_HAS_STD_WSTRING
+template<>
+struct ci_matcher_supported<wchar_t> : std::true_type {};
+#endif  // GTEST_HAS_STD_WSTRING
+
 // String matchers.
 
 // Implements equality-based string matchers like StrEq, StrCaseNe, and etc.
-template <typename StringType>
+// StrCaseEq and StrCaseNe are only supported for char and wchar_t strings.
+template <typename StringType, typename CaseSensitive = std::true_type,
+          typename std::enable_if_t<
+              std::disjunction_v<
+                  CaseSensitive,
+                  ci_matcher_supported<typename StringType::value_type>
+              >,
+              int> = 0
+          >
 class [[nodiscard]] StrEqualityMatcher {
  public:
-  StrEqualityMatcher(StringType str, bool expect_eq, bool case_sensitive)
+  StrEqualityMatcher(StringType str, bool expect_eq)
       : string_(std::move(str)),
-        expect_eq_(expect_eq),
-        case_sensitive_(case_sensitive) {}
+        expect_eq_(expect_eq) {}
 
 #if GTEST_INTERNAL_HAS_STRING_VIEW
   bool MatchAndExplain(const internal::StringView& s,
@@ -947,9 +967,14 @@ class [[nodiscard]] StrEqualityMatcher {
   bool MatchAndExplain(const MatcheeStringType& s,
                        MatchResultListener* /* listener */) const {
     const StringType s2(s);
-    const bool eq = case_sensitive_ ? s2 == string_
-                                    : CaseInsensitiveStringEquals(s2, string_);
-    return expect_eq_ == eq;
+    if constexpr(ci_matcher_supported<typename StringType::value_type>::value) {
+      const bool eq = CaseSensitive::value ?
+          s2 == string_ : CaseInsensitiveStringEquals(s2, string_);
+      return expect_eq_ == eq;
+    } else {
+      const bool eq = s2 == string_;
+      return expect_eq_ == eq;
+    }
   }
 
   void DescribeTo(::std::ostream* os) const {
@@ -964,7 +989,7 @@ class [[nodiscard]] StrEqualityMatcher {
   void DescribeToHelper(bool expect_eq, ::std::ostream* os) const {
     *os << (expect_eq ? "is " : "isn't ");
     *os << "equal to ";
-    if (!case_sensitive_) {
+    if constexpr(!CaseSensitive::value) {
       *os << "(ignoring case) ";
     }
     UniversalPrint(string_, os);
@@ -972,7 +997,6 @@ class [[nodiscard]] StrEqualityMatcher {
 
   const StringType string_;
   const bool expect_eq_;
-  const bool case_sensitive_;
 };
 
 // Implements the polymorphic HasSubstr(substring) matcher, which
@@ -4780,116 +4804,70 @@ internal::ResultOfMatcher<Callable, InnerMatcher> ResultOf(
 // String matchers.
 
 // Matches a string equal to str.
-template <typename T = std::string>
-PolymorphicMatcher<internal::StrEqualityMatcher<std::string>> StrEq(
+template <typename T = std::string,
+          typename CharT = internal::get_char_type_t<T>>
+PolymorphicMatcher<internal::StrEqualityMatcher<std::basic_string<CharT>>> StrEq(
     const internal::StringLike<T>& str) {
   return MakePolymorphicMatcher(
-      internal::StrEqualityMatcher<std::string>(std::string(str), true, true));
+      internal::StrEqualityMatcher<std::basic_string<CharT>>(std::basic_string<CharT>(str), true));
 }
 
 // Matches a string not equal to str.
-template <typename T = std::string>
-PolymorphicMatcher<internal::StrEqualityMatcher<std::string>> StrNe(
+template <typename T = std::string,
+          typename CharT = internal::get_char_type_t<T>>
+PolymorphicMatcher<internal::StrEqualityMatcher<std::basic_string<CharT>>> StrNe(
     const internal::StringLike<T>& str) {
   return MakePolymorphicMatcher(
-      internal::StrEqualityMatcher<std::string>(std::string(str), false, true));
+      internal::StrEqualityMatcher<std::basic_string<CharT>>(std::basic_string<CharT>(str), false));
 }
 
 // Matches a string equal to str, ignoring case.
-template <typename T = std::string>
-PolymorphicMatcher<internal::StrEqualityMatcher<std::string>> StrCaseEq(
+template <typename T = std::string,
+          typename CharT = internal::get_char_type_t<T>>
+PolymorphicMatcher<internal::StrEqualityMatcher<std::basic_string<CharT>, std::false_type>> StrCaseEq(
     const internal::StringLike<T>& str) {
   return MakePolymorphicMatcher(
-      internal::StrEqualityMatcher<std::string>(std::string(str), true, false));
+      internal::StrEqualityMatcher<std::basic_string<CharT>, std::false_type>(
+          std::basic_string<CharT>(str), true));
 }
 
 // Matches a string not equal to str, ignoring case.
-template <typename T = std::string>
-PolymorphicMatcher<internal::StrEqualityMatcher<std::string>> StrCaseNe(
+template <typename T = std::string,
+          typename CharT = internal::get_char_type_t<T>>
+PolymorphicMatcher<internal::StrEqualityMatcher<std::basic_string<CharT>, std::false_type>> StrCaseNe(
     const internal::StringLike<T>& str) {
-  return MakePolymorphicMatcher(internal::StrEqualityMatcher<std::string>(
-      std::string(str), false, false));
+  return MakePolymorphicMatcher(
+      internal::StrEqualityMatcher<std::basic_string<CharT>, std::false_type>(
+          std::basic_string<CharT>(str), false));
 }
 
 // Creates a matcher that matches any string, std::string, or C string
 // that contains the given substring.
-template <typename T = std::string>
-PolymorphicMatcher<internal::HasSubstrMatcher<std::string>> HasSubstr(
+template <typename T = std::string,
+          typename CharT = internal::get_char_type_t<T>>
+PolymorphicMatcher<internal::HasSubstrMatcher<std::basic_string<CharT>>> HasSubstr(
     const internal::StringLike<T>& substring) {
   return MakePolymorphicMatcher(
-      internal::HasSubstrMatcher<std::string>(std::string(substring)));
+      internal::HasSubstrMatcher<std::basic_string<CharT>>(std::basic_string<CharT>(substring)));
 }
 
 // Matches a string that starts with 'prefix' (case-sensitive).
-template <typename T = std::string>
-PolymorphicMatcher<internal::StartsWithMatcher<std::string>> StartsWith(
+template <typename T = std::string,
+          typename CharT = internal::get_char_type_t<T>>
+PolymorphicMatcher<internal::StartsWithMatcher<std::basic_string<CharT>>> StartsWith(
     const internal::StringLike<T>& prefix) {
   return MakePolymorphicMatcher(
-      internal::StartsWithMatcher<std::string>(std::string(prefix)));
+      internal::StartsWithMatcher<std::basic_string<CharT>>(std::basic_string<CharT>(prefix)));
 }
 
 // Matches a string that ends with 'suffix' (case-sensitive).
-template <typename T = std::string>
-PolymorphicMatcher<internal::EndsWithMatcher<std::string>> EndsWith(
+template <typename T = std::string,
+          typename CharT = internal::get_char_type_t<T>>
+PolymorphicMatcher<internal::EndsWithMatcher<std::basic_string<CharT>>> EndsWith(
     const internal::StringLike<T>& suffix) {
   return MakePolymorphicMatcher(
-      internal::EndsWithMatcher<std::string>(std::string(suffix)));
+      internal::EndsWithMatcher<std::basic_string<CharT>>(std::basic_string<CharT>(suffix)));
 }
-
-#if GTEST_HAS_STD_WSTRING
-// Wide string matchers.
-
-// Matches a string equal to str.
-inline PolymorphicMatcher<internal::StrEqualityMatcher<std::wstring>> StrEq(
-    const std::wstring& str) {
-  return MakePolymorphicMatcher(
-      internal::StrEqualityMatcher<std::wstring>(str, true, true));
-}
-
-// Matches a string not equal to str.
-inline PolymorphicMatcher<internal::StrEqualityMatcher<std::wstring>> StrNe(
-    const std::wstring& str) {
-  return MakePolymorphicMatcher(
-      internal::StrEqualityMatcher<std::wstring>(str, false, true));
-}
-
-// Matches a string equal to str, ignoring case.
-inline PolymorphicMatcher<internal::StrEqualityMatcher<std::wstring>> StrCaseEq(
-    const std::wstring& str) {
-  return MakePolymorphicMatcher(
-      internal::StrEqualityMatcher<std::wstring>(str, true, false));
-}
-
-// Matches a string not equal to str, ignoring case.
-inline PolymorphicMatcher<internal::StrEqualityMatcher<std::wstring>> StrCaseNe(
-    const std::wstring& str) {
-  return MakePolymorphicMatcher(
-      internal::StrEqualityMatcher<std::wstring>(str, false, false));
-}
-
-// Creates a matcher that matches any ::wstring, std::wstring, or C wide string
-// that contains the given substring.
-inline PolymorphicMatcher<internal::HasSubstrMatcher<std::wstring>> HasSubstr(
-    const std::wstring& substring) {
-  return MakePolymorphicMatcher(
-      internal::HasSubstrMatcher<std::wstring>(substring));
-}
-
-// Matches a string that starts with 'prefix' (case-sensitive).
-inline PolymorphicMatcher<internal::StartsWithMatcher<std::wstring>> StartsWith(
-    const std::wstring& prefix) {
-  return MakePolymorphicMatcher(
-      internal::StartsWithMatcher<std::wstring>(prefix));
-}
-
-// Matches a string that ends with 'suffix' (case-sensitive).
-inline PolymorphicMatcher<internal::EndsWithMatcher<std::wstring>> EndsWith(
-    const std::wstring& suffix) {
-  return MakePolymorphicMatcher(
-      internal::EndsWithMatcher<std::wstring>(suffix));
-}
-
-#endif  // GTEST_HAS_STD_WSTRING
 
 // Creates a polymorphic matcher that matches a 2-tuple where the
 // first field == the second field.

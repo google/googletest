@@ -1270,6 +1270,10 @@ TEST(StrEqTest, MatchesEqualString) {
   EXPECT_TRUE(m2.Matches("Hello"));
   EXPECT_FALSE(m2.Matches("Hi"));
 
+  Matcher<std::string_view> m4 = StrEq("Hello");
+  EXPECT_TRUE(m4.Matches("Hello"));
+  EXPECT_FALSE(m4.Matches("Hi"));
+
 #if GTEST_INTERNAL_HAS_STRING_VIEW
   Matcher<const internal::StringView&> m3 =
       StrEq(internal::StringView("Hello"));
@@ -1282,6 +1286,10 @@ TEST(StrEqTest, MatchesEqualString) {
   EXPECT_TRUE(m_empty.Matches(internal::StringView()));
   EXPECT_FALSE(m_empty.Matches(internal::StringView("hello")));
 #endif  // GTEST_INTERNAL_HAS_STRING_VIEW
+
+  Matcher<std::string_view> m5 = StrEq(std::string_view("Hello"));
+  EXPECT_TRUE(m5.Matches("Hello"));
+  EXPECT_FALSE(m5.Matches("Hi"));
 }
 
 TEST(StrEqTest, CanDescribeSelf) {
@@ -1296,6 +1304,115 @@ TEST(StrEqTest, CanDescribeSelf) {
   str[0] = str[6] = str[7] = str[9] = str[10] = '\0';
   Matcher<std::string> m3 = StrEq(str);
   EXPECT_EQ("is equal to \"\\012\\045\\0\\08\\0\\0\"", Describe(m3));
+}
+
+TEST(StrEqTest, AllowsWideChars) {
+  Matcher<const char16_t*> mu16c = StrEq(u"Hello");
+  EXPECT_TRUE(mu16c.Matches(u"Hello"));
+  EXPECT_FALSE(mu16c.Matches(u"hello"));
+  EXPECT_FALSE(mu16c.Matches(nullptr));
+
+  Matcher<const std::u16string&> mu16 = StrEq(std::u16string(u"Hello"));
+  EXPECT_TRUE(mu16.Matches(std::u16string(u"Hello")));
+  EXPECT_FALSE(mu16.Matches(std::u16string(u"hello")));
+
+  Matcher<std::u16string_view> mu16sv = StrEq(std::u16string_view(u"Hello"));
+  EXPECT_TRUE(mu16sv.Matches(std::u16string_view(u"Hello")));
+  EXPECT_FALSE(mu16sv.Matches(std::u16string_view(u"hello")));
+
+  Matcher<const char32_t*> mu32c = StrEq(U"Hello");
+  EXPECT_TRUE(mu32c.Matches(U"Hello"));
+  EXPECT_FALSE(mu32c.Matches(U"hello"));
+  EXPECT_FALSE(mu32c.Matches(nullptr));
+
+  Matcher<const std::u32string&> mu32 = StrEq(std::u32string(U"Hello"));
+  EXPECT_TRUE(mu32.Matches(std::u32string(U"Hello")));
+  EXPECT_FALSE(mu32.Matches(std::u32string(U"hello")));
+
+  Matcher<std::u32string_view> mu32sv = StrEq(std::u32string_view(U"Hello"));
+  EXPECT_TRUE(mu32sv.Matches(std::u32string_view(U"Hello")));
+  EXPECT_FALSE(mu32sv.Matches(std::u32string_view(U"hello")));
+
+#ifdef __cpp_lib_char8_t
+  Matcher<const char8_t*> mu8c = StrEq(u8"Hello");
+  EXPECT_TRUE(mu8c.Matches("Hello"));
+  EXPECT_FALSE(mu8c.Matches("hello"));
+  EXPECT_FALSE(mu8c.Matches(nullptr));
+
+  Matcher<const std::u8string&> mu8 = StrEq(std::u8string(u8"Hello"));
+  EXPECT_TRUE(mu8.Matches(std::u8string("Hello")));
+  EXPECT_FALSE(mu8.Matches(std::u8string("hello")));
+
+  Matcher<std::u8string_view> mu8sv = StrEq(std::u8string_view(u8"Hello"));
+  EXPECT_TRUE(mu8sv.Matches(std::u8string_view("Hello")));
+  EXPECT_FALSE(mu8sv.Matches(std::u8string_view("hello")));
+#endif  // __cpp_lib_char8_t
+
+#if GTEST_HAS_STD_WSTRING
+  Matcher<const wchar_t*> mwc = StrEq(L"Hello");
+  EXPECT_TRUE(mwc.Matches(L"Hello"));
+  EXPECT_FALSE(mwc.Matches(L"hello"));
+  EXPECT_FALSE(mwc.Matches(nullptr));
+
+  Matcher<const std::wstring&> mw = StrEq(std::wstring(L"Hello"));
+  EXPECT_TRUE(mw.Matches(std::wstring(L"Hello")));
+  EXPECT_FALSE(mw.Matches(std::wstring(L"hello")));
+
+  Matcher<std::wstring_view> mwvu = StrEq(std::wstring_view(L"Hello"));
+  EXPECT_TRUE(mwvu.Matches(std::wstring_view(L"Hello")));
+  EXPECT_FALSE(mwvu.Matches(std::wstring_view(L"hello")));
+#endif  // GTEST_HAS_STD_WSTRING
+}
+
+TEST(StrEqTest, AllowsCustomStringLikeType) {
+  struct MyString {
+    operator std::string() const { return std::string("Hello"); }
+  };
+
+  Matcher<const char*> m = StrEq(MyString{});
+  EXPECT_TRUE(m.Matches("Hello"));
+  EXPECT_FALSE(m.Matches("hello"));
+  EXPECT_FALSE(m.Matches(nullptr));
+
+#if GTEST_HAS_STD_WSTRING
+  struct MyWString {
+    operator std::wstring() const { return std::wstring(L"Hello"); }
+  };
+
+  Matcher<const wchar_t*> mw = StrEq(MyWString{});
+  EXPECT_TRUE(mw.Matches(L"Hello"));
+  EXPECT_FALSE(mw.Matches(L"hello"));
+  EXPECT_FALSE(mw.Matches(nullptr));
+#endif  // GTEST_HAS_STD_WSTRING
+
+  struct MyU16String {
+    operator std::u16string() const { return std::u16string(u"Hello"); }
+  };
+
+  Matcher<const char16_t*> m16 = StrEq(MyU16String{});
+  EXPECT_TRUE(m16.Matches(u"Hello"));
+  EXPECT_FALSE(m16.Matches(u"hello"));
+  EXPECT_FALSE(m16.Matches(nullptr));
+
+  struct MyU32String {
+    operator std::u32string() const { return std::u32string(U"Hello"); }
+  };
+
+  Matcher<const char32_t*> m32 = StrEq(MyU32String{});
+  EXPECT_TRUE(m32.Matches(U"Hello"));
+  EXPECT_FALSE(m32.Matches(U"hello"));
+  EXPECT_FALSE(m32.Matches(nullptr));
+
+#ifdef __cpp_lib_char8_t
+  struct MyU8String {
+    operator std::u8string() const { return std::u8string(u8"Hello"); }
+  };
+
+  Matcher<const char8_t*> m8 = StrEq(MyU8String{});
+  EXPECT_TRUE(m8.Matches(u8"Hello"));
+  EXPECT_FALSE(m8.Matches(u8"hello"));
+  EXPECT_FALSE(m8.Matches(nullptr));
+#endif  // __cpp_lib_char8_t
 }
 
 TEST(StrNeTest, MatchesUnequalString) {
@@ -1314,11 +1431,73 @@ TEST(StrNeTest, MatchesUnequalString) {
   EXPECT_TRUE(m3.Matches(internal::StringView()));
   EXPECT_FALSE(m3.Matches(internal::StringView("Hello")));
 #endif  // GTEST_INTERNAL_HAS_STRING_VIEW
+
+  Matcher<std::string_view> m4 = StrNe(std::string_view("Hello"));
+  EXPECT_TRUE(m4.Matches("hello"));
+  EXPECT_FALSE(m4.Matches("Hello"));
 }
 
 TEST(StrNeTest, CanDescribeSelf) {
   Matcher<const char*> m = StrNe("Hi");
   EXPECT_EQ("isn't equal to \"Hi\"", Describe(m));
+}
+
+TEST(StrNeTest, AllowsWideChars) {
+  Matcher<const char16_t*> mu16 = StrNe(u"Hello");
+  EXPECT_TRUE(mu16.Matches(u""));
+  EXPECT_TRUE(mu16.Matches(nullptr));
+  EXPECT_FALSE(mu16.Matches(u"Hello"));
+
+  Matcher<std::u16string> mu16s = StrNe(std::u16string(u"Hello"));
+  EXPECT_TRUE(mu16s.Matches(u""));
+  EXPECT_FALSE(mu16s.Matches(u"Hello"));
+
+  Matcher<std::u16string_view> mu16sv = StrNe(std::u16string_view(u"Hello"));
+  EXPECT_TRUE(mu16sv.Matches(u""));
+  EXPECT_FALSE(mu16sv.Matches(u"Hello"));
+
+  Matcher<const char32_t*> mu32 = StrNe(U"Hello");
+  EXPECT_TRUE(mu32.Matches(U""));
+  EXPECT_TRUE(mu32.Matches(nullptr));
+  EXPECT_FALSE(mu32.Matches(U"Hello"));
+
+  Matcher<std::u32string> mu32s = StrNe(std::u32string(U"Hello"));
+  EXPECT_TRUE(mu32s.Matches(U""));
+  EXPECT_FALSE(mu32s.Matches(U"Hello"));
+
+  Matcher<std::u32string_view> mu32sv = StrNe(std::u32string_view(U"Hello"));
+  EXPECT_TRUE(mu32sv.Matches(U""));
+  EXPECT_FALSE(mu32sv.Matches(U"Hello"));
+
+#ifdef __cpp_lib_char8_t
+  Matcher<const char8_t*> mu8 = StrNe(u8"Hello");
+  EXPECT_TRUE(mu8.Matches(u8""));
+  EXPECT_TRUE(mu8.Matches(nullptr));
+  EXPECT_FALSE(mu8.Matches(u8"Hello"));
+
+  Matcher<std::u8string> mu8s = StrNe(std::u8string(u8"Hello"));
+  EXPECT_TRUE(mu8s.Matches(u8""));
+  EXPECT_FALSE(mu8s.Matches(u8"Hello"));
+
+  Matcher<std::u8string_view> mu8sv = StrNe(std::u8string_view(u8"Hello"));
+  EXPECT_TRUE(mu8sv.Matches(u8""));
+  EXPECT_FALSE(mu8sv.Matches(u8"Hello"));
+#endif  // __cpp_lib_char8_t
+
+#if GTEST_HAS_STD_WSTRING
+  Matcher<const wchar_t*> mw = StrNe(L"Hello");
+  EXPECT_TRUE(mw.Matches(L""));
+  EXPECT_TRUE(mw.Matches(nullptr));
+  EXPECT_FALSE(mw.Matches(L"Hello"));
+
+  Matcher<std::wstring> mws = StrNe(std::wstring(L"Hello"));
+  EXPECT_TRUE(mws.Matches(L""));
+  EXPECT_FALSE(mws.Matches(L"Hello"));
+
+  Matcher<std::wstring_view> mwsv = StrNe(std::wstring_view(L"Hello"));
+  EXPECT_TRUE(mwsv.Matches(L""));
+  EXPECT_FALSE(mwsv.Matches(L"Hello"));
+#endif  // GTEST_HAS_STD_WSTRING
 }
 
 TEST(StrCaseEqTest, MatchesEqualStringIgnoringCase) {
@@ -1340,6 +1519,10 @@ TEST(StrCaseEqTest, MatchesEqualStringIgnoringCase) {
   EXPECT_FALSE(m3.Matches(internal::StringView("Hi")));
   EXPECT_FALSE(m3.Matches(internal::StringView()));
 #endif  // GTEST_INTERNAL_HAS_STRING_VIEW
+
+  Matcher<std::string_view> m4 = StrCaseEq(std::string_view("Hello"));
+  EXPECT_TRUE(m4.Matches("hello"));
+  EXPECT_FALSE(m4.Matches("Hi"));
 }
 
 TEST(StrCaseEqTest, MatchesEqualStringWith0IgnoringCase) {
@@ -1372,6 +1555,23 @@ TEST(StrCaseEqTest, CanDescribeSelf) {
   EXPECT_EQ("is equal to (ignoring case) \"Hi\"", Describe(m));
 }
 
+TEST(StrCaseEqTest, AllowsWideChars) {
+#if GTEST_HAS_STD_WSTRING
+  Matcher<const wchar_t*> mw = StrCaseEq(L"Hello");
+  EXPECT_TRUE(mw.Matches(L"hello"));
+  EXPECT_FALSE(mw.Matches(L"Hi"));
+  EXPECT_FALSE(mw.Matches(nullptr));
+
+  Matcher<std::wstring> mws = StrCaseEq(std::wstring(L"Hello"));
+  EXPECT_TRUE(mws.Matches(L"hello"));
+  EXPECT_FALSE(mws.Matches(L"Hi"));
+
+  Matcher<std::wstring_view> mwsv = StrCaseEq(std::wstring_view(L"Hello"));
+  EXPECT_TRUE(mwsv.Matches(L"hello"));
+  EXPECT_FALSE(mwsv.Matches(L"Hi"));
+#endif  // GTEST_HAS_STD_WSTRING
+}
+
 TEST(StrCaseNeTest, MatchesUnequalStringIgnoringCase) {
   Matcher<const char*> m = StrCaseNe("Hello");
   EXPECT_TRUE(m.Matches("Hi"));
@@ -1391,11 +1591,35 @@ TEST(StrCaseNeTest, MatchesUnequalStringIgnoringCase) {
   EXPECT_FALSE(m3.Matches(internal::StringView("Hello")));
   EXPECT_FALSE(m3.Matches(internal::StringView("hello")));
 #endif  // GTEST_INTERNAL_HAS_STRING_VIEW
+
+  Matcher<std::string_view> m4 = StrCaseNe(std::string_view("Hello"));
+  EXPECT_TRUE(m4.Matches("Hi"));
+  EXPECT_FALSE(m4.Matches("Hello"));
+  EXPECT_FALSE(m4.Matches("hello"));
 }
 
 TEST(StrCaseNeTest, CanDescribeSelf) {
   Matcher<const char*> m = StrCaseNe("Hi");
   EXPECT_EQ("isn't equal to (ignoring case) \"Hi\"", Describe(m));
+}
+
+TEST(StrCaseNeTest, AllowsWideChars) {
+#if GTEST_HAS_STD_WSTRING
+  Matcher<const wchar_t*> mw = StrCaseNe(L"Hello");
+  EXPECT_TRUE(mw.Matches(L"Hi"));
+  EXPECT_TRUE(mw.Matches(nullptr));
+  EXPECT_FALSE(mw.Matches(L"hello"));
+
+  Matcher<std::wstring> mws = StrCaseNe(std::wstring(L"Hello"));
+  EXPECT_TRUE(mws.Matches(L"Hi"));
+  EXPECT_FALSE(mws.Matches(L"Hello"));
+  EXPECT_FALSE(mws.Matches(L"hello"));
+
+  Matcher<std::wstring_view> mwsv = StrCaseNe(std::wstring_view(L"Hello"));
+  EXPECT_TRUE(mwsv.Matches(L"Hi"));
+  EXPECT_FALSE(mwsv.Matches(L"Hello"));
+  EXPECT_FALSE(mwsv.Matches(L"hello"));
+#endif  // GTEST_HAS_STD_WSTRING
 }
 
 // Tests that HasSubstr() works for matching string-typed values.
@@ -1452,10 +1676,80 @@ TEST(HasSubstrTest, WorksForStringViewClasses) {
 }
 #endif  // GTEST_INTERNAL_HAS_STRING_VIEW
 
+TEST(HasSubstrTest, WorksForStdStringViewClasses) {
+  const Matcher<std::string_view> m1 = HasSubstr(std::string_view("foo"));
+  EXPECT_TRUE(m1.Matches("I love food."));
+  EXPECT_FALSE(m1.Matches("tofo"));
+  EXPECT_FALSE(m1.Matches(std::string_view()));
+
+  const Matcher<std::string_view> m2 = HasSubstr(std::string_view(""));
+  EXPECT_TRUE(m2.Matches("foo"));
+  EXPECT_TRUE(m2.Matches(""));
+  EXPECT_TRUE(m2.Matches(std::string_view()));
+}
+
 // Tests that HasSubstr(s) describes itself properly.
 TEST(HasSubstrTest, CanDescribeSelf) {
   Matcher<std::string> m = HasSubstr("foo\n\"");
   EXPECT_EQ("has substring \"foo\\n\\\"\"", Describe(m));
+}
+
+TEST(HasSubstrTest, AllowsWideChars) {
+  Matcher<const char16_t*> m16 = HasSubstr(u"foo");
+  EXPECT_TRUE(m16.Matches(u"I love food"));
+  EXPECT_FALSE(m16.Matches(nullptr));
+  EXPECT_FALSE(m16.Matches(u"hello"));
+
+  Matcher<std::u16string> m16s = HasSubstr(std::u16string(u"foo"));
+  EXPECT_TRUE(m16s.Matches(u"I love food"));
+  EXPECT_FALSE(m16s.Matches(u"hello"));
+
+  Matcher<std::u16string_view> m16sv = HasSubstr(std::u16string_view(u"foo"));
+  EXPECT_TRUE(m16sv.Matches(u"I love food"));
+  EXPECT_FALSE(m16sv.Matches(u"hello"));
+
+  Matcher<const char32_t*> m32 = HasSubstr(U"foo");
+  EXPECT_TRUE(m32.Matches(U"I love food"));
+  EXPECT_FALSE(m32.Matches(nullptr));
+  EXPECT_FALSE(m32.Matches(U"hello"));
+
+  Matcher<std::u32string> m32s = HasSubstr(std::u32string(U"foo"));
+  EXPECT_TRUE(m32s.Matches(U"I love food"));
+  EXPECT_FALSE(m32s.Matches(U"hello"));
+
+  Matcher<std::u32string_view> m32sv = HasSubstr(std::u32string_view(U"foo"));
+  EXPECT_TRUE(m32sv.Matches(U"I love food"));
+  EXPECT_FALSE(m32sv.Matches(U"hello"));
+
+#ifdef __cpp_lib_char8_t
+  Matcher<const char8_t*> m8 = HasSubstr(u8"foo");
+  EXPECT_TRUE(m8.Matches(u8"I love food"));
+  EXPECT_FALSE(m8.Matches(nullptr));
+  EXPECT_FALSE(m8.Matches(u8"hello"));
+
+  Matcher<std::u8string> m8s = HasSubstr(std::u8string(u8"foo"));
+  EXPECT_TRUE(m8s.Matches(u8"I love food"));
+  EXPECT_FALSE(m8s.Matches(u8"hello"));
+
+  Matcher<std::u8string_view> m8sv = HasSubstr(std::u8string_view(u8"foo"));
+  EXPECT_TRUE(m8sv.Matches(u8"I love food"));
+  EXPECT_FALSE(m8sv.Matches(u8"hello"));
+#endif  // __cpp_lib_char8_t
+
+#if GTEST_HAS_STD_WSTRING
+  Matcher<const wchar_t*> mw = HasSubstr(L"foo");
+  EXPECT_TRUE(mw.Matches(L"I love food"));
+  EXPECT_FALSE(mw.Matches(nullptr));
+  EXPECT_FALSE(mw.Matches(L"hello"));
+
+  Matcher<std::wstring> mws = HasSubstr(std::wstring(L"foo"));
+  EXPECT_TRUE(mws.Matches(L"I love food"));
+  EXPECT_FALSE(mws.Matches(L"hello"));
+
+  Matcher<std::wstring_view> mwsv = HasSubstr(std::wstring_view(L"foo"));
+  EXPECT_TRUE(mwsv.Matches(L"I love food"));
+  EXPECT_FALSE(mwsv.Matches(L"hello"));
+#endif  // GTEST_HAS_STD_WSTRING
 }
 
 INSTANTIATE_GTEST_MATCHER_TEST_P(KeyTest);
@@ -1856,6 +2150,13 @@ TEST(StartsWithTest, MatchesStringWithGivenPrefix) {
   EXPECT_TRUE(m_empty.Matches(internal::StringView("")));
   EXPECT_TRUE(m_empty.Matches(internal::StringView("not empty")));
 #endif  // GTEST_INTERNAL_HAS_STRING_VIEW
+
+  const Matcher<std::string_view> m3 = StartsWith(std::string_view("Hi"));
+  EXPECT_TRUE(m3.Matches("Hi"));
+  EXPECT_TRUE(m3.Matches("Hi Hi!"));
+  EXPECT_TRUE(m3.Matches("High"));
+  EXPECT_FALSE(m3.Matches("H"));
+  EXPECT_FALSE(m3.Matches(" Hi"));
 }
 
 TEST(StartsWithTest, CanDescribeSelf) {
@@ -1870,6 +2171,64 @@ TEST(StartsWithTest, WorksWithStringMatcherOnStringViewMatchee) {
 #else
   GTEST_SKIP() << "Not applicable without internal::StringView.";
 #endif  // GTEST_INTERNAL_HAS_STRING_VIEW
+}
+
+TEST(StartsWithTest, AllowsWideChars) {
+  const Matcher<const char16_t*> m16 = StartsWith(u"Hi");
+  EXPECT_TRUE(m16.Matches(u"Hi"));
+  EXPECT_FALSE(m16.Matches(u"hi"));
+  EXPECT_FALSE(m16.Matches(nullptr));
+
+  const Matcher<std::u16string> m16s = StartsWith(std::u16string(u"Hi"));
+  EXPECT_TRUE(m16s.Matches(u"Hi"));
+  EXPECT_FALSE(m16s.Matches(u"hi"));
+
+  const Matcher<std::u16string_view> m16sv = StartsWith(std::u16string_view(u"Hi"));
+  EXPECT_TRUE(m16sv.Matches(u"Hi"));
+  EXPECT_FALSE(m16sv.Matches(u"hi"));
+
+  const Matcher<const char32_t*> m32 = StartsWith(U"Hi");
+  EXPECT_TRUE(m32.Matches(U"Hi"));
+  EXPECT_FALSE(m32.Matches(U"hi"));
+  EXPECT_FALSE(m32.Matches(nullptr));
+
+  const Matcher<std::u32string> m32s = StartsWith(std::u32string(U"Hi"));
+  EXPECT_TRUE(m32s.Matches(U"Hi"));
+  EXPECT_FALSE(m32s.Matches(U"hi"));
+
+  const Matcher<std::u32string_view> m32sv = StartsWith(std::u32string_view(U"Hi"));
+  EXPECT_TRUE(m32sv.Matches(U"Hi"));
+  EXPECT_FALSE(m32sv.Matches(U"hi"));
+
+#ifdef __cpp_lib_char8_t
+  const Matcher<const char8_t*> m8 = StartsWith(u8"Hi");
+  EXPECT_TRUE(m8.Matches(u8"Hi"));
+  EXPECT_FALSE(m8.Matches(u8"hi"));
+  EXPECT_FALSE(m8.Matches(nullptr));
+
+  const Matcher<std::u8string> m8s = StartsWith(std::u8string(u8"Hi"));
+  EXPECT_TRUE(m8s.Matches(u8"Hi"));
+  EXPECT_FALSE(m8s.Matches(u8"hi"));
+
+  const Matcher<std::u8string_view> m8sv = StartsWith(std::u8string_view(u8"Hi"));
+  EXPECT_TRUE(m8sv.Matches(u8"Hi"));
+  EXPECT_FALSE(m8sv.Matches(u8"hi"));
+#endif  // __cpp_lib_char8_t
+
+#if GTEST_HAS_STD_WSTRING
+  const Matcher<const wchar_t*> mw = StartsWith(L"Hi");
+  EXPECT_TRUE(mw.Matches(L"Hi"));
+  EXPECT_FALSE(mw.Matches(L"hi"));
+  EXPECT_FALSE(mw.Matches(nullptr));
+
+  const Matcher<std::wstring> mws = StartsWith(std::wstring(L"Hi"));
+  EXPECT_TRUE(mws.Matches(L"Hi"));
+  EXPECT_FALSE(mws.Matches(L"hi"));
+
+  const Matcher<std::wstring_view> mwsv = StartsWith(std::wstring_view(L"Hi"));
+  EXPECT_TRUE(mwsv.Matches(L"Hi"));
+  EXPECT_FALSE(mwsv.Matches(L"hi"));
+#endif  // GTEST_HAS_STD_WSTRING
 }
 
 // Tests EndsWith(s).
@@ -1895,11 +2254,76 @@ TEST(EndsWithTest, MatchesStringWithGivenSuffix) {
   EXPECT_TRUE(m4.Matches(internal::StringView()));
   EXPECT_TRUE(m4.Matches(internal::StringView("")));
 #endif  // GTEST_INTERNAL_HAS_STRING_VIEW
+
+  const Matcher<std::string_view> m5 = EndsWith(std::string_view("Hi"));
+  EXPECT_TRUE(m5.Matches("Hi"));
+  EXPECT_TRUE(m5.Matches("Wow Hi Hi"));
+  EXPECT_TRUE(m5.Matches("Super Hi"));
+  EXPECT_FALSE(m5.Matches("i"));
+  EXPECT_FALSE(m5.Matches("Hi "));
 }
 
 TEST(EndsWithTest, CanDescribeSelf) {
   Matcher<const std::string> m = EndsWith("Hi");
   EXPECT_EQ("ends with \"Hi\"", Describe(m));
+}
+
+TEST(EndsWithTest, AllowsWideChars) {
+  const Matcher<const char16_t*> m16 = EndsWith(u"Hi");
+  EXPECT_TRUE(m16.Matches(u"Wow Hi Hi"));
+  EXPECT_FALSE(m16.Matches(u"hi"));
+  EXPECT_FALSE(m16.Matches(nullptr));
+
+  const Matcher<std::u16string> m16s = EndsWith(std::u16string(u"Hi"));
+  EXPECT_TRUE(m16s.Matches(u"Wow Hi Hi"));
+  EXPECT_FALSE(m16s.Matches(u"hi"));
+
+  const Matcher<std::u16string_view> m16sv = EndsWith(std::u16string_view(u"Hi"));
+  EXPECT_TRUE(m16sv.Matches(u"Wow Hi Hi"));
+  EXPECT_FALSE(m16sv.Matches(u"hi"));
+
+  const Matcher<const char32_t*> m32 = EndsWith(U"Hi");
+  EXPECT_TRUE(m32.Matches(U"Wow Hi Hi"));
+  EXPECT_FALSE(m32.Matches(U"hi"));
+  EXPECT_FALSE(m32.Matches(nullptr));
+
+  const Matcher<std::u32string> m32s = EndsWith(std::u32string(U"Hi"));
+  EXPECT_TRUE(m32s.Matches(U"Wow Hi Hi"));
+  EXPECT_FALSE(m32s.Matches(U"hi"));
+
+  const Matcher<std::u32string_view> m32sv = EndsWith(std::u32string_view(U"Hi"));
+  EXPECT_TRUE(m32sv.Matches(U"Wow Hi Hi"));
+  EXPECT_FALSE(m32sv.Matches(U"hi"));
+
+#ifdef __cpp_lib_char8_t
+  const Matcher<const char8_t*> m8 = EndsWith(u8"Hi");
+  EXPECT_TRUE(m8.Matches(u8"Wow Hi Hi"));
+  EXPECT_FALSE(m8.Matches(u8"hi"));
+  EXPECT_FALSE(m8.Matches(nullptr));
+
+  const Matcher<std::u8string> m8s = EndsWith(std::u8string(u8"Hi"));
+  EXPECT_TRUE(m8s.Matches(u8"Wow Hi Hi"));
+  EXPECT_FALSE(m8s.Matches(u8"hi"));
+
+  const Matcher<std::u8string_view> m8sv = EndsWith(std::u8string_view(u8"Hi"));
+  EXPECT_TRUE(m8sv.Matches(u8"Wow Hi Hi"));
+  EXPECT_FALSE(m8sv.Matches(u8"hi"));
+#endif  // __cpp_lib_char8_t
+
+#if GTEST_HAS_STD_WSTRING
+  const Matcher<const wchar_t*> mw = EndsWith(L"Hi");
+  EXPECT_TRUE(mw.Matches(L"Wow Hi Hi"));
+  EXPECT_FALSE(mw.Matches(L"hi"));
+  EXPECT_FALSE(mw.Matches(nullptr));
+
+  const Matcher<std::wstring> mws = EndsWith(std::wstring(L"Hi"));
+  EXPECT_TRUE(mws.Matches(L"Wow Hi Hi"));
+  EXPECT_FALSE(mws.Matches(L"hi"));
+
+  const Matcher<std::wstring_view> mwsv = EndsWith(std::wstring_view(L"Hi"));
+  EXPECT_TRUE(mwsv.Matches(L"Wow Hi Hi"));
+  EXPECT_FALSE(mwsv.Matches(L"hi"));
+#endif  // GTEST_HAS_STD_WSTRING
 }
 
 // Tests WhenBase64Unescaped.
