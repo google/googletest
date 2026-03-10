@@ -825,6 +825,10 @@ class GTEST_API_ UnitTestImpl {
   // UnitTest::Run() starts.
   bool catch_exceptions() const { return catch_exceptions_; }
 
+  const std::vector<TestPartResult>& global_env_failures() const {
+    return global_env_failures_;
+  }
+  
  private:
   // Returns true if a warning should be issued if no tests match the test
   // filter flag.
@@ -968,6 +972,9 @@ class GTEST_API_ UnitTestImpl {
 
   // A per-thread stack of traces created by the SCOPED_TRACE() macro.
   internal::ThreadLocal<std::vector<TraceInfo> > gtest_trace_stack_;
+
+  // Stores failures that occur in global environment setup/teardown.
+  std::vector<TestPartResult> global_env_failures_;
 
   // The value of GTEST_FLAG(catch_exceptions) at the moment RunAllTests()
   // starts.
