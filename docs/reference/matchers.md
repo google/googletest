@@ -256,6 +256,14 @@ Matcher | Description
 `Le()`  | `x <= y`
 `Lt()`  | `x < y`
 `Ne()`  | `x != y`
+`FloatEq()` | `x` approximately equals `y`
+`DoubleEq()` | `x` approximately equals `y`
+`NanSensitiveFloatEq()` | Same as `FloatEq()`, but treats two NaNs as equal
+`NanSensitiveDoubleEq()` | Same as `DoubleEq()`, but treats two NaNs as equal
+`FloatNear(max_abs_error)` | `x` is within `max_abs_error` of `y`
+`DoubleNear(max_abs_error)` | `x` is within `max_abs_error` of `y`
+`NanSensitiveFloatNear(max_abs_error)` | Same as `FloatNear(max_abs_error)`, but treats two NaNs as near
+`NanSensitiveDoubleNear(max_abs_error)` | Same as `DoubleNear(max_abs_error)`, but treats two NaNs as near
 
 You can use the following selectors to pick a subset of the arguments (or
 reorder them) to participate in the matching:
