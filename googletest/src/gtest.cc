@@ -1357,7 +1357,7 @@ Message& Message::operator<<(const ::std::wstring& wstr) {
 // Gets the text streamed to this object so far as an std::string.
 // Each '\0' character in the buffer is replaced with "\\0".
 std::string Message::GetString() const {
-  return internal::StringStreamToString(ss_.get());
+  return internal::StringStreamToString(*ss_);
 }
 
 namespace internal {
@@ -1776,8 +1776,8 @@ AssertionResult FloatingPointLE(const char* expr1, const char* expr2,
 
   return AssertionFailure()
          << "Expected: (" << expr1 << ") <= (" << expr2 << ")\n"
-         << "  Actual: " << StringStreamToString(&val1_ss) << " vs "
-         << StringStreamToString(&val2_ss);
+         << "  Actual: " << StringStreamToString(val1_ss) << " vs "
+         << StringStreamToString(val2_ss);
 }
 
 }  // namespace internal
@@ -2145,7 +2145,7 @@ std::string WideStringToUtf8(const wchar_t* str, int num_chars) {
 
     stream << CodePointToUtf8(unicode_code_point);
   }
-  return StringStreamToString(&stream);
+  return StringStreamToString(stream);
 }
 
 // Converts a wide C string to an std::string using the UTF-8 encoding.
@@ -2286,8 +2286,8 @@ std::string String::FormatByte(unsigned char value) {
 
 // Converts the buffer in a stringstream to an std::string, converting NUL
 // bytes to "\\0" along the way.
-std::string StringStreamToString(::std::stringstream* ss) {
-  const ::std::string& str = ss->str();
+std::string StringStreamToString(const ::std::stringstream& ss) {
+  const ::std::string& str = ss.str();
   const char* const start = str.c_str();
   const char* const end = start + str.length();
 
@@ -4073,7 +4073,7 @@ void XmlUnitTestResultPrinter::OnTestIterationEnd(const UnitTest& unit_test,
   FILE* xmlout = OpenFileForWriting(output_file_);
   std::stringstream stream;
   PrintXmlUnitTest(&stream, unit_test);
-  fprintf(xmlout, "%s", StringStreamToString(&stream).c_str());
+  fprintf(xmlout, "%s", StringStreamToString(stream).c_str());
   fclose(xmlout);
 }
 
@@ -4082,7 +4082,7 @@ void XmlUnitTestResultPrinter::ListTestsMatchingFilter(
   FILE* xmlout = OpenFileForWriting(output_file_);
   std::stringstream stream;
   PrintXmlTestsList(&stream, test_suites);
-  fprintf(xmlout, "%s", StringStreamToString(&stream).c_str());
+  fprintf(xmlout, "%s", StringStreamToString(stream).c_str());
   fclose(xmlout);
 }
 
@@ -4601,7 +4601,7 @@ void JsonUnitTestResultPrinter::OnTestIterationEnd(const UnitTest& unit_test,
   FILE* jsonout = OpenFileForWriting(output_file_);
   std::stringstream stream;
   PrintJsonUnitTest(&stream, unit_test);
-  fprintf(jsonout, "%s", StringStreamToString(&stream).c_str());
+  fprintf(jsonout, "%s", StringStreamToString(stream).c_str());
   fclose(jsonout);
 }
 
@@ -6424,7 +6424,7 @@ void UnitTestImpl::ListTestsMatchingFilter() {
           UnitTestOptions::GetAbsolutePathToOutputFile().c_str())
           .PrintJsonTestList(&stream, test_suites_);
     }
-    fprintf(fileout, "%s", StringStreamToString(&stream).c_str());
+    fprintf(fileout, "%s", StringStreamToString(stream).c_str());
     fclose(fileout);
   }
 #endif  // GTEST_HAS_FILE_SYSTEM
