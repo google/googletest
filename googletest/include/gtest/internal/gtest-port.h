@@ -2388,4 +2388,32 @@ using StringView = ::std::string_view;
 #define GTEST_INTERNAL_HAS_COMPARE_LIB 0
 #endif
 
+#ifndef GTEST_INTERNAL_LOCALTIME_
+#include <time.h>  // NOLINT
+namespace testing {
+namespace internal {
+inline bool LocalTime(time_t seconds, struct tm* out) {
+#if defined(_MSC_VER)
+  return localtime_s(out, &seconds) == 0;
+#elif defined(__MINGW32__) || defined(__MINGW64__)
+  // MINGW <time.h> provides neither localtime_r nor localtime_s, but uses
+  // Windows' localtime(), which has a thread-local tm buffer.
+  struct tm* tm_ptr = localtime(&seconds);  // NOLINT
+  if (tm_ptr == nullptr) return false;
+  *out = *tm_ptr;
+  return true;
+#elif defined(__STDC_LIB_EXT1__)
+  // Uses localtime_s when available as localtime_r is only available from
+  // C23 standard.
+  return localtime_s(&seconds, out) != nullptr;
+#else
+  return localtime_r(&seconds, out) != nullptr;
+#endif
+}
+}  // namespace internal
+}  // namespace testing
+#endif // GTEST_INTERNAL_LOCALTIME_
+
+
+
 #endif  // GOOGLETEST_INCLUDE_GTEST_INTERNAL_GTEST_PORT_H_
