@@ -3591,7 +3591,7 @@ and supports the following operations:
 bool matched = matcher.MatchAndExplain(value, maybe_os);
 // where `value` is of type `T` and
 // `maybe_os` is of type `std::ostream*`, where it can be null if the caller
-// is not interested in there textual explanation.
+// is not interested in the textual explanation.
 
 matcher.DescribeTo(os);
 matcher.DescribeNegationTo(os);
