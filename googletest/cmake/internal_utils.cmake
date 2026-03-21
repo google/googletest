@@ -91,7 +91,17 @@ macro(config_compiler_and_linker)
     endif()
   elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR
       CMAKE_CXX_COMPILER_ID STREQUAL "IntelLLVM")
-    set(cxx_base_flags "-Wall -Wshadow -Wconversion -Wundef")
+    set(cxx_base_flags "-Wall \
+                        -Wshadow \
+                        -Wconversion \
+                        -Wundef \
+                        -Wswitch-default \
+                        -Wswitch-enum \
+                        -Wextra \
+                        -Wcast-align \
+                        -Wunused \
+                        -Wunreachable-code \
+    ")
     set(cxx_exception_flags "-fexceptions")
     set(cxx_no_exception_flags "-fno-exceptions")
     set(cxx_strict_flags "-W -Wpointer-arith -Wreturn-type -Wcast-qual -Wwrite-strings -Wswitch -Wunused-parameter -Wcast-align -Winline -Wredundant-decls")
