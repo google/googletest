@@ -8,7 +8,7 @@ zephyr_include_directories_ifdef(CONFIG_GTEST ${ZEPHYR_GOOGLETEST_MODULE_DIR}/go
 zephyr_library_sources_ifdef(CONFIG_GTEST
     ${ZEPHYR_GOOGLETEST_MODULE_DIR}/googletest/src/gtest-all.cc
 )
-target_sources_ifdef(CONFIG_GTEST app PRIVATE
+target_sources_ifdef(CONFIG_GTEST_MAIN app PRIVATE
     ${ZEPHYR_GOOGLETEST_MODULE_DIR}/googletest/src/gtest_main.cc
 )
 

@@ -5,6 +5,16 @@ config GTEST
     select REQUIRES_FULL_LIBCPP
     select FPU
 
+config GTEST_MAIN
+    bool "Enable GoogleTest main function"
+    default y
+    depends on GTEST
+    help
+      Use main function from GoogleTest.
+      This is required to automatically configure and run the tests.
+      This could be deactivated if we already have a main function
+      and that we want to manually intiaalize and run the tests.
+
 config GMOCK
     bool "GoogleMock mocking framework"
     select GTEST
