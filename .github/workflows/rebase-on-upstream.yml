@@ -1,0 +1,53 @@
+name: Sync upstream and rebase Zephyr branch
+
+on:
+  schedule:
+    # Runs every day at 03:00 UTC
+    - cron: '0 3 * * *'
+  workflow_dispatch: # Allow manual triggering
+
+jobs:
+  rebase:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout fork
+        uses: actions/checkout@v4
+        with:
+          # We need the full history for rebase to work properly
+          fetch-depth: 0
+          # Use a PAT so the workflow can push back to your fork.
+          # Create a fine-grained PAT with "Contents: Read and Write" on this
+          # repo, then store it as a secret named REBASE_TOKEN.
+          token: ${{ secrets.REBASE_TOKEN }}
+
+      - name: Configure git
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Add upstream remote
+        run: |
+          git remote add upstream https://github.com/google/googletest.git
+          git fetch upstream
+
+      - name: Update fork's main from upstream
+        run: |
+          git checkout main
+          git merge --ff-only upstream/main
+          git push origin main
+
+      - name: Rebase zephyr dev branch onto updated main
+        run: |
+          git checkout abailon/zephyr/dev
+          git rebase main
+
+      - name: Force-push rebased branch
+        run: |
+          git push --force-with-lease origin abailon/zephyr/dev
+
+      - name: Report failure
+        if: failure()
+        run: |
+          echo "::error::Rebase failed — likely due to conflicts."
+          echo "::error::Please resolve conflicts manually and push."
+          exit 1
