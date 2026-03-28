@@ -1310,7 +1310,7 @@ TEST(AssignTest, Int) {
 
 TEST(AssignTest, String) {
   ::std::string x;
-  Action<void(void)> a = Assign(&x, "Hello, world");
+  Action<void()> a = Assign(&x, "Hello, world");
   a.Perform(std::make_tuple());
   EXPECT_EQ("Hello, world", x);
 }
@@ -1662,14 +1662,14 @@ class SetErrnoAndReturnTest : public testing::Test {
 };
 
 TEST_F(SetErrnoAndReturnTest, Int) {
-  Action<int(void)> a = SetErrnoAndReturn(ENOTTY, -5);
+  Action<int()> a = SetErrnoAndReturn(ENOTTY, -5);
   EXPECT_EQ(-5, a.Perform(std::make_tuple()));
   EXPECT_EQ(ENOTTY, errno);
 }
 
 TEST_F(SetErrnoAndReturnTest, Ptr) {
   int x;
-  Action<int*(void)> a = SetErrnoAndReturn(ENOTTY, &x);
+  Action<int*()> a = SetErrnoAndReturn(ENOTTY, &x);
   EXPECT_EQ(&x, a.Perform(std::make_tuple()));
   EXPECT_EQ(ENOTTY, errno);
 }
