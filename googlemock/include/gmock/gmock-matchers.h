@@ -264,8 +264,7 @@
 #include <iterator>
 #include <limits>
 #include <memory>
-#include <ostream>  // NOLINT
-#include <sstream>
+#include <iosfwd>
 #include <string>
 #include <tuple>
 #include <type_traits>
@@ -305,16 +304,17 @@ namespace testing {
 // A match result listener that stores the explanation in a string.
 class [[nodiscard]] StringMatchResultListener : public MatchResultListener {
  public:
-  StringMatchResultListener() : MatchResultListener(&ss_) {}
+  StringMatchResultListener();
+  ~StringMatchResultListener() override;
 
   // Returns the explanation accumulated so far.
-  std::string str() const { return ss_.str(); }
+  std::string str() const;
 
   // Clears the explanation accumulated so far.
-  void Clear() { ss_.str(""); }
+  void Clear();
 
  private:
-  ::std::stringstream ss_;
+  const std::unique_ptr< ::std::ostream> ss_;
 
   StringMatchResultListener(const StringMatchResultListener&) = delete;
   StringMatchResultListener& operator=(const StringMatchResultListener&) =
@@ -578,12 +578,8 @@ struct Rank1 : Rank0 {};
 using HighestRank = Rank1;
 
 // If the explanation is not empty, prints it to the ostream.
-inline void PrintIfNotEmpty(const std::string& explanation,
-                            ::std::ostream* os) {
-  if (!explanation.empty() && os != nullptr) {
-    *os << ", " << explanation;
-  }
-}
+GTEST_API_ void PrintIfNotEmpty(const std::string& explanation,
+                                ::std::ostream* os);
 
 // Returns true if the given type name is easy to read by a human.
 // This is used to decide whether printing the type of a value might
@@ -657,9 +653,9 @@ class [[nodiscard]] TuplePrefix {
     const Value& value = std::get<N - 1>(values);
     StringMatchResultListener listener;
     if (!matcher.MatchAndExplain(value, &listener)) {
-      *os << "  Expected arg #" << N - 1 << ": ";
+      ::testing::internal::StreamTo(os, "  Expected arg #"); ::testing::internal::StreamTo(os, N - 1); ::testing::internal::StreamTo(os, ": ");
       std::get<N - 1>(matchers).DescribeTo(os);
-      *os << "\n           Actual: ";
+      ::testing::internal::StreamTo(os, "\n           Actual: ");
       // We remove the reference in type Value to prevent the
       // universal printer from printing the address of value, which
       // isn't interesting to the user most of the time.  The
@@ -667,7 +663,7 @@ class [[nodiscard]] TuplePrefix {
       // the address is interesting.
       internal::UniversalPrint(value, os);
       PrintIfNotEmpty(listener.str(), os);
-      *os << "\n";
+      ::testing::internal::StreamTo(os, "\n");
     }
   }
 };
@@ -766,12 +762,12 @@ class [[nodiscard]] AnythingMatcher {
   bool MatchAndExplain(const T& /* x */, std::ostream* /* listener */) const {
     return true;
   }
-  void DescribeTo(std::ostream* os) const { *os << "is anything"; }
+  void DescribeTo(std::ostream* os) const { ::testing::internal::StreamTo(os, "is anything"); }
   void DescribeNegationTo(::std::ostream* os) const {
     // This is mostly for completeness' sake, as it's not very useful
     // to write Not(A<bool>()).  However we cannot completely rule out
     // such a possibility, and it doesn't hurt to be prepared.
-    *os << "never matches";
+    ::testing::internal::StreamTo(os, "never matches");
   }
 };
 
@@ -785,8 +781,8 @@ class [[nodiscard]] IsNullMatcher {
     return p == nullptr;
   }
 
-  void DescribeTo(::std::ostream* os) const { *os << "is NULL"; }
-  void DescribeNegationTo(::std::ostream* os) const { *os << "isn't NULL"; }
+  void DescribeTo(::std::ostream* os) const { ::testing::internal::StreamTo(os, "is NULL"); }
+  void DescribeNegationTo(::std::ostream* os) const { ::testing::internal::StreamTo(os, "isn't NULL"); }
 };
 
 // Implements the polymorphic NotNull() matcher, which matches any raw or smart
@@ -799,8 +795,8 @@ class [[nodiscard]] NotNullMatcher {
     return p != nullptr;
   }
 
-  void DescribeTo(::std::ostream* os) const { *os << "isn't NULL"; }
-  void DescribeNegationTo(::std::ostream* os) const { *os << "is NULL"; }
+  void DescribeTo(::std::ostream* os) const { ::testing::internal::StreamTo(os, "isn't NULL"); }
+  void DescribeNegationTo(::std::ostream* os) const { ::testing::internal::StreamTo(os, "is NULL"); }
 };
 
 // Ref(variable) matches any argument that is a reference to
@@ -857,12 +853,12 @@ class [[nodiscard]] RefMatcher<T&> {
     }
 
     void DescribeTo(::std::ostream* os) const override {
-      *os << "references the variable ";
+      ::testing::internal::StreamTo(os, "references the variable ");
       UniversalPrinter<Super&>::Print(object_, os);
     }
 
     void DescribeNegationTo(::std::ostream* os) const override {
-      *os << "does not reference the variable ";
+      ::testing::internal::StreamTo(os, "does not reference the variable ");
       UniversalPrinter<Super&>::Print(object_, os);
     }
 
@@ -962,10 +958,10 @@ class [[nodiscard]] StrEqualityMatcher {
 
  private:
   void DescribeToHelper(bool expect_eq, ::std::ostream* os) const {
-    *os << (expect_eq ? "is " : "isn't ");
-    *os << "equal to ";
+    ::testing::internal::StreamTo(os, (expect_eq ? "is " : "isn't "));
+    ::testing::internal::StreamTo(os, "equal to ");
     if (!case_sensitive_) {
-      *os << "(ignoring case) ";
+      ::testing::internal::StreamTo(os, "(ignoring case) ");
     }
     UniversalPrint(string_, os);
   }
@@ -1016,12 +1012,12 @@ class [[nodiscard]] HasSubstrMatcher {
 
   // Describes what this matcher matches.
   void DescribeTo(::std::ostream* os) const {
-    *os << "has substring ";
+    ::testing::internal::StreamTo(os, "has substring ");
     UniversalPrint(substring_, os);
   }
 
   void DescribeNegationTo(::std::ostream* os) const {
-    *os << "has no substring ";
+    ::testing::internal::StreamTo(os, "has no substring ");
     UniversalPrint(substring_, os);
   }
 
@@ -1070,12 +1066,12 @@ class [[nodiscard]] StartsWithMatcher {
   }
 
   void DescribeTo(::std::ostream* os) const {
-    *os << "starts with ";
+    ::testing::internal::StreamTo(os, "starts with ");
     UniversalPrint(prefix_, os);
   }
 
   void DescribeNegationTo(::std::ostream* os) const {
-    *os << "doesn't start with ";
+    ::testing::internal::StreamTo(os, "doesn't start with ");
     UniversalPrint(prefix_, os);
   }
 
@@ -1124,12 +1120,12 @@ class [[nodiscard]] EndsWithMatcher {
   }
 
   void DescribeTo(::std::ostream* os) const {
-    *os << "ends with ";
+    ::testing::internal::StreamTo(os, "ends with ");
     UniversalPrint(suffix_, os);
   }
 
   void DescribeNegationTo(::std::ostream* os) const {
-    *os << "doesn't end with ";
+    ::testing::internal::StreamTo(os, "doesn't end with ");
     UniversalPrint(suffix_, os);
   }
 
@@ -1163,12 +1159,12 @@ class [[nodiscard]] WhenBase64UnescapedMatcher {
   }
 
   void DescribeTo(::std::ostream* os) const {
-    *os << "matches after Base64Unescape ";
+    ::testing::internal::StreamTo(os, "matches after Base64Unescape ");
     internal_matcher_.DescribeTo(os);
   }
 
   void DescribeNegationTo(::std::ostream* os) const {
-    *os << "does not match after Base64Unescape ";
+    ::testing::internal::StreamTo(os, "does not match after Base64Unescape ");
     internal_matcher_.DescribeTo(os);
   }
 
@@ -1209,10 +1205,10 @@ class [[nodiscard]] PairMatchBase {
       return Op()(::std::get<0>(args), ::std::get<1>(args));
     }
     void DescribeTo(::std::ostream* os) const override {
-      *os << "are " << GetDesc;
+      ::testing::internal::StreamTo(os, "are "); ::testing::internal::StreamTo(os, GetDesc);
     }
     void DescribeNegationTo(::std::ostream* os) const override {
-      *os << "aren't " << GetDesc;
+      ::testing::internal::StreamTo(os, "aren't "); ::testing::internal::StreamTo(os, GetDesc);
     }
   };
 };
@@ -1302,21 +1298,21 @@ class [[nodiscard]] AllOfMatcherImpl : public MatcherInterface<const T&> {
       : matchers_(std::move(matchers)) {}
 
   void DescribeTo(::std::ostream* os) const override {
-    *os << "(";
+    ::testing::internal::StreamTo(os, "(");
     for (size_t i = 0; i < matchers_.size(); ++i) {
-      if (i != 0) *os << ") and (";
+      if (i != 0) ::testing::internal::StreamTo(os, ") and (");
       matchers_[i].DescribeTo(os);
     }
-    *os << ")";
+    ::testing::internal::StreamTo(os, ")");
   }
 
   void DescribeNegationTo(::std::ostream* os) const override {
-    *os << "(";
+    ::testing::internal::StreamTo(os, "(");
     for (size_t i = 0; i < matchers_.size(); ++i) {
-      if (i != 0) *os << ") or (";
+      if (i != 0) ::testing::internal::StreamTo(os, ") or (");
       matchers_[i].DescribeNegationTo(os);
     }
-    *os << ")";
+    ::testing::internal::StreamTo(os, ")");
   }
 
   bool MatchAndExplain(const T& x,
@@ -1438,21 +1434,21 @@ class [[nodiscard]] AnyOfMatcherImpl : public MatcherInterface<const T&> {
       : matchers_(std::move(matchers)) {}
 
   void DescribeTo(::std::ostream* os) const override {
-    *os << "(";
+    ::testing::internal::StreamTo(os, "(");
     for (size_t i = 0; i < matchers_.size(); ++i) {
-      if (i != 0) *os << ") or (";
+      if (i != 0) ::testing::internal::StreamTo(os, ") or (");
       matchers_[i].DescribeTo(os);
     }
-    *os << ")";
+    ::testing::internal::StreamTo(os, ")");
   }
 
   void DescribeNegationTo(::std::ostream* os) const override {
-    *os << "(";
+    ::testing::internal::StreamTo(os, "(");
     for (size_t i = 0; i < matchers_.size(); ++i) {
-      if (i != 0) *os << ") and (";
+      if (i != 0) ::testing::internal::StreamTo(os, ") and (");
       matchers_[i].DescribeNegationTo(os);
     }
-    *os << ")";
+    ::testing::internal::StreamTo(os, ")");
   }
 
   bool MatchAndExplain(const T& x,
@@ -1600,11 +1596,11 @@ class [[nodiscard]] TrulyMatcher {
   }
 
   void DescribeTo(::std::ostream* os) const {
-    *os << "satisfies the given predicate";
+    ::testing::internal::StreamTo(os, "satisfies the given predicate");
   }
 
   void DescribeNegationTo(::std::ostream* os) const {
-    *os << "doesn't satisfy the given predicate";
+    ::testing::internal::StreamTo(os, "doesn't satisfy the given predicate");
   }
 
  private:
@@ -1717,8 +1713,8 @@ class [[nodiscard]] IsNanMatcher {
     return (::std::isnan)(f);
   }
 
-  void DescribeTo(::std::ostream* os) const { *os << "is NaN"; }
-  void DescribeNegationTo(::std::ostream* os) const { *os << "isn't NaN"; }
+  void DescribeTo(::std::ostream* os) const { ::testing::internal::StreamTo(os, "is NaN"); }
+  void DescribeNegationTo(::std::ostream* os) const { ::testing::internal::StreamTo(os, "isn't NaN"); }
 };
 
 // Implements the polymorphic floating point equality matcher, which matches
@@ -1801,14 +1797,16 @@ class [[nodiscard]] FloatingEqMatcher {
           os->precision(::std::numeric_limits<FloatType>::digits10 + 2);
       if (FloatingPoint<FloatType>(expected_).is_nan()) {
         if (nan_eq_nan_) {
-          *os << "is NaN";
+          ::testing::internal::StreamTo(os, "is NaN");
         } else {
-          *os << "never matches";
+          ::testing::internal::StreamTo(os, "never matches");
         }
       } else {
-        *os << "is approximately " << expected_;
+        ::testing::internal::StreamTo(os, "is approximately "); ::testing::internal::StreamTo(os, expected_);
         if (HasMaxAbsError()) {
-          *os << " (absolute error <= " << max_abs_error_ << ")";
+          ::testing::internal::StreamTo(os, " (absolute error <= ");
+          ::testing::internal::StreamTo(os, max_abs_error_);
+          ::testing::internal::StreamTo(os, ")");
         }
       }
       os->precision(old_precision);
@@ -1820,14 +1818,14 @@ class [[nodiscard]] FloatingEqMatcher {
           os->precision(::std::numeric_limits<FloatType>::digits10 + 2);
       if (FloatingPoint<FloatType>(expected_).is_nan()) {
         if (nan_eq_nan_) {
-          *os << "isn't NaN";
+          ::testing::internal::StreamTo(os, "isn't NaN");
         } else {
-          *os << "is anything";
+          ::testing::internal::StreamTo(os, "is anything");
         }
       } else {
-        *os << "isn't approximately " << expected_;
+        ::testing::internal::StreamTo(os, "isn't approximately "); ::testing::internal::StreamTo(os, expected_);
         if (HasMaxAbsError()) {
-          *os << " (absolute error > " << max_abs_error_ << ")";
+          ::testing::internal::StreamTo(os, " (absolute error > "); ::testing::internal::StreamTo(os, max_abs_error_); ::testing::internal::StreamTo(os, ")");
         }
       }
       // Restore original precision.
@@ -1924,10 +1922,10 @@ class [[nodiscard]] FloatingEq2Matcher {
       }
     }
     void DescribeTo(::std::ostream* os) const override {
-      *os << "are " << GetDesc;
+      ::testing::internal::StreamTo(os, "are "); ::testing::internal::StreamTo(os, GetDesc);
     }
     void DescribeNegationTo(::std::ostream* os) const override {
-      *os << "aren't " << GetDesc;
+      ::testing::internal::StreamTo(os, "aren't "); ::testing::internal::StreamTo(os, GetDesc);
     }
 
    private:
@@ -1976,12 +1974,12 @@ class [[nodiscard]] PointeeMatcher {
         : matcher_(MatcherCast<const Pointee&>(matcher)) {}
 
     void DescribeTo(::std::ostream* os) const override {
-      *os << "points to a value that ";
+      ::testing::internal::StreamTo(os, "points to a value that ");
       matcher_.DescribeTo(os);
     }
 
     void DescribeNegationTo(::std::ostream* os) const override {
-      *os << "does not point to a value that ";
+      ::testing::internal::StreamTo(os, "does not point to a value that ");
       matcher_.DescribeTo(os);
     }
 
@@ -2035,12 +2033,12 @@ class [[nodiscard]] PointerMatcher {
         : matcher_(MatcherCast<Pointer>(matcher)) {}
 
     void DescribeTo(::std::ostream* os) const override {
-      *os << "is a pointer that ";
+      ::testing::internal::StreamTo(os, "is a pointer that ");
       matcher_.DescribeTo(os);
     }
 
     void DescribeNegationTo(::std::ostream* os) const override {
-      *os << "is not a pointer that ";
+      ::testing::internal::StreamTo(os, "is not a pointer that ");
       matcher_.DescribeTo(os);
     }
 
@@ -2088,7 +2086,7 @@ class [[nodiscard]] WhenDynamicCastToMatcherBase {
 
  private:
   static void GetCastTypeDescription(::std::ostream* os) {
-    *os << "when dynamic_cast to " << GetToName() << ", ";
+    ::testing::internal::StreamTo(os, "when dynamic_cast to "); ::testing::internal::StreamTo(os, GetToName()); ::testing::internal::StreamTo(os, ", ");
   }
 };
 
@@ -2146,12 +2144,12 @@ class [[nodiscard]] FieldMatcher {
         whose_field_("whose field `" + field_name + "` ") {}
 
   void DescribeTo(::std::ostream* os) const {
-    *os << "is an object " << whose_field_;
+    ::testing::internal::StreamTo(os, "is an object "); ::testing::internal::StreamTo(os, whose_field_);
     matcher_.DescribeTo(os);
   }
 
   void DescribeNegationTo(::std::ostream* os) const {
-    *os << "is an object " << whose_field_;
+    ::testing::internal::StreamTo(os, "is an object "); ::testing::internal::StreamTo(os, whose_field_);
     matcher_.DescribeNegationTo(os);
   }
 
@@ -2213,12 +2211,12 @@ class [[nodiscard]] PropertyMatcher {
         whose_property_("whose property `" + property_name + "` ") {}
 
   void DescribeTo(::std::ostream* os) const {
-    *os << "is an object " << whose_property_;
+    ::testing::internal::StreamTo(os, "is an object "); ::testing::internal::StreamTo(os, whose_property_);
     matcher_.DescribeTo(os);
   }
 
   void DescribeNegationTo(::std::ostream* os) const {
-    *os << "is an object " << whose_property_;
+    ::testing::internal::StreamTo(os, "is an object "); ::testing::internal::StreamTo(os, whose_property_);
     matcher_.DescribeNegationTo(os);
   }
 
@@ -2333,18 +2331,18 @@ class [[nodiscard]] ResultOfMatcher {
 
     void DescribeTo(::std::ostream* os) const override {
       if (result_description_.empty()) {
-        *os << "is mapped by the given callable to a value that ";
+        ::testing::internal::StreamTo(os, "is mapped by the given callable to a value that ");
       } else {
-        *os << "whose " << result_description_ << " ";
+        ::testing::internal::StreamTo(os, "whose "); ::testing::internal::StreamTo(os, result_description_); ::testing::internal::StreamTo(os, " ");
       }
       matcher_.DescribeTo(os);
     }
 
     void DescribeNegationTo(::std::ostream* os) const override {
       if (result_description_.empty()) {
-        *os << "is mapped by the given callable to a value that ";
+        ::testing::internal::StreamTo(os, "is mapped by the given callable to a value that ");
       } else {
-        *os << "whose " << result_description_ << " ";
+        ::testing::internal::StreamTo(os, "whose "); ::testing::internal::StreamTo(os, result_description_); ::testing::internal::StreamTo(os, " ");
       }
       matcher_.DescribeNegationTo(os);
     }
@@ -2400,11 +2398,11 @@ class [[nodiscard]] SizeIsMatcher {
         : size_matcher_(MatcherCast<SizeType>(size_matcher)) {}
 
     void DescribeTo(::std::ostream* os) const override {
-      *os << "has a size that ";
+      ::testing::internal::StreamTo(os, "has a size that ");
       size_matcher_.DescribeTo(os);
     }
     void DescribeNegationTo(::std::ostream* os) const override {
-      *os << "has a size that ";
+      ::testing::internal::StreamTo(os, "has a size that ");
       size_matcher_.DescribeNegationTo(os);
     }
 
@@ -2453,11 +2451,11 @@ class [[nodiscard]] BeginEndDistanceIsMatcher {
         : distance_matcher_(MatcherCast<DistanceType>(distance_matcher)) {}
 
     void DescribeTo(::std::ostream* os) const override {
-      *os << "distance between begin() and end() ";
+      ::testing::internal::StreamTo(os, "distance between begin() and end() ");
       distance_matcher_.DescribeTo(os);
     }
     void DescribeNegationTo(::std::ostream* os) const override {
-      *os << "distance between begin() and end() ";
+      ::testing::internal::StreamTo(os, "distance between begin() and end() ");
       distance_matcher_.DescribeNegationTo(os);
     }
 
@@ -2511,11 +2509,11 @@ class [[nodiscard]] ContainerEqMatcher {
       : expected_(View::Copy(expected)) {}
 
   void DescribeTo(::std::ostream* os) const {
-    *os << "equals ";
+    ::testing::internal::StreamTo(os, "equals ");
     UniversalPrint(expected_, os);
   }
   void DescribeNegationTo(::std::ostream* os) const {
-    *os << "does not equal ";
+    ::testing::internal::StreamTo(os, "does not equal ");
     UniversalPrint(expected_, os);
   }
 
@@ -2537,9 +2535,9 @@ class [[nodiscard]] ContainerEqMatcher {
         if (internal::ArrayAwareFind(expected_.begin(), expected_.end(), *it) ==
             expected_.end()) {
           if (printed_header) {
-            *os << ", ";
+            ::testing::internal::StreamTo(os, ", ");
           } else {
-            *os << "which has these unexpected elements: ";
+            ::testing::internal::StreamTo(os, "which has these unexpected elements: ");
             printed_header = true;
           }
           UniversalPrint(*it, os);
@@ -2553,10 +2551,10 @@ class [[nodiscard]] ContainerEqMatcher {
                                      lhs_stl_container.end(),
                                      *it) == lhs_stl_container.end()) {
           if (printed_header2) {
-            *os << ", ";
+            ::testing::internal::StreamTo(os, ", ");
           } else {
-            *os << (printed_header ? ",\nand" : "which")
-                << " doesn't have these expected elements: ";
+            ::testing::internal::StreamTo(os, (printed_header ? ",\nand" : "which"));
+            ::testing::internal::StreamTo(os, " doesn't have these expected elements: ");
             printed_header2 = true;
           }
           UniversalPrint(*it, os);
@@ -2610,12 +2608,12 @@ class [[nodiscard]] WhenSortedByMatcher {
         : comparator_(comparator), matcher_(matcher) {}
 
     void DescribeTo(::std::ostream* os) const override {
-      *os << "(when sorted) ";
+      ::testing::internal::StreamTo(os, "(when sorted) ");
       matcher_.DescribeTo(os);
     }
 
     void DescribeNegationTo(::std::ostream* os) const override {
-      *os << "(when sorted) ";
+      ::testing::internal::StreamTo(os, "(when sorted) ");
       matcher_.DescribeNegationTo(os);
     }
 
@@ -2714,18 +2712,20 @@ class [[nodiscard]] PointwiseMatcher {
           rhs_(rhs) {}
 
     void DescribeTo(::std::ostream* os) const override {
-      *os << "contains " << rhs_.size()
-          << " values, where each value and its corresponding value in ";
+      ::testing::internal::StreamTo(os, "contains ");
+      ::testing::internal::StreamTo(os, rhs_.size());
+      ::testing::internal::StreamTo(os, " values, where each value and its corresponding value in ");
       UniversalPrinter<RhsStlContainer>::Print(rhs_, os);
-      *os << " ";
+      ::testing::internal::StreamTo(os, " ");
       mono_tuple_matcher_.DescribeTo(os);
     }
     void DescribeNegationTo(::std::ostream* os) const override {
-      *os << "doesn't contain exactly " << rhs_.size()
-          << " values, or contains a value x at some index i"
-          << " where x and the i-th value of ";
+      ::testing::internal::StreamTo(os, "doesn't contain exactly ");
+      ::testing::internal::StreamTo(os, rhs_.size());
+      ::testing::internal::StreamTo(os, " values, or contains a value x at some index i");
+      ::testing::internal::StreamTo(os, " where x and the i-th value of ");
       UniversalPrint(rhs_, os);
-      *os << " ";
+      ::testing::internal::StreamTo(os, " ");
       mono_tuple_matcher_.DescribeNegationTo(os);
     }
 
@@ -2880,12 +2880,12 @@ class [[nodiscard]] ContainsMatcherImpl
 
   // Describes what this matcher does.
   void DescribeTo(::std::ostream* os) const override {
-    *os << "contains at least one element that ";
+    ::testing::internal::StreamTo(os, "contains at least one element that ");
     this->inner_matcher_.DescribeTo(os);
   }
 
   void DescribeNegationTo(::std::ostream* os) const override {
-    *os << "doesn't contain any element that ";
+    ::testing::internal::StreamTo(os, "doesn't contain any element that ");
     this->inner_matcher_.DescribeTo(os);
   }
 
@@ -2919,12 +2919,12 @@ class [[nodiscard]] DistanceFromMatcherImpl : public MatcherInterface<V> {
   // Describes what this matcher does.
   void DescribeTo(::std::ostream* os) const override {
     distance_matcher_.DescribeTo(os);
-    *os << " away from " << PrintToString(target_);
+    ::testing::internal::StreamTo(os, " away from "); ::testing::internal::StreamTo(os, PrintToString(target_));
   }
 
   void DescribeNegationTo(::std::ostream* os) const override {
     distance_matcher_.DescribeNegationTo(os);
-    *os << " away from " << PrintToString(target_);
+    ::testing::internal::StreamTo(os, " away from "); ::testing::internal::StreamTo(os, PrintToString(target_));
   }
 
   bool MatchAndExplain(V value, MatchResultListener* listener) const override {
@@ -2954,12 +2954,12 @@ class [[nodiscard]] EachMatcherImpl : public QuantifierMatcherImpl<Container> {
 
   // Describes what this matcher does.
   void DescribeTo(::std::ostream* os) const override {
-    *os << "only contains elements that ";
+    ::testing::internal::StreamTo(os, "only contains elements that ");
     this->inner_matcher_.DescribeTo(os);
   }
 
   void DescribeNegationTo(::std::ostream* os) const override {
-    *os << "contains some element that ";
+    ::testing::internal::StreamTo(os, "contains some element that ");
     this->inner_matcher_.DescribeNegationTo(os);
   }
 
@@ -2982,16 +2982,16 @@ class [[nodiscard]] ContainsTimesMatcherImpl
         count_matcher_(std::move(count_matcher)) {}
 
   void DescribeTo(::std::ostream* os) const override {
-    *os << "quantity of elements that match ";
+    ::testing::internal::StreamTo(os, "quantity of elements that match ");
     this->inner_matcher_.DescribeTo(os);
-    *os << " ";
+    ::testing::internal::StreamTo(os, " ");
     count_matcher_.DescribeTo(os);
   }
 
   void DescribeNegationTo(::std::ostream* os) const override {
-    *os << "quantity of elements that match ";
+    ::testing::internal::StreamTo(os, "quantity of elements that match ");
     this->inner_matcher_.DescribeTo(os);
-    *os << " ";
+    ::testing::internal::StreamTo(os, " ");
     count_matcher_.DescribeNegationTo(os);
   }
 
@@ -3156,13 +3156,13 @@ class [[nodiscard]] KeyMatcherImpl : public MatcherInterface<PairType> {
 
   // Describes what this matcher does.
   void DescribeTo(::std::ostream* os) const override {
-    *os << "has a key that ";
+    ::testing::internal::StreamTo(os, "has a key that ");
     inner_matcher_.DescribeTo(os);
   }
 
   // Describes what the negation of this matcher does.
   void DescribeNegationTo(::std::ostream* os) const override {
-    *os << "doesn't have a key that ";
+    ::testing::internal::StreamTo(os, "doesn't have a key that ");
     inner_matcher_.DescribeTo(os);
   }
 
@@ -3207,12 +3207,12 @@ class [[nodiscard]] AddressMatcher {
         : matcher_(MatcherCast<Address>(matcher)) {}
 
     void DescribeTo(::std::ostream* os) const override {
-      *os << "has address that ";
+      ::testing::internal::StreamTo(os, "has address that ");
       matcher_.DescribeTo(os);
     }
 
     void DescribeNegationTo(::std::ostream* os) const override {
-      *os << "does not have address that ";
+      ::testing::internal::StreamTo(os, "does not have address that ");
       matcher_.DescribeTo(os);
     }
 
@@ -3247,17 +3247,17 @@ class [[nodiscard]] PairMatcherImpl : public MatcherInterface<PairType> {
 
   // Describes what this matcher does.
   void DescribeTo(::std::ostream* os) const override {
-    *os << "has a first field that ";
+    ::testing::internal::StreamTo(os, "has a first field that ");
     first_matcher_.DescribeTo(os);
-    *os << ", and has a second field that ";
+    ::testing::internal::StreamTo(os, ", and has a second field that ");
     second_matcher_.DescribeTo(os);
   }
 
   // Describes what the negation of this matcher does.
   void DescribeNegationTo(::std::ostream* os) const override {
-    *os << "has a first field that ";
+    ::testing::internal::StreamTo(os, "has a first field that ");
     first_matcher_.DescribeNegationTo(os);
-    *os << ", or has a second field that ";
+    ::testing::internal::StreamTo(os, ", or has a second field that ");
     second_matcher_.DescribeNegationTo(os);
   }
 
@@ -3519,13 +3519,19 @@ class [[nodiscard]] FieldsAreMatcherImpl<Struct, std::index_sequence<I...>>
   void DescribeTo(::std::ostream* os) const override {
     const char* separator = "";
     VariadicExpand(
-        {(*os << separator << "has field #" << I << " that ",
+        {(::testing::internal::StreamTo(os, separator),
+          ::testing::internal::StreamTo(os, "has field #"),
+          ::testing::internal::StreamTo(os, I),
+          ::testing::internal::StreamTo(os, " that "),
           std::get<I>(matchers_).DescribeTo(os), separator = ", and ")...});
   }
 
   void DescribeNegationTo(::std::ostream* os) const override {
     const char* separator = "";
-    VariadicExpand({(*os << separator << "has field #" << I << " that ",
+    VariadicExpand({(::testing::internal::StreamTo(os, separator),
+                     ::testing::internal::StreamTo(os, "has field #"),
+                     ::testing::internal::StreamTo(os, I),
+                     ::testing::internal::StreamTo(os, " that "),
                      std::get<I>(matchers_).DescribeNegationTo(os),
                      separator = ", or ")...});
   }
@@ -3615,17 +3621,17 @@ class [[nodiscard]] ElementsAreMatcherImpl
   // Describes what this matcher does.
   void DescribeTo(::std::ostream* os) const override {
     if (count() == 0) {
-      *os << "is empty";
+      ::testing::internal::StreamTo(os, "is empty");
     } else if (count() == 1) {
-      *os << "has 1 element that ";
+      ::testing::internal::StreamTo(os, "has 1 element that ");
       matchers_[0].DescribeTo(os);
     } else {
-      *os << "has " << Elements(count()) << " where\n";
+      ::testing::internal::StreamTo(os, "has "); ::testing::internal::StreamTo(os, Elements(count())); ::testing::internal::StreamTo(os, " where\n");
       for (size_t i = 0; i != count(); ++i) {
-        *os << "element #" << i << " ";
+        ::testing::internal::StreamTo(os, "element #"); ::testing::internal::StreamTo(os, i); ::testing::internal::StreamTo(os, " ");
         matchers_[i].DescribeTo(os);
         if (i + 1 < count()) {
-          *os << ",\n";
+          ::testing::internal::StreamTo(os, ",\n");
         }
       }
     }
@@ -3634,16 +3640,16 @@ class [[nodiscard]] ElementsAreMatcherImpl
   // Describes what the negation of this matcher does.
   void DescribeNegationTo(::std::ostream* os) const override {
     if (count() == 0) {
-      *os << "isn't empty";
+      ::testing::internal::StreamTo(os, "isn't empty");
       return;
     }
 
-    *os << "doesn't have " << Elements(count()) << ", or\n";
+    ::testing::internal::StreamTo(os, "doesn't have "); ::testing::internal::StreamTo(os, Elements(count())); ::testing::internal::StreamTo(os, ", or\n");
     for (size_t i = 0; i != count(); ++i) {
-      *os << "element #" << i << " ";
+      ::testing::internal::StreamTo(os, "element #"); ::testing::internal::StreamTo(os, i); ::testing::internal::StreamTo(os, " ");
       matchers_[i].DescribeNegationTo(os);
       if (i + 1 < count()) {
-        *os << ", or\n";
+        ::testing::internal::StreamTo(os, ", or\n");
       }
     }
   }
@@ -4096,9 +4102,9 @@ class [[nodiscard]] BoundSecondMatcher {
           second_value_(second) {}
 
     void DescribeTo(::std::ostream* os) const override {
-      *os << "and ";
+      ::testing::internal::StreamTo(os, "and ");
       UniversalPrint(second_value_, os);
-      *os << " ";
+      ::testing::internal::StreamTo(os, " ");
       mono_tuple2_matcher_.DescribeTo(os);
     }
 
@@ -4171,12 +4177,12 @@ class [[nodiscard]] OptionalMatcher {
         : value_matcher_(MatcherCast<ValueType>(value_matcher)) {}
 
     void DescribeTo(::std::ostream* os) const override {
-      *os << "value ";
+      ::testing::internal::StreamTo(os, "value ");
       value_matcher_.DescribeTo(os);
     }
 
     void DescribeNegationTo(::std::ostream* os) const override {
-      *os << "value ";
+      ::testing::internal::StreamTo(os, "value ");
       value_matcher_.DescribeNegationTo(os);
     }
 
@@ -4244,14 +4250,16 @@ class [[nodiscard]] VariantMatcher {
   }
 
   void DescribeTo(std::ostream* os) const {
-    *os << "is a variant<> with value of type '" << GetTypeName()
-        << "' and the value ";
+    ::testing::internal::StreamTo(os, "is a variant<> with value of type '");
+    ::testing::internal::StreamTo(os, GetTypeName());
+    ::testing::internal::StreamTo(os, "' and the value ");
     matcher_.DescribeTo(os);
   }
 
   void DescribeNegationTo(std::ostream* os) const {
-    *os << "is a variant<> with value of type other than '" << GetTypeName()
-        << "' or the value ";
+    ::testing::internal::StreamTo(os, "is a variant<> with value of type other than '");
+    ::testing::internal::StreamTo(os, GetTypeName());
+    ::testing::internal::StreamTo(os, "' or the value ");
     matcher_.DescribeNegationTo(os);
   }
 
@@ -4305,14 +4313,16 @@ class [[nodiscard]] AnyCastMatcher {
   }
 
   void DescribeTo(std::ostream* os) const {
-    *os << "is an 'any' type with value of type '" << GetTypeName()
-        << "' and the value ";
+    ::testing::internal::StreamTo(os, "is an 'any' type with value of type '");
+    ::testing::internal::StreamTo(os, GetTypeName());
+    ::testing::internal::StreamTo(os, "' and the value ");
     matcher_.DescribeTo(os);
   }
 
   void DescribeNegationTo(std::ostream* os) const {
-    *os << "is an 'any' type with value of type other than '" << GetTypeName()
-        << "' or the value ";
+    ::testing::internal::StreamTo(os, "is an 'any' type with value of type other than '");
+    ::testing::internal::StreamTo(os, GetTypeName());
+    ::testing::internal::StreamTo(os, "' or the value ");
     matcher_.DescribeNegationTo(os);
   }
 
@@ -4362,13 +4372,13 @@ class [[nodiscard]] ArgsMatcherImpl : public MatcherInterface<ArgsTuple> {
   }
 
   void DescribeTo(::std::ostream* os) const override {
-    *os << "are a tuple ";
+    ::testing::internal::StreamTo(os, "are a tuple ");
     PrintIndices(os);
     inner_matcher_.DescribeTo(os);
   }
 
   void DescribeNegationTo(::std::ostream* os) const override {
-    *os << "are a tuple ";
+    ::testing::internal::StreamTo(os, "are a tuple ");
     PrintIndices(os);
     inner_matcher_.DescribeNegationTo(os);
   }
@@ -4376,7 +4386,7 @@ class [[nodiscard]] ArgsMatcherImpl : public MatcherInterface<ArgsTuple> {
  private:
   // Prints the indices of the selected fields.
   static void PrintIndices(::std::ostream* os) {
-    *os << "whose fields (";
+    ::testing::internal::StreamTo(os, "whose fields (");
     const char* sep = "";
     // Workaround spurious C4189 on MSVC<=15.7 when k is empty.
     (void)sep;
@@ -4385,9 +4395,12 @@ class [[nodiscard]] ArgsMatcherImpl : public MatcherInterface<ArgsTuple> {
     // and may have been trying to use the first operation of the comma operator
     // as a member of the array, so Clang warns that we may have made a mistake.
     const char* dummy[] = {
-        "", (static_cast<void>(*os << sep << "#" << k), sep = ", ")...};
+        "", (static_cast<void>(::testing::internal::StreamTo(os, sep),
+                               ::testing::internal::StreamTo(os, "#"),
+                               ::testing::internal::StreamTo(os, k)),
+             sep = ", ")...};
     (void)dummy;
-    *os << ") ";
+    ::testing::internal::StreamTo(os, ") ");
   }
 
   MonomorphicInnerMatcher inner_matcher_;
@@ -5587,12 +5600,12 @@ class [[nodiscard]] WithWhatMatcherImpl {
       : matcher_(std::move(matcher)) {}
 
   void DescribeTo(std::ostream* os) const {
-    *os << "contains .what() that ";
+    ::testing::internal::StreamTo(os, "contains .what() that ");
     matcher_.DescribeTo(os);
   }
 
   void DescribeNegationTo(std::ostream* os) const {
-    *os << "contains .what() that does not ";
+    ::testing::internal::StreamTo(os, "contains .what() that does not ");
     matcher_.DescribeTo(os);
   }
 
@@ -5653,14 +5666,16 @@ class [[nodiscard]] ExceptionMatcherImpl {
       : matcher_(std::move(matcher)) {}
 
   void DescribeTo(std::ostream* os) const {
-    *os << "throws an exception which is a " << GetTypeName<Err>();
-    *os << " which ";
+    ::testing::internal::StreamTo(os, "throws an exception which is a ");
+    ::testing::internal::StreamTo(os, GetTypeName<Err>());
+    ::testing::internal::StreamTo(os, " which ");
     matcher_.DescribeTo(os);
   }
 
   void DescribeNegationTo(std::ostream* os) const {
-    *os << "throws an exception which is not a " << GetTypeName<Err>();
-    *os << " which ";
+    ::testing::internal::StreamTo(os, "throws an exception which is not a ");
+    ::testing::internal::StreamTo(os, GetTypeName<Err>());
+    ::testing::internal::StreamTo(os, " which ");
     matcher_.DescribeNegationTo(os);
   }
 

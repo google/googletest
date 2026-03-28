@@ -65,9 +65,8 @@
 #include <functional>
 #include <map>
 #include <memory>
-#include <ostream>
+#include <iosfwd>
 #include <set>
-#include <sstream>
 #include <string>
 #include <type_traits>
 #include <utility>
@@ -698,7 +697,8 @@ class GTEST_API_ ExpectationBase {
 
   // Describes the source file location of this expectation.
   void DescribeLocationTo(::std::ostream* os) const {
-    *os << FormatFileLocation(file(), line()) << " ";
+    ::testing::internal::StreamTo(os, FormatFileLocation(file(), line()));
+    ::testing::internal::StreamTo(os, " ");
   }
 
   // Describes how many times a function call matching this
@@ -1084,9 +1084,9 @@ class TypedExpectation<R(Args...)> : public ExpectationBase {
   // describes it to the ostream.
   void MaybeDescribeExtraMatcherTo(::std::ostream* os) override {
     if (extra_matcher_specified_) {
-      *os << "    Expected args: ";
+      ::testing::internal::StreamTo(os, "    Expected args: ");
       extra_matcher_.DescribeTo(os);
-      *os << "\n";
+      ::testing::internal::StreamTo(os, "\n");
     }
   }
 
@@ -1140,40 +1140,42 @@ class TypedExpectation<R(Args...)> : public ExpectationBase {
     g_gmock_mutex.AssertHeld();
 
     if (is_retired()) {
-      *os << "         Expected: the expectation is active\n"
-          << "           Actual: it is retired\n";
+      ::testing::internal::StreamTo(os, "         Expected: the expectation is active\n");
+      ::testing::internal::StreamTo(os, "           Actual: it is retired\n");
     } else if (!Matches(args)) {
       if (!TupleMatches(matchers_, args)) {
         ExplainMatchFailureTupleTo(matchers_, args, os);
       }
       StringMatchResultListener listener;
       if (!extra_matcher_.MatchAndExplain(args, &listener)) {
-        *os << "    Expected args: ";
+        ::testing::internal::StreamTo(os, "    Expected args: ");
         extra_matcher_.DescribeTo(os);
-        *os << "\n           Actual: don't match";
+        ::testing::internal::StreamTo(os, "\n           Actual: don't match");
 
         internal::PrintIfNotEmpty(listener.str(), os);
-        *os << "\n";
+        ::testing::internal::StreamTo(os, "\n");
       }
     } else if (!AllPrerequisitesAreSatisfied()) {
-      *os << "         Expected: all pre-requisites are satisfied\n"
-          << "           Actual: the following immediate pre-requisites "
-          << "are not satisfied:\n";
+      ::testing::internal::StreamTo(os, "         Expected: all pre-requisites are satisfied\n");
+      ::testing::internal::StreamTo(os, "           Actual: the following immediate pre-requisites ");
+      ::testing::internal::StreamTo(os, "are not satisfied:\n");
       ExpectationSet unsatisfied_prereqs;
       FindUnsatisfiedPrerequisites(&unsatisfied_prereqs);
       int i = 0;
       for (ExpectationSet::const_iterator it = unsatisfied_prereqs.begin();
            it != unsatisfied_prereqs.end(); ++it) {
         it->expectation_base()->DescribeLocationTo(os);
-        *os << "pre-requisite #" << i++ << "\n";
+        ::testing::internal::StreamTo(os, "pre-requisite #");
+        ::testing::internal::StreamTo(os, i++);
+        ::testing::internal::StreamTo(os, "\n");
       }
-      *os << "                   (end of pre-requisites)\n";
+      ::testing::internal::StreamTo(os, "                   (end of pre-requisites)\n");
     } else {
       // This line is here just for completeness' sake.  It will never
       // be executed as currently the ExplainMatchResultTo() function
       // is called only when the mock function call does NOT match the
       // expectation.
-      *os << "The call matches the expectation.\n";
+      ::testing::internal::StreamTo(os, "The call matches the expectation.\n");
     }
   }
 
@@ -1602,11 +1604,12 @@ class FunctionMocker<R(Args...)> final : public UntypedFunctionMockerBase {
     const OnCallSpec<F>* const spec = FindOnCallSpec(args);
 
     if (spec == nullptr) {
-      *os << (std::is_void<Result>::value ? "returning directly.\n"
-                                          : "returning default value.\n");
+      ::testing::internal::StreamTo(os, (std::is_void<Result>::value ? "returning directly.\n"
+                                          : "returning default value.\n"));
     } else {
-      *os << "taking default action specified at:\n"
-          << FormatFileLocation(spec->file(), spec->line()) << "\n";
+      ::testing::internal::StreamTo(os, "taking default action specified at:\n");
+      ::testing::internal::StreamTo(os, FormatFileLocation(spec->file(), spec->line()));
+      ::testing::internal::StreamTo(os, "\n");
     }
   }
 
@@ -1618,9 +1621,10 @@ class FunctionMocker<R(Args...)> final : public UntypedFunctionMockerBase {
       GTEST_LOCK_EXCLUDED_(g_gmock_mutex) {
     const ArgumentTuple& args =
         *static_cast<const ArgumentTuple*>(untyped_args);
-    *os << "Uninteresting mock function call - ";
+    ::testing::internal::StreamTo(os, "Uninteresting mock function call - ");
     DescribeDefaultActionTo(args, os);
-    *os << "    Function call: " << Name();
+    ::testing::internal::StreamTo(os, "    Function call: ");
+    ::testing::internal::StreamTo(os, Name());
     UniversalPrint(args, os);
   }
 
@@ -1697,7 +1701,7 @@ class FunctionMocker<R(Args...)> final : public UntypedFunctionMockerBase {
                                          ::std::ostream* why) const
       GTEST_EXCLUSIVE_LOCK_REQUIRED_(g_gmock_mutex) {
     g_gmock_mutex.AssertHeld();
-    *os << "\nUnexpected mock function call - ";
+    ::testing::internal::StreamTo(os, "\nUnexpected mock function call - ");
     DescribeDefaultActionTo(args, os);
     PrintTriedExpectationsLocked(args, why);
   }

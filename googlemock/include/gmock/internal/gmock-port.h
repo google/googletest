@@ -44,7 +44,6 @@
 #include <stdlib.h>
 
 #include <cstdint>
-#include <iostream>
 
 // Most of the utilities needed for porting Google Mock are also
 // required for Google Test and are defined in gtest-port.h.

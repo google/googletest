@@ -289,11 +289,10 @@
 #include <cerrno>
 // #include <condition_variable>  // Guarded by GTEST_IS_THREADSAFE below
 #include <cstdint>
-#include <iostream>
+#include <iosfwd>
 #include <limits>
 #include <locale>
 #include <memory>
-#include <ostream>
 #include <string>
 // #include <mutex>  // Guarded by GTEST_IS_THREADSAFE below
 #include <tuple>
@@ -1046,7 +1045,19 @@ class GTEST_API_ [[nodiscard]] GTestLog {
   // Flushes the buffers and, if severity is GTEST_FATAL, aborts the program.
   ~GTestLog();
 
-  ::std::ostream& GetStream() { return ::std::cerr; }
+  GTestLog& operator<<(const char* message);
+  GTestLog& operator<<(const std::string& message);
+  GTestLog& operator<<(int error_code);
+  GTestLog& operator<<(const void* pointer);
+  GTestLog& operator<<(::std::ostream& (*manipulator)(::std::ostream&));
+
+  template <typename T>
+  GTestLog& operator<<(const T& val) {
+    GetStream() << val;
+    return *this;
+  }
+
+  ::std::ostream& GetStream();
 
  private:
   const GTestLogSeverity severity_;
@@ -1059,8 +1070,7 @@ class GTEST_API_ [[nodiscard]] GTestLog {
 
 #define GTEST_LOG_(severity)                                           \
   ::testing::internal::GTestLog(::testing::internal::GTEST_##severity, \
-                                __FILE__, __LINE__)                    \
-      .GetStream()
+                                __FILE__, __LINE__)
 
 inline void LogToStderr() {}
 inline void FlushInfoLog() { fflush(nullptr); }
@@ -1683,28 +1693,14 @@ class [[nodiscard]] ThreadLocal : public ThreadLocalBase {
 class [[nodiscard]] MutexBase {
  public:
   // Acquires this mutex.
-  void lock() {
-    GTEST_CHECK_POSIX_SUCCESS_(pthread_mutex_lock(&mutex_));
-    owner_ = pthread_self();
-    has_owner_ = true;
-  }
+  void lock();
 
   // Releases this mutex.
-  void unlock() {
-    // Since the lock is being released the owner_ field should no longer be
-    // considered valid. We don't protect writing to has_owner_ here, as it's
-    // the caller's responsibility to ensure that the current thread holds the
-    // mutex when this is called.
-    has_owner_ = false;
-    GTEST_CHECK_POSIX_SUCCESS_(pthread_mutex_unlock(&mutex_));
-  }
+  void unlock();
 
   // Does nothing if the current thread holds the mutex. Otherwise, crashes
   // with high probability.
-  void AssertHeld() const {
-    GTEST_CHECK_(has_owner_ && pthread_equal(owner_, pthread_self()))
-        << "The current thread is not holding the mutex @" << this;
-  }
+  void AssertHeld() const;
 
   // A static mutex may be used before main() is entered.  It may even
   // be used before the dynamic initialization stage.  Therefore we
@@ -1740,11 +1736,8 @@ class [[nodiscard]] MutexBase {
 // shares its API with MutexBase otherwise.
 class [[nodiscard]] Mutex : public MutexBase {
  public:
-  Mutex() {
-    GTEST_CHECK_POSIX_SUCCESS_(pthread_mutex_init(&mutex_, nullptr));
-    has_owner_ = false;
-  }
-  ~Mutex() { GTEST_CHECK_POSIX_SUCCESS_(pthread_mutex_destroy(&mutex_)); }
+  Mutex();
+  ~Mutex();
 
  private:
   Mutex(const Mutex&) = delete;

@@ -53,9 +53,8 @@
 #include <cstdint>
 #include <limits>
 #include <memory>
-#include <ostream>
+#include <iosfwd>
 #include <set>
-#include <sstream>
 #include <string>
 #include <string_view>
 #include <type_traits>
@@ -1589,17 +1588,9 @@ AssertionResult CmpHelperFloatingPointEQ(const char* lhs_expression,
     return AssertionSuccess();
   }
 
-  ::std::stringstream lhs_ss;
-  lhs_ss.precision(std::numeric_limits<RawType>::digits10 + 2);
-  lhs_ss << lhs_value;
-
-  ::std::stringstream rhs_ss;
-  rhs_ss.precision(std::numeric_limits<RawType>::digits10 + 2);
-  rhs_ss << rhs_value;
-
   return EqFailure(lhs_expression, rhs_expression,
-                   StringStreamToString(&lhs_ss), StringStreamToString(&rhs_ss),
-                   false);
+                   (Message() << lhs_value).GetString(),
+                   (Message() << rhs_value).GetString(), false);
 }
 
 // Helper function for implementing ASSERT_NEAR.

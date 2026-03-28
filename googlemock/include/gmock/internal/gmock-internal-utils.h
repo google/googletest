@@ -42,7 +42,6 @@
 #include <stdio.h>
 
 #include <iterator>
-#include <ostream>  // NOLINT
 #include <string>
 #include <type_traits>
 #include <utility>
