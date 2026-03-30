@@ -208,6 +208,7 @@ int DieInDebugElse12(int* sideeffect) {
 #ifdef GTEST_OS_WINDOWS
 
 // Death in dbg due to Windows CRT assertion failure, not opt.
+#ifdef _DEBUG
 int DieInCRTDebugElse12(int* sideeffect) {
   if (sideeffect) *sideeffect = 12;
 
@@ -222,6 +223,7 @@ int DieInCRTDebugElse12(int* sideeffect) {
 
   return 12;
 }
+#endif  // _DEBUG
 
 #endif  // GTEST_OS_WINDOWS
 
