@@ -36,6 +36,7 @@
 
 #include <cstdint>
 #include <fstream>
+#include <iostream>
 #include <memory>
 #include <ostream>
 #include <string>
@@ -1064,6 +1065,60 @@ GTestLog::~GTestLog() {
     posix::Abort();
   }
 }
+
+::std::ostream& GTestLog::GetStream() { return ::std::cerr; }
+
+GTestLog& GTestLog::operator<<(const char* message) {
+  GetStream() << message;
+  return *this;
+}
+
+GTestLog& GTestLog::operator<<(const std::string& message) {
+  GetStream() << message;
+  return *this;
+}
+
+GTestLog& GTestLog::operator<<(int error_code) {
+  GetStream() << error_code;
+  return *this;
+}
+
+GTestLog& GTestLog::operator<<(const void* pointer) {
+  GetStream() << pointer;
+  return *this;
+}
+
+GTestLog& GTestLog::operator<<(::std::ostream& (*manipulator)(::std::ostream&)) {
+  GetStream() << manipulator;
+  return *this;
+}
+
+#if GTEST_HAS_PTHREAD
+
+void MutexBase::lock() {
+  GTEST_CHECK_POSIX_SUCCESS_(pthread_mutex_lock(&mutex_));
+  owner_ = pthread_self();
+  has_owner_ = true;
+}
+
+void MutexBase::unlock() {
+  has_owner_ = false;
+  GTEST_CHECK_POSIX_SUCCESS_(pthread_mutex_unlock(&mutex_));
+}
+
+void MutexBase::AssertHeld() const {
+  GTEST_CHECK_(has_owner_ && pthread_equal(owner_, pthread_self()))
+      << "The current thread is not holding the mutex @" << this;
+}
+
+Mutex::Mutex() {
+  GTEST_CHECK_POSIX_SUCCESS_(pthread_mutex_init(&mutex_, nullptr));
+  has_owner_ = false;
+}
+
+Mutex::~Mutex() { GTEST_CHECK_POSIX_SUCCESS_(pthread_mutex_destroy(&mutex_)); }
+
+#endif  // GTEST_HAS_PTHREAD
 
 #if GTEST_HAS_STREAM_REDIRECTION
 

@@ -1348,6 +1348,58 @@ Message::Message() : ss_(new ::std::stringstream) {
   *ss_ << std::setprecision(std::numeric_limits<double>::digits10 + 2);
 }
 
+// Copy constructor.
+Message::Message(const Message& msg) : ss_(new ::std::stringstream) {
+  *ss_ << msg.GetString();
+}
+
+// Destructor.
+Message::~Message() = default;
+
+// Constructs a Message from a C-string.
+Message::Message(const char* str) : ss_(new ::std::stringstream) {
+  *ss_ << str;
+}
+
+Message& Message::operator<<(const char* s) {
+  *ss_ << (s == nullptr ? "(null)" : s);
+  return *this;
+}
+
+Message& Message::operator<<(const std::string& s) {
+  *ss_ << s;
+  return *this;
+}
+
+Message& Message::operator<<(int n) {
+  *ss_ << n;
+  return *this;
+}
+
+Message& Message::operator<<(long n) {
+  *ss_ << n;
+  return *this;
+}
+
+Message& Message::operator<<(double n) {
+  *ss_ << n;
+  return *this;
+}
+
+Message& Message::operator<<(const void* p) {
+  if (p == nullptr) {
+    *ss_ << "(null)";
+  } else {
+    *ss_ << p;
+  }
+  return *this;
+}
+
+Message& Message::operator<<(::std::ostream& (*val)(::std::ostream&)) {
+  *ss_ << val;
+  return *this;
+}
+
 // These two overloads allow streaming a wide C string to a Message
 // using the UTF-8 encoding.
 Message& Message::operator<<(const wchar_t* wide_c_str) {
@@ -2298,8 +2350,8 @@ std::string String::FormatByte(unsigned char value) {
 
 // Converts the buffer in a stringstream to an std::string, converting NUL
 // bytes to "\\0" along the way.
-std::string StringStreamToString(::std::stringstream* ss) {
-  const ::std::string& str = ss->str();
+std::string StringStreamToString(::std::ostream* ss) {
+  const ::std::string& str = static_cast<const ::std::stringstream*>(ss)->str();
   const char* const start = str.c_str();
   const char* const end = start + str.length();
 

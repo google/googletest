@@ -41,8 +41,9 @@
 // defines Foo.
 
 #include "gtest/gtest-printers.h"
+#include "gtest/gtest-message.h"
 
-#include <stdio.h>
+#include <ctype.h>
 
 #include <cctype>
 #include <cstdint>
@@ -331,6 +332,20 @@ void PrintTo(__int128_t v, ::std::ostream* os) {
 }
 #endif  // __SIZEOF_INT128__
 
+void PrintTo(float f, ::std::ostream* os) {
+  auto old_precision = os->precision();
+  os->precision(AppropriateResolution(f));
+  *os << f;
+  os->precision(old_precision);
+}
+
+void PrintTo(double d, ::std::ostream* os) {
+  auto old_precision = os->precision();
+  os->precision(AppropriateResolution(d));
+  *os << d;
+  os->precision(old_precision);
+}
+
 // Prints the given array of characters to the ostream.  CharType must be either
 // char, char8_t, char16_t, char32_t, or wchar_t.
 // The array starts at begin (which may be nullptr) and contains len characters.
@@ -549,6 +564,28 @@ void PrintWideStringTo(::std::wstring_view s, ostream* os) {
   PrintCharsAsStringTo(s.data(), s.size(), os);
 }
 #endif  // GTEST_HAS_STD_WSTRING
+
+std::string PrintToStringWithPrinter(
+    const void* value, void (*printer)(::std::ostream*, const void*)) {
+  ::std::stringstream ss;
+  printer(&ss, value);
+  return ss.str();
+}
+
+void StreamTo(::std::ostream* os, char c) { *os << c; }
+void StreamTo(::std::ostream* os, const char* s) { *os << s; }
+void StreamTo(::std::ostream* os, const std::string& s) { *os << s; }
+void StreamTo(::std::ostream* os, const void* p) { *os << p; }
+void StreamTo(::std::ostream* os, bool b) { *os << (b ? "true" : "false"); }
+void StreamTo(::std::ostream* os, float f) { *os << f; }
+void StreamTo(::std::ostream* os, double d) { *os << d; }
+void StreamTo(::std::ostream* os, int n) { *os << n; }
+void StreamTo(::std::ostream* os, unsigned int n) { *os << n; }
+void StreamTo(::std::ostream* os, long n) { *os << n; }
+void StreamTo(::std::ostream* os, unsigned long n) { *os << n; }
+void StreamTo(::std::ostream* os, long long n) { *os << n; }
+void StreamTo(::std::ostream* os, unsigned long long n) { *os << n; }
+void StreamTo(::std::ostream* os, const Message& msg) { *os << msg.GetString(); }
 
 }  // namespace internal
 

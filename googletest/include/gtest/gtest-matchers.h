@@ -43,7 +43,7 @@
 #include <cstddef>
 #include <functional>
 #include <memory>
-#include <ostream>
+#include <iosfwd>
 #include <string>
 #include <type_traits>
 
@@ -88,12 +88,12 @@ class [[nodiscard]] MatchResultListener {
   // is NULL.
   template <typename T>
   MatchResultListener& operator<<(const T& x) {
-    if (stream_ != nullptr) *stream_ << x;
+    if (stream_ != nullptr) internal::StreamTo(stream_, x);
     return *this;
   }
 
   // Returns the underlying ostream.
-  ::std::ostream* stream() { return stream_; }
+  ::std::ostream* stream() const { return stream_; }
 
   // Returns true if and only if the listener is interested in an explanation
   // of the match result.  A matcher's MatchAndExplain() method can use
@@ -129,11 +129,7 @@ class GTEST_API_ [[nodiscard]] MatcherDescriberInterface {
   // You are not required to override this when implementing
   // MatcherInterface, but it is highly advised so that your matcher
   // can produce good error messages.
-  virtual void DescribeNegationTo(::std::ostream* os) const {
-    *os << "not (";
-    DescribeTo(os);
-    *os << ")";
-  }
+  virtual void DescribeNegationTo(::std::ostream* os) const;
 };
 
 // The implementation of a matcher.
@@ -801,11 +797,11 @@ class [[nodiscard]] ImplicitCastEqMatcher {
   }
 
   void DescribeTo(std::ostream* os) const {
-    *os << "is equal to ";
+    internal::StreamTo(os, "is equal to ");
     UniversalPrint(rhs(), os);
   }
   void DescribeNegationTo(std::ostream* os) const {
-    *os << "isn't equal to ";
+    internal::StreamTo(os, "isn't equal to ");
     UniversalPrint(rhs(), os);
   }
 
@@ -857,13 +853,15 @@ class [[nodiscard]] MatchesRegexMatcher {
   }
 
   void DescribeTo(::std::ostream* os) const {
-    *os << (full_match_ ? "matches" : "contains") << " regular expression ";
+    internal::StreamTo(os, full_match_ ? "matches" : "contains");
+    internal::StreamTo(os, " regular expression ");
     UniversalPrinter<std::string>::Print(regex_->pattern(), os);
   }
 
   void DescribeNegationTo(::std::ostream* os) const {
-    *os << "doesn't " << (full_match_ ? "match" : "contain")
-        << " regular expression ";
+    internal::StreamTo(os, "doesn't ");
+    internal::StreamTo(os, full_match_ ? "match" : "contain");
+    internal::StreamTo(os, " regular expression ");
     UniversalPrinter<std::string>::Print(regex_->pattern(), os);
   }
 

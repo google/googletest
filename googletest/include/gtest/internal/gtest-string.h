@@ -51,7 +51,7 @@
 #include <string.h>
 
 #include <cstdint>
-#include <sstream>
+#include <iosfwd>
 #include <string>
 
 #include "gtest/internal/gtest-port.h"
@@ -170,7 +170,7 @@ class GTEST_API_ [[nodiscard]] String {
 
 // Gets the content of the stringstream's buffer as an std::string.  Each '\0'
 // character in the buffer is replaced with "\\0".
-GTEST_API_ std::string StringStreamToString(::std::stringstream* stream);
+GTEST_API_ std::string StringStreamToString(::std::ostream* stream);
 
 }  // namespace internal
 }  // namespace testing
