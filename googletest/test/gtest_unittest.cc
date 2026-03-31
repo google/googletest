@@ -1873,36 +1873,31 @@ TEST(ShouldRunTestOnShardTest, IsPartitionWhenThereIsOneShard) {
 
 class ShouldShardTest : public testing::Test {
  protected:
-  void SetUp() override {
-    index_var_ = GTEST_FLAG_PREFIX_UPPER_ "INDEX";
-    total_var_ = GTEST_FLAG_PREFIX_UPPER_ "TOTAL";
-  }
+  void SetUp() override {}
 
   void TearDown() override {
-    SetEnv(index_var_, "");
-    SetEnv(total_var_, "");
+    GTEST_FLAG_SET(shard_index, -1);
+    GTEST_FLAG_SET(total_shards, -1);
   }
-
-  const char* index_var_;
-  const char* total_var_;
 };
 
 // Tests that sharding is disabled if neither of the environment variables
 // are set.
 TEST_F(ShouldShardTest, ReturnsFalseWhenNeitherEnvVarIsSet) {
-  SetEnv(index_var_, "");
-  SetEnv(total_var_, "");
+  GTEST_FLAG_SET(shard_index, -1);
+  GTEST_FLAG_SET(total_shards, -1);
 
-  EXPECT_FALSE(ShouldShard(total_var_, index_var_, false));
-  EXPECT_FALSE(ShouldShard(total_var_, index_var_, true));
+  EXPECT_FALSE(ShouldShard(false));
+  EXPECT_FALSE(ShouldShard(true));
 }
 
 // Tests that sharding is not enabled if total_shards  == 1.
 TEST_F(ShouldShardTest, ReturnsFalseWhenTotalShardIsOne) {
-  SetEnv(index_var_, "0");
-  SetEnv(total_var_, "1");
-  EXPECT_FALSE(ShouldShard(total_var_, index_var_, false));
-  EXPECT_FALSE(ShouldShard(total_var_, index_var_, true));
+  GTEST_FLAG_SET(shard_index, 0);
+  GTEST_FLAG_SET(total_shards, 1);
+
+  EXPECT_FALSE(ShouldShard(false));
+  EXPECT_FALSE(ShouldShard(true));
 }
 
 // Tests that sharding is enabled if total_shards > 1 and
@@ -1910,20 +1905,20 @@ TEST_F(ShouldShardTest, ReturnsFalseWhenTotalShardIsOne) {
 // Environment variables are not supported on Windows CE.
 #ifndef GTEST_OS_WINDOWS_MOBILE
 TEST_F(ShouldShardTest, WorksWhenShardEnvVarsAreValid) {
-  SetEnv(index_var_, "4");
-  SetEnv(total_var_, "22");
-  EXPECT_TRUE(ShouldShard(total_var_, index_var_, false));
-  EXPECT_FALSE(ShouldShard(total_var_, index_var_, true));
+  GTEST_FLAG_SET(shard_index, 4);
+  GTEST_FLAG_SET(total_shards, 22);
+  EXPECT_TRUE(ShouldShard(false));
+  EXPECT_FALSE(ShouldShard(true));
 
-  SetEnv(index_var_, "8");
-  SetEnv(total_var_, "9");
-  EXPECT_TRUE(ShouldShard(total_var_, index_var_, false));
-  EXPECT_FALSE(ShouldShard(total_var_, index_var_, true));
+  GTEST_FLAG_SET(shard_index, 8);
+  GTEST_FLAG_SET(total_shards, 9);
+  EXPECT_TRUE(ShouldShard(false));
+  EXPECT_FALSE(ShouldShard(true));
 
-  SetEnv(index_var_, "0");
-  SetEnv(total_var_, "9");
-  EXPECT_TRUE(ShouldShard(total_var_, index_var_, false));
-  EXPECT_FALSE(ShouldShard(total_var_, index_var_, true));
+  GTEST_FLAG_SET(shard_index, 0);
+  GTEST_FLAG_SET(total_shards, 9);
+  EXPECT_TRUE(ShouldShard(false));
+  EXPECT_FALSE(ShouldShard(true));
 }
 #endif  // !GTEST_OS_WINDOWS_MOBILE
 
@@ -1932,21 +1927,21 @@ TEST_F(ShouldShardTest, WorksWhenShardEnvVarsAreValid) {
 typedef ShouldShardTest ShouldShardDeathTest;
 
 TEST_F(ShouldShardDeathTest, AbortsWhenShardingEnvVarsAreInvalid) {
-  SetEnv(index_var_, "4");
-  SetEnv(total_var_, "4");
-  EXPECT_DEATH_IF_SUPPORTED(ShouldShard(total_var_, index_var_, false), ".*");
+  GTEST_FLAG_SET(shard_index, 4);
+  GTEST_FLAG_SET(total_shards, 4);
+  EXPECT_DEATH_IF_SUPPORTED(ShouldShard(false), ".*");
 
-  SetEnv(index_var_, "4");
-  SetEnv(total_var_, "-2");
-  EXPECT_DEATH_IF_SUPPORTED(ShouldShard(total_var_, index_var_, false), ".*");
+  GTEST_FLAG_SET(shard_index, 4);
+  GTEST_FLAG_SET(total_shards, -2);
+  EXPECT_DEATH_IF_SUPPORTED(ShouldShard(false), ".*");
 
-  SetEnv(index_var_, "5");
-  SetEnv(total_var_, "");
-  EXPECT_DEATH_IF_SUPPORTED(ShouldShard(total_var_, index_var_, false), ".*");
+  GTEST_FLAG_SET(shard_index, 5);
+  GTEST_FLAG_SET(total_shards, 5);
+  EXPECT_DEATH_IF_SUPPORTED(ShouldShard(false), ".*");
 
-  SetEnv(index_var_, "");
-  SetEnv(total_var_, "5");
-  EXPECT_DEATH_IF_SUPPORTED(ShouldShard(total_var_, index_var_, false), ".*");
+  GTEST_FLAG_SET(shard_index, -1);
+  GTEST_FLAG_SET(total_shards, 5);
+  EXPECT_DEATH_IF_SUPPORTED(ShouldShard(false), ".*");
 }
 
 // Tests that ShouldRunTestOnShard is a partition when 5
