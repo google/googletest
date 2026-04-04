@@ -2820,6 +2820,10 @@ TEST_F(FloatTest, Zeros) {
   EXPECT_FLOAT_EQ(0.0, -0.0);
   EXPECT_NONFATAL_FAILURE(EXPECT_FLOAT_EQ(-0.0, 1.0), "1.0");
   EXPECT_FATAL_FAILURE(ASSERT_FLOAT_EQ(0.0, 1.5), "1.5");
+
+  EXPECT_FLOAT_NE(-0.0, 1.0);
+  EXPECT_NONFATAL_FAILURE(EXPECT_FLOAT_NE(-0.0,0.0), "0.0");
+  EXPECT_FATAL_FAILURE(ASSERT_FLOAT_NE(-0.0, 0.0), "0.0");
 }
 
 // Tests comparing numbers close to 0.
@@ -2845,6 +2849,23 @@ TEST_F(FloatTest, AlmostZeros) {
         ASSERT_FLOAT_EQ(v.close_to_positive_zero, v.further_from_negative_zero);
       },
       "v.further_from_negative_zero");
+
+  EXPECT_FLOAT_NE(v.close_to_positive_zero, v.further_from_negative_zero);
+  
+  EXPECT_FATAL_FAILURE(
+      {  // NOLINT
+        ASSERT_FLOAT_NE(0.0, v.close_to_positive_zero);
+        ASSERT_FLOAT_NE(v.close_to_negative_zero, v.close_to_positive_zero);
+      },
+      "v.close_to_positive_zero");
+
+  EXPECT_FATAL_FAILURE(
+      {  // NOLINT
+        ASSERT_FLOAT_NE(-0.0, v.close_to_negative_zero);
+        ASSERT_FLOAT_NE(v.close_to_positive_zero, v.close_to_negative_zero);
+      },
+      "v.close_to_negative_zero");
+
 }
 
 // Tests comparing numbers close to each other.
@@ -2852,11 +2873,17 @@ TEST_F(FloatTest, SmallDiff) {
   EXPECT_FLOAT_EQ(1.0, values_.close_to_one);
   EXPECT_NONFATAL_FAILURE(EXPECT_FLOAT_EQ(1.0, values_.further_from_one),
                           "values_.further_from_one");
+
+  EXPECT_FLOAT_NE(1.0, values_.further_from_one);
+  EXPECT_NONFATAL_FAILURE(EXPECT_FLOAT_NE(1.0, values_.close_to_one), 
+                          "values_.close_to_one");
 }
 
 // Tests comparing numbers far apart.
 TEST_F(FloatTest, LargeDiff) {
   EXPECT_NONFATAL_FAILURE(EXPECT_FLOAT_EQ(2.5, 3.0), "3.0");
+
+  EXPECT_FLOAT_NE(2.5, 3.5);
 }
 
 // Tests comparing with infinity.
@@ -2914,6 +2941,12 @@ TEST_F(FloatTest, Commutative) {
   // We already tested EXPECT_FLOAT_EQ(1.0, values_.further_from_one).
   EXPECT_NONFATAL_FAILURE(EXPECT_FLOAT_EQ(values_.further_from_one, 1.0),
                           "1.0");
+
+  // We already tested EXPECT_FLOAT_NE(1.0, values_.close_to_one).
+  EXPECT_NONFATAL_FAILURE(EXPECT_FLOAT_NE(values_.close_to_one, 1.0), "1.0");
+
+  // We already tested EXPECT_FLOAT_NE(1.0, values_.further_from_one).
+  EXPECT_FLOAT_NE(values_.further_from_one, 1.0);
 }
 
 // Tests EXPECT_NEAR.
@@ -3001,6 +3034,10 @@ TEST_F(DoubleTest, Zeros) {
   EXPECT_DOUBLE_EQ(0.0, -0.0);
   EXPECT_NONFATAL_FAILURE(EXPECT_DOUBLE_EQ(-0.0, 1.0), "1.0");
   EXPECT_FATAL_FAILURE(ASSERT_DOUBLE_EQ(0.0, 1.0), "1.0");
+
+  EXPECT_DOUBLE_NE(-0.0, 1.0);
+  EXPECT_NONFATAL_FAILURE(EXPECT_DOUBLE_NE(-0.0, 0.0), "0.0");
+  EXPECT_FATAL_FAILURE(ASSERT_DOUBLE_NE(-0.0, 0.0), "0.0");
 }
 
 // Tests comparing numbers close to 0.
@@ -3027,6 +3064,26 @@ TEST_F(DoubleTest, AlmostZeros) {
                          v.further_from_negative_zero);
       },
       "v.further_from_negative_zero");
+
+  EXPECT_DOUBLE_NE(v.close_to_positive_zero, v.further_from_negative_zero);
+
+  EXPECT_FATAL_FAILURE(
+      {  // NOLINT
+        ASSERT_DOUBLE_NE(0.0, 
+                         v.close_to_positive_zero);
+        ASSERT_DOUBLE_NE(v.close_to_negative_zero, 
+                         v.close_to_positive_zero);
+      },
+      "v.close_to_positive_zero");
+
+  EXPECT_FATAL_FAILURE(
+      {  // NOLINT
+        ASSERT_DOUBLE_NE(-0.0, 
+                         v.close_to_negative_zero);
+        ASSERT_DOUBLE_NE(v.close_to_positive_zero, 
+                         v.close_to_negative_zero);
+      },
+      "v.close_to_negative_zero");
 }
 
 // Tests comparing numbers close to each other.
@@ -3034,11 +3091,17 @@ TEST_F(DoubleTest, SmallDiff) {
   EXPECT_DOUBLE_EQ(1.0, values_.close_to_one);
   EXPECT_NONFATAL_FAILURE(EXPECT_DOUBLE_EQ(1.0, values_.further_from_one),
                           "values_.further_from_one");
+
+  EXPECT_DOUBLE_NE(1.0, values_.further_from_one);
+  EXPECT_NONFATAL_FAILURE(EXPECT_DOUBLE_NE(1.0, values_.close_to_one),
+                          "values_.close_to_one");
 }
 
 // Tests comparing numbers far apart.
 TEST_F(DoubleTest, LargeDiff) {
   EXPECT_NONFATAL_FAILURE(EXPECT_DOUBLE_EQ(2.0, 3.0), "3.0");
+
+  EXPECT_DOUBLE_NE(2.0, 3.0);
 }
 
 // Tests comparing with infinity.
@@ -3091,6 +3154,12 @@ TEST_F(DoubleTest, Commutative) {
   // We already tested EXPECT_DOUBLE_EQ(1.0, values_.further_from_one).
   EXPECT_NONFATAL_FAILURE(EXPECT_DOUBLE_EQ(values_.further_from_one, 1.0),
                           "1.0");
+
+  // We already tested EXPECT_DOUBLE_NE(1.0, values_.close_to_one).
+  EXPECT_NONFATAL_FAILURE(EXPECT_DOUBLE_NE(values_.close_to_one, 1.0), "1.0");
+
+  // We already tested EXPECT_FLOAT_NE(1.0, values_.further_from_one).
+  EXPECT_DOUBLE_NE(values_.further_from_one, 1.0);
 }
 
 // Tests EXPECT_NEAR.
