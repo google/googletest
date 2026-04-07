@@ -77,6 +77,12 @@ config_setting(
     values = {"define": "absl=1"},
 )
 
+config_setting(
+    name = "bzlmod_enabled",
+    flag_values = {"//command_line_option:enable_bzlmod": "true"},
+)
+
+
 # Library that defines the FRIEND_TEST macro.
 cc_library(
     name = "gtest_prod",
@@ -115,8 +121,9 @@ cc_library(
         ":windows": [],
         "//conditions:default": ["-pthread"],
     }),
-    defines = select({
+defines = select({
         ":has_absl": ["GTEST_HAS_ABSL=1"],
+        ":bzlmod_enabled": ["GTEST_HAS_ABSL=1"],
         "//conditions:default": [],
     }),
     features = select({
@@ -142,8 +149,20 @@ cc_library(
         ],
         "//conditions:default": ["-pthread"],
     }),
-    deps = select({
+deps = select({
         ":has_absl": [
+            "@abseil-cpp//absl/container:flat_hash_set",
+            "@abseil-cpp//absl/debugging:failure_signal_handler",
+            "@abseil-cpp//absl/debugging:stacktrace",
+            "@abseil-cpp//absl/debugging:symbolize",
+            "@abseil-cpp//absl/flags:flag",
+            "@abseil-cpp//absl/flags:parse",
+            "@abseil-cpp//absl/flags:reflection",
+            "@abseil-cpp//absl/flags:usage",
+            "@abseil-cpp//absl/strings",
+            "@re2",
+        ],
+        ":bzlmod_enabled": [
             "@abseil-cpp//absl/container:flat_hash_set",
             "@abseil-cpp//absl/debugging:failure_signal_handler",
             "@abseil-cpp//absl/debugging:stacktrace",
