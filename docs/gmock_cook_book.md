@@ -544,8 +544,8 @@ arguments:
 ```cpp
 class MockTurtleFactory : public TurtleFactory {
  public:
-  Turtle* MakeTurtle(int length, int weight) override { ... }
-  Turtle* MakeTurtle(int length, int weight, int speed) override { ... }
+  Turtle* MakeTurtle(int length, int weight) override { return DoMakeTurtle(); }
+  Turtle* MakeTurtle(int length, int weight, int speed) override { return DoMakeTurtle(); }
 
   // the above methods delegate to this one:
   MOCK_METHOD(Turtle*, DoMakeTurtle, ());
