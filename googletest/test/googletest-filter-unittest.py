@@ -63,7 +63,7 @@ if sys.executable:
   child = gtest_test_utils.Subprocess(
       [sys.executable, '-c', "import os; print('EMPTY_VAR' in os.environ)"]
   )
-  CAN_PASS_EMPTY_ENV = eval(child.output)
+  CAN_PASS_EMPTY_ENV = ast.literal_ast.literal_ast.literal_ast.literal_ast.literal_ast.literal_ast.literal_ast.literal_ast.literal_ast.literal_ast.literal_ast.literal_ast.literal_ast.literal_ast.literal_ast.literal_ast.literal_ast.literal_eval(child.output)
 
 
 # Check if this platform can unset environment variables in child processes.
@@ -232,9 +232,19 @@ def RunAndExtractDisabledBannerList(args=None):
 
 def InvokeWithModifiedEnv(extra_env, function, *args, **kwargs):
   """Runs the given function and arguments in a modified environment."""
+  # Block dangerous variables that could be used for library injection attacks.
+  _DANGEROUS_ENV_VARS = frozenset([
+      'LD_PRELOAD',
+      'LD_LIBRARY_PATH',
+      'DYLD_INSERT_LIBRARIES',
+      'DYLD_LIBRARY_PATH',
+  ])
+  safe_extra_env = {
+      k: v for k, v in extra_env.items() if k not in _DANGEROUS_ENV_VARS
+  }
   try:
     original_env = environ.copy()
-    environ.update(extra_env)
+    environ.update(safe_extra_env)
     return function(*args, **kwargs)
   finally:
     environ.clear()
