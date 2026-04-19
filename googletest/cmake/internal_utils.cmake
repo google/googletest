@@ -167,14 +167,12 @@ function(cxx_library_with_type name type cxx_flags)
   set_target_properties(${name}
     PROPERTIES
     COMPILE_FLAGS "${cxx_flags}")
-  # Set the output directory for build artifacts.
-  set_target_properties(${name}
-    PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
-    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
-    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
-    PDB_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
-    COMPILE_PDB_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
+  # Do not hardcode output directories so that the user's
+  # CMAKE_RUNTIME_OUTPUT_DIRECTORY, CMAKE_ARCHIVE_OUTPUT_DIRECTORY,
+  # CMAKE_LIBRARY_OUTPUT_DIRECTORY, CMAKE_PDB_OUTPUT_DIRECTORY, and
+  # CMAKE_COMPILE_PDB_OUTPUT_DIRECTORY variables are respected.
+  # CMake will apply those variables automatically when the corresponding
+  # target properties are left unset.
   # Make PDBs match library name.
   get_target_property(pdb_debug_postfix ${name} DEBUG_POSTFIX)
   set_target_properties(${name}
@@ -317,12 +315,14 @@ function(install_project)
       LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}")
     if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
       # Install PDBs.
+      # Use $<TARGET_FILE_DIR:t> so the correct directory is resolved at
+      # install time regardless of what CMAKE_PDB_OUTPUT_DIRECTORY or
+      # CMAKE_RUNTIME_OUTPUT_DIRECTORY is set to by the user.
       foreach(t ${ARGN})
         get_target_property(t_pdb_name ${t} COMPILE_PDB_NAME)
         get_target_property(t_pdb_name_debug ${t} COMPILE_PDB_NAME_DEBUG)
-        get_target_property(t_pdb_output_directory ${t} PDB_OUTPUT_DIRECTORY)
         install(FILES
-          "${t_pdb_output_directory}/\${CMAKE_INSTALL_CONFIG_NAME}/$<$<CONFIG:Debug>:${t_pdb_name_debug}>$<$<NOT:$<CONFIG:Debug>>:${t_pdb_name}>.pdb"
+          "$<TARGET_FILE_DIR:${t}>/$<$<CONFIG:Debug>:${t_pdb_name_debug}>$<$<NOT:$<CONFIG:Debug>>:${t_pdb_name}>.pdb"
           COMPONENT "${PROJECT_NAME}"
           DESTINATION ${CMAKE_INSTALL_LIBDIR}
           OPTIONAL)
