@@ -1146,7 +1146,7 @@ class CapturedStream {
     if (!EndsWithPathSeparator(name_template))
       name_template.push_back(GTEST_PATH_SEP_[0]);
 #else
-    name_template = "/tmp/";
+    name_template = TempDir();
 #endif
     name_template.append("gtest_captured_stream.XXXXXX");
 
