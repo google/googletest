@@ -91,7 +91,7 @@ class GMockLeakTest(gmock_test_utils.TestCase):
         ).exit_code,
     )
 
-  def testCatchesLeakedMockWhenEnabledWithExplictFlagValue(self):
+  def testCatchesLeakedMockWhenEnabledWithExplicitFlagValue(self):
     self.assertNotEqual(
         0,
         gmock_test_utils.Subprocess(
