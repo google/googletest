@@ -1201,7 +1201,7 @@ TEST(RefTest, CanDescribeSelf) {
   EXPECT_EQ(ss.str(), Describe(m));
 }
 
-// Test that Ref(non_const_varialbe) can be used as a matcher for a
+// Test that Ref(non_const_variable) can be used as a matcher for a
 // const reference.
 TEST(RefTest, CanBeUsedAsMatcherForConstReference) {
   int a = 0;

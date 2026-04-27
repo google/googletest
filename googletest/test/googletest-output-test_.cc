@@ -62,7 +62,7 @@ void TestEq1(int x) { ASSERT_EQ(1, x); }
 // This function calls a test subroutine, catches the fatal failure it
 // generates, and then returns early.
 void TryTestSubroutine() {
-  // Calls a subrountine that yields a fatal failure.
+  // Calls a subroutine that yields a fatal failure.
   TestEq1(2);
 
   // Catches the fatal failure and aborts the test.
@@ -124,7 +124,7 @@ TEST(FatalFailureTest, FatalFailureInSubroutine) {
 TEST(FatalFailureTest, FatalFailureInNestedSubroutine) {
   printf("(expecting a failure that x should be 1)\n");
 
-  // Calls a subrountine that yields a fatal failure.
+  // Calls a subroutine that yields a fatal failure.
   TryTestSubroutine();
 
   // Catches the fatal failure and aborts the test.
