@@ -86,6 +86,10 @@ class MyEnvironment : public testing::Environment {
 // was run.
 TEST(FooTest, Bar) { test_was_run = true; }
 
+// A disabled test used to verify that environments are still set up and
+// torn down when all matching tests are disabled.
+TEST(FooTest, DISABLED_Baz) { FAIL() << "Disabled test should not run."; }
+
 // Prints the message and aborts the program if condition is false.
 void Check(bool condition, const char* msg) {
   if (!condition) {
@@ -158,6 +162,25 @@ void TestNoTestsRunSetUpFailure() {
         "The global tear-down should run, as the global set-up was run.");
 }
 
+// Verifies that RUN_ALL_TESTS() runs the global set-up and tear-down
+// even when all tests matching the filter are disabled.
+void TestDisabledTestsRunEnvironments() {
+  MyEnvironment* const env = RegisterTestEnv();
+  GTEST_FLAG_SET(filter, "FooTest.DISABLED_Baz");
+  Check(RunAllTests(env, NO_FAILURE) != 0,
+        "RUN_ALL_TESTS() should return non-zero, as the global tear-down "
+        "should generate a failure.");
+  Check(!test_was_run,
+        "The disabled test should not have run.");
+  Check(set_up_was_run,
+        "The global set-up should run, even when all matching tests "
+        "are disabled.");
+  Check(tear_down_was_run,
+        "The global tear-down should run, even when all matching tests "
+        "are disabled.");
+  GTEST_FLAG_SET(filter, "*");
+}
+
 // Verifies that RUN_ALL_TESTS() doesn't do global set-up or
 // tear-down when there is no test to run.
 void TestNoTestsSkipsSetUp() {
@@ -180,6 +203,7 @@ int main(int argc, char** argv) {
   TestGlobalSetUp();
   TestTestsRun();
   TestNoTestsRunSetUpFailure();
+  TestDisabledTestsRunEnvironments();
   TestNoTestsSkipsSetUp();
 
   printf("PASS\n");

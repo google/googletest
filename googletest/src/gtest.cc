@@ -6003,6 +6003,21 @@ bool UnitTestImpl::RunAllTests() {
       FilterTests(should_shard ? HONOR_SHARDING_PROTOCOL
                                : IGNORE_SHARDING_PROTOCOL) > 0;
 
+  // Check if any tests matched the filter, including disabled ones.
+  // This is needed to decide whether to run environment SetUp/TearDown:
+  // environments should be set up and torn down even if all matching tests
+  // are disabled, since the environment may need to perform cleanup.
+  bool has_tests_matching_filter = false;
+  for (const auto* test_suite : test_suites_) {
+    for (const TestInfo* test_info : test_suite->test_info_list()) {
+      if (test_info->matches_filter_ && !test_info->is_in_another_shard_) {
+        has_tests_matching_filter = true;
+        break;
+      }
+    }
+    if (has_tests_matching_filter) break;
+  }
+
   // Lists the tests and exits if the --gtest_list_tests flag was specified.
   if (GTEST_FLAG_GET(list_tests)) {
     // This must be called *after* FilterTests() has been called.
@@ -6056,8 +6071,12 @@ bool UnitTestImpl::RunAllTests() {
     // Tells the unit test event listeners that the tests are about to start.
     repeater->OnTestIterationStart(*parent_, i);
 
-    // Runs each test suite if there is at least one test to run.
-    if (has_tests_to_run) {
+    // Sets up and tears down global test environments if any tests matched
+    // the filter for this shard, including disabled tests. This ensures that
+    // environment TearDown() runs for cleanup even when all matching tests
+    // are disabled. Test suites are only actually executed when there are
+    // non-disabled tests to run (each TestSuite::Run() checks should_run_).
+    if (has_tests_matching_filter) {
       // Sets up all environments beforehand. If test environments aren't
       // recreated for each iteration, only do so on the first iteration.
       if (i == 0 || recreate_environments_when_repeating) {
@@ -6113,7 +6132,9 @@ bool UnitTestImpl::RunAllTests() {
                       TearDownEnvironment);
         repeater->OnEnvironmentsTearDownEnd(*parent_);
       }
-    } else if (GTEST_FLAG_GET(fail_if_no_test_selected)) {
+    }
+
+    if (!has_tests_to_run && GTEST_FLAG_GET(fail_if_no_test_selected)) {
       // If there were no tests to run, bail if we were requested to be
       // strict.
       constexpr char kNoTestsSelectedMessage[] =
