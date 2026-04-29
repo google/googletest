@@ -520,6 +520,13 @@ Matcher<const std::string&> : public internal::MatcherBase<const std::string&> {
 
   // Allows the user to write "foo" instead of Eq("foo") sometimes.
   Matcher(const char* s);  // NOLINT
+
+#if GTEST_INTERNAL_HAS_STRING_VIEW
+  // Allows the user to pass absl::string_views or std::string_views directly.
+  // Copies into a std::string so the matcher owns its data and does not alias
+  // a (possibly temporary) buffer in the caller.
+  Matcher(internal::StringView s);  // NOLINT
+#endif
 };
 
 template <>
@@ -544,6 +551,13 @@ Matcher<std::string> : public internal::MatcherBase<std::string> {
 
   // Allows the user to write "foo" instead of Eq("foo") sometimes.
   Matcher(const char* s);  // NOLINT
+
+#if GTEST_INTERNAL_HAS_STRING_VIEW
+  // Allows the user to pass absl::string_views or std::string_views directly.
+  // Copies into a std::string so the matcher owns its data and does not alias
+  // a (possibly temporary) buffer in the caller.
+  Matcher(internal::StringView s);  // NOLINT
+#endif
 };
 
 #if GTEST_INTERNAL_HAS_STRING_VIEW
