@@ -36,27 +36,27 @@ sudo xcode-select -s /Applications/Xcode_26.2.app/Contents/Developer
 
 brew install cmake
 
-export CMAKE_BUILD_PARALLEL_LEVEL=$(sysctl -n hw.ncpu)
-export CTEST_PARALLEL_LEVEL=$(sysctl -n hw.ncpu)
+# macOS does not provide nproc(1); use hw.ncpu like parallel CMake/CTest levels.
+NCPU="$(sysctl -n hw.ncpu)"
+export CMAKE_BUILD_PARALLEL_LEVEL="${NCPU}"
+export CTEST_PARALLEL_LEVEL="${NCPU}"
 
 if [[ -z ${GTEST_ROOT:-} ]]; then
-  GTEST_ROOT="$(realpath $(dirname ${0})/..)"
+  GTEST_ROOT="$(realpath "$(dirname "${0}")/..")"
 fi
 
-# Test the CMake build
-for cmake_off_on in OFF ON; do
-  BUILD_DIR=$(mktemp -d build_dir.XXXXXXXX)
-  cd ${BUILD_DIR}
-  time cmake ${GTEST_ROOT} \
-    -DCMAKE_CXX_STANDARD=17 \
-    -Dgtest_build_samples=ON \
-    -Dgtest_build_tests=ON \
-    -Dgmock_build_tests=ON \
-    -Dcxx_no_exception=${cmake_off_on} \
-    -Dcxx_no_rtti=${cmake_off_on}
-  time make -j$(nproc)
-  time ctest -j$(nproc) --output-on-failure
-done
+# Test the CMake build. cxx_no_exception / cxx_no_rtti are full flag strings set
+# in googletest/cmake/internal_utils.cmake; passing -Dcxx_no_*=OFF/ON does not
+# toggle builds and was misleading, so we use a single configure here.
+BUILD_DIR="$(mktemp -d "${TMPDIR:-/tmp}/gtest_cmake_build.XXXXXXXX")"
+cd "${BUILD_DIR}"
+time cmake "${GTEST_ROOT}" \
+  -DCMAKE_CXX_STANDARD=17 \
+  -Dgtest_build_samples=ON \
+  -Dgtest_build_tests=ON \
+  -Dgmock_build_tests=ON
+time make -j"${NCPU}"
+time ctest -j"${NCPU}" --output-on-failure
 
 # Test the Bazel build
 
@@ -75,7 +75,7 @@ if [[ ${KOKORO_GFILE_DIR:-} ]] && [[ -f "${KOKORO_GFILE_DIR}/distdir/googletest_
   BAZEL_EXTRA_ARGS="--vendor_dir=${HOME}/googletest_vendor ${BAZEL_EXTRA_ARGS:-}"
 fi
 
-cd ${GTEST_ROOT}
+cd "${GTEST_ROOT}"
 for absl in 0 1; do
   ${BAZEL_BIN} test ... \
     --copt="-Wall" \
