@@ -49,49 +49,42 @@ if [[ -z ${STD:-} ]]; then
   STD="c++17 c++20 c++23"
 fi
 
-# Test CMake + GCC
-for cmake_off_on in OFF ON; do
-  time docker run \
-    --volume="${GTEST_ROOT}:/src:ro" \
-    --tmpfs="/build:exec" \
-    --workdir="/build" \
-    --rm \
-    --env="CC=/usr/local/bin/gcc" \
-    --env=CXXFLAGS="-Werror -Wdeprecated" \
-    ${LINUX_LATEST_CONTAINER} \
-    /bin/bash -c "
-      cmake /src \
-        -DCMAKE_CXX_STANDARD=17 \
-        -Dgtest_build_samples=ON \
-        -Dgtest_build_tests=ON \
-        -Dgmock_build_tests=ON \
-        -Dcxx_no_exception=${cmake_off_on} \
-        -Dcxx_no_rtti=${cmake_off_on} && \
-      make -j$(nproc) && \
-      ctest -j$(nproc) --output-on-failure"
-done
+# Test CMake + GCC (~internal_utils.cmake computes cxx_no_* flag strings from the
+# compiler; passing -Dcxx_no_*=OFF/ON does not toggle configs.)
+time docker run \
+  --volume="${GTEST_ROOT}:/src:ro" \
+  --tmpfs="/build:exec" \
+  --workdir="/build" \
+  --rm \
+  --env="CC=/usr/local/bin/gcc" \
+  --env=CXXFLAGS="-Werror -Wdeprecated" \
+  ${LINUX_LATEST_CONTAINER} \
+  /bin/bash -c "
+    cmake /src \
+      -DCMAKE_CXX_STANDARD=17 \
+      -Dgtest_build_samples=ON \
+      -Dgtest_build_tests=ON \
+      -Dgmock_build_tests=ON && \
+    make -j\$(nproc) && \
+    ctest -j\$(nproc) --output-on-failure"
 
 # Test CMake + Clang
-for cmake_off_on in OFF ON; do
-  time docker run \
-    --volume="${GTEST_ROOT}:/src:ro" \
-    --tmpfs="/build:exec" \
-    --workdir="/build" \
-    --rm \
-    --env="CC=/opt/llvm/bin/clang" \
-    --env=CXXFLAGS="-Werror -Wdeprecated --gcc-toolchain=/usr/local" \
-    ${LINUX_LATEST_CONTAINER} \
-    /bin/bash -c "
-      cmake /src \
-        -DCMAKE_CXX_STANDARD=17 \
-        -Dgtest_build_samples=ON \
-        -Dgtest_build_tests=ON \
-        -Dgmock_build_tests=ON \
-        -Dcxx_no_exception=${cmake_off_on} \
-        -Dcxx_no_rtti=${cmake_off_on} && \
-      make -j$(nproc) && \
-      ctest -j$(nproc) --output-on-failure"
-done
+time docker run \
+  --volume="${GTEST_ROOT}:/src:ro" \
+  --tmpfs="/build:exec" \
+  --workdir="/build" \
+  --rm \
+  --env="CC=/opt/llvm/bin/clang" \
+  --env=CXXFLAGS="-Werror -Wdeprecated --gcc-toolchain=/usr/local" \
+  ${LINUX_LATEST_CONTAINER} \
+  /bin/bash -c "
+    cmake /src \
+      -DCMAKE_CXX_STANDARD=17 \
+      -Dgtest_build_samples=ON \
+      -Dgtest_build_tests=ON \
+      -Dgmock_build_tests=ON && \
+    make -j\$(nproc) && \
+    ctest -j\$(nproc) --output-on-failure"
 
 # Do one test with an older version of GCC
 time docker run \
