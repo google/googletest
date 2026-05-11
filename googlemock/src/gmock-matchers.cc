@@ -245,6 +245,7 @@ static void LogElementMatcherPairVec(const ElementMatcherPairs& pairs,
 
 static void LogActualExpectedPairVec(const ElementMatcherPairs& pairs,
                                      ::std::ostream* stream) {
+  // Keep pairings in Actual/Expected order for quick visual diffing.
   typedef ElementMatcherPairs::const_iterator Iter;
   ::std::ostream& os = *stream;
   const char* sep = "";
