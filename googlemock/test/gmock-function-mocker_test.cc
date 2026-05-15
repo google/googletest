@@ -458,6 +458,87 @@ TYPED_TEST(FunctionMockerTest, MocksReturnTypeWithCommaAndCallType) {
 
 #endif  // GTEST_OS_WINDOWS
 
+// Compilability test, to ensure macros expand to all the arguments they're
+// supposed to.
+class MockManyArgs {
+  using T = int;
+
+ public:
+  MockManyArgs() = default;
+
+  MOCK_METHOD(void, F, (), ());
+  MOCK_METHOD(void, F, (T), ());
+  MOCK_METHOD(void, F, (T, T), ());
+  MOCK_METHOD(void, F, (T, T, T), ());
+  MOCK_METHOD(void, F, (T, T, T, T), ());
+  MOCK_METHOD(void, F, (T, T, T, T, T), ());
+  MOCK_METHOD(void, F, (T, T, T, T, T, T), ());
+  MOCK_METHOD(void, F, (T, T, T, T, T, T, T), ());
+  MOCK_METHOD(void, F, (T, T, T, T, T, T, T, T), ());
+  MOCK_METHOD(void, F, (T, T, T, T, T, T, T, T, T), ());
+  MOCK_METHOD(void, F, (T, T, T, T, T, T, T, T, T, T), ());
+  MOCK_METHOD(void, F, (T, T, T, T, T, T, T, T, T, T, T), ());
+  MOCK_METHOD(void, F, (T, T, T, T, T, T, T, T, T, T, T, T), ());
+  MOCK_METHOD(void, F, (T, T, T, T, T, T, T, T, T, T, T, T, T), ());
+  MOCK_METHOD(void, F, (T, T, T, T, T, T, T, T, T, T, T, T, T, T), ());
+  MOCK_METHOD(void, F, (T, T, T, T, T, T, T, T, T, T, T, T, T, T, T), ());
+  MOCK_METHOD(void, F, (T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T), ());
+  MOCK_METHOD(void, F, (T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T), ());
+  MOCK_METHOD(void, F, (T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T),
+              ());
+  MOCK_METHOD(void, F,
+              (T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T), ());
+  MOCK_METHOD(void, F,
+              (T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T), ());
+  MOCK_METHOD(void, F,
+              (T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T),
+              ());
+  MOCK_METHOD(void, F,
+              (T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T,
+               T),
+              ());
+  MOCK_METHOD(void, F,
+              (T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T,
+               T),
+              ());
+  MOCK_METHOD(void, F,
+              (T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T,
+               T, T),
+              ());
+  MOCK_METHOD(void, F,
+              (T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T,
+               T, T, T),
+              ());
+  MOCK_METHOD(void, F,
+              (T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T,
+               T, T, T, T),
+              ());
+  MOCK_METHOD(void, F,
+              (T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T,
+               T, T, T, T, T),
+              ());
+  MOCK_METHOD(void, F,
+              (T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T,
+               T, T, T, T, T, T),
+              ());
+  MOCK_METHOD(void, F,
+              (T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T,
+               T, T, T, T, T, T, T),
+              ());
+  MOCK_METHOD(void, F,
+              (T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T,
+               T, T, T, T, T, T, T, T),
+              ());
+  MOCK_METHOD(void, F,
+              (T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T,
+               T, T, T, T, T, T, T, T, T),
+              ());
+
+ private:
+  MockManyArgs(const MockManyArgs&) = delete;
+  MockManyArgs& operator=(const MockManyArgs&) = delete;
+};
+
 TEST(FunctionMockerTest, RefQualified) {
   MockFoo mock_foo;
 
