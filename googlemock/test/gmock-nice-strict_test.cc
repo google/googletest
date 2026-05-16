@@ -190,6 +190,24 @@ TEST(RawMockTest, InfoForUninterestingCall) {
   GMOCK_FLAG_SET(verbose, saved_flag);
 }
 
+// Tests that a raw mock using mock name in warnings for uninteresting calls.
+TEST(RawMockTest, NamedMockInUninteresingCall) {
+  MockFoo raw_foo;
+
+  const std::string saved_flag = GMOCK_FLAG_GET(verbose);
+  GMOCK_FLAG_SET(verbose, "info");
+
+  const std::string test_name = "NamedMock";
+  Mock::SetMockName(&raw_foo, test_name);
+  CaptureStdout();
+  raw_foo.DoThis();
+  ASSERT_THAT(GetCapturedStdout(),
+              HasSubstr("Uninteresting mock function call"));
+  EXPECT_THAT(GetCapturedStdout(), HasSubstr(test_name));
+
+  GMOCK_FLAG_SET(verbose, saved_flag);
+}
+
 TEST(RawMockTest, IsNaggy_IsNice_IsStrict) {
   MockFoo raw_foo;
   EXPECT_TRUE(Mock::IsNaggy(&raw_foo));
