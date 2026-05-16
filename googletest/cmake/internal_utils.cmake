@@ -144,7 +144,6 @@ macro(config_compiler_and_linker)
   else()
     set(GTEST_HAS_PTHREAD_MACRO "-DGTEST_HAS_PTHREAD=0")
   endif()
-  set(cxx_base_flags "${cxx_base_flags} ${GTEST_HAS_PTHREAD_MACRO}")
 
   # For building gtest's own tests and samples.
   set(cxx_exception "${cxx_base_flags} ${cxx_exception_flags}")
@@ -164,6 +163,7 @@ function(cxx_library_with_type name type cxx_flags)
   # ARGN refers to additional arguments after 'cxx_flags'.
   add_library(${name} ${type} ${ARGN})
   add_library(${cmake_package_name}::${name} ALIAS ${name})
+  target_compile_definitions(${name} PUBLIC "${GTEST_HAS_PTHREAD_MACRO}")
   set_target_properties(${name}
     PROPERTIES
     COMPILE_FLAGS "${cxx_flags}")
