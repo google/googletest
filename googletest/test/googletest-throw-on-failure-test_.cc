@@ -54,6 +54,7 @@ int main(int argc, char** argv) {
   std::set_terminate(&TerminateHandler);
 #endif
   testing::InitGoogleTest(&argc, argv);
+  GTEST_FLAG_SET(throw_on_failure, true);
 
   // We want to ensure that people can use Google Test assertions in
   // other testing frameworks, as long as they initialize Google Test
