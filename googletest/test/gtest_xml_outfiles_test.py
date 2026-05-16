@@ -32,7 +32,7 @@
 """Unit test for the gtest_xml_output module."""
 
 import os
-from xml.dom import minidom, Node
+from xml.dom import minidom
 from googletest.test import gtest_test_utils
 from googletest.test import gtest_xml_test_utils
 
