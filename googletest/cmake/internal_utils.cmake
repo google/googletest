@@ -157,13 +157,17 @@ macro(config_compiler_and_linker)
   set(cxx_strict "${cxx_default} ${cxx_strict_flags}")
 endmacro()
 
+function(add_library_and_alias name type)
+  add_library(${name} ${type} ${ARGN})
+  add_library(${cmake_package_name}::${name} ALIAS ${name})
+endfunction()
+
 # Defines the gtest & gtest_main libraries. User tests should link
 # with one of them.
 function(cxx_library_with_type name type cxx_flags)
   # type can be either STATIC or SHARED to denote a static or shared library.
   # ARGN refers to additional arguments after 'cxx_flags'.
-  add_library(${name} ${type} ${ARGN})
-  add_library(${cmake_package_name}::${name} ALIAS ${name})
+  add_library_and_alias(${name} ${type} ${ARGN})
   set_target_properties(${name}
     PROPERTIES
     COMPILE_FLAGS "${cxx_flags}")
