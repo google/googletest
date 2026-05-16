@@ -1345,13 +1345,13 @@ class [[nodiscard]] NeverThrown {
                           expected_exception>::type>::type,                    \
                       std::exception>::value,                                  \
          const ::testing::internal::NeverThrown&, const std::exception&>::type \
-             e) {                                                              \
+             gtest_caught_exception) {                                         \
     gtest_msg.value = "Expected: " #statement                                  \
                       " throws an exception of type " #expected_exception      \
                       ".\n  Actual: it throws ";                               \
-    gtest_msg.value += GTEST_EXCEPTION_TYPE_(e);                               \
+    gtest_msg.value += GTEST_EXCEPTION_TYPE_(gtest_caught_exception);          \
     gtest_msg.value += " with description \"";                                 \
-    gtest_msg.value += e.what();                                               \
+    gtest_msg.value += gtest_caught_exception.what();                          \
     gtest_msg.value += "\".";                                                  \
     goto GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__);                \
   }
