@@ -1,6 +1,6 @@
 # GoogleTest FAQ
 
-## Why should test suite names and test names not contain underscore?
+## Why are there restrictions on underscores in test suite and test names?
 
 {: .callout .note}
 Note: GoogleTest reserves underscore (`_`) for special-purpose keywords, such as
@@ -48,15 +48,25 @@ TEST(Time_Flies, Like_An_Arrow) { ... }
 Now, the two `TEST`s will both generate the same class
 (`Time_Flies_Like_An_Arrow_Test`). That's not good.
 
-So for simplicity, we just ask the users to avoid `_` in `TestSuiteName` and
-`TestName`. The rule is more constraining than necessary, but it's simple and
-easy to remember. It also gives GoogleTest some wiggle room in case its
-implementation needs to change in the future.
+GoogleTest allows underscores (`_`) in test suite names and test names.
 
-If you violate the rule, there may not be immediate consequences, but your test
-may (just may) break with a new compiler (or a new version of the compiler you
-are using) or with a new version of GoogleTest. Therefore it's best to follow
-the rule.
+However, certain underscore patterns are prohibited by the C++ standard:
+
+1.  Any identifier that starts with an underscore followed by an upper-case
+    letter.
+2.  Any identifier that contains two consecutive underscores (`__`) anywhere in
+    its name.
+
+In addition, some combinations of underscores may cause internal name collisions
+in the generated test class names.
+
+
+If you violate the C++ reserved identifier rules or create a name collision,
+there may not be immediate consequences, but your test may break with a new
+compiler or a new version of GoogleTest. Therefore it is best to avoid leading
+or trailing underscores and avoid double underscores in test suite and test
+names.
+
 
 ## Why does GoogleTest support `EXPECT_EQ(NULL, ptr)` and `ASSERT_EQ(NULL, ptr)` but not `EXPECT_NE(NULL, ptr)` and `ASSERT_NE(NULL, ptr)`?
 
