@@ -3895,7 +3895,9 @@ TestEventRepeater::~TestEventRepeater() {
 }
 
 void TestEventRepeater::Append(TestEventListener* listener) {
-  listeners_.push_back(listener);
+  if (listener != nullptr) {
+    listeners_.push_back(listener);
+  }
 }
 
 TestEventListener* TestEventRepeater::Release(TestEventListener* listener) {
