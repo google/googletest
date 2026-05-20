@@ -1096,8 +1096,11 @@ DefaultGlobalTestPartResultReporter::DefaultGlobalTestPartResultReporter(
 
 void DefaultGlobalTestPartResultReporter::ReportTestPartResult(
     const TestPartResult& result) {
+   if (unit_test_->current_test_info() == nullptr) {
+    unit_test_->global_env_failures_.push_back(result);
+    return;
+  }
   unit_test_->current_test_result()->AddTestPartResult(result);
-  unit_test_->listeners()->repeater()->OnTestPartResult(result);
 }
 
 DefaultPerThreadTestPartResultReporter::DefaultPerThreadTestPartResultReporter(
@@ -1106,7 +1109,11 @@ DefaultPerThreadTestPartResultReporter::DefaultPerThreadTestPartResultReporter(
 
 void DefaultPerThreadTestPartResultReporter::ReportTestPartResult(
     const TestPartResult& result) {
-  unit_test_->GetGlobalTestPartResultReporter()->ReportTestPartResult(result);
+  if (unit_test_->current_test_info() == nullptr) {
+    unit_test_->global_env_failures_.push_back(result);
+    return;
+  }
+  unit_test_->current_test_result()->AddTestPartResult(result);
 }
 
 // Returns the global test part result reporter.
@@ -4504,6 +4511,17 @@ void XmlUnitTestResultPrinter::PrintXmlTestsList(
 
   for (auto test_suite : test_suites) {
     PrintXmlTestSuite(stream, *test_suite);
+  }
+  if (!GetUnitTestImpl()->global_env_failures().empty()) {
+  *stream << "  <global_environment_errors>\n";
+  for (const auto& failure : GetUnitTestImpl()->global_env_failures()) {
+    *stream << "    <failure message=\""
+            << EscapeXmlAttribute(failure.message())
+            << "\"><![CDATA["
+            << failure.message()
+            << "]]></failure>\n";
+  }
+  *stream << "  </global_environment_errors>\n";
   }
   *stream << "</" << kTestsuites << ">\n";
 }
