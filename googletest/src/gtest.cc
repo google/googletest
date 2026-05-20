@@ -3491,7 +3491,7 @@ void PrettyUnitTestResultPrinter::OnTestIterationStart(
     const int32_t shard_index = GTEST_FLAG_GET(shard_index);
     ColoredPrintf(GTestColor::kYellow, "Note: This is test shard %d of %d.\n",
                   static_cast<int>(shard_index) + 1,
-                  GTEST_FLAG_GET(total_shards));
+                  (int) GTEST_FLAG_GET(total_shards));
   }
 
   if (GTEST_FLAG_GET(shuffle)) {
