@@ -34,12 +34,19 @@
 
 #include "gtest/gtest-matchers.h"
 
+#include <ostream>
 #include <string>
 
 #include "gtest/internal/gtest-internal.h"
 #include "gtest/internal/gtest-port.h"
 
 namespace testing {
+
+void MatcherDescriberInterface::DescribeNegationTo(::std::ostream* os) const {
+  *os << "not (";
+  DescribeTo(os);
+  *os << ")";
+}
 
 // Constructs a matcher that matches a const std::string& whose value is
 // equal to s.

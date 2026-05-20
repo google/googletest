@@ -50,8 +50,7 @@
 
 #include <limits>
 #include <memory>
-#include <ostream>
-#include <sstream>
+#include <iosfwd>
 #include <string>
 
 #include "gtest/internal/gtest-port.h"
@@ -109,18 +108,24 @@ class GTEST_API_ Message {
   Message();
 
   // Copy constructor.
-  Message(const Message& msg) : ss_(new ::std::stringstream) {  // NOLINT
-    *ss_ << msg.GetString();
-  }
+  Message(const Message& msg);
+
+  // Destructor.
+  ~Message();
 
   // Constructs a Message from a C-string.
-  explicit Message(const char* str) : ss_(new ::std::stringstream) {
-    *ss_ << str;
-  }
+  explicit Message(const char* str);
 
   // Streams a non-pointer value to this object. If building a version of
   // GoogleTest with ABSL, this overload is only enabled if the value does not
   // have an AbslStringify definition.
+  Message& operator<<(const char* s);
+  Message& operator<<(const std::string& s);
+  Message& operator<<(int n);
+  Message& operator<<(long n);
+  Message& operator<<(double n);
+  Message& operator<<(const void* p);
+
   template <
       typename T
 #ifdef GTEST_HAS_ABSL
@@ -179,12 +184,7 @@ class GTEST_API_ Message {
   // as "(null)".
   template <typename T>
   inline Message& operator<<(T* const& pointer) {  // NOLINT
-    if (pointer == nullptr) {
-      *ss_ << "(null)";
-    } else {
-      *ss_ << pointer;
-    }
-    return *this;
+    return (*this << static_cast<const void*>(pointer));
   }
 
   // Since the basic IO manipulators are overloaded for both narrow
@@ -193,10 +193,7 @@ class GTEST_API_ Message {
   // templatized version above.  Without this definition, streaming
   // endl or other basic IO manipulators to Message will confuse the
   // compiler.
-  Message& operator<<(BasicNarrowIoManip val) {
-    *ss_ << val;
-    return *this;
-  }
+  Message& operator<<(BasicNarrowIoManip val);
 
   // Instead of 1/0, we want to see true/false for bool values.
   Message& operator<<(bool b) { return *this << (b ? "true" : "false"); }
@@ -220,7 +217,7 @@ class GTEST_API_ Message {
 
  private:
   // We'll hold the text streamed to this object here.
-  const std::unique_ptr< ::std::stringstream> ss_;
+  const std::unique_ptr< ::std::ostream> ss_;
 
   // We declare (but don't implement) this to prevent the compiler
   // from implementing the assignment operator.

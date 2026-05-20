@@ -40,7 +40,7 @@
 #ifndef GOOGLEMOCK_INCLUDE_GMOCK_GMOCK_MORE_MATCHERS_H_
 #define GOOGLEMOCK_INCLUDE_GMOCK_GMOCK_MORE_MATCHERS_H_
 
-#include <ostream>
+#include <iosfwd>
 #include <string>
 
 #include "gmock/gmock-matchers.h"
@@ -80,9 +80,13 @@ class [[nodiscard]] IsEmptyMatcher {
   }
 
   // Describes what this matcher matches.
-  void DescribeTo(std::ostream* os) const { *os << "is empty"; }
+  void DescribeTo(std::ostream* os) const {
+    ::testing::internal::StreamTo(os, "is empty");
+  }
 
-  void DescribeNegationTo(std::ostream* os) const { *os << "isn't empty"; }
+  void DescribeNegationTo(std::ostream* os) const {
+    ::testing::internal::StreamTo(os, "isn't empty");
+  }
 };
 
 }  // namespace internal

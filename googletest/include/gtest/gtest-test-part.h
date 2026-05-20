@@ -35,7 +35,6 @@
 #define GOOGLETEST_INCLUDE_GTEST_GTEST_TEST_PART_H_
 
 #include <iosfwd>
-#include <ostream>
 #include <string>
 #include <string_view>
 #include <vector>

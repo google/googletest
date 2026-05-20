@@ -39,7 +39,7 @@
 #define GOOGLETEST_INCLUDE_GTEST_GTEST_ASSERTION_RESULT_H_
 
 #include <memory>
-#include <ostream>
+#include <iosfwd>
 #include <string>
 #include <type_traits>
 

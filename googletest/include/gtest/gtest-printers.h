@@ -108,7 +108,7 @@
 #include <functional>
 #include <memory>
 #include <optional>
-#include <ostream>  // NOLINT
+#include <iosfwd>
 #include <sstream>
 #include <string>
 #include <string_view>
@@ -135,10 +135,29 @@
 #endif              // GTEST_INTERNAL_HAS_COMPARE_LIB
 
 namespace testing {
+class Message;
 
 // Definitions in the internal* namespaces are subject to change without notice.
 // DO NOT USE THEM IN USER CODE!
 namespace internal {
+
+GTEST_API_ ::std::string PrintToStringWithPrinter(
+    const void* value, void (*printer)(::std::ostream*, const void*));
+
+GTEST_API_ void StreamTo(::std::ostream* os, char c);
+GTEST_API_ void StreamTo(::std::ostream* os, const char* s);
+GTEST_API_ void StreamTo(::std::ostream* os, const std::string& s);
+GTEST_API_ void StreamTo(::std::ostream* os, const void* p);
+GTEST_API_ void StreamTo(::std::ostream* os, bool b);
+GTEST_API_ void StreamTo(::std::ostream* os, float f);
+GTEST_API_ void StreamTo(::std::ostream* os, double d);
+GTEST_API_ void StreamTo(::std::ostream* os, int n);
+GTEST_API_ void StreamTo(::std::ostream* os, unsigned int n);
+GTEST_API_ void StreamTo(::std::ostream* os, long n);
+GTEST_API_ void StreamTo(::std::ostream* os, unsigned long n);
+GTEST_API_ void StreamTo(::std::ostream* os, long long n);
+GTEST_API_ void StreamTo(::std::ostream* os, unsigned long long n);
+GTEST_API_ void StreamTo(::std::ostream* os, const Message& msg);
 
 template <typename T>
 void UniversalPrint(const T& value, ::std::ostream* os);
@@ -171,17 +190,17 @@ struct ContainerPrinter {
                 IsStdSpan<T>::value>::type>
   static void PrintValue(const T& container, std::ostream* os) {
     const size_t kMaxCount = 32;  // The maximum number of elements to print.
-    *os << '{';
+    StreamTo(os, '{');
     size_t count = 0;
     for (auto&& elem : container) {
       if (count > 0) {
-        *os << ',';
+        StreamTo(os, ',');
         if (count == kMaxCount) {  // Enough has been printed.
-          *os << " ...";
+          StreamTo(os, " ...");
           break;
         }
       }
-      *os << ' ';
+      StreamTo(os, ' ');
       // We cannot call PrintTo(elem, os) here as PrintTo() doesn't
       // handle `elem` being a native array.
       internal::UniversalPrint(elem, os);
@@ -189,9 +208,9 @@ struct ContainerPrinter {
     }
 
     if (count > 0) {
-      *os << ' ';
+      StreamTo(os, ' ');
     }
-    *os << '}';
+    StreamTo(os, '}');
   }
 };
 
@@ -206,12 +225,12 @@ struct FunctionPointerPrinter {
                             std::is_function<T>::value>::type>
   static void PrintValue(T* p, ::std::ostream* os) {
     if (p == nullptr) {
-      *os << "NULL";
+      StreamTo(os, "NULL");
     } else {
       // T is a function type, so '*os << p' doesn't do what we want
       // (it just prints p as bool).  We want to print p as a const
       // void*.
-      *os << reinterpret_cast<const void*>(p);
+      StreamTo(os, reinterpret_cast<const void*>(p));
     }
   }
 };
@@ -220,12 +239,12 @@ struct PointerPrinter {
   template <typename T>
   static void PrintValue(T* p, ::std::ostream* os) {
     if (p == nullptr) {
-      *os << "NULL";
+      StreamTo(os, "NULL");
     } else {
       // T is not a function type.  We just call << to print p,
       // relying on ADL to pick up user-defined << for their pointer
       // types, if any.
-      *os << p;
+      StreamTo(os, p);
     }
   }
 };
@@ -273,7 +292,9 @@ struct ProtobufPrinter {
     if (pretty_str.length() > kProtobufOneLinerMaxLength) {
       pretty_str = "\n" + value.DebugString();
     }
-    *os << ("<" + pretty_str + ">");
+    StreamTo(os, "<");
+    StreamTo(os, pretty_str);
+    StreamTo(os, ">");
   }
 };
 
@@ -286,7 +307,7 @@ struct ConvertibleToIntegerPrinter {
   // T is not an enum, printing it as an integer is the best we can do
   // given that it has no user-defined printer.
   static void PrintValue(internal::BiggestInt value, ::std::ostream* os) {
-    *os << value;
+    StreamTo(os, value);
   }
 };
 
@@ -304,7 +325,7 @@ struct ConvertibleToAbslStringifyPrinter {
             typename = typename std::enable_if<
                 absl::HasAbslStringify<T>::value>::type>  // NOLINT
   static void PrintValue(const T& value, ::std::ostream* os) {
-    *os << absl::StrCat(value);
+    StreamTo(os, absl::StrCat(value));
   }
 };
 #endif  // GTEST_HAS_ABSL
@@ -328,7 +349,7 @@ struct RawBytesPrinter {
 struct FallbackPrinter {
   template <typename T>
   static void PrintValue(const T&, ::std::ostream* os) {
-    *os << "(incomplete type)";
+    StreamTo(os, "(incomplete type)");
   }
 };
 
@@ -511,7 +532,7 @@ inline void PrintTo(char c, ::std::ostream* os) {
 
 // Overloads for other simple built-in types.
 inline void PrintTo(bool x, ::std::ostream* os) {
-  *os << (x ? "true" : "false");
+  StreamTo(os, x ? "true" : "false");
 }
 
 // Overload for wchar_t type.
@@ -624,19 +645,8 @@ int AppropriateResolution(FloatType val) {
   return full;
 }
 
-inline void PrintTo(float f, ::std::ostream* os) {
-  auto old_precision = os->precision();
-  os->precision(AppropriateResolution(f));
-  *os << f;
-  os->precision(old_precision);
-}
-
-inline void PrintTo(double d, ::std::ostream* os) {
-  auto old_precision = os->precision();
-  os->precision(AppropriateResolution(d));
-  *os << d;
-  os->precision(old_precision);
-}
+GTEST_API_ void PrintTo(float f, ::std::ostream* os);
+GTEST_API_ void PrintTo(double d, ::std::ostream* os);
 
 // Overloads for C strings.
 GTEST_API_ void PrintTo(const char* s, ::std::ostream* os);
@@ -784,10 +794,12 @@ inline const void* VoidifyPointer(volatile const void* p) {
 template <typename T, typename Ptr>
 void PrintSmartPointer(const Ptr& ptr, std::ostream* os, char) {
   if (ptr == nullptr) {
-    *os << "(nullptr)";
+    StreamTo(os, "(nullptr)");
   } else {
     // We can't print the value. Just print the pointer..
-    *os << "(" << (VoidifyPointer)(ptr.get()) << ")";
+    StreamTo(os, "(");
+    StreamTo(os, (VoidifyPointer)(ptr.get()));
+    StreamTo(os, ")");
   }
 }
 template <typename T, typename Ptr,
@@ -795,11 +807,13 @@ template <typename T, typename Ptr,
                                              !std::is_array<T>::value>::type>
 void PrintSmartPointer(const Ptr& ptr, std::ostream* os, int) {
   if (ptr == nullptr) {
-    *os << "(nullptr)";
+    StreamTo(os, "(nullptr)");
   } else {
-    *os << "(ptr = " << (VoidifyPointer)(ptr.get()) << ", value = ";
+    StreamTo(os, "(ptr = ");
+    StreamTo(os, (VoidifyPointer)(ptr.get()));
+    StreamTo(os, ", value = ");
     UniversalPrinter<T>::Print(*ptr, os);
-    *os << ")";
+    StreamTo(os, ")");
   }
 }
 
@@ -861,7 +875,7 @@ void PrintTupleTo(const T& t, std::integral_constant<size_t, I>,
   GTEST_INTENTIONAL_CONST_COND_PUSH_()
   if (I > 1) {
     GTEST_INTENTIONAL_CONST_COND_POP_()
-    *os << ", ";
+    StreamTo(os, ", ");
   }
   UniversalPrinter<typename std::tuple_element<I - 1, T>::type>::Print(
       std::get<I - 1>(t), os);
@@ -923,9 +937,10 @@ class [[nodiscard]] UniversalPrinter<std::any> {
  public:
   static void Print(const std::any& value, ::std::ostream* os) {
     if (value.has_value()) {
-      *os << "value of type " << GetTypeName(value);
+      StreamTo(os, "value of type ");
+      StreamTo(os, GetTypeName(value));
     } else {
-      *os << "no value";
+      StreamTo(os, "no value");
     }
   }
 
@@ -945,20 +960,20 @@ template <typename T>
 class [[nodiscard]] UniversalPrinter<std::optional<T>> {
  public:
   static void Print(const std::optional<T>& value, ::std::ostream* os) {
-    *os << '(';
+    StreamTo(os, '(');
     if (!value) {
-      *os << "nullopt";
+      StreamTo(os, "nullopt");
     } else {
       UniversalPrint(*value, os);
     }
-    *os << ')';
+    StreamTo(os, ')');
   }
 };
 
 template <>
 class [[nodiscard]] UniversalPrinter<std::nullopt_t> {
  public:
-  static void Print(std::nullopt_t, ::std::ostream* os) { *os << "(nullopt)"; }
+  static void Print(std::nullopt_t, ::std::ostream* os) { StreamTo(os, "(nullopt)"); }
 };
 
 // Printer for std::variant
@@ -966,17 +981,20 @@ template <typename... T>
 class [[nodiscard]] UniversalPrinter<std::variant<T...>> {
  public:
   static void Print(const std::variant<T...>& value, ::std::ostream* os) {
-    *os << '(';
+    StreamTo(os, '(');
     std::visit(Visitor{os, value.index()}, value);
-    *os << ')';
+    StreamTo(os, ')');
   }
 
  private:
   struct Visitor {
     template <typename U>
     void operator()(const U& u) const {
-      *os << "'" << GetTypeName<U>() << "(index = " << index
-          << ")' with value ";
+      StreamTo(os, "'");
+      StreamTo(os, GetTypeName<U>());
+      StreamTo(os, "(index = ");
+      StreamTo(os, index);
+      StreamTo(os, ")' with value ");
       UniversalPrint(u, os);
     }
     ::std::ostream* os;
@@ -989,9 +1007,9 @@ class [[nodiscard]] UniversalPrinter<std::variant<T...>> {
 template <typename T>
 void UniversalPrintArray(const T* begin, size_t len, ::std::ostream* os) {
   if (len == 0) {
-    *os << "{}";
+    StreamTo(os, "{}");
   } else {
-    *os << "{ ";
+    StreamTo(os, "{ ");
     const size_t kThreshold = 18;
     const size_t kChunkSize = 8;
     // If the array has more than kThreshold elements, we'll have to
@@ -1001,10 +1019,10 @@ void UniversalPrintArray(const T* begin, size_t len, ::std::ostream* os) {
       PrintRawArrayTo(begin, len, os);
     } else {
       PrintRawArrayTo(begin, kChunkSize, os);
-      *os << ", ..., ";
+      StreamTo(os, ", ..., ");
       PrintRawArrayTo(begin + len - kChunkSize, kChunkSize, os);
     }
-    *os << " }";
+    StreamTo(os, " }");
   }
 }
 // This overload prints a (const) char array compactly.
@@ -1051,7 +1069,9 @@ class [[nodiscard]] UniversalPrinter<T&> {
   static void Print(const T& value, ::std::ostream* os) {
     // Prints the address of the value.  We use reinterpret_cast here
     // as static_cast doesn't compile when T is a function type.
-    *os << "@" << reinterpret_cast<const void*>(&value) << " ";
+    StreamTo(os, "@");
+    StreamTo(os, reinterpret_cast<const void*>(&value));
+    StreamTo(os, " ");
 
     // Then prints the value itself.
     UniversalPrint(value, os);
@@ -1097,7 +1117,7 @@ class [[nodiscard]] UniversalTersePrinter<const char*> {
  public:
   static void Print(const char* str, ::std::ostream* os) {
     if (str == nullptr) {
-      *os << "NULL";
+      StreamTo(os, "NULL");
     } else {
       UniversalPrint(std::string(str), os);
     }
@@ -1113,7 +1133,7 @@ class [[nodiscard]] UniversalTersePrinter<const char8_t*> {
  public:
   static void Print(const char8_t* str, ::std::ostream* os) {
     if (str == nullptr) {
-      *os << "NULL";
+      StreamTo(os, "NULL");
     } else {
       UniversalPrint(::std::u8string(str), os);
     }
@@ -1129,7 +1149,7 @@ class [[nodiscard]] UniversalTersePrinter<const char16_t*> {
  public:
   static void Print(const char16_t* str, ::std::ostream* os) {
     if (str == nullptr) {
-      *os << "NULL";
+      StreamTo(os, "NULL");
     } else {
       UniversalPrint(::std::u16string(str), os);
     }
@@ -1144,7 +1164,7 @@ class [[nodiscard]] UniversalTersePrinter<const char32_t*> {
  public:
   static void Print(const char32_t* str, ::std::ostream* os) {
     if (str == nullptr) {
-      *os << "NULL";
+      StreamTo(os, "NULL");
     } else {
       UniversalPrint(::std::u32string(str), os);
     }
@@ -1160,7 +1180,7 @@ class [[nodiscard]] UniversalTersePrinter<const wchar_t*> {
  public:
   static void Print(const wchar_t* str, ::std::ostream* os) {
     if (str == nullptr) {
-      *os << "NULL";
+      StreamTo(os, "NULL");
     } else {
       UniversalPrint(::std::wstring(str), os);
     }

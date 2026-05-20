@@ -42,7 +42,7 @@
 #include <limits.h>
 
 #include <memory>
-#include <ostream>  // NOLINT
+#include <iosfwd>  // NOLINT
 
 #include "gmock/internal/gmock-port.h"
 #include "gtest/gtest.h"

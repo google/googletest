@@ -43,7 +43,7 @@
 #include <iterator>
 #include <map>
 #include <memory>
-#include <ostream>
+#include <iosfwd>
 #include <set>
 #include <string>
 #include <tuple>
@@ -250,7 +250,7 @@ class [[nodiscard]] RangeGenerator : public ParamGeneratorInterface<T> {
       // iterator is of the same type and we can downcast.
       GTEST_CHECK_(BaseGenerator() == other.BaseGenerator())
           << "The program attempted to compare iterators "
-          << "from different generators." << std::endl;
+          << "from different generators." << "\n";
       const int other_index =
           CheckedDowncastToActualType<const Iterator>(&other)->index_;
       return index_ == other_index;
@@ -347,7 +347,7 @@ class [[nodiscard]] ValuesInIteratorRangeGenerator
       // iterator is of the same type and we can downcast.
       GTEST_CHECK_(BaseGenerator() == other.BaseGenerator())
           << "The program attempted to compare iterators "
-          << "from different generators." << std::endl;
+          << "from different generators." << "\n";
       return iterator_ ==
              CheckedDowncastToActualType<const Iterator>(&other)->iterator_;
     }
@@ -586,11 +586,11 @@ class [[nodiscard]] ParameterizedTestSuiteInfo
               << "Parameterized test name '" << param_name
               << "' is invalid (contains spaces, dashes, or any "
                  "non-alphanumeric characters other than underscores), in "
-              << file << " line " << line << "" << std::endl;
+              << file << " line " << line << "" << "\n";
 
           GTEST_CHECK_(test_param_names.count(param_name) == 0)
               << "Duplicate parameterized test name '" << param_name << "', in "
-              << file << " line " << line << std::endl;
+              << file << " line " << line << "\n";
 
           if (!test_info->test_base_name.empty()) {
             test_name.append(test_info->test_base_name).append("/");
@@ -882,7 +882,7 @@ class [[nodiscard]] CartesianProductGenerator
       // iterator is of the same type and we can downcast.
       GTEST_CHECK_(BaseGenerator() == other.BaseGenerator())
           << "The program attempted to compare iterators "
-          << "from different generators." << std::endl;
+          << "from different generators." << "\n";
       const IteratorImpl* typed_other =
           CheckedDowncastToActualType<const IteratorImpl>(&other);
 
@@ -1004,7 +1004,7 @@ class [[nodiscard]] ParamGeneratorConverter
       // iterator is of the same type and we can downcast.
       GTEST_CHECK_(BaseGenerator() == other.BaseGenerator())
           << "The program attempted to compare iterators "
-          << "from different generators." << std::endl;
+          << "from different generators." << "\n";
       const ParamIterator<From> other_it =
           CheckedDowncastToActualType<const Iterator>(&other)->it_;
       return it_ == other_it;

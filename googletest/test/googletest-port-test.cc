@@ -30,6 +30,8 @@
 // This file tests the internal cross-platform support utilities.
 #include <stdio.h>
 
+#include <iostream>
+
 #include "gtest/internal/gtest-port.h"
 
 #ifdef GTEST_OS_MAC

@@ -42,7 +42,28 @@
 #include <vector>
 
 namespace testing {
+
+StringMatchResultListener::StringMatchResultListener()
+    : MatchResultListener(new ::std::stringstream),
+      ss_(static_cast< ::std::stringstream*>(stream())) {}
+
+StringMatchResultListener::~StringMatchResultListener() = default;
+
+std::string StringMatchResultListener::str() const {
+  return static_cast<const ::std::stringstream*>(stream())->str();
+}
+
+void StringMatchResultListener::Clear() {
+  static_cast< ::std::stringstream*>(stream())->str("");
+}
+
 namespace internal {
+
+void PrintIfNotEmpty(const std::string& explanation, ::std::ostream* os) {
+  if (explanation != "" && os != nullptr) {
+    *os << "\n          " << explanation;
+  }
+}
 
 // Returns the description for a matcher defined using the MATCHER*()
 // macro where the user-supplied description string is "", if
