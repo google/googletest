@@ -222,10 +222,20 @@ struct PointerPrinter {
     if (p == nullptr) {
       *os << "NULL";
     } else {
-      // T is not a function type.  We just call << to print p,
-      // relying on ADL to pick up user-defined << for their pointer
-      // types, if any.
-      *os << p;
+      // Print the pointer value as a hex address using const void*.
+      // We use an explicit static_cast rather than relying on the
+      // implicit T* -> const void* conversion + ADL lookup of
+      // operator<<(ostream&, const void*), because ADL rules for pointer
+      // types vary across compilers: AppleClang 17 on macOS arm64 restricts
+      // ADL to the namespace of the pointed-to type T and does not find
+      // std::operator<<(ostream&, const void*) via the implicit conversion
+      // path.  The explicit cast makes this well-defined and portable on all
+      // platforms.
+      //
+      // Note: users who want PrintTo() to show the pointed-at value should
+      // define PrintTo(T*, ostream*) in T's own namespace — that is the
+      // portable, documented extension point.
+      *os << static_cast<const void*>(p);
     }
   }
 };
