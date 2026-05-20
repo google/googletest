@@ -3944,6 +3944,114 @@ class [[nodiscard]] UnorderedElementsAreMatcherImpl
   ::std::vector<Matcher<const Element&>> matchers_;
 };
 
+// Implements ContainsSubequence().
+template <typename Container>
+class [[nodiscard]] ContainsSubsequenceMatcherImpl
+    : public MatcherInterface<Container> {
+ public:
+  typedef GTEST_REMOVE_REFERENCE_AND_CONST_(Container) RawContainer;
+  typedef internal::StlContainerView<RawContainer> View;
+  typedef typename View::type StlContainer;
+  typedef typename View::const_reference StlContainerReference;
+  typedef typename internal::RangeTraits<StlContainer>::value_type Element;
+
+  // Constructs the matcher from a sequence of element values or
+  // element matchers.
+  template <typename InputIter>
+  ContainsSubsequenceMatcherImpl(InputIter first, InputIter last) {
+    std::copy(first, last, std::back_inserter(matchers_));
+  }
+
+  // Describes what this matcher does.
+  void DescribeTo(::std::ostream* os) const override {
+    if (matchers_.size() == 0) {
+      *os << "contains an empty sequence";
+      return;
+    }
+    *os << "contains in order a subsequence of elements that matches: ";
+    for (size_t i = 0; i != matchers_.size(); ++i) {
+      if (i > 0) {
+        *os << ", then ";
+      }
+      matchers_[i].DescribeTo(os);
+    }
+  }
+
+  // Describes what the negation of this matcher does.
+  void DescribeNegationTo(::std::ostream* os) const override {
+    if (matchers_.size() == 0) {
+      *os << "does not contain an empty sequence";
+      return;
+    }
+    *os << "does not contain in order a subsequence of elements that matches ";
+    for (size_t i = 0; i != matchers_.size(); ++i) {
+      if (i > 0) {
+        *os << ", then ";
+      }
+      matchers_[i].DescribeTo(os);
+    }
+  }
+
+  bool MatchAndExplain(Container container,
+                       MatchResultListener* listener) const override {
+    StlContainerReference stl_container = View::ConstReference(container);
+
+    size_t num_matches = 0;
+    // Track which elements match which matcher.
+    size_t num_elements_examined = 0;
+    std::vector<size_t> match_indices;
+    for (const auto& element : stl_container) {
+      if (num_matches == matchers_.size()) {
+        break;
+      }
+      StringMatchResultListener inner_listener;
+      if (matchers_[num_matches].MatchAndExplain(element, &inner_listener)) {
+        ++num_matches;
+        match_indices.push_back(num_elements_examined);
+      }
+
+      ++num_elements_examined;
+    }
+
+    if (num_matches < matchers_.size()) {
+      // We provide an explanation of the first matcher that failed to match
+      // when trying to match the subsequence greedily. A better approach would
+      // be to compute the longest common subsequence (LCS) between the
+      // elements and the matchers and then provide explanations for any
+      // remaining matchers and elements that couldn't match each other, but
+      // this introduces a fair bit of complexity.
+      if (listener->IsInterested()) {
+        for (size_t i = 0; i < match_indices.size(); ++i) {
+          *listener << "found match for matcher #" << i
+                    << " with element at position #" << match_indices[i]
+                    << ", ";
+        }
+
+        if (num_matches > 0) {
+          *listener << "but ";
+        }
+
+        *listener << "could not find a match for matcher #" << num_matches
+                  << " (";
+        matchers_[num_matches].DescribeTo(listener->stream());
+        *listener << ")";
+
+        if (num_matches > 0) {
+          *listener << " after the last match at position #"
+                    << match_indices[num_matches - 1];
+        }
+      }
+
+      return false;
+    }
+
+    return true;
+  }
+
+ private:
+  ::std::vector<Matcher<const Element&>> matchers_;
+};
+
 // Functor for use in TransformTuple.
 // Performs MatcherCast<Target> on an input argument of any type.
 template <typename Target>
@@ -3952,6 +4060,33 @@ struct CastAndAppendTransform {
   Matcher<Target> operator()(const Arg& a) const {
     return MatcherCast<Target>(a);
   }
+};
+
+// Implements ContainsSubsequence.
+template <typename MatcherTuple>
+class [[nodiscard]] ContainsSubsequenceMatcher {
+ public:
+  explicit ContainsSubsequenceMatcher(const MatcherTuple& args)
+      : matchers_(args) {}
+
+  template <typename Container>
+  // NOLINTNEXTLINE(google-explicit-constructor)
+  operator Matcher<Container>() const {
+    typedef GTEST_REMOVE_REFERENCE_AND_CONST_(Container) RawContainer;
+    typedef typename internal::StlContainerView<RawContainer>::type View;
+    typedef typename internal::RangeTraits<View>::value_type Element;
+    typedef ::std::vector<Matcher<const Element&>> MatcherVec;
+    MatcherVec matchers;
+    matchers.reserve(::std::tuple_size<MatcherTuple>::value);
+    TransformTupleValues(CastAndAppendTransform<const Element&>(), matchers_,
+                         ::std::back_inserter(matchers));
+    return Matcher<Container>(
+        new ContainsSubsequenceMatcherImpl<const Container&>(matchers.begin(),
+                                                             matchers.end()));
+  }
+
+ private:
+  const MatcherTuple matchers_;
 };
 
 // Implements UnorderedElementsAre.
@@ -5420,6 +5555,18 @@ UnorderedElementsAre(const Args&... matchers) {
   return internal::UnorderedElementsAreMatcher<
       std::tuple<typename std::decay<const Args&>::type...>>(
       std::make_tuple(matchers...));
+}
+
+// ContainsSubsequence(m1, m2, ..., mk) matches a container that contains
+// elements that match m1, m2, ..., mk in that order with possible gaps
+// between them.
+template <typename... Args>
+internal::ContainsSubsequenceMatcher<
+    ::std::tuple<typename ::std::decay<const Args&>::type...>>
+ContainsSubsequence(const Args&... matchers) {
+  return internal::ContainsSubsequenceMatcher<
+      ::std::tuple<typename ::std::decay<const Args&>::type...>>(
+      ::std::make_tuple(matchers...));
 }
 
 // Define variadic matcher versions.
