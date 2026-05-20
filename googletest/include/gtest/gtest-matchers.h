@@ -43,6 +43,7 @@
 #include <cstddef>
 #include <functional>
 #include <memory>
+#include <new>
 #include <ostream>
 #include <string>
 #include <type_traits>
@@ -403,11 +404,9 @@ class [[nodiscard]] MatcherBase : private MatcherDescriberInterface {
   template <typename M, bool = MatcherBase::IsInlined<M>()>
   struct ValuePolicy {
     static const M& Get(const MatcherBase& m) {
-      // When inlined along with Init, need to be explicit to avoid violating
+      // When inlined along with Init, need to be laundered to avoid violating
       // strict aliasing rules.
-      const M* ptr =
-          static_cast<const M*>(static_cast<const void*>(&m.buffer_));
-      return *ptr;
+      return *std::launder(reinterpret_cast<const M*>(&m.buffer_));
     }
     static void Init(MatcherBase& m, M impl) {
       ::new (static_cast<void*>(&m.buffer_)) M(impl);
