@@ -322,6 +322,12 @@ GTEST_DEFINE_bool_(
 
 GTEST_DEFINE_bool_(list_tests, false, "List all tests without running them.");
 
+GTEST_DEFINE_bool_(
+    list_tests_brief,
+    testing::internal::BoolFromGTestEnv("list_tests_brief", false),
+    "True if --gtest_list_tests should omit the per-test "
+    "\"# GetParam() = ...\" and \"# TypeParam = ...\" annotations.");
+
 // The net priority order after flag processing is thus:
 //   --gtest_output command line flag
 //   GTEST_OUTPUT environment variable
@@ -6388,6 +6394,7 @@ static void PrintOnOneLine(const char* str, int max_length) {
 void UnitTestImpl::ListTestsMatchingFilter() {
   // Print at most this many characters for each type/value parameter.
   const int kMaxParamLength = 250;
+  const bool brief = GTEST_FLAG_GET(list_tests_brief);
 
   for (auto* test_suite : test_suites_) {
     bool printed_test_suite_name = false;
@@ -6398,7 +6405,7 @@ void UnitTestImpl::ListTestsMatchingFilter() {
         if (!printed_test_suite_name) {
           printed_test_suite_name = true;
           printf("%s.", test_suite->name());
-          if (test_suite->type_param() != nullptr) {
+          if (!brief && test_suite->type_param() != nullptr) {
             printf("  # %s = ", kTypeParamLabel);
             // We print the type parameter on a single line to make
             // the output easy to parse by a program.
@@ -6407,7 +6414,7 @@ void UnitTestImpl::ListTestsMatchingFilter() {
           printf("\n");
         }
         printf("  %s", test_info->name());
-        if (test_info->value_param() != nullptr) {
+        if (!brief && test_info->value_param() != nullptr) {
           printf("  # %s = ", kValueParamLabel);
           // We print the value parameter on a single line to make the
           // output easy to parse by a program.
@@ -6706,6 +6713,10 @@ static const char kColorEncodedHelpMessage[] =
     "      List the names of all tests instead of running them. The name of\n"
     "      TEST(Foo, Bar) is \"Foo.Bar\".\n"
     "  @G--" GTEST_FLAG_PREFIX_
+    "list_tests_brief@D\n"
+    "      When listing tests, omit the \"# GetParam() = ...\" and\n"
+    "      \"# TypeParam = ...\" annotations.\n"
+    "  @G--" GTEST_FLAG_PREFIX_
     "filter=@YPOSITIVE_PATTERNS"
     "[@G-@YNEGATIVE_PATTERNS]@D\n"
     "      Run only the tests whose name matches one of the positive patterns "
@@ -6813,6 +6824,7 @@ static bool ParseGoogleTestFlag(const char* const arg) {
   GTEST_INTERNAL_PARSE_FLAG(filter);
   GTEST_INTERNAL_PARSE_FLAG(internal_run_death_test);
   GTEST_INTERNAL_PARSE_FLAG(list_tests);
+  GTEST_INTERNAL_PARSE_FLAG(list_tests_brief);
   GTEST_INTERNAL_PARSE_FLAG(output);
   GTEST_INTERNAL_PARSE_FLAG(brief);
   GTEST_INTERNAL_PARSE_FLAG(print_time);
