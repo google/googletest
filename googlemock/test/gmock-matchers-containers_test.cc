@@ -1274,7 +1274,10 @@ TEST(WhenSortedByTest, ExplainsMatchResult) {
   const int a[] = {2, 1};
   EXPECT_EQ(
       Explain(WhenSortedBy(less<int>(), ElementsAre(2, 3)), a),
-      "which is { 1, 2 } when sorted, whose element #0 (1) isn't equal to 2");
+      "which is { 1, 2 } when sorted, element mismatch at index 0:\n"
+      "  Actual: 1\n"
+      "  Expected: is equal to 2\n"
+      "  Detail: isn't equal to 2");
   EXPECT_EQ(Explain(WhenSortedBy(less<int>(), ElementsAre(1, 2)), a),
             "which is { 1, 2 } when sorted");
 }
@@ -1623,16 +1626,17 @@ TEST(IsSupersetOfTest, MatchAndExplain) {
   ASSERT_FALSE(ExplainMatchResult(IsSupersetOf(expected), v, &listener))
       << listener.str();
   EXPECT_THAT(listener.str(),
-              Eq("where the following matchers don't match any elements:\n"
-                 "matcher #0: is equal to 1"));
+              Eq("UnorderedElementsAre mismatch:\n"
+                 "Expected entries with no matching actual value:\n"
+                 "  - Expected #0: is equal to 1"));
 
   v.push_back(1);
   listener.Clear();
   ASSERT_TRUE(ExplainMatchResult(IsSupersetOf(expected), v, &listener))
       << listener.str();
   EXPECT_THAT(listener.str(), Eq("where:\n"
-                                 " - element #0 is matched by matcher #1,\n"
-                                 " - element #2 is matched by matcher #0"));
+                                 " - Actual #0 is matched by Expected #1,\n"
+                                 " - Actual #2 is matched by Expected #0"));
 }
 
 TEST(IsSupersetOfTest, WorksForRhsInitializerList) {
@@ -1751,16 +1755,16 @@ TEST(IsSubsetOfTest, MatchAndExplain) {
   ASSERT_FALSE(ExplainMatchResult(IsSubsetOf(expected), v, &listener))
       << listener.str();
   EXPECT_THAT(listener.str(),
-              Eq("where the following elements don't match any matchers:\n"
-                 "element #1: 3"));
+              Eq("Actual entries with no matching expected value:\n"
+                 "  - Actual #1: 3"));
 
   expected.push_back(3);
   listener.Clear();
   ASSERT_TRUE(ExplainMatchResult(IsSubsetOf(expected), v, &listener))
       << listener.str();
   EXPECT_THAT(listener.str(), Eq("where:\n"
-                                 " - element #0 is matched by matcher #1,\n"
-                                 " - element #1 is matched by matcher #2"));
+                                 " - Actual #0 is matched by Expected #1,\n"
+                                 " - Actual #1 is matched by Expected #2"));
 }
 
 TEST(IsSubsetOfTest, WorksForRhsInitializerList) {
@@ -2314,12 +2318,13 @@ TEST_F(UnorderedElementsAreTest, FailMessageCountWrong) {
       << listener.str();
   EXPECT_THAT(listener.str(),
               Eq("which has 1 element\n"
-                 "where the following matchers don't match any elements:\n"
-                 "matcher #0: is equal to 1,\n"
-                 "matcher #1: is equal to 2,\n"
-                 "matcher #2: is equal to 3\n"
-                 "and where the following elements don't match any matchers:\n"
-                 "element #0: 4"));
+                 "UnorderedElementsAre mismatch:\n"
+                 "Expected entries with no matching actual value:\n"
+                 "  - Expected #0: is equal to 1\n"
+                 "  - Expected #1: is equal to 2\n"
+                 "  - Expected #2: is equal to 3\n"
+                 "Actual entries with no matching expected value:\n"
+                 "  - Actual #0: 4"));
 }
 
 TEST_F(UnorderedElementsAreTest, FailMessageCountWrongZero) {
@@ -2328,10 +2333,11 @@ TEST_F(UnorderedElementsAreTest, FailMessageCountWrongZero) {
   EXPECT_FALSE(ExplainMatchResult(UnorderedElementsAre(1, 2, 3), v, &listener))
       << listener.str();
   EXPECT_THAT(listener.str(),
-              Eq("where the following matchers don't match any elements:\n"
-                 "matcher #0: is equal to 1,\n"
-                 "matcher #1: is equal to 2,\n"
-                 "matcher #2: is equal to 3"));
+              Eq("UnorderedElementsAre mismatch:\n"
+                 "Expected entries with no matching actual value:\n"
+                 "  - Expected #0: is equal to 1\n"
+                 "  - Expected #1: is equal to 2\n"
+                 "  - Expected #2: is equal to 3"));
 }
 
 TEST_F(UnorderedElementsAreTest, FailMessageUnmatchedMatchers) {
@@ -2342,8 +2348,9 @@ TEST_F(UnorderedElementsAreTest, FailMessageUnmatchedMatchers) {
   EXPECT_FALSE(ExplainMatchResult(UnorderedElementsAre(1, 2), v, &listener))
       << listener.str();
   EXPECT_THAT(listener.str(),
-              Eq("where the following matchers don't match any elements:\n"
-                 "matcher #1: is equal to 2"));
+              Eq("UnorderedElementsAre mismatch:\n"
+                 "Expected entries with no matching actual value:\n"
+                 "  - Expected #1: is equal to 2"));
 }
 
 TEST_F(UnorderedElementsAreTest, FailMessageUnmatchedElements) {
@@ -2353,9 +2360,9 @@ TEST_F(UnorderedElementsAreTest, FailMessageUnmatchedElements) {
   StringMatchResultListener listener;
   EXPECT_FALSE(ExplainMatchResult(UnorderedElementsAre(1, 1), v, &listener))
       << listener.str();
-  EXPECT_THAT(listener.str(),
-              Eq("where the following elements don't match any matchers:\n"
-                 "element #1: 2"));
+  EXPECT_THAT(listener.str(), Eq("Actual entries with no matching expected "
+                                 "value:\n"
+                                 "  - Actual #1: 2"));
 }
 
 TEST_F(UnorderedElementsAreTest, FailMessageUnmatchedMatcherAndElement) {
@@ -2366,20 +2373,11 @@ TEST_F(UnorderedElementsAreTest, FailMessageUnmatchedMatcherAndElement) {
   EXPECT_FALSE(ExplainMatchResult(UnorderedElementsAre(1, 2), v, &listener))
       << listener.str();
   EXPECT_THAT(listener.str(),
-              Eq("where"
-                 " the following matchers don't match any elements:\n"
-                 "matcher #0: is equal to 1\n"
-                 "and"
-                 " where"
-                 " the following elements don't match any matchers:\n"
-                 "element #1: 3"));
-}
-
-// Test helper for formatting element, matcher index pairs in expectations.
-static std::string EMString(int element, int matcher) {
-  stringstream ss;
-  ss << "(element #" << element << ", matcher #" << matcher << ")";
-  return ss.str();
+              Eq("UnorderedElementsAre mismatch:\n"
+                 "Expected entries with no matching actual value:\n"
+                 "  - Expected #0: is equal to 1\n"
+                 "Actual entries with no matching expected value:\n"
+                 "  - Actual #1: 3"));
 }
 
 TEST_F(UnorderedElementsAreTest, FailMessageImperfectMatchOnly) {
@@ -2394,20 +2392,22 @@ TEST_F(UnorderedElementsAreTest, FailMessageImperfectMatchOnly) {
       UnorderedElementsAre("a", "a", AnyOf("b", "c")), v, &listener))
       << listener.str();
 
-  std::string prefix =
-      "where no permutation of the elements can satisfy all matchers, "
-      "and the closest match is 2 of 3 matchers with the "
-      "pairings:\n";
+  std::string prefix = "UnorderedElementsAre pairing mismatch:\n"
+                       "  Matched 2 of 3 expected entries.\n"
+                       "Pairings (Actual <-> Expected):\n";
 
   // We have to be a bit loose here, because there are 4 valid max matches.
   EXPECT_THAT(
       listener.str(),
       AnyOf(
-          prefix + "{\n  " + EMString(0, 0) + ",\n  " + EMString(1, 2) + "\n}",
-          prefix + "{\n  " + EMString(0, 1) + ",\n  " + EMString(1, 2) + "\n}",
-          prefix + "{\n  " + EMString(0, 0) + ",\n  " + EMString(2, 2) + "\n}",
-          prefix + "{\n  " + EMString(0, 1) + ",\n  " + EMString(2, 2) +
-              "\n}"));
+          prefix + "  - Actual #0 <-> Expected #0\n"
+                   "  - Actual #1 <-> Expected #2",
+          prefix + "  - Actual #0 <-> Expected #1\n"
+                   "  - Actual #1 <-> Expected #2",
+          prefix + "  - Actual #0 <-> Expected #0\n"
+                   "  - Actual #2 <-> Expected #2",
+          prefix + "  - Actual #0 <-> Expected #1\n"
+                   "  - Actual #2 <-> Expected #2"));
 }
 
 TEST_F(UnorderedElementsAreTest, Describe) {
@@ -2759,8 +2759,8 @@ TEST(UnorderedPointwiseTest, RejectsWrongContent) {
   const int rhs[3] = {2, 6, 6};
   EXPECT_THAT(lhs, Not(UnorderedPointwise(IsHalfOf(), rhs)));
   EXPECT_EQ(
-      "where the following elements don't match any matchers:\n"
-      "element #1: 2",
+      "Actual entries with no matching expected value:\n"
+      "  - Actual #1: 2",
       Explain(UnorderedPointwise(IsHalfOf(), rhs), lhs));
 }
 
@@ -2938,8 +2938,8 @@ TEST_P(ElementsAreTestP, ExplainsNonTrivialMatch) {
   const int a[] = {10, 0, 100};
   vector<int> test_vector(std::begin(a), std::end(a));
   EXPECT_EQ(
-      "whose element #0 matches, which is 9 more than 1,\n"
-      "and whose element #2 matches, which is 98 more than 2",
+      "element #0 matches: which is 9 more than 1,\n"
+      "and element #2 matches: which is 98 more than 2",
       Explain(m, test_vector));
 }
 
@@ -2951,7 +2951,8 @@ TEST(ElementsAreTest, CanExplainMismatchWrongSize) {
   EXPECT_EQ("", Explain(m, test_list));
 
   test_list.push_back(1);
-  EXPECT_EQ("which has 1 element", Explain(m, test_list));
+  EXPECT_EQ("size mismatch:\n  Expected size: 2\n  Actual size: 1",
+            Explain(m, test_list));
 }
 
 TEST_P(ElementsAreTestP, CanExplainMismatchRightSize) {
@@ -2960,11 +2961,18 @@ TEST_P(ElementsAreTestP, CanExplainMismatchRightSize) {
   vector<int> v;
   v.push_back(2);
   v.push_back(1);
-  EXPECT_EQ(Explain(m, v), "whose element #0 (2) isn't equal to 1");
+  EXPECT_EQ(Explain(m, v),
+            "element mismatch at index 0:\n"
+            "  Actual: 2\n"
+            "  Expected: is equal to 1\n"
+            "  Detail: isn't equal to 1");
 
   v[0] = 1;
   EXPECT_EQ(Explain(m, v),
-            "whose element #1 (1) is <= 5, which is 4 less than 5");
+            "element mismatch at index 1:\n"
+            "  Actual: 1\n"
+            "  Expected: is > 5\n"
+            "  Detail: is <= 5, which is 4 less than 5");
 }
 
 TEST(ElementsAreTest, MatchesOneElementVector) {
