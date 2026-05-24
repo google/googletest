@@ -442,13 +442,15 @@ bool UntypedFunctionMockerBase::VerifyAndClearExpectationsLocked()
 
   return expectations_met;
 }
-
-static CallReaction intToCallReaction(int mock_behavior) {
+namespace{ 
+ CallReaction intToCallReaction(int mock_behavior) {
   if (mock_behavior >= kAllow && mock_behavior <= kFail) {
     return static_cast<internal::CallReaction>(mock_behavior);
   }
   return kWarn;
 }
+
+} 
 
 }  // namespace internal
 
