@@ -942,6 +942,15 @@ static constexpr bool IsMockFunctionTemplateArgumentDeducedTo(
 
 }  // namespace
 
+// Like std::add_const, but for function types.
+template <typename F>
+struct AddConstToFunction;
+
+template <typename R, typename... Args>
+struct AddConstToFunction<R(Args...)> {
+  using type = R(Args...) const;
+};
+
 template <typename F>
 class MockMethodMockFunctionSignatureTest : public Test {};
 
@@ -953,25 +962,69 @@ TYPED_TEST_SUITE(MockMethodMockFunctionSignatureTest,
 
 TYPED_TEST(MockMethodMockFunctionSignatureTest,
            IsMockFunctionTemplateArgumentDeducedForRawSignature) {
-  using Argument = TypeParam;
-  MockFunction<Argument> foo;
-  EXPECT_TRUE(IsMockFunctionTemplateArgumentDeducedTo<TypeParam>(foo));
+  // Non-const
+  {
+    using Argument = TypeParam;
+    MockFunction<Argument> foo;
+    EXPECT_TRUE(IsMockFunctionTemplateArgumentDeducedTo<TypeParam>(foo));
+  }
+
+  // Const
+  {
+    using Argument = typename AddConstToFunction<TypeParam>::type;
+    MockFunction<Argument> foo;
+    EXPECT_TRUE(IsMockFunctionTemplateArgumentDeducedTo<TypeParam>(foo));
+  }
 }
 
 TYPED_TEST(MockMethodMockFunctionSignatureTest,
            IsMockFunctionTemplateArgumentDeducedForStdFunction) {
-  using Argument = std::function<TypeParam>;
-  MockFunction<Argument> foo;
-  EXPECT_TRUE(IsMockFunctionTemplateArgumentDeducedTo<TypeParam>(foo));
+  // Non-const
+  {
+    using Argument = std::function<TypeParam>;
+    MockFunction<Argument> foo;
+    EXPECT_TRUE(IsMockFunctionTemplateArgumentDeducedTo<TypeParam>(foo));
+  }
+
+// As of 2026-05 MSVC doesn't know how to deal with this, providing pages of
+// inscrutable errors about std::_Get_function_impl. But this is fine, since
+// std::function<R(Args...) const> doesn't apply the const qualifier correctly
+// anyway.
+#if !defined(_MSC_VER)
+
+  // Const
+  {
+    using Argument =
+        std::function<typename AddConstToFunction<TypeParam>::type>;
+
+    MockFunction<Argument> foo;
+    EXPECT_TRUE(IsMockFunctionTemplateArgumentDeducedTo<TypeParam>(foo));
+  }
+
+#endif
 }
 
 TYPED_TEST(
     MockMethodMockFunctionSignatureTest,
     IsMockFunctionCallMethodSignatureTheSameForRawSignatureAndStdFunction) {
-  using ForRawSignature = decltype(&MockFunction<TypeParam>::Call);
-  using ForStdFunction =
-      decltype(&MockFunction<std::function<TypeParam>>::Call);
-  EXPECT_TRUE((std::is_same<ForRawSignature, ForStdFunction>::value));
+  // Non-const
+  {
+    using ForRawSignature = decltype(&MockFunction<TypeParam>::Call);
+    using ForStdFunction =
+        decltype(&MockFunction<std::function<TypeParam>>::Call);
+    EXPECT_TRUE((std::is_same<ForRawSignature, ForStdFunction>::value));
+  }
+
+  // Const
+  {
+    using ConstTypeParam = typename AddConstToFunction<TypeParam>::type;
+    using ForRawSignature = decltype(&MockFunction<ConstTypeParam>::Call);
+
+    using ForStdFunction =
+        decltype(&MockFunction<std::function<ConstTypeParam>>::Call);
+
+    EXPECT_TRUE((std::is_same<ForRawSignature, ForStdFunction>::value));
+  }
 }
 
 template <typename F>
