@@ -95,6 +95,21 @@ void PrintFlag(const char* flag) {
     return;
   }
 
+  if (strcmp(flag, "print_test_filter") == 0) {
+    cout << GTEST_FLAG_GET(print_test_filter);
+    return;
+  }
+
+  if (strcmp(flag, "print_test_shard_status") == 0) {
+    cout << GTEST_FLAG_GET(print_test_shard_status);
+    return;
+  }
+
+  if (strcmp(flag, "print_test_shuffle_seed") == 0) {
+    cout << GTEST_FLAG_GET(print_test_shuffle_seed);
+    return;
+  }
+
   if (strcmp(flag, "repeat") == 0) {
     cout << GTEST_FLAG_GET(repeat);
     return;

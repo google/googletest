@@ -73,6 +73,10 @@ def RandomSeedFlag(n):
   return '--gtest_random_seed=%s' % (n,)
 
 
+def PrintTestShuffleSeedFlag(value):
+  return '--gtest_print_test_shuffle_seed=%s' % (value,)
+
+
 def RunAndReturnOutput(extra_env, args):
   """Runs the test program and returns its output."""
 
@@ -350,6 +354,17 @@ class GTestShuffleUnitTest(gtest_test_utils.TestCase):
     self.assertTrue(
         tests_in_iteration2 != tests_in_iteration3, tests_in_iteration2
     )
+
+  def testSuppressingShuffleSeedNoteDoesNotDisableShuffle(self):
+    shuffled_tests = GetTestsForAllIterations(
+        {}, [ShuffleFlag(), RandomSeedFlag(1)]
+    )[0]
+    shuffled_tests_without_note = GetTestsForAllIterations(
+        {}, [ShuffleFlag(), RandomSeedFlag(1), PrintTestShuffleSeedFlag('0')]
+    )[0]
+
+    self.assertEqual(shuffled_tests, shuffled_tests_without_note)
+    self.assertNotEqual(ACTIVE_TESTS, shuffled_tests_without_note)
 
   def testShuffleShardedTestsPreservesPartition(self):
     # If we run M tests on N shards, the same M tests should be run in

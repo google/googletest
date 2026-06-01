@@ -89,6 +89,20 @@ COMMAND_WITH_SHARDING = (
         '--gtest_filter=PassingTest.*',
     ],
 )
+COMMAND_WITH_SHUFFLE = (
+    {},
+    [
+        PROGRAM_PATH,
+        'internal_skip_environment_and_ad_hoc_tests',
+        '--gtest_filter=PassingTest.*',
+        '--gtest_shuffle',
+        '--gtest_random_seed=1',
+    ],
+)
+
+FILTER_NOTE = 'Note: Google Test filter = PassingTest.*'
+SHARD_NOTE = 'Note: This is test shard 2 of 2.'
+SHUFFLE_SEED_NOTE = "Note: Randomizing tests' orders with a seed of 1 ."
 
 GOLDEN_PATH = os.path.join(gtest_test_utils.GetSourceDir(), GOLDEN_NAME)
 
@@ -360,6 +374,46 @@ class GTestOutputTest(gtest_test_utils.TestCase):
         ).write(normalized_golden)
 
       self.assertEqual(normalized_golden, normalized_actual)
+
+  def testDefaultStartupNotesArePrinted(self):
+    sharding_output = GetCommandOutput(COMMAND_WITH_SHARDING)
+    self.assertIn(FILTER_NOTE, sharding_output)
+    self.assertIn(SHARD_NOTE, sharding_output)
+
+    shuffle_output = GetCommandOutput(COMMAND_WITH_SHUFFLE)
+    self.assertIn(FILTER_NOTE, shuffle_output)
+    self.assertIn(SHUFFLE_SEED_NOTE, shuffle_output)
+
+  def testPrintTestFilterFalseSuppressesOnlyFilterNote(self):
+    env, cmdline = COMMAND_WITH_SHUFFLE
+    output = GetCommandOutput(
+        (env, cmdline + ['--gtest_print_test_filter=false'])
+    )
+
+    self.assertNotIn(FILTER_NOTE, output)
+    self.assertIn(SHUFFLE_SEED_NOTE, output)
+    self.assertIn('[==========] Running 2 tests from 1 test suite.', output)
+    self.assertIn('[ RUN      ] PassingTest.PassingTest', output)
+
+  def testPrintTestShardStatusFalseSuppressesOnlyShardNote(self):
+    env, cmdline = COMMAND_WITH_SHARDING
+    output = GetCommandOutput(
+        (env, cmdline + ['--gtest_print_test_shard_status=false'])
+    )
+
+    self.assertIn(FILTER_NOTE, output)
+    self.assertNotIn(SHARD_NOTE, output)
+    self.assertIn('[ RUN      ] PassingTest.PassingTest2', output)
+
+  def testPrintTestShuffleSeedFalseSuppressesOnlyShuffleSeedNote(self):
+    env, cmdline = COMMAND_WITH_SHUFFLE
+    output = GetCommandOutput(
+        (env, cmdline + ['--gtest_print_test_shuffle_seed=false'])
+    )
+
+    self.assertIn(FILTER_NOTE, output)
+    self.assertNotIn(SHUFFLE_SEED_NOTE, output)
+    self.assertIn('[ RUN      ] PassingTest.PassingTest', output)
 
 
 if __name__ == '__main__':
