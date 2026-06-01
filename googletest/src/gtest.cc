@@ -6868,9 +6868,12 @@ void ParseGoogleTestFlagsOnlyImpl(int* argc, CharType** argv) {
       LoadFlagsFromFile(flagfile_value);
       remove_flag = true;
 #endif  // GTEST_USE_OWN_FLAGFILE_FLAG_ && GTEST_HAS_FILE_SYSTEM
-    } else if (arg_string == "--help" || HasGoogleTestFlagPrefix(arg)) {
-      // Both help flag and unrecognized Google Test flags (excluding
-      // internal ones) trigger help display.
+    } else if (arg_string == "--help") {
+      g_help_flag = true;
+      remove_flag = true;
+    } else if (HasGoogleTestFlagPrefix(arg)) {
+      // Unrecognized Google Test flags (excluding internal ones) trigger help
+      // display, but remain available for other flag parsers.
       g_help_flag = true;
     }
 
