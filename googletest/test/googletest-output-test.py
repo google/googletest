@@ -160,7 +160,7 @@ def NormalizeToCurrentPlatform(test_output):
 
   if IS_WINDOWS:
     # Removes the color information that is not present on Windows.
-    test_output = re.sub('\x1b\\[(0;3\d)?m', '', test_output)
+    test_output = re.sub(r'\x1b\[(0;3\d)?m', '', test_output)
     # Changes failure message headers into the Windows format.
     test_output = re.sub(r': Failure\n', r': error: ', test_output)
     # Changes file(line_number) to file:line_number.
@@ -267,6 +267,16 @@ def GetOutputOfAllCommands():
   )
 
 
+def WriteDebugOutputFile(filename, contents):
+  with open(
+      os.path.join(gtest_test_utils.GetSourceDir(), filename),
+      'w',
+      encoding='utf-8',
+      newline='',
+  ) as debug_file:
+    debug_file.write(contents)
+
+
 test_list = GetShellCommandOutput(COMMAND_LIST_TESTS)
 SUPPORTS_DEATH_TESTS = 'DeathTest' in test_list
 SUPPORTS_TYPED_TESTS = 'TypedTest' in test_list
@@ -344,20 +354,14 @@ class GTestOutputTest(gtest_test_utils.TestCase):
 
       # This code is very handy when debugging golden file differences:
       if os.getenv('DEBUG_GTEST_OUTPUT_TEST'):
-        open(
-            os.path.join(
-                gtest_test_utils.GetSourceDir(),
-                '_googletest-output-test_normalized_actual.txt',
-            ),
-            'wb',
-        ).write(normalized_actual)
-        open(
-            os.path.join(
-                gtest_test_utils.GetSourceDir(),
-                '_googletest-output-test_normalized_golden.txt',
-            ),
-            'wb',
-        ).write(normalized_golden)
+        WriteDebugOutputFile(
+            '_googletest-output-test_normalized_actual.txt',
+            normalized_actual,
+        )
+        WriteDebugOutputFile(
+            '_googletest-output-test_normalized_golden.txt',
+            normalized_golden,
+        )
 
       self.assertEqual(normalized_golden, normalized_actual)
 
