@@ -189,4 +189,32 @@ std::string Explain(const MatcherType& m, const Value& x) {
 }  // namespace gmock_matchers_test
 }  // namespace testing
 
+namespace pseudo_container {
+
+class PseudoContainer {
+ public:
+  PseudoContainer(const std::vector<int>& elements) : elements(elements) {}
+
+  PseudoContainer(const PseudoContainer& other) = default;
+
+  const int* Start() const { return elements.data(); }
+  const int* End() const { return elements.data() + elements.size(); }
+
+  bool operator==(const PseudoContainer& other) const {
+    return elements == other.elements;
+  }
+
+ private:
+  std::vector<int> elements;
+};
+
+inline const int* begin(const PseudoContainer& container) {
+  return container.Start();
+}
+inline const int* end(const PseudoContainer& container) {
+  return container.End();
+}
+
+}  // namespace pseudo_container
+
 #endif  // GOOGLEMOCK_TEST_GMOCK_MATCHERS_TEST_H_

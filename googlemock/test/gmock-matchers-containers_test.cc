@@ -45,8 +45,8 @@
 #include <vector>
 
 #include "gmock/gmock.h"
-#include "test/gmock-matchers_test.h"
 #include "gtest/gtest.h"
+#include "test/gmock-matchers_test.h"
 
 // Silence warning C4244: 'initializing': conversion from 'int' to 'short',
 // possible loss of data and C4100, unreferenced local parameter
@@ -1256,6 +1256,15 @@ TEST(WhenSortedByTest, WorksForNativeArray) {
   EXPECT_THAT(numbers, Not(WhenSortedBy(less<int>(), ElementsAre(1, 3, 2, 4))));
 }
 
+TEST(WhenSortedByTest, WorksForPseudoContainer) {
+  pseudo_container::PseudoContainer numbers({1, 3, 2, 4});
+  pseudo_container::PseudoContainer sorted_numbers({1, 2, 3, 4});
+  EXPECT_THAT(numbers, WhenSortedBy(less<int>(), ElementsAre(1, 2, 3, 4)));
+  EXPECT_THAT(numbers,
+              WhenSortedBy(less<int>(), ElementsAreArray(sorted_numbers)));
+  EXPECT_THAT(numbers, Not(WhenSortedBy(less<int>(), ElementsAre(1, 3, 2, 4))));
+}
+
 TEST(WhenSortedByTest, CanDescribeSelf) {
   const Matcher<vector<int>> m = WhenSortedBy(less<int>(), ElementsAre(1, 2));
   EXPECT_EQ(
@@ -1331,6 +1340,12 @@ TEST(WhenSortedTest, WorksForPolymorphicMatcher) {
   std::deque<int> d;
   d.push_back(2);
   d.push_back(1);
+  EXPECT_THAT(d, WhenSorted(ElementsAre(1, 2)));
+  EXPECT_THAT(d, Not(WhenSorted(ElementsAre(2, 1))));
+}
+
+TEST(WhenSortedTest, WorksForPseudoContainer) {
+  pseudo_container::PseudoContainer d({2, 1});
   EXPECT_THAT(d, WhenSorted(ElementsAre(1, 2)));
   EXPECT_THAT(d, Not(WhenSorted(ElementsAre(2, 1))));
 }
@@ -1457,6 +1472,12 @@ TEST(BeginEndDistanceIsTest, WorksWithNonStdList) {
   EXPECT_THAT(s, BeginEndDistanceIs(5));
 }
 
+TEST(BeginEndDistanceIsTest, WorksWithPseudoContainers) {
+  std::vector<int> a = {1, 2, 3, 4, 5};
+  pseudo_container::PseudoContainer s(a);
+  EXPECT_THAT(s, BeginEndDistanceIs(5));
+}
+
 TEST(BeginEndDistanceIsTest, CanDescribeSelf) {
   Matcher<vector<int>> m = BeginEndDistanceIs(2);
   EXPECT_EQ("distance between begin() and end() is equal to 2", Describe(m));
@@ -1570,6 +1591,31 @@ TEST(IsSupersetOfTest, WorksForStreamlike) {
 
   expected.push_back(0);
   EXPECT_THAT(s, Not(IsSupersetOf(expected)));
+}
+
+TEST(IsSupersetOfTest, WorksForPseudoContainer) {
+  std::vector<int> a = {1, 2, 3, 4, 5};
+  pseudo_container::PseudoContainer actual(a);
+
+  vector<int> expected;
+  expected.push_back(1);
+  expected.push_back(2);
+  expected.push_back(5);
+  EXPECT_THAT(actual, IsSupersetOf(expected));
+
+  expected.push_back(0);
+  EXPECT_THAT(actual, Not(IsSupersetOf(expected)));
+}
+
+TEST(IsSupersetOfTest, TakesPseudoContainer) {
+  std::vector<int> a = {1, 2, 3, 4, 5};
+  pseudo_container::PseudoContainer expected(a);
+
+  std::vector<int> actual1 = {1, 2, 3};
+  EXPECT_THAT(actual1, Not(IsSupersetOf(expected)));
+
+  std::vector<int> actual2 = {1, 2, 3, 4, 5, 6};
+  EXPECT_THAT(actual2, IsSupersetOf(expected));
 }
 
 TEST(IsSupersetOfTest, TakesStlContainer) {
@@ -1696,6 +1742,30 @@ TEST(IsSubsetOfTest, WorksForStreamlike) {
   expected.push_back(2);
   expected.push_back(5);
   EXPECT_THAT(s, IsSubsetOf(expected));
+}
+
+TEST(IsSubsetOfTest, WorksWithPseudoContainer) {
+  std::vector<int> a = {1, 2};
+  pseudo_container::PseudoContainer actual(a);
+
+  vector<int> expected;
+  expected.push_back(1);
+  EXPECT_THAT(actual, Not(IsSubsetOf(expected)));
+  expected.push_back(2);
+  expected.push_back(5);
+  EXPECT_THAT(actual, IsSubsetOf(expected));
+}
+
+TEST(IsSubsetOfTest, TakesPseudoContainer) {
+  std::vector<int> a = {1, 2};
+  pseudo_container::PseudoContainer expected(a);
+
+  vector<int> actual;
+  actual.push_back(1);
+  EXPECT_THAT(actual, IsSubsetOf(expected));
+  actual.push_back(2);
+  actual.push_back(5);
+  EXPECT_THAT(actual, Not(IsSubsetOf(expected)));
 }
 
 TEST(IsSubsetOfTest, TakesStlContainer) {
@@ -2163,6 +2233,36 @@ TEST(UnorderedElementsAreArrayTest, WorksForStreamlike) {
   EXPECT_THAT(s, Not(UnorderedElementsAreArray(expected)));
 }
 
+TEST(UnorderedElementsAreArrayTest, WorksForPseudoContainer) {
+  pseudo_container::PseudoContainer actual({2, 1, 4, 5, 3});
+
+  ::std::vector<int> expected;
+  expected.push_back(1);
+  expected.push_back(2);
+  expected.push_back(3);
+  expected.push_back(4);
+  expected.push_back(5);
+  EXPECT_THAT(actual, UnorderedElementsAreArray(expected));
+
+  expected.push_back(6);
+  EXPECT_THAT(actual, Not(UnorderedElementsAreArray(expected)));
+}
+
+TEST(UnorderedElementsAreArrayTest, TakesPseudoContainer) {
+  pseudo_container::PseudoContainer expected({2, 1, 4, 5, 3});
+
+  ::std::vector<int> actual;
+  actual.push_back(1);
+  actual.push_back(2);
+  actual.push_back(3);
+  actual.push_back(4);
+  actual.push_back(5);
+  EXPECT_THAT(actual, UnorderedElementsAreArray(expected));
+
+  actual.push_back(6);
+  EXPECT_THAT(actual, Not(UnorderedElementsAreArray(expected)));
+}
+
 TEST(UnorderedElementsAreArrayTest, TakesStlContainer) {
   const int actual[] = {3, 1, 2};
 
@@ -2257,6 +2357,13 @@ TEST_F(UnorderedElementsAreTest, WorksForStreamlike) {
   // size() or empty() methods.
   const int a[5] = {2, 1, 4, 5, 3};
   Streamlike<int> s(std::begin(a), std::end(a));
+
+  EXPECT_THAT(s, UnorderedElementsAre(1, 2, 3, 4, 5));
+  EXPECT_THAT(s, Not(UnorderedElementsAre(2, 2, 3, 4, 5)));
+}
+
+TEST_F(UnorderedElementsAreTest, WorksForPseudoContainer) {
+  pseudo_container::PseudoContainer s({2, 1, 4, 5, 3});
 
   EXPECT_THAT(s, UnorderedElementsAre(1, 2, 3, 4, 5));
   EXPECT_THAT(s, Not(UnorderedElementsAre(2, 2, 3, 4, 5)));
@@ -2530,6 +2637,14 @@ TEST(EachTest, WorksWithMoveOnly) {
   helper.Call(MakeUniquePtrs({1, 2}));
 }
 
+TEST(EachTest, WorksWithPseudoContainers) {
+  std::vector<int> a = {1, 2, 3};
+  pseudo_container::PseudoContainer pa(a);
+
+  EXPECT_THAT(pa, Each(Gt(0)));
+  EXPECT_THAT(pa, Not(Each(Gt(1))));
+}
+
 // For testing Pointwise().
 class IsHalfOfMatcher {
  public:
@@ -2601,6 +2716,30 @@ TEST(PointwiseTest, WorksForLhsNativeArray) {
 
 TEST(PointwiseTest, WorksForRhsNativeArray) {
   const int rhs[] = {1, 2, 3};
+  vector<int> lhs;
+  lhs.push_back(2);
+  lhs.push_back(4);
+  lhs.push_back(6);
+  EXPECT_THAT(lhs, Pointwise(Gt(), rhs));
+  EXPECT_THAT(lhs, Not(Pointwise(Lt(), rhs)));
+}
+
+TEST(PointwiseTest, WorksForLhsPseudoContainer) {
+  std::vector<int> a = {1, 2, 3};
+  pseudo_container::PseudoContainer lhs(a);
+
+  vector<int> rhs;
+  rhs.push_back(2);
+  rhs.push_back(4);
+  rhs.push_back(6);
+  EXPECT_THAT(lhs, Pointwise(Lt(), rhs));
+  EXPECT_THAT(lhs, Not(Pointwise(Gt(), rhs)));
+}
+
+TEST(PointwiseTest, WorksForRhsPseudoContainer) {
+  std::vector<int> a = {1, 2, 3};
+  pseudo_container::PseudoContainer rhs(a);
+
   vector<int> lhs;
   lhs.push_back(2);
   lhs.push_back(4);
@@ -2729,6 +2868,26 @@ TEST(UnorderedPointwiseTest, WorksForLhsNativeArray) {
 
 TEST(UnorderedPointwiseTest, WorksForRhsNativeArray) {
   const int rhs[] = {1, 2, 3};
+  vector<int> lhs;
+  lhs.push_back(4);
+  lhs.push_back(2);
+  lhs.push_back(6);
+  EXPECT_THAT(lhs, UnorderedPointwise(Gt(), rhs));
+  EXPECT_THAT(lhs, Not(UnorderedPointwise(Lt(), rhs)));
+}
+
+TEST(UnorderedPointwiseTest, WorksForLhsPseudoContainer) {
+  pseudo_container::PseudoContainer lhs({1, 2, 3});
+  vector<int> rhs;
+  rhs.push_back(4);
+  rhs.push_back(6);
+  rhs.push_back(2);
+  EXPECT_THAT(lhs, UnorderedPointwise(Lt(), rhs));
+  EXPECT_THAT(lhs, Not(UnorderedPointwise(Gt(), rhs)));
+}
+
+TEST(UnorderedPointwiseTest, WorksForRhsPseudoContainer) {
+  pseudo_container::PseudoContainer rhs({1, 2, 3});
   vector<int> lhs;
   lhs.push_back(4);
   lhs.push_back(2);
@@ -3134,6 +3293,14 @@ TEST(ElementsAreTest, AcceptsStringLiteral) {
   EXPECT_THAT(array, Not(ElementsAre("hi", "one", "too")));
 }
 
+TEST(ElementsAreTest, WorksWithPseudoContainer) {
+  std::vector<int> array = {0, 1, 2};
+  pseudo_container::PseudoContainer pseudoArray(array);
+  EXPECT_THAT(pseudoArray, ElementsAre(0, 1, _));
+  EXPECT_THAT(pseudoArray, Not(ElementsAre(1, _, _)));
+  EXPECT_THAT(pseudoArray, Not(ElementsAre(0, _)));
+}
+
 // Declared here with the size unknown.  Defined AFTER the following test.
 extern const char kHi[];
 
@@ -3305,6 +3472,22 @@ TEST(ElementsAreArrayTest, SourceLifeSpan) {
   EXPECT_THAT(test_vector, Not(matcher_maker));
 }
 
+TEST(ElementsAreArrayTest, WorksWithPseudoContainers) {
+  std::vector<int> source_a = {1, 2, 3, 4, 5};
+  std::vector<int> source_b = {1, 2, 4, 6, 3};
+
+  pseudo_container::PseudoContainer test_container(source_a);
+  pseudo_container::PseudoContainer not_expected_container(source_b);
+
+  EXPECT_THAT(source_a, ElementsAreArray(test_container));
+  EXPECT_THAT(source_a, Not(ElementsAreArray(not_expected_container)));
+
+  EXPECT_THAT(test_container, ElementsAreArray(source_a));
+  EXPECT_THAT(test_container, Not(ElementsAreArray(source_b)));
+
+  EXPECT_THAT(test_container, ElementsAreArray(test_container));
+  EXPECT_THAT(test_container, Not(ElementsAreArray(not_expected_container)));
+}
 // Tests Contains().
 
 INSTANTIATE_GTEST_MATCHER_TEST_P(ContainsTest);
@@ -3437,6 +3620,13 @@ TEST(ContainsTest, WorksForTwoDimensionalNativeArray) {
   EXPECT_THAT(a, Contains(Contains(5)));
   EXPECT_THAT(a, Not(Contains(ElementsAre(3, 4, 5))));
   EXPECT_THAT(a, Contains(Not(Contains(5))));
+}
+
+TEST(ContainsTest, WorksForPseudoContainer) {
+  std::vector<int> a = {1, 2, 3};
+  pseudo_container::PseudoContainer pa(a);
+  EXPECT_THAT(pa, Contains(Gt(2)));
+  EXPECT_THAT(pa, Contains(Not(Gt(4))));
 }
 
 // Tests ContainsSubsequence().
