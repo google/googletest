@@ -3386,30 +3386,6 @@ With this definition, the above assertion will give a better message:
     Actual: 27 (the remainder is 6)
 ```
 
-#### Using EXPECT_ Statements in Matchers
-
-You can also use `EXPECT_...` statements inside custom matcher definitions. In
-many cases, this allows you to write your matcher more concisely while still
-providing an informative error message. For example:
-
-```cpp
-MATCHER(IsDivisibleBy7, "") {
-  const auto remainder = arg % 7;
-  EXPECT_EQ(remainder, 0);
-  return true;
-}
-```
-
-If you write a test that includes the line `EXPECT_THAT(27, IsDivisibleBy7());`,
-you will get an error something like the following:
-
-```shell
-Expected equality of these values:
-  remainder
-    Which is: 6
-  0
-```
-
 #### `MatchAndExplain`
 
 You should let `MatchAndExplain()` print *any additional information* that can
@@ -3428,6 +3404,66 @@ the value of `(arg % 7) == 0` can be implicitly converted to a `bool`. In the
 `Bar(IsDivisibleBy7())` example above, if method `Bar()` takes an `int`,
 `arg_type` will be `int`; if it takes an `unsigned long`, `arg_type` will be
 `unsigned long`; and so on.
+
+#### Anti-pattern: Using EXPECT_ Statements in Matchers
+
+Using `EXPECT_...` statements inside custom matcher definitions is an
+**anti-pattern** and should be avoided.
+
+While it might appear to write matchers more concisely and generate informative
+messages, this pattern has critical issues:
+
+1.  **Negation Breakage (`Not`):** If wrapped in `Not(IsDivisibleBy7())`,
+    evaluating it still triggers the internal `EXPECT_EQ`, registering a test
+    failure on the runner even when the overall assertion is expected to
+    succeed.
+2.  **Composition / Container Breakage (`AnyOf`, `AllOf`, `Contains`):** When
+    composed or used inside container matchers, elements that are expected
+    mismatches will trigger the internal `EXPECT_` and register spurious
+    failures.
+3.  **ASSERT_* compilation errors:** `ASSERT_*` macros use `return;` to abort
+    from a void function. Since matchers return `bool`, using `ASSERT_` inside
+    them triggers a compilation error.
+4.  **Purity Violations:** Matchers must be functionally pure (side-effect
+    free), whereas registering global failures is a major side effect.
+5.  **Line Number Confusion:** Failure reports point to the matcher's definition
+    line rather than the calling `EXPECT_THAT`
+    line.
+
+##### The Anti-Pattern
+
+```cpp
+// Anti-pattern: Do not do this!
+MATCHER(IsDivisibleBy7, "") {
+  const auto remainder = arg % 7;
+  EXPECT_EQ(remainder, 0);  // Spurious failures if negated/composed!
+  return true;
+}
+```
+
+##### The Correct Solution
+
+To write concise matchers that delegate to other matchers and safely propagate
+the mismatch explanation, use **`::testing::ExplainMatchResult`** instead,
+passing it the sub-matcher, the value to check, and the `result_listener`:
+
+```cpp
+MATCHER(IsDivisibleBy7, "") {
+  const auto remainder = arg % 7;
+  return ::testing::ExplainMatchResult(::testing::Eq(0), remainder,
+                                       result_listener);
+}
+```
+
+If you write a test that includes the line:
+
+```cpp
+EXPECT_THAT(28, Not(IsDivisibleBy7()));
+```
+
+it will correctly report the mismatch, properly point to the `EXPECT_THAT` line
+number, and support negation (`Not`) and composition (`AllOf`, `AnyOf`, etc.)
+without registering spurious failures.
 
 ### Writing New Parameterized Matchers Quickly
 
