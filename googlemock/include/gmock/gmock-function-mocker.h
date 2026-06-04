@@ -50,6 +50,9 @@ namespace internal {
 template <typename T>
 using identity_t = T;
 
+template <typename T>
+struct TypeTag {};
+
 template <typename Pattern>
 struct ThisRefAdjuster {
   template <typename T>
@@ -322,6 +325,12 @@ using internal::FunctionMocker;
       const ::testing::internal::WithoutMatchers&,                             \
       GMOCK_PP_IF(_Constness, const, )::testing::internal::Function<           \
           GMOCK_PP_REMOVE_PARENS(_Signature)>*) const _RefSpec _NoexceptSpec;  \
+  ::testing::FunctionMocker<GMOCK_PP_REMOVE_PARENS(_Signature)>&               \
+      gmock_get_mocker_##_MethodName(                                          \
+          ::testing::internal::TypeTag<GMOCK_PP_REMOVE_PARENS(                 \
+              _Signature) GMOCK_PP_IF(_Constness, const, ) _RefSpec>) const {  \
+    return GMOCK_MOCKER_(_N, _Constness, _MethodName);                         \
+  }                                                                            \
   mutable ::testing::FunctionMocker<GMOCK_PP_REMOVE_PARENS(_Signature)>        \
   GMOCK_MOCKER_(_N, _Constness, _MethodName)
 
@@ -335,18 +344,23 @@ using internal::FunctionMocker;
       GMOCK_PP_IF(_Constness, const, )                                         \
           _RefSpec _NoexceptSpec GMOCK_PP_IF(_Override, override, )            \
               GMOCK_PP_IF(_Final, final, ) {                                   \
-    GMOCK_MOCKER_(_N, _Constness, _MethodName)                                 \
-        .SetOwnerAndName(this, #_MethodName);                                  \
-    return GMOCK_MOCKER_(_N, _Constness, _MethodName)                          \
-        .Invoke(GMOCK_PP_REPEAT(GMOCK_INTERNAL_FORWARD_ARG, _Signature, _N));  \
+    auto& mocker = gmock_get_mocker_##_MethodName(                             \
+        ::testing::internal::TypeTag<GMOCK_PP_REMOVE_PARENS(                   \
+            _Signature) GMOCK_PP_IF(_Constness, const, ) _RefSpec>{});         \
+    mocker.SetOwnerAndName(this, #_MethodName);                                \
+    return mocker.Invoke(                                                      \
+        GMOCK_PP_REPEAT(GMOCK_INTERNAL_FORWARD_ARG, _Signature, _N));          \
   }                                                                            \
   ::testing::MockSpec<GMOCK_PP_REMOVE_PARENS(_Signature)>                      \
       _MockClass::gmock_##_MethodName(                                         \
           GMOCK_PP_REPEAT(GMOCK_INTERNAL_MATCHER_PARAMETER, _Signature, _N))   \
           GMOCK_PP_IF(_Constness, const, ) _RefSpec {                          \
-    GMOCK_MOCKER_(_N, _Constness, _MethodName).RegisterOwner(this);            \
-    return GMOCK_MOCKER_(_N, _Constness, _MethodName)                          \
-        .With(GMOCK_PP_REPEAT(GMOCK_INTERNAL_MATCHER_ARGUMENT, , _N));         \
+    auto& mocker = gmock_get_mocker_##_MethodName(                             \
+        ::testing::internal::TypeTag<GMOCK_PP_REMOVE_PARENS(                   \
+            _Signature) GMOCK_PP_IF(_Constness, const, ) _RefSpec>{});         \
+    mocker.RegisterOwner(this);                                                \
+    return mocker.With(                                                        \
+        GMOCK_PP_REPEAT(GMOCK_INTERNAL_MATCHER_ARGUMENT, , _N));               \
   }                                                                            \
   ::testing::MockSpec<GMOCK_PP_REMOVE_PARENS(_Signature)>                      \
       _MockClass::gmock_##_MethodName(                                         \
