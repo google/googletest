@@ -116,10 +116,10 @@ using internal::FunctionMocker;
   GMOCK_INTERNAL_WARNING_POP()
 
 #define GMOCK_INTERNAL_MOCK_METHOD_ARG_1(...) \
-  GMOCK_INTERNAL_WRONG_ARITY(__VA_ARGS__)
+  GMOCK_INTERNAL_MOCK_METHOD_WRONG_ARITY(__VA_ARGS__)
 
 #define GMOCK_INTERNAL_MOCK_METHOD_ARG_2(...) \
-  GMOCK_INTERNAL_WRONG_ARITY(__VA_ARGS__)
+  GMOCK_INTERNAL_MOCK_METHOD_WRONG_ARITY(__VA_ARGS__)
 
 #define GMOCK_INTERNAL_MOCK_METHOD_ARG_3(_Ret, _MethodName, _Args) \
   GMOCK_INTERNAL_MOCK_METHOD_ARG_4(_Ret, _MethodName, _Args, ())
@@ -139,20 +139,118 @@ using internal::FunctionMocker;
       (GMOCK_INTERNAL_SIGNATURE(_Ret, _Args)))
 
 #define GMOCK_INTERNAL_MOCK_METHOD_ARG_5(...) \
-  GMOCK_INTERNAL_WRONG_ARITY(__VA_ARGS__)
+  GMOCK_INTERNAL_MOCK_METHOD_WRONG_ARITY(__VA_ARGS__)
 
 #define GMOCK_INTERNAL_MOCK_METHOD_ARG_6(...) \
-  GMOCK_INTERNAL_WRONG_ARITY(__VA_ARGS__)
+  GMOCK_INTERNAL_MOCK_METHOD_WRONG_ARITY(__VA_ARGS__)
 
 #define GMOCK_INTERNAL_MOCK_METHOD_ARG_7(...) \
-  GMOCK_INTERNAL_WRONG_ARITY(__VA_ARGS__)
+  GMOCK_INTERNAL_MOCK_METHOD_WRONG_ARITY(__VA_ARGS__)
 
-#define GMOCK_INTERNAL_WRONG_ARITY(...)                                      \
+#define GMOCK_INTERNAL_MOCK_METHOD_WRONG_ARITY(...)                          \
   static_assert(                                                             \
       false,                                                                 \
       "MOCK_METHOD must be called with 3 or 4 arguments. _Ret, "             \
       "_MethodName, _Args and optionally _Spec. _Args and _Spec must be "    \
       "enclosed in parentheses. If _Ret is a type with unprotected commas, " \
+      "it must also be enclosed in parentheses.")
+
+#define DECLARE_MOCK_METHOD(...)                                               \
+  GMOCK_INTERNAL_WARNING_PUSH()                                                \
+  GMOCK_INTERNAL_WARNING_CLANG(ignored, "-Wunused-member-function")            \
+  GMOCK_PP_VARIADIC_CALL(GMOCK_INTERNAL_DECLARE_MOCK_METHOD_ARG_, __VA_ARGS__) \
+  GMOCK_INTERNAL_WARNING_POP()
+
+#define GMOCK_INTERNAL_DECLARE_MOCK_METHOD_ARG_1(...) \
+  GMOCK_INTERNAL_DECLARE_MOCK_METHOD_WRONG_ARITY(__VA_ARGS__)
+
+#define GMOCK_INTERNAL_DECLARE_MOCK_METHOD_ARG_2(...) \
+  GMOCK_INTERNAL_DECLARE_MOCK_METHOD_WRONG_ARITY(__VA_ARGS__)
+
+#define GMOCK_INTERNAL_DECLARE_MOCK_METHOD_ARG_3(_Ret, _MethodName, _Args) \
+  GMOCK_INTERNAL_DECLARE_MOCK_METHOD_ARG_4(_Ret, _MethodName, _Args, ())
+
+#define GMOCK_INTERNAL_DECLARE_MOCK_METHOD_ARG_4(_Ret, _MethodName, _Args, \
+                                                 _Spec)                    \
+  GMOCK_INTERNAL_ASSERT_PARENTHESIS(_Args);                                \
+  GMOCK_INTERNAL_ASSERT_PARENTHESIS(_Spec);                                \
+  GMOCK_INTERNAL_ASSERT_VALID_SIGNATURE(                                   \
+      GMOCK_PP_NARG0 _Args, GMOCK_INTERNAL_SIGNATURE(_Ret, _Args));        \
+  GMOCK_INTERNAL_ASSERT_VALID_SPEC(_Spec)                                  \
+  GMOCK_INTERNAL_DECLARE_MOCK_METHOD_IMPL(                                 \
+      GMOCK_PP_NARG0 _Args, _MethodName, GMOCK_INTERNAL_HAS_CONST(_Spec),  \
+      GMOCK_INTERNAL_HAS_OVERRIDE(_Spec), GMOCK_INTERNAL_HAS_FINAL(_Spec), \
+      GMOCK_INTERNAL_GET_NOEXCEPT_SPEC(_Spec),                             \
+      GMOCK_INTERNAL_GET_CALLTYPE_SPEC(_Spec),                             \
+      GMOCK_INTERNAL_GET_REF_SPEC(_Spec),                                  \
+      (GMOCK_INTERNAL_SIGNATURE(_Ret, _Args)))
+
+#define GMOCK_INTERNAL_DECLARE_MOCK_METHOD_ARG_5(...) \
+  GMOCK_INTERNAL_DECLARE_MOCK_METHOD_WRONG_ARITY(__VA_ARGS__)
+
+#define GMOCK_INTERNAL_DECLARE_MOCK_METHOD_ARG_6(...) \
+  GMOCK_INTERNAL_DECLARE_MOCK_METHOD_WRONG_ARITY(__VA_ARGS__)
+
+#define GMOCK_INTERNAL_DECLARE_MOCK_METHOD_ARG_7(...) \
+  GMOCK_INTERNAL_DECLARE_MOCK_METHOD_WRONG_ARITY(__VA_ARGS__)
+
+#define GMOCK_INTERNAL_DECLARE_MOCK_METHOD_WRONG_ARITY(...)                  \
+  static_assert(                                                             \
+      false,                                                                 \
+      "DECLARE_MOCK_METHOD must be called with 3 or 4 arguments. _Ret, "     \
+      "_MethodName, _Args and optionally _Spec. _Args and _Spec must be "    \
+      "enclosed in parentheses. If _Ret is a type with unprotected commas, " \
+      "it must also be enclosed in parentheses.")
+
+#define DEFINE_MOCK_METHOD(...) \
+  GMOCK_PP_VARIADIC_CALL(GMOCK_INTERNAL_DEFINE_MOCK_METHOD_ARG_, __VA_ARGS__)
+
+#define GMOCK_INTERNAL_DEFINE_MOCK_METHOD_ARG_1(...) \
+  GMOCK_INTERNAL_DEFINE_MOCK_METHOD_WRONG_ARITY(__VA_ARGS__)
+
+#define GMOCK_INTERNAL_DEFINE_MOCK_METHOD_ARG_2(...) \
+  GMOCK_INTERNAL_DEFINE_MOCK_METHOD_WRONG_ARITY(__VA_ARGS__)
+
+#define GMOCK_INTERNAL_DEFINE_MOCK_METHOD_ARG_3(...) \
+  GMOCK_INTERNAL_DEFINE_MOCK_METHOD_WRONG_ARITY(__VA_ARGS__)
+
+#define GMOCK_INTERNAL_DEFINE_MOCK_METHOD_ARG_4(_MockClass, _Ret, _MethodName, \
+                                                _Args)                         \
+  GMOCK_INTERNAL_DEFINE_MOCK_METHOD_ARG_5(_MockClass, _Ret, _MethodName,       \
+                                          _Args, ())
+
+#define GMOCK_INTERNAL_DEFINE_MOCK_METHOD_ARG_5(_MockClass, _Ret, _MethodName, \
+                                                _Args, _Spec)                  \
+  GMOCK_INTERNAL_ASSERT_PARENTHESIS(_Args);                                    \
+  GMOCK_INTERNAL_ASSERT_PARENTHESIS(_Spec);                                    \
+  GMOCK_INTERNAL_ASSERT_VALID_SIGNATURE(                                       \
+      GMOCK_PP_NARG0 _Args, GMOCK_INTERNAL_SIGNATURE(_Ret, _Args));            \
+  GMOCK_INTERNAL_ASSERT_VALID_SPEC(_Spec)                                      \
+  GMOCK_INTERNAL_DEFINE_MOCK_METHOD_IMPL(                                      \
+      GMOCK_PP_NARG0 _Args, _MockClass, _MethodName,                           \
+      GMOCK_INTERNAL_HAS_CONST(_Spec), GMOCK_INTERNAL_HAS_OVERRIDE(_Spec),     \
+      GMOCK_INTERNAL_HAS_FINAL(_Spec),                                         \
+      GMOCK_INTERNAL_GET_NOEXCEPT_SPEC(_Spec),                                 \
+      GMOCK_INTERNAL_GET_CALLTYPE_SPEC(_Spec),                                 \
+      GMOCK_INTERNAL_GET_REF_SPEC(_Spec),                                      \
+      (GMOCK_INTERNAL_SIGNATURE(_Ret, _Args)))
+
+#define GMOCK_INTERNAL_DEFINE_MOCK_METHOD_ARG_6(...) \
+  GMOCK_INTERNAL_DEFINE_MOCK_METHOD_WRONG_ARITY(__VA_ARGS__)
+
+#define GMOCK_INTERNAL_DEFINE_MOCK_METHOD_ARG_7(...) \
+  GMOCK_INTERNAL_DEFINE_MOCK_METHOD_WRONG_ARITY(__VA_ARGS__)
+
+#define GMOCK_INTERNAL_DEFINE_MOCK_METHOD_ARG_8(...) \
+  GMOCK_INTERNAL_DEFINE_MOCK_METHOD_WRONG_ARITY(__VA_ARGS__)
+
+#define GMOCK_INTERNAL_DEFINE_MOCK_METHOD_WRONG_ARITY(...)                    \
+  static_assert(                                                              \
+      false,                                                                  \
+      "DEFINE_MOCK_METHOD must be called with 4 or 5 arguments. _MockClass, " \
+      "_Ret, "                                                                \
+      "_MethodName, _Args and optionally _Spec. _Args and _Spec must be "     \
+      "enclosed in parentheses. If _Ret is a type with unprotected commas, "  \
       "it must also be enclosed in parentheses.")
 
 #define GMOCK_INTERNAL_ASSERT_PARENTHESIS(_Tuple) \
@@ -207,6 +305,60 @@ using internal::FunctionMocker;
   }                                                                            \
   mutable ::testing::FunctionMocker<GMOCK_PP_REMOVE_PARENS(_Signature)>        \
   GMOCK_MOCKER_(_N, _Constness, _MethodName)
+
+#define GMOCK_INTERNAL_DECLARE_MOCK_METHOD_IMPL(                               \
+    _N, _MethodName, _Constness, _Override, _Final, _NoexceptSpec, _CallType,  \
+    _RefSpec, _Signature)                                                      \
+  typename ::testing::internal::Function<GMOCK_PP_REMOVE_PARENS(               \
+      _Signature)>::Result GMOCK_INTERNAL_EXPAND(_CallType)                    \
+      _MethodName(GMOCK_PP_REPEAT(GMOCK_INTERNAL_PARAMETER, _Signature, _N))   \
+          GMOCK_PP_IF(_Constness, const, )                                     \
+              _RefSpec _NoexceptSpec GMOCK_PP_IF(_Override, override, )        \
+                  GMOCK_PP_IF(_Final, final, );                                \
+  ::testing::MockSpec<GMOCK_PP_REMOVE_PARENS(_Signature)> gmock_##_MethodName( \
+      GMOCK_PP_REPEAT(GMOCK_INTERNAL_MATCHER_PARAMETER, _Signature, _N))       \
+      GMOCK_PP_IF(_Constness, const, ) _RefSpec;                               \
+  ::testing::MockSpec<GMOCK_PP_REMOVE_PARENS(_Signature)> gmock_##_MethodName( \
+      const ::testing::internal::WithoutMatchers&,                             \
+      GMOCK_PP_IF(_Constness, const, )::testing::internal::Function<           \
+          GMOCK_PP_REMOVE_PARENS(_Signature)>*) const _RefSpec _NoexceptSpec;  \
+  mutable ::testing::FunctionMocker<GMOCK_PP_REMOVE_PARENS(_Signature)>        \
+  GMOCK_MOCKER_(_N, _Constness, _MethodName)
+
+#define GMOCK_INTERNAL_DEFINE_MOCK_METHOD_IMPL(                                \
+    _N, _MockClass, _MethodName, _Constness, _Override, _Final, _NoexceptSpec, \
+    _CallType, _RefSpec, _Signature)                                           \
+  typename ::testing::internal::Function<GMOCK_PP_REMOVE_PARENS(               \
+      _Signature)>::Result                                                     \
+  GMOCK_INTERNAL_EXPAND(_CallType) _MockClass::_MethodName(                    \
+      GMOCK_PP_REPEAT(GMOCK_INTERNAL_PARAMETER, _Signature, _N))               \
+      GMOCK_PP_IF(_Constness, const, )                                         \
+          _RefSpec _NoexceptSpec GMOCK_PP_IF(_Override, override, )            \
+              GMOCK_PP_IF(_Final, final, ) {                                   \
+    GMOCK_MOCKER_(_N, _Constness, _MethodName)                                 \
+        .SetOwnerAndName(this, #_MethodName);                                  \
+    return GMOCK_MOCKER_(_N, _Constness, _MethodName)                          \
+        .Invoke(GMOCK_PP_REPEAT(GMOCK_INTERNAL_FORWARD_ARG, _Signature, _N));  \
+  }                                                                            \
+  ::testing::MockSpec<GMOCK_PP_REMOVE_PARENS(_Signature)>                      \
+      _MockClass::gmock_##_MethodName(                                         \
+          GMOCK_PP_REPEAT(GMOCK_INTERNAL_MATCHER_PARAMETER, _Signature, _N))   \
+          GMOCK_PP_IF(_Constness, const, ) _RefSpec {                          \
+    GMOCK_MOCKER_(_N, _Constness, _MethodName).RegisterOwner(this);            \
+    return GMOCK_MOCKER_(_N, _Constness, _MethodName)                          \
+        .With(GMOCK_PP_REPEAT(GMOCK_INTERNAL_MATCHER_ARGUMENT, , _N));         \
+  }                                                                            \
+  ::testing::MockSpec<GMOCK_PP_REMOVE_PARENS(_Signature)>                      \
+      _MockClass::gmock_##_MethodName(                                         \
+          const ::testing::internal::WithoutMatchers&,                         \
+          GMOCK_PP_IF(_Constness, const, )::testing::internal::Function<       \
+              GMOCK_PP_REMOVE_PARENS(_Signature)>*)                            \
+          const _RefSpec _NoexceptSpec {                                       \
+    return ::testing::internal::ThisRefAdjuster<GMOCK_PP_IF(                   \
+        _Constness, const, ) int _RefSpec>::Adjust(*this)                      \
+        .gmock_##_MethodName(GMOCK_PP_REPEAT(                                  \
+            GMOCK_INTERNAL_A_MATCHER_ARGUMENT, _Signature, _N));               \
+  }
 
 #define GMOCK_INTERNAL_EXPAND(...) __VA_ARGS__
 
