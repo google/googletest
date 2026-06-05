@@ -3665,6 +3665,13 @@ TEST(ContainsSubsequenceTest, WorksForEmptySmallSizedSubsequences) {
   EXPECT_THAT(a, Not(ContainsSubsequence(Lt(2), Lt(2))));
 }
 
+TEST(ContainsSubsequenceTest, WorksForPseudoContainer) {
+  std::vector<int> a = {1, 2, 3, 4, 5};
+  pseudo_container::PseudoContainer pa(a);
+  EXPECT_THAT(pa, ContainsSubsequence(1, 3, 4));
+  EXPECT_THAT(pa, Not(ContainsSubsequence(1, 3, 2)));
+}
+
 TEST(ContainsSubsequenceTest, DescribesItselfCorrectly) {
   Matcher<const int (&)[5]> m = ContainsSubsequence(1, 3, 4);
   EXPECT_EQ(
