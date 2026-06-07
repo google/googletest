@@ -55,10 +55,9 @@ GTEST_DISABLE_MSC_WARNINGS_PUSH_(4503)
 #include <type_traits>
 #include <utility>
 
-#include "split-mock_test_helper.h"
-
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "split-mock_test_helper.h"
 
 namespace testing {
 namespace gmock_function_mocker_test {
@@ -584,9 +583,11 @@ TEST(SplitMockTest, CallMockMethods) {
 
   EXPECT_CALL(mock_split, func_overloaded()).WillOnce(Return(5));
   EXPECT_CALL(mock_split, func_overloaded(6)).WillOnce(Return(7));
-  EXPECT_CALL(std::as_const(mock_split), func_overloaded(8)).WillOnce(Return(9));
+  EXPECT_CALL(std::as_const(mock_split), func_overloaded(8))
+      .WillOnce(Return(9));
   EXPECT_CALL(mock_split, func_overloaded(10, 11)).WillOnce(Return(12));
-  EXPECT_CALL(std::move(mock_split), func_overloaded(13, 14)).WillOnce(Return(15));
+  EXPECT_CALL(std::move(mock_split), func_overloaded(13, 14))
+      .WillOnce(Return(15));
 
   EXPECT_CALL(mock_split, func_legacy(16, 17)).WillOnce(Return(18));
   EXPECT_CALL(mock_split, func_legacy_const(19)).WillOnce(Return(20));
