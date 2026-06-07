@@ -372,7 +372,8 @@ using internal::FunctionMocker;
         _Constness, const, ) int _RefSpec>::Adjust(*this)                      \
         .gmock_##_MethodName(GMOCK_PP_REPEAT(                                  \
             GMOCK_INTERNAL_A_MATCHER_ARGUMENT, _Signature, _N));               \
-  }
+  }                                                                            \
+  static_assert(true, "no-op to require trailing semicolon")
 
 #define GMOCK_INTERNAL_EXPAND(...) __VA_ARGS__
 
