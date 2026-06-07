@@ -2950,7 +2950,7 @@ MockFoo::~MockFoo() {}
 
 // These macros expand to the actual definitions of the mock methods.
 // For each DECLARE_MOCK_METHOD call in your class body, you need a
-// corresponding  DEFINE_MOCK_METHOD call in your .cc file.
+// corresponding DEFINE_MOCK_METHOD call in your .cc file.
 DEFINE_MOCK_METHOD(MockFoo, int, DoThis, (), (override));
 DEFINE_MOCK_METHOD(MockFoo, bool, DoThat, (const char* str), (override));
 ... more mock methods ...
