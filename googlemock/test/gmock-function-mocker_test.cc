@@ -53,6 +53,9 @@ GTEST_DISABLE_MSC_WARNINGS_PUSH_(4503)
 #include <map>
 #include <string>
 #include <type_traits>
+#include <utility>
+
+#include "split-mock_test_helper.h"
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -571,6 +574,34 @@ TEST(FunctionMockerTest, RefQualified) {
             6);
   EXPECT_EQ(mock_foo.RefQualifiedOverloaded(), 7);
   EXPECT_EQ(std::move(mock_foo).RefQualifiedOverloaded(), 8);  // NOLINT
+}
+
+TEST(SplitMockTest, CallMockMethods) {
+  MockSplitDeclarationAndDefinition mock_split;
+
+  EXPECT_CALL(mock_split, func(1)).WillOnce(Return(2));
+  EXPECT_CALL(mock_split, func_const(3)).WillOnce(Return(4));
+
+  EXPECT_CALL(mock_split, func_overloaded()).WillOnce(Return(5));
+  EXPECT_CALL(mock_split, func_overloaded(6)).WillOnce(Return(7));
+  EXPECT_CALL(std::as_const(mock_split), func_overloaded(8)).WillOnce(Return(9));
+  EXPECT_CALL(mock_split, func_overloaded(10, 11)).WillOnce(Return(12));
+  EXPECT_CALL(std::move(mock_split), func_overloaded(13, 14)).WillOnce(Return(15));
+
+  EXPECT_CALL(mock_split, func_legacy(16, 17)).WillOnce(Return(18));
+  EXPECT_CALL(mock_split, func_legacy_const(19)).WillOnce(Return(20));
+
+  EXPECT_EQ(mock_split.func(1), 2);
+  EXPECT_EQ(std::as_const(mock_split).func_const(3), 4);
+
+  EXPECT_EQ(mock_split.func_overloaded(), 5);
+  EXPECT_EQ(mock_split.func_overloaded(6), 7);
+  EXPECT_EQ(std::as_const(mock_split).func_overloaded(8), 9);
+  EXPECT_EQ(mock_split.func_overloaded(10, 11), 12);
+  EXPECT_EQ(std::move(std::as_const(mock_split)).func_overloaded(13, 14), 15);
+
+  EXPECT_EQ(mock_split.func_legacy(16, 17), 18);
+  EXPECT_EQ(std::as_const(mock_split).func_legacy_const(19), 20);
 }
 
 class MockB {
