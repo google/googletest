@@ -55,3 +55,9 @@ DEFINE_MOCK_METHOD2(MockSplitDeclarationAndDefinition, func_legacy,
                     int(int, int));
 DEFINE_MOCK_CONST_METHOD1(MockSplitDeclarationAndDefinition, func_legacy_const,
                           int(int));
+
+DEFINE_MOCK_METHOD(MockSplitDeclarationAndDefinition, int, func_inherited,
+                   (int), (override final));
+
+DEFINE_MOCK_METHOD(MockSplitDeclarationAndDefinition, NESTED_TYPEDEF,
+                   func_nested_typedef, (NESTED_TYPEDEF));

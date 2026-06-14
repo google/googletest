@@ -35,7 +35,12 @@
 
 #include "gmock/gmock-function-mocker.h"
 
-struct MockSplitDeclarationAndDefinition {
+struct MockSplitDeclarationAndDefinitionBase {
+  virtual int func_inherited(int) = 0;
+};
+
+struct MockSplitDeclarationAndDefinition
+    : MockSplitDeclarationAndDefinitionBase {
   MockSplitDeclarationAndDefinition();
   ~MockSplitDeclarationAndDefinition();
 
@@ -50,6 +55,11 @@ struct MockSplitDeclarationAndDefinition {
 
   DECLARE_MOCK_METHOD2(func_legacy, int(int, int));
   DECLARE_MOCK_CONST_METHOD1(func_legacy_const, int(int));
+
+  DECLARE_MOCK_METHOD(int, func_inherited, (int), (override final));
+
+  using NESTED_TYPEDEF = int;
+  DECLARE_MOCK_METHOD(NESTED_TYPEDEF, func_nested_typedef, (NESTED_TYPEDEF));
 };
 
 #endif  // GOOGLEMOCK_TEST_SPLIT_MOCK_TEST_HELPER_H_

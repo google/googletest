@@ -592,6 +592,9 @@ TEST(SplitMockTest, CallMockMethods) {
   EXPECT_CALL(mock_split, func_legacy(16, 17)).WillOnce(Return(18));
   EXPECT_CALL(mock_split, func_legacy_const(19)).WillOnce(Return(20));
 
+  EXPECT_CALL(mock_split, func_inherited(21)).WillOnce(Return(22));
+  EXPECT_CALL(mock_split, func_nested_typedef(23)).WillOnce(Return(24));
+
   EXPECT_EQ(mock_split.func(1), 2);
   EXPECT_EQ(std::as_const(mock_split).func_const(3), 4);
 
@@ -603,6 +606,9 @@ TEST(SplitMockTest, CallMockMethods) {
 
   EXPECT_EQ(mock_split.func_legacy(16, 17), 18);
   EXPECT_EQ(std::as_const(mock_split).func_legacy_const(19), 20);
+
+  EXPECT_EQ(mock_split.func_inherited(21), 22);
+  EXPECT_EQ(mock_split.func_nested_typedef(23), 24);
 }
 
 class MockB {

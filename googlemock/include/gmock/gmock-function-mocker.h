@@ -226,8 +226,6 @@ using internal::FunctionMocker;
                                                 _Args, _Spec)                  \
   GMOCK_INTERNAL_ASSERT_PARENTHESIS(_Args);                                    \
   GMOCK_INTERNAL_ASSERT_PARENTHESIS(_Spec);                                    \
-  GMOCK_INTERNAL_ASSERT_VALID_SIGNATURE(                                       \
-      GMOCK_PP_NARG0 _Args, GMOCK_INTERNAL_SIGNATURE(_Ret, _Args));            \
   GMOCK_INTERNAL_ASSERT_VALID_SPEC(_Spec)                                      \
   GMOCK_INTERNAL_DEFINE_MOCK_METHOD_IMPL(                                      \
       GMOCK_PP_NARG0 _Args, _MockClass, _MethodName,                           \
@@ -236,7 +234,9 @@ using internal::FunctionMocker;
       GMOCK_INTERNAL_GET_NOEXCEPT_SPEC(_Spec),                                 \
       GMOCK_INTERNAL_GET_CALLTYPE_SPEC(_Spec),                                 \
       GMOCK_INTERNAL_GET_REF_SPEC(_Spec),                                      \
-      (GMOCK_INTERNAL_SIGNATURE(_Ret, _Args)))
+      (GMOCK_INTERNAL_SIGNATURE(_Ret, _Args)),                                 \
+      GMOCK_INTERNAL_ASSERT_VALID_SIGNATURE(                                   \
+          GMOCK_PP_NARG0 _Args, GMOCK_INTERNAL_SIGNATURE(_Ret, _Args)))
 
 #define GMOCK_INTERNAL_DEFINE_MOCK_METHOD_ARG_6(...) \
   GMOCK_INTERNAL_DEFINE_MOCK_METHOD_WRONG_ARITY(__VA_ARGS__)
@@ -336,14 +336,13 @@ using internal::FunctionMocker;
 
 #define GMOCK_INTERNAL_DEFINE_MOCK_METHOD_IMPL(                                \
     _N, _MockClass, _MethodName, _Constness, _Override, _Final, _NoexceptSpec, \
-    _CallType, _RefSpec, _Signature)                                           \
-  typename ::testing::internal::Function<GMOCK_PP_REMOVE_PARENS(               \
-      _Signature)>::Result                                                     \
-  GMOCK_INTERNAL_EXPAND(_CallType) _MockClass::_MethodName(                    \
+    _CallType, _RefSpec, _Signature, _InClassAssertions)                       \
+  auto GMOCK_INTERNAL_EXPAND(_CallType) _MockClass::_MethodName(               \
       GMOCK_PP_REPEAT(GMOCK_INTERNAL_PARAMETER, _Signature, _N))               \
-      GMOCK_PP_IF(_Constness, const, )                                         \
-          _RefSpec _NoexceptSpec GMOCK_PP_IF(_Override, override, )            \
-              GMOCK_PP_IF(_Final, final, ) {                                   \
+      GMOCK_PP_IF(_Constness, const, ) _RefSpec _NoexceptSpec ->               \
+      typename ::testing::internal::Function<GMOCK_PP_REMOVE_PARENS(           \
+          _Signature)>::Result {                                               \
+    _InClassAssertions;                                                        \
     auto& mocker = gmock_get_mocker_##_MethodName(                             \
         ::testing::internal::TypeTag<GMOCK_PP_REMOVE_PARENS(                   \
             _Signature) GMOCK_PP_IF(_Constness, const, ) _RefSpec>{});         \
@@ -351,10 +350,10 @@ using internal::FunctionMocker;
     return mocker.Invoke(                                                      \
         GMOCK_PP_REPEAT(GMOCK_INTERNAL_FORWARD_ARG, _Signature, _N));          \
   }                                                                            \
-  ::testing::MockSpec<GMOCK_PP_REMOVE_PARENS(_Signature)>                      \
-      _MockClass::gmock_##_MethodName(                                         \
-          GMOCK_PP_REPEAT(GMOCK_INTERNAL_MATCHER_PARAMETER, _Signature, _N))   \
-          GMOCK_PP_IF(_Constness, const, ) _RefSpec {                          \
+  auto _MockClass::gmock_##_MethodName(                                        \
+      GMOCK_PP_REPEAT(GMOCK_INTERNAL_MATCHER_PARAMETER, _Signature, _N))       \
+      GMOCK_PP_IF(_Constness, const, )                                         \
+          _RefSpec->::testing::MockSpec<GMOCK_PP_REMOVE_PARENS(_Signature)> {  \
     auto& mocker = gmock_get_mocker_##_MethodName(                             \
         ::testing::internal::TypeTag<GMOCK_PP_REMOVE_PARENS(                   \
             _Signature) GMOCK_PP_IF(_Constness, const, ) _RefSpec>{});         \
@@ -362,12 +361,11 @@ using internal::FunctionMocker;
     return mocker.With(                                                        \
         GMOCK_PP_REPEAT(GMOCK_INTERNAL_MATCHER_ARGUMENT, , _N));               \
   }                                                                            \
-  ::testing::MockSpec<GMOCK_PP_REMOVE_PARENS(_Signature)>                      \
-      _MockClass::gmock_##_MethodName(                                         \
-          const ::testing::internal::WithoutMatchers&,                         \
-          GMOCK_PP_IF(_Constness, const, )::testing::internal::Function<       \
-              GMOCK_PP_REMOVE_PARENS(_Signature)>*)                            \
-          const _RefSpec _NoexceptSpec {                                       \
+  auto _MockClass::gmock_##_MethodName(                                        \
+      const ::testing::internal::WithoutMatchers&,                             \
+      GMOCK_PP_IF(_Constness, const, )::testing::internal::Function<           \
+          GMOCK_PP_REMOVE_PARENS(_Signature)>*) const _RefSpec _NoexceptSpec   \
+      ->::testing::MockSpec<GMOCK_PP_REMOVE_PARENS(_Signature)> {              \
     return ::testing::internal::ThisRefAdjuster<GMOCK_PP_IF(                   \
         _Constness, const, ) int _RefSpec>::Adjust(*this)                      \
         .gmock_##_MethodName(GMOCK_PP_REPEAT(                                  \
@@ -1047,11 +1045,11 @@ using internal::FunctionMocker;
 
 #define GMOCK_INTERNAL_DEFINE_MOCK_METHODN(constness, ct, Class, Method, \
                                            args_num, ...)                \
-  GMOCK_INTERNAL_ASSERT_VALID_SIGNATURE(                                 \
-      args_num, ::testing::internal::identity_t<__VA_ARGS__>);           \
   GMOCK_INTERNAL_DEFINE_MOCK_METHOD_IMPL(                                \
       args_num, Class, Method, GMOCK_PP_NARG0(constness), 0, 0, , ct, ,  \
-      (::testing::internal::identity_t<__VA_ARGS__>))
+      (::testing::internal::identity_t<__VA_ARGS__>),                    \
+      GMOCK_INTERNAL_ASSERT_VALID_SIGNATURE(                             \
+          args_num, ::testing::internal::identity_t<__VA_ARGS__>))
 
 #define GMOCK_MOCKER_(arity, constness, Method) \
   GTEST_CONCAT_TOKEN_(gmock##constness##arity##_##Method##_, __LINE__)
