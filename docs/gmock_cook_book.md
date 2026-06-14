@@ -2918,7 +2918,7 @@ class MockFoo : public Foo {
 };
 ```
 
-After the change, it would look like:
+After the changes, it would look like:
 
 ```cpp
 // File mock_foo.h.
