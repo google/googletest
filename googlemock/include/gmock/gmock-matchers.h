@@ -275,6 +275,7 @@
 #include "gmock/internal/gmock-internal-utils.h"
 #include "gmock/internal/gmock-pp.h"
 #include "gtest/gtest.h"
+#include "gtest/internal/gtest-internal.h"
 
 // MSVC warning C5046 is new as of VS2017 version 15.8.
 #if defined(_MSC_VER) && _MSC_VER >= 1915
@@ -2059,6 +2060,15 @@ class [[nodiscard]] PointerMatcher {
 };
 
 #if GTEST_HAS_RTTI
+// A type trait to essentially determine if `DynamicCastMessage` is available,
+// since older versions of protobuf don't have this function.
+template <typename T, typename = void>
+static constexpr bool kHasDynamicCastMessage = false;
+template <typename T>
+static constexpr bool kHasDynamicCastMessage<
+    T, std::void_t<decltype(proto2::DynamicCastMessage<T>(
+           std::declval<const proto2::MessageLite*>()))>> = true;
+
 // Implements the WhenDynamicCastTo<T>(m) matcher that matches a pointer or
 // reference that matches inner_matcher when dynamic_cast<T> is applied.
 // The result of dynamic_cast<To> is forwarded to the inner matcher.
@@ -2086,6 +2096,27 @@ class [[nodiscard]] WhenDynamicCastToMatcherBase {
 
   static std::string GetToName() { return GetTypeName<To>(); }
 
+  template <typename From>
+  static auto DoDynamicCast(From& from) {
+    using ToType =
+        std::remove_const_t<std::remove_reference_t<std::remove_pointer_t<To>>>;
+
+    if constexpr (std::is_base_of_v<proto2::MessageLite, ToType> &&
+                  kHasDynamicCastMessage<ToType>) {
+      if constexpr (std::is_pointer_v<From>) {
+        return proto2::DynamicCastMessage<ToType>(from);
+      } else {
+        // We don't want an std::bad_cast here, so do the cast with pointers.
+        return proto2::DynamicCastMessage<ToType>(&from);
+      }
+    } else if constexpr (std::is_pointer_v<To>) {
+      return dynamic_cast<To>(from);
+    } else {
+      // We don't want an std::bad_cast here, so do the cast with pointers.
+      return dynamic_cast<std::remove_reference_t<To>*>(&from);
+    }
+  }
+
  private:
   static void GetCastTypeDescription(::std::ostream* os) {
     *os << "when dynamic_cast to " << GetToName() << ", ";
@@ -2103,7 +2134,7 @@ class [[nodiscard]] WhenDynamicCastToMatcher
 
   template <typename From>
   bool MatchAndExplain(From from, MatchResultListener* listener) const {
-    To to = dynamic_cast<To>(from);
+    To to = this->DoDynamicCast(from);
     return MatchPrintAndExplain(to, this->matcher_, listener);
   }
 };
@@ -2119,8 +2150,7 @@ WhenDynamicCastToMatcher<To&> : public WhenDynamicCastToMatcherBase<To&> {
 
   template <typename From>
   bool MatchAndExplain(From& from, MatchResultListener* listener) const {
-    // We don't want an std::bad_cast here, so do the cast with pointers.
-    To* to = dynamic_cast<To*>(&from);
+    To* to = this->DoDynamicCast(from);
     if (to == nullptr) {
       *listener << "which cannot be dynamic_cast to " << this->GetToName();
       return false;
