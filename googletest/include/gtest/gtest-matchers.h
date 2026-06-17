@@ -815,8 +815,31 @@ class [[nodiscard]] ImplicitCastEqMatcher {
   StoredRhs stored_rhs_;
 };
 
-template <typename T, typename = typename std::enable_if<
-                          std::is_constructible<std::string, T>::value>::type>
+template<typename T, typename CharT>
+struct maybe_stringish : std::bool_constant<std::is_constructible_v<std::basic_string<CharT>, T>> {
+  using type = CharT;
+};
+
+struct default_char_type : std::true_type
+{
+    using type = char;
+};
+
+template<typename T>
+using get_char_type_t = typename std::disjunction<
+    maybe_stringish<T, char>,
+#if GTEST_HAS_STD_WSTRING
+    maybe_stringish<T, wchar_t>,
+#endif  // GTEST_HAS_STD_WSTRING
+    maybe_stringish<T, char16_t>,
+    maybe_stringish<T, char32_t>,
+#ifdef __cpp_lib_char8_t
+    maybe_stringish<T, char8_t>,
+#endif  // __cpp_lib_char8_t
+    default_char_type  // we will default to char anyway
+  >::type;
+
+template<typename T, typename = std::enable_if_t<std::is_constructible_v<std::basic_string<get_char_type_t<T>>, T>>>
 using StringLike = T;
 
 // Implements polymorphic matchers MatchesRegex(regex) and
