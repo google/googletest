@@ -320,11 +320,15 @@ function(install_project)
       foreach(t ${ARGN})
         get_target_property(t_pdb_name ${t} COMPILE_PDB_NAME)
         get_target_property(t_pdb_name_debug ${t} COMPILE_PDB_NAME_DEBUG)
-        get_target_property(t_pdb_output_directory ${t} PDB_OUTPUT_DIRECTORY)
+        get_target_property(t_pdb_output_directory ${t} COMPILE_PDB_OUTPUT_DIRECTORY)
+        get_target_property(t_shared_pdb_name ${t} PDB_NAME)
+        get_target_property(t_shared_pdb_name_debug ${t} PDB_NAME_DEBUG)
+        get_target_property(t_shared_pdb_output_directory ${t} PDB_OUTPUT_DIRECTORY)
         install(FILES
-          "${t_pdb_output_directory}/\${CMAKE_INSTALL_CONFIG_NAME}/$<$<CONFIG:Debug>:${t_pdb_name_debug}>$<$<NOT:$<CONFIG:Debug>>:${t_pdb_name}>.pdb"
+          "$<$<STREQUAL:$<TARGET_PROPERTY:${t},TYPE>,STATIC_LIBRARY>:${t_pdb_output_directory}/\${CMAKE_INSTALL_CONFIG_NAME}/$<IF:$<CONFIG:Debug>,${t_pdb_name_debug},${t_pdb_name}>.pdb>"
+          "$<$<STREQUAL:$<TARGET_PROPERTY:${t},TYPE>,SHARED_LIBRARY>:${t_shared_pdb_output_directory}/\${CMAKE_INSTALL_CONFIG_NAME}/$<IF:$<CONFIG:Debug>,${t_shared_pdb_name_debug},${t_shared_pdb_name}>.pdb>"
           COMPONENT "${PROJECT_NAME}"
-          DESTINATION ${CMAKE_INSTALL_LIBDIR}
+          DESTINATION $<IF:$<STREQUAL:$<TARGET_PROPERTY:${t},TYPE>,STATIC_LIBRARY>,${CMAKE_INSTALL_LIBDIR},${CMAKE_INSTALL_BINDIR}>
           OPTIONAL)
       endforeach()
     endif()
