@@ -284,6 +284,44 @@
 #define GMOCK_MAYBE_5046_
 #endif
 
+#if GTEST_HAS_RTTI
+namespace proto2 {
+namespace internal {
+
+// A type trait to essentially determine if `DynamicCastMessage` is available,
+// since older versions of protobuf don't have this function.
+template <typename T, typename = void>
+static constexpr bool kHasDynamicCastMessage = false;
+template <typename T>
+static constexpr bool kHasDynamicCastMessage<
+    T, std::void_t<decltype(DynamicCastMessage<T>(
+           std::declval<const proto2::MessageLite*>()))>> = true;
+
+// A helper function to call `DynamicCastMessage` if available, otherwise
+// falling back to `dynamic_cast`. Note that we must declare this function in
+// the `proto2` namespace because we need ADL to find the right
+// `DynamicCastMessage`, and ADL only applies to unqualified function calls.
+template <typename T>
+const T* DynamicCastMessageForGtest(const proto2::MessageLite* msg) {
+  if constexpr (kHasDynamicCastMessage<T>) {
+    return DynamicCastMessage<T>(msg);
+  } else {
+    return dynamic_cast<const T*>(msg);
+  }
+}
+template <typename T>
+T* DynamicCastMessageForGtest(proto2::MessageLite* msg) {
+  if constexpr (kHasDynamicCastMessage<T>) {
+    return DynamicCastMessage<T>(msg);
+  } else {
+    return dynamic_cast<T*>(msg);
+  }
+}
+
+}  // namespace internal
+}  // namespace proto2
+#endif  // GTEST_HAS_RTTI
+
 GTEST_DISABLE_MSC_WARNINGS_PUSH_(
     4251 GMOCK_MAYBE_5046_ /* class A needs to have dll-interface to be used by
                               clients of class B */
@@ -2060,15 +2098,6 @@ class [[nodiscard]] PointerMatcher {
 };
 
 #if GTEST_HAS_RTTI
-// A type trait to essentially determine if `DynamicCastMessage` is available,
-// since older versions of protobuf don't have this function.
-template <typename T, typename = void>
-static constexpr bool kHasDynamicCastMessage = false;
-template <typename T>
-static constexpr bool kHasDynamicCastMessage<
-    T, std::void_t<decltype(proto2::DynamicCastMessage<T>(
-           std::declval<const proto2::MessageLite*>()))>> = true;
-
 // Implements the WhenDynamicCastTo<T>(m) matcher that matches a pointer or
 // reference that matches inner_matcher when dynamic_cast<T> is applied.
 // The result of dynamic_cast<To> is forwarded to the inner matcher.
@@ -2101,13 +2130,12 @@ class [[nodiscard]] WhenDynamicCastToMatcherBase {
     using ToType =
         std::remove_const_t<std::remove_reference_t<std::remove_pointer_t<To>>>;
 
-    if constexpr (std::is_base_of_v<proto2::MessageLite, ToType> &&
-                  kHasDynamicCastMessage<ToType>) {
-      if constexpr (std::is_pointer_v<From>) {
-        return proto2::DynamicCastMessage<ToType>(from);
+    if constexpr (std::is_base_of_v<proto2::MessageLite, ToType>) {
+      if constexpr (std::is_pointer_v<To>) {
+        return proto2::internal::DynamicCastMessageForGtest<ToType>(from);
       } else {
         // We don't want an std::bad_cast here, so do the cast with pointers.
-        return proto2::DynamicCastMessage<ToType>(&from);
+        return proto2::internal::DynamicCastMessageForGtest<ToType>(&from);
       }
     } else if constexpr (std::is_pointer_v<To>) {
       return dynamic_cast<To>(from);
