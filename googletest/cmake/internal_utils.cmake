@@ -167,14 +167,6 @@ function(cxx_library_with_type name type cxx_flags)
   set_target_properties(${name}
     PROPERTIES
     COMPILE_FLAGS "${cxx_flags}")
-  # Set the output directory for build artifacts.
-  set_target_properties(${name}
-    PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
-    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
-    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
-    PDB_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
-    COMPILE_PDB_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
   # Make PDBs match library name.
   get_target_property(pdb_debug_postfix ${name} DEBUG_POSTFIX)
   set_target_properties(${name}
@@ -316,20 +308,37 @@ function(install_project)
       ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
       LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}")
     if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-      # Install PDBs.
+      # Install PDBs.  Use the target property if set, otherwise fall back to
+      # the CMake variable, and if neither is set skip PDB install.
       foreach(t ${ARGN})
         get_target_property(t_pdb_name ${t} COMPILE_PDB_NAME)
         get_target_property(t_pdb_name_debug ${t} COMPILE_PDB_NAME_DEBUG)
         get_target_property(t_pdb_output_directory ${t} COMPILE_PDB_OUTPUT_DIRECTORY)
+        if(t_pdb_output_directory MATCHES "-NOTFOUND$")
+          if(CMAKE_COMPILE_PDB_OUTPUT_DIRECTORY)
+            set(t_pdb_output_directory "${CMAKE_COMPILE_PDB_OUTPUT_DIRECTORY}")
+          else()
+            set(t_pdb_output_directory "")
+          endif()
+        endif()
         get_target_property(t_shared_pdb_name ${t} PDB_NAME)
         get_target_property(t_shared_pdb_name_debug ${t} PDB_NAME_DEBUG)
         get_target_property(t_shared_pdb_output_directory ${t} PDB_OUTPUT_DIRECTORY)
-        install(FILES
-          "$<$<STREQUAL:$<TARGET_PROPERTY:${t},TYPE>,STATIC_LIBRARY>:${t_pdb_output_directory}/\${CMAKE_INSTALL_CONFIG_NAME}/$<IF:$<CONFIG:Debug>,${t_pdb_name_debug},${t_pdb_name}>.pdb>"
-          "$<$<STREQUAL:$<TARGET_PROPERTY:${t},TYPE>,SHARED_LIBRARY>:${t_shared_pdb_output_directory}/\${CMAKE_INSTALL_CONFIG_NAME}/$<IF:$<CONFIG:Debug>,${t_shared_pdb_name_debug},${t_shared_pdb_name}>.pdb>"
-          COMPONENT "${PROJECT_NAME}"
-          DESTINATION $<IF:$<STREQUAL:$<TARGET_PROPERTY:${t},TYPE>,STATIC_LIBRARY>,${CMAKE_INSTALL_LIBDIR},${CMAKE_INSTALL_BINDIR}>
-          OPTIONAL)
+        if(t_shared_pdb_output_directory MATCHES "-NOTFOUND$")
+          if(CMAKE_PDB_OUTPUT_DIRECTORY)
+            set(t_shared_pdb_output_directory "${CMAKE_PDB_OUTPUT_DIRECTORY}")
+          else()
+            set(t_shared_pdb_output_directory "")
+          endif()
+        endif()
+        if(t_pdb_output_directory OR t_shared_pdb_output_directory)
+          install(FILES
+            "$<$<STREQUAL:$<TARGET_PROPERTY:${t},TYPE>,STATIC_LIBRARY>:${t_pdb_output_directory}/\${CMAKE_INSTALL_CONFIG_NAME}/$<IF:$<CONFIG:Debug>,${t_pdb_name_debug},${t_pdb_name}>.pdb>"
+            "$<$<STREQUAL:$<TARGET_PROPERTY:${t},TYPE>,SHARED_LIBRARY>:${t_shared_pdb_output_directory}/\${CMAKE_INSTALL_CONFIG_NAME}/$<IF:$<CONFIG:Debug>,${t_shared_pdb_name_debug},${t_shared_pdb_name}>.pdb>"
+            COMPONENT "${PROJECT_NAME}"
+            DESTINATION $<IF:$<STREQUAL:$<TARGET_PROPERTY:${t},TYPE>,STATIC_LIBRARY>,${CMAKE_INSTALL_LIBDIR},${CMAKE_INSTALL_BINDIR}>
+            OPTIONAL)
+        endif()
       endforeach()
     endif()
     # Configure and install pkgconfig files.
