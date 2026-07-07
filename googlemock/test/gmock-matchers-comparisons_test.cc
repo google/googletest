@@ -1094,6 +1094,16 @@ TEST(IsEmptyTest, MatchesCString) {
   EXPECT_FALSE(m.Matches(b));
 }
 
+#if GTEST_HAS_STD_WSTRING
+TEST(IsEmptyTest, MatchesCWideString) {
+  const Matcher<const wchar_t*> m = IsEmpty();
+  const wchar_t a[] = L"";
+  const wchar_t b[] = L"x";
+  EXPECT_TRUE(m.Matches(a));
+  EXPECT_FALSE(m.Matches(b));
+}
+#endif  // GTEST_HAS_STD_WSTRING
+
 // Tests that IsNull() matches any NULL pointer of any type.
 TEST(IsNullTest, MatchesNullPointer) {
   Matcher<int*> m1 = IsNull();
