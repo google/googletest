@@ -1379,15 +1379,18 @@ bool ParseInt32(const Message& src_text, const char* str, int32_t* value) {
 // Reads and returns the Boolean environment variable corresponding to
 // the given flag; if it's not set, returns default_value.
 //
-// The value is considered true if and only if it's not "0".
+// The value is considered true if and only if it does not start with '0', 'f',
+// or 'F'.
 bool BoolFromGTestEnv(const char* flag, bool default_value) {
 #if defined(GTEST_GET_BOOL_FROM_ENV_)
   return GTEST_GET_BOOL_FROM_ENV_(flag, default_value);
 #else
   const std::string env_var = FlagToEnvVar(flag);
   const char* const string_value = posix::GetEnv(env_var.c_str());
-  return string_value == nullptr ? default_value
-                                 : strcmp(string_value, "0") != 0;
+  return string_value == nullptr
+             ? default_value
+             : !(*string_value == '0' || *string_value == 'f' ||
+                 *string_value == 'F');
 #endif  // defined(GTEST_GET_BOOL_FROM_ENV_)
 }
 

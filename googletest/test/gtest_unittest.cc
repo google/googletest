@@ -43,7 +43,9 @@ TEST(CommandLineFlagsTest, CanBeAccessedInCodeOnceGTestHIsIncluded) {
       GTEST_FLAG_GET(color) != "unknown" || GTEST_FLAG_GET(fail_fast) ||
       GTEST_FLAG_GET(filter) != "unknown" || GTEST_FLAG_GET(list_tests) ||
       GTEST_FLAG_GET(output) != "unknown" || GTEST_FLAG_GET(brief) ||
-      GTEST_FLAG_GET(print_time) || GTEST_FLAG_GET(random_seed) ||
+      GTEST_FLAG_GET(print_time) || GTEST_FLAG_GET(print_test_filter) ||
+      GTEST_FLAG_GET(print_test_shard_status) ||
+      GTEST_FLAG_GET(print_test_shuffle_seed) || GTEST_FLAG_GET(random_seed) ||
       GTEST_FLAG_GET(repeat) > 0 ||
       GTEST_FLAG_GET(recreate_environments_when_repeating) ||
       GTEST_FLAG_GET(show_internal_stack_frames) || GTEST_FLAG_GET(shuffle) ||
@@ -1613,6 +1615,9 @@ class GTestFlagSaverTest : public Test {
     GTEST_FLAG_SET(output, "");
     GTEST_FLAG_SET(brief, false);
     GTEST_FLAG_SET(print_time, true);
+    GTEST_FLAG_SET(print_test_filter, true);
+    GTEST_FLAG_SET(print_test_shard_status, true);
+    GTEST_FLAG_SET(print_test_shuffle_seed, true);
     GTEST_FLAG_SET(random_seed, 0);
     GTEST_FLAG_SET(repeat, 1);
     GTEST_FLAG_SET(recreate_environments_when_repeating, true);
@@ -1643,6 +1648,9 @@ class GTestFlagSaverTest : public Test {
     EXPECT_STREQ("", GTEST_FLAG_GET(output).c_str());
     EXPECT_FALSE(GTEST_FLAG_GET(brief));
     EXPECT_TRUE(GTEST_FLAG_GET(print_time));
+    EXPECT_TRUE(GTEST_FLAG_GET(print_test_filter));
+    EXPECT_TRUE(GTEST_FLAG_GET(print_test_shard_status));
+    EXPECT_TRUE(GTEST_FLAG_GET(print_test_shuffle_seed));
     EXPECT_EQ(0, GTEST_FLAG_GET(random_seed));
     EXPECT_EQ(1, GTEST_FLAG_GET(repeat));
     EXPECT_TRUE(GTEST_FLAG_GET(recreate_environments_when_repeating));
@@ -1662,6 +1670,9 @@ class GTestFlagSaverTest : public Test {
     GTEST_FLAG_SET(output, "xml:foo.xml");
     GTEST_FLAG_SET(brief, true);
     GTEST_FLAG_SET(print_time, false);
+    GTEST_FLAG_SET(print_test_filter, false);
+    GTEST_FLAG_SET(print_test_shard_status, false);
+    GTEST_FLAG_SET(print_test_shuffle_seed, false);
     GTEST_FLAG_SET(random_seed, 1);
     GTEST_FLAG_SET(repeat, 100);
     GTEST_FLAG_SET(recreate_environments_when_repeating, false);
@@ -5525,6 +5536,9 @@ struct Flags {
         output(""),
         brief(false),
         print_time(true),
+        print_test_filter(true),
+        print_test_shard_status(true),
+        print_test_shuffle_seed(true),
         random_seed(0),
         repeat(1),
         recreate_environments_when_repeating(true),
@@ -5615,6 +5629,30 @@ struct Flags {
     return flags;
   }
 
+  // Creates a Flags struct where the gtest_print_test_filter flag has the
+  // given value.
+  static Flags PrintTestFilter(bool print_test_filter) {
+    Flags flags;
+    flags.print_test_filter = print_test_filter;
+    return flags;
+  }
+
+  // Creates a Flags struct where the gtest_print_test_shard_status flag has
+  // the given value.
+  static Flags PrintTestShardStatus(bool print_test_shard_status) {
+    Flags flags;
+    flags.print_test_shard_status = print_test_shard_status;
+    return flags;
+  }
+
+  // Creates a Flags struct where the gtest_print_test_shuffle_seed flag has
+  // the given value.
+  static Flags PrintTestShuffleSeed(bool print_test_shuffle_seed) {
+    Flags flags;
+    flags.print_test_shuffle_seed = print_test_shuffle_seed;
+    return flags;
+  }
+
   // Creates a Flags struct where the gtest_random_seed flag has the given
   // value.
   static Flags RandomSeed(int32_t random_seed) {
@@ -5684,6 +5722,9 @@ struct Flags {
   const char* output;
   bool brief;
   bool print_time;
+  bool print_test_filter;
+  bool print_test_shard_status;
+  bool print_test_shuffle_seed;
   int32_t random_seed;
   int32_t repeat;
   bool recreate_environments_when_repeating;
@@ -5708,6 +5749,9 @@ class ParseFlagsTest : public Test {
     GTEST_FLAG_SET(output, "");
     GTEST_FLAG_SET(brief, false);
     GTEST_FLAG_SET(print_time, true);
+    GTEST_FLAG_SET(print_test_filter, true);
+    GTEST_FLAG_SET(print_test_shard_status, true);
+    GTEST_FLAG_SET(print_test_shuffle_seed, true);
     GTEST_FLAG_SET(random_seed, 0);
     GTEST_FLAG_SET(repeat, 1);
     GTEST_FLAG_SET(recreate_environments_when_repeating, true);
@@ -5742,6 +5786,11 @@ class ParseFlagsTest : public Test {
     EXPECT_STREQ(expected.output, GTEST_FLAG_GET(output).c_str());
     EXPECT_EQ(expected.brief, GTEST_FLAG_GET(brief));
     EXPECT_EQ(expected.print_time, GTEST_FLAG_GET(print_time));
+    EXPECT_EQ(expected.print_test_filter, GTEST_FLAG_GET(print_test_filter));
+    EXPECT_EQ(expected.print_test_shard_status,
+              GTEST_FLAG_GET(print_test_shard_status));
+    EXPECT_EQ(expected.print_test_shuffle_seed,
+              GTEST_FLAG_GET(print_test_shuffle_seed));
     EXPECT_EQ(expected.random_seed, GTEST_FLAG_GET(random_seed));
     EXPECT_EQ(expected.repeat, GTEST_FLAG_GET(repeat));
     EXPECT_EQ(expected.recreate_environments_when_repeating,
@@ -6086,6 +6135,37 @@ TEST_F(ParseFlagsTest, PrintTimeFalse_F) {
   const char* argv2[] = {"foo.exe", nullptr};
 
   GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::PrintTime(false), false);
+}
+
+// Tests parsing --gtest_print_test_filter=0.
+TEST_F(ParseFlagsTest, PrintTestFilterFalse) {
+  const char* argv[] = {"foo.exe", "--gtest_print_test_filter=0", nullptr};
+
+  const char* argv2[] = {"foo.exe", nullptr};
+
+  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::PrintTestFilter(false), false);
+}
+
+// Tests parsing --gtest_print_test_shard_status=0.
+TEST_F(ParseFlagsTest, PrintTestShardStatusFalse) {
+  const char* argv[] = {"foo.exe", "--gtest_print_test_shard_status=0",
+                        nullptr};
+
+  const char* argv2[] = {"foo.exe", nullptr};
+
+  GTEST_TEST_PARSING_FLAGS_(argv, argv2,
+                            Flags::PrintTestShardStatus(false), false);
+}
+
+// Tests parsing --gtest_print_test_shuffle_seed=0.
+TEST_F(ParseFlagsTest, PrintTestShuffleSeedFalse) {
+  const char* argv[] = {"foo.exe", "--gtest_print_test_shuffle_seed=0",
+                        nullptr};
+
+  const char* argv2[] = {"foo.exe", nullptr};
+
+  GTEST_TEST_PARSING_FLAGS_(argv, argv2,
+                            Flags::PrintTestShuffleSeed(false), false);
 }
 
 // Tests parsing --gtest_random_seed=number

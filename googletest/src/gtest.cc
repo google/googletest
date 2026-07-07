@@ -349,6 +349,24 @@ GTEST_DEFINE_bool_(print_time,
                    "True if and only if " GTEST_NAME_
                    " should display elapsed time in text output.");
 
+GTEST_DEFINE_bool_(print_test_filter,
+                   testing::internal::BoolFromGTestEnv("print_test_filter",
+                                                       true),
+                   "True if and only if " GTEST_NAME_
+                   " should display the test filter in text output.");
+
+GTEST_DEFINE_bool_(print_test_shard_status,
+                   testing::internal::BoolFromGTestEnv(
+                       "print_test_shard_status", true),
+                   "True if and only if " GTEST_NAME_
+                   " should display the test shard status in text output.");
+
+GTEST_DEFINE_bool_(print_test_shuffle_seed,
+                   testing::internal::BoolFromGTestEnv(
+                       "print_test_shuffle_seed", true),
+                   "True if and only if " GTEST_NAME_
+                   " should display the test shuffle seed in text output.");
+
 GTEST_DEFINE_bool_(print_utf8,
                    testing::internal::BoolFromGTestEnv("print_utf8", true),
                    "True if and only if " GTEST_NAME_
@@ -3482,19 +3500,20 @@ void PrettyUnitTestResultPrinter::OnTestIterationStart(
 
   // Prints the filter if it's not *.  This reminds the user that some
   // tests may be skipped.
-  if (!String::CStringEquals(filter, kUniversalFilter)) {
+  if (!String::CStringEquals(filter, kUniversalFilter) &&
+      GTEST_FLAG_GET(print_test_filter)) {
     ColoredPrintf(GTestColor::kYellow, "Note: %s filter = %s\n", GTEST_NAME_,
                   filter);
   }
 
-  if (internal::ShouldShard(false)) {
+  if (internal::ShouldShard(false) && GTEST_FLAG_GET(print_test_shard_status)) {
     const int32_t shard_index = GTEST_FLAG_GET(shard_index);
     ColoredPrintf(GTestColor::kYellow, "Note: This is test shard %d of %d.\n",
                   static_cast<int>(shard_index) + 1,
                   GTEST_FLAG_GET(total_shards));
   }
 
-  if (GTEST_FLAG_GET(shuffle)) {
+  if (GTEST_FLAG_GET(shuffle) && GTEST_FLAG_GET(print_test_shuffle_seed)) {
     ColoredPrintf(GTestColor::kYellow,
                   "Note: Randomizing tests' orders with a seed of %d .\n",
                   unit_test.random_seed());
@@ -6744,6 +6763,15 @@ static const char kColorEncodedHelpMessage[] =
     "print_time=0@D\n"
     "      Don't print the elapsed time of each test.\n"
     "  @G--" GTEST_FLAG_PREFIX_
+    "print_test_filter=0@D\n"
+    "      Don't print the test filter.\n"
+    "  @G--" GTEST_FLAG_PREFIX_
+    "print_test_shard_status=0@D\n"
+    "      Don't print the test shard status.\n"
+    "  @G--" GTEST_FLAG_PREFIX_
+    "print_test_shuffle_seed=0@D\n"
+    "      Don't print the test shuffle seed.\n"
+    "  @G--" GTEST_FLAG_PREFIX_
     "output=@Y(@Gjson@Y|@Gxml@Y)[@G:@YDIRECTORY_PATH@G" GTEST_PATH_SEP_
     "@Y|@G:@YFILE_PATH]@D\n"
     "      Generate a JSON or XML report in the given directory or with the "
@@ -6816,6 +6844,9 @@ static bool ParseGoogleTestFlag(const char* const arg) {
   GTEST_INTERNAL_PARSE_FLAG(output);
   GTEST_INTERNAL_PARSE_FLAG(brief);
   GTEST_INTERNAL_PARSE_FLAG(print_time);
+  GTEST_INTERNAL_PARSE_FLAG(print_test_filter);
+  GTEST_INTERNAL_PARSE_FLAG(print_test_shard_status);
+  GTEST_INTERNAL_PARSE_FLAG(print_test_shuffle_seed);
   GTEST_INTERNAL_PARSE_FLAG(print_utf8);
   GTEST_INTERNAL_PARSE_FLAG(random_seed);
   GTEST_INTERNAL_PARSE_FLAG(repeat);

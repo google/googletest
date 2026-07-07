@@ -2110,6 +2110,15 @@ By default, GoogleTest prints the time it takes to run each test. To disable
 that, run the test program with the `--gtest_print_time=0` command line flag, or
 set the GTEST_PRINT_TIME environment variable to `0`.
 
+#### Suppressing Test Execution Notes
+
+By default, GoogleTest prints note lines for non-universal test filters,
+active test shards, and shuffle seeds. To disable these notes independently,
+use `--gtest_print_test_filter=0`, `--gtest_print_test_shard_status=0`, or
+`--gtest_print_test_shuffle_seed=0`, or set the corresponding
+`GTEST_PRINT_TEST_FILTER`, `GTEST_PRINT_TEST_SHARD_STATUS`, or
+`GTEST_PRINT_TEST_SHUFFLE_SEED` environment variable to `0`.
+
 #### Suppressing UTF-8 Text Output
 
 In case of assertion failures, GoogleTest prints expected and actual values of
