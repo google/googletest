@@ -64,6 +64,7 @@ IS_WINDOWS = os.name == 'nt'
 PROGRAM_PATH = gtest_test_utils.GetTestExecutablePath('gtest_help_test_')
 FLAG_PREFIX = '--gtest_'
 DEATH_TEST_STYLE_FLAG = FLAG_PREFIX + 'death_test_style'
+DEATH_TEST_USE_FORK_FLAG = FLAG_PREFIX + 'death_test_use_fork'
 STREAM_RESULT_TO_FLAG = FLAG_PREFIX + 'stream_result_to'
 LIST_TESTS_FLAG = FLAG_PREFIX + 'list_tests'
 INTERNAL_FLAG_FOR_TESTING = FLAG_PREFIX + 'internal_flag_for_testing'
@@ -90,11 +91,17 @@ HELP_REGEX = re.compile(
     + FLAG_PREFIX
     + r'random_seed=.*'
     + FLAG_PREFIX
+    + r'fail_fast.*'
+    + FLAG_PREFIX
+    + r'fail_if_no_test_linked.*'
+    + FLAG_PREFIX
     + r'color=.*'
     + FLAG_PREFIX
     + r'brief.*'
     + FLAG_PREFIX
     + r'print_time.*'
+    + FLAG_PREFIX
+    + r'print_utf8.*'
     + FLAG_PREFIX
     + r'output=.*'
     + FLAG_PREFIX
@@ -102,7 +109,9 @@ HELP_REGEX = re.compile(
     + FLAG_PREFIX
     + r'throw_on_failure.*'
     + FLAG_PREFIX
-    + r'catch_exceptions=0.*',
+    + r'catch_exceptions=0.*'
+    + FLAG_PREFIX
+    + r'stack_trace_depth=.*',
     re.DOTALL,
 )
 
@@ -151,8 +160,10 @@ class GTestHelpTest(gtest_test_utils.TestCase):
 
     if SUPPORTS_DEATH_TESTS and not IS_WINDOWS:
       self.assertIn(DEATH_TEST_STYLE_FLAG, output)
+      self.assertIn(DEATH_TEST_USE_FORK_FLAG, output)
     else:
       self.assertNotIn(DEATH_TEST_STYLE_FLAG, output)
+      self.assertNotIn(DEATH_TEST_USE_FORK_FLAG, output)
 
   def test_runs_tests_without_help_flag(self):
     """Verifies correct behavior when no help flag is specified.
