@@ -1092,6 +1092,7 @@ TEST(IsEmptyTest, MatchesCString) {
   const char b[] = "x";
   EXPECT_TRUE(m.Matches(a));
   EXPECT_FALSE(m.Matches(b));
+  EXPECT_FALSE(m.Matches(nullptr));
 }
 
 #if GTEST_HAS_STD_WSTRING
@@ -1101,6 +1102,7 @@ TEST(IsEmptyTest, MatchesCWideString) {
   const wchar_t b[] = L"x";
   EXPECT_TRUE(m.Matches(a));
   EXPECT_FALSE(m.Matches(b));
+  EXPECT_FALSE(m.Matches(nullptr));
 }
 #endif  // GTEST_HAS_STD_WSTRING
 
