@@ -22,7 +22,7 @@ We use Google's internal systems for continuous integration.
 
 #### Coming Soon
 
-*   We are planning to take a dependency on
+* We are planning to take a dependency on
     [Abseil](https://github.com/abseil/abseil-cpp).
 
 ## Welcome to **GoogleTest**, Google's C++ test framework!
@@ -42,36 +42,34 @@ More information about building GoogleTest can be found at
 
 ## Features
 
-*   xUnit test framework: \
-    Googletest is based on the [xUnit](https://en.wikipedia.org/wiki/XUnit)
+* **xUnit test framework:** \
+    GoogleTest is based on the [xUnit](https://en.wikipedia.org/wiki/XUnit)
     testing framework, a popular architecture for unit testing.
-*   Test discovery: \
-    Googletest automatically discovers and runs your tests, eliminating the need
-    to manually register your tests.
-*   Rich set of assertions: \
-    Googletest provides a variety of assertions, such as equality, inequality,
-    exceptions, and more, making it easy to test your code.
-*   User-defined assertions: \
-    You can define your own assertions with Googletest, making it simple to
-    write tests that are specific to your code.
-*   Death tests: \
-    Googletest supports death tests, which verify that your code exits in a
+* **Test discovery:** \
+    GoogleTest automatically discovers and runs your tests, eliminating the need
+    to manually register them.
+* **Rich set of assertions:** \
+    GoogleTest provides a variety of assertions—such as equality, inequality,
+    exceptions, and more—making it easy to test your code.
+* **User-defined assertions:** \
+    You can define your own assertions within GoogleTest, making it simple to
+    write tests that are specific to your codebase.
+* **Death tests:** \
+    GoogleTest supports death tests, which verify that your code exits in a
     certain way, making it useful for testing error-handling code.
-*   Fatal and non-fatal failures: \
+* **Fatal and non-fatal failures:** \
     You can specify whether a test failure should be treated as fatal or
-    non-fatal with Googletest, allowing tests to continue running even if a
-    failure occurs.
-*   Value-parameterized tests: \
-    Googletest supports value-parameterized tests, which run multiple times with
-    different input values, making it useful for testing functions that take
-    different inputs.
-*   Type-parameterized tests: \
-    Googletest also supports type-parameterized tests, which run with different
-    data types, making it useful for testing functions that work with different
-    data types.
-*   Various options for running tests: \
-    Googletest provides many options for running tests including running
-    individual tests, running tests in a specific order and running tests in
+    non-fatal, allowing tests to continue running even if a failure occurs.
+* **Value-parameterized tests:** \
+    GoogleTest supports value-parameterized tests, which run multiple times with
+    different input values, making it useful for testing functions that accept
+    varied inputs.
+* **Type-parameterized tests:** \
+    GoogleTest also supports type-parameterized tests, which run with different
+    data types, making it useful for testing functions that work across multiple types.
+* **Various options for running tests:** \
+    GoogleTest provides many options for running tests, including running
+    individual tests, running tests in a specific order, and running tests in
     parallel.
 
 ## Supported Platforms
@@ -88,23 +86,23 @@ tools.
 In addition to many internal projects at Google, GoogleTest is also used by the
 following notable projects:
 
-*   The [Chromium projects](https://www.chromium.org/) (behind the Chrome
+* The [Chromium projects](https://www.chromium.org/) (behind the Chrome
     browser and Chrome OS).
-*   The [LLVM](https://llvm.org/) compiler.
-*   [Protocol Buffers](https://github.com/google/protobuf), Google's data
+* The [LLVM](https://llvm.org/) compiler.
+* [Protocol Buffers](https://github.com/google/protobuf), Google's data
     interchange format.
-*   The [OpenCV](https://opencv.org/) computer vision library.
+* The [OpenCV](https://opencv.org/) computer vision library.
 
 ## Related Open Source Projects
 
-[GTest Runner](https://github.com/nholthaus/gtest-runner) is a Qt5 based
-automated test-runner and Graphical User Interface with powerful features for
+[GTest Runner](https://github.com/nholthaus/gtest-runner) is a Qt5-based
+automated test runner and Graphical User Interface with powerful features for
 Windows and Linux platforms.
 
 [GoogleTest UI](https://github.com/ospector/gtest-gbar) is a test runner that
 runs your test binary, allows you to track its progress via a progress bar, and
-displays a list of test failures. Clicking on one shows failure text. GoogleTest
-UI is written in C#.
+displays a list of test failures. Clicking on a failure shows its detailed text. 
+GoogleTest UI is written in C#.
 
 [GTest TAP Listener](https://github.com/kinow/gtest-tap-listener) is an event
 listener for GoogleTest that implements the
@@ -112,15 +110,15 @@ listener for GoogleTest that implements the
 result output. If your test runner understands TAP, you may find it useful.
 
 [gtest-parallel](https://github.com/google/gtest-parallel) is a test runner that
-runs tests from your binary in parallel to provide significant speed-up.
+runs tests from your binary in parallel to provide a significant speedup.
 
 [GoogleTest Adapter](https://marketplace.visualstudio.com/items?itemName=DavidSchuldenfrei.gtest-adapter)
-is a VS Code extension allowing to view GoogleTest in a tree view and run/debug
+is a VS Code extension allowing you to view GoogleTest in a tree view and run or debug
 your tests.
 
 [C++ TestMate](https://github.com/matepek/vscode-catch2-test-adapter) is a VS
-Code extension allowing to view GoogleTest in a tree view and run/debug your
-tests.
+Code extension allowing you to view GoogleTest in a tree view and run or debug
+your tests.
 
 [Cornichon](https://pypi.org/project/cornichon/) is a small Gherkin DSL parser
 that generates stub code for GoogleTest.
