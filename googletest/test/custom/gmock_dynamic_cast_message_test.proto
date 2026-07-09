@@ -1,0 +1,9 @@
+edition = "2024";
+
+package testing.internal.dynamic_cast_message_test;
+
+message FooMessage {
+  int32 int_field = 1;
+}
+
+message BarMessage {}

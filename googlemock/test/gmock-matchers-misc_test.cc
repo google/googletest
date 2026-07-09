@@ -813,7 +813,7 @@ class SampleVariantIntString {
 
   template <typename T>
   friend bool holds_alternative(const SampleVariantIntString& value) {
-    return value.has_int_ == std::is_same<T, int>::value;
+    return value.has_int_ == std::is_same_v<T, int>;
   }
 
   template <typename T>

@@ -194,11 +194,11 @@ using LosslessArithmeticConvertibleImpl = std::integral_constant<
        // Converting between integers of different widths is allowed so long
        // as the conversion does not go from signed to unsigned.
       (((sizeof(From) < sizeof(To)) &&
-        !(std::is_signed<From>::value && !std::is_signed<To>::value)) ||
+        !(std::is_signed_v<From> && !std::is_signed_v<To>)) ||
        // Converting between integers of the same width only requires the
        // two types to have the same signedness.
        ((sizeof(From) == sizeof(To)) &&
-        (std::is_signed<From>::value == std::is_signed<To>::value)))
+        (std::is_signed_v<From> == std::is_signed_v<To>)))
        ) ? true
       // Floating point conversions are lossless if and only if `To` is at least
       // as wide as `From`.
@@ -371,7 +371,7 @@ class [[nodiscard]] StlContainerView {
   typedef typename type::value_type RawElement;
 
   static const_reference ConstReference(const RawContainer& container) {
-    static_assert(!std::is_const<RawContainer>::value,
+    static_assert(!std::is_const_v<RawContainer>,
                   "RawContainer type must not be const");
     return type(&container, RelationToSourceReference());
   }
@@ -394,7 +394,7 @@ class [[nodiscard]] StlContainerView<Element[N]> {
   typedef const type const_reference;
 
   static const_reference ConstReference(const Element (&array)[N]) {
-    static_assert(std::is_same<Element, RawElement>::value,
+    static_assert(std::is_same_v<Element, RawElement>,
                   "Element type must not be const");
     return type(array, N, RelationToSourceReference());
   }
@@ -458,11 +458,11 @@ auto ApplyImpl(F&& f, Tuple&& args, std::index_sequence<Idx...>)
 template <typename F, typename Tuple>
 auto Apply(F&& f, Tuple&& args) -> decltype(ApplyImpl(
     std::forward<F>(f), std::forward<Tuple>(args),
-    std::make_index_sequence<std::tuple_size<
-        typename std::remove_reference<Tuple>::type>::value>())) {
+    std::make_index_sequence<
+        std::tuple_size_v<std::remove_reference_t<Tuple>>>())) {
   return ApplyImpl(std::forward<F>(f), std::forward<Tuple>(args),
-                   std::make_index_sequence<std::tuple_size<
-                       typename std::remove_reference<Tuple>::type>::value>());
+                   std::make_index_sequence<
+                       std::tuple_size_v<std::remove_reference_t<Tuple>>>());
 }
 
 // Template struct Function<F>, where F must be a function type, contains
@@ -498,7 +498,7 @@ struct Function<R(Args...)> {
 // See: https://github.com/google/googletest/issues/3931
 // Can be replaced with std::tuple_element_t in C++14.
 template <size_t I, typename T>
-using TupleElement = typename std::tuple_element<I, T>::type;
+using TupleElement = std::tuple_element_t<I, T>;
 
 bool Base64Unescape(const std::string& encoded, std::string* decoded);
 

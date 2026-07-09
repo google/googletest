@@ -937,7 +937,7 @@ namespace {
 template <typename Expected, typename F>
 static constexpr bool IsMockFunctionTemplateArgumentDeducedTo(
     const internal::MockFunction<F>&) {
-  return std::is_same<F, Expected>::value;
+  return std::is_same_v<F, Expected>;
 }
 
 }  // namespace

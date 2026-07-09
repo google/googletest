@@ -275,6 +275,7 @@
 #include "gmock/internal/gmock-internal-utils.h"
 #include "gmock/internal/gmock-pp.h"
 #include "gtest/gtest.h"
+#include "gtest/internal/gtest-internal.h"
 
 // MSVC warning C5046 is new as of VS2017 version 15.8.
 #if defined(_MSC_VER) && _MSC_VER >= 1915
@@ -282,6 +283,44 @@
 #else
 #define GMOCK_MAYBE_5046_
 #endif
+
+#if GTEST_HAS_RTTI
+namespace proto2 {
+namespace internal {
+
+// A type trait to essentially determine if `DynamicCastMessage` is available,
+// since older versions of protobuf don't have this function.
+template <typename T, typename = void>
+static constexpr bool kHasDynamicCastMessage = false;
+template <typename T>
+static constexpr bool kHasDynamicCastMessage<
+    T, std::void_t<decltype(DynamicCastMessage<T>(
+           std::declval<const proto2::MessageLite*>()))>> = true;
+
+// A helper function to call `DynamicCastMessage` if available, otherwise
+// falling back to `dynamic_cast`. Note that we must declare this function in
+// the `proto2` namespace because we need ADL to find the right
+// `DynamicCastMessage`, and ADL only applies to unqualified function calls.
+template <typename T>
+const T* DynamicCastMessageForGtest(const proto2::MessageLite* msg) {
+  if constexpr (kHasDynamicCastMessage<T>) {
+    return DynamicCastMessage<T>(msg);
+  } else {
+    return dynamic_cast<const T*>(msg);
+  }
+}
+template <typename T>
+T* DynamicCastMessageForGtest(proto2::MessageLite* msg) {
+  if constexpr (kHasDynamicCastMessage<T>) {
+    return DynamicCastMessage<T>(msg);
+  } else {
+    return dynamic_cast<T*>(msg);
+  }
+}
+
+}  // namespace internal
+}  // namespace proto2
+#endif  // GTEST_HAS_RTTI
 
 GTEST_DISABLE_MSC_WARNINGS_PUSH_(
     4251 GMOCK_MAYBE_5046_ /* class A needs to have dll-interface to be used by
@@ -2086,6 +2125,26 @@ class [[nodiscard]] WhenDynamicCastToMatcherBase {
 
   static std::string GetToName() { return GetTypeName<To>(); }
 
+  template <typename From>
+  static auto DoDynamicCast(From& from) {
+    using ToType =
+        std::remove_const_t<std::remove_reference_t<std::remove_pointer_t<To>>>;
+
+    if constexpr (std::is_base_of_v<proto2::MessageLite, ToType>) {
+      if constexpr (std::is_pointer_v<To>) {
+        return proto2::internal::DynamicCastMessageForGtest<ToType>(from);
+      } else {
+        // We don't want an std::bad_cast here, so do the cast with pointers.
+        return proto2::internal::DynamicCastMessageForGtest<ToType>(&from);
+      }
+    } else if constexpr (std::is_pointer_v<To>) {
+      return dynamic_cast<To>(from);
+    } else {
+      // We don't want an std::bad_cast here, so do the cast with pointers.
+      return dynamic_cast<std::remove_reference_t<To>*>(&from);
+    }
+  }
+
  private:
   static void GetCastTypeDescription(::std::ostream* os) {
     *os << "when dynamic_cast to " << GetToName() << ", ";
@@ -2103,7 +2162,7 @@ class [[nodiscard]] WhenDynamicCastToMatcher
 
   template <typename From>
   bool MatchAndExplain(From from, MatchResultListener* listener) const {
-    To to = dynamic_cast<To>(from);
+    To to = this->DoDynamicCast(from);
     return MatchPrintAndExplain(to, this->matcher_, listener);
   }
 };
@@ -2119,8 +2178,7 @@ WhenDynamicCastToMatcher<To&> : public WhenDynamicCastToMatcherBase<To&> {
 
   template <typename From>
   bool MatchAndExplain(From& from, MatchResultListener* listener) const {
-    // We don't want an std::bad_cast here, so do the cast with pointers.
-    To* to = dynamic_cast<To*>(&from);
+    To* to = this->DoDynamicCast(from);
     if (to == nullptr) {
       *listener << "which cannot be dynamic_cast to " << this->GetToName();
       return false;
