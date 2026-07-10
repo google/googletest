@@ -123,8 +123,7 @@ struct GtestGreaterThanMatcher {
 };
 
 template <typename T>
-GtestGreaterThanMatcher<typename std::decay<T>::type> GtestGreaterThan(
-    T&& rhs) {
+GtestGreaterThanMatcher<std::decay_t<T>> GtestGreaterThan(T&& rhs) {
   return {rhs};
 }
 

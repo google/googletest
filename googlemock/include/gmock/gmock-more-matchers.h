@@ -76,8 +76,21 @@ class [[nodiscard]] IsEmptyMatcher {
 
   // Matches C-style strings.
   bool MatchAndExplain(const char* s, MatchResultListener* listener) const {
+    if (s == nullptr) {
+      return false;
+    }
     return MatchAndExplain(std::string(s), listener);
   }
+
+#if GTEST_HAS_STD_WSTRING
+  // Matches C-style wide strings.
+  bool MatchAndExplain(const wchar_t* s, MatchResultListener* listener) const {
+    if (s == nullptr) {
+      return false;
+    }
+    return MatchAndExplain(std::wstring(s), listener);
+  }
+#endif  // GTEST_HAS_STD_WSTRING
 
   // Describes what this matcher matches.
   void DescribeTo(std::ostream* os) const { *os << "is empty"; }
