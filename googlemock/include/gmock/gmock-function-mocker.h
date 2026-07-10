@@ -50,8 +50,11 @@ namespace internal {
 template <typename T>
 using identity_t = T;
 
-template <typename T>
-struct TypeTag {};
+// A type tag used for matching overloaded function types. For simplicity,
+// for const/ref-qualified function types we apply the qualifiers to a second int
+// template argument rather than to the signature itself.
+template <typename UnqualifiedSignature, typename IntWithFunctionQualifiers>
+struct FunctionSignatureTag {};
 
 template <typename Pattern>
 struct ThisRefAdjuster {
@@ -327,8 +330,9 @@ using internal::FunctionMocker;
           GMOCK_PP_REMOVE_PARENS(_Signature)>*) const _RefSpec _NoexceptSpec;  \
   ::testing::FunctionMocker<GMOCK_PP_REMOVE_PARENS(_Signature)>&               \
       gmock_get_mocker_##_MethodName(                                          \
-          ::testing::internal::TypeTag<GMOCK_PP_REMOVE_PARENS(                 \
-              _Signature) GMOCK_PP_IF(_Constness, const, ) _RefSpec>) const {  \
+          ::testing::internal::FunctionSignatureTag<                           \
+              GMOCK_PP_REMOVE_PARENS(_Signature),                              \
+              int GMOCK_PP_IF(_Constness, const, ) _RefSpec>) const {          \
     return GMOCK_MOCKER_(_N, _Constness, _MethodName);                         \
   }                                                                            \
   mutable ::testing::FunctionMocker<GMOCK_PP_REMOVE_PARENS(_Signature)>        \
@@ -344,8 +348,9 @@ using internal::FunctionMocker;
           _Signature)>::Result {                                               \
     _InClassAssertions;                                                        \
     auto& mocker = gmock_get_mocker_##_MethodName(                             \
-        ::testing::internal::TypeTag<GMOCK_PP_REMOVE_PARENS(                   \
-            _Signature) GMOCK_PP_IF(_Constness, const, ) _RefSpec>{});         \
+        ::testing::internal::FunctionSignatureTag<                             \
+            GMOCK_PP_REMOVE_PARENS(_Signature),                                \
+            int GMOCK_PP_IF(_Constness, const, ) _RefSpec>{});                 \
     mocker.SetOwnerAndName(this, #_MethodName);                                \
     return mocker.Invoke(                                                      \
         GMOCK_PP_REPEAT(GMOCK_INTERNAL_FORWARD_ARG, _Signature, _N));          \
@@ -355,8 +360,9 @@ using internal::FunctionMocker;
       GMOCK_PP_IF(_Constness, const, )                                         \
           _RefSpec->::testing::MockSpec<GMOCK_PP_REMOVE_PARENS(_Signature)> {  \
     auto& mocker = gmock_get_mocker_##_MethodName(                             \
-        ::testing::internal::TypeTag<GMOCK_PP_REMOVE_PARENS(                   \
-            _Signature) GMOCK_PP_IF(_Constness, const, ) _RefSpec>{});         \
+        ::testing::internal::FunctionSignatureTag<                             \
+            GMOCK_PP_REMOVE_PARENS(_Signature),                                \
+            int GMOCK_PP_IF(_Constness, const, ) _RefSpec>{});                 \
     mocker.RegisterOwner(this);                                                \
     return mocker.With(                                                        \
         GMOCK_PP_REPEAT(GMOCK_INTERNAL_MATCHER_ARGUMENT, , _N));               \
