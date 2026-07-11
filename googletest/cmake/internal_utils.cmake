@@ -255,7 +255,7 @@ function(cxx_executable name dir libs)
 endfunction()
 
 if(gtest_build_tests)
-  find_package(Python3)
+  find_package(Python3 COMPONENTS Interpreter)
 endif()
 
 # cxx_test_with_flags(name cxx_flags libs srcs...)
