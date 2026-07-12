@@ -350,14 +350,14 @@ class GTestOutputTest(gtest_test_utils.TestCase):
                 '_googletest-output-test_normalized_actual.txt',
             ),
             'wb',
-        ).write(normalized_actual)
+        ).write(normalized_actual.encode())
         open(
             os.path.join(
                 gtest_test_utils.GetSourceDir(),
                 '_googletest-output-test_normalized_golden.txt',
             ),
             'wb',
-        ).write(normalized_golden)
+        ).write(normalized_golden.encode())
 
       self.assertEqual(normalized_golden, normalized_actual)
 
