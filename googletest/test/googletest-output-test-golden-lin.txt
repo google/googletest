@@ -917,12 +917,12 @@ DynamicFixture()
 gtest.cc:#: Failure
 Failed
 All tests in the same test suite must use the same test fixture
-class, so mixing TEST_F and TEST in the same test suite is
-illegal.  In test suite BadDynamicFixture1,
-test FixtureBase is defined using TEST_F but
-test TestBase is defined using TEST.  You probably
-want to change the TEST to TEST_F or move it to another test
-case.
+class.  However, in test suite BadDynamicFixture1,
+you defined test FixtureBase and test TestBase
+using two different test fixture classes.  This can happen if
+the two classes are from different namespaces or translation
+units and have the same name.  You should probably rename one
+of the classes to put the tests into different test suites.
 Stack trace: (omitted)
 
 ~DynamicFixture()
