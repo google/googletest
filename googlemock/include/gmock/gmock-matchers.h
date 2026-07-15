@@ -1711,9 +1711,8 @@ class [[nodiscard]] PredicateFormatterFromMatcher {
     // potentially unsafe downcasting of the matcher argument.
     const Matcher<const T&> matcher = SafeMatcherCast<const T&>(matcher_);
 
-    // The expected path here is that the matcher should match (i.e. that most
-    // tests pass) so optimize for this case.
-    if (matcher.Matches(x)) {
+    StringMatchResultListener listener;
+    if (matcher.MatchAndExplain(x, &listener)) {
       return AssertionSuccess();
     }
 
@@ -1721,13 +1720,6 @@ class [[nodiscard]] PredicateFormatterFromMatcher {
     ss << "Value of: " << value_text << "\n"
        << "Expected: ";
     matcher.DescribeTo(&ss);
-
-    // Rerun the matcher to "PrintAndExplain" the failure.
-    StringMatchResultListener listener;
-    if (MatchPrintAndExplain(x, matcher, &listener)) {
-      ss << "\n  The matcher failed on the initial attempt; but passed when "
-            "rerun to generate the explanation.";
-    }
     ss << "\n  Actual: " << listener.str();
     return AssertionFailure() << ss.str();
   }

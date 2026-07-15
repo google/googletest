@@ -1752,6 +1752,19 @@ TEST(ThrowsTest, CallableExecutedExactlyOnce) {
               Throws<std::runtime_error>(
                   Property(&std::runtime_error::what, HasSubstr("message"))));
   EXPECT_EQ(a, 4u);
+
+  // Non-throwing path should also invoke the callable exactly once.
+  EXPECT_THAT(std::function<void()>([&a]() {
+                a++;
+              }),
+              Not(Throws<int>()));
+  EXPECT_EQ(a, 5u);
+
+  EXPECT_THAT(std::function<void()>([&a]() {
+                a++;
+              }),
+              Not(Throws<std::runtime_error>()));
+  EXPECT_EQ(a, 6u);
 }
 
 TEST(ThrowsTest, Describe) {
