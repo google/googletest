@@ -821,7 +821,11 @@ class [[nodiscard]] IsNullMatcher {
   template <typename Pointer>
   bool MatchAndExplain(const Pointer& p,
                        MatchResultListener* /* listener */) const {
-    return p == nullptr;
+    if constexpr (std::is_function_v<Pointer>) {
+      return false;
+    } else {
+      return p == nullptr;
+    }
   }
 
   void DescribeTo(::std::ostream* os) const { *os << "is NULL"; }
@@ -835,7 +839,11 @@ class [[nodiscard]] NotNullMatcher {
   template <typename Pointer>
   bool MatchAndExplain(const Pointer& p,
                        MatchResultListener* /* listener */) const {
-    return p != nullptr;
+    if constexpr (std::is_function_v<Pointer>) {
+      return true;
+    } else {
+      return p != nullptr;
+    }
   }
 
   void DescribeTo(::std::ostream* os) const { *os << "isn't NULL"; }
