@@ -1223,15 +1223,15 @@ class Foo {
 // Tests InvokeWithoutArgs(function).
 TEST(InvokeWithoutArgsTest, Function) {
   // As an action that takes one argument.
-  Action<int(int)> a = InvokeWithoutArgs(Nullary);  // NOLINT
+  Action<int(int)> a = Nullary;  // NOLINT
   EXPECT_EQ(1, a.Perform(std::make_tuple(2)));
 
   // As an action that takes two arguments.
-  Action<int(int, double)> a2 = InvokeWithoutArgs(Nullary);  // NOLINT
+  Action<int(int, double)> a2 = Nullary;  // NOLINT
   EXPECT_EQ(1, a2.Perform(std::make_tuple(2, 3.5)));
 
   // As an action that returns void.
-  Action<void(int)> a3 = InvokeWithoutArgs(VoidNullary);  // NOLINT
+  Action<void(int)> a3 = VoidNullary;  // NOLINT
   g_done = false;
   a3.Perform(std::make_tuple(1));
   EXPECT_TRUE(g_done);
