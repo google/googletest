@@ -105,10 +105,10 @@ endif()
 string(REPLACE ";" "$<SEMICOLON>" dirs "${gmock_build_include_dirs}")
 target_include_directories(gmock SYSTEM INTERFACE
   "$<BUILD_INTERFACE:${dirs}>"
-  "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
+  "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
 target_include_directories(gmock_main SYSTEM INTERFACE
   "$<BUILD_INTERFACE:${dirs}>"
-  "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
+  "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
 
 ########################################################################
 #
