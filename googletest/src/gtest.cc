@@ -4281,7 +4281,7 @@ void XmlUnitTestResultPrinter::OutputXmlTestSuiteForTestResult(
   OutputXmlAttribute(
       stream, "testsuite", "timestamp",
       FormatEpochTimeInMillisAsIso8601(result.start_timestamp()));
-  *stream << ">";
+  *stream << ">\n";
 
   OutputXmlTestCaseForTestResult(stream, result);
 
@@ -4405,13 +4405,18 @@ void XmlUnitTestResultPrinter::OutputXmlTestResult(::std::ostream* stream,
 void XmlUnitTestResultPrinter::PrintXmlTestSuite(std::ostream* stream,
                                                  const TestSuite& test_suite) {
   const std::string kTestsuite = "testsuite";
+  // A failed ad hoc test result (e.g. a failure in SetUpTestSuite) is output
+  // as an extra test case below, so include it in the counts.
+  const int ad_hoc_failure = test_suite.ad_hoc_test_result().Failed() ? 1 : 0;
   *stream << "  <" << kTestsuite;
   OutputXmlAttribute(stream, kTestsuite, "name", test_suite.name());
-  OutputXmlAttribute(stream, kTestsuite, "tests",
-                     StreamableToString(test_suite.reportable_test_count()));
+  OutputXmlAttribute(
+      stream, kTestsuite, "tests",
+      StreamableToString(test_suite.reportable_test_count() + ad_hoc_failure));
   if (!GTEST_FLAG_GET(list_tests)) {
-    OutputXmlAttribute(stream, kTestsuite, "failures",
-                       StreamableToString(test_suite.failed_test_count()));
+    OutputXmlAttribute(
+        stream, kTestsuite, "failures",
+        StreamableToString(test_suite.failed_test_count() + ad_hoc_failure));
     OutputXmlAttribute(
         stream, kTestsuite, "disabled",
         StreamableToString(test_suite.reportable_disabled_test_count()));
@@ -4440,18 +4445,38 @@ void XmlUnitTestResultPrinter::PrintXmlTestSuite(std::ostream* stream,
   *stream << "  </" << kTestsuite << ">\n";
 }
 
+// Counts the synthetic test cases that are output for failures recorded
+// outside of individual tests (e.g. in SetUpTestSuite or a global test
+// environment), so that they can be included in the aggregate counts.
+static int AdHocTestFailureCount(const UnitTest& unit_test) {
+  int count = unit_test.ad_hoc_test_result().Failed() ? 1 : 0;
+  for (int i = 0; i < unit_test.total_test_suite_count(); ++i) {
+    const TestSuite& test_suite = *unit_test.GetTestSuite(i);
+    if (test_suite.reportable_test_count() > 0 &&
+        test_suite.ad_hoc_test_result().Failed()) {
+      ++count;
+    }
+  }
+  return count;
+}
+
 // Prints an XML summary of unit_test to output stream out.
 void XmlUnitTestResultPrinter::PrintXmlUnitTest(std::ostream* stream,
                                                 const UnitTest& unit_test) {
   const std::string kTestsuites = "testsuites";
+  // Failures outside of individual tests are output as synthetic test cases,
+  // so include them in the counts.
+  const int ad_hoc_failures = AdHocTestFailureCount(unit_test);
 
   *stream << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
   *stream << "<" << kTestsuites;
 
-  OutputXmlAttribute(stream, kTestsuites, "tests",
-                     StreamableToString(unit_test.reportable_test_count()));
-  OutputXmlAttribute(stream, kTestsuites, "failures",
-                     StreamableToString(unit_test.failed_test_count()));
+  OutputXmlAttribute(
+      stream, kTestsuites, "tests",
+      StreamableToString(unit_test.reportable_test_count() + ad_hoc_failures));
+  OutputXmlAttribute(
+      stream, kTestsuites, "failures",
+      StreamableToString(unit_test.failed_test_count() + ad_hoc_failures));
   OutputXmlAttribute(
       stream, kTestsuites, "disabled",
       StreamableToString(unit_test.reportable_disabled_test_count()));
@@ -4874,14 +4899,17 @@ void JsonUnitTestResultPrinter::PrintJsonTestSuite(
     std::ostream* stream, const TestSuite& test_suite) {
   const std::string kTestsuite = "testsuite";
   const std::string kIndent = Indent(6);
+  // A failed ad hoc test result (e.g. a failure in SetUpTestSuite) is output
+  // as an extra test case below, so include it in the counts.
+  const int ad_hoc_failure = test_suite.ad_hoc_test_result().Failed() ? 1 : 0;
 
   *stream << Indent(4) << "{\n";
   OutputJsonKey(stream, kTestsuite, "name", test_suite.name(), kIndent);
-  OutputJsonKey(stream, kTestsuite, "tests", test_suite.reportable_test_count(),
-                kIndent);
+  OutputJsonKey(stream, kTestsuite, "tests",
+                test_suite.reportable_test_count() + ad_hoc_failure, kIndent);
   if (!GTEST_FLAG_GET(list_tests)) {
     OutputJsonKey(stream, kTestsuite, "failures",
-                  test_suite.failed_test_count(), kIndent);
+                  test_suite.failed_test_count() + ad_hoc_failure, kIndent);
     OutputJsonKey(stream, kTestsuite, "disabled",
                   test_suite.reportable_disabled_test_count(), kIndent);
     OutputJsonKey(stream, kTestsuite, "errors", 0, kIndent);
@@ -4927,12 +4955,15 @@ void JsonUnitTestResultPrinter::PrintJsonUnitTest(std::ostream* stream,
                                                   const UnitTest& unit_test) {
   const std::string kTestsuites = "testsuites";
   const std::string kIndent = Indent(2);
+  // Failures outside of individual tests are output as synthetic test cases,
+  // so include them in the counts.
+  const int ad_hoc_failures = AdHocTestFailureCount(unit_test);
   *stream << "{\n";
 
-  OutputJsonKey(stream, kTestsuites, "tests", unit_test.reportable_test_count(),
-                kIndent);
-  OutputJsonKey(stream, kTestsuites, "failures", unit_test.failed_test_count(),
-                kIndent);
+  OutputJsonKey(stream, kTestsuites, "tests",
+                unit_test.reportable_test_count() + ad_hoc_failures, kIndent);
+  OutputJsonKey(stream, kTestsuites, "failures",
+                unit_test.failed_test_count() + ad_hoc_failures, kIndent);
   OutputJsonKey(stream, kTestsuites, "disabled",
                 unit_test.reportable_disabled_test_count(), kIndent);
   OutputJsonKey(stream, kTestsuites, "errors", 0, kIndent);
