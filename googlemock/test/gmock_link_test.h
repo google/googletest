@@ -338,10 +338,12 @@ TEST(LinkTest, TestInvokeWithoutArgs) {
   Mock mock;
   InvokeHelper test_invoke_helper;
 
+  GTEST_DISABLE_DEPRECATED_PUSH_()
   EXPECT_CALL(mock, VoidFromString(_))
       .WillOnce(InvokeWithoutArgs(&InvokeHelper::StaticVoidFromVoid))
       .WillOnce(
           InvokeWithoutArgs(&test_invoke_helper, &InvokeHelper::VoidFromVoid));
+  GTEST_DISABLE_DEPRECATED_POP_()
   mock.VoidFromString(nullptr);
   mock.VoidFromString(nullptr);
 }

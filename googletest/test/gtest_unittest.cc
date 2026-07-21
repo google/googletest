@@ -442,11 +442,11 @@ class FormatEpochTimeInMillisAsIso8601Test : public Test {
   void SetUp() override {
     saved_tz_.reset();
 
-    GTEST_DISABLE_MSC_DEPRECATED_PUSH_(/* getenv: deprecated */)
+    GTEST_DISABLE_DEPRECATED_PUSH_(/* getenv: deprecated */)
     if (const char* tz = getenv("TZ")) {
       saved_tz_ = std::make_unique<std::string>(tz);
     }
-    GTEST_DISABLE_MSC_DEPRECATED_POP_()
+    GTEST_DISABLE_DEPRECATED_POP_()
 
     // Set the local time zone for FormatEpochTimeInMillisAsIso8601 to be
     // a fixed time zone for reproducibility purposes.

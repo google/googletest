@@ -363,18 +363,24 @@
 #define GTEST_DISABLE_MSC_WARNINGS_POP_()
 #endif
 
-// Clang on Windows does not understand MSVC's pragma warning.
-// We need clang-specific way to disable function deprecation warning.
-#ifdef __clang__
-#define GTEST_DISABLE_MSC_DEPRECATED_PUSH_()                            \
+// Pragmas to disable function deprecation warnings.
+#if defined(__clang__)
+#define GTEST_DISABLE_DEPRECATED_PUSH_()                                \
   _Pragma("clang diagnostic push")                                      \
       _Pragma("clang diagnostic ignored \"-Wdeprecated-declarations\"") \
           _Pragma("clang diagnostic ignored \"-Wdeprecated-implementations\"")
-#define GTEST_DISABLE_MSC_DEPRECATED_POP_() _Pragma("clang diagnostic pop")
+#define GTEST_DISABLE_DEPRECATED_POP_() _Pragma("clang diagnostic pop")
+#elif defined(__GNUC__)
+#define GTEST_DISABLE_DEPRECATED_PUSH_() \
+  _Pragma("GCC diagnostic push")         \
+      _Pragma("GCC diagnostic ignored \"-Wdeprecated-declarations\"")
+#define GTEST_DISABLE_DEPRECATED_POP_() _Pragma("GCC diagnostic pop")
+#elif defined(_MSC_VER)
+#define GTEST_DISABLE_DEPRECATED_PUSH_() GTEST_DISABLE_MSC_WARNINGS_PUSH_(4996)
+#define GTEST_DISABLE_DEPRECATED_POP_() GTEST_DISABLE_MSC_WARNINGS_POP_()
 #else
-#define GTEST_DISABLE_MSC_DEPRECATED_PUSH_() \
-  GTEST_DISABLE_MSC_WARNINGS_PUSH_(4996)
-#define GTEST_DISABLE_MSC_DEPRECATED_POP_() GTEST_DISABLE_MSC_WARNINGS_POP_()
+#define GTEST_DISABLE_DEPRECATED_PUSH_()
+#define GTEST_DISABLE_DEPRECATED_POP_()
 #endif
 
 // Brings in definitions for functions used in the testing::internal::posix
@@ -2119,7 +2125,7 @@ inline int IsATTY(int fd) {
 
 // Functions deprecated by MSVC 8.0.
 
-GTEST_DISABLE_MSC_DEPRECATED_PUSH_()
+GTEST_DISABLE_DEPRECATED_PUSH_()
 
 // ChDir(), FReopen(), FDOpen(), Read(), Write(), Close(), and
 // StrError() aren't needed on Windows CE at this time and thus not
@@ -2181,7 +2187,7 @@ inline const char* GetEnv(const char* name) {
 #endif
 }
 
-GTEST_DISABLE_MSC_DEPRECATED_POP_()
+GTEST_DISABLE_DEPRECATED_POP_()
 
 #ifdef GTEST_OS_WINDOWS_MOBILE
 // Windows CE has no C library. The abort() function is used in
