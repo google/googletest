@@ -272,6 +272,40 @@ TEST(StringViewMatcherTest, CanBeImplicitlyConstructedFromStringView) {
   EXPECT_TRUE(m2.Matches("cats"));
   EXPECT_FALSE(m2.Matches("dogs"));
 }
+
+// Tests that a StringView object can be implicitly converted to a
+// Matcher<std::string> or Matcher<const std::string&>. This is the symmetric
+// counterpart of CanBeImplicitlyConstructedFromString above; without these
+// constructors, a StringView falls through to a polymorphic Eq matcher that
+// stores the view by value and dangles past the constructing call.
+TEST(StringMatcherTest, CanBeImplicitlyConstructedFromStringView) {
+  Matcher<std::string> m1 = internal::StringView("cats");
+  EXPECT_TRUE(m1.Matches("cats"));
+  EXPECT_FALSE(m1.Matches("dogs"));
+
+  Matcher<const std::string&> m2 = internal::StringView("cats");
+  EXPECT_TRUE(m2.Matches("cats"));
+  EXPECT_FALSE(m2.Matches("dogs"));
+}
+
+// Tests that the matcher copies the string data and is safe to use after the
+// underlying buffer the StringView was constructed from is destroyed.
+TEST(StringMatcherTest, StringViewCtorIsLifetimeSafe) {
+  Matcher<std::string> m1;
+  Matcher<const std::string&> m2;
+  {
+    std::string buffer = "cats";
+    m1 = internal::StringView(buffer);
+    m2 = internal::StringView(buffer);
+    // Mutate buffer and let it go out of scope to ensure the matcher does not
+    // alias |buffer|'s storage.
+    buffer = "dogs";
+  }
+  EXPECT_TRUE(m1.Matches("cats"));
+  EXPECT_FALSE(m1.Matches("dogs"));
+  EXPECT_TRUE(m2.Matches("cats"));
+  EXPECT_FALSE(m2.Matches("dogs"));
+}
 #endif  // GTEST_INTERNAL_HAS_STRING_VIEW
 
 // Tests that a std::reference_wrapper<std::string> object can be implicitly
