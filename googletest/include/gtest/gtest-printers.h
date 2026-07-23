@@ -170,7 +170,14 @@ struct ContainerPrinter {
                  !IsRecursiveContainer<T>::value) ||
                 IsStdSpan<T>::value>::type>
   static void PrintValue(const T& container, std::ostream* os) {
-    const size_t kMaxCount = 32;  // The maximum number of elements to print.
+
+// The maximum number of elements to print.
+#ifdef GTEST_MAX_NUM_ELEMENTS_TO_PRINT
+    const size_t kMaxCount = GTEST_MAX_NUM_ELEMENTS_TO_PRINT;
+#else
+    const size_t kMaxCount = 32;
+#endif
+
     *os << '{';
     size_t count = 0;
     for (auto&& elem : container) {
