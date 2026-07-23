@@ -1863,6 +1863,7 @@ TEST(MockMethodTest, CanReturnMoveOnlyValue_Invoke) {
   // Check default value
   DefaultValue<std::unique_ptr<int>>::SetFactory(
       [] { return std::make_unique<int>(42); });
+  EXPECT_CALL(mock, MakeUnique()).WillOnce(DoDefault());
   EXPECT_EQ(42, *mock.MakeUnique());
 
   EXPECT_CALL(mock, MakeUnique()).WillRepeatedly(UniquePtrSource);
