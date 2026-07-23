@@ -51,6 +51,8 @@ with the following content:
 bazel_dep(name = "googletest", version = "1.17.0")
 ```
 
+**Note:** When using bzlmod/BCR, Abseil support (including AbslStringify for custom printers) is enabled by default since Abseil is an unconditional dependency.
+
 Now you're ready to build C++ code that uses GoogleTest.
 
 ## Create and run a binary
