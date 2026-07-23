@@ -73,9 +73,22 @@ config_setting(
 )
 
 config_setting(
-    name = "has_absl",
-    values = {"define": "absl=1"},
+    name = "absl_disabled",
+    values = {"define": "absl=0"},
 )
+
+_ABSL_DEPS = [
+    "@abseil-cpp//absl/container:flat_hash_set",
+    "@abseil-cpp//absl/debugging:failure_signal_handler",
+    "@abseil-cpp//absl/debugging:stacktrace",
+    "@abseil-cpp//absl/debugging:symbolize",
+    "@abseil-cpp//absl/flags:flag",
+    "@abseil-cpp//absl/flags:parse",
+    "@abseil-cpp//absl/flags:reflection",
+    "@abseil-cpp//absl/flags:usage",
+    "@abseil-cpp//absl/strings",
+    "@re2",
+]
 
 # Library that defines the FRIEND_TEST macro.
 cc_library(
@@ -116,8 +129,8 @@ cc_library(
         "//conditions:default": ["-pthread"],
     }),
     defines = select({
-        ":has_absl": ["GTEST_HAS_ABSL=1"],
-        "//conditions:default": [],
+        ":absl_disabled": [],
+        "//conditions:default": ["GTEST_HAS_ABSL=1"],
     }),
     features = select({
         ":windows": ["windows_export_all_symbols"],
@@ -143,19 +156,8 @@ cc_library(
         "//conditions:default": ["-pthread"],
     }),
     deps = select({
-        ":has_absl": [
-            "@abseil-cpp//absl/container:flat_hash_set",
-            "@abseil-cpp//absl/debugging:failure_signal_handler",
-            "@abseil-cpp//absl/debugging:stacktrace",
-            "@abseil-cpp//absl/debugging:symbolize",
-            "@abseil-cpp//absl/flags:flag",
-            "@abseil-cpp//absl/flags:parse",
-            "@abseil-cpp//absl/flags:reflection",
-            "@abseil-cpp//absl/flags:usage",
-            "@abseil-cpp//absl/strings",
-            "@re2",
-        ],
-        "//conditions:default": [],
+        ":absl_disabled": [],
+        "//conditions:default": _ABSL_DEPS,
     }) + select({
         # `gtest-death-test.cc` has `EXPECT_DEATH` that spawns a process,
         # expects it to crash and inspects its logs with the given matcher,
