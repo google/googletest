@@ -168,8 +168,8 @@ GMOCK_DECLARE_KIND_(long double, kFloatingPoint);
 #undef GMOCK_DECLARE_KIND_
 
 // Evaluates to the kind of 'type'.
-#define GMOCK_KIND_OF_(type)                   \
-  static_cast< ::testing::internal::TypeKind>( \
+#define GMOCK_KIND_OF_(type)                  \
+  static_cast<::testing::internal::TypeKind>( \
       ::testing::internal::KindOf<type>::value)
 
 // LosslessArithmeticConvertibleImpl<kFromKind, From, kToKind, To>::value
@@ -326,8 +326,7 @@ inline T Invalid() {
 void GetValueType(const void*);
 
 template <class T>
-typename std::iterator_traits<
-    decltype(std::begin(std::declval<T&>()))>::value_type
+std::remove_reference_t<decltype(*iterator_help::Begin(std::declval<T&>()))>
 GetValueType(T*);
 
 template <class T, class = void>
@@ -360,15 +359,25 @@ struct RangeTraits<T, std::conditional_t<true, void, typename T::value_type>> {
 template <class RawContainer>
 class [[nodiscard]] StlContainerView {
  public:
-  typedef RawContainer type;
-  typedef const type& const_reference;
+  typedef internal::ContainerWrapper<GTEST_REMOVE_REFERENCE_AND_CONST_(
+      RawContainer)>
+      type;
+  // ContainerWrapper<T> can represent a type either by value or by reference
+  // (selected by a constructor argument), so 'const type' can be used to
+  // reference a const wrapper.  We cannot 'typedef const type& const_reference'
+  // here, as that would mean ConstReference() has to return a reference to a
+  // local variable.
+  typedef const type const_reference;
+  typedef typename type::value_type RawElement;
 
   static const_reference ConstReference(const RawContainer& container) {
     static_assert(!std::is_const_v<RawContainer>,
                   "RawContainer type must not be const");
-    return container;
+    return type(&container, RelationToSourceReference());
   }
-  static type Copy(const RawContainer& container) { return container; }
+  static type Copy(const RawContainer& container) {
+    return type(&container, RelationToSourceCopy());
+  }
 };
 
 // This specialization is used when RawContainer is a native array type.
@@ -397,7 +406,7 @@ class [[nodiscard]] StlContainerView<Element[N]> {
 // This specialization is used when RawContainer is a native array
 // represented as a (pointer, size) tuple.
 template <typename ElementPointer, typename Size>
-class [[nodiscard]] StlContainerView< ::std::tuple<ElementPointer, Size> > {
+class [[nodiscard]] StlContainerView<::std::tuple<ElementPointer, Size>> {
  public:
   typedef typename std::remove_const<
       typename std::pointer_traits<ElementPointer>::element_type>::type
@@ -430,7 +439,7 @@ struct RemoveConstFromKey {
 
 // Partially specialized to remove constness from std::pair<const K, V>.
 template <typename K, typename V>
-struct RemoveConstFromKey<std::pair<const K, V> > {
+struct RemoveConstFromKey<std::pair<const K, V>> {
   typedef std::pair<K, V> type;
 };
 

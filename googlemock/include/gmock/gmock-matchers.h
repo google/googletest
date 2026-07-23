@@ -4647,9 +4647,9 @@ inline auto ElementsAreArray(const T (&array)[N])
 }
 
 template <typename Container>
-inline auto ElementsAreArray(const Container& container)
-    -> decltype(ElementsAreArray(container.begin(), container.end())) {
-  return ElementsAreArray(container.begin(), container.end());
+inline auto ElementsAreArray(const Container& container) {
+  auto view = internal::StlContainerView<Container>::ConstReference(container);
+  return ElementsAreArray(view.begin(), view.end());
 }
 
 template <typename T>
@@ -4694,9 +4694,10 @@ inline internal::UnorderedElementsAreArrayMatcher<T> UnorderedElementsAreArray(
 
 template <typename Container>
 inline internal::UnorderedElementsAreArrayMatcher<
-    typename Container::value_type>
+    typename internal::RangeTraits<Container>::value_type>
 UnorderedElementsAreArray(const Container& container) {
-  return UnorderedElementsAreArray(container.begin(), container.end());
+  auto view = internal::StlContainerView<Container>::ConstReference(container);
+  return UnorderedElementsAreArray(view.begin(), view.end());
 }
 
 template <typename T>
@@ -5392,9 +5393,10 @@ inline internal::UnorderedElementsAreArrayMatcher<T> IsSupersetOf(
 
 template <typename Container>
 inline internal::UnorderedElementsAreArrayMatcher<
-    typename Container::value_type>
+    typename internal::RangeTraits<Container>::value_type>
 IsSupersetOf(const Container& container) {
-  return IsSupersetOf(container.begin(), container.end());
+  auto view = internal::StlContainerView<Container>::ConstReference(container);
+  return IsSupersetOf(view.begin(), view.end());
 }
 
 template <typename T>
@@ -5449,9 +5451,10 @@ inline internal::UnorderedElementsAreArrayMatcher<T> IsSubsetOf(
 
 template <typename Container>
 inline internal::UnorderedElementsAreArrayMatcher<
-    typename Container::value_type>
+    typename internal::RangeTraits<Container>::value_type>
 IsSubsetOf(const Container& container) {
-  return IsSubsetOf(container.begin(), container.end());
+  auto view = internal::StlContainerView<Container>::ConstReference(container);
+  return IsSubsetOf(view.begin(), view.end());
 }
 
 template <typename T>
