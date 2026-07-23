@@ -1258,7 +1258,11 @@ std::string GetCapturedStderr() {
 
 size_t GetFileSize(FILE* file) {
   fseek(file, 0, SEEK_END);
-  return static_cast<size_t>(ftell(file));
+  const long size = ftell(file);
+  if (size < 0) {
+    return 0;
+  }
+  return static_cast<size_t>(size);
 }
 
 std::string ReadEntireFile(FILE* file) {
