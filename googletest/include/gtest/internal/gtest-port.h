@@ -2308,22 +2308,29 @@ using TimeInMillis = int64_t;  // Represents time in milliseconds.
 
 // Macros for defining flags.
 #define GTEST_DEFINE_bool_(name, default_val, doc)  \
+  GTEST_DECLARE_bool_(name);                        \
   namespace testing {                               \
   GTEST_API_ bool GTEST_FLAG(name) = (default_val); \
   }                                                 \
   static_assert(true, "no-op to require trailing semicolon")
 #define GTEST_DEFINE_int32_(name, default_val, doc)         \
+  GTEST_DECLARE_int32_(name);                               \
   namespace testing {                                       \
   GTEST_API_ std::int32_t GTEST_FLAG(name) = (default_val); \
   }                                                         \
   static_assert(true, "no-op to require trailing semicolon")
 #define GTEST_DEFINE_string_(name, default_val, doc)         \
+  GTEST_DECLARE_string_(name);                               \
   namespace testing {                                        \
   GTEST_API_ ::std::string GTEST_FLAG(name) = (default_val); \
   }                                                          \
   static_assert(true, "no-op to require trailing semicolon")
 
 // Macros for declaring flags.
+//
+// We also need to declare the flag in the public namespace to avoid triggering
+// -Wmissing-variable-declarations warnings, as reported here:
+// https://github.com/google/googletest/issues/4897
 #define GTEST_DECLARE_bool_(name)          \
   namespace testing {                      \
   GTEST_API_ extern bool GTEST_FLAG(name); \
