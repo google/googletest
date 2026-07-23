@@ -5166,21 +5166,25 @@ class ScopedPrematureExitFile {
  public:
   explicit ScopedPrematureExitFile(const char* premature_exit_filepath)
       : premature_exit_filepath_(
-            premature_exit_filepath ? premature_exit_filepath : "") {
+            premature_exit_filepath ? premature_exit_filepath : ""),
+        file_created_(false) {
     // If a path to the premature-exit file is specified...
     if (!premature_exit_filepath_.empty()) {
       // create the file with a single "0" character in it.  I/O
       // errors are ignored as there's nothing better we can do and we
       // don't want to fail the test because of this.
       FILE* pfile = posix::FOpen(premature_exit_filepath_.c_str(), "w");
-      fwrite("0", 1, 1, pfile);
-      fclose(pfile);
+      if (pfile != nullptr) {
+        fwrite("0", 1, 1, pfile);
+        fclose(pfile);
+        file_created_ = true;
+      }
     }
   }
 
   ~ScopedPrematureExitFile() {
 #ifndef GTEST_OS_ESP8266
-    if (!premature_exit_filepath_.empty()) {
+    if (file_created_) {
       int retval = remove(premature_exit_filepath_.c_str());
       if (retval) {
         GTEST_LOG_(ERROR) << "Failed to remove premature exit filepath \""
@@ -5193,6 +5197,7 @@ class ScopedPrematureExitFile {
 
  private:
   const std::string premature_exit_filepath_;
+  bool file_created_;
 
   ScopedPrematureExitFile(const ScopedPrematureExitFile&) = delete;
   ScopedPrematureExitFile& operator=(const ScopedPrematureExitFile&) = delete;
