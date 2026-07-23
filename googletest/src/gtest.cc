@@ -6005,6 +6005,8 @@ bool UnitTestImpl::RunAllTests() {
   const bool has_tests_to_run =
       FilterTests(should_shard ? HONOR_SHARDING_PROTOCOL
                                : IGNORE_SHARDING_PROTOCOL) > 0;
+  const bool has_tests_selected =
+      has_tests_to_run || reportable_disabled_test_count() > 0;
 
   // Lists the tests and exits if the --gtest_list_tests flag was specified.
   if (GTEST_FLAG_GET(list_tests)) {
@@ -6059,8 +6061,11 @@ bool UnitTestImpl::RunAllTests() {
     // Tells the unit test event listeners that the tests are about to start.
     repeater->OnTestIterationStart(*parent_, i);
 
-    // Runs each test suite if there is at least one test to run.
-    if (has_tests_to_run) {
+    // Sets up and tears down environments if there is at least one test to run,
+    // or if the selected tests are all disabled. The disabled tests still do
+    // not run, but global tear-down can clean resources created before
+    // RUN_ALL_TESTS().
+    if (has_tests_selected) {
       // Sets up all environments beforehand. If test environments aren't
       // recreated for each iteration, only do so on the first iteration.
       if (i == 0 || recreate_environments_when_repeating) {
