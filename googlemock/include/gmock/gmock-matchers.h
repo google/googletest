@@ -3774,7 +3774,9 @@ class [[nodiscard]] ElementsAreMatcherImpl
       // prints the empty container.  Otherwise we just need to show
       // how many elements there actually are.
       if (listener_interested && (actual_count != 0)) {
-        *listener << "which has " << Elements(actual_count);
+        *listener << "size mismatch:\n"
+                  << "  Expected size: " << count() << "\n"
+                  << "  Actual size: " << actual_count;
       }
       return false;
     }
@@ -3797,8 +3799,11 @@ class [[nodiscard]] ElementsAreMatcherImpl
         // corresponding matcher description. Therefore we print the index, the
         // value of the mismatched element, and the corresponding matcher
         // description to ease debugging.
-        *listener << "whose element #" << exam_pos << " ("
-                  << PrintToString(*unmatched_it) << ") ";
+        *listener << "element mismatch at index " << exam_pos << ":\n";
+        *listener << "  Actual: " << PrintToString(*unmatched_it) << "\n";
+        *listener << "  Expected: ";
+        matchers_[exam_pos].DescribeTo(listener->stream());
+        *listener << "\n  Detail: ";
         matchers_[exam_pos].DescribeNegationTo(listener->stream());
         PrintIfNotEmpty(explanations[exam_pos], listener->stream());
       }
@@ -3815,7 +3820,7 @@ class [[nodiscard]] ElementsAreMatcherImpl
           if (reason_printed) {
             *listener << ",\nand ";
           }
-          *listener << "whose element #" << i << " matches, " << s;
+          *listener << "element #" << i << " matches: " << s;
           reason_printed = true;
         }
       }
