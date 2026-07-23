@@ -948,7 +948,7 @@ TEST_F(PREFIX_WITH_MACRO(NamingTestNonParametrized),
   EXPECT_STREQ("FooSomeTestName", test_info->name());
 }
 
-TEST(MacroNameing, LookupNames) {
+TEST(MacroNaming, LookupNames) {
   std::set<std::string> know_suite_names, know_test_names;
 
   const auto& ins = testing::UnitTest::GetInstance();
