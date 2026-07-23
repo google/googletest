@@ -427,21 +427,21 @@ class [[nodiscard]] OnceAction<Result(Args...)> final {
   // via StdFunctionAdaptor.
   template <typename Callable>
   using IsDirectlyCompatible = internal::conjunction<
-      // It must be possible to capture the callable in StdFunctionAdaptor.
-      std::is_constructible<typename std::decay<Callable>::type, Callable>,
       // The callable must be compatible with our signature.
       internal::is_callable_r<Result, typename std::decay<Callable>::type,
-                              Args...>>;
+                              Args...>,
+      // It must be possible to capture the callable in StdFunctionAdaptor.
+      std::is_constructible<typename std::decay<Callable>::type, Callable>>;
 
   // True iff we can use the given callable type via StdFunctionAdaptor once we
   // ignore incoming arguments.
   template <typename Callable>
   using IsCompatibleAfterIgnoringArguments = internal::conjunction<
-      // It must be possible to capture the callable in a lambda.
-      std::is_constructible<typename std::decay<Callable>::type, Callable>,
       // The callable must be invocable with zero arguments, returning something
       // convertible to Result.
-      internal::is_callable_r<Result, typename std::decay<Callable>::type>>;
+      internal::is_callable_r<Result, typename std::decay<Callable>::type>,
+      // It must be possible to capture the callable in a lambda.
+      std::is_constructible<typename std::decay<Callable>::type, Callable>>;
 
  public:
   // Construct from a callable that is directly compatible with our mocked
