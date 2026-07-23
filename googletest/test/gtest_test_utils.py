@@ -31,19 +31,17 @@
 # Suppresses the 'Import not at the top of the file' lint complaint.
 # pylint: disable=g-import-not-at-top
 
+import atexit
 import os
+import shutil
 import subprocess
 import sys
+import tempfile
+import unittest as _test_module
 
 IS_WINDOWS = os.name == 'nt'
 IS_CYGWIN = os.name == 'posix' and 'CYGWIN' in os.uname()[0]
 IS_OS2 = os.name == 'os2'
-
-import atexit
-import shutil
-import tempfile
-import unittest as _test_module
-# pylint: enable=g-import-not-at-top
 
 GTEST_OUTPUT_VAR_NAME = 'GTEST_OUTPUT'
 
