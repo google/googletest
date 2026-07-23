@@ -5942,6 +5942,15 @@ TEST_F(ParseFlagsTest, UnrecognizedFlag) {
   GTEST_TEST_PARSING_FLAGS_(argv, argv2, flags, false);
 }
 
+// Tests having a --help flag on the command line.
+TEST_F(ParseFlagsTest, HelpFlag) {
+  const char* argv[] = {"foo.exe", "--help", "bar", nullptr};
+
+  const char* argv2[] = {"foo.exe", "bar", nullptr};
+
+  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags(), true);
+}
+
 // Tests having a --gtest_list_tests flag
 TEST_F(ParseFlagsTest, ListTestsFlag) {
   const char* argv[] = {"foo.exe", "--gtest_list_tests", nullptr};
