@@ -93,6 +93,26 @@ if (MSVC)
               "${gtest_dir}/src/gtest-all.cc"
               src/gmock-all.cc
               src/gmock_main.cc)
+
+  if(GTEST_HAS_ABSL)
+    target_compile_definitions(gmock PUBLIC GTEST_HAS_ABSL=1)
+    target_compile_definitions(gmock_main PUBLIC GTEST_HAS_ABSL=1)
+    set(gmock_DEPENDENCIES
+          absl::failure_signal_handler
+          absl::stacktrace
+          absl::symbolize
+          absl::flags_parse
+          absl::flags_reflection
+          absl::flags_usage
+          absl::strings
+          absl::any
+          absl::optional
+          absl::variant
+          re2::re2
+    )
+    target_link_libraries(gmock PUBLIC ${gmock_DEPENDENCIES})
+    target_link_libraries(gmock_main PUBLIC ${gmock_DEPENDENCIES})
+  endif ()
 else()
   cxx_library(gmock "${cxx_strict}" src/gmock-all.cc)
   target_link_libraries(gmock PUBLIC gtest)
