@@ -62,7 +62,7 @@ macro(config_compiler_and_linker)
   endif()
 
   fix_default_compiler_settings_()
-
+  set(cxx_strict_flags "")
   if (MSVC)
     # When Google Test is built as a shared library, it should also use shared
     # runtime libraries. Otherwise, it may end up with multiple copies of
