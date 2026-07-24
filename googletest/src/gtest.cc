@@ -2700,7 +2700,7 @@ Result HandleSehExceptionsInMethodIfSupported(T* object, Result (T::*method)(),
 }
 
 // Runs the given method and catches and reports C++ and/or SEH-style
-// exceptions, if they are supported; returns the 0-value for type
+// exceptions, if they are supported; returns the default-value for type
 // Result in case of an SEH exception.
 template <class T, typename Result>
 Result HandleExceptionsInMethodIfSupported(T* object, Result (T::*method)(),
@@ -2748,7 +2748,7 @@ Result HandleExceptionsInMethodIfSupported(T* object, Result (T::*method)(),
           TestPartResult::kFatalFailure,
           FormatCxxExceptionMessage(nullptr, location));
     }
-    return static_cast<Result>(0);
+    return Result();
 #else
     return HandleSehExceptionsInMethodIfSupported(object, method, location);
 #endif  // GTEST_HAS_EXCEPTIONS
