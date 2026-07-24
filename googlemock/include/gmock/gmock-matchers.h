@@ -3732,7 +3732,7 @@ class [[nodiscard]] ElementsAreMatcherImpl
     // the end of either the elements or the matchers, or until we find a
     // mismatch.
     for (; it != stl_container.end() && exam_pos != count(); ++it, ++exam_pos) {
-      bool match;  // Does the current element match the current matcher?
+      bool match = false;  // Does the current element match the current matcher?
       if (listener_interested) {
         StringMatchResultListener s;
         match = matchers_[exam_pos].MatchAndExplain(*it, &s);
