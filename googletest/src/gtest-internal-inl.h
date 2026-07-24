@@ -587,7 +587,7 @@ class GTEST_API_ UnitTestImpl {
   // total_test_suite_count() - 1. If i is not in that range, returns NULL.
   const TestSuite* GetTestSuite(int i) const {
     const int index = GetElementOr(test_suite_indices_, i, -1);
-    return index < 0 ? nullptr : test_suites_[static_cast<size_t>(i)];
+    return index < 0 ? nullptr : test_suites_[static_cast<size_t>(index)];
   }
 
   //  Legacy API is deprecated but still available
