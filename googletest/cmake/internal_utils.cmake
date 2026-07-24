@@ -35,21 +35,21 @@ macro(fix_default_compiler_settings_)
         # preferable to use CRT as static libraries, as we don't have to rely
         # on CRT DLLs being available. CMake always defaults to using shared
         # CRT libraries, so we override that default here.
-        string(REPLACE "/MD" "-MT" ${flag_var} "${${flag_var}}")
+        string(REGEX REPLACE "([/-])MD" "\\1MT" ${flag_var} "${${flag_var}}")
 
         # When using Ninja with Clang, static builds pass -D_DLL on Windows.
         # This is incorrect and should not happen, so we fix that here.
-        string(REPLACE "-D_DLL" "" ${flag_var} "${${flag_var}}")
+        string(REGEX REPLACE "([/-])D_DLL" "" ${flag_var} "${${flag_var}}")
       endif()
 
       # We prefer more strict warning checking for building Google Test.
       # Replaces /W3 with /W4 in defaults.
-      string(REPLACE "/W3" "/W4" ${flag_var} "${${flag_var}}")
+      string(REGEX REPLACE "([/-])W3" "\\1W4" ${flag_var} "${${flag_var}}")
 
       # Prevent D9025 warning for targets that have exception handling
       # turned off (/EHs-c- flag). Where required, exceptions are explicitly
       # re-enabled using the cxx_exception_flags variable.
-      string(REPLACE "/EHsc" "" ${flag_var} "${${flag_var}}")
+      string(REGEX REPLACE "([/-])EHsc" "" ${flag_var} "${${flag_var}}")
     endforeach()
   endif()
 endmacro()
