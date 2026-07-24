@@ -1254,22 +1254,22 @@ TEST(RefTest, ExplainsResult) {
 // Tests string comparison matchers.
 
 template <typename T = std::string>
-internal::StringType<T> ToString(T str) {
-  return internal::StringType<T>(str);
+std::string FromStringLike(internal::StringLike<T> str) {
+  return std::string(str);
 }
 
-TEST(StringType, TestConversions) {
-  EXPECT_EQ("foo", ToString("foo"));
-  EXPECT_EQ("foo", ToString(std::string("foo")));
+TEST(StringLike, TestConversions) {
+  EXPECT_EQ("foo", FromStringLike("foo"));
+  EXPECT_EQ("foo", FromStringLike(std::string("foo")));
 #if GTEST_INTERNAL_HAS_STRING_VIEW
-  EXPECT_EQ("foo", ToString(internal::StringView("foo")));
+  EXPECT_EQ("foo", FromStringLike(internal::StringView("foo")));
 #endif  // GTEST_INTERNAL_HAS_STRING_VIEW
 
   // Non deducible types.
-  EXPECT_EQ("", ToString({}));
-  EXPECT_EQ("foo", ToString({'f', 'o', 'o'}));
+  EXPECT_EQ("", FromStringLike({}));
+  EXPECT_EQ("foo", FromStringLike({'f', 'o', 'o'}));
   const char buf[] = "foo";
-  EXPECT_EQ("foo", ToString({buf, buf + 3}));
+  EXPECT_EQ("foo", FromStringLike({buf, buf + 3}));
 }
 
 TEST(StrEqTest, MatchesEqualString) {
