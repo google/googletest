@@ -443,7 +443,17 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 #define GTEST_USES_RE2 1
 #elif GTEST_HAS_POSIX_RE
 #include <regex.h>  // NOLINT
+
+// If the POSIX regex functions have been redefined as macros (e.g., by
+// MinGW headers leaking into the include path on non-Windows systems),
+// the POSIX regex implementation cannot be used reliably.  Fall back to
+// the simple regex implementation instead.
+#if defined(regcomp) || defined(regexec) || defined(regfree)
+#undef GTEST_USES_POSIX_RE
+#define GTEST_USES_SIMPLE_RE 1
+#else
 #define GTEST_USES_POSIX_RE 1
+#endif  // defined(regcomp) || defined(regexec) || defined(regfree)
 #else
 // Use our own simple regex implementation.
 #define GTEST_USES_SIMPLE_RE 1
