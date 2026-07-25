@@ -1243,16 +1243,16 @@ TEST(InvokeWithoutArgsTest, Function) {
 TEST(InvokeWithoutArgsTest, Functor) {
   GTEST_DISABLE_DEPRECATED_PUSH_()
   // As an action that takes no argument.
-  Action<int()> a = InvokeWithoutArgs(NullaryFunctor());  // NOLINT
+  Action<int()> a = NullaryFunctor();  // NOLINT
   EXPECT_EQ(2, a.Perform(std::make_tuple()));
 
   // As an action that takes three arguments.
   Action<int(int, double, char)> a2 =  // NOLINT
-      InvokeWithoutArgs(NullaryFunctor());
+      NullaryFunctor();
   EXPECT_EQ(2, a2.Perform(std::make_tuple(3, 3.5, 'a')));
 
   // As an action that returns void.
-  Action<void()> a3 = InvokeWithoutArgs(VoidNullaryFunctor());
+  Action<void()> a3 = VoidNullaryFunctor();
   g_done = false;
   a3.Perform(std::make_tuple());
   EXPECT_TRUE(g_done);
