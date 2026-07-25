@@ -1719,9 +1719,13 @@ class [[nodiscard]] PredicateFormatterFromMatcher {
     // potentially unsafe downcasting of the matcher argument.
     const Matcher<const T&> matcher = SafeMatcherCast<const T&>(matcher_);
 
-    // The expected path here is that the matcher should match (i.e. that most
-    // tests pass) so optimize for this case.
-    if (matcher.Matches(x)) {
+    // Capture the explanation during the initial match attempt so that
+    // side-effecting matchers (like Throws) are not invoked a second time
+    // when formatting the failure message.
+    StringMatchResultListener listener;
+    const bool matches = matcher.MatchAndExplain(x, &listener);
+
+    if (matches) {
       return AssertionSuccess();
     }
 
@@ -1729,14 +1733,15 @@ class [[nodiscard]] PredicateFormatterFromMatcher {
     ss << "Value of: " << value_text << "\n"
        << "Expected: ";
     matcher.DescribeTo(&ss);
-
-    // Rerun the matcher to "PrintAndExplain" the failure.
-    StringMatchResultListener listener;
-    if (MatchPrintAndExplain(x, matcher, &listener)) {
-      ss << "\n  The matcher failed on the initial attempt; but passed when "
-            "rerun to generate the explanation.";
+    ss << "\n  Actual: ";
+    UniversalPrint(x, &ss);
+#if GTEST_HAS_RTTI
+    {
+      const std::string& type_name = GetTypeName<T>();
+      if (IsReadableTypeName(type_name)) ss << " (of type " << type_name << ")";
     }
-    ss << "\n  Actual: " << listener.str();
+#endif
+    PrintIfNotEmpty(listener.str(), &ss);
     return AssertionFailure() << ss.str();
   }
 

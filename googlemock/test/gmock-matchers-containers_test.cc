@@ -2805,9 +2805,6 @@ class PredicateFormatterFromMatcherTest : public ::testing::Test {
  protected:
   enum Behavior { kInitialSuccess, kAlwaysFail, kFlaky };
 
-  // A matcher that can return different results when used multiple times on the
-  // same input. No real matcher should do this; but this lets us test that we
-  // detect such behavior and fail appropriately.
   class MockMatcher : public MatcherInterface<Behavior> {
    public:
     bool MatchAndExplain(Behavior behavior,
@@ -2815,20 +2812,11 @@ class PredicateFormatterFromMatcherTest : public ::testing::Test {
       *listener << "[MatchAndExplain]";
       switch (behavior) {
         case kInitialSuccess:
-          // The first call to MatchAndExplain should use a "not interested"
-          // listener; so this is expected to return |true|. There should be no
-          // subsequent calls.
-          return !listener->IsInterested();
-
+          return true;
         case kAlwaysFail:
           return false;
-
         case kFlaky:
-          // The first call to MatchAndExplain should use a "not interested"
-          // listener; so this will return |false|. Subsequent calls should have
-          // an "interested" listener; so this will return |true|, thus
-          // simulating a flaky matcher.
-          return listener->IsInterested();
+          return false;
       }
 
       GTEST_LOG_(FATAL) << "This should never be reached";
@@ -2867,13 +2855,11 @@ TEST_F(PredicateFormatterFromMatcherTest, NoShortCircuitOnFailure) {
   EXPECT_EQ(expect, result.message());
 }
 
-TEST_F(PredicateFormatterFromMatcherTest, DetectsFlakyShortCircuit) {
+TEST_F(PredicateFormatterFromMatcherTest, AlwaysFails) {
   AssertionResult result = RunPredicateFormatter(kFlaky);
   EXPECT_FALSE(result);  // Implicit cast to bool.
   std::string expect =
       "Value of: dummy-name\nExpected: [DescribeTo]\n"
-      "  The matcher failed on the initial attempt; but passed when rerun to "
-      "generate the explanation.\n"
       "  Actual: 2" +
       OfType(internal::GetTypeName<Behavior>()) + ", [MatchAndExplain]";
   EXPECT_EQ(expect, result.message());
