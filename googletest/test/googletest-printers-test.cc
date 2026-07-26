@@ -395,12 +395,24 @@ TEST(PrintCharTest, UnsignedChar) {
   EXPECT_EQ("'b' (98, 0x62)", Print(static_cast<unsigned char>('b')));
 }
 
-TEST(PrintCharTest, Char16) { EXPECT_EQ("U+0041", Print(u'A')); }
+TEST(PrintCharTest, Char16) {
+  EXPECT_EQ("U+0041", Print(u'A'));
+  EXPECT_EQ("U+754C", Print(u'界'));
+  // Surrogates are not code points, so they are printed as code units.
+  EXPECT_EQ("u'\\xD800' (55296)", Print(static_cast<char16_t>(0xD800)));
+  EXPECT_EQ("u'\\xDFFF' (57343)", Print(static_cast<char16_t>(0xDFFF)));
+}
 
 TEST(PrintCharTest, Char32) { EXPECT_EQ("U+0041", Print(U'A')); }
 
 #ifdef __cpp_lib_char8_t
-TEST(PrintCharTest, Char8) { EXPECT_EQ("U+0041", Print(u8'A')); }
+TEST(PrintCharTest, Char8) {
+  EXPECT_EQ("U+0041", Print(u8'A'));
+  // Only ASCII code units encode a code point on their own; the rest are
+  // printed as code units.
+  EXPECT_EQ("u8'\\x80' (128)", Print(static_cast<char8_t>(0x80)));
+  EXPECT_EQ("u8'\\xFF' (255)", Print(static_cast<char8_t>(0xFF)));
+}
 #endif
 
 // Tests printing other simple, built-in types.
@@ -455,7 +467,7 @@ TEST(PrintBuiltInTypeTest, Integer) {
 #ifdef __cpp_lib_char8_t
   EXPECT_EQ("U+0000",
             Print(std::numeric_limits<char8_t>::min()));  // char8_t
-  EXPECT_EQ("U+00FF",
+  EXPECT_EQ("u8'\\xFF' (255)",
             Print(std::numeric_limits<char8_t>::max()));  // char8_t
 #endif
   EXPECT_EQ("U+0000",
