@@ -39,6 +39,8 @@
 
 #include "sample2.h"
 
+#include <iterator>
+
 #include "gtest/gtest.h"
 namespace {
 // In this example, we test the MyString class (a simple string).
@@ -78,7 +80,7 @@ const char kHelloString[] = "Hello, world!";
 TEST(MyString, ConstructorFromCString) {
   const MyString s(kHelloString);
   EXPECT_EQ(0, strcmp(s.c_string(), kHelloString));
-  EXPECT_EQ(sizeof(kHelloString) / sizeof(kHelloString[0]) - 1, s.Length());
+  EXPECT_EQ(std::size(kHelloString) - 1, s.Length());
 }
 
 // Tests the copy c'tor.
