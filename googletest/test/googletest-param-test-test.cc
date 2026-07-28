@@ -39,6 +39,7 @@
 #include <cstdint>
 #include <functional>
 #include <iostream>
+#include <iterator>
 #include <list>
 #include <set>
 #include <sstream>
@@ -737,10 +738,7 @@ const int test_generation_params[] = {36, 42, 72};
 
 class TestGenerationTest : public TestWithParam<int> {
  public:
-  enum {
-    PARAMETER_COUNT =
-        sizeof(test_generation_params) / sizeof(test_generation_params[0])
-  };
+  enum { PARAMETER_COUNT = std::size(test_generation_params) };
 
   typedef TestGenerationEnvironment<PARAMETER_COUNT> Environment;
 

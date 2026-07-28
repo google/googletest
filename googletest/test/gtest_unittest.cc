@@ -33,6 +33,8 @@
 
 #include "gtest/gtest.h"
 
+#include <iterator>
+
 // Verifies that the command line flag variables can be accessed in
 // code once "gtest.h" has been #included.
 // Do not move it after other gtest #includes.
@@ -5853,9 +5855,8 @@ class ParseFlagsTest : public Test {
   // to specify the array sizes.
 
 #define GTEST_TEST_PARSING_FLAGS_(argv1, argv2, expected, should_print_help) \
-  TestParsingFlags(sizeof(argv1) / sizeof(*argv1) - 1, argv1,                \
-                   sizeof(argv2) / sizeof(*argv2) - 1, argv2, expected,      \
-                   should_print_help)
+  TestParsingFlags(std::size(argv1) - 1, argv1, std::size(argv2) - 1, argv2, \
+                   expected, should_print_help)
 };
 
 // Tests parsing an empty command line.
