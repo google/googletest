@@ -2030,6 +2030,26 @@ TEST(PrintOneofTest, Basic) {
       PrintToString(Type(NonPrintable{})));
 }
 
+TEST(PrintVariantTest, Monostate) {
+  EXPECT_EQ("(monostate)", PrintToString(std::monostate()));
+
+#if GTEST_HAS_EXCEPTIONS
+  struct ThrowOnMove {
+    ThrowOnMove() = default;
+    ThrowOnMove(ThrowOnMove&& other) { *this = std::move(other); }
+    ThrowOnMove& operator=(ThrowOnMove&&) {
+      (void)std::vector<bool>().at(0);
+      return *this;
+    }
+  };
+  std::variant<std::monostate, ThrowOnMove> v = std::monostate();
+  EXPECT_EQ("('std::monostate(index = 0)' with value (monostate))",
+            PrintToString(v));
+  EXPECT_THROW(v = ThrowOnMove(), std::out_of_range);
+  EXPECT_EQ("(valueless)", PrintToString(v));
+#endif
+}
+
 #if GTEST_INTERNAL_HAS_COMPARE_LIB
 TEST(PrintOrderingTest, Basic) {
   EXPECT_EQ("(less)", PrintToString(std::strong_ordering::less));
