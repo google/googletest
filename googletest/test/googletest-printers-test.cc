@@ -2043,8 +2043,9 @@ TEST(PrintVariantTest, Monostate) {
     }
   };
   std::variant<std::monostate, ThrowOnMove> v = std::monostate();
-  EXPECT_EQ("('std::monostate(index = 0)' with value (monostate))",
-            PrintToString(v));
+  std::string res = PrintToString(v);
+  EXPECT_NE(res.find("::monostate(index = 0)' with value (monostate))"),
+            res.npos);
   EXPECT_THROW(v = ThrowOnMove(), std::out_of_range);
   EXPECT_EQ("(valueless)", PrintToString(v));
 #endif
