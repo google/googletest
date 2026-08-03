@@ -80,6 +80,11 @@
 //                              is/isn't available.
 //   GTEST_HAS_RTTI           - Define it to 1/0 to indicate that RTTI is/isn't
 //                              enabled.
+//   GTEST_HAS_WCHAR          - Define it to 1/0 to indicate that wide
+//                              characters are/aren't supported. (Google Test
+//                              can be used where std::char_traits<wchar_t> and
+//                              libc wchar_t functions (putwc, getwc, etc.) are
+//                              unavailable.)
 //   GTEST_HAS_STD_WSTRING    - Define it to 1/0 to indicate that
 //                              std::wstring does/doesn't work (Google Test can
 //                              be used where std::wstring is unavailable).
@@ -499,22 +504,89 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 #endif  // defined(_MSC_VER) || defined(__BORLANDC__)
 #endif  // GTEST_HAS_EXCEPTIONS
 
-#ifndef GTEST_HAS_STD_WSTRING
-// The user didn't tell us whether ::std::wstring is available, so we need
-// to figure it out.
+// 1. Calculate default GTEST_HAS_WCHAR and GTEST_HAS_STD_WSTRING values based
+// on compiler / STL capabilities.
+#if defined(_MSC_VER)
+// MSVC always supports ::std::wstring.
+#define GTEST_HAS_STD_WSTRING_DEFAULT 1
+// MSVC either defines wchar_t as a typedef of unsigned short, or as a native
+// type (in which case, it defines _NATIVE_WCHAR_T_DEFINED). When wchar_t is a
+// typedef, defining an overload for const wchar_t* would cause unsigned short*
+// be printed as a wide string, possibly causing invalid memory accesses, so we
+// omit wchar_t overloads in that case.
+#if defined(_NATIVE_WCHAR_T_DEFINED)
+#define GTEST_HAS_WCHAR_DEFAULT 1
+#else
+#define GTEST_HAS_WCHAR_DEFAULT 0
+#endif
+
+#elif defined(_LIBCPP_VERSION)
+#if _LIBCPP_HAS_WIDE_CHARACTERS
+#define GTEST_HAS_WCHAR_DEFAULT 1
+#define GTEST_HAS_STD_WSTRING_DEFAULT 1
+#else
+#define GTEST_HAS_WCHAR_DEFAULT 0
+#define GTEST_HAS_STD_WSTRING_DEFAULT 0
+#endif
+
+#elif defined(__GLIBCXX__)
+#if _GLIBCXX_USE_WCHAR_T
+#define GTEST_HAS_WCHAR_DEFAULT 1
+#define GTEST_HAS_STD_WSTRING_DEFAULT 1
+#else
+#define GTEST_HAS_WCHAR_DEFAULT 0
+#define GTEST_HAS_STD_WSTRING_DEFAULT 0
+#endif
+
+#else
+// Unknown standard library implementation; fall back to a list of OSes known to
+// not support wide characters.
+//
 // Cygwin 1.7 and below doesn't support ::std::wstring.
 // Solaris' libc++ doesn't support it either.  Android has
 // no support for it at least as recent as Froyo (2.2).
+//
+// Always let the user override the defaults in this case; they might have more
+// information about what's supported than we do.
 #if (!(defined(GTEST_OS_LINUX_ANDROID) || defined(GTEST_OS_CYGWIN) || \
        defined(GTEST_OS_SOLARIS) || defined(GTEST_OS_HAIKU) ||        \
        defined(GTEST_OS_ESP32) || defined(GTEST_OS_ESP8266) ||        \
        defined(GTEST_OS_XTENSA) || defined(GTEST_OS_QURT) ||          \
        defined(GTEST_OS_NXP_QN9090) || defined(GTEST_OS_NRF52)))
-#define GTEST_HAS_STD_WSTRING 1
+#define GTEST_HAS_WCHAR_DEFAULT 1
+#define GTEST_HAS_STD_WSTRING_DEFAULT 1
 #else
-#define GTEST_HAS_STD_WSTRING 0
+#define GTEST_HAS_WCHAR_DEFAULT 0
+#define GTEST_HAS_STD_WSTRING_DEFAULT 0
 #endif
-#endif  // GTEST_HAS_STD_WSTRING
+#endif
+
+// 2. Validate explicit user overrides (if user passed -DGTEST_HAS_*=1)
+#if defined(GTEST_HAS_WCHAR) && GTEST_HAS_WCHAR
+#if defined(_MSC_VER) && !defined(_NATIVE_WCHAR_T_DEFINED)
+#error Cannot explicitly enable GTEST_HAS_WCHAR when wchar_t is a typedef.
+#elif defined(_LIBCPP_VERSION) && !_LIBCPP_HAS_WIDE_CHARACTERS
+#error Cannot explicitly enable GTEST_HAS_WCHAR without libc++ wide character support.
+#elif defined(__GLIBCXX__) && !_GLIBCXX_USE_WCHAR_T
+#error Cannot explicitly enable GTEST_HAS_WCHAR without libstdc++ wide character support.
+#endif
+#endif
+
+#if defined(GTEST_HAS_STD_WSTRING) && GTEST_HAS_STD_WSTRING
+#if defined(_LIBCPP_VERSION) && !_LIBCPP_HAS_WIDE_CHARACTERS
+#error Cannot explicitly enable GTEST_HAS_STD_WSTRING without libc++ wide character support.
+#elif defined(__GLIBCXX__) && !_GLIBCXX_USE_WCHAR_T
+#error Cannot explicitly enable GTEST_HAS_STD_WSTRING without libstdc++ wide character support.
+#endif
+#endif
+
+// 3. Set final values if not explicitly overridden by user
+#if !defined(GTEST_HAS_WCHAR)
+#define GTEST_HAS_WCHAR GTEST_HAS_WCHAR_DEFAULT
+#endif
+#if !defined(GTEST_HAS_STD_WSTRING)
+#define GTEST_HAS_STD_WSTRING GTEST_HAS_STD_WSTRING_DEFAULT
+#endif
 
 #ifndef GTEST_HAS_FILE_SYSTEM
 // Most platforms support a file system.
