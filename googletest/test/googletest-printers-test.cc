@@ -648,7 +648,13 @@ TEST(PrintU32StringTest, EscapesProperly) {
             Print(p));
 }
 
-#if GTEST_HAS_WCHAR
+// MSVC compiler can be configured to define whar_t as a typedef
+// of unsigned short. Defining an overload for const wchar_t* in that case
+// would cause pointers to unsigned shorts be printed as wide strings,
+// possibly accessing more memory than intended and causing invalid
+// memory accesses. MSVC defines _NATIVE_WCHAR_T_DEFINED symbol when
+// wchar_t is implemented as a native type.
+#if !defined(_MSC_VER) || defined(_NATIVE_WCHAR_T_DEFINED)
 
 // const wchar_t*.
 TEST(PrintWideCStringTest, Const) {
@@ -679,7 +685,7 @@ TEST(PrintWideCStringTest, EscapesProperly) {
                 "\\n\\r\\t\\v\\xD3\\x576\\x8D3\\xC74D a\"",
             Print(static_cast<const wchar_t*>(s)));
 }
-#endif  // GTEST_HAS_WCHAR
+#endif  // native wchar_t
 
 // Tests printing pointers to other char types.
 
