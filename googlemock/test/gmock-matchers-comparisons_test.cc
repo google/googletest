@@ -42,6 +42,10 @@
 #include "test/gmock-matchers_test.h"
 #include "gtest/gtest.h"
 
+#if GTEST_INTERNAL_HAS_STRING_VIEW
+#include <string_view>
+#endif
+
 // Silence warning C4244: 'initializing': conversion from 'int' to 'short',
 // possible loss of data and C4100, unreferenced local parameter
 GTEST_DISABLE_MSC_WARNINGS_PUSH_(4244 4100)
@@ -1254,22 +1258,29 @@ TEST(RefTest, ExplainsResult) {
 // Tests string comparison matchers.
 
 template <typename T = std::string>
-std::string FromStringLike(internal::StringLike<T> str) {
-  return std::string(str);
+internal::StringType<T> ToString(T str) {
+  return internal::StringType<T>(str);
 }
 
-TEST(StringLike, TestConversions) {
-  EXPECT_EQ("foo", FromStringLike("foo"));
-  EXPECT_EQ("foo", FromStringLike(std::string("foo")));
+TEST(StringType, TestConversions) {
+  EXPECT_EQ("foo", ToString("foo"));
+  EXPECT_EQ("foo", ToString(std::string("foo")));
+
+#if GTEST_HAS_STD_WSTRING
+  EXPECT_EQ(L"foo", ToString(L"foo"));
+  EXPECT_EQ(L"foo", ToString(std::wstring(L"foo")));
+#endif
+
 #if GTEST_INTERNAL_HAS_STRING_VIEW
-  EXPECT_EQ("foo", FromStringLike(internal::StringView("foo")));
+  EXPECT_EQ("foo", ToString(internal::StringView("foo")));
+  EXPECT_EQ(L"foo", ToString(std::wstring_view(L"foo")));
 #endif  // GTEST_INTERNAL_HAS_STRING_VIEW
 
   // Non deducible types.
-  EXPECT_EQ("", FromStringLike({}));
-  EXPECT_EQ("foo", FromStringLike({'f', 'o', 'o'}));
+  EXPECT_EQ("", ToString({}));
+  EXPECT_EQ("foo", ToString({'f', 'o', 'o'}));
   const char buf[] = "foo";
-  EXPECT_EQ("foo", FromStringLike({buf, buf + 3}));
+  EXPECT_EQ("foo", ToString({buf, buf + 3}));
 }
 
 TEST(StrEqTest, MatchesEqualString) {

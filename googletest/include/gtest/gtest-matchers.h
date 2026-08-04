@@ -45,6 +45,7 @@
 #include <memory>
 #include <ostream>
 #include <string>
+#include <string_view>
 #include <type_traits>
 
 #include "gtest/gtest-printers.h"
@@ -812,9 +813,26 @@ class [[nodiscard]] ImplicitCastEqMatcher {
   StoredRhs stored_rhs_;
 };
 
-template <typename T,
-          typename = std::enable_if_t<std::is_constructible_v<std::string, T>>>
-using StringLike = T;
+// Dummy function (never defined) whose return type evaluates to std::string if
+// the given type is a string-like type that can be converted to std::string,
+// either directly or through an intermediate std::string_view.
+template <class T>
+extern std::enable_if_t<std::is_constructible_v<std::string, T>, std::string>
+ResolveAsString(const void* /* preferred */);
+
+#if GTEST_HAS_STD_WSTRING
+// Same as above, but for std::wstring. In cases where both conversions are
+// possible, this overload takes lower priority.
+template <class T>
+extern std::enable_if_t<std::is_constructible_v<std::wstring, T>, std::wstring>
+ResolveAsString(... /* fallback */);
+#endif
+
+// Evaluates to the std::basic_string type that the given string-like type can
+// be converted to. Prefers std::string over std::wstring if both are possible.
+// Fails in a SFINAE-friendly way if no conversion was viable.
+template <typename T>
+using StringType = decltype(ResolveAsString<T>(nullptr));
 
 // Implements polymorphic matchers MatchesRegex(regex) and
 // ContainsRegex(regex), which can be used as a Matcher<T> as long as
@@ -877,9 +895,10 @@ inline PolymorphicMatcher<internal::MatchesRegexMatcher> MatchesRegex(
   return MakePolymorphicMatcher(internal::MatchesRegexMatcher(regex, true));
 }
 template <typename T = std::string>
-PolymorphicMatcher<internal::MatchesRegexMatcher> MatchesRegex(
-    const internal::StringLike<T>& regex) {
-  return MatchesRegex(new internal::RE(std::string(regex)));
+std::enable_if_t<std::is_constructible_v<internal::RE, internal::StringType<T>>,
+                 PolymorphicMatcher<internal::MatchesRegexMatcher>>
+MatchesRegex(const T& regex) {
+  return MatchesRegex(new internal::RE(internal::StringType<T>(regex)));
 }
 
 // Matches a string that contains regular expression 'regex'.
@@ -889,9 +908,10 @@ inline PolymorphicMatcher<internal::MatchesRegexMatcher> ContainsRegex(
   return MakePolymorphicMatcher(internal::MatchesRegexMatcher(regex, false));
 }
 template <typename T = std::string>
-PolymorphicMatcher<internal::MatchesRegexMatcher> ContainsRegex(
-    const internal::StringLike<T>& regex) {
-  return ContainsRegex(new internal::RE(std::string(regex)));
+std::enable_if_t<std::is_constructible_v<internal::RE, internal::StringType<T>>,
+                 PolymorphicMatcher<internal::MatchesRegexMatcher>>
+ContainsRegex(const T& regex) {
+  return ContainsRegex(new internal::RE(internal::StringType<T>(regex)));
 }
 
 // Creates a polymorphic matcher that matches anything equal to x.
