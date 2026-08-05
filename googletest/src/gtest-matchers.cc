@@ -93,6 +93,18 @@ Matcher<internal::StringView>::Matcher(const char* s) {
 Matcher<internal::StringView>::Matcher(internal::StringView s) {
   *this = Eq(std::string(s));
 }
+
+// Constructs a matcher that matches a const std::string& whose value is
+// equal to s. Copies into a std::string so the matcher owns its data.
+Matcher<const std::string&>::Matcher(internal::StringView s) {
+  *this = Eq(std::string(s));
+}
+
+// Constructs a matcher that matches a std::string whose value is equal to s.
+// Copies into a std::string so the matcher owns its data.
+Matcher<std::string>::Matcher(internal::StringView s) {
+  *this = Eq(std::string(s));
+}
 #endif  // GTEST_INTERNAL_HAS_STRING_VIEW
 
 }  // namespace testing
