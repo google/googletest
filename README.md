@@ -8,12 +8,12 @@ Our documentation is now live on GitHub Pages at
 https://google.github.io/googletest/. We recommend browsing the documentation on
 GitHub Pages rather than directly in the repository.
 
-#### Release 1.17.0
+#### Release 1.18.0
 
-[Release 1.17.0](https://github.com/google/googletest/releases/tag/v1.17.0) is
+[Release 1.18.0](https://github.com/google/googletest/releases/tag/v1.18.0) is
 now available.
 
-The 1.17.x branch
+The 1.18.x branch
 [requires at least C++17](https://opensource.google/documentation/policies/cplusplus-support#c_language_standard).
 
 #### Continuous Integration
