@@ -963,7 +963,6 @@ class [[nodiscard]] StrEqualityMatcher {
         expect_eq_(expect_eq),
         case_sensitive_(case_sensitive) {}
 
-#if GTEST_INTERNAL_HAS_STRING_VIEW
   bool MatchAndExplain(const internal::StringView& s,
                        MatchResultListener* listener) const {
     // This should fail to compile if StringView is used with wide
@@ -971,7 +970,6 @@ class [[nodiscard]] StrEqualityMatcher {
     const StringType& str = std::string(s);
     return MatchAndExplain(str, listener);
   }
-#endif  // GTEST_INTERNAL_HAS_STRING_VIEW
 
   // Accepts pointer types, particularly:
   //   const char*
@@ -1031,7 +1029,6 @@ class [[nodiscard]] HasSubstrMatcher {
   explicit HasSubstrMatcher(const StringType& substring)
       : substring_(substring) {}
 
-#if GTEST_INTERNAL_HAS_STRING_VIEW
   bool MatchAndExplain(const internal::StringView& s,
                        MatchResultListener* listener) const {
     // This should fail to compile if StringView is used with wide
@@ -1039,7 +1036,6 @@ class [[nodiscard]] HasSubstrMatcher {
     const StringType& str = std::string(s);
     return MatchAndExplain(str, listener);
   }
-#endif  // GTEST_INTERNAL_HAS_STRING_VIEW
 
   // Accepts pointer types, particularly:
   //   const char*
@@ -1084,7 +1080,6 @@ class [[nodiscard]] StartsWithMatcher {
  public:
   explicit StartsWithMatcher(const StringType& prefix) : prefix_(prefix) {}
 
-#if GTEST_INTERNAL_HAS_STRING_VIEW
   bool MatchAndExplain(const internal::StringView& s,
                        MatchResultListener* listener) const {
     // This should fail to compile if StringView is used with wide
@@ -1092,7 +1087,6 @@ class [[nodiscard]] StartsWithMatcher {
     const StringType& str = std::string(s);
     return MatchAndExplain(str, listener);
   }
-#endif  // GTEST_INTERNAL_HAS_STRING_VIEW
 
   // Accepts pointer types, particularly:
   //   const char*
@@ -1138,7 +1132,6 @@ class [[nodiscard]] EndsWithMatcher {
  public:
   explicit EndsWithMatcher(const StringType& suffix) : suffix_(suffix) {}
 
-#if GTEST_INTERNAL_HAS_STRING_VIEW
   bool MatchAndExplain(const internal::StringView& s,
                        MatchResultListener* listener) const {
     // This should fail to compile if StringView is used with wide
@@ -1146,7 +1139,6 @@ class [[nodiscard]] EndsWithMatcher {
     const StringType& str = std::string(s);
     return MatchAndExplain(str, listener);
   }
-#endif  // GTEST_INTERNAL_HAS_STRING_VIEW
 
   // Accepts pointer types, particularly:
   //   const char*

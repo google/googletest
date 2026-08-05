@@ -940,7 +940,7 @@ TEST(PrintStringTest, StringInStdNamespace) {
 
 TEST(PrintStringTest, StringViewInStdNamespace) {
   const char s[] = "'\"?\\\a\b\f\n\0\r\t\v\x7F\xFF a";
-  const ::std::string_view str(s, sizeof(s));
+  const std::string_view str(s, sizeof(s));
   EXPECT_EQ("\"'\\\"?\\\\\\a\\b\\f\\n\\0\\r\\t\\v\\x7F\\xFF a\\0\"",
             Print(str));
 }
@@ -1091,8 +1091,6 @@ TEST(PrintTypeWithGenericStreamingTest, TypeImplicitlyConvertible) {
   EXPECT_EQ("AllowsGenericStreamingAndImplicitConversionTemplate", Print(a));
 }
 
-#if GTEST_INTERNAL_HAS_STRING_VIEW
-
 // Tests printing internal::StringView.
 
 TEST(PrintStringViewTest, SimpleStringView) {
@@ -1105,8 +1103,6 @@ TEST(PrintStringViewTest, UnprintableCharacters) {
   const internal::StringView sp(str, sizeof(str) - 1);
   EXPECT_EQ("\"NUL (\\0) and \\r\\t\"", Print(sp));
 }
-
-#endif  // GTEST_INTERNAL_HAS_STRING_VIEW
 
 // Tests printing STL containers.
 
@@ -1940,7 +1936,7 @@ TEST(UniversalPrintTest, StringViewNonZeroTerminated) {
   // `strlen` instead of `str.size()`, it will include 'X' and cause a visible
   // difference (in addition to ASAN tests detecting a buffer overflow due to
   // the missing 0 at the end).
-  const ::std::string_view str(s, 3);
+  const std::string_view str(s, 3);
   ::std::stringstream ss;
   UniversalPrint(str, &ss);
   EXPECT_EQ("\"\\xEF\\xA3\\xA2\"\n    As Text: \"\xEF\xA3\xA2\"", ss.str());

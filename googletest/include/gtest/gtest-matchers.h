@@ -544,9 +544,8 @@ Matcher<std::string> : public internal::MatcherBase<std::string> {
   Matcher(const char* s);  // NOLINT
 };
 
-#if GTEST_INTERNAL_HAS_STRING_VIEW
 // The following two specializations allow the user to write str
-// instead of Eq(str) and "foo" instead of Eq("foo") when a absl::string_view
+// instead of Eq(str) and "foo" instead of Eq("foo") when a std::string_view
 // matcher is expected.
 template <>
 class GTEST_API_ [[nodiscard]] Matcher<const internal::StringView&>
@@ -570,7 +569,7 @@ class GTEST_API_ [[nodiscard]] Matcher<const internal::StringView&>
   // Allows the user to write "foo" instead of Eq("foo") sometimes.
   Matcher(const char* s);  // NOLINT
 
-  // Allows the user to pass absl::string_views or std::string_views directly.
+  // Allows the user to pass std::string_views directly.
   Matcher(internal::StringView s);  // NOLINT
 };
 
@@ -597,10 +596,9 @@ class GTEST_API_ [[nodiscard]] Matcher<internal::StringView>
   // Allows the user to write "foo" instead of Eq("foo") sometimes.
   Matcher(const char* s);  // NOLINT
 
-  // Allows the user to pass absl::string_views or std::string_views directly.
+  // Allows the user to pass std::string_views directly.
   Matcher(internal::StringView s);  // NOLINT
 };
-#endif  // GTEST_INTERNAL_HAS_STRING_VIEW
 
 // Prints a matcher in a human-readable format.
 template <typename T>
@@ -842,12 +840,10 @@ class [[nodiscard]] MatchesRegexMatcher {
   MatchesRegexMatcher(const RE* regex, bool full_match)
       : regex_(regex), full_match_(full_match) {}
 
-#if GTEST_INTERNAL_HAS_STRING_VIEW
   bool MatchAndExplain(const internal::StringView& s,
                        MatchResultListener* listener) const {
     return MatchAndExplain(std::string(s), listener);
   }
-#endif  // GTEST_INTERNAL_HAS_STRING_VIEW
 
   // Accepts pointer types, particularly:
   //   const char*
@@ -862,7 +858,7 @@ class [[nodiscard]] MatchesRegexMatcher {
   // Matches anything that can convert to std::string.
   //
   // This is a template, not just a plain function with const std::string&,
-  // because absl::string_view has some interfering non-explicit constructors.
+  // because std::string_view has some interfering non-explicit constructors.
   template <class MatcheeStringType>
   bool MatchAndExplain(const MatcheeStringType& s,
                        MatchResultListener* /* listener */) const {
