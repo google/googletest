@@ -1273,7 +1273,9 @@ TEST(StringType, TestConversions) {
 
 #if GTEST_INTERNAL_HAS_STRING_VIEW
   EXPECT_EQ("foo", ToString(internal::StringView("foo")));
+#if GTEST_HAS_STD_WSTRING
   EXPECT_EQ(L"foo", ToString(std::wstring_view(L"foo")));
+#endif
 #endif  // GTEST_INTERNAL_HAS_STRING_VIEW
 
   // Non deducible types.
