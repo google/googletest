@@ -71,7 +71,8 @@ macro(config_compiler_and_linker)
     # as static libraries, as we don't have to rely on CRT DLLs being available.
     # CMake always defaults to using shared CRT libraries, so we override that
     # default here.
-    if (NOT BUILD_SHARED_LIBS AND NOT gtest_force_shared_crt AND NOT DEFINED CMAKE_MSVC_RUNTIME_LIBRARY)
+    if (NOT BUILD_SHARED_LIBS AND NOT gtest_force_shared_crt AND NOT DEFINED CMAKE_MSVC_RUNTIME_LIBRARY
+        AND CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
       set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
     endif()
 
