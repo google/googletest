@@ -115,6 +115,14 @@ TEST(InitGoogleMockTest, ParsesGoogleMockFlagAndUnrecognizedFlag) {
   TestInitGoogleMock(argv, new_argv, "error");
 }
 
+TEST(InitGoogleMockTest, ParsesIgnoreVerboseFlag) {
+  const char* argv[] = {"foo.exe", "--gmock_verbose=ignore", nullptr};
+
+  const char* new_argv[] = {"foo.exe", nullptr};
+
+  TestInitGoogleMock(argv, new_argv, "ignore");
+}
+
 TEST(WideInitGoogleMockTest, ParsesInvalidCommandLine) {
   const wchar_t* argv[] = {nullptr};
 

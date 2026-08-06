@@ -238,4 +238,4 @@ it.
 | Flag                           | Description                               |
 | :----------------------------- | :---------------------------------------- |
 | `--gmock_catch_leaked_mocks=0` | Don't report leaked mock objects as failures. |
-| `--gmock_verbose=LEVEL` | Sets the default verbosity level (`info`, `warning`, or `error`) of Google Mock messages. |
+| `--gmock_verbose=LEVEL` | Sets the default verbosity level (`info`, `warning`, `error`, or `ignore`) of Google Mock messages. |

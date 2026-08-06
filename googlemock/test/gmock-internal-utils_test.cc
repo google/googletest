@@ -495,6 +495,13 @@ TEST(LogTest, NoLogsArePrintedWhenVerbosityIsError) {
   TestLogWithSeverity(kErrorVerbosity, kWarning, false);
 }
 
+// Tests that no logs are printed when the value of the
+// --gmock_verbose flag is "ignore".
+TEST(LogTest, NoLogsArePrintedWhenVerbosityIsIgnore) {
+  TestLogWithSeverity(kIgnoreVerbosity, kInfo, false);
+  TestLogWithSeverity(kIgnoreVerbosity, kWarning, false);
+}
+
 // Tests that only warnings are printed when the value of the
 // --gmock_verbose flag is invalid.
 TEST(LogTest, OnlyWarningsArePrintedWhenVerbosityIsInvalid) {
@@ -543,6 +550,12 @@ TEST(ExpectCallTest, DoesNotLogWhenVerbosityIsError) {
   EXPECT_STREQ("", GrabOutput(ExpectCallLogger, kErrorVerbosity).c_str());
 }
 
+// Verifies that EXPECT_CALL doesn't log
+// if the --gmock_verbose flag is set to "ignore".
+TEST(ExpectCallTest, DoesNotLogWhenVerbosityIsIgnore) {
+  EXPECT_STREQ("", GrabOutput(ExpectCallLogger, kIgnoreVerbosity).c_str());
+}
+
 void OnCallLogger() {
   DummyMock mock;
   (void)ON_CALL(mock, TestMethod());
@@ -564,6 +577,12 @@ TEST(OnCallTest, DoesNotLogWhenVerbosityIsWarning) {
 // the --gmock_verbose flag is set to "error".
 TEST(OnCallTest, DoesNotLogWhenVerbosityIsError) {
   EXPECT_STREQ("", GrabOutput(OnCallLogger, kErrorVerbosity).c_str());
+}
+
+// Verifies that ON_CALL doesn't log if
+// the --gmock_verbose flag is set to "ignore".
+TEST(OnCallTest, DoesNotLogWhenVerbosityIsIgnore) {
+  EXPECT_STREQ("", GrabOutput(OnCallLogger, kIgnoreVerbosity).c_str());
 }
 
 void OnCallAnyArgumentLogger() {

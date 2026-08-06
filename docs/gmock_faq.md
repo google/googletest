@@ -265,7 +265,7 @@ using ::testing::_;
 
 This tells gMock that you do expect the calls and no warning should be printed.
 
-Also, you can control the verbosity by specifying `--gmock_verbose=error`. Other
+Also, you can control the verbosity by specifying `--gmock_verbose=error` or `--gmock_verbose=ignore`. Other
 values are `info` and `warning`. If you find the output too noisy when
 debugging, just choose a less verbose level.
 

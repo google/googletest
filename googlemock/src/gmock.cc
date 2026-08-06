@@ -42,7 +42,8 @@ GMOCK_DEFINE_string_(verbose, testing::internal::kWarningVerbosity,
                      "  Valid values:\n"
                      "  info    - prints all messages.\n"
                      "  warning - prints warnings and errors.\n"
-                     "  error   - prints errors only.");
+                     "  error   - prints errors only.\n"
+                     "  ignore  - prints no messages.");
 
 GMOCK_DEFINE_int32_(default_mock_behavior, 1,
                     "Controls the default behavior of mocks."

@@ -52,6 +52,7 @@ using ::testing::internal::FormatFileLocation;
 using ::testing::internal::kAllow;
 using ::testing::internal::kErrorVerbosity;
 using ::testing::internal::kFail;
+using ::testing::internal::kIgnoreVerbosity;
 using ::testing::internal::kInfoVerbosity;
 using ::testing::internal::kWarn;
 using ::testing::internal::kWarningVerbosity;
@@ -2091,10 +2092,18 @@ TEST_F(GMockVerboseFlagTest, Warning) {
   TestUninterestingCallOnNaggyMock(true);
 }
 
-// Tests that --gmock_verbose=warning causes neither expected nor
+// Tests that --gmock_verbose=error causes neither expected nor
 // uninteresting calls to be reported.
 TEST_F(GMockVerboseFlagTest, Error) {
   GMOCK_FLAG_SET(verbose, kErrorVerbosity);
+  TestExpectedCall(false);
+  TestUninterestingCallOnNaggyMock(false);
+}
+
+// Tests that --gmock_verbose=ignore causes neither expected nor
+// uninteresting calls to be reported.
+TEST_F(GMockVerboseFlagTest, Ignore) {
+  GMOCK_FLAG_SET(verbose, kIgnoreVerbosity);
   TestExpectedCall(false);
   TestUninterestingCallOnNaggyMock(false);
 }

@@ -134,8 +134,9 @@ GTEST_API_ bool LogIsVisible(LogSeverity severity) {
   if (GMOCK_FLAG_GET(verbose) == kInfoVerbosity) {
     // Always show the log if --gmock_verbose=info.
     return true;
-  } else if (GMOCK_FLAG_GET(verbose) == kErrorVerbosity) {
-    // Always hide it if --gmock_verbose=error.
+  } else if (GMOCK_FLAG_GET(verbose) == kErrorVerbosity ||
+             GMOCK_FLAG_GET(verbose) == kIgnoreVerbosity) {
+    // Always hide it if --gmock_verbose=error or --gmock_verbose=ignore.
     return false;
   } else {
     // If --gmock_verbose is neither "info" nor "error", we treat it

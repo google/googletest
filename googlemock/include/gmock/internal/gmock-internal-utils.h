@@ -276,6 +276,8 @@ const char kInfoVerbosity[] = "info";
 const char kWarningVerbosity[] = "warning";
 // No logs are printed.
 const char kErrorVerbosity[] = "error";
+// No logs are printed.
+const char kIgnoreVerbosity[] = "ignore";
 
 // Returns true if and only if a log with the given severity is visible
 // according to the --gmock_verbose flag.
