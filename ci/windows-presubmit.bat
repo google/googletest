@@ -19,6 +19,7 @@ IF %errorlevel% neq 0 EXIT /B 1
 SET CMAKE_BUILD_PATH=cmake_msvc2022
 MKDIR %CMAKE_BUILD_PATH%
 CD %CMAKE_BUILD_PATH%
+SET CXXFLAGS="/WX"
 
 %CMAKE_BIN% %GTEST_ROOT% ^
   -G "Visual Studio 17 2022" ^
@@ -37,6 +38,7 @@ IF %errorlevel% neq 0 EXIT /B 1
 %CTEST_BIN% -C Debug --timeout 600
 IF %errorlevel% neq 0 EXIT /B 1
 
+SET "CXXFLAGS="
 CD %GTEST_ROOT%
 RMDIR /S /Q %CMAKE_BUILD_PATH%
 
