@@ -812,7 +812,7 @@ EXPECT_NO_FATAL_FAILURE({
 });
 ```
 
-Assertions from multiple threads are currently not supported on Windows.
+Assertions from multiple threads are supported on Windows.
 
 #### Checking for Failures in the Current Test
 
@@ -1576,7 +1576,7 @@ well, use one of the following macros instead:
 ```
 
 {: .callout .note}
-NOTE: Assertions from multiple threads are currently not supported on Windows.
+NOTE: Assertions from multiple threads are supported on Windows.
 
 For technical reasons, there are some caveats:
 
