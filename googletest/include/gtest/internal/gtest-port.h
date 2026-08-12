@@ -503,17 +503,22 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 #ifndef GTEST_HAS_STD_WSTRING
 // The user didn't tell us whether ::std::wstring is available, so we need
 // to figure it out.
+#if defined(GTEST_OS_LINUX_ANDROID)
+// Android started supporting std::wstring with API Level 21 (Lollipop).
+#define GTEST_HAS_STD_WSTRING (__ANDROID_API__ >= 21)
+// The following platforms are known not to support ::std::wstring; assume it's
+// supported on all others.
+//
 // Cygwin 1.7 and below doesn't support ::std::wstring.
-// Solaris' libc++ doesn't support it either.  Android has
-// no support for it at least as recent as Froyo (2.2).
-#if (!(defined(GTEST_OS_LINUX_ANDROID) || defined(GTEST_OS_CYGWIN) || \
-       defined(GTEST_OS_SOLARIS) || defined(GTEST_OS_HAIKU) ||        \
-       defined(GTEST_OS_ESP32) || defined(GTEST_OS_ESP8266) ||        \
-       defined(GTEST_OS_XTENSA) || defined(GTEST_OS_QURT) ||          \
-       defined(GTEST_OS_NXP_QN9090) || defined(GTEST_OS_NRF52)))
-#define GTEST_HAS_STD_WSTRING 1
-#else
+// Solaris' libc++ doesn't support it either.
+#elif defined(GTEST_OS_CYGWIN) || defined(GTEST_OS_SOLARIS) || \
+    defined(GTEST_OS_HAIKU) || defined(GTEST_OS_ESP32) ||      \
+    defined(GTEST_OS_ESP8266) || defined(GTEST_OS_XTENSA) ||   \
+    defined(GTEST_OS_QURT) || defined(GTEST_OS_NXP_QN9090) ||  \
+    defined(GTEST_OS_NRF52)
 #define GTEST_HAS_STD_WSTRING 0
+#else
+#define GTEST_HAS_STD_WSTRING 1
 #endif
 #endif  // GTEST_HAS_STD_WSTRING
 
