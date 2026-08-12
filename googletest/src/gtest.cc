@@ -322,6 +322,11 @@ GTEST_DEFINE_bool_(
 
 GTEST_DEFINE_bool_(list_tests, false, "List all tests without running them.");
 
+GTEST_DEFINE_bool_(
+    list_tests_flat, testing::internal::BoolFromGTestEnv("list_tests_flat", false),
+    "List all tests without running them, printing one fully-qualified name "
+    "(Suite.Test) per line. Implies --gtest_list_tests.");
+
 // The net priority order after flag processing is thus:
 //   --gtest_output command line flag
 //   GTEST_OUTPUT environment variable
@@ -6005,8 +6010,8 @@ bool UnitTestImpl::RunAllTests() {
       FilterTests(should_shard ? HONOR_SHARDING_PROTOCOL
                                : IGNORE_SHARDING_PROTOCOL) > 0;
 
-  // Lists the tests and exits if the --gtest_list_tests flag was specified.
-  if (GTEST_FLAG_GET(list_tests)) {
+  // Lists the tests and exits if a list-tests flag was specified.
+  if (GTEST_FLAG_GET(list_tests) || GTEST_FLAG_GET(list_tests_flat)) {
     // This must be called *after* FilterTests() has been called.
     ListTestsMatchingFilter();
     return true;
@@ -6390,8 +6395,19 @@ static void PrintOnOneLine(const char* str, int max_length) {
 void UnitTestImpl::ListTestsMatchingFilter() {
   // Print at most this many characters for each type/value parameter.
   const int kMaxParamLength = 250;
+  const bool flat_list = GTEST_FLAG_GET(list_tests_flat);
 
   for (auto* test_suite : test_suites_) {
+    if (flat_list) {
+      for (size_t j = 0; j < test_suite->test_info_list().size(); j++) {
+        const TestInfo* const test_info = test_suite->test_info_list()[j];
+        if (test_info->matches_filter_) {
+          printf("%s.%s\n", test_suite->name(), test_info->name());
+        }
+      }
+      continue;
+    }
+
     bool printed_test_suite_name = false;
 
     for (size_t j = 0; j < test_suite->test_info_list().size(); j++) {
@@ -6708,6 +6724,10 @@ static const char kColorEncodedHelpMessage[] =
     "      List the names of all tests instead of running them. The name of\n"
     "      TEST(Foo, Bar) is \"Foo.Bar\".\n"
     "  @G--" GTEST_FLAG_PREFIX_
+    "list_tests_flat@D\n"
+    "      Like --gtest_list_tests, but print one fully-qualified test name\n"
+    "      (Suite.Test) per line for easy parsing by scripts.\n"
+    "  @G--" GTEST_FLAG_PREFIX_
     "filter=@YPOSITIVE_PATTERNS"
     "[@G-@YNEGATIVE_PATTERNS]@D\n"
     "      Run only the tests whose name matches one of the positive patterns "
@@ -6830,6 +6850,7 @@ static bool ParseGoogleTestFlag(const char* const arg) {
   GTEST_INTERNAL_PARSE_FLAG(filter);
   GTEST_INTERNAL_PARSE_FLAG(internal_run_death_test);
   GTEST_INTERNAL_PARSE_FLAG(list_tests);
+  GTEST_INTERNAL_PARSE_FLAG(list_tests_flat);
   GTEST_INTERNAL_PARSE_FLAG(output);
   GTEST_INTERNAL_PARSE_FLAG(brief);
   GTEST_INTERNAL_PARSE_FLAG(print_time);
