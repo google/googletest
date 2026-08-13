@@ -940,7 +940,7 @@ class [[nodiscard]] ReturnAction final {
                 std::is_convertible<R, U>,        //
                 std::is_move_constructible<U>>::value>::type>
   operator OnceAction<U(Args...)>() && {  // NOLINT
-    return Impl<U>(std::move(value_));
+    return OnceImpl<U>(std::move(value_));
   }
 
   template <typename U, typename... Args,
@@ -959,13 +959,6 @@ class [[nodiscard]] ReturnAction final {
   template <typename U>
   class Impl final {
    public:
-    // The constructor used when the return value is allowed to move from the
-    // input value (i.e. we are converting to OnceAction).
-    explicit Impl(R&& input_value)
-        : state_(new State(std::move(input_value))) {}
-
-    // The constructor used when the return value is not allowed to move from
-    // the input value (i.e. we are converting to Action).
     explicit Impl(const R& input_value) : state_(new State(input_value)) {}
 
     U operator()() && { return std::move(state_->value); }
@@ -995,18 +988,6 @@ class [[nodiscard]] ReturnAction final {
             // U, and uses that path for the conversion, even U Result has an
             // explicit constructor from R.
             value(ImplicitCast_<U>(internal::as_const(input_value))) {}
-
-      // As above, but for the case where we're moving from the ReturnAction
-      // object because it's being used as a OnceAction.
-      explicit State(R&& input_value_in)
-          : input_value(std::move(input_value_in)),
-            // For the same reason as above we make an implicit conversion to U
-            // before initializing the value.
-            //
-            // Unlike above we provide the input value as an rvalue to the
-            // implicit conversion because this is a OnceAction: it's fine if it
-            // wants to consume the input value.
-            value(ImplicitCast_<U>(std::move(input_value))) {}
 
       // A copy of the value originally provided by the user. We retain this in
       // addition to the value of the mock function's result type below in case
@@ -1083,6 +1064,23 @@ class [[nodiscard]] ReturnAction final {
     };
 
     const std::shared_ptr<State> state_;
+  };
+
+  // Implements the Return(x) action for a mock function that returns type U,
+  // but is only executed at most once. This allows us to store the original
+  // value and move construct the return value type on the first (and only)
+  // call.
+  template <typename U>
+  class OnceImpl final {
+   public:
+    explicit OnceImpl(R&& input_value)
+        : input_value_(new R(std::move(input_value))) {}
+
+    U operator()() && { return std::move(*input_value_); }
+
+   private:
+    // Move the input value to the heap and make it copyable.
+    const std::shared_ptr<R> input_value_;
   };
 
   R value_;
