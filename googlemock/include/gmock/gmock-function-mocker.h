@@ -186,6 +186,7 @@ using internal::FunctionMocker;
                   GMOCK_PP_IF(_Final, final, ) {                               \
     GMOCK_MOCKER_(_N, _Constness, _MethodName)                                 \
         .SetOwnerAndName(this, #_MethodName);                                  \
+    ::testing::internal::EnforceNiceOrStrictMockKind(this);                    \
     return GMOCK_MOCKER_(_N, _Constness, _MethodName)                          \
         .Invoke(GMOCK_PP_REPEAT(GMOCK_INTERNAL_FORWARD_ARG, _Signature, _N));  \
   }                                                                            \
@@ -193,6 +194,7 @@ using internal::FunctionMocker;
       GMOCK_PP_REPEAT(GMOCK_INTERNAL_MATCHER_PARAMETER, _Signature, _N))       \
       GMOCK_PP_IF(_Constness, const, ) _RefSpec {                              \
     GMOCK_MOCKER_(_N, _Constness, _MethodName).RegisterOwner(this);            \
+    ::testing::internal::EnforceNiceOrStrictMockKind(this);                    \
     return GMOCK_MOCKER_(_N, _Constness, _MethodName)                          \
         .With(GMOCK_PP_REPEAT(GMOCK_INTERNAL_MATCHER_ARGUMENT, , _N));         \
   }                                                                            \
