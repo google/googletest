@@ -3161,7 +3161,7 @@ observe every mock call that happens (including argument values, the return
 value, and the stack trace). Clearly, one size doesn't fit all.
 
 You can control how much gMock tells you using the `--gmock_verbose=LEVEL`
-command-line flag, where `LEVEL` is a string with three possible values:
+command-line flag, where `LEVEL` is a string with four possible values:
 
 *   `info`: gMock will print all informational messages, warnings, and errors
     (most verbose). At this setting, gMock will also log any calls to the
@@ -3170,6 +3170,7 @@ command-line flag, where `LEVEL` is a string with three possible values:
 *   `warning`: gMock will print both warnings and errors (less verbose); it will
     omit the stack traces in "uninteresting call" warnings. This is the default.
 *   `error`: gMock will print errors only (least verbose).
+*   `ignore`: gMock will suppress warnings (same as `error`).
 
 Alternatively, you can adjust the value of that flag from within your tests like
 so:
