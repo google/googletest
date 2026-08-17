@@ -649,6 +649,7 @@ TEST(PrintU32StringTest, EscapesProperly) {
 }
 
 #if GTEST_HAS_NATIVE_WCHAR
+#if GTEST_HAS_STD_WSTRING
 
 // const wchar_t*.
 TEST(PrintWideCStringTest, Const) {
@@ -679,6 +680,7 @@ TEST(PrintWideCStringTest, EscapesProperly) {
                 "\\n\\r\\t\\v\\xD3\\x576\\x8D3\\xC74D a\"",
             Print(static_cast<const wchar_t*>(s)));
 }
+#endif  // GTEST_HAS_STD_WSTRING
 #endif  // GTEST_HAS_NATIVE_WCHAR
 
 // Tests printing pointers to other char types.

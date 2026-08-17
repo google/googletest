@@ -468,10 +468,9 @@ void PrintTo(const char16_t* s, ostream* os) { PrintCStringTo(s, os); }
 
 void PrintTo(const char32_t* s, ostream* os) { PrintCStringTo(s, os); }
 
-#if GTEST_HAS_NATIVE_WCHAR
-// Prints the given wide C string to the ostream.
+#if GTEST_HAS_STD_WSTRING && GTEST_HAS_NATIVE_WCHAR
 void PrintTo(const wchar_t* s, ostream* os) { PrintCStringTo(s, os); }
-#endif  // GTEST_HAS_NATIVE_WCHAR
+#endif
 
 namespace {
 

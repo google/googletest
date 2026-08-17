@@ -1101,6 +1101,7 @@ TEST(SetArgPointeeTest, AcceptsStringLiteral) {
   EXPECT_STREQ("world", ptr);
 }
 
+#if GTEST_HAS_STD_WSTRING
 TEST(SetArgPointeeTest, AcceptsWideStringLiteral) {
   typedef void MyFunction(const wchar_t**);
   Action<MyFunction> a = SetArgPointee<0>(L"world");
@@ -1108,16 +1109,13 @@ TEST(SetArgPointeeTest, AcceptsWideStringLiteral) {
   a.Perform(std::make_tuple(&ptr));
   EXPECT_STREQ(L"world", ptr);
 
-#if GTEST_HAS_STD_WSTRING
-
   typedef void MyStringFunction(std::wstring*);
   Action<MyStringFunction> a2 = SetArgPointee<0>(L"world");
   std::wstring str = L"";
   a2.Perform(std::make_tuple(&str));
   EXPECT_EQ(L"world", str);
-
-#endif
 }
+#endif
 
 // Tests that SetArgPointee<N>() accepts a char pointer.
 TEST(SetArgPointeeTest, AcceptsCharPointer) {

@@ -674,7 +674,12 @@ inline void PrintTo(char32_t* s, ::std::ostream* os) {
   PrintTo(ImplicitCast_<const char32_t*>(s), os);
 }
 
-#if GTEST_HAS_NATIVE_WCHAR
+// Only add an overload for printing wchar_t* if:
+// 1. Wide string support is enabled.
+// 2. wchar_t is a distinct native type. (If it's a typedef, the overload could
+//    cause a pointer to the underlying type to be mistakenly treated as a
+//    string.)
+#if GTEST_HAS_STD_WSTRING && GTEST_HAS_NATIVE_WCHAR
 // Overloads for wide C strings
 GTEST_API_ void PrintTo(const wchar_t* s, ::std::ostream* os);
 inline void PrintTo(wchar_t* s, ::std::ostream* os) {
