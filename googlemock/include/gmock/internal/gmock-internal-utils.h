@@ -111,16 +111,6 @@ inline Element* GetRawPointer(Element* p) {
 #define GMOCK_INTERNAL_WARNING_POP() _Pragma("clang diagnostic pop")
 #endif
 
-// MSVC treats wchar_t as a native type usually, but treats it as the
-// same as unsigned short when the compiler option /Zc:wchar_t- is
-// specified.  It defines _NATIVE_WCHAR_T_DEFINED symbol when wchar_t
-// is a native type.
-#if defined(_MSC_VER) && !defined(_NATIVE_WCHAR_T_DEFINED)
-// wchar_t is a typedef.
-#else
-#define GMOCK_WCHAR_T_IS_NATIVE_ 1
-#endif
-
 // In what follows, we use the term "kind" to indicate whether a type
 // is bool, an integer type (excluding bool), a floating-point type,
 // or none of them.  This categorization is useful for determining
@@ -156,7 +146,7 @@ GMOCK_DECLARE_KIND_(unsigned long, kInteger);       // NOLINT
 GMOCK_DECLARE_KIND_(long long, kInteger);           // NOLINT
 GMOCK_DECLARE_KIND_(unsigned long long, kInteger);  // NOLINT
 
-#if GMOCK_WCHAR_T_IS_NATIVE_
+#if GTEST_HAS_NATIVE_WCHAR
 GMOCK_DECLARE_KIND_(wchar_t, kInteger);
 #endif
 

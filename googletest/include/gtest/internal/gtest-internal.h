@@ -39,7 +39,7 @@
 #ifndef GOOGLETEST_INCLUDE_GTEST_INTERNAL_GTEST_INTERNAL_H_
 #define GOOGLETEST_INCLUDE_GTEST_INTERNAL_GTEST_INTERNAL_H_
 
-#include "gtest/internal/gtest-port.h"
+#include "gtest/internal/gtest-port.h"  // IWYU pragma: export
 
 #ifdef GTEST_OS_LINUX
 #include <stdlib.h>

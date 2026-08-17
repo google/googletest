@@ -146,6 +146,7 @@
 #include "gmock/internal/gmock-internal-utils.h"
 #include "gmock/internal/gmock-port.h"
 #include "gmock/internal/gmock-pp.h"
+#include "gtest/gtest.h"
 
 GTEST_DISABLE_MSC_WARNINGS_PUSH_(4100)
 
@@ -249,7 +250,7 @@ GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE_(char, '\0');
 // There's also no need for a default action for unsigned wchar_t, as
 // that type is the same as unsigned int for gcc, and invalid for
 // MSVC.
-#if GMOCK_WCHAR_T_IS_NATIVE_
+#if GTEST_HAS_NATIVE_WCHAR
 GMOCK_DEFINE_DEFAULT_ACTION_FOR_RETURN_TYPE_(wchar_t, 0U);  // NOLINT
 #endif
 

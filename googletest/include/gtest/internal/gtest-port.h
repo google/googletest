@@ -500,6 +500,17 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 #endif  // defined(_MSC_VER) || defined(__BORLANDC__)
 #endif  // GTEST_HAS_EXCEPTIONS
 
+// MSVC either defines wchar_t as a typedef of unsigned short, or as a native
+// type (in which case, it defines _NATIVE_WCHAR_T_DEFINED). When wchar_t is a
+// typedef, defining an overload for const wchar_t* would cause unsigned short*
+// be printed as a wide string, possibly causing invalid memory accesses, so we
+// omit wchar_t overloads in that case.
+#if defined(_MSC_VER) && !defined(_NATIVE_WCHAR_T_DEFINED)
+#define GTEST_HAS_NATIVE_WCHAR 0
+#else
+#define GTEST_HAS_NATIVE_WCHAR 1
+#endif
+
 // 1. Calculate default GTEST_HAS_STD_WSTRING values based on STL capabilities.
 #if defined(_MSVC_STL_VERSION)
 // Microsoft's STL implementation always supports ::std::wstring.

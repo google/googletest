@@ -270,7 +270,7 @@ TEST(BuiltInDefaultValueTest, IsZeroForNumericTypes) {
   EXPECT_EQ(0U, BuiltInDefaultValue<unsigned char>::Get());
   EXPECT_EQ(0, BuiltInDefaultValue<signed char>::Get());
   EXPECT_EQ(0, BuiltInDefaultValue<char>::Get());
-#if GMOCK_WCHAR_T_IS_NATIVE_
+#if GTEST_HAS_NATIVE_WCHAR
 #if !defined(__WCHAR_UNSIGNED__)
   EXPECT_EQ(0, BuiltInDefaultValue<wchar_t>::Get());
 #else
@@ -299,7 +299,7 @@ TEST(BuiltInDefaultValueTest, ExistsForNumericTypes) {
   EXPECT_TRUE(BuiltInDefaultValue<unsigned char>::Exists());
   EXPECT_TRUE(BuiltInDefaultValue<signed char>::Exists());
   EXPECT_TRUE(BuiltInDefaultValue<char>::Exists());
-#if GMOCK_WCHAR_T_IS_NATIVE_
+#if GTEST_HAS_NATIVE_WCHAR
   EXPECT_TRUE(BuiltInDefaultValue<wchar_t>::Exists());
 #endif
   EXPECT_TRUE(BuiltInDefaultValue<unsigned short>::Exists());  // NOLINT

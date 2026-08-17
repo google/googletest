@@ -71,7 +71,7 @@
 #include "gtest/gtest-typed-test.h"  // IWYU pragma: export
 #include "gtest/gtest_pred_impl.h"  // IWYU pragma: export
 #include "gtest/gtest_prod.h"  // IWYU pragma: export
-#include "gtest/internal/gtest-internal.h"
+#include "gtest/internal/gtest-internal.h"  // IWYU pragma: export
 #include "gtest/internal/gtest-string.h"
 
 GTEST_DISABLE_MSC_WARNINGS_PUSH_(4251 \
