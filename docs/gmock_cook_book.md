@@ -293,7 +293,7 @@ to accept a std::function instead of the free function, and then use
 
 Before the generic `MOCK_METHOD` macro
 [was introduced in 2018](https://github.com/google/googletest/commit/c5f08bf91944ce1b19bcf414fa1760e69d20afc2),
-mocks where created using a family of macros collectively called `MOCK_METHODn`.
+mocks were created using a family of macros collectively called `MOCK_METHODn`.
 These macros are still supported, though migration to the new `MOCK_METHOD` is
 recommended.
 
@@ -1242,7 +1242,7 @@ Field(&Foo::number, Ge(3))
 matches a plain pointer `p` where `p->number >= 3`. If `p` is `NULL`, the match
 will always fail regardless of the inner matcher.
 
-What if you want to validate more than one members at the same time? Remember
+What if you want to validate more than one member at the same time? Remember
 that there are [`AllOf()` and `AllOfArray()`](#CombiningMatchers).
 
 Finally `Field()` and `Property()` provide overloads that take the field or
