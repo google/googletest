@@ -2173,8 +2173,8 @@ could generate this report:
 <testsuites tests="3" failures="1" errors="0" time="0.035" timestamp="2011-10-31T18:52:42" name="AllTests">
   <testsuite name="MathTest" tests="2" failures="1" errors="0" time="0.015">
     <testcase name="Addition" file="test.cpp" line="1" status="run" time="0.007" classname="">
-      <failure message="Value of: add(1, 1)&#x0A;  Actual: 3&#x0A;Expected: 2" type="">...</failure>
-      <failure message="Value of: add(1, -1)&#x0A;  Actual: 1&#x0A;Expected: 0" type="">...</failure>
+      <failure message="Value of: add(1, 1)&#x0A;  Actual: 3&#x0A;Expected: 2" type=""/>
+      <failure message="Value of: add(1, -1)&#x0A;  Actual: 1&#x0A;Expected: 0" type=""/>
     </testcase>
     <testcase name="Subtraction" file="test.cpp" line="2" status="run" time="0.005" classname="">
     </testcase>
