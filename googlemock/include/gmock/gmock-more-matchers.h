@@ -60,17 +60,20 @@ namespace internal {
 
 // Implements the polymorphic IsEmpty matcher, which
 // can be used as a Matcher<T> as long as T is either a container that defines
-// empty() and size() (e.g. std::vector or std::string), or a C-style string.
+// size() (e.g. std::vector or std::string), can calculate size using the
+// difference of iterators (e.g std::distance), or a C-style string.
 class [[nodiscard]] IsEmptyMatcher {
  public:
-  // Matches anything that defines empty() and size().
+  // Matches anything that defines size().
   template <typename MatcheeContainerType>
   bool MatchAndExplain(const MatcheeContainerType& c,
                        MatchResultListener* listener) const {
-    if (c.empty()) {
+    auto view = StlContainerView<MatcheeContainerType>::ConstReference(c);
+    const size_t size = view.size();
+    if (size == 0) {
       return true;
     }
-    *listener << "whose size is " << c.size();
+    *listener << "whose size is " << size;
     return false;
   }
 
