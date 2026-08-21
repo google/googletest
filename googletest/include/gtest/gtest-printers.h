@@ -522,17 +522,14 @@ inline void PrintTo(bool x, ::std::ostream* os) {
 GTEST_API_ void PrintTo(wchar_t wc, ::std::ostream* os);
 
 GTEST_API_ void PrintTo(char32_t c, ::std::ostream* os);
-inline void PrintTo(char16_t c, ::std::ostream* os) {
-  // TODO(b/418738869): Incorrect for values not representing valid codepoints.
-  // Also see https://github.com/google/googletest/issues/4762.
-  PrintTo(static_cast<char32_t>(c), os);
-}
+
+// Overloads for the UTF-8 and UTF-16 code unit types.  A code unit that
+// encodes a code point all by itself is printed with the U+XXXX notation;
+// one that does not (any non-ASCII char8_t, and the UTF-16 surrogates) is
+// printed as a code unit instead, the way wchar_t is.
+GTEST_API_ void PrintTo(char16_t c, ::std::ostream* os);
 #ifdef __cpp_lib_char8_t
-inline void PrintTo(char8_t c, ::std::ostream* os) {
-  // TODO(b/418738869): Incorrect for values not representing valid codepoints.
-  // Also see https://github.com/google/googletest/issues/4762.
-  PrintTo(static_cast<char32_t>(c), os);
-}
+GTEST_API_ void PrintTo(char8_t c, ::std::ostream* os);
 #endif
 
 // gcc/clang __{u,}int128_t
