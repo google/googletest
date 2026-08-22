@@ -1259,7 +1259,7 @@ TEST_F(ScopedFakeTestPartResultReporterWithThreadsTest,
 
 typedef ScopedFakeTestPartResultReporterTest ExpectFatalFailureTest;
 
-TEST_F(ExpectFatalFailureTest, CatchesFatalFaliure) {
+TEST_F(ExpectFatalFailureTest, CatchesFatalFailure) {
   EXPECT_FATAL_FAILURE(AddFatalFailure(), "Expected fatal failure.");
 }
 

@@ -255,11 +255,11 @@ TEST(FormatFileLocationTest, FormatsUnknownFile) {
   EXPECT_PRED_FORMAT2(IsSubstring, "42", FormatFileLocation(nullptr, 42));
 }
 
-TEST(FormatFileLocationTest, FormatsUknownLine) {
+TEST(FormatFileLocationTest, FormatsUnknownLine) {
   EXPECT_EQ("foo.cc:", FormatFileLocation("foo.cc", -1));
 }
 
-TEST(FormatFileLocationTest, FormatsUknownFileAndLine) {
+TEST(FormatFileLocationTest, FormatsUnknownFileAndLine) {
   EXPECT_EQ("unknown file:", FormatFileLocation(nullptr, -1));
 }
 
@@ -268,16 +268,16 @@ TEST(FormatCompilerIndependentFileLocationTest, FormatsFileLocation) {
   EXPECT_EQ("foo.cc:42", FormatCompilerIndependentFileLocation("foo.cc", 42));
 }
 
-TEST(FormatCompilerIndependentFileLocationTest, FormatsUknownFile) {
+TEST(FormatCompilerIndependentFileLocationTest, FormatsUnknownFile) {
   EXPECT_EQ("unknown file:42",
             FormatCompilerIndependentFileLocation(nullptr, 42));
 }
 
-TEST(FormatCompilerIndependentFileLocationTest, FormatsUknownLine) {
+TEST(FormatCompilerIndependentFileLocationTest, FormatsUnknownLine) {
   EXPECT_EQ("foo.cc", FormatCompilerIndependentFileLocation("foo.cc", -1));
 }
 
-TEST(FormatCompilerIndependentFileLocationTest, FormatsUknownFileAndLine) {
+TEST(FormatCompilerIndependentFileLocationTest, FormatsUnknownFileAndLine) {
   EXPECT_EQ("unknown file", FormatCompilerIndependentFileLocation(nullptr, -1));
 }
 
@@ -820,7 +820,7 @@ TEST(MatchRegexAtHeadTest, WorksWhenRegexStartsWithRepetition) {
   EXPECT_TRUE(MatchRegexAtHead("a?b", "ab"));
 }
 
-TEST(MatchRegexAtHeadTest, WorksWhenRegexStartsWithRepetionOfEscapeSequence) {
+TEST(MatchRegexAtHeadTest, WorksWhenRegexStartsWithRepetitionOfEscapeSequence) {
   EXPECT_FALSE(MatchRegexAtHead("\\.+a", "abc"));
   EXPECT_FALSE(MatchRegexAtHead("\\s?b", "  b"));
 
@@ -985,7 +985,7 @@ class NoDefaultConstructor {
   NoDefaultConstructor(const NoDefaultConstructor&) = default;
 };
 
-TEST(ThreadLocalTest, ValueDefaultContructorIsNotRequiredForParamVersion) {
+TEST(ThreadLocalTest, ValueDefaultConstructorIsNotRequiredForParamVersion) {
   ThreadLocal<NoDefaultConstructor> bar(NoDefaultConstructor("foo"));
   bar.pointer();
 }

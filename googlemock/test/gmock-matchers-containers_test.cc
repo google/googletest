@@ -2069,14 +2069,14 @@ TEST(ElementsAreArrayTest, WorksWithContainerWithIteratorWithNoMemberTypes) {
 // Tests using ElementsAre() and ElementsAreArray() with stream-like
 // "containers".
 
-TEST(ElemensAreStreamTest, WorksForStreamlike) {
+TEST(ElementsAreStreamTest, WorksForStreamlike) {
   const int a[5] = {1, 2, 3, 4, 5};
   Streamlike<int> s(std::begin(a), std::end(a));
   EXPECT_THAT(s, ElementsAre(1, 2, 3, 4, 5));
   EXPECT_THAT(s, Not(ElementsAre(2, 1, 4, 5, 3)));
 }
 
-TEST(ElemensAreArrayStreamTest, WorksForStreamlike) {
+TEST(ElementsAreArrayStreamTest, WorksForStreamlike) {
   const int a[5] = {1, 2, 3, 4, 5};
   Streamlike<int> s(std::begin(a), std::end(a));
 
