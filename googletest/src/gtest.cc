@@ -4372,11 +4372,20 @@ void XmlUnitTestResultPrinter::OutputXmlTestResult(::std::ostream* stream,
           internal::FormatCompilerIndependentFileLocation(part.file_name(),
                                                           part.line_number());
       const std::string summary = location + "\n" + part.summary();
-      *stream << "      <failure message=\"" << EscapeXmlAttribute(summary)
-              << "\" type=\"\">";
       const std::string detail = location + "\n" + part.message();
-      OutputXmlCDataSection(stream, RemoveInvalidXmlCharacters(detail).c_str());
-      *stream << "</failure>\n";
+      *stream << "      <failure message=\"" << EscapeXmlAttribute(summary)
+              << "\" type=\"\"";
+      // The "message" attribute already carries the summary, so only write a
+      // CDATA body when the full message adds something to it (a stack trace,
+      // for instance). Otherwise the exact same text is reported twice.
+      if (detail == summary) {
+        *stream << " />\n";
+      } else {
+        *stream << ">";
+        OutputXmlCDataSection(stream,
+                              RemoveInvalidXmlCharacters(detail).c_str());
+        *stream << "</failure>\n";
+      }
     } else if (part.skipped()) {
       if (++skips == 1 && failures == 0) {
         *stream << ">\n";
@@ -4385,11 +4394,17 @@ void XmlUnitTestResultPrinter::OutputXmlTestResult(::std::ostream* stream,
           internal::FormatCompilerIndependentFileLocation(part.file_name(),
                                                           part.line_number());
       const std::string summary = location + "\n" + part.summary();
-      *stream << "      <skipped message=\"" << EscapeXmlAttribute(summary)
-              << "\">";
       const std::string detail = location + "\n" + part.message();
-      OutputXmlCDataSection(stream, RemoveInvalidXmlCharacters(detail).c_str());
-      *stream << "</skipped>\n";
+      *stream << "      <skipped message=\"" << EscapeXmlAttribute(summary)
+              << "\"";
+      if (detail == summary) {
+        *stream << " />\n";
+      } else {
+        *stream << ">";
+        OutputXmlCDataSection(stream,
+                              RemoveInvalidXmlCharacters(detail).c_str());
+        *stream << "</skipped>\n";
+      }
     }
   }
 
