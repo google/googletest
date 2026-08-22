@@ -5,7 +5,7 @@
 #### Documentation Updates
 
 Our documentation is now live on GitHub Pages at
-https://google.github.io/googletest/. We recommend browsing the documentation on
+https://google.github.io/googletest. We recommend browsing the documentation on
 GitHub Pages rather than directly in the repository.
 
 #### Release 1.18.0
