@@ -177,14 +177,40 @@ function(cxx_library_with_type name type cxx_flags)
   set_target_properties(${name}
     PROPERTIES
     COMPILE_FLAGS "${cxx_flags}")
+
   # Set the output directory for build artifacts.
+  set(runtime_output_dir "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
+  if(NOT runtime_output_dir)
+    set(runtime_output_dir "${CMAKE_BINARY_DIR}/bin")
+  endif()
+
+  set(library_output_dir "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
+  if(NOT library_output_dir)
+    set(library_output_dir "${CMAKE_BINARY_DIR}/lib")
+  endif()
+
+  set(archive_output_dir "${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}")
+  if(NOT archive_output_dir)
+    set(archive_output_dir "${CMAKE_BINARY_DIR}/lib")
+  endif()
+
+  set(pdb_output_dir "${CMAKE_PDB_OUTPUT_DIRECTORY}")
+  if(NOT pdb_output_dir)
+    set(pdb_output_dir "${runtime_output_dir}")
+  endif()
+
+  set(compile_pdb_output_dir "${CMAKE_COMPILE_PDB_OUTPUT_DIRECTORY}")
+  if(NOT compile_pdb_output_dir)
+    set(compile_pdb_output_dir "${archive_output_dir}")
+  endif()
+
   set_target_properties(${name}
     PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
-    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
-    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
-    PDB_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
-    COMPILE_PDB_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
+      RUNTIME_OUTPUT_DIRECTORY "${runtime_output_dir}"
+      LIBRARY_OUTPUT_DIRECTORY "${library_output_dir}"
+      ARCHIVE_OUTPUT_DIRECTORY "${archive_output_dir}"
+      PDB_OUTPUT_DIRECTORY "${pdb_output_dir}"
+      COMPILE_PDB_OUTPUT_DIRECTORY "${compile_pdb_output_dir}")
   # Make PDBs match library name.
   get_target_property(pdb_debug_postfix ${name} DEBUG_POSTFIX)
   set_target_properties(${name}
