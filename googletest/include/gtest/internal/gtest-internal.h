@@ -481,7 +481,7 @@ struct CodeLocation {
 };
 
 //  Helper to identify which setup function for TestCase / TestSuite to call.
-//  Only one function is allowed, either TestCase or TestSute but not both.
+//  Only one function is allowed, either TestCase or TestSuite but not both.
 
 // Utility functions to help SuiteApiResolver
 using SetUpTearDownSuiteFuncType = void (*)();

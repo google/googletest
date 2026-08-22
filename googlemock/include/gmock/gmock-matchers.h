@@ -1785,7 +1785,7 @@ class [[nodiscard]] FloatingEqMatcher {
         nan_eq_nan_(nan_eq_nan),
         max_abs_error_(max_abs_error) {
     GTEST_CHECK_(max_abs_error >= 0)
-        << ", where max_abs_error is" << max_abs_error;
+        << ", where max_abs_error is " << max_abs_error;
   }
 
   // Implements floating point equality matcher as a Matcher<T>.
@@ -4343,7 +4343,7 @@ auto IsOptionalEngaged(const Optional& optional, Rank0)
   return optional.has_value();
 }
 
-// Implements a matcher that checks the value of a optional<> type variable.
+// Implements a matcher that checks the value of an optional<> type variable.
 template <typename ValueMatcher>
 class [[nodiscard]] OptionalMatcher {
  public:
@@ -5913,7 +5913,7 @@ PolymorphicMatcher<internal::ExceptionMatcherImpl<Err>> ThrowsMessage(
   EXPECT_PRED_FORMAT1(              \
       ::testing::internal::MakePredicateFormatterFromMatcher(matcher), value)
 
-// MATCHER* macros itself are listed below.
+// MATCHER* macros are listed below.
 #define MATCHER(name, description)                                            \
   class name##Matcher                                                         \
       : public ::testing::internal::MatcherBaseImpl<name##Matcher> {          \
