@@ -2188,7 +2188,7 @@ inline int IsATTY(int fd) {
 
 GTEST_DISABLE_DEPRECATED_PUSH_()
 
-// ChDir(), FReopen(), FDOpen(), Read(), Write(), Close(), and
+// ChDir(), FReopen(), FDOpen(), Read(), Write(), Close(), Dup(), Dup2(), and
 // StrError() aren't needed on Windows CE at this time and thus not
 // defined there.
 #if GTEST_HAS_FILE_SYSTEM
@@ -2196,7 +2196,13 @@ GTEST_DISABLE_DEPRECATED_PUSH_()
     !defined(GTEST_OS_WINDOWS_RT) && !defined(GTEST_OS_WINDOWS_GAMES) &&     \
     !defined(GTEST_OS_ESP8266) && !defined(GTEST_OS_XTENSA) &&               \
     !defined(GTEST_OS_QURT)
-inline int ChDir(const char* dir) { return chdir(dir); }
+inline int ChDir(const char* dir) {
+#ifdef GTEST_OS_WINDOWS
+  return _chdir(dir);
+#else
+  return chdir(dir);
+#endif
+}
 #endif
 inline FILE* FOpen(const char* path, const char* mode) {
 #if defined(GTEST_OS_WINDOWS) && !defined(GTEST_OS_WINDOWS_MINGW)
@@ -2213,17 +2219,51 @@ inline FILE* FOpen(const char* path, const char* mode) {
 inline FILE* FReopen(const char* path, const char* mode, FILE* stream) {
   return freopen(path, mode, stream);
 }
-inline FILE* FDOpen(int fd, const char* mode) { return fdopen(fd, mode); }
+inline FILE* FDOpen(int fd, const char* mode) {
+#ifdef GTEST_OS_WINDOWS
+  return _fdopen(fd, mode);
+#else
+  return fdopen(fd, mode);
+#endif
+}
 #endif  // !GTEST_OS_WINDOWS_MOBILE && !GTEST_OS_QURT
 inline int FClose(FILE* fp) { return fclose(fp); }
 #if !defined(GTEST_OS_WINDOWS_MOBILE) && !defined(GTEST_OS_QURT)
 inline int Read(int fd, void* buf, unsigned int count) {
+#ifdef GTEST_OS_WINDOWS
+  return static_cast<int>(_read(fd, buf, count));
+#else
   return static_cast<int>(read(fd, buf, count));
+#endif
 }
 inline int Write(int fd, const void* buf, unsigned int count) {
+#ifdef GTEST_OS_WINDOWS
+  return static_cast<int>(_write(fd, buf, count));
+#else
   return static_cast<int>(write(fd, buf, count));
+#endif
 }
-inline int Close(int fd) { return close(fd); }
+inline int Close(int fd) {
+#ifdef GTEST_OS_WINDOWS
+  return _close(fd);
+#else
+  return close(fd);
+#endif
+}
+inline int Dup(int fd) {
+#ifdef GTEST_OS_WINDOWS
+  return _dup(fd);
+#else
+  return dup(fd);
+#endif
+}
+inline int Dup2(int fd1, int fd2) {
+#ifdef GTEST_OS_WINDOWS
+  return _dup2(fd1, fd2);
+#else
+  return dup2(fd1, fd2);
+#endif
+}
 #endif  // !GTEST_OS_WINDOWS_MOBILE && !GTEST_OS_QURT
 #endif  // GTEST_HAS_FILE_SYSTEM
 

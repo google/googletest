@@ -484,9 +484,11 @@ class FormatEpochTimeInMillisAsIso8601Test : public Test {
     const std::string env_var =
         std::string("TZ=") + (time_zone ? time_zone : "");
     _putenv(env_var.c_str());
-    GTEST_DISABLE_MSC_WARNINGS_PUSH_(4996 /* deprecated function */)
+#if defined(GTEST_OS_WINDOWS)
+    _tzset();
+#else
     tzset();
-    GTEST_DISABLE_MSC_WARNINGS_POP_()
+#endif
 #else
 #if defined(GTEST_OS_LINUX_ANDROID) && __ANDROID_API__ < 21
     // Work around KitKat bug in tzset by setting "UTC" before setting "UTC+00".
