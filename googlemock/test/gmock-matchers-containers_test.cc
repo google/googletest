@@ -78,6 +78,52 @@ TEST(ContainsTest, WorksWithMoveOnly) {
 
 INSTANTIATE_GTEST_MATCHER_TEST_P(ElementsAreTest);
 
+// A range of decreasing, positive integers.
+class DecreasingIntRange {
+ public:
+  explicit DecreasingIntRange(int start) : v_(start) {}
+
+  struct Sentinel {};
+
+  class Iterator {
+   public:
+    using difference_type = std::ptrdiff_t;
+    using value_type = int;
+    using iterator_category = std::input_iterator_tag;
+    using pointer = void;
+    using reference = int;
+
+    explicit Iterator(int v) : v_(v) {}
+
+    int operator*() const { return v_; }
+
+    Iterator& operator++() {
+      --v_;
+      return *this;
+    }
+    Iterator operator++(int) {
+      auto tmp = *this;
+      ++*this;
+      return tmp;
+    }
+
+    bool operator==(const Iterator& other) const { return v_ == other.v_; }
+    bool operator!=(const Iterator& other) const { return v_ != other.v_; }
+
+    bool operator==(const Sentinel&) const { return v_ < 0; }
+    bool operator!=(const Sentinel&) const { return v_ >= 0; }
+
+   private:
+    int v_;
+  };
+
+  Iterator begin() const { return Iterator(v_); }
+  Sentinel end() const { return Sentinel{}; }
+
+ private:
+  int v_;
+};
+
 // Tests the variadic version of the ElementsAreMatcher
 TEST(ElementsAreTest, HugeMatcher) {
   vector<int> test_vector{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
@@ -85,6 +131,13 @@ TEST(ElementsAreTest, HugeMatcher) {
   EXPECT_THAT(test_vector,
               ElementsAre(Eq(1), Eq(2), Lt(13), Eq(4), Eq(5), Eq(6), Eq(7),
                           Eq(8), Eq(9), Eq(10), Gt(1), Eq(12)));
+}
+
+// Tests ElementsAreMatcher with a range that uses a sentinel.
+TEST(ElementsAreTest, HugeMatcherSentinel) {
+  DecreasingIntRange range(3);
+
+  EXPECT_THAT(range, ElementsAre(Eq(3), Eq(2), Eq(1), Eq(0)));
 }
 
 // Tests the variadic version of the UnorderedElementsAreMatcher
@@ -103,6 +156,13 @@ TEST(ElementsAreTest, HugeMatcherUnordered) {
   EXPECT_THAT(test_vector, UnorderedElementsAre(
                                Eq(2), Eq(1), Gt(7), Eq(5), Eq(4), Eq(6), Eq(7),
                                Eq(3), Eq(9), Eq(12), Eq(11), Ne(122)));
+}
+
+// Tests the UnorderedElementsAreMatcher with a range that uses a sentinel.
+TEST(ElementsAreTest, HugeMatcherUnorderedSentinel) {
+  DecreasingIntRange range(3);
+
+  EXPECT_THAT(range, UnorderedElementsAre(Eq(2), Eq(1), Eq(3), Eq(0)));
 }
 
 // Tests that ASSERT_THAT() and EXPECT_THAT() work when the value

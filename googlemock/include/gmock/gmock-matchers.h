@@ -3971,8 +3971,8 @@ class [[nodiscard]] UnorderedElementsAreMatcherImpl
   }
 
  private:
-  template <typename ElementIter>
-  MatchMatrix AnalyzeElements(ElementIter elem_first, ElementIter elem_last,
+  template <typename ElementIter, typename ElementIterEnd>
+  MatchMatrix AnalyzeElements(ElementIter elem_first, ElementIterEnd elem_last,
                               ::std::vector<std::string>* element_printouts,
                               MatchResultListener* listener) const {
     element_printouts->clear();
