@@ -1701,9 +1701,9 @@ checkpoints to implement a resource leak checker, for example.
 
 ### Defining Event Listeners
 
-To define a event listener, you subclass either
+To define an event listener, you subclass either
 [`testing::TestEventListener`](reference/testing.md#TestEventListener) or
-[`testing::EmptyTestEventListener`](reference/testing.md#EmptyTestEventListener)
+[`testing::EmptyTestEventListener`](reference/testing.md#EmptyTestEventListener).
 The former is an (abstract) interface, where *each pure virtual method can be
 overridden to handle a test event* (For example, when a test starts, the
 `OnTestStart()` method will be called.). The latter provides an empty

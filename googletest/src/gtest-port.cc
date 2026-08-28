@@ -1136,7 +1136,7 @@ class CapturedStream {
 #elif defined(GTEST_OS_IOS)
     char user_temp_dir[PATH_MAX + 1];
 
-    // Documented alternative to NSTemporaryDirectory() (for obtaining creating
+    // Documented alternative to NSTemporaryDirectory() (for creating
     // a temporary directory) at
     // https://developer.apple.com/library/archive/documentation/Security/Conceptual/SecureCodingGuide/Articles/RaceConditions.html#//apple_ref/doc/uid/TP40002585-SW10
     //
