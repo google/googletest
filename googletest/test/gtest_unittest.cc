@@ -34,6 +34,7 @@
 #include "gtest/gtest.h"
 
 #include <iterator>
+#include <limits>
 
 // Verifies that the command line flag variables can be accessed in
 // code once "gtest.h" has been #included.
@@ -4029,7 +4030,7 @@ enum {
   // On Linux, kCaseB and kCaseA have the same value when truncated to
   // int size.  We want to test whether this will confuse the
   // assertions.
-  kCaseB = testing::internal::kMaxBiggestInt,
+  kCaseB = (std::numeric_limits<intmax_t>::max)(),
 
 #else
 

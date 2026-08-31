@@ -236,7 +236,6 @@
 // Integer types:
 //   TypeWithSize   - maps an integer to a int type.
 //   TimeInMillis   - integers of known sizes.
-//   BiggestInt     - the biggest signed integer type.
 //
 // Command-line utilities:
 //   GetInjectableArgvs() - returns the command line as a vector of strings.
@@ -2302,14 +2301,6 @@ GTEST_DISABLE_DEPRECATED_POP_()
 #else
 #define GTEST_SNPRINTF_ snprintf
 #endif
-
-// The biggest signed integer type the compiler supports.
-//
-// long long is guaranteed to be at least 64-bits in C++11.
-using BiggestInt = long long;  // NOLINT
-
-// The maximum number a BiggestInt can represent.
-constexpr BiggestInt kMaxBiggestInt = (std::numeric_limits<BiggestInt>::max)();
 
 // This template class serves as a compile-time function from size to
 // type.  It maps a size in bytes to a primitive type with that
