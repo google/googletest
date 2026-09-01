@@ -341,13 +341,6 @@
 #define GTEST_INIT_GOOGLE_TEST_NAME_ "testing::InitGoogleTest"
 #endif  // !defined(GTEST_INIT_GOOGLE_TEST_NAME_)
 
-// Determines the version of gcc that is used to compile this.
-#ifdef __GNUC__
-// 40302 means version 4.3.2.
-#define GTEST_GCC_VER_ \
-  (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
-#endif  // __GNUC__
-
 // Macros for disabling Microsoft Visual C++ warnings.
 //
 //   GTEST_DISABLE_MSC_WARNINGS_PUSH_(4800 4385)

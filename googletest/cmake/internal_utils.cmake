@@ -113,16 +113,10 @@ macro(config_compiler_and_linker)
       endif()
     endif()
   elseif (CMAKE_COMPILER_IS_GNUCXX)
-    set(cxx_base_flags "-Wall -Wshadow -Wundef")
-    if(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 7.0.0)
-      set(cxx_base_flags "${cxx_base_flags} -Wno-error=dangling-else")
-    endif()
+    set(cxx_base_flags "-Wall -Wshadow -Wundef -Wno-error=dangling-else")
     set(cxx_exception_flags "-fexceptions")
     set(cxx_no_exception_flags "-fno-exceptions")
-    # Until version 4.3.2, GCC doesn't define a macro to indicate
-    # whether RTTI is enabled. Therefore we define GTEST_HAS_RTTI
-    # explicitly.
-    set(cxx_no_rtti_flags "-fno-rtti -DGTEST_HAS_RTTI=0")
+    set(cxx_no_rtti_flags "-fno-rtti")
     set(cxx_strict_flags
       "-Wextra -Wno-unused-parameter -Wno-missing-field-initializers")
   elseif (CMAKE_CXX_COMPILER_ID STREQUAL "SunPro")
