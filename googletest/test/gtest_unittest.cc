@@ -4010,8 +4010,8 @@ TEST(AssertionTest, NamedEnum) {
   EXPECT_NONFATAL_FAILURE(EXPECT_EQ(kE1, kE2), "Which is: 1");
 }
 
-// Sun Studio and HP aCC2reject this code.
-#if !defined(__SUNPRO_CC) && !defined(__HP_aCC)
+// Sun Studio rejects this code.
+#if !defined(__SUNPRO_CC)
 
 // Tests using assertions with anonymous enums.
 enum {
@@ -4072,7 +4072,7 @@ TEST(AssertionTest, AnonymousEnum) {
   EXPECT_FATAL_FAILURE(ASSERT_EQ(kCaseA, kCaseC), "\n    Which is: -1");
 }
 
-#endif  // !GTEST_OS_MAC && !defined(__SUNPRO_CC)
+#endif  // !defined(__SUNPRO_CC)
 
 #ifdef GTEST_OS_WINDOWS
 

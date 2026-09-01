@@ -481,10 +481,6 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 #elif defined(__IBMCPP__) && defined(__EXCEPTIONS) && __EXCEPTIONS
 // xlC defines __EXCEPTIONS to 1 if and only if exceptions are enabled.
 #define GTEST_HAS_EXCEPTIONS 1
-#elif defined(__HP_aCC)
-// Exception handling is in effect by default in HP aCC compiler. It has to
-// be turned of by +noeh compiler option if desired.
-#define GTEST_HAS_EXCEPTIONS 1
 #else
 // For other compilers, we assume exceptions are disabled to be
 // conservative.
@@ -745,7 +741,7 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 // Typed tests need <typeinfo> and variadic macros, which GCC, VC++ 8.0,
 // Sun Pro CC, IBM Visual Age, and HP aCC support.
 #if defined(__GNUC__) || defined(_MSC_VER) || defined(__SUNPRO_CC) || \
-    defined(__IBMCPP__) || defined(__HP_aCC)
+    defined(__IBMCPP__)
 #define GTEST_HAS_TYPED_TEST 1
 #define GTEST_HAS_TYPED_TEST_P 1
 #endif

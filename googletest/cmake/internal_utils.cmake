@@ -134,12 +134,6 @@ macro(config_compiler_and_linker)
     # whether RTTI is enabled. Therefore we define GTEST_HAS_RTTI
     # explicitly.
     set(cxx_no_rtti_flags "-qnortti -DGTEST_HAS_RTTI=0")
-  elseif (CMAKE_CXX_COMPILER_ID STREQUAL "HP")
-    set(cxx_base_flags "-AA -mt")
-    set(cxx_exception_flags "-DGTEST_HAS_EXCEPTIONS=1")
-    set(cxx_no_exception_flags "+noeh -DGTEST_HAS_EXCEPTIONS=0")
-    # RTTI can not be disabled in HP aCC compiler.
-    set(cxx_no_rtti_flags "")
   endif()
 
   # The pthreads library is available and allowed?
