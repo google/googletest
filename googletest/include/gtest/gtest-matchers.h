@@ -60,8 +60,8 @@
 #endif
 
 GTEST_DISABLE_MSC_WARNINGS_PUSH_(
-    4251 GTEST_MAYBE_5046_ /* class A needs to have dll-interface to be used by
-                              clients of class B */
+    // class A needs to have dll-interface to be used by clients of class B
+    4251 GTEST_MAYBE_5046_
     /* Symbol involving type with internal linkage not defined */)
 
 namespace testing {
