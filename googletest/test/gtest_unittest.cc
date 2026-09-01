@@ -598,9 +598,7 @@ TEST(NullLiteralTest, ImplicitConversion) {
 
 #ifdef __clang__
 #pragma clang diagnostic push
-#if __has_warning("-Wzero-as-null-pointer-constant")
 #pragma clang diagnostic error "-Wzero-as-null-pointer-constant"
-#endif
 #endif
 
 TEST(NullLiteralTest, NoConversionNoWarning) {
