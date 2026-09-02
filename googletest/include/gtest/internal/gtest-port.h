@@ -465,9 +465,6 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 #elif defined(__GNUC__) && defined(__EXCEPTIONS) && __EXCEPTIONS
 // gcc defines __EXCEPTIONS to 1 if and only if exceptions are enabled.
 #define GTEST_HAS_EXCEPTIONS 1
-#elif defined(__IBMCPP__) && defined(__EXCEPTIONS) && __EXCEPTIONS
-// xlC defines __EXCEPTIONS to 1 if and only if exceptions are enabled.
-#define GTEST_HAS_EXCEPTIONS 1
 #else
 // For other compilers, we assume exceptions are disabled to be
 // conservative.
@@ -596,16 +593,6 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 
 #define GTEST_HAS_RTTI __has_feature(cxx_rtti)
 
-// Starting with version 9.0 IBM Visual Age defines __RTTI_ALL__ to 1 if
-// both the typeid and dynamic_cast features are present.
-#elif defined(__IBMCPP__) && (__IBMCPP__ >= 900)
-
-#ifdef __RTTI_ALL__
-#define GTEST_HAS_RTTI 1
-#else
-#define GTEST_HAS_RTTI 0
-#endif
-
 #else
 
 // For all other compilers, we assume RTTI is enabled.
@@ -727,7 +714,7 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 
 // Typed tests need <typeinfo> and variadic macros, which GCC, VC++ 8.0,
 // Sun Pro CC, IBM Visual Age, and HP aCC support.
-#if defined(__GNUC__) || defined(_MSC_VER) || defined(__IBMCPP__)
+#if defined(__GNUC__) || defined(_MSC_VER)
 #define GTEST_HAS_TYPED_TEST 1
 #define GTEST_HAS_TYPED_TEST_P 1
 #endif
