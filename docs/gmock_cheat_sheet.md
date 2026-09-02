@@ -189,6 +189,14 @@ expectations must be matched in a given order, you can use the
 [`InSequence` clause](reference/mocking.md#EXPECT_CALL.InSequence) of
 `EXPECT_CALL`, or use an [`InSequence` object](reference/mocking.md#InSequence).
 
+## Distinguishing between Unintresting Calls from Different Mocks
+
+By default unintresting mock function calls will be logged as function name and its address.
+In case when multiple instances of same mocked class is used it can be useful to set mock name:
+```cpp
+Mock::SetMockName(&mock_obj, "NamedObject");
+```
+
 ## Verifying and Resetting a Mock
 
 gMock will verify the expectations on a mock object when it is destructed, or
