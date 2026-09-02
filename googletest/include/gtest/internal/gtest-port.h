@@ -448,14 +448,6 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 #if defined(_MSC_VER) && defined(_CPPUNWIND)
 // MSVC defines _CPPUNWIND to 1 if and only if exceptions are enabled.
 #define GTEST_HAS_EXCEPTIONS 1
-#elif defined(__BORLANDC__)
-// C++Builder's implementation of the STL uses the _HAS_EXCEPTIONS
-// macro to enable exceptions, so we'll do the same.
-// Assumes that exceptions are enabled by default.
-#ifndef _HAS_EXCEPTIONS
-#define _HAS_EXCEPTIONS 1
-#endif  // _HAS_EXCEPTIONS
-#define GTEST_HAS_EXCEPTIONS _HAS_EXCEPTIONS
 #elif defined(__clang__)
 // clang defines __EXCEPTIONS if and only if exceptions are enabled before clang
 // 220714, but if and only if cleanups are enabled after that. In Obj-C++ files,
@@ -480,7 +472,7 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 // For other compilers, we assume exceptions are disabled to be
 // conservative.
 #define GTEST_HAS_EXCEPTIONS 0
-#endif  // defined(_MSC_VER) || defined(__BORLANDC__)
+#endif  // defined(_MSC_VER) && defined(_CPPUNWIND)
 #endif  // GTEST_HAS_EXCEPTIONS
 
 // MSVC either defines wchar_t as a typedef of unsigned short, or as a native
@@ -849,8 +841,7 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 #ifndef GTEST_HAS_SEH
 // The user didn't tell us, so we need to figure it out.
 
-#if defined(_MSC_VER) || defined(__BORLANDC__)
-// These two compilers are known to support SEH.
+#ifdef _MSC_VER
 #define GTEST_HAS_SEH 1
 #else
 // Assume no SEH.
@@ -2128,12 +2119,6 @@ inline bool IsDir(const StatStruct& st) { return S_ISDIR(st.st_mode); }
 
 #ifdef GTEST_OS_WINDOWS
 
-#ifdef __BORLANDC__
-inline int DoIsATTY(int fd) { return isatty(fd); }
-inline int StrCaseCmp(const char* s1, const char* s2) {
-  return stricmp(s1, s2);
-}
-#else  // !__BORLANDC__
 #if defined(GTEST_OS_WINDOWS_MOBILE) || defined(GTEST_OS_ZOS) || \
     defined(GTEST_OS_IOS) || defined(GTEST_OS_WINDOWS_PHONE) ||  \
     defined(GTEST_OS_WINDOWS_RT) || defined(ESP_PLATFORM)
@@ -2144,7 +2129,6 @@ inline int DoIsATTY(int fd) { return _isatty(fd); }
 inline int StrCaseCmp(const char* s1, const char* s2) {
   return _stricmp(s1, s2);
 }
-#endif  // __BORLANDC__
 
 #else
 
@@ -2246,11 +2230,6 @@ inline const char* GetEnv(const char* name) {
   // We are on an embedded platform, which has no environment variables.
   static_cast<void>(name);  // To prevent 'unused argument' warning.
   return nullptr;
-#elif defined(__BORLANDC__)
-  // Environment variables which we programmatically clear will be set to the
-  // empty string rather than unset (NULL).  Handle that case.
-  const char* const env = getenv(name);
-  return (env != nullptr && env[0] != '\0') ? env : nullptr;
 #else
   return getenv(name);
 #endif
