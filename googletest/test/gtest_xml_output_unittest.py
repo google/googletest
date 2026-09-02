@@ -144,7 +144,7 @@ It is good practice to tell why you skip a test.
     </properties>
     <testcase name="OneProperty" file="gtest_xml_output_unittest_.cc" line="125" status="run" result="completed" time="*" timestamp="*" classname="PropertyRecordingTest">
       <properties>
-        <property name="key_1" value="1"/>
+        <property name="key_1" value="caf\u00e9 \u4e2d"/>
       </properties>
     </testcase>
     <testcase name="IntValuedProperty" file="gtest_xml_output_unittest_.cc" line="129" status="run" result="completed" time="*" timestamp="*" classname="PropertyRecordingTest">
