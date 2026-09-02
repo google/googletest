@@ -1712,7 +1712,7 @@ static void SetEnv(const char* name, const char* value) {
 #ifdef GTEST_OS_WINDOWS_MOBILE
   // Environment variables are not supported on Windows CE.
   return;
-#elif defined(__BORLANDC__) || defined(__SunOS_5_8) || defined(__SunOS_5_9)
+#elif defined(__BORLANDC__)
   // C++Builder's putenv only stores a pointer to its parameter; we have to
   // ensure that the string remains valid as long as it might be needed.
   // We use an std::map to do so.
@@ -4010,9 +4010,6 @@ TEST(AssertionTest, NamedEnum) {
   EXPECT_NONFATAL_FAILURE(EXPECT_EQ(kE1, kE2), "Which is: 1");
 }
 
-// Sun Studio rejects this code.
-#if !defined(__SUNPRO_CC)
-
 // Tests using assertions with anonymous enums.
 enum {
   kCaseA = -1,
@@ -4071,8 +4068,6 @@ TEST(AssertionTest, AnonymousEnum) {
 
   EXPECT_FATAL_FAILURE(ASSERT_EQ(kCaseA, kCaseC), "\n    Which is: -1");
 }
-
-#endif  // !defined(__SUNPRO_CC)
 
 #ifdef GTEST_OS_WINDOWS
 

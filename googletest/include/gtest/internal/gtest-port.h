@@ -473,11 +473,6 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 #elif defined(__GNUC__) && defined(__EXCEPTIONS) && __EXCEPTIONS
 // gcc defines __EXCEPTIONS to 1 if and only if exceptions are enabled.
 #define GTEST_HAS_EXCEPTIONS 1
-#elif defined(__SUNPRO_CC)
-// Sun Pro CC supports exceptions.  However, there is no compile-time way of
-// detecting whether they are enabled or not.  Therefore, we assume that
-// they are enabled unless the user tells us otherwise.
-#define GTEST_HAS_EXCEPTIONS 1
 #elif defined(__IBMCPP__) && defined(__EXCEPTIONS) && __EXCEPTIONS
 // xlC defines __EXCEPTIONS to 1 if and only if exceptions are enabled.
 #define GTEST_HAS_EXCEPTIONS 1
@@ -740,8 +735,7 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 
 // Typed tests need <typeinfo> and variadic macros, which GCC, VC++ 8.0,
 // Sun Pro CC, IBM Visual Age, and HP aCC support.
-#if defined(__GNUC__) || defined(_MSC_VER) || defined(__SUNPRO_CC) || \
-    defined(__IBMCPP__)
+#if defined(__GNUC__) || defined(_MSC_VER) || defined(__IBMCPP__)
 #define GTEST_HAS_TYPED_TEST 1
 #define GTEST_HAS_TYPED_TEST_P 1
 #endif
@@ -2252,7 +2246,7 @@ inline const char* GetEnv(const char* name) {
   // We are on an embedded platform, which has no environment variables.
   static_cast<void>(name);  // To prevent 'unused argument' warning.
   return nullptr;
-#elif defined(__BORLANDC__) || defined(__SunOS_5_8) || defined(__SunOS_5_9)
+#elif defined(__BORLANDC__)
   // Environment variables which we programmatically clear will be set to the
   // empty string rather than unset (NULL).  Handle that case.
   const char* const env = getenv(name);

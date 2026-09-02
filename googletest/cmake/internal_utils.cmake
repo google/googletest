@@ -119,12 +119,7 @@ macro(config_compiler_and_linker)
     set(cxx_no_rtti_flags "-fno-rtti")
     set(cxx_strict_flags
       "-Wextra -Wno-unused-parameter -Wno-missing-field-initializers")
-  elseif (CMAKE_CXX_COMPILER_ID STREQUAL "SunPro")
-    set(cxx_exception_flags "-features=except")
-    # Sun Pro doesn't provide macros to indicate whether exceptions and
-    # RTTI are enabled, so we define GTEST_HAS_* explicitly.
-    set(cxx_no_exception_flags "-features=no%except -DGTEST_HAS_EXCEPTIONS=0")
-    set(cxx_no_rtti_flags "-features=no%rtti -DGTEST_HAS_RTTI=0")
+
   elseif (CMAKE_CXX_COMPILER_ID STREQUAL "VisualAge" OR
       CMAKE_CXX_COMPILER_ID STREQUAL "XL")
     # CMake 2.8 changes Visual Age's compiler ID to "XL".
