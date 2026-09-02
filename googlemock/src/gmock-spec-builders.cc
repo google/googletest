@@ -56,12 +56,6 @@
 #include <qurt_event.h>
 #endif
 
-// Silence C4800 (C4800: 'int *const ': forcing value
-// to bool 'true' or 'false') for MSVC 15
-#if defined(_MSC_VER) && (_MSC_VER == 1900)
-GTEST_DISABLE_MSC_WARNINGS_PUSH_(4800)
-#endif
-
 namespace testing {
 namespace internal {
 
@@ -786,7 +780,3 @@ InSequence::~InSequence() {
 }
 
 }  // namespace testing
-
-#if defined(_MSC_VER) && (_MSC_VER == 1900)
-GTEST_DISABLE_MSC_WARNINGS_POP_()  // 4800
-#endif

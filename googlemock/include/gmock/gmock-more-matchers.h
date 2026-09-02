@@ -50,11 +50,6 @@ namespace testing {
 // Silence C4100 (unreferenced formal
 // parameter) for MSVC
 GTEST_DISABLE_MSC_WARNINGS_PUSH_(4100)
-#if defined(_MSC_VER) && (_MSC_VER == 1900)
-// and silence C4800 (C4800: 'int *const ': forcing value
-// to bool 'true' or 'false') for MSVC 14
-GTEST_DISABLE_MSC_WARNINGS_PUSH_(4800)
-#endif
 
 namespace internal {
 
@@ -123,9 +118,6 @@ MATCHER(IsFalse, negation ? "is true" : "is false") {
   return !static_cast<bool>(arg);
 }
 
-#if defined(_MSC_VER) && (_MSC_VER == 1900)
-GTEST_DISABLE_MSC_WARNINGS_POP_()  // 4800
-#endif
 GTEST_DISABLE_MSC_WARNINGS_POP_()  // 4100
 
 }  // namespace testing

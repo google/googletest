@@ -53,11 +53,6 @@
 // Silence C4100 (unreferenced formal parameter) and C4503 (decorated name
 // length exceeded) for MSVC.
 GTEST_DISABLE_MSC_WARNINGS_PUSH_(4100 4503)
-#if defined(_MSC_VER) && (_MSC_VER == 1900)
-// and silence C4800 (C4800: 'int *const ': forcing value
-// to bool 'true' or 'false') for MSVC 15
-GTEST_DISABLE_MSC_WARNINGS_PUSH_(4800)
-#endif
 
 namespace testing {
 namespace {
@@ -2217,7 +2212,4 @@ TEST(ActionMacro, LargeArity) {
 }  // namespace
 }  // namespace testing
 
-#if defined(_MSC_VER) && (_MSC_VER == 1900)
-GTEST_DISABLE_MSC_WARNINGS_POP_()  // 4800
-#endif
 GTEST_DISABLE_MSC_WARNINGS_POP_()  // 4100 4503

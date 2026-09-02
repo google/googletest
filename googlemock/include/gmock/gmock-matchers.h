@@ -4538,7 +4538,7 @@ class [[nodiscard]] ArgsMatcherImpl : public MatcherInterface<ArgsTuple> {
 
   bool MatchAndExplain(ArgsTuple args,
                        MatchResultListener* listener) const override {
-    // Workaround spurious C4100 on MSVC<=15.7 when k is empty.
+    // Workaround spurious GCC warning when k is empty.
     (void)args;
     const SelectedArgs& selected_args =
         std::forward_as_tuple(std::get<k>(args)...);
@@ -4571,7 +4571,7 @@ class [[nodiscard]] ArgsMatcherImpl : public MatcherInterface<ArgsTuple> {
   static void PrintIndices(::std::ostream* os) {
     *os << "whose fields (";
     const char* sep = "";
-    // Workaround spurious C4189 on MSVC<=15.7 when k is empty.
+    // Workaround spurious GCC warning when k is empty.
     (void)sep;
     // The static_cast to void is needed to silence Clang's -Wcomma warning.
     // This pattern looks suspiciously like we may have mismatched parentheses

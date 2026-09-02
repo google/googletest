@@ -226,13 +226,10 @@ if (gtest_build_tests)
   ############################################################
   # C++ tests built with non-standard compiler flags.
 
-  # MSVC 7.1 does not support STL with exceptions disabled.
-  if (NOT MSVC OR MSVC_VERSION GREATER 1310)
-    cxx_library(gtest_no_exception "${cxx_no_exception}"
-      src/gtest-all.cc)
-    cxx_library(gtest_main_no_exception "${cxx_no_exception}"
-      src/gtest-all.cc src/gtest_main.cc)
-  endif()
+  cxx_library(gtest_no_exception "${cxx_no_exception}"
+    src/gtest-all.cc)
+  cxx_library(gtest_main_no_exception "${cxx_no_exception}"
+    src/gtest-all.cc src/gtest_main.cc)
   cxx_library(gtest_main_no_rtti "${cxx_no_rtti}"
     src/gtest-all.cc src/gtest_main.cc)
 
@@ -264,14 +261,11 @@ if (gtest_build_tests)
   py_test(gtest_skip_check_output_test)
   py_test(gtest_skip_environment_check_output_test)
 
-  # Visual Studio .NET 2003 does not support STL with exceptions disabled.
-  if (NOT MSVC OR MSVC_VERSION GREATER 1310) # 1310 is Visual Studio .NET 2003
-    cxx_executable_with_flags(
-      googletest-catch-exceptions-no-ex-test_
-      "${cxx_no_exception}"
-      gtest_main_no_exception
-      test/googletest-catch-exceptions-test_.cc)
-  endif()
+  cxx_executable_with_flags(
+    googletest-catch-exceptions-no-ex-test_
+    "${cxx_no_exception}"
+    gtest_main_no_exception
+    test/googletest-catch-exceptions-test_.cc)
 
   cxx_executable_with_flags(
     googletest-catch-exceptions-ex-test_
@@ -301,14 +295,11 @@ if (gtest_build_tests)
   cxx_executable(googletest-shuffle-test_ test gtest)
   py_test(googletest-shuffle-test)
 
-  # MSVC 7.1 does not support STL with exceptions disabled.
-  if (NOT MSVC OR MSVC_VERSION GREATER 1310)
-    cxx_executable(googletest-throw-on-failure-test_ test gtest_no_exception)
-    set_target_properties(googletest-throw-on-failure-test_
-      PROPERTIES
-      COMPILE_FLAGS "${cxx_no_exception}")
-    py_test(googletest-throw-on-failure-test)
-  endif()
+  cxx_executable(googletest-throw-on-failure-test_ test gtest_no_exception)
+  set_target_properties(googletest-throw-on-failure-test_
+    PROPERTIES
+    COMPILE_FLAGS "${cxx_no_exception}")
+  py_test(googletest-throw-on-failure-test)
 
   cxx_executable(googletest-uninitialized-test_ test gtest)
   py_test(googletest-uninitialized-test)
