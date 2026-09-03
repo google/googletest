@@ -6010,6 +6010,7 @@ PolymorphicMatcher<internal::ExceptionMatcherImpl<Err>> ThrowsMessage(
       void DescribeNegationTo(::std::ostream* gmock_os) const override {       \
         *gmock_os << FormatDescription(true);                                  \
       }                                                                        \
+      /* NOLINTNEXTLINE(misc-non-private-member-variables-in-classes) */       \
       GMOCK_INTERNAL_MATCHER_MEMBERS(args)                                     \
                                                                                \
      private:                                                                  \
