@@ -74,8 +74,7 @@ py_test(
         ":gmock_test_utils",
     ],
     tags = [
-        "no_test_msvc2015",
-        "no_test_msvc2017",
+        "no_test_msvc2022",
     ],
 )
 
@@ -105,8 +104,7 @@ py_test(
         ":gmock_output_test_golden.txt",
     ],
     tags = [
-        "no_test_msvc2015",
-        "no_test_msvc2017",
+        "no_test_msvc2022",
     ],
     deps = [":gmock_test_utils"],
 )

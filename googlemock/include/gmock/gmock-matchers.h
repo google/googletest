@@ -277,13 +277,6 @@
 #include "gtest/gtest.h"
 #include "gtest/internal/gtest-internal.h"
 
-// MSVC warning C5046 is new as of VS2017 version 15.8.
-#if defined(_MSC_VER) && _MSC_VER >= 1915
-#define GMOCK_MAYBE_5046_ 5046
-#else
-#define GMOCK_MAYBE_5046_
-#endif
-
 #if GTEST_HAS_RTTI
 namespace proto2 {
 namespace internal {
@@ -324,7 +317,7 @@ T* DynamicCastMessageForGtest(proto2::MessageLite* msg) {
 
 GTEST_DISABLE_MSC_WARNINGS_PUSH_(
     // class A needs to have dll-interface to be used by clients of class B
-    4251 GMOCK_MAYBE_5046_
+    4251 5046
     /* Symbol involving type with internal linkage not defined */)
 
 namespace testing {

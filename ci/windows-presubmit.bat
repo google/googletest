@@ -69,7 +69,7 @@ IF EXIST "%KOKORO_GFILE_DIR%\distdir\googletest_vendor.tar.gz" (
   --keep_going ^
   --per_file_copt=external/.*@/w ^
   --test_output=errors ^
-  --test_tag_filters=-no_test_msvc2017 ^
+  --test_tag_filters=-no_test_msvc2022 ^
   %VENDOR_FLAG%
 IF %errorlevel% neq 0 EXIT /B 1
 
@@ -84,6 +84,6 @@ IF %errorlevel% neq 0 EXIT /B 1
   --keep_going ^
   --per_file_copt=external/.*@/w ^
   --test_output=errors ^
-  --test_tag_filters=-no_test_msvc2017 ^
+  --test_tag_filters=-no_test_msvc2022 ^
   %VENDOR_FLAG%
 IF %errorlevel% neq 0 EXIT /B 1
