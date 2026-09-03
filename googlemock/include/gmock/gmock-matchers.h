@@ -6021,8 +6021,8 @@ PolymorphicMatcher<internal::ExceptionMatcherImpl<Err>> ThrowsMessage(
     };                                                                         \
   };                                                                           \
   template <GMOCK_INTERNAL_MATCHER_TEMPLATE_PARAMS(args)>                      \
-  inline full_name<GMOCK_INTERNAL_MATCHER_TYPE_PARAMS(args)> name(             \
-      GMOCK_INTERNAL_MATCHER_FUNCTION_ARGS(args)) {                            \
+  [[maybe_unused]] inline full_name<GMOCK_INTERNAL_MATCHER_TYPE_PARAMS(args)>  \
+  name(GMOCK_INTERNAL_MATCHER_FUNCTION_ARGS(args)) {                           \
     return full_name<GMOCK_INTERNAL_MATCHER_TYPE_PARAMS(args)>(                \
         GMOCK_INTERNAL_MATCHER_ARGS_USAGE(args));                              \
   }                                                                            \

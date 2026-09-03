@@ -1659,7 +1659,7 @@ MATCHER(M, "") {
 }
 
 template <typename T1, typename T2>
-bool AllOf(const T1& /*t1*/, const T2& /*t2*/) {
+[[maybe_unused]] bool AllOf(const T1& /*t1*/, const T2& /*t2*/) {
   return true;
 }
 
@@ -1669,7 +1669,7 @@ TEST(AllOfTest, DoesNotCallAllOfUnqualified) {
 }
 
 template <typename T1, typename T2>
-bool AnyOf(const T1&, const T2&) {
+[[maybe_unused]] bool AnyOf(const T1&, const T2&) {
   return true;
 }
 
