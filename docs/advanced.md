@@ -1233,9 +1233,11 @@ returns the value of `testing::PrintToString(GetParam())`. It does not work for
 `std::string` or C strings.
 
 {: .callout .note}
-NOTE: test names must be non-empty, unique, and may only contain ASCII
-alphanumeric characters. In particular, they
-[should not contain underscores](faq.md#why-should-test-suite-names-and-test-names-not-contain-underscore)
+NOTE: test names must be non-empty, unique,
+and may only contain ASCII
+alphanumeric characters and underscores.
+
+
 
 ```c++
 class MyTestSuite : public testing::TestWithParam<int> {};
