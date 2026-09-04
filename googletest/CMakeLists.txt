@@ -205,6 +205,10 @@ if (gtest_build_tests)
   cxx_test(googletest-param-test-test gtest
     test/googletest-param-test2-test.cc)
   cxx_test(googletest-port-test gtest_main)
+  if (CYGWIN)
+    cxx_test(gtest_cygwin_strict_test gtest_main)
+    set_property(TARGET gtest_cygwin_strict_test PROPERTY CXX_EXTENSIONS OFF)
+  endif()
   cxx_test(gtest_pred_impl_unittest gtest_main)
   cxx_test(gtest_premature_exit_test gtest
     test/gtest_premature_exit_test.cc)
