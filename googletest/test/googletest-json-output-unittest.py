@@ -336,7 +336,7 @@ EXPECTED_NON_EMPTY = {
                     'time': '*',
                     'timestamp': '*',
                     'classname': 'PropertyRecordingTest',
-                    'key_1': '1',
+                    'key_1': 'caf\u00e9 \u4e2d',
                 },
                 {
                     'name': 'IntValuedProperty',
@@ -878,7 +878,7 @@ class GTestJsonOutputUnitTest(gtest_test_utils.TestCase):
           'the expected exit code %s.'
           % (command, p.exit_code, expected_exit_code),
       )
-    with open(json_path) as f:
+    with open(json_path, encoding='utf-8') as f:
       actual = json.load(f)
     return actual
 

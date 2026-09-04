@@ -123,7 +123,7 @@ class PropertyRecordingTest : public Test {
 };
 
 TEST_F(PropertyRecordingTest, OneProperty) {
-  RecordProperty("key_1", "1");
+  RecordProperty("key_1", "caf\xC3\xA9 \xE4\xB8\xAD");
 }
 
 TEST_F(PropertyRecordingTest, IntValuedProperty) {
