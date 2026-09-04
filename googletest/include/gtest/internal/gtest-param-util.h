@@ -613,7 +613,7 @@ class [[nodiscard]] ParameterizedTestSuiteInfo
     }  // for test_info
 
     if (!generated_instantiations) {
-      // There are no generaotrs, or they all generate nothing ...
+      // There are no generators, or they all generate nothing ...
       InsertSyntheticTestCase(GetTestSuiteName(), code_location_,
                               !tests_.empty());
     }
@@ -762,7 +762,7 @@ class [[nodiscard]] ParameterizedTestSuiteRegistry {
 };
 
 // Keep track of what type-parameterized test suite are defined and
-// where as well as which are intatiated. This allows susequently
+// where as well as which are instantiated. This allows subsequently
 // identifying suits that are defined but never used.
 class [[nodiscard]] TypeParameterizedTestSuiteRegistry {
  public:

@@ -1021,7 +1021,7 @@ TEST(UnexpectedCallTest, GeneratesFailureForVoidFunction) {
 
 // Tests that an unexpected non-void function generates the right
 // failure message.
-TEST(UnexpectedCallTest, GeneartesFailureForNonVoidFunction) {
+TEST(UnexpectedCallTest, GeneratesFailureForNonVoidFunction) {
   MockB b1;
   EXPECT_CALL(b1, DoB(1));
   b1.DoB(1);
@@ -1385,7 +1385,7 @@ TEST(SequenceTest, Retirement) {
 
 // Tests Expectation.
 
-TEST(ExpectationTest, ConstrutorsWork) {
+TEST(ExpectationTest, ConstructorsWork) {
   MockA a;
   Expectation e1;  // Default ctor.
 
