@@ -262,7 +262,7 @@ according to the C++ language specification, and so you may not use fatal
 assertions in them; you'll get a compilation error if you try. Instead, either
 call `abort` and crash the entire test executable, or put the fatal assertion in
 a `SetUp`/`TearDown` function; see
-[constructor/destructor vs. `SetUp`/`TearDown`](faq.md#CtorVsSetUp)
+[constructor/destructor vs. `SetUp`/`TearDown`](faq.md#CtorVsSetUp).
 
 {: .callout .warning}
 WARNING: A fatal assertion in a helper function (private void-returning method)
@@ -1235,7 +1235,7 @@ returns the value of `testing::PrintToString(GetParam())`. It does not work for
 {: .callout .note}
 NOTE: test names must be non-empty, unique, and may only contain ASCII
 alphanumeric characters. In particular, they
-[should not contain underscores](faq.md#why-should-test-suite-names-and-test-names-not-contain-underscore)
+[should not contain underscores](faq.md#why-should-test-suite-names-and-test-names-not-contain-underscore).
 
 ```c++
 class MyTestSuite : public testing::TestWithParam<int> {};
@@ -1701,9 +1701,9 @@ checkpoints to implement a resource leak checker, for example.
 
 ### Defining Event Listeners
 
-To define a event listener, you subclass either
+To define an event listener, you subclass either
 [`testing::TestEventListener`](reference/testing.md#TestEventListener) or
-[`testing::EmptyTestEventListener`](reference/testing.md#EmptyTestEventListener)
+[`testing::EmptyTestEventListener`](reference/testing.md#EmptyTestEventListener).
 The former is an (abstract) interface, where *each pure virtual method can be
 overridden to handle a test event* (For example, when a test starts, the
 `OnTestStart()` method will be called.). The latter provides an empty
