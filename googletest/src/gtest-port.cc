@@ -729,7 +729,7 @@ bool RE::PartialMatch(const char* str, const RE& re) {
 void RE::Init(const char* regex) {
   pattern_ = regex;
 
-  // NetBSD (and Android, which takes its regex implemntation from NetBSD) does
+  // NetBSD (and Android, which takes its regex implementation from NetBSD) does
   // not include the GNU regex extensions (such as Perl style character classes
   // like \w) in REG_EXTENDED. REG_EXTENDED is only specified to include the
   // [[:alpha:]] style character classes. Enable REG_GNU wherever it is defined
@@ -1136,7 +1136,7 @@ class CapturedStream {
 #elif defined(GTEST_OS_IOS)
     char user_temp_dir[PATH_MAX + 1];
 
-    // Documented alternative to NSTemporaryDirectory() (for obtaining creating
+    // Documented alternative to NSTemporaryDirectory() (for creating
     // a temporary directory) at
     // https://developer.apple.com/library/archive/documentation/Security/Conceptual/SecureCodingGuide/Articles/RaceConditions.html#//apple_ref/doc/uid/TP40002585-SW10
     //
