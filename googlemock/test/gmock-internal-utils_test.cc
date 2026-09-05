@@ -582,18 +582,19 @@ TEST(OnCallTest, LogsAnythingArgument) {
 // Tests StlContainerView.
 
 TEST(StlContainerViewTest, WorksForStlContainer) {
-  StaticAssertTypeEq<std::vector<int>,
+  StaticAssertTypeEq<internal::ContainerWrapper<std::vector<int>>,
                      StlContainerView<std::vector<int>>::type>();
-  StaticAssertTypeEq<const std::vector<double>&,
+  StaticAssertTypeEq<const internal::ContainerWrapper<std::vector<double>>,
                      StlContainerView<std::vector<double>>::const_reference>();
 
-  typedef std::vector<char> Chars;
+  using Chars = std::vector<char>;
+  using Adaptor = internal::ContainerWrapper<Chars>;
   Chars v1;
-  const Chars& v2(StlContainerView<Chars>::ConstReference(v1));
-  EXPECT_EQ(&v1, &v2);
+  const Adaptor& v2(StlContainerView<Chars>::ConstReference(v1));
+  EXPECT_EQ(v1.begin(), v2.begin());
 
   v1.push_back('a');
-  Chars v3 = StlContainerView<Chars>::Copy(v1);
+  Adaptor v3 = StlContainerView<Chars>::Copy(v1);
   EXPECT_THAT(v3, Eq(v3));
 }
 
