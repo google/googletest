@@ -416,41 +416,16 @@ systems (Linux, Cygwin, Mac), GoogleTest uses the
 syntax. To learn about POSIX syntax, you may want to read this
 [Wikipedia entry](https://en.wikipedia.org/wiki/Regular_expression#POSIX_extended).
 
-On Windows, GoogleTest uses its own simple regular expression implementation. It
-lacks many features. For example, we don't support union (`"x|y"`), grouping
-(`"(xy)"`), brackets (`"[xy]"`), and repetition count (`"x{5,7}"`), among
-others. Below is what we do support (`A` denotes a literal character, period
-(`.`), or a single `\\ ` escape sequence; `x` and `y` denote regular
-expressions.):
-
-Expression | Meaning
----------- | --------------------------------------------------------------
-`c`        | matches any literal character `c`
-`\\d`      | matches any decimal digit
-`\\D`      | matches any character that's not a decimal digit
-`\\f`      | matches `\f`
-`\\n`      | matches `\n`
-`\\r`      | matches `\r`
-`\\s`      | matches any ASCII whitespace, including `\n`
-`\\S`      | matches any character that's not a whitespace
-`\\t`      | matches `\t`
-`\\v`      | matches `\v`
-`\\w`      | matches any letter, `_`, or decimal digit
-`\\W`      | matches any character that `\\w` doesn't match
-`\\c`      | matches any literal character `c`, which must be a punctuation
-`.`        | matches any single character except `\n`
-`A?`       | matches 0 or 1 occurrences of `A`
-`A*`       | matches 0 or many occurrences of `A`
-`A+`       | matches 1 or many occurrences of `A`
-`^`        | matches the beginning of a string (not that of each line)
-`$`        | matches the end of a string (not that of each line)
-`xy`       | matches `x` followed by `y`
+Otherwise (e.g. on Windows), GoogleTest uses the
+[`std::regex`](https://en.cppreference.com/w/cpp/regex) implementation from the
+C++ standard library with the
+[ECMAScript](https://en.cppreference.com/w/cpp/regex/ecmascript) syntax.
 
 To help you determine which capability is available on your system, GoogleTest
 defines macros to govern which regular expression it is using. The macros are:
-`GTEST_USES_SIMPLE_RE=1` or `GTEST_USES_POSIX_RE=1`. If you want your death
-tests to work in all cases, you can either `#if` on these macros or use the more
-limited syntax only.
+`GTEST_USES_RE2=1`, `GTEST_USES_POSIX_RE=1`, or `GTEST_USES_STD_RE=1`. If you
+want your death tests to work in all cases, you can either `#if` on these macros
+or use regular expressions supported by all engines.
 
 ## Death Tests
 

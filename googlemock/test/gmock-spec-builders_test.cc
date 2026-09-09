@@ -1088,22 +1088,16 @@ TEST(UnexpectedCallTest, UnsatisfiedPrerequisites) {
 
   // Verifies that the failure message contains the two unsatisfied
   // pre-requisites but not the satisfied one.
-#ifdef GTEST_USES_POSIX_RE
   EXPECT_THAT(r.message(),
               ContainsRegex(
                   // POSIX RE doesn't understand the (?s) prefix, but has no
-                  // trouble with (.|\n).
+                  // trouble with [^\b]. MSVC <regex> raises
+                  // std::regex_constants::error_stack on some strings with
+                  // (.|\n) but also has no trouble with [^\b].
                   "the following immediate pre-requisites are not satisfied:\n"
-                  "(.|\n)*: pre-requisite #0\n"
-                  "(.|\n)*: pre-requisite #1"));
-#else
-  // We can only use Google Test's own simple regex.
-  EXPECT_THAT(r.message(),
-              ContainsRegex(
-                  "the following immediate pre-requisites are not satisfied:"));
-  EXPECT_THAT(r.message(), ContainsRegex(": pre-requisite #0"));
-  EXPECT_THAT(r.message(), ContainsRegex(": pre-requisite #1"));
-#endif  // GTEST_USES_POSIX_RE
+                  "[^\b]*: pre-requisite #0\n"
+                  "[^\b]*: pre-requisite #1"))
+      << r.message();
 
   b.DoB(1);
   b.DoB(3);

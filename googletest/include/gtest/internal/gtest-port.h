@@ -176,7 +176,7 @@
 //   GTEST_USES_POSIX_RE    - enhanced POSIX regex is used. Do not confuse with
 //                            GTEST_HAS_POSIX_RE (see above) which users can
 //                            define themselves.
-//   GTEST_USES_SIMPLE_RE   - our own simple regex is used;
+//   GTEST_USES_STD_RE      - std::regex from the C++ standard library is used;
 //                            the above RE\b(s) are mutually exclusive.
 //   GTEST_HAS_ABSL         - Google Test is compiled with Abseil.
 
@@ -438,8 +438,9 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 #include <regex.h>  // NOLINT
 #define GTEST_USES_POSIX_RE 1
 #else
-// Use our own simple regex implementation.
-#define GTEST_USES_SIMPLE_RE 1
+// Use std::regex from the C++ standard library.
+#include <regex>  // NOLINT
+#define GTEST_USES_STD_RE 1
 #endif
 
 #ifndef GTEST_HAS_EXCEPTIONS
@@ -992,12 +993,11 @@ class GTEST_API_ [[nodiscard]] RE {
   RE2 regex_;
 };
 
-#elif defined(GTEST_USES_POSIX_RE) || defined(GTEST_USES_SIMPLE_RE)
+#elif defined(GTEST_USES_POSIX_RE) || defined(GTEST_USES_STD_RE)
 GTEST_DISABLE_MSC_WARNINGS_PUSH_(4251 \
 /* class A needs to have dll-interface to be used by clients of class B */)
 
-// A simple C++ wrapper for <regex.h>.  It uses the POSIX Extended
-// Regular Expression syntax.
+// A simple C++ wrapper for <regex.h> or <regex>.
 class GTEST_API_ [[nodiscard]] RE {
  public:
   // A copy constructor is required by the Standard to initialize object
@@ -1037,9 +1037,9 @@ class GTEST_API_ [[nodiscard]] RE {
   regex_t full_regex_;     // For FullMatch().
   regex_t partial_regex_;  // For PartialMatch().
 
-#else  // GTEST_USES_SIMPLE_RE
+#else  // GTEST_USES_STD_RE
 
-  std::string full_pattern_;  // For FullMatch();
+  std::regex regex_;
 
 #endif
 };
