@@ -63,6 +63,7 @@ PROGRAM_PATH = gtest_test_utils.GetTestExecutablePath('googletest-output-test_')
 # 'internal_skip_environment_and_ad_hoc_tests' argument.
 COMMAND_LIST_TESTS = ({}, [PROGRAM_PATH, '--gtest_list_tests'])
 COMMAND_WITH_COLOR = ({}, [PROGRAM_PATH, '--gtest_color=yes'])
+COMMAND_WITH_COLOR_ENV = ({'GTEST_COLOR': 'yes'}, [PROGRAM_PATH])
 COMMAND_WITH_TIME = (
     {},
     [
@@ -282,6 +283,14 @@ CAN_GENERATE_GOLDEN_FILE = (
 
 
 class GTestOutputTest(gtest_test_utils.TestCase):
+
+  def testForcedColorWithCapturedStdout(self):
+    if not IS_WINDOWS:
+      return
+
+    for command in (COMMAND_WITH_COLOR, COMMAND_WITH_COLOR_ENV):
+      output = GetShellCommandOutput(command)
+      self.assertIn('\033[0;3', output)
 
   def RemoveUnsupportedTests(self, test_output):
     if not SUPPORTS_DEATH_TESTS:
