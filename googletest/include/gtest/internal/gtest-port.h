@@ -1755,14 +1755,16 @@ class [[nodiscard]] MutexBase {
 #define GTEST_DECLARE_STATIC_MUTEX_(mutex) \
   extern ::testing::internal::MutexBase mutex
 
+#if defined(PTHREAD_NULL)
+#define GTEST_INTERNAL_PTHREAD_NULL PTHREAD_NULL
+#else
+#define GTEST_INTERNAL_PTHREAD_NULL (pthread_t{})
+#endif
+
 // Defines and statically (i.e. at link time) initializes a static mutex.
-// The initialization list here does not explicitly initialize each field,
-// instead relying on default initialization for the unspecified fields. In
-// particular, the owner_ field (a pthread_t) is not explicitly initialized.
-// This allows initialization to work whether pthread_t is a scalar or struct.
-// The flag -Wmissing-field-initializers must not be specified for this to work.
-#define GTEST_DEFINE_STATIC_MUTEX_(mutex) \
-  ::testing::internal::MutexBase mutex = {PTHREAD_MUTEX_INITIALIZER, false, 0}
+#define GTEST_DEFINE_STATIC_MUTEX_(mutex)                                   \
+  ::testing::internal::MutexBase mutex = {PTHREAD_MUTEX_INITIALIZER, false, \
+                                          GTEST_INTERNAL_PTHREAD_NULL}
 
 // The Mutex class can only be used for mutexes created at runtime. It
 // shares its API with MutexBase otherwise.
