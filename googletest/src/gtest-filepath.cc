@@ -109,7 +109,10 @@ FilePath FilePath::GetCurrentDir() {
   return FilePath(kCurrentDirectoryString);
 #elif defined(GTEST_OS_WINDOWS)
   char cwd[GTEST_PATH_MAX_ + 1] = {'\0'};
-  return FilePath(_getcwd(cwd, sizeof(cwd)) == nullptr ? "" : cwd);
+  if (_getcwd(cwd, sizeof(cwd)) == nullptr) return {};
+  auto len = std::strlen(cwd);
+  if (len > 0 && cwd[len - 1] == '\\') cwd[--len] = 0;
+  return FilePath({cwd, len});
 #else
   char cwd[GTEST_PATH_MAX_ + 1] = {'\0'};
   char* result = getcwd(cwd, sizeof(cwd));
