@@ -57,8 +57,8 @@ else:
   STACK_TRACE_TEMPLATE = '\n'
 
 EXPECTED_NON_EMPTY = {
-    'tests': 28,
-    'failures': 5,
+    'tests': 30,
+    'failures': 7,
     'disabled': 2,
     'errors': 0,
     'timestamp': '*',
@@ -423,8 +423,8 @@ EXPECTED_NON_EMPTY = {
         },
         {
             'name': 'SetupFailTest',
-            'tests': 1,
-            'failures': 0,
+            'tests': 2,
+            'failures': 1,
             'disabled': 0,
             'errors': 0,
             'time': '*',
@@ -463,8 +463,8 @@ EXPECTED_NON_EMPTY = {
         },
         {
             'name': 'TearDownFailTest',
-            'tests': 1,
-            'failures': 0,
+            'tests': 2,
+            'failures': 1,
             'disabled': 0,
             'errors': 0,
             'timestamp': '*',
@@ -667,8 +667,8 @@ EXPECTED_FILTERED = {
 }
 
 EXPECTED_NO_TEST = {
-    'tests': 0,
-    'failures': 0,
+    'tests': 1,
+    'failures': 1,
     'disabled': 0,
     'errors': 0,
     'time': '*',
