@@ -82,7 +82,7 @@ include_directories(${gmock_build_include_dirs})
 # Google Mock libraries. We build them using more strict warnings than what
 # are used for other targets, to ensure that Google Mock can be compiled by
 # a user aggressive about warnings.
-if (MSVC)
+if (MSVC OR CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC")
   cxx_library(gmock
               "${cxx_strict}"
               "${gtest_dir}/src/gtest-all.cc"
@@ -165,7 +165,7 @@ if (gmock_build_tests)
   ############################################################
   # C++ tests built with non-standard compiler flags.
 
-  if (MSVC)
+  if (MSVC OR CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC")
     cxx_library(gmock_main_no_exception "${cxx_no_exception}"
       "${gtest_dir}/src/gtest-all.cc" src/gmock-all.cc src/gmock_main.cc)
 
