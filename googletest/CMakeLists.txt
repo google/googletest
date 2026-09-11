@@ -112,6 +112,23 @@ set(gtest_build_include_dirs
   "${gtest_SOURCE_DIR}")
 include_directories(${gtest_build_include_dirs})
 
+# Add the public GoogleTest headers to the target so the Visual Studio
+# generator shows them under "Header Files" without changing how the target is
+# built or how include directories are exposed.
+set(gtest_headers
+  include/gtest/gtest.h
+  include/gtest/gtest-assertion-result.h
+  include/gtest/gtest-death-test.h
+  include/gtest/gtest-matchers.h
+  include/gtest/gtest-message.h
+  include/gtest/gtest-param-test.h
+  include/gtest/gtest_pred_impl.h
+  include/gtest/gtest-printers.h
+  include/gtest/gtest_prod.h
+  include/gtest/gtest-spi.h
+  include/gtest/gtest-test-part.h
+  include/gtest/gtest-typed-test.h)
+
 ########################################################################
 #
 # Defines the gtest & gtest_main libraries. User tests should link
@@ -121,6 +138,7 @@ include_directories(${gtest_build_include_dirs})
 # are used for other targets, to ensure that gtest can be compiled by a user
 # aggressive about warnings.
 cxx_library(gtest "${cxx_strict}" src/gtest-all.cc)
+target_sources(gtest PRIVATE ${gtest_headers})
 set_target_properties(gtest PROPERTIES VERSION ${GOOGLETEST_VERSION})
 if(GTEST_HAS_ABSL)
   target_compile_definitions(gtest PUBLIC GTEST_HAS_ABSL=1)
