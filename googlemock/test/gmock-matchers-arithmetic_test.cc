@@ -1182,6 +1182,10 @@ TEST(AllArgsTest, WorksWithoutMatchers) {
   ON_CALL(helper, OneArg).WillByDefault(Return(20));
   ON_CALL(helper, TwoArgs).WillByDefault(Return(30));
 
+  EXPECT_CALL(helper, NoArgs);
+  EXPECT_CALL(helper, OneArg);
+  EXPECT_CALL(helper, TwoArgs);
+
   EXPECT_EQ(10, helper.NoArgs());
   EXPECT_EQ(20, helper.OneArg(1));
   EXPECT_EQ(30, helper.TwoArgs('\1', 2));
