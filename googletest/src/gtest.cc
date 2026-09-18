@@ -2950,6 +2950,7 @@ void TestInfo::Skip() {
 
   // Notifies the unit test event listeners that a test is about to start.
   repeater->OnTestStart(*this);
+  result_.set_start_timestamp(internal::GetTimeInMillis());
 
   const TestPartResult test_part_result =
       TestPartResult(TestPartResult::kSkip, this->file(), this->line(), "");
@@ -3127,6 +3128,8 @@ void TestSuite::Run() {
 // Skips all tests under this TestSuite.
 void TestSuite::Skip() {
   if (!should_run_) return;
+
+  start_timestamp_ = internal::GetTimeInMillis();
 
   UnitTest::GetInstance()->set_current_test_suite(this);
 
@@ -6079,6 +6082,10 @@ bool UnitTestImpl::RunAllTests() {
           }
         }
         fflush(stdout);
+        for (int test_index = 0; test_index < total_test_suite_count();
+             test_index++) {
+          GetMutableSuiteCase(test_index)->Skip();
+        }
       } else if (!Test::HasFatalFailure()) {
         for (int test_index = 0; test_index < total_test_suite_count();
              test_index++) {
