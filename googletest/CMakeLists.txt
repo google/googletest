@@ -216,6 +216,7 @@ if (gtest_build_tests)
   cxx_test(gtest_stress_test gtest)
   cxx_test(googletest-test-part-test gtest_main)
   cxx_test(gtest_throw_on_failure_ex_test gtest)
+  cxx_test(gtest_assert_by_exception_test gtest)
   cxx_test(gtest-typed-test_test gtest_main
     test/gtest-typed-test2_test.cc)
   cxx_test(gtest_unittest gtest_main)

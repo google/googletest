@@ -2744,13 +2744,21 @@ Result HandleExceptionsInMethodIfSupported(T* object, Result (T::*method)(),
       // framework catch it.  Therefore we just re-throw it.
       throw;
     } catch (const std::exception& e) {  // NOLINT
-      internal::ReportFailureInUnknownLocation(
-          TestPartResult::kFatalFailure,
-          FormatCxxExceptionMessage(e.what(), location));
+      try {
+        internal::ReportFailureInUnknownLocation(
+            TestPartResult::kFatalFailure,
+            FormatCxxExceptionMessage(e.what(), location));
+      } catch (const AssertionException&) {  // NOLINT
+        // This failure was reported already.
+      }
     } catch (...) {  // NOLINT
-      internal::ReportFailureInUnknownLocation(
-          TestPartResult::kFatalFailure,
-          FormatCxxExceptionMessage(nullptr, location));
+      try {
+        internal::ReportFailureInUnknownLocation(
+            TestPartResult::kFatalFailure,
+            FormatCxxExceptionMessage(nullptr, location));
+      } catch (const AssertionException&) {  // NOLINT
+        // This failure was reported already.
+      }
     }
     return Result();
 #else
