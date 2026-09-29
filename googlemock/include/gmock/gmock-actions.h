@@ -1699,14 +1699,34 @@ class [[nodiscard]] DoAllAction<InitialAction, OtherActions...>
 
 template <typename T, typename... Params>
 struct ReturnNewAction {
-  T* operator()() const {
+  std::tuple<Params...> params;
+
+  template <typename R, typename... Args,
+            typename = std::enable_if_t<std::is_convertible<T*, R>::value>>
+  operator Action<R(Args...)>() const {  // NOLINT
+    return [*this] { return Perform(); };
+  }
+
+  template <typename R, typename... Args,
+            typename = std::enable_if_t<std::is_convertible<T*, R>::value>>
+  operator OnceAction<R(Args...)>() const& {  // NOLINT
+    return [*this] { return Perform(); };
+  }
+
+  template <typename R, typename... Args,
+            typename = std::enable_if_t<std::is_convertible<T*, R>::value>>
+  operator OnceAction<R(Args...)>() && {  // NOLINT
+    return [action = std::move(*this)] { return action.Perform(); };
+  }
+
+ private:
+  T* Perform() const {
     return internal::Apply(
         [](const Params&... unpacked_params) {
           return new T(unpacked_params...);
         },
         params);
   }
-  std::tuple<Params...> params;
 };
 
 template <size_t k>
@@ -1801,9 +1821,30 @@ class [[nodiscard]] DeleteArgAction {
 template <typename Ptr>
 struct ReturnPointeeAction {
   Ptr pointer;
-  template <typename... Args>
-  auto operator()(const Args&...) const -> decltype(*pointer) {
-    return *pointer;
+  using Result = decltype(*std::declval<const Ptr&>());
+
+  template <
+      typename R, typename... Args,
+      typename = std::enable_if_t<!std::is_void<R>::value &&
+                                  is_implicitly_convertible<Result, R>::value>>
+  operator Action<R(Args...)>() const {  // NOLINT
+    return [*this]() -> Result { return *pointer; };
+  }
+
+  template <
+      typename R, typename... Args,
+      typename = std::enable_if_t<!std::is_void<R>::value &&
+                                  is_implicitly_convertible<Result, R>::value>>
+  operator OnceAction<R(Args...)>() const& {  // NOLINT
+    return [*this]() -> Result { return *pointer; };
+  }
+
+  template <
+      typename R, typename... Args,
+      typename = std::enable_if_t<!std::is_void<R>::value &&
+                                  is_implicitly_convertible<Result, R>::value>>
+  operator OnceAction<R(Args...)>() && {  // NOLINT
+    return [action = std::move(*this)]() -> Result { return *action.pointer; };
   }
 };
 
