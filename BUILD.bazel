@@ -29,6 +29,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 #   Bazel Build for Google C++ Testing Framework(Google Test)
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 
