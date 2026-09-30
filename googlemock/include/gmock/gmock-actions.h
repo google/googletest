@@ -175,7 +175,7 @@ struct BuiltInDefaultValueGetter {
 template <typename T>
 struct BuiltInDefaultValueGetter<T, false> {
   static T Get() {
-    Assert(/*condition=*/false, __FILE__, __LINE__,
+    Assert(false, __FILE__, __LINE__,
            "Default action undefined for the function return type.");
 #if defined(__GNUC__) || defined(__clang__)
     __builtin_unreachable();

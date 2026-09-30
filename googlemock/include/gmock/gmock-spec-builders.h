@@ -909,7 +909,7 @@ class TypedExpectation<R(Args...)> : public ExpectationBase {
   // Implements the .With() clause.
   TypedExpectation& With(const Matcher<const ArgumentTuple&>& m) {
     if (last_clause_ == kWith) {
-      ExpectSpecProperty(/*property=*/false,
+      ExpectSpecProperty(false,
                          ".With() cannot appear "
                          "more than once in an EXPECT_CALL().");
     } else {
@@ -1032,7 +1032,7 @@ class TypedExpectation<R(Args...)> : public ExpectationBase {
   // Implements the .WillRepeatedly() clause.
   TypedExpectation& WillRepeatedly(const Action<F>& action) {
     if (last_clause_ == kWillRepeatedly) {
-      ExpectSpecProperty(/*property=*/false,
+      ExpectSpecProperty(false,
                          ".WillRepeatedly() cannot appear "
                          "more than once in an EXPECT_CALL().");
     } else {
@@ -1421,11 +1421,11 @@ struct UntypedFunctionMockerBase::FailureCleanupHandler {
 
     if (!found) {
       // No expectation matches this call - reports a failure.
-      Expect(/*condition=*/false, /*file=*/nullptr, -1, ss.str());
+      Expect(false, nullptr, -1, ss.str());
     } else if (is_excessive) {
       // We had an upper-bound violation and the failure message is in ss.
-      Expect(/*condition=*/false, untyped_expectation->file(),
-             untyped_expectation->line(), ss.str());
+      Expect(false, untyped_expectation->file(), untyped_expectation->line(),
+             ss.str());
     } else {
       // We had an expected call and the matching expectation is
       // described in ss.
@@ -1841,8 +1841,7 @@ R FunctionMocker<R(Args...)>::InvokeWith(ArgumentTuple&& args)
     const UninterestingCallCleanupHandler report_uninteresting_call = {reaction,
                                                                        ss};
 
-    return PerformActionAndPrintResult(/*untyped_action=*/nullptr,
-                                       std::move(args), ss.str(), ss);
+    return PerformActionAndPrintResult(nullptr, std::move(args), ss.str(), ss);
   }
 
   bool is_excessive = false;
