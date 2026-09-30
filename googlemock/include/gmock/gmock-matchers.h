@@ -1908,12 +1908,12 @@ class [[nodiscard]] FloatingEqMatcher {
 template <typename FloatType>
 class [[nodiscard]] FloatingEq2Matcher {
  public:
-  FloatingEq2Matcher() { Init(-1, false); }
+  FloatingEq2Matcher() { Init(-1, /*nan_eq_nan_val=*/false); }
 
   explicit FloatingEq2Matcher(bool nan_eq_nan) { Init(-1, nan_eq_nan); }
 
   explicit FloatingEq2Matcher(FloatType max_abs_error) {
-    Init(max_abs_error, false);
+    Init(max_abs_error, /*nan_eq_nan_val=*/false);
   }
 
   FloatingEq2Matcher(FloatType max_abs_error, bool nan_eq_nan) {
@@ -2942,7 +2942,8 @@ class [[nodiscard]] ContainsMatcherImpl
 
   bool MatchAndExplain(Container container,
                        MatchResultListener* listener) const override {
-    return this->MatchAndExplainImpl(false, container, listener);
+    return this->MatchAndExplainImpl(/*all_elements_should_match=*/false,
+                                     container, listener);
   }
 };
 
@@ -4740,13 +4741,13 @@ inline PolymorphicMatcher<internal::IsNanMatcher> IsNan() {
 // Creates a matcher that matches any double argument approximately
 // equal to rhs, where two NANs are considered unequal.
 inline internal::FloatingEqMatcher<double> DoubleEq(double rhs) {
-  return internal::FloatingEqMatcher<double>(rhs, false);
+  return internal::FloatingEqMatcher<double>(rhs, /*nan_eq_nan=*/false);
 }
 
 // Creates a matcher that matches any double argument approximately
 // equal to rhs, including NaN values when rhs is NaN.
 inline internal::FloatingEqMatcher<double> NanSensitiveDoubleEq(double rhs) {
-  return internal::FloatingEqMatcher<double>(rhs, true);
+  return internal::FloatingEqMatcher<double>(rhs, /*nan_eq_nan=*/true);
 }
 
 // Creates a matcher that matches any double argument approximately equal to
@@ -4754,7 +4755,8 @@ inline internal::FloatingEqMatcher<double> NanSensitiveDoubleEq(double rhs) {
 // considered unequal.  The max absolute error bound must be non-negative.
 inline internal::FloatingEqMatcher<double> DoubleNear(double rhs,
                                                       double max_abs_error) {
-  return internal::FloatingEqMatcher<double>(rhs, false, max_abs_error);
+  return internal::FloatingEqMatcher<double>(rhs, /*nan_eq_nan=*/false,
+                                             max_abs_error);
 }
 
 // The DistanceFrom(target, get_distance, m) and DistanceFrom(target, m)
@@ -4798,19 +4800,20 @@ DistanceFrom(T target, DistanceMatcher distance_matcher) {
 // rhs is NaN.  The max absolute error bound must be non-negative.
 inline internal::FloatingEqMatcher<double> NanSensitiveDoubleNear(
     double rhs, double max_abs_error) {
-  return internal::FloatingEqMatcher<double>(rhs, true, max_abs_error);
+  return internal::FloatingEqMatcher<double>(rhs, /*nan_eq_nan=*/true,
+                                             max_abs_error);
 }
 
 // Creates a matcher that matches any float argument approximately
 // equal to rhs, where two NANs are considered unequal.
 inline internal::FloatingEqMatcher<float> FloatEq(float rhs) {
-  return internal::FloatingEqMatcher<float>(rhs, false);
+  return internal::FloatingEqMatcher<float>(rhs, /*nan_eq_nan=*/false);
 }
 
 // Creates a matcher that matches any float argument approximately
 // equal to rhs, including NaN values when rhs is NaN.
 inline internal::FloatingEqMatcher<float> NanSensitiveFloatEq(float rhs) {
-  return internal::FloatingEqMatcher<float>(rhs, true);
+  return internal::FloatingEqMatcher<float>(rhs, /*nan_eq_nan=*/true);
 }
 
 // Creates a matcher that matches any float argument approximately equal to
@@ -4818,7 +4821,8 @@ inline internal::FloatingEqMatcher<float> NanSensitiveFloatEq(float rhs) {
 // considered unequal.  The max absolute error bound must be non-negative.
 inline internal::FloatingEqMatcher<float> FloatNear(float rhs,
                                                     float max_abs_error) {
-  return internal::FloatingEqMatcher<float>(rhs, false, max_abs_error);
+  return internal::FloatingEqMatcher<float>(rhs, /*nan_eq_nan=*/false,
+                                            max_abs_error);
 }
 
 // Creates a matcher that matches any float argument approximately equal to
@@ -4826,7 +4830,8 @@ inline internal::FloatingEqMatcher<float> FloatNear(float rhs,
 // rhs is NaN.  The max absolute error bound must be non-negative.
 inline internal::FloatingEqMatcher<float> NanSensitiveFloatNear(
     float rhs, float max_abs_error) {
-  return internal::FloatingEqMatcher<float>(rhs, true, max_abs_error);
+  return internal::FloatingEqMatcher<float>(rhs, /*nan_eq_nan=*/true,
+                                            max_abs_error);
 }
 
 // Creates a matcher that matches a pointer (raw or smart) that points
@@ -5069,13 +5074,13 @@ inline internal::FloatingEq2Matcher<double> DoubleEq() {
 // Creates a polymorphic matcher that matches a 2-tuple where
 // FloatEq(first field) matches the second field with NaN equality.
 inline internal::FloatingEq2Matcher<float> NanSensitiveFloatEq() {
-  return internal::FloatingEq2Matcher<float>(true);
+  return internal::FloatingEq2Matcher<float>(/*nan_eq_nan=*/true);
 }
 
 // Creates a polymorphic matcher that matches a 2-tuple where
 // DoubleEq(first field) matches the second field with NaN equality.
 inline internal::FloatingEq2Matcher<double> NanSensitiveDoubleEq() {
-  return internal::FloatingEq2Matcher<double>(true);
+  return internal::FloatingEq2Matcher<double>(/*nan_eq_nan=*/true);
 }
 
 // Creates a polymorphic matcher that matches a 2-tuple where
@@ -5095,7 +5100,8 @@ inline internal::FloatingEq2Matcher<double> DoubleNear(double max_abs_error) {
 // equality.
 inline internal::FloatingEq2Matcher<float> NanSensitiveFloatNear(
     float max_abs_error) {
-  return internal::FloatingEq2Matcher<float>(max_abs_error, true);
+  return internal::FloatingEq2Matcher<float>(max_abs_error,
+                                             /*nan_eq_nan=*/true);
 }
 
 // Creates a polymorphic matcher that matches a 2-tuple where
@@ -5103,7 +5109,8 @@ inline internal::FloatingEq2Matcher<float> NanSensitiveFloatNear(
 // equality.
 inline internal::FloatingEq2Matcher<double> NanSensitiveDoubleNear(
     double max_abs_error) {
-  return internal::FloatingEq2Matcher<double>(max_abs_error, true);
+  return internal::FloatingEq2Matcher<double>(max_abs_error,
+                                              /*nan_eq_nan=*/true);
 }
 
 // Creates a matcher that matches any value of type T that m doesn't
