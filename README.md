@@ -1,3 +1,5 @@
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/google/googletest/badge)](https://securityscorecards.dev/viewer/?uri=github.com/google/googletest)
+
 # GoogleTest
 
 ### Announcements
