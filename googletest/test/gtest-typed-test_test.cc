@@ -144,6 +144,19 @@ TYPED_TEST_SUITE(TypedTest2, Types<int>);
 // share the same name.
 TYPED_TEST(TypedTest2, A) {}
 
+template <typename T>
+class TypedTest3 : public Test {
+};
+
+// Verifies that an empty Types<> type list works.
+// This is useful in case Types<> is constructed conditionally, e.g.
+// `my_types = typename std::conditional<have_types, some_types, Types<>>::type;`
+TYPED_TEST_SUITE(TypedTest3, Types<>);
+
+TYPED_TEST(TypedTest3, A) {
+  ASSERT_TRUE(false); // Make sure this test is never executed.
+}
+
 // Tests that a typed test case can be defined in a namespace.
 
 namespace library1 {
