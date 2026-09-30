@@ -102,6 +102,39 @@ else()
   set_target_properties(gmock_main PROPERTIES VERSION ${GOOGLETEST_VERSION})
 endif()
 
+# ---- Without exceptions / RTTI ----
+# no-exception
+if (MSVC)
+  cxx_library(gmock_main_no_exception "${cxx_no_exception}"
+          "${gtest_dir}/src/gtest-all.cc" src/gmock-all.cc src/gmock_main.cc)
+else()
+  cxx_library(gmock_main_no_exception "${cxx_no_exception}" src/gmock_main.cc)
+  target_link_libraries(gmock_main_no_exception PUBLIC gmock)
+endif()
+set_target_properties(gmock_main_no_exception PROPERTIES VERSION ${GOOGLETEST_VERSION})
+
+# no-rtti
+if (MSVC)
+  cxx_library(gmock_main_no_rtti "${cxx_no_rtti}"
+          "${gtest_dir}/src/gtest-all.cc" src/gmock-all.cc src/gmock_main.cc)
+else()
+  cxx_library(gmock_main_no_rtti "${cxx_no_rtti}" src/gmock_main.cc)
+  target_link_libraries(gmock_main_no_rtti PUBLIC gmock)
+endif()
+set_target_properties(gmock_main_no_rtti PROPERTIES VERSION ${GOOGLETEST_VERSION})
+
+# no-exception + no-rtti
+if (MSVC)
+  set(_gmock_noexc_nortti "${cxx_no_exception} ${cxx_no_rtti}")
+  cxx_library(gmock_main_no_exception_no_rtti "${_gmock_noexc_nortti}"
+          "${gtest_dir}/src/gtest-all.cc" src/gmock-all.cc src/gmock_main.cc)
+else()
+  set(_gmock_noexc_nortti "${cxx_no_exception} ${cxx_no_rtti}")
+  cxx_library(gmock_main_no_exception_no_rtti "${_gmock_noexc_nortti}" src/gmock_main.cc)
+  target_link_libraries(gmock_main_no_exception_no_rtti PUBLIC gmock)
+endif()
+set_target_properties(gmock_main_no_exception_no_rtti PROPERTIES VERSION ${GOOGLETEST_VERSION})
+
 string(REPLACE ";" "$<SEMICOLON>" dirs "${gmock_build_include_dirs}")
 target_include_directories(gmock SYSTEM INTERFACE
   "$<BUILD_INTERFACE:${dirs}>"
@@ -114,6 +147,17 @@ target_include_directories(gmock_main SYSTEM INTERFACE
 #
 # Install rules.
 install_project(gmock gmock_main)
+
+install(
+        TARGETS
+        gmock_main_no_exception
+        gmock_main_no_rtti
+        gmock_main_no_exception_no_rtti
+        EXPORT gtestTargets
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+)
 
 ########################################################################
 #
@@ -165,20 +209,6 @@ if (gmock_build_tests)
   ############################################################
   # C++ tests built with non-standard compiler flags.
 
-  if (MSVC)
-    cxx_library(gmock_main_no_exception "${cxx_no_exception}"
-      "${gtest_dir}/src/gtest-all.cc" src/gmock-all.cc src/gmock_main.cc)
-
-    cxx_library(gmock_main_no_rtti "${cxx_no_rtti}"
-      "${gtest_dir}/src/gtest-all.cc" src/gmock-all.cc src/gmock_main.cc)
-
-  else()
-    cxx_library(gmock_main_no_exception "${cxx_no_exception}" src/gmock_main.cc)
-    target_link_libraries(gmock_main_no_exception PUBLIC gmock)
-
-    cxx_library(gmock_main_no_rtti "${cxx_no_rtti}" src/gmock_main.cc)
-    target_link_libraries(gmock_main_no_rtti PUBLIC gmock)
-  endif()
   cxx_test_with_flags(gmock-more-actions_no_exception_test "${cxx_no_exception}"
     gmock_main_no_exception test/gmock-more-actions_test.cc)
 
