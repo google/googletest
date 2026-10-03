@@ -71,6 +71,28 @@ from GitHub. In the above example, `03597a01ee50ed33e9dfd640b249b4be3799d395` is
 the Git commit hash of the GoogleTest version to use; we recommend updating the
 hash often to point to the latest version.
 
+### Declaring a Vendored or Local Dependency (Offline Builds)
+
+If your build environment cannot access the internet (such as in offline CI or air-gapped systems), or if you want to avoid network dependencies during configuration, you can download a GoogleTest release archive and vendor it directly in your project (for example, in a `vendor/` directory):
+
+```cmake
+include(FetchContent)
+FetchContent_Declare(
+  googletest
+  URL ${CMAKE_CURRENT_SOURCE_DIR}/vendor/googletest-1.18.0.zip
+  URL_HASH SHA256=63b9c77751a5b8f492486005f67533fdc58682b67476fcb91650be5958d5195a
+)
+# For Windows: Prevent overriding the parent project's compiler/linker settings
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(googletest)
+```
+
+Alternatively, if you cloned GoogleTest as a Git submodule or extracted the source directly into a local subdirectory (e.g. `third_party/googletest`), you can include it directly:
+
+```cmake
+add_subdirectory(third_party/googletest)
+```
+
 For more information about how to create `CMakeLists.txt` files, see the
 [CMake Tutorial](https://cmake.org/cmake/help/latest/guide/tutorial/index.html).
 
