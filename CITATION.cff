@@ -1,0 +1,29 @@
+# CITATION.cff for google/googletest
+cff-version: 1.2.0
+message: "If you use GoogleTest in your research or project, please cite it using these metadata."
+title: "GoogleTest"
+type: "software"
+authors:
+  - name: "Google"
+    affiliation: "Google LLC"
+  - name: "GoogleTest Contributors"
+repository-code: "https://github.com/google/googletest"
+url: "https://github.com/google/googletest"
+abstract: "GoogleTest is Google's C++ testing and mocking framework."
+license: "BSD-3-Clause"
+version: "1.18.0"
+date-released: "2025-07-08"   # approximate; adjust if you know the exact release date
+keywords:
+  - "c++"
+  - "testing"
+  - "unit-test"
+  - "mock"
+  - "google"
+preferred-citation:
+  type: "software"
+  title: "GoogleTest"
+  authors:
+    - name: "Google"
+  year: "2025"
+  url: "https://github.com/google/googletest"
+  version: "1.18.0"
