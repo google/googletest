@@ -1373,7 +1373,9 @@ class [[nodiscard]] NeverThrown {
   if (::testing::internal::TrueWithString gtest_msg{}) {                    \
     bool gtest_caught_expected = false;                                     \
     try {                                                                   \
-      GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement);            \
+      /* Discard [[nodiscard]] results: return value is unused if thrown. */ \
+      GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(                       \
+          static_cast<void>(statement));                                    \
     } catch (expected_exception const&) {                                   \
       gtest_caught_expected = true;                                         \
     }                                                                       \
@@ -1435,7 +1437,8 @@ class [[nodiscard]] NeverThrown {
   if (::testing::internal::AlwaysTrue()) {                           \
     bool gtest_caught_any = false;                                   \
     try {                                                            \
-      GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement);     \
+      GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(                \
+          static_cast<void>(statement));                             \
     } catch (...) {                                                  \
       gtest_caught_any = true;                                       \
     }                                                                \
