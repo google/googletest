@@ -1604,6 +1604,7 @@ class GTestFlagSaverTest : public Test {
     GTEST_FLAG_SET(fail_fast, false);
     GTEST_FLAG_SET(filter, "");
     GTEST_FLAG_SET(list_tests, false);
+    GTEST_FLAG_SET(list_tests_flat, false);
     GTEST_FLAG_SET(output, "");
     GTEST_FLAG_SET(brief, false);
     GTEST_FLAG_SET(print_time, true);
@@ -5489,6 +5490,7 @@ struct Flags {
         fail_fast(false),
         filter(""),
         list_tests(false),
+        list_tests_flat(false),
         output(""),
         brief(false),
         print_time(true),
@@ -5555,6 +5557,14 @@ struct Flags {
   static Flags ListTests(bool list_tests) {
     Flags flags;
     flags.list_tests = list_tests;
+    return flags;
+  }
+
+  // Creates a Flags struct where the gtest_list_tests_flat flag has the
+  // given value.
+  static Flags ListTestsFlat(bool list_tests_flat) {
+    Flags flags;
+    flags.list_tests_flat = list_tests_flat;
     return flags;
   }
 
@@ -5648,6 +5658,7 @@ struct Flags {
   bool fail_fast;
   const char* filter;
   bool list_tests;
+  bool list_tests_flat;
   const char* output;
   bool brief;
   bool print_time;
@@ -5672,6 +5683,7 @@ class ParseFlagsTest : public Test {
     GTEST_FLAG_SET(fail_fast, false);
     GTEST_FLAG_SET(filter, "");
     GTEST_FLAG_SET(list_tests, false);
+    GTEST_FLAG_SET(list_tests_flat, false);
     GTEST_FLAG_SET(output, "");
     GTEST_FLAG_SET(brief, false);
     GTEST_FLAG_SET(print_time, true);
@@ -5706,6 +5718,7 @@ class ParseFlagsTest : public Test {
     EXPECT_EQ(expected.fail_fast, GTEST_FLAG_GET(fail_fast));
     EXPECT_STREQ(expected.filter, GTEST_FLAG_GET(filter).c_str());
     EXPECT_EQ(expected.list_tests, GTEST_FLAG_GET(list_tests));
+    EXPECT_EQ(expected.list_tests_flat, GTEST_FLAG_GET(list_tests_flat));
     EXPECT_STREQ(expected.output, GTEST_FLAG_GET(output).c_str());
     EXPECT_EQ(expected.brief, GTEST_FLAG_GET(brief));
     EXPECT_EQ(expected.print_time, GTEST_FLAG_GET(print_time));
@@ -5951,6 +5964,15 @@ TEST_F(ParseFlagsTest, ListTestsFalse_F) {
   const char* argv2[] = {"foo.exe", nullptr};
 
   GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::ListTests(false), false);
+}
+
+// Tests having a --gtest_list_tests_flat flag
+TEST_F(ParseFlagsTest, ListTestsFlatFlag) {
+  const char* argv[] = {"foo.exe", "--gtest_list_tests_flat", nullptr};
+
+  const char* argv2[] = {"foo.exe", nullptr};
+
+  GTEST_TEST_PARSING_FLAGS_(argv, argv2, Flags::ListTestsFlat(true), false);
 }
 
 // Tests parsing --gtest_output=xml
