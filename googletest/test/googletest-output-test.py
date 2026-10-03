@@ -209,6 +209,24 @@ def NormalizeOutput(output):
   """Normalizes output (the output of googletest-output-test_.exe)."""
 
   output = ToUnixLineEnding(output)
+  # Normalize the fixture class mismatch message if the platform's linker
+  # did not deduplicate the type ID of testing::Test across shared library
+  # boundaries.
+  output = re.sub(
+      r'class\.  However, in test suite (.*),\n'
+      r'you defined test (.*) and test (.*)\n'
+      r'using two different test fixture classes\.  This can happen if\n'
+      r'the two classes are from different namespaces or translation\n'
+      r'units and have the same name\.  You should probably rename one\n'
+      r'of the classes to put the tests into different test suites\.',
+      r'class, so mixing TEST_F and TEST in the same test suite is\n'
+      r'illegal.  In test suite \1,\n'
+      r'test \2 is defined using TEST_F but\n'
+      r'test \3 is defined using TEST.  You probably\n'
+      r'want to change the TEST to TEST_F or move it to another test\n'
+      r'case.',
+      output,
+  )
   output = RemoveLocations(output)
   output = RemoveStackTraceDetails(output)
   output = RemoveTime(output)
