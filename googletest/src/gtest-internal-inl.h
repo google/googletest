@@ -330,7 +330,7 @@ inline void Shuffle(internal::Random* random, std::vector<E>* v) {
 // A function for deleting an object.  Handy for being used as a
 // functor.
 template <typename T>
-static void Delete(T* x) {
+inline void Delete(T* x) {
   delete x;
 }
 
