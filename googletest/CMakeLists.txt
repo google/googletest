@@ -315,4 +315,20 @@ if (gtest_build_tests)
   cxx_executable(gtest_xml_output_unittest_ test gtest)
   py_test(gtest_xml_output_unittest --no_stacktrace_support)
   py_test(googletest-json-output-unittest --no_stacktrace_support)
+
+  cxx_executable_with_flags(
+    googletest-fail-if-no-test-linked-test-without-test_
+    "${cxx_default}"
+    gtest_main
+    src/gtest_main.cc)
+  cxx_executable(
+    googletest-fail-if-no-test-linked-test-with-disabled-test_
+    test
+    gtest_main)
+  cxx_executable(
+    googletest-fail-if-no-test-linked-test-with-enabled-test_
+    test
+    gtest_main)
+  py_test(googletest-fail-if-no-test-linked-test)
+  py_test(googletest-fail-if-no-test-selected-test)
 endif()
