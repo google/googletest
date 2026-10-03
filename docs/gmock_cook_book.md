@@ -1242,7 +1242,7 @@ Field(&Foo::number, Ge(3))
 matches a plain pointer `p` where `p->number >= 3`. If `p` is `NULL`, the match
 will always fail regardless of the inner matcher.
 
-What if you want to validate more than one members at the same time? Remember
+What if you want to validate more than one member at the same time? Remember
 that there are [`AllOf()` and `AllOfArray()`](#CombiningMatchers).
 
 Finally `Field()` and `Property()` provide overloads that take the field or
