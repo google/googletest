@@ -110,6 +110,10 @@ GTEST_DECLARE_bool_(install_failure_signal_handler);
 // are actually run if the flag is provided.
 GTEST_DECLARE_bool_(list_tests);
 
+// This flag suppresses the "# GetParam() = ..." and "# TypeParam = ..."
+// annotations when listing tests with --gtest_list_tests.
+GTEST_DECLARE_bool_(list_tests_brief);
+
 // This flag controls whether Google Test emits a detailed XML report to a file
 // in addition to its normal textual output.
 GTEST_DECLARE_string_(output);

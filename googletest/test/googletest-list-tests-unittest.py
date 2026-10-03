@@ -97,6 +97,53 @@ MyInstantiation/ValueParamTest\.
 )
 
 # The expected output when running googletest-list-tests-unittest_ with
+# --gtest_list_tests and --gtest_list_tests_brief.  The "# TypeParam = ..."
+# and "# GetParam() = ..." annotations must be omitted.
+EXPECTED_OUTPUT_BRIEF_RE = re.compile(
+    r"""FooDeathTest\.
+  Test1
+Foo\.
+  Bar1
+  Bar2
+  DISABLED_Bar3
+Abc\.
+  Xyz
+  Def
+FooBar\.
+  Baz
+FooTest\.
+  Test1
+  DISABLED_Test2
+  Test3
+TypedTest/0\.
+  TestA
+  TestB
+TypedTest/1\.
+  TestA
+  TestB
+TypedTest/2\.
+  TestA
+  TestB
+My/TypeParamTest/0\.
+  TestA
+  TestB
+My/TypeParamTest/1\.
+  TestA
+  TestB
+My/TypeParamTest/2\.
+  TestA
+  TestB
+MyInstantiation/ValueParamTest\.
+  TestA/0
+  TestA/1
+  TestA/2
+  TestB/0
+  TestB/1
+  TestB/2
+"""
+)
+
+# The expected output when running googletest-list-tests-unittest_ with
 # --gtest_list_tests and --gtest_filter=Foo*.
 EXPECTED_OUTPUT_FILTER_FOO_RE = re.compile(
     r"""FooDeathTest\.
@@ -219,6 +266,19 @@ class GTestListTestsUnitTest(gtest_test_utils.TestCase):
         expected_output_re=EXPECTED_OUTPUT_FILTER_FOO_RE,
         other_flag='--gtest_filter=Foo*',
     )
+
+  def testListTestsBriefOmitsParamAnnotations(self):
+    """--gtest_list_tests_brief omits "# GetParam() =" and "# TypeParam ="."""
+
+    output = Run(['--gtest_list_tests', '--gtest_list_tests_brief'])
+    self.assertTrue(
+        EXPECTED_OUTPUT_BRIEF_RE.match(output),
+        'output of "--gtest_list_tests --gtest_list_tests_brief" is "%s",\n'
+        'which does not match regex "%s"'
+        % (output, EXPECTED_OUTPUT_BRIEF_RE.pattern),
+    )
+    self.assertNotIn('GetParam()', output)
+    self.assertNotIn('TypeParam =', output)
 
 
 if __name__ == '__main__':
