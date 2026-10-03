@@ -787,8 +787,6 @@ EXPECT_NO_FATAL_FAILURE({
 });
 ```
 
-Assertions from multiple threads are currently not supported on Windows.
-
 #### Checking for Failures in the Current Test
 
 `HasFatalFailure()` in the `::testing::Test` class returns `true` if an
@@ -1549,9 +1547,6 @@ well, use one of the following macros instead:
   EXPECT_FATAL_FAILURE_ON_ALL_THREADS(statement, substring);
   EXPECT_NONFATAL_FAILURE_ON_ALL_THREADS(statement, substring);
 ```
-
-{: .callout .note}
-NOTE: Assertions from multiple threads are currently not supported on Windows.
 
 For technical reasons, there are some caveats:
 
