@@ -3300,7 +3300,7 @@ static WORD GetNewColor(GTestColor color, WORD old_color_attrs) {
   return new_color;
 }
 
-#else
+#endif  // GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_MOBILE
 
 // Returns the ANSI color code for the given color. GTestColor::kDefault is
 // an invalid input.
@@ -3317,8 +3317,6 @@ static const char* GetAnsiColorCode(GTestColor color) {
       return "9";
   }
 }
-
-#endif  // GTEST_OS_WINDOWS && !GTEST_OS_WINDOWS_MOBILE
 
 // Returns true if and only if Google Test should use colors in the output.
 bool ShouldUseColor(bool stdout_is_tty) {
@@ -3358,10 +3356,9 @@ bool ShouldUseColor(bool stdout_is_tty) {
   // be conservative.
 }
 
-// Helpers for printing colored strings to stdout. Note that on Windows, we
-// cannot simply emit special characters and have the terminal change colors.
-// This routine must actually emit the characters rather than return a string
-// that would be colored when printed, as can be done on Linux.
+// Helpers for printing colored strings to stdout. On Windows, console
+// attributes are used when stdout is a console; ANSI escape sequences are
+// used when color is explicitly requested but stdout is redirected.
 
 GTEST_ATTRIBUTE_PRINTF_(2, 3)
 static void ColoredPrintf(GTestColor color, const char* fmt, ...) {
@@ -3388,7 +3385,16 @@ static void ColoredPrintf(GTestColor color, const char* fmt, ...) {
 
   // Gets the current text color.
   CONSOLE_SCREEN_BUFFER_INFO buffer_info;
-  GetConsoleScreenBufferInfo(stdout_handle, &buffer_info);
+  if (!GetConsoleScreenBufferInfo(stdout_handle, &buffer_info)) {
+    // When stdout is redirected, it may not have a console screen buffer. If
+    // color was explicitly requested, emit ANSI sequences instead.
+    const bool use_ansi_color = ShouldUseColor(false);
+    if (use_ansi_color) printf("\033[0;3%sm", GetAnsiColorCode(color));
+    vprintf(fmt, args);
+    if (use_ansi_color) printf("\033[m");
+    va_end(args);
+    return;
+  }
   const WORD old_color_attrs = buffer_info.wAttributes;
   const WORD new_color = GetNewColor(color, old_color_attrs);
 
