@@ -97,7 +97,7 @@ class [[nodiscard]] ParamGenerator;
 // Interface for iterating over elements provided by an implementation
 // of ParamGeneratorInterface<T>.
 template <typename T>
-class [[nodiscard]] ParamIteratorInterface {
+class ParamIteratorInterface {
  public:
   virtual ~ParamIteratorInterface() = default;
   // A pointer to the base generator instance.
