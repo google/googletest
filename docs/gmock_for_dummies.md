@@ -679,8 +679,7 @@ using ::testing::Return;
 
   for (int i = 1; i <= n; i++) {
     EXPECT_CALL(turtle, GetX())
-        .WillOnce(Return(10*i))
-        .RetiresOnSaturation();
+        .WillOnce(Return(10*i));
   }
 }
 ```
