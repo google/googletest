@@ -49,6 +49,8 @@ class SkipEntireEnvironmentTest(gtest_test_utils.TestCase):
   def testSkipEntireEnvironmentTest(self):
     self.assertIn('Skipping the entire environment', OUTPUT)
     self.assertNotIn('FAILED', OUTPUT)
+    self.assertIn('[  SKIPPED ] 1 test', OUTPUT)
+    self.assertNotIn('[  PASSED  ] 1 test', OUTPUT)
 
 
 if __name__ == '__main__':
