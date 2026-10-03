@@ -34,3 +34,6 @@ if(BUILD_GMOCK)
 else()
   add_subdirectory( googletest )
 endif()
+
+# Include CPack
+include(CPackConfig.txt)
