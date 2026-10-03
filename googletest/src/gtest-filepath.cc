@@ -227,12 +227,12 @@ FilePath FilePath::RemoveFileName() const {
 FilePath FilePath::MakeFileName(const FilePath& directory,
                                 const FilePath& base_name, int number,
                                 const char* extension) {
+  std::string base = base_name.IsEmpty() ? "file" : base_name.string();
   std::string file;
   if (number == 0) {
-    file = base_name.string() + "." + extension;
+    file = base + "." + extension;
   } else {
-    file =
-        base_name.string() + "_" + StreamableToString(number) + "." + extension;
+    file = base + "_" + StreamableToString(number) + "." + extension;
   }
   return ConcatPaths(directory, FilePath(file));
 }
