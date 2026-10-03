@@ -272,6 +272,10 @@
 // GCC15 warns that <ciso646> is deprecated in C++17 and suggests using
 // <version> instead, even though <version> is not available in C++17 mode prior
 // to GCC9.
+#if defined(__CYGWIN__) && defined(__STRICT_ANSI__) && !defined(_POSIX_C_SOURCE)
+#define _POSIX_C_SOURCE 200809L
+#endif
+
 #if GTEST_INTERNAL_CPLUSPLUS_LANG >= 202002L || \
     GTEST_INTERNAL_HAS_INCLUDE(<version>)
 #include <version>  // C++20 or <version> support.
