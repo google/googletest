@@ -1754,6 +1754,19 @@ TEST(ThrowsTest, CallableExecutedExactlyOnce) {
   EXPECT_EQ(a, 4u);
 }
 
+TEST(ThrowsTest, EvaluatesCallableOnlyOnceOnFailure) {
+  int call_count = 0;
+  auto stateful_lambda = [&call_count]() {
+    ++call_count;
+  };
+
+  EXPECT_NONFATAL_FAILURE(
+      EXPECT_THAT(stateful_lambda, Throws<std::runtime_error>()),
+      "does not throw any exception");
+
+  EXPECT_EQ(call_count, 1);
+}
+
 TEST(ThrowsTest, Describe) {
   Matcher<std::function<void()>> matcher = Throws<std::runtime_error>();
   std::stringstream ss;
