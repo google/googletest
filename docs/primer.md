@@ -480,3 +480,29 @@ NOTE: `ParseGUnitFlags()` is deprecated in favor of `InitGoogleTest()`.
     the assertions are done in the main thread. If you want to help, you can
     volunteer to implement the necessary synchronization primitives in
     `gtest-port.h` for your platform.
+
+## Tips for Beginners
+
+If you're just starting with GoogleTest, here are some helpful tips to keep in mind:
+
+- ✅ Use `EXPECT_*` macros (like `EXPECT_EQ`, `EXPECT_TRUE`) when you want to check multiple things in one test. These don't stop the test on failure.
+- 🛑 Use `ASSERT_*` macros (like `ASSERT_EQ`, `ASSERT_TRUE`) when continuing the test after failure doesn’t make sense. These **abort** the test function if they fail.
+- 🧪 Always group logically related tests into a single test suite by giving them the same first argument in `TEST()`.
+- 💡 Keep your test names descriptive and consistent to make your test output more readable.
+- 📦 Organize repeated setup logic using **test fixtures** (`TEST_F`) so you don’t duplicate code.
+
+### 💡 Sample Minimal Test Example
+
+Here’s a basic test for an `Add()` function:
+
+```cpp
+int Add(int a, int b) {
+    return a + b;
+}
+
+TEST(MathTest, CanAddTwoNumbers) {
+    EXPECT_EQ(Add(2, 3), 5);
+    EXPECT_EQ(Add(-1, 1), 0);
+    EXPECT_EQ(Add(0, 0), 0);
+}
+
