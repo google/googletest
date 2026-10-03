@@ -141,7 +141,7 @@ See also
 
 The functions listed in the table above appear to return generators that create
 values of the desired types, but this is not generally the case. Rather, they
-typically return factory objects that convert to the the desired generators.
+typically return factory objects that convert to the desired generators.
 This affords some flexibility in allowing you to specify values of types that
 are different from, yet implicitly convertible to, the actual parameter type
 required by your fixture class.

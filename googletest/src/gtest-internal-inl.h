@@ -711,8 +711,8 @@ class GTEST_API_ UnitTestImpl {
 
   // Registers all parameterized tests defined using TEST_P and
   // INSTANTIATE_TEST_SUITE_P, creating regular tests for each test/parameter
-  // combination. This method can be called more then once; it has guards
-  // protecting from registering the tests more then once.  If
+  // combination. This method can be called more than once; it has guards
+  // protecting from registering the tests more than once.  If
   // value-parameterized tests are disabled, RegisterParameterizedTests is
   // present but does nothing.
   void RegisterParameterizedTests();
