@@ -178,3 +178,5 @@ class GTestJsonOutFilesTest(gtest_test_utils.TestCase):
 if __name__ == '__main__':
   os.environ['GTEST_STACK_TRACE_DEPTH'] = '0'
   gtest_test_utils.Main()
+
+  # running on MAcos 64 but noit in bit 32 
