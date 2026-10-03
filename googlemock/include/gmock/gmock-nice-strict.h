@@ -27,7 +27,8 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-// Implements class templates NiceMock, NaggyMock, and StrictMock.
+// Implements class templates NiceMock, NaggyMock, and StrictMock, and the
+// DEFAULT_TO_NICE() / DEFAULT_TO_STRICT() macros (issue #4882).
 //
 // Given a mock class MockFoo that is created using Google Mock,
 // NiceMock<MockFoo> is a subclass of MockFoo that allows
@@ -43,6 +44,12 @@
 // leads to more maintainable tests.  When that happens, MockFoo will
 // stop behaving like NaggyMock<MockFoo> and start behaving like
 // NiceMock<MockFoo>.
+//
+// DEFAULT_TO_NICE() / DEFAULT_TO_STRICT() may be placed in a mock class
+// to select nice/strict behavior for bare instances of that class.
+// With -DGOOGLEMOCK_REQUIRE_STRICT_OR_NICE=1 (or
+// -DGMOCK_FORCE_EXPLICIT_MOCK_KIND=1), naggy mocks are rejected: use a
+// NiceMock/StrictMock wrapper or one of those macros.
 //
 // NiceMock, NaggyMock, and StrictMock "inherit" the constructors of
 // their respective base class.  Therefore you can write
@@ -145,6 +152,28 @@ class [[nodiscard]] StrictMockImpl {
 
 }  // namespace internal
 
+// Declares that an uninteresting call on this mock class should be allowed
+// (nice). Place in a **public** section of the mock class:
+//
+//   class MockFoo : public Foo {
+//    public:
+//     DEFAULT_TO_NICE();
+//     MOCK_METHOD(void, DoFoo, (), (override));
+//   };
+//
+// When GOOGLEMOCK_REQUIRE_STRICT_OR_NICE / GMOCK_FORCE_EXPLICIT_MOCK_KIND is
+// enabled, either this macro, DEFAULT_TO_STRICT(), or a NiceMock/StrictMock
+// wrapper is required (issue #4882).
+#define DEFAULT_TO_NICE()                                                    \
+  ::testing::internal::DefaultMockKindInstaller<::testing::internal::kAllow> \
+      gmock_explicit_mock_kind_installer_
+
+// Declares that an uninteresting call on this mock class should fail (strict).
+// Place in a **public** section of the mock class.
+#define DEFAULT_TO_STRICT()                                                 \
+  ::testing::internal::DefaultMockKindInstaller<::testing::internal::kFail> \
+      gmock_explicit_mock_kind_installer_
+
 template <class MockClass>
 class [[nodiscard]] GTEST_INTERNAL_EMPTY_BASE_CLASS NiceMock
     : private internal::NiceMockImpl<MockClass>,
@@ -195,6 +224,12 @@ class [[nodiscard]] GTEST_INTERNAL_EMPTY_BASE_CLASS NaggyMock
                 "strictness modifier. See "
                 "https://google.github.io/googletest/"
                 "gmock_cook_book.html#NiceStrictNaggy");
+  static_assert(
+      !GMOCK_INTERNAL_REQUIRE_STRICT_OR_NICE,
+      "NaggyMock is disabled when GOOGLEMOCK_REQUIRE_STRICT_OR_NICE or "
+      "GMOCK_FORCE_EXPLICIT_MOCK_KIND is enabled; use NiceMock, StrictMock, "
+      "DEFAULT_TO_NICE(), or DEFAULT_TO_STRICT() instead "
+      "(https://github.com/google/googletest/issues/4882)");
 
  public:
   NaggyMock() : MockClass() {
