@@ -91,6 +91,19 @@ TEST(Test, Test) {
   Fail("A failed assertion should've thrown but didn't.");
 }
 
+// Tests that an uncaught std::exception thrown in a test body causes the test
+// to fail, but does not abort the entire test run when ThrowListener is used.
+TEST(Test, ThrowsStdException) {
+  throw std::runtime_error("an uncaught exception that fails a single test");
+}
+
+// Tests that an uncaught non-std::exception thrown in a test body causes the
+// test to fail, but does not abort the entire test run when ThrowListener is
+// used.
+TEST(Test, ThrowsNonStdException) {
+  throw 42;
+}
+
 int kTestForContinuingTest = 0;
 
 TEST(Test, Test2) { kTestForContinuingTest = 1; }
