@@ -1020,8 +1020,8 @@ TEST_P(CustomLambdaNamingTest, CustomTestNames) {}
 
 INSTANTIATE_TEST_SUITE_P(CustomParamNameLambda, CustomLambdaNamingTest,
                          Values(std::string("LambdaName")),
-                         [](const ::testing::TestParamInfo<std::string>& inf) {
-                           return inf.param;
+                         [](const ::testing::TestParamInfo<std::string>& info) {
+                           return info.param;
                          });
 
 TEST(CustomNamingTest, CheckNameRegistry) {
