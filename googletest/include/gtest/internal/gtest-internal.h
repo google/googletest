@@ -120,7 +120,7 @@ template <typename T>
 
 namespace internal {
 
-struct TraceInfo;    // Information about a trace point.
+struct TraceInfo;                  // Information about a trace point.
 class [[nodiscard]] TestInfoImpl;  // Opaque implementation of TestInfo
 class [[nodiscard]] UnitTestImpl;  // Opaque implementation of UnitTest
 
@@ -271,8 +271,8 @@ class [[nodiscard]] FloatingPoint {
   static const Bits kSignBitMask = static_cast<Bits>(1) << (kBitCount - 1);
 
   // The mask for the fraction bits.
-  static const Bits kFractionBitMask = ~static_cast<Bits>(0) >>
-                                       (kExponentBitCount + 1);
+  static const Bits kFractionBitMask =
+      ~static_cast<Bits>(0) >> (kExponentBitCount + 1);
 
   // The mask for the exponent bits.
   static const Bits kExponentBitMask = ~(kSignBitMask | kFractionBitMask);
@@ -1131,6 +1131,141 @@ class [[nodiscard]] NativeArray {
   void (NativeArray::*clone_)(const Element*, size_t);
 };
 
+// This is a separate namespace so that std::begin and std::end are not brought
+// in to the whole ::testing::internal namespace
+namespace iterator_help {
+using std::begin;
+using std::end;
+
+template <typename T>
+auto BeginImpl(T& container, int) -> decltype(container.begin()) {
+  return container.begin();
+}
+
+template <typename T>
+auto BeginImpl(T& container, float) -> decltype(begin(container)) {
+  return begin(container);
+}
+
+template <typename T>
+auto Begin(T& container) -> decltype(BeginImpl(container, 0)) {
+  return BeginImpl(container, 0);
+}
+
+template <typename T>
+auto Begin(const T& container) -> decltype(BeginImpl(container, 0)) {
+  return BeginImpl(container, 0);
+}
+
+template <typename T>
+auto EndImpl(T& container, int) -> decltype(container.end()) {
+  return container.end();
+}
+
+template <typename T>
+auto EndImpl(T& container, float) -> decltype(end(container)) {
+  return end(container);
+}
+
+template <typename T>
+auto End(T& container) -> decltype(EndImpl(container, 0)) {
+  return EndImpl(container, 0);
+}
+
+template <typename T>
+auto End(const T& container) -> decltype(EndImpl(container, 0)) {
+  return EndImpl(container, 0);
+}
+
+template <typename T>
+auto SizeImpl(T& container, int) -> decltype(container.size()) {
+  return container.size();
+}
+
+template <typename T>
+auto SizeImpl(T& container, float) {
+  return std::distance(iterator_help::Begin(container),
+                       iterator_help::End(container));
+}
+
+template <typename T>
+auto Size(T& container) -> decltype(SizeImpl(container, 0)) {
+  return SizeImpl(container, 0);
+}
+
+template <typename T>
+auto Size(const T& container) -> decltype(SizeImpl(container, 0)) {
+  return SizeImpl(container, 0);
+}
+
+}  // namespace iterator_help
+
+// Adapts a type to a read-only STL-style container. Instead of the complete STL
+// container concept, this adaptor only implements members useful for Google
+// Mock's container matchers. New members should be added as needed. We support
+// types that we can get an iterator from using ::begin()/::end() or
+// begin()/end() member functions, a size using std::distance on the type's
+// iterators or a size() member function, and support operator==.
+template <typename Container>
+class [[nodiscard]] ContainerWrapper {
+ public:
+  using WrappedType = GTEST_REMOVE_REFERENCE_AND_CONST_(Container);
+
+  // STL-style container typedefs.
+  using value_type = GTEST_REMOVE_REFERENCE_AND_CONST_(
+      decltype(*iterator_help::Begin(std::declval<const WrappedType>())));
+  using iterator = decltype(iterator_help::Begin(std::declval<WrappedType>()));
+  using const_iterator =
+      decltype(iterator_help::Begin(std::declval<const WrappedType>()));
+
+  // Constructs from a native array. References the source.
+  ContainerWrapper(const Container* container, RelationToSourceReference) {
+    InitRef(container);
+  }
+
+  // Constructs from a native array. Copies the source.
+  ContainerWrapper(const Container* container, RelationToSourceCopy) {
+    InitCopy(container);
+  }
+
+  // Copy constructor.
+  ContainerWrapper(const ContainerWrapper& rhs) {
+    (this->*rhs.clone_)(rhs.container_);
+  }
+
+  ~ContainerWrapper() {
+    if (clone_ != &ContainerWrapper::InitRef) delete container_;
+  }
+
+  // STL-style container methods.
+  size_t size() const { return iterator_help::Size(*container_); }
+  const_iterator begin() const { return iterator_help::Begin(*container_); }
+  const_iterator end() const { return iterator_help::End(*container_); }
+  bool operator==(const ContainerWrapper& rhs) const {
+    return *container_ == *rhs.container_;
+  }
+
+ private:
+  static_assert(!std::is_const<Container>::value, "Type must not be const");
+  static_assert(!std::is_reference<Container>::value,
+                "Type must not be a reference");
+
+  // Initializes this object with a copy of the input.
+  void InitCopy(const Container* container) {
+    container_ = new Container(*container);
+    clone_ = &ContainerWrapper::InitCopy;
+  }
+
+  // Initializes this object with a reference of the input.
+  void InitRef(const Container* container) {
+    container_ = container;
+    clone_ = &ContainerWrapper::InitRef;
+  }
+
+  const Container* container_;
+  void (ContainerWrapper::*clone_)(const Container*);
+};
+
 template <size_t>
 struct Ignore {
   Ignore(...);  // NOLINT
@@ -1340,8 +1475,7 @@ class [[nodiscard]] NeverThrown {
 
 #else  // GTEST_HAS_RTTI
 
-#define GTEST_EXCEPTION_TYPE_(e) \
-  std::string { "an std::exception-derived error" }
+#define GTEST_EXCEPTION_TYPE_(e) std::string{"an std::exception-derived error"}
 
 #endif  // GTEST_HAS_RTTI
 
