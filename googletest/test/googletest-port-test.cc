@@ -843,6 +843,8 @@ TEST(WindowsTypesTest, CRITICAL_SECTIONIs_RTL_CRITICAL_SECTION) {
 }
 #endif
 
+// CreateFileW() is not available to UWP apps.
+#ifdef GTEST_OS_WINDOWS_DESKTOP
 // Narrow paths on Windows are encoded in the active code page, like argv and
 // the paths passed to the other narrow CRT functions (_stat(), _mkdir(), ...).
 // posix::FOpen() must open such a path even if it contains non-ASCII
@@ -892,6 +894,7 @@ TEST(FOpenTest, OpensNonAsciiPathInActiveCodePage) {
   GTEST_SKIP() << "No non-ASCII test file name is representable in code page "
                << acp;
 }
+#endif  // GTEST_OS_WINDOWS_DESKTOP
 
 #endif  // GTEST_OS_WINDOWS
 

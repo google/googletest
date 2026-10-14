@@ -2162,8 +2162,8 @@ inline int ChDir(const char* dir) {
 // On Windows, the CRT decodes narrow paths with the active code page (or UTF-8
 // if the CRT locale is UTF-8). fopen() does this conversion itself and then
 // opens the file through the wide-character API, exactly like the other narrow
-// CRT functions used here (_stat(), _mkdir(), ...), so don't convert the path
-// by hand.
+// CRT functions GoogleTest uses (_stat(), _mkdir(), ...), so don't convert the
+// path by hand.
 inline FILE* FOpen(const char* path, const char* mode) {
   return fopen(path, mode);
 }
