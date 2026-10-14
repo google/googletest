@@ -843,6 +843,56 @@ TEST(WindowsTypesTest, CRITICAL_SECTIONIs_RTL_CRITICAL_SECTION) {
 }
 #endif
 
+// Narrow paths on Windows are encoded in the active code page, like argv and
+// the paths passed to the other narrow CRT functions (_stat(), _mkdir(), ...).
+// posix::FOpen() must open such a path even if it contains non-ASCII
+// characters.
+TEST(FOpenTest, OpensNonAsciiPathInActiveCodePage) {
+  wchar_t temp_dir[MAX_PATH + 2];
+  const DWORD temp_dir_len = ::GetTempPathW(MAX_PATH + 2, temp_dir);
+  ASSERT_GT(temp_dir_len, 0u);
+  ASSERT_LT(temp_dir_len, static_cast<DWORD>(MAX_PATH + 2));
+
+  const UINT acp = ::GetACP();
+  // WideCharToMultiByte() rejects the best-fit flag and the used-default-char
+  // output for CP_UTF8.
+  const DWORD flags = acp == CP_UTF8 ? 0 : WC_NO_BEST_FIT_CHARS;
+
+  // Uses the first non-ASCII file name that is representable in the active
+  // code page. The process ID keeps concurrent runs from sharing the file.
+  const std::wstring suffix =
+      L"_" + std::to_wstring(::GetCurrentProcessId()) + L".txt";
+  const wchar_t* const kFileNamePrefixes[] = {L"gtest_fopen_\u4e2d\u6587",
+                                              L"gtest_fopen_\u20ac"};
+  for (const wchar_t* prefix : kFileNamePrefixes) {
+    const std::wstring wide_path = std::wstring(temp_dir) + prefix + suffix;
+    BOOL used_default_char = FALSE;
+    const int size = ::WideCharToMultiByte(
+        acp, flags, wide_path.c_str(), -1, nullptr, 0, nullptr,
+        acp == CP_UTF8 ? nullptr : &used_default_char);
+    if (size == 0 || used_default_char) continue;
+    std::string narrow_path(static_cast<size_t>(size), '\0');
+    ::WideCharToMultiByte(acp, flags, wide_path.c_str(), -1, &narrow_path[0],
+                          size, nullptr, nullptr);
+    narrow_path.resize(static_cast<size_t>(size) - 1);  // Drops the NUL.
+
+    const HANDLE handle =
+        ::CreateFileW(wide_path.c_str(), GENERIC_WRITE, 0, nullptr,
+                      CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+    ASSERT_NE(handle, INVALID_HANDLE_VALUE);
+    ::CloseHandle(handle);
+
+    FILE* const file = posix::FOpen(narrow_path.c_str(), "r");
+    const bool opened = file != nullptr;
+    if (opened) posix::FClose(file);
+    ::DeleteFileW(wide_path.c_str());
+    EXPECT_TRUE(opened) << "Failed to open " << narrow_path;
+    return;
+  }
+  GTEST_SKIP() << "No non-ASCII test file name is representable in code page "
+               << acp;
+}
+
 #endif  // GTEST_OS_WINDOWS
 
 }  // namespace internal
