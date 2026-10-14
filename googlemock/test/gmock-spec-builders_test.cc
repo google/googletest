@@ -2579,6 +2579,34 @@ TEST(ParameterlessExpectationsTest,
   EXPECT_THAT(const_mock.Overloaded(7), 13);
 }
 
+struct CallReactionTestCase {
+  internal::CallReaction reaction;
+  bool should_fail;
+};
+
+class ReportUninterestingCallTest : public TestWithParam<CallReactionTestCase> {
+};
+
+TEST_P(ReportUninterestingCallTest, HandlesAllRelevantReactions) {
+  const CallReactionTestCase test_case = GetParam();
+  if (test_case.should_fail) {
+    EXPECT_NONFATAL_FAILURE(internal::ReportUninterestingCall(
+                                test_case.reaction, "uninteresting call"),
+                            "uninteresting call");
+  } else {
+    // kAllow and kWarn should not generate test failures.
+    internal::ReportUninterestingCall(test_case.reaction, "uninteresting call");
+  }
+}
+
+INSTANTIATE_TEST_SUITE_P(AllReactions, ReportUninterestingCallTest,
+                         Values(CallReactionTestCase{internal::kAllow, false},
+                                CallReactionTestCase{internal::kWarn, false},
+                                CallReactionTestCase{internal::kFail, true},
+                                CallReactionTestCase{
+                                    static_cast<internal::CallReaction>(999),
+                                    true}));
+
 }  // namespace
 }  // namespace testing
 
