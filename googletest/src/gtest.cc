@@ -5015,7 +5015,7 @@ std::string JsonUnitTestResultPrinter::TestPropertiesAsJson(
   for (int i = 0; i < result.test_property_count(); ++i) {
     const TestProperty& property = result.GetTestProperty(i);
     attributes << ",\n"
-               << indent << "\"" << property.key() << "\": " << "\""
+               << indent << "\"" << EscapeJson(property.key()) << "\": " << "\""
                << EscapeJson(property.value()) << "\"";
   }
   return attributes.GetString();
