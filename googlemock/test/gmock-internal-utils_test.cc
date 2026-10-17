@@ -427,7 +427,7 @@ TEST(LogTest, NoStackTraceWhenStackFramesToSkipIsNegative) {
   GMOCK_FLAG_SET(verbose, saved_flag);
 }
 
-struct MockStackTraceGetter : testing::internal::OsStackTraceGetterInterface {
+struct MockStackTraceGetter : testing::OsStackTraceGetterInterface {
   std::string CurrentStackTrace(int max_depth, int skip_count) override {
     return (testing::Message() << max_depth << "::" << skip_count << "\n")
         .GetString();
