@@ -76,6 +76,9 @@ class [[nodiscard]] IsEmptyMatcher {
     }
     return MatchAndExplain(std::string(s), listener);
   }
+  bool MatchAndExplain(char* s, MatchResultListener* listener) const {
+    return MatchAndExplain(static_cast<const char*>(s), listener);
+  }
 
 #if GTEST_HAS_STD_WSTRING
   // Matches C-style wide strings.
@@ -84,6 +87,9 @@ class [[nodiscard]] IsEmptyMatcher {
       return false;
     }
     return MatchAndExplain(std::wstring(s), listener);
+  }
+  bool MatchAndExplain(wchar_t* s, MatchResultListener* listener) const {
+    return MatchAndExplain(static_cast<const wchar_t*>(s), listener);
   }
 #endif  // GTEST_HAS_STD_WSTRING
 
