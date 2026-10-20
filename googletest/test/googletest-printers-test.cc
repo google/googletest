@@ -408,6 +408,20 @@ TEST(PrintCharTest, Char16) {
 
 TEST(PrintCharTest, Char32) { EXPECT_EQ("U+0041", Print(U'A')); }
 
+// Printing a char16_t or char32_t must not change the formatting state of the
+// stream, as that would affect whatever is printed after it.
+TEST(PrintCharTest, Char32DoesNotChangeStreamState) {
+  ::std::stringstream ss;
+  UniversalPrint(U'A', &ss);
+  ss << " " << 10 << " ";
+  ss.width(3);
+  ss << 7;
+  EXPECT_EQ("U+0041 10   7", ss.str());
+
+  EXPECT_EQ("(U+0041, 10)", Print(std::make_tuple(U'A', 10)));
+  EXPECT_EQ("(U+0041, 'x' (120, 0x78))", Print(std::make_pair(u'A', 'x')));
+}
+
 #ifdef __cpp_lib_char8_t
 TEST(PrintCharTest, Char8) {
   EXPECT_EQ("U+0041", Print(u8'A'));
