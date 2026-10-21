@@ -358,6 +358,12 @@ enum CallReaction {
   kFail,
 };
 
+// Installs DEFAULT_TO_NICE / DEFAULT_TO_STRICT call reactions (see
+// gmock-nice-strict.h). Friended by Mock so it can call the private
+// Allow/Fail/Unregister APIs.
+template <CallReaction kReaction>
+class DefaultMockKindInstaller;
+
 }  // namespace internal
 
 // Utilities for manipulating mock objects.
@@ -406,6 +412,8 @@ class GTEST_API_ Mock {
   friend class internal::NaggyMockImpl;
   template <typename MockClass>
   friend class internal::StrictMockImpl;
+  template <internal::CallReaction kReaction>
+  friend class internal::DefaultMockKindInstaller;
 
   // Tells Google Mock to allow uninteresting calls on the given mock
   // object.
@@ -461,6 +469,84 @@ class GTEST_API_ Mock {
   static void UnregisterLocked(internal::UntypedFunctionMockerBase* mocker)
       GTEST_EXCLUSIVE_LOCK_REQUIRED_(internal::g_gmock_mutex);
 };  // class Mock
+
+namespace internal {
+
+// Used by DEFAULT_TO_NICE() / DEFAULT_TO_STRICT() to set the uninteresting-call
+// reaction for a bare mock instance and clear it on destruction.
+template <CallReaction kReaction>
+class DefaultMockKindInstaller {
+ public:
+  DefaultMockKindInstaller() = default;
+  ~DefaultMockKindInstaller() {
+    if (mock_obj_ != 0) {
+      Mock::UnregisterCallReaction(mock_obj_);
+    }
+  }
+
+  DefaultMockKindInstaller(const DefaultMockKindInstaller&) = delete;
+  DefaultMockKindInstaller& operator=(const DefaultMockKindInstaller&) = delete;
+
+  void EnsureInstalled(const void* mock_obj) const {
+    if (mock_obj_ != 0) {
+      return;
+    }
+    mock_obj_ = reinterpret_cast<uintptr_t>(mock_obj);
+    if constexpr (kReaction == kAllow) {
+      Mock::AllowUninterestingCalls(mock_obj_);
+    } else if constexpr (kReaction == kFail) {
+      Mock::FailUninterestingCalls(mock_obj_);
+    } else {
+      Mock::WarnUninterestingCalls(mock_obj_);
+    }
+  }
+
+ private:
+  mutable uintptr_t mock_obj_ = 0;
+};
+
+template <typename T, typename = void>
+struct HasDefaultMockKindInstaller : std::false_type {};
+
+template <typename T>
+struct HasDefaultMockKindInstaller<
+    T, std::void_t<decltype(std::declval<T&>().gmock_explicit_mock_kind_installer_)>>
+    : std::true_type {};
+
+// Called from MOCK_METHOD on ON_CALL/EXPECT_CALL and on each mock invocation.
+// Installs DEFAULT_TO_* reactions when present. When
+// GMOCK_INTERNAL_REQUIRE_STRICT_OR_NICE is enabled, also rejects naggy/bare
+// mocks (NiceMock/StrictMock wrappers and DEFAULT_TO_* are allowed).
+template <typename MockT>
+void EnforceNiceOrStrictMockKind(const MockT* mock) {
+  if constexpr (HasDefaultMockKindInstaller<MockT>::value) {
+    void* const mock_obj =
+        const_cast<void*>(static_cast<const void*>(mock));
+    // NiceMock/StrictMock register their reaction in a base before MockClass
+    // runs; prefer that over DEFAULT_TO_* on the mock class.
+    if (Mock::IsNice(mock_obj) || Mock::IsStrict(mock_obj)) {
+      return;
+    }
+    mock->gmock_explicit_mock_kind_installer_.EnsureInstalled(mock);
+    return;
+  }
+#if GMOCK_INTERNAL_REQUIRE_STRICT_OR_NICE
+  void* const mock_obj =
+      const_cast<void*>(static_cast<const void*>(mock));
+  if (!Mock::IsNice(mock_obj) && !Mock::IsStrict(mock_obj)) {
+    Assert(false, __FILE__, __LINE__,
+           "When GOOGLEMOCK_REQUIRE_STRICT_OR_NICE or "
+           "GMOCK_FORCE_EXPLICIT_MOCK_KIND is enabled, mocks must be wrapped "
+           "in NiceMock<> or StrictMock<>, or the mock class must declare "
+           "DEFAULT_TO_NICE() or DEFAULT_TO_STRICT(). See "
+           "https://github.com/google/googletest/issues/4882");
+  }
+#else
+  (void)mock;
+#endif
+}
+
+}  // namespace internal
 
 // An abstract handle of an expectation.  Useful in the .After()
 // clause of EXPECT_CALL() for setting the (partial) order of
