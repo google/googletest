@@ -731,7 +731,7 @@ class GTestJsonOutputUnitTest(gtest_test_utils.TestCase):
   def testNoTestJsonOutput(self):
     """Verifies JSON output for a Google Test binary without actual tests.
 
-    Runs a test program that generates an JSON output for a binary with no
+    Runs a test program that generates a JSON output for a binary with no
     tests, and tests that the JSON output is expected.
     """
 
@@ -750,7 +750,7 @@ class GTestJsonOutputUnitTest(gtest_test_utils.TestCase):
     match = re.match(r'(\d+)-(\d\d)-(\d\d)T(\d\d):(\d\d):(\d\d)', date_time_str)
     self.assertTrue(
         re.match,
-        'JSON datettime string %s has incorrect format' % date_time_str,
+        'JSON datetime string %s has incorrect format' % date_time_str,
     )
     date_time_from_json = datetime.datetime(
         year=int(match.group(1)),
@@ -771,7 +771,7 @@ class GTestJsonOutputUnitTest(gtest_test_utils.TestCase):
   def testDefaultOutputFile(self):
     """Verifies the default output file name.
 
-    Confirms that Google Test produces an JSON output file with the expected
+    Confirms that Google Test produces a JSON output file with the expected
     default name if no name is explicitly specified.
     """
     output_file = os.path.join(

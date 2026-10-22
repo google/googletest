@@ -332,7 +332,7 @@ class [[nodiscard]] ValuesInIteratorRangeGenerator
       return new Iterator(*this);
     }
     // We need to use cached value referenced by iterator_ because *iterator_
-    // can return a temporary object (and of type other then T), so just
+    // can return a temporary object (and of type other than T), so just
     // having "return &*iterator_;" doesn't work.
     // value_ is updated here and not in Advance() because Advance()
     // can advance iterator_ beyond the end of the range, and we cannot
@@ -761,19 +761,19 @@ class [[nodiscard]] ParameterizedTestSuiteRegistry {
       const ParameterizedTestSuiteRegistry&) = delete;
 };
 
-// Keep track of what type-parameterized test suite are defined and
-// where as well as which are intatiated. This allows susequently
-// identifying suits that are defined but never used.
+// Keep track of what type-parameterized test suites are defined and
+// where as well as which are instantiated. This allows subsequently
+// identifying suites that are defined but never used.
 class [[nodiscard]] TypeParameterizedTestSuiteRegistry {
  public:
   // Add a suite definition
   void RegisterTestSuite(const char* test_suite_name,
                          CodeLocation code_location);
 
-  // Add an instantiation of a suit.
+  // Add an instantiation of a suite.
   void RegisterInstantiation(const char* test_suite_name);
 
-  // For each suit repored as defined but not reported as instantiation,
+  // For each suite reported as defined but not reported as instantiation,
   // emit a test that reports that fact (configurably, as an error).
   void CheckForInstantiations();
 
