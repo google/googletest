@@ -373,10 +373,10 @@ bool UnorderedElementsAreMatcherImplBase::VerifyMatchMatrix(
     return true;
   }
 
-  const bool is_exact_match_with_size_discrepency =
+  const bool is_exact_match_with_size_discrepancy =
       match_flags() == UnorderedMatcherRequire::ExactMatch &&
       matrix.LhsSize() != matrix.RhsSize();
-  if (is_exact_match_with_size_discrepency) {
+  if (is_exact_match_with_size_discrepancy) {
     // The element count doesn't match.  If the container is empty,
     // there's no need to explain anything as Google Mock already
     // prints the empty container. Otherwise we just need to show
@@ -386,7 +386,7 @@ bool UnorderedElementsAreMatcherImplBase::VerifyMatchMatrix(
     }
   }
 
-  bool result = !is_exact_match_with_size_discrepency;
+  bool result = !is_exact_match_with_size_discrepancy;
   ::std::vector<char> element_matched(matrix.LhsSize(), 0);
   ::std::vector<char> matcher_matched(matrix.RhsSize(), 0);
 

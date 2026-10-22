@@ -114,14 +114,14 @@ GTEST_DECLARE_bool_(list_tests);
 // in addition to its normal textual output.
 GTEST_DECLARE_string_(output);
 
-// This flags control whether Google Test prints only test failures.
+// This flag controls whether Google Test prints only test failures.
 GTEST_DECLARE_bool_(brief);
 
-// This flags control whether Google Test prints the elapsed time for each
+// This flag controls whether Google Test prints the elapsed time for each
 // test.
 GTEST_DECLARE_bool_(print_time);
 
-// This flags control whether Google Test prints UTF8 characters as text.
+// This flag controls whether Google Test prints UTF8 characters as text.
 GTEST_DECLARE_bool_(print_utf8);
 
 // This flag specifies the random number seed.

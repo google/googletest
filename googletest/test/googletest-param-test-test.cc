@@ -960,7 +960,7 @@ TEST(MacroNameing, LookupNames) {
     }
   }
 
-  // Check that the expected form of the test suit name actually exists.
+  // Check that the expected form of the test suite name actually exists.
   EXPECT_NE(  //
       know_suite_names.find("FortyTwo/MacroNamingTest"),
       know_suite_names.end());
