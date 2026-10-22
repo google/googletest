@@ -282,8 +282,12 @@ void PrintTo(wchar_t wc, ostream* os) { PrintCharAndCodeTo(wc, os); }
 
 // TODO(dcheng): Consider making this delegate to PrintCharAndCodeTo() as well.
 void PrintTo(char32_t c, ::std::ostream* os) {
+  const ostream::fmtflags flags = os->flags();
+  const char fill = os->fill();
   *os << std::hex << "U+" << std::uppercase << std::setfill('0') << std::setw(4)
       << static_cast<uint32_t>(c);
+  os->flags(flags);
+  os->fill(fill);
 }
 
 // char8_t and char16_t hold code units, not code points, so the U+XXXX
