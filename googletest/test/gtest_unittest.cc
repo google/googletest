@@ -2128,6 +2128,8 @@ class UnitTestRecordPropertyTestEnvironment : public Environment {
         "time");
     ExpectNonFatalFailureRecordingPropertyWithReservedKeyOutsideOfTestSuite(
         "random_seed");
+    ExpectNonFatalFailureRecordingPropertyWithReservedKeyOutsideOfTestSuite(
+        "skipped");
   }
 };
 
