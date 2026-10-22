@@ -243,6 +243,19 @@ static void LogElementMatcherPairVec(const ElementMatcherPairs& pairs,
   os << "\n}";
 }
 
+static void LogActualExpectedPairVec(const ElementMatcherPairs& pairs,
+                                     ::std::ostream* stream) {
+  // Keep pairings in Actual/Expected order for quick visual diffing.
+  typedef ElementMatcherPairs::const_iterator Iter;
+  ::std::ostream& os = *stream;
+  const char* sep = "";
+  for (Iter it = pairs.begin(); it != pairs.end(); ++it) {
+    os << sep << "  - Actual #" << it->first << " <-> Expected #"
+       << it->second;
+    sep = "\n";
+  }
+}
+
 bool MatchMatrix::NextGraph() {
   for (size_t ilhs = 0; ilhs < LhsSize(); ++ilhs) {
     for (size_t irhs = 0; irhs < RhsSize(); ++irhs) {
@@ -399,33 +412,43 @@ bool UnorderedElementsAreMatcherImplBase::VerifyMatchMatrix(
   }
 
   if (match_flags() & UnorderedMatcherRequire::Superset) {
-    const char* sep =
-        "where the following matchers don't match any elements:\n";
+    const char* sep = "";
+    bool header_printed = false;
     for (size_t mi = 0; mi < matcher_matched.size(); ++mi) {
       if (matcher_matched[mi]) continue;
       result = false;
       if (listener->IsInterested()) {
-        *listener << sep << "matcher #" << mi << ": ";
+        if (!header_printed) {
+          *listener << "UnorderedElementsAre mismatch:\n"
+                    << "Expected entries with no matching actual value:\n";
+          header_printed = true;
+        }
+        *listener << sep << "  - Expected #" << mi << ": ";
         matcher_describers_[mi]->DescribeTo(listener->stream());
-        sep = ",\n";
+        sep = "\n";
       }
     }
   }
 
   if (match_flags() & UnorderedMatcherRequire::Subset) {
-    const char* sep =
-        "where the following elements don't match any matchers:\n";
+    const char* sep = "";
     const char* outer_sep = "";
     if (!result) {
-      outer_sep = "\nand ";
+      outer_sep = "\n";
     }
+    bool header_printed = false;
     for (size_t ei = 0; ei < element_matched.size(); ++ei) {
       if (element_matched[ei]) continue;
       result = false;
       if (listener->IsInterested()) {
-        *listener << outer_sep << sep << "element #" << ei << ": "
+        if (!header_printed) {
+          *listener << outer_sep
+                    << "Actual entries with no matching expected value:\n";
+          header_printed = true;
+        }
+        *listener << sep << "  - Actual #" << ei << ": "
                   << element_printouts[ei];
-        sep = ",\n";
+        sep = "\n";
         outer_sep = "";
       }
     }
@@ -441,22 +464,22 @@ bool UnorderedElementsAreMatcherImplBase::FindPairing(
   if ((match_flags() & UnorderedMatcherRequire::Superset) &&
       max_flow < matrix.RhsSize()) {
     if (listener->IsInterested()) {
-      *listener << "where no permutation of the elements can satisfy all "
-                   "matchers, and the closest match is "
-                << max_flow << " of " << matrix.RhsSize()
-                << " matchers with the pairings:\n";
-      LogElementMatcherPairVec(matches, listener->stream());
+      *listener << "UnorderedElementsAre pairing mismatch:\n"
+                << "  Matched " << max_flow << " of " << matrix.RhsSize()
+                << " expected entries.\n"
+                << "Pairings (Actual <-> Expected):\n";
+      LogActualExpectedPairVec(matches, listener->stream());
     }
     return false;
   }
   if ((match_flags() & UnorderedMatcherRequire::Subset) &&
       max_flow < matrix.LhsSize()) {
     if (listener->IsInterested()) {
-      *listener
-          << "where not all elements can be matched, and the closest match is "
-          << max_flow << " of " << matrix.RhsSize()
-          << " matchers with the pairings:\n";
-      LogElementMatcherPairVec(matches, listener->stream());
+      *listener << "UnorderedElementsAre pairing mismatch:\n"
+                << "  Matched " << max_flow << " of " << matrix.LhsSize()
+                << " actual entries.\n"
+                << "Pairings (Actual <-> Expected):\n";
+      LogActualExpectedPairVec(matches, listener->stream());
     }
     return false;
   }
@@ -465,8 +488,8 @@ bool UnorderedElementsAreMatcherImplBase::FindPairing(
     if (listener->IsInterested()) {
       const char* sep = "where:\n";
       for (size_t mi = 0; mi < matches.size(); ++mi) {
-        *listener << sep << " - element #" << matches[mi].first
-                  << " is matched by matcher #" << matches[mi].second;
+        *listener << sep << " - Actual #" << matches[mi].first
+                  << " is matched by Expected #" << matches[mi].second;
         sep = ",\n";
       }
     }
