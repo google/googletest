@@ -16,6 +16,8 @@ GoogleTest defines the following macros for working with mocks.
 Defines a mock method *`method_name`* with arguments `(`*`args...`*`)` and
 return type *`return_type`* within a mock class.
 
+The number of arguments is limited to 31.
+
 The parameters of `MOCK_METHOD` mirror the method declaration. The optional
 fourth parameter *`specs...`* is a comma-separated list of qualifiers. The
 following qualifiers are accepted:
