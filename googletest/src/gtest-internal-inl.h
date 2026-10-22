@@ -152,6 +152,7 @@ class GTestFlagSaver {
     filter_ = GTEST_FLAG_GET(filter);
     internal_run_death_test_ = GTEST_FLAG_GET(internal_run_death_test);
     list_tests_ = GTEST_FLAG_GET(list_tests);
+    list_tests_flat_ = GTEST_FLAG_GET(list_tests_flat);
     output_ = GTEST_FLAG_GET(output);
     brief_ = GTEST_FLAG_GET(brief);
     print_time_ = GTEST_FLAG_GET(print_time);
@@ -178,6 +179,7 @@ class GTestFlagSaver {
     GTEST_FLAG_SET(fail_fast, fail_fast_);
     GTEST_FLAG_SET(internal_run_death_test, internal_run_death_test_);
     GTEST_FLAG_SET(list_tests, list_tests_);
+    GTEST_FLAG_SET(list_tests_flat, list_tests_flat_);
     GTEST_FLAG_SET(output, output_);
     GTEST_FLAG_SET(brief, brief_);
     GTEST_FLAG_SET(print_time, print_time_);
@@ -204,6 +206,7 @@ class GTestFlagSaver {
   std::string filter_;
   std::string internal_run_death_test_;
   bool list_tests_;
+  bool list_tests_flat_;
   std::string output_;
   bool brief_;
   bool print_time_;
