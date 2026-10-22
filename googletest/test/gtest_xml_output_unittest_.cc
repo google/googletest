@@ -142,7 +142,7 @@ TEST_F(PropertyRecordingTest, TwoValuesForOneKeyUsesLastValue) {
 }
 
 TEST(NoFixtureTest, RecordProperty) {
-  RecordProperty("key", "1");
+  RecordProperty("key\"quoted", "1");
 }
 
 void ExternalUtilityThatCallsRecordProperty(const std::string& key, int value) {
