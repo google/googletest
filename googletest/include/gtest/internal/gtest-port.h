@@ -616,15 +616,16 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 //
 // To disable threading support in Google Test, add -DGTEST_HAS_PTHREAD=0
 // to your compiler flags.
-#if (defined(GTEST_OS_LINUX) || defined(GTEST_OS_MAC) ||              \
-     defined(GTEST_OS_HPUX) || defined(GTEST_OS_QNX) ||               \
-     defined(GTEST_OS_FREEBSD) || defined(GTEST_OS_NACL) ||           \
-     defined(GTEST_OS_NETBSD) || defined(GTEST_OS_FUCHSIA) ||         \
-     defined(GTEST_OS_DRAGONFLY) || defined(GTEST_OS_GNU_KFREEBSD) || \
-     defined(GTEST_OS_OPENBSD) || defined(GTEST_OS_HAIKU) ||          \
-     defined(GTEST_OS_GNU_HURD) || defined(GTEST_OS_SOLARIS) ||       \
-     defined(GTEST_OS_AIX) || defined(GTEST_OS_ZOS) ||                \
-     (defined(GTEST_OS_EMSCRIPTEN) && defined(__EMSCRIPTEN_PTHREADS__)))
+#if (defined(GTEST_OS_LINUX) || defined(GTEST_OS_MAC) ||                   \
+     defined(GTEST_OS_HPUX) || defined(GTEST_OS_QNX) ||                    \
+     defined(GTEST_OS_FREEBSD) || defined(GTEST_OS_NACL) ||                \
+     defined(GTEST_OS_NETBSD) || defined(GTEST_OS_FUCHSIA) ||              \
+     defined(GTEST_OS_DRAGONFLY) || defined(GTEST_OS_GNU_KFREEBSD) ||      \
+     defined(GTEST_OS_OPENBSD) || defined(GTEST_OS_HAIKU) ||               \
+     defined(GTEST_OS_GNU_HURD) || defined(GTEST_OS_SOLARIS) ||            \
+     defined(GTEST_OS_AIX) || defined(GTEST_OS_ZOS) ||                     \
+     (defined(GTEST_OS_EMSCRIPTEN) && defined(__EMSCRIPTEN_PTHREADS__)) || \
+     defined(GTEST_OS_CYGWIN))
 #define GTEST_HAS_PTHREAD 1
 #else
 #define GTEST_HAS_PTHREAD 0
