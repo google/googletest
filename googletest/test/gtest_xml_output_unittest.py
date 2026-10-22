@@ -66,7 +66,27 @@ else:
   # unittest.main() can't handle unknown flags
   sys.argv.remove(NO_STACKTRACE_SUPPORT_FLAG)
 
-EXPECTED_NON_EMPTY_XML = """<?xml version="1.0" encoding="UTF-8"?>
+
+def RemoveRepeatedDetails(xml):
+  """Drops the bodies of <failure> elements that only repeat their message.
+
+  GoogleTest writes the detail of a failure as a CDATA body only when it holds
+  more than the "message" attribute already does. Without stack trace support
+  the two are always identical, so the body is not written at all.
+
+  Args:
+    xml: an expected XML document, as a string.
+
+  Returns:
+    The document with such bodies replaced by empty elements.
+  """
+  if SUPPORTS_STACK_TRACES:
+    return xml
+  return re.sub(r'><!\[CDATA\[.*?\]\]></failure>', ' />', xml, flags=re.DOTALL)
+
+
+EXPECTED_NON_EMPTY_XML = RemoveRepeatedDetails(
+    """<?xml version="1.0" encoding="UTF-8"?>
 <testsuites tests="28" failures="5" disabled="2" errors="0" time="*" timestamp="*" name="AllTests">
   <properties>
     <property name="ad_hoc_property" value="42"/>
@@ -115,23 +135,17 @@ Invalid characters in brackets []%(stack)s]]></failure>
   </testsuite>
   <testsuite name="SkippedTest" tests="3" failures="1" disabled="0" skipped="2" errors="0" time="*" timestamp="*">
     <testcase name="Skipped" status="run" file="gtest_xml_output_unittest_.cc" line="75" result="skipped" time="*" timestamp="*" classname="SkippedTest">
-      <skipped message="gtest_xml_output_unittest_.cc:*&#x0A;&#x0A;"><![CDATA[gtest_xml_output_unittest_.cc:*
-
-]]></skipped>
+      <skipped message="gtest_xml_output_unittest_.cc:*&#x0A;&#x0A;" />
     </testcase>
     <testcase name="SkippedWithMessage" file="gtest_xml_output_unittest_.cc" line="79" status="run" result="skipped" time="*" timestamp="*" classname="SkippedTest">
-      <skipped message="gtest_xml_output_unittest_.cc:*&#x0A;It is good practice to tell why you skip a test.&#x0A;"><![CDATA[gtest_xml_output_unittest_.cc:*
-It is good practice to tell why you skip a test.
-]]></skipped>
+      <skipped message="gtest_xml_output_unittest_.cc:*&#x0A;It is good practice to tell why you skip a test.&#x0A;" />
     </testcase>
     <testcase name="SkippedAfterFailure" file="gtest_xml_output_unittest_.cc" line="83" status="run" result="completed" time="*" timestamp="*" classname="SkippedTest">
       <failure message="gtest_xml_output_unittest_.cc:*&#x0A;Expected equality of these values:&#x0A;  1&#x0A;  2%(stack_entity)s" type=""><![CDATA[gtest_xml_output_unittest_.cc:*
 Expected equality of these values:
   1
   2%(stack)s]]></failure>
-      <skipped message="gtest_xml_output_unittest_.cc:*&#x0A;It is good practice to tell why you skip a test.&#x0A;"><![CDATA[gtest_xml_output_unittest_.cc:*
-It is good practice to tell why you skip a test.
-]]></skipped>
+      <skipped message="gtest_xml_output_unittest_.cc:*&#x0A;It is good practice to tell why you skip a test.&#x0A;" />
     </testcase>
 
   </testsuite>
@@ -184,8 +198,7 @@ It is good practice to tell why you skip a test.
   </testsuite>
   <testsuite name="SetupFailTest" tests="1" failures="0" disabled="0" skipped="1" errors="0" time="*" timestamp="*">
     <testcase name="NoopPassingTest" file="gtest_xml_output_unittest_.cc" line="172" status="run" result="skipped" time="*" timestamp="*" classname="SetupFailTest">
-      <skipped message="gtest_xml_output_unittest_.cc:*&#x0A;"><![CDATA[gtest_xml_output_unittest_.cc:*
-]]></skipped>
+      <skipped message="gtest_xml_output_unittest_.cc:*&#x0A;" />
     </testcase>
     <testcase name="" status="run" result="completed" classname="" time="*" timestamp="*">
       <failure message="gtest_xml_output_unittest_.cc:*&#x0A;Expected equality of these values:&#x0A;  1&#x0A;  2%(stack_entity)s" type=""><![CDATA[gtest_xml_output_unittest_.cc:*
@@ -222,9 +235,10 @@ Expected equality of these values:
     <testcase name="HasTypeParamAttribute" file="gtest_xml_output_unittest_.cc" line="200" type_param="*" status="run" result="completed" time="*" timestamp="*" classname="Single/TypeParameterizedTestSuite/1" />
   </testsuite>
 </testsuites>""" % {
-    'stack': STACK_TRACE_TEMPLATE,
-    'stack_entity': STACK_TRACE_ENTITY_TEMPLATE,
-}
+        'stack': STACK_TRACE_TEMPLATE,
+        'stack_entity': STACK_TRACE_ENTITY_TEMPLATE,
+    }
+)
 
 EXPECTED_FILTERED_TEST_XML = """<?xml version="1.0" encoding="UTF-8"?>
 <testsuites tests="1" failures="0" disabled="0" errors="0" time="*" timestamp="*" name="AllTests">
@@ -263,7 +277,8 @@ EXPECTED_SHARDED_TEST_XML = """<?xml version="1.0" encoding="UTF-8"?>
   </testsuite>
 </testsuites>"""
 
-EXPECTED_NO_TEST_XML = """<?xml version="1.0" encoding="UTF-8"?>
+EXPECTED_NO_TEST_XML = RemoveRepeatedDetails(
+    """<?xml version="1.0" encoding="UTF-8"?>
 <testsuites tests="0" failures="0" disabled="0" errors="0" time="*"
             timestamp="*" name="AllTests">
   <testsuite name="NonTestSuiteFailure" tests="1" failures="1" disabled="0" skipped="0" errors="0" time="*" timestamp="*">
@@ -275,9 +290,10 @@ Expected equality of these values:
     </testcase>
   </testsuite>
 </testsuites>""" % {
-    'stack': STACK_TRACE_TEMPLATE,
-    'stack_entity': STACK_TRACE_ENTITY_TEMPLATE,
-}
+        'stack': STACK_TRACE_TEMPLATE,
+        'stack_entity': STACK_TRACE_ENTITY_TEMPLATE,
+    }
+)
 
 GTEST_PROGRAM_PATH = gtest_test_utils.GetTestExecutablePath(GTEST_PROGRAM_NAME)
 
@@ -312,6 +328,32 @@ class GTestXMLOutputUnitTest(gtest_xml_test_utils.GTestXMLTestCase):
     """
 
     self._TestXmlOutput('gtest_no_test_unittest', EXPECTED_NO_TEST_XML, 0)
+
+  def testFailureDetailIsNotACopyOfTheMessage(self):
+    """Verifies that a failure detail does not repeat the message attribute.
+
+    The "message" attribute of a <failure> or <skipped> element already holds
+    the summary of the failure, so the body of the element is only written when
+    it adds something to that summary.
+    """
+    actual = self._GetXmlOutput(GTEST_PROGRAM_NAME, [], {}, 1)
+    elements = actual.getElementsByTagName(
+        'failure'
+    ) + actual.getElementsByTagName('skipped')
+    self.assertTrue(elements, 'the test program reported no failure')
+    for element in elements:
+      detail = ''.join(
+          child.nodeValue
+          for child in element.childNodes
+          if child.nodeType == child.CDATA_SECTION_NODE
+      )
+      self.assertNotEqual(
+          element.getAttribute('message'),
+          detail,
+          'the detail of a <%s> element repeats its message attribute'
+          % element.tagName,
+      )
+    actual.unlink()
 
   def testTimestampValue(self):
     """Checks whether the timestamp attribute in the XML output is valid.
