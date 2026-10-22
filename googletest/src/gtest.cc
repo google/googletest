@@ -5097,8 +5097,12 @@ void StreamingListener::SocketWriter::MakeConnection() {
 
 // class OsStackTraceGetter
 
+}  // namespace internal
+
 const char* const OsStackTraceGetterInterface::kElidedFramesMarker =
     "... " GTEST_NAME_ " internal frames ...";
+
+namespace internal {
 
 std::string OsStackTraceGetter::CurrentStackTrace(int max_depth, int skip_count)
     GTEST_LOCK_EXCLUDED_(mutex_) {
@@ -5427,6 +5431,10 @@ void UnitTest::set_current_test_info(TestInfo* a_current_test_info) {
 // Returns the list of event listeners that can be used to track events
 // inside Google Test.
 TestEventListeners& UnitTest::listeners() { return *impl()->listeners(); }
+
+void UnitTest::set_os_stack_trace_getter(OsStackTraceGetterInterface* getter) {
+  impl()->set_os_stack_trace_getter(getter);
+}
 
 // Registers and returns a global test environment.  When a test
 // program is run, all global test environments will be set-up in the

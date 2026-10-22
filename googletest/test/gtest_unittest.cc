@@ -7769,3 +7769,50 @@ TEST(PatternGlobbingTest, MatchesFilterEdgeCases) {
   EXPECT_FALSE(testing::internal::UnitTestOptions::MatchesFilter("a", ""));
   EXPECT_TRUE(testing::internal::UnitTestOptions::MatchesFilter("", ""));
 }
+
+// A stack trace getter that returns a fixed trace and counts how many times it
+// has been destroyed.
+class FixedStackTraceGetter : public testing::OsStackTraceGetterInterface {
+ public:
+  explicit FixedStackTraceGetter(int* destroy_count)
+      : destroy_count_(destroy_count) {}
+  ~FixedStackTraceGetter() override { ++*destroy_count_; }
+
+  std::string CurrentStackTrace(int, int) override { return "fixed trace\n"; }
+  void UponLeavingGTest() override {}
+
+ private:
+  int* destroy_count_;
+};
+
+// Restores the default OS stack trace getter when it goes out of scope, so a
+// custom getter never outlives the test state it refers to.
+class RestoreDefaultStackTraceGetter {
+ public:
+  ~RestoreDefaultStackTraceGetter() {
+    testing::UnitTest::GetInstance()->set_os_stack_trace_getter(nullptr);
+  }
+};
+
+TEST(UnitTestSetOsStackTraceGetterTest, ReplacesAndRestoresGetter) {
+  testing::UnitTest* unit_test = testing::UnitTest::GetInstance();
+  int destroy_count = 0;
+  RestoreDefaultStackTraceGetter restore_default;
+
+  unit_test->set_os_stack_trace_getter(
+      new FixedStackTraceGetter(&destroy_count));
+  EXPECT_EQ("fixed trace\n",
+            testing::internal::GetCurrentOsStackTraceExceptTop(0));
+  EXPECT_EQ(0, destroy_count);
+
+  // Replacing the getter deletes the previous one.
+  unit_test->set_os_stack_trace_getter(
+      new FixedStackTraceGetter(&destroy_count));
+  EXPECT_EQ(1, destroy_count);
+
+  // Passing nullptr deletes the custom getter and restores the default.
+  unit_test->set_os_stack_trace_getter(nullptr);
+  EXPECT_EQ(2, destroy_count);
+  EXPECT_NE("fixed trace\n",
+            testing::internal::GetCurrentOsStackTraceExceptTop(0));
+}
