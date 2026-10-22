@@ -380,6 +380,13 @@ py_test(
 )
 
 py_test(
+    name = "gtest_test_utils_test",
+    size = "small",
+    srcs = ["gtest_test_utils_test.py"],
+    deps = [":gtest_test_utils"],
+)
+
+py_test(
     name = "googletest-list-tests-unittest",
     size = "small",
     srcs = ["googletest-list-tests-unittest.py"],
