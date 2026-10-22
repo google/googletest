@@ -261,7 +261,7 @@ class Queue {
  public:
   Queue();
   void Enqueue(const E& element);
-  E* Dequeue();  // Returns NULL if the queue is empty.
+  E* Dequeue();  // Returns nullptr if the queue is empty.
   size_t size() const;
   ...
 };
