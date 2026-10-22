@@ -77,6 +77,7 @@ cc_test(
             "gtest-listener_test.cc",
             "gtest-unittest-api_test.cc",
             "gtest_all_test.cc",
+            "gtest_premature_exit_diagnostics_test_.cc",
             # go/keep-sorted end
         ],
     ) + select({
@@ -624,5 +625,20 @@ py_test(
     tags = [
         "no_test_msvc2022",
     ],
+    deps = [":gtest_test_utils"],
+)
+
+cc_binary(
+    name = "gtest_premature_exit_diagnostics_test_",
+    testonly = 1,
+    srcs = ["gtest_premature_exit_diagnostics_test_.cc"],
+    deps = ["//:gtest_main"],
+)
+
+py_test(
+    name = "gtest_premature_exit_diagnostics_test",
+    size = "small",
+    srcs = ["gtest_premature_exit_diagnostics_test.py"],
+    data = [":gtest_premature_exit_diagnostics_test_"],
     deps = [":gtest_test_utils"],
 )

@@ -258,6 +258,9 @@ if (gtest_build_tests)
   cxx_executable(googletest-break-on-failure-unittest_ test gtest)
   py_test(googletest-break-on-failure-unittest)
 
+  cxx_executable(gtest_premature_exit_diagnostics_test_ test gtest_main)
+  py_test(gtest_premature_exit_diagnostics_test)
+
   py_test(gtest_skip_check_output_test)
   py_test(gtest_skip_environment_check_output_test)
 
