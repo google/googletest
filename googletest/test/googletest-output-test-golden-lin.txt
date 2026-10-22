@@ -1002,7 +1002,7 @@ Stack trace: (omitted)
 googletest-output-test_.cc:#: Failure
 Parameterized test suite NoTests is instantiated via INSTANTIATE_TEST_SUITE_P, but no tests are defined via TEST_P . No test cases will run.
 
-Ideally, INSTANTIATE_TEST_SUITE_P should only ever be invoked from code that always depend on code that provides TEST_P. Failing to do so is often an indication of dead code, e.g. the last TEST_P was removed but the rest got left behind.
+Ideally, INSTANTIATE_TEST_SUITE_P should only ever be invoked from code that always depends on code that provides TEST_P. Failing to do so is often an indication of dead code, e.g. the last TEST_P was removed but the rest got left behind.
 
 To suppress this error for this test suite, insert the following line (in a non-header) in the namespace it is defined in:
 
