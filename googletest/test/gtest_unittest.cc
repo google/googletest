@@ -1773,10 +1773,12 @@ TEST(ParseInt32FlagTest, ReturnsDefaultWhenValueOverflows) {
   printf("(expecting 2 warnings)\n");
 
   int32_t value = 123;
-  EXPECT_FALSE(ParseFlag("--abc=12345678987654321", "abc", &value));
+  EXPECT_FALSE(ParseFlag("--" GTEST_FLAG_PREFIX_ "abc=12345678987654321", "abc",
+                         &value));
   EXPECT_EQ(123, value);
 
-  EXPECT_FALSE(ParseFlag("--abc=-12345678987654321", "abc", &value));
+  EXPECT_FALSE(ParseFlag("--" GTEST_FLAG_PREFIX_ "abc=-12345678987654321",
+                         "abc", &value));
   EXPECT_EQ(123, value);
 }
 
@@ -1787,10 +1789,20 @@ TEST(ParseInt32FlagTest, ReturnsDefaultWhenValueIsInvalid) {
   printf("(expecting 2 warnings)\n");
 
   int32_t value = 123;
-  EXPECT_FALSE(ParseFlag("--abc=A1", "abc", &value));
+  EXPECT_FALSE(ParseFlag("--" GTEST_FLAG_PREFIX_ "abc=A1", "abc", &value));
   EXPECT_EQ(123, value);
 
-  EXPECT_FALSE(ParseFlag("--abc=12X", "abc", &value));
+  EXPECT_FALSE(ParseFlag("--" GTEST_FLAG_PREFIX_ "abc=12X", "abc", &value));
+  EXPECT_EQ(123, value);
+}
+
+// Tests that ParseInt32Flag() rejects an empty value and doesn't change the
+// output value.
+TEST(ParseInt32FlagTest, RejectsEmptyValue) {
+  printf("(expecting 1 warning)\n");
+
+  int32_t value = 123;
+  EXPECT_FALSE(ParseFlag("--" GTEST_FLAG_PREFIX_ "abc=", "abc", &value));
   EXPECT_EQ(123, value);
 }
 
