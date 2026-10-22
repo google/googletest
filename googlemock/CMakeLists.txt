@@ -10,6 +10,9 @@
 
 option(gmock_build_tests "Build all of Google Mock's own tests." OFF)
 
+set(gmock_default_mock_behavior "1" CACHE STRING
+    "Controls default mock behavior (0=Nice, 1=Naggy, 2=Strict).")
+
 # A directory to find Google Test sources.
 if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/gtest/CMakeLists.txt")
   set(gtest_dir gtest)
@@ -101,6 +104,9 @@ else()
   target_link_libraries(gmock_main PUBLIC gmock)
   set_target_properties(gmock_main PROPERTIES VERSION ${GOOGLETEST_VERSION})
 endif()
+
+target_compile_definitions(gmock PRIVATE
+    GMOCK_DEFAULT_MOCK_BEHAVIOR=${gmock_default_mock_behavior})
 
 string(REPLACE ";" "$<SEMICOLON>" dirs "${gmock_build_include_dirs}")
 target_include_directories(gmock SYSTEM INTERFACE
