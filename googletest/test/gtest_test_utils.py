@@ -213,6 +213,8 @@ class Subprocess:
       following attributes:
         terminated_by_signal   True if and only if the child process has been
                                terminated by a signal.
+        signal                 The signal number that terminated the child
+                               process, if terminated_by_signal is True.
         exited                 True if and only if the child process exited
                                normally.
         exit_code              The code with which the child process exited.
@@ -240,6 +242,7 @@ class Subprocess:
 
     if bool(self._return_code & 0x80000000):
       self.terminated_by_signal = True
+      self.signal = (~self._return_code & 0x7fffffff) + 1
       self.exited = False
     else:
       self.terminated_by_signal = False
