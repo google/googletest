@@ -1823,6 +1823,15 @@ TEST(IsSubsetOfTest, MatchAndExplain) {
                                  " - element #1 is matched by matcher #2"));
 }
 
+TEST(IsSubsetOfTest, MatchAndExplainReportsUnmatchedElementCount) {
+  std::vector<int> v{1, 1, 1};
+  StringMatchResultListener listener;
+  ASSERT_FALSE(ExplainMatchResult(IsSubsetOf({1, 2}), v, &listener))
+      << listener.str();
+  // The denominator is the number of elements, not the number of matchers.
+  EXPECT_THAT(listener.str(), HasSubstr("is 1 of 3 elements"));
+}
+
 TEST(IsSubsetOfTest, WorksForRhsInitializerList) {
   const int numbers[] = {1, 2, 3};
   EXPECT_THAT(numbers, IsSubsetOf({1, 2, 3, 4}));
