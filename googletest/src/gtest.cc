@@ -311,6 +311,11 @@ GTEST_DEFINE_string_(
     "exclude).  A test is run if it matches one of the positive "
     "patterns and does not match any of the negative patterns.");
 
+GTEST_DEFINE_string_(
+    source_file_filter, "*",
+    "A glob (not regex) pattern for filtering tests "
+    "by the source file that defines them.");
+
 GTEST_DEFINE_bool_(
     install_failure_signal_handler,
     testing::internal::BoolFromGTestEnv("install_failure_signal_handler",
@@ -814,6 +819,12 @@ static bool PatternMatchesString(const std::string& name_str,
 }
 
 namespace {
+
+static bool SourceFileMatchesFilter(const std::string& source_file,
+                                    const std::string& filter) {
+  return PatternMatchesString(source_file, filter.c_str(),
+                              filter.c_str() + filter.size());
+}
 
 bool IsGlobPattern(const std::string& pattern) {
   return std::any_of(pattern.begin(), pattern.end(),
@@ -6161,8 +6172,13 @@ bool UnitTestImpl::RunAllTests() {
   // Try to warn the user if no tests matched the test filter.
   if (ShouldWarnIfNoTestsMatchFilter()) {
     const std::string filter_warning =
-        std::string("filter \"") + GTEST_FLAG_GET(filter) +
-        "\" did not match any test; no tests were run\n";
+        GTEST_FLAG_GET(source_file_filter) == "*"
+            ? std::string("filter \"") + GTEST_FLAG_GET(filter) +
+                  "\" did not match any test; no tests were run\n"
+            : std::string("filter \"") + GTEST_FLAG_GET(filter) +
+                  "\" and source file filter \"" +
+                  GTEST_FLAG_GET(source_file_filter) +
+                  "\" did not match any test; no tests were run\n";
     ColoredPrintf(GTestColor::kRed, "WARNING: %s", filter_warning.c_str());
 #if GTEST_HAS_FILE_SYSTEM
     AppendToTestWarningsOutputFile(filter_warning);
@@ -6291,6 +6307,7 @@ int UnitTestImpl::FilterTests(ReactionToSharding shard_tests) {
 
   const PositiveAndNegativeUnitTestFilter gtest_flag_filter(
       GTEST_FLAG_GET(filter));
+  const std::string source_file_filter = GTEST_FLAG_GET(source_file_filter);
   const UnitTestFilter disable_test_filter(kDisableTestFilter);
   // num_runnable_tests are the number of tests that will
   // run across all shards (i.e., match filter and are not disabled).
@@ -6312,7 +6329,8 @@ int UnitTestImpl::FilterTests(ReactionToSharding shard_tests) {
       test_info->is_disabled_ = is_disabled;
 
       const bool matches_filter =
-          gtest_flag_filter.MatchesTest(test_suite_name, test_name);
+          gtest_flag_filter.MatchesTest(test_suite_name, test_name) &&
+          SourceFileMatchesFilter(test_info->file(), source_file_filter);
       test_info->matches_filter_ = matches_filter;
 
       const bool is_runnable =
@@ -6347,11 +6365,13 @@ bool UnitTestImpl::ShouldWarnIfNoTestsMatchFilter() const {
   }
   const PositiveAndNegativeUnitTestFilter gtest_flag_filter(
       GTEST_FLAG_GET(filter));
+  const std::string source_file_filter = GTEST_FLAG_GET(source_file_filter);
   for (auto* test_suite : test_suites_) {
     const std::string& test_suite_name = test_suite->name_;
     for (TestInfo* test_info : test_suite->test_info_list()) {
       const std::string& test_name = test_info->name_;
-      if (gtest_flag_filter.MatchesTest(test_suite_name, test_name)) {
+      if (gtest_flag_filter.MatchesTest(test_suite_name, test_name) &&
+          SourceFileMatchesFilter(test_info->file(), source_file_filter)) {
         return false;
       }
     }
@@ -6710,6 +6730,8 @@ static const char kColorEncodedHelpMessage[] =
     "      none of the negative patterns. '?' matches any single character; "
     "'*'\n"
     "      matches any substring; ':' separates two patterns.\n"
+    "  @G--sourceFileFilter @YPATTERN@D\n"
+    "      Run only tests defined in matching source files.\n"
     "  @G--" GTEST_FLAG_PREFIX_
     "also_run_disabled_tests@D\n"
     "      Run all disabled tests too.\n"
@@ -6835,6 +6857,7 @@ static bool ParseGoogleTestFlag(const char* const arg) {
   GTEST_INTERNAL_PARSE_FLAG(total_shards);
   GTEST_INTERNAL_PARSE_FLAG(recreate_environments_when_repeating);
   GTEST_INTERNAL_PARSE_FLAG(shuffle);
+  GTEST_INTERNAL_PARSE_FLAG(source_file_filter);
   GTEST_INTERNAL_PARSE_FLAG(stack_trace_depth);
   GTEST_INTERNAL_PARSE_FLAG(stream_result_to);
   GTEST_INTERNAL_PARSE_FLAG(throw_on_failure);
@@ -6919,6 +6942,48 @@ void ParseGoogleTestFlagsOnlyImpl(int* argc, CharType** argv) {
   }
 }
 
+template <typename CharType>
+void ParseSourceFileFilterFlag(int* argc, CharType** argv) {
+  static const std::string kSourceFileFilterPrefix = "--sourceFileFilter=";
+  static const std::string kGTestSourceFileFilterPrefix =
+      "--gtest_source_file_filter=";
+  for (int i = 1; i < *argc; ++i) {
+    const std::string arg = StreamableToString(argv[i]);
+    int args_to_remove = 0;
+    if (arg == "--") {
+      break;
+    } else if (arg.compare(0, kSourceFileFilterPrefix.size(),
+                           kSourceFileFilterPrefix) == 0) {
+      GTEST_FLAG_SET(source_file_filter,
+                     arg.substr(kSourceFileFilterPrefix.size()));
+      args_to_remove = 1;
+    } else if (arg.compare(0, kGTestSourceFileFilterPrefix.size(),
+                           kGTestSourceFileFilterPrefix) == 0) {
+      GTEST_FLAG_SET(source_file_filter,
+                     arg.substr(kGTestSourceFileFilterPrefix.size()));
+      args_to_remove = 1;
+    } else if (arg == "--sourceFileFilter" ||
+               arg == "--gtest_source_file_filter") {
+      if (i + 1 < *argc && StreamableToString(argv[i + 1]) != "--") {
+        GTEST_FLAG_SET(source_file_filter, StreamableToString(argv[i + 1]));
+        args_to_remove = 2;
+      } else {
+        g_help_flag = true;
+        args_to_remove = 1;
+      }
+    }
+
+    if (args_to_remove != 0) {
+      for (int j = i + args_to_remove; j < *argc; ++j) {
+        argv[j - args_to_remove] = argv[j];
+      }
+      *argc -= args_to_remove;
+      argv[*argc] = nullptr;
+      --i;
+    }
+  }
+}
+
 // Parses the command line for Google Test flags, without initializing
 // other parts of Google Test. This function updates argc and argv by removing
 // flags that are known to GoogleTest (including other user flags defined using
@@ -6926,6 +6991,7 @@ void ParseGoogleTestFlagsOnlyImpl(int* argc, CharType** argv) {
 // remain in place. Unrecognized flags are not reported and do not cause the
 // program to exit.
 void ParseGoogleTestFlagsOnly(int* argc, char** argv) {
+  ParseSourceFileFilterFlag(argc, argv);
 #ifdef GTEST_HAS_ABSL_FLAGS
   if (*argc <= 0) return;
 
@@ -6990,6 +7056,7 @@ void ParseGoogleTestFlagsOnly(int* argc, char** argv) {
 #endif
 }
 void ParseGoogleTestFlagsOnly(int* argc, wchar_t** argv) {
+  ParseSourceFileFilterFlag(argc, argv);
   ParseGoogleTestFlagsOnlyImpl(argc, argv);
 }
 

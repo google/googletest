@@ -256,7 +256,10 @@ py_test(
 cc_binary(
     name = "googletest-filter-unittest_",
     testonly = 1,
-    srcs = ["googletest-filter-unittest_.cc"],
+    srcs = [
+        "googletest-filter-unittest_.cc",
+        "googletest-filter-unittest-extra_.cc",
+    ],
     deps = ["//:gtest"],
 )
 
