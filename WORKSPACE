@@ -64,3 +64,10 @@ bazel_features_deps()
 load("@rules_cc//cc:extensions.bzl", "compatibility_proxy_repo")
 
 compatibility_proxy_repo()
+
+load("@bazel_tools//tools/build_defs/repo:local.bzl", "local_repository")
+
+local_repository(
+    name = "docker_toolchain",
+    path = "ci/docker_toolchain",
+)
