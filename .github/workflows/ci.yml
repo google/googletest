@@ -1,0 +1,211 @@
+# Copyright 2026 Google Inc.
+# All Rights Reserved.
+#
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are
+# met:
+#
+#     * Redistributions of source code must retain the above copyright
+# notice, this list of conditions and the following disclaimer.
+#     * Redistributions in binary form must reproduce the above
+# copyright notice, this list of conditions and the following disclaimer
+# in the documentation and/or other materials provided with the
+# distribution.
+#     * Neither the name of Google Inc. nor the names of its
+# contributors may be used to endorse or promote products derived from
+# this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+# OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+name: Tests
+
+on:
+  # continuous runs
+  schedule:
+    # Run every hour
+    - cron: "0 * * * *"
+
+  # postsubmit runs
+  push:
+    branches:
+      - main
+
+  # presubmit runs
+  pull_request:
+    branches:
+      - main
+
+  # manual runs
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Avoid running twice at the same time over the same changes.
+concurrency:
+  group: ${{ github.event_name }}-${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: ${{ contains(fromJSON('["pull_request", "workflow_dispatch", "schedule"]'), github.event_name) }}
+
+jobs:
+  linux:
+    name: Linux ${{ matrix.config.name }} Bazel
+    strategy:
+      fail-fast: false  # Don't cancel all jobs if one fails.
+      matrix:
+        config:
+          - name: Clang/libc++
+            toolchain: clang
+          - name: Clang/libc++ ASAN
+            toolchain: asan
+            stds: '["c++17"]'
+            compilation_modes: '["fastbuild"]'
+          - name: Clang/libc++ TSAN
+            toolchain: tsan
+            stds: '["c++17"]'
+            compilation_modes: '["fastbuild"]'
+          - name: Clang/libstdc++
+            toolchain: libstdc++
+            compilation_modes: '["fastbuild"]'
+          - name: GCC/libstdc++
+            toolchain: gcc
+          - name: GCC/libstdc++ (floor)
+            toolchain: gcc-floor
+            remote_config: remote-floor
+            container_image: gcr.io/google.com/absl-177019/oss-linux-toolchain-floor@sha256:9027d0b4cae51d764cebafecbf9e390a14f97cf977ca24d02cc533998614acd2
+            stds: '["c++17"]'
+            compilation_modes: '["fastbuild"]'
+          - name: GCC/libstdc++ (WORKSPACE)
+            toolchain: linux
+            remote_config: remote-cache
+            container_image: none
+            bazel_version: "8.x"
+            extra_bazel_args: "--enable_bzlmod=false --enable_workspace=true"
+            stds: '["c++17"]'
+            compilation_modes: '["fastbuild"]'
+            absls: '[0]'
+          - name: ARM64 Clang/libc++
+            os: ubuntu-24.04-arm
+            toolchain: clang-arm
+            remote_config: remote-arm
+            stds: '["c++17", "c++20"]'
+            compilation_modes: '["fastbuild"]'
+    uses: ./.github/workflows/bazel.yml
+    secrets:
+      GAR_SERVICE_ACCOUNT: ${{ secrets.GAR_SERVICE_ACCOUNT }}
+    with:
+      os: ${{ matrix.config.os || 'ubuntu-24.04' }}
+      toolchain: ${{ matrix.config.toolchain }}
+      remote_config: ${{ matrix.config.remote_config || 'remote' }}
+      container_image: ${{ matrix.config.container_image || 'gcr.io/google.com/absl-177019/oss-linux-toolchain-latest@sha256:81009eeb5523ae59cfbea8dc0847d41572ed100f79e3c976c64378a0c30d353c' }}
+      bazel_version: ${{ matrix.config.bazel_version || '9.x' }}
+      extra_bazel_args: ${{ matrix.config.extra_bazel_args || '' }}
+      stds: ${{ matrix.config.stds || '["c++17", "c++20", "c++23"]' }}
+      compilation_modes: ${{ matrix.config.compilation_modes || '["opt", "fastbuild"]' }}
+      absls: ${{ matrix.config.absls || '[0, 1]' }}
+
+  cmake:
+    name: ${{ matrix.config.name }} CMake
+    strategy:
+      fail-fast: false  # Don't cancel all jobs if one fails.
+      matrix:
+        config:
+          - name: Linux GCC/libstdc++
+            os: ubuntu-24.04
+            compiler: gcc
+            container_image: gcr.io/google.com/absl-177019/oss-linux-latest@sha256:84505366948db3ea97c71d0aa384a920e73f6994bb4194d7f80ee77979fd9d58
+          - name: Linux Clang/libstdc++
+            os: ubuntu-24.04
+            compiler: clang
+            container_image: gcr.io/google.com/absl-177019/oss-linux-latest@sha256:84505366948db3ea97c71d0aa384a920e73f6994bb4194d7f80ee77979fd9d58
+          - name: Alpine Linux GCC (musl)
+            os: ubuntu-24.04
+            compiler: gcc
+            container_image: gcr.io/google.com/absl-177019/alpine@sha256:52945833fc7b7b93f73ec865eb82390aa46d4e3acd1af87d253cd4a05f95d241
+            build_types: '["Debug"]'
+            link_modes: '["static"]'
+          - name: Linux Install
+            os: ubuntu-24.04
+            compiler: gcc
+            container_image: gcr.io/google.com/absl-177019/oss-linux-latest@sha256:84505366948db3ea97c71d0aa384a920e73f6994bb4194d7f80ee77979fd9d58
+            build_types: '["Release"]'
+            link_modes: '["static", "shared"]'
+            install_test: true
+          - name: macOS Xcode
+            os: macos-latest
+            build_types: '["Debug"]'
+          - name: Windows MSVC 2022
+            os: windows-2022
+            build_types: '["Debug"]'
+    uses: ./.github/workflows/cmake.yml
+    secrets:
+      GAR_SERVICE_ACCOUNT: ${{ secrets.GAR_SERVICE_ACCOUNT }}
+    with:
+      os: ${{ matrix.config.os }}
+      container_image: ${{ matrix.config.container_image || '' }}
+      compiler: ${{ matrix.config.compiler || 'gcc' }}
+      build_types: ${{ matrix.config.build_types || '["Debug", "Release"]' }}
+      link_modes: ${{ matrix.config.link_modes || '["static", "shared"]' }}
+      install_test: ${{ matrix.config.install_test || false }}
+
+  windows:
+    name: Windows ${{ matrix.config.name }} Bazel
+    strategy:
+      fail-fast: false  # Don't cancel all jobs if one fails.
+      matrix:
+        config:
+          - name: MSVC 2022
+            toolchain: windows-msvc
+          - name: ClangCL
+            toolchain: windows-clangcl
+            stds: '["c++17"]'
+            compilation_modes: '["fastbuild"]'
+    uses: ./.github/workflows/bazel.yml
+    secrets:
+      GAR_SERVICE_ACCOUNT: ${{ secrets.GAR_SERVICE_ACCOUNT }}
+    with:
+      os: windows-2022
+      toolchain: ${{ matrix.config.toolchain }}
+      remote_config: remote-cache
+      stds: ${{ matrix.config.stds || '["c++17", "c++20"]' }}
+      compilation_modes: ${{ matrix.config.compilation_modes || '["dbg", "opt"]' }}
+      absls: '[0, 1]'
+
+  macos:
+    name: macOS Xcode Bazel
+    uses: ./.github/workflows/bazel.yml
+    secrets:
+      GAR_SERVICE_ACCOUNT: ${{ secrets.GAR_SERVICE_ACCOUNT }}
+    with:
+      os: macos-latest
+      toolchain: macos
+      remote_config: remote-cache
+      stds: '["c++17"]'
+      compilation_modes: '["fastbuild"]'
+      absls: '[0, 1]'
+
+  # Provide a single predictably-named job for copybara to look for
+  all-blocking-tests:
+    name: All Blocking Tests
+    needs: [linux, cmake, windows, macos]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check for cancellations
+        if: ${{ contains(join(needs.*.result, ' '), 'cancelled') }}
+        run: echo "One or more tests were cancelled.  If this was a presubmit job cancelled by a submit job, you can ignore this." && exit 1
+      - name: Check for failures
+        if: ${{ contains(join(needs.*.result, ' '), 'failure') }}
+        run: echo "One or more tests failed.  Please check the logs above and fix the issues." && exit 1
+    # This workflow must run even if one or more of the dependent workflows
+    # failed.
+    if: always()

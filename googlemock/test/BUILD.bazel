@@ -75,6 +75,7 @@ py_test(
     ],
     tags = [
         "no_test_msvc2022",
+        "noasan",
     ],
 )
 
