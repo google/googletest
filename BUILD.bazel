@@ -87,6 +87,13 @@ config_setting(
     values = {"define": "absl=1"},
 )
 
+config_setting(
+    name = "windows_has_absl",
+    constraint_values = ["@platforms//os:windows"],
+    values = {"define": "absl=1"},
+    visibility = ["//visibility:private"],
+)
+
 # Library that defines the FRIEND_TEST macro.
 cc_library(
     name = "gtest_prod",
@@ -240,7 +247,10 @@ cc_test(
         "googletest/samples/sample7_unittest.cc",
         "googletest/samples/sample8_unittest.cc",
     ],
-    linkstatic = 0,
+    linkstatic = select({
+        ":windows_has_absl": 1,
+        "//conditions:default": 0,
+    }),
     deps = [
         "gtest_sample_lib",
         ":gtest_main",
@@ -258,5 +268,6 @@ cc_test(
     name = "sample10_unittest",
     size = "small",
     srcs = ["googletest/samples/sample10_unittest.cc"],
+    tags = ["noasan"],
     deps = [":gtest"],
 )

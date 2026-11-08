@@ -1,0 +1,268 @@
+# Copyright 2026 Google Inc.
+# All Rights Reserved.
+#
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are
+# met:
+#
+#     * Redistributions of source code must retain the above copyright
+# notice, this list of conditions and the following disclaimer.
+#     * Redistributions in binary form must reproduce the above
+# copyright notice, this list of conditions and the following disclaimer
+# in the documentation and/or other materials provided with the
+# distribution.
+#     * Neither the name of Google Inc. nor the names of its
+# contributors may be used to endorse or promote products derived from
+# this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+# OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+name: CMake Tests
+
+on:
+  workflow_call:
+    inputs:
+      os:
+        description: "GitHub Actions runner OS (e.g. ubuntu-24.04, macos-latest, windows-2022)"
+        required: true
+        type: string
+      container_image:
+        description: "Docker container image to run in (empty string for host execution)"
+        required: false
+        default: ""
+        type: string
+      compiler:
+        description: "Compiler toolchain to use on Linux (gcc or clang)"
+        required: false
+        default: "gcc"
+        type: string
+      build_types:
+        description: "JSON array of CMAKE_BUILD_TYPE values to test"
+        required: false
+        default: '["Debug", "Release"]'
+        type: string
+      link_modes:
+        description: "JSON array of link modes to test (static, shared)"
+        required: false
+        default: '["static", "shared"]'
+        type: string
+      install_test:
+        description: "Whether to run the CMake installation integration test"
+        required: false
+        default: false
+        type: boolean
+    secrets:
+      GAR_SERVICE_ACCOUNT:
+        description: "Google Cloud service account key JSON for Artifact Registry, RBE, and sccache"
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ${{ inputs.os }}
+    name: (${{ matrix.build_type }}, ${{ matrix.link_mode }})
+    container:
+      image: ${{ inputs.container_image }}
+      # core=1 skips kernel pipe core_pattern handlers (e.g. apport) on death tests.
+      options: --ulimit core=1
+      credentials:
+        # TODO(b/582433361): Switch to Workload Identity Federation to avoid the need for secrets.
+        username: _json_key
+        password: ${{ secrets.GAR_SERVICE_ACCOUNT }}
+    strategy:
+      fail-fast: false  # Don't cancel all jobs if one fails.
+      matrix:
+        build_type: ${{ fromJSON(inputs.build_types) }}
+        link_mode: ${{ fromJSON(inputs.link_modes) }}
+    defaults:
+      run:
+        shell: bash
+    env:
+      CC: ${{ startsWith(inputs.os, 'ubuntu') && (inputs.compiler == 'clang' && '/opt/llvm/bin/clang' || 'gcc') || '' }}
+      CFLAGS: ${{ startsWith(inputs.os, 'ubuntu') && format('{0}{1}', !inputs.install_test && '-Werror ' || '', inputs.compiler == 'clang' && '--gcc-toolchain=/usr/local' || '') || '' }}
+      CXX: ${{ startsWith(inputs.os, 'ubuntu') && (inputs.compiler == 'clang' && '/opt/llvm/bin/clang++' || 'g++') || '' }}
+      CXXFLAGS: ${{ startsWith(inputs.os, 'ubuntu') && format('{0}{1}', !inputs.install_test && '-Werror -Wdeprecated ' || '', inputs.compiler == 'clang' && '--gcc-toolchain=/usr/local' || '') || (!inputs.install_test && startsWith(inputs.os, 'windows') && '-WX' || '') }}
+      LDFLAGS: ${{ startsWith(inputs.os, 'ubuntu') && inputs.compiler == 'clang' && '-Wl,-rpath,/usr/local/lib64' || '' }}
+      CMAKE_BUILD_PARALLEL_LEVEL: ${{ startsWith(inputs.os, 'ubuntu') && 50 || 8 }}
+      CMAKE_C_COMPILER_LAUNCHER: ${{ startsWith(inputs.os, 'ubuntu') && 'rewrapper' || 'sccache' }}
+      CMAKE_CXX_COMPILER_LAUNCHER: ${{ startsWith(inputs.os, 'ubuntu') && 'rewrapper' || 'sccache' }}
+      CMAKE_GENERATOR: Ninja
+      CTEST_OUTPUT_ON_FAILURE: 1
+      CTEST_PARALLEL_LEVEL: 16
+      RBE_service: us-east1-remotebuildexecution.googleapis.com:443
+      RBE_instance: projects/google.com:absl-177019/instances/absl-ci-east
+      RBE_use_application_default_credentials: true
+      RBE_exec_strategy: remote
+      RBE_exec_root: ${{ github.workspace }}
+      RBE_platform: OSArch=amd64,cache-silo-key=n2-highcpu-2-2026-10-14,container-image=docker://${{ inputs.container_image }},dockerRunAsRoot=true
+      SCCACHE_GCS_BUCKET: gtest-cmake-sccache
+      SCCACHE_GCS_RW_MODE: READ_WRITE
+      SCCACHE_IDLE_TIMEOUT: 0
+      SCCACHE_IGNORE_SERVER_IO_ERROR: 1
+      SCCACHE_RECACHE: 1
+      RBE_remote_accept_cache: false
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Set up MSVC
+        if: ${{ runner.os == 'Windows' }}
+        uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
+        with:
+          arch: x64
+          vsversion: "2022"
+
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
+        with:
+          credentials_json: ${{ secrets.GAR_SERVICE_ACCOUNT }}
+
+      - name: Set up sccache
+        if: ${{ runner.os != 'Linux' }}
+        uses: mozilla-actions/sccache-action@fc920bf0ec8de6ee65d409111f7ec508035751ba # v0.0.11
+        with:
+          disable_annotations: true
+
+      - name: Start sccache
+        if: ${{ runner.os != 'Linux' }}
+        env:
+          SCCACHE_GCS_KEY_PATH: ${{ steps.auth.outputs.credentials_file_path }}
+        run: sccache --start-server
+
+      - name: Start reclient (RBE)
+        if: ${{ runner.os == 'Linux' }}
+        run: |
+          # CMake passes absolute source/include paths (${GITHUB_WORKSPACE}/...) to
+          # the compiler, so mount the remote input root at that same container path.
+          echo "RBE_platform=${RBE_platform},InputRootAbsolutePath=${GITHUB_WORKSPACE}" >> "$GITHUB_ENV"
+          bootstrap
+
+      - name: Run installation test
+        if: ${{ inputs.install_test }}
+        env:
+          BUILD_TYPE: ${{ matrix.build_type }}
+          BUILD_SHARED: ${{ matrix.link_mode == 'shared' && 'ON' || 'OFF' }}
+        run: |
+          set -euo pipefail
+          cmake -B build \
+            -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" \
+            -DCMAKE_CXX_STANDARD=17 \
+            -DBUILD_SHARED_LIBS="${BUILD_SHARED}" \
+            -DCMAKE_INSTALL_MESSAGE=LAZY \
+            -DCMAKE_JOB_POOLS="link=$(nproc)" \
+            -DCMAKE_JOB_POOL_LINK=link
+          cmake --build build
+          cmake --install build
+          ldconfig
+
+          targets_files=(/usr/local/lib*/cmake/GTest/GTestTargets.cmake)
+          if [[ ! -f "${targets_files[0]}" ]] || ! grep -q "GTest::gtest" "${targets_files[0]}"; then
+            echo "GTestTargets.cmake missing or does not define GTest::gtest" >&2
+            exit 1
+          fi
+
+          consumer_dir="$(mktemp -d)"
+          cat > "${consumer_dir}/CMakeLists.txt" << 'EOF'
+          cmake_minimum_required(VERSION 3.16)
+          project(gtest_install_consumer LANGUAGES CXX)
+          set(CMAKE_CXX_STANDARD 17)
+          set(CMAKE_CXX_STANDARD_REQUIRED ON)
+          find_package(GTest CONFIG REQUIRED)
+          add_executable(consumer consumer.cc)
+          target_link_libraries(consumer PRIVATE GTest::gtest GTest::gmock_main)
+          EOF
+
+          cat > "${consumer_dir}/consumer.cc" << 'EOF'
+          #include <gmock/gmock.h>
+          #include <gtest/gtest.h>
+
+          namespace {
+          class Foo {
+           public:
+            virtual ~Foo() = default;
+            virtual int Bar() const = 0;
+          };
+
+          class MockFoo : public Foo {
+           public:
+            MOCK_METHOD(int, Bar, (), (const, override));
+          };
+
+          TEST(InstallTest, Works) {
+            MockFoo mock;
+            EXPECT_CALL(mock, Bar()).WillOnce(::testing::Return(42));
+            EXPECT_EQ(mock.Bar(), 42);
+          }
+          }  // namespace
+          EOF
+
+          # Compile the consumer locally against /usr/local rather than on RBE workers.
+          env -u CMAKE_C_COMPILER_LAUNCHER -u CMAKE_CXX_COMPILER_LAUNCHER \
+            cmake -S "${consumer_dir}" -B "${consumer_dir}/build" \
+              -DCMAKE_BUILD_TYPE="${BUILD_TYPE}"
+          env -u CMAKE_C_COMPILER_LAUNCHER -u CMAKE_CXX_COMPILER_LAUNCHER \
+            cmake --build "${consumer_dir}/build"
+          "${consumer_dir}/build/consumer"
+
+          export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:/usr/local/lib64/pkgconfig:/usr/local/lib/x86_64-linux-gnu/pkgconfig${PKG_CONFIG_PATH:+:${PKG_CONFIG_PATH}}"
+          pkg-config --exists gtest gtest_main gmock gmock_main
+          read -r -a pc_args <<< "$(pkg-config --cflags --libs gmock_main)"
+          g++ -std=c++17 "${consumer_dir}/consumer.cc" "${pc_args[@]}" -o "${consumer_dir}/consumer_pc"
+          "${consumer_dir}/consumer_pc"
+
+      - name: Configure
+        if: ${{ !inputs.install_test }}
+        env:
+          BUILD_TYPE: ${{ matrix.build_type }}
+          BUILD_SHARED: ${{ matrix.link_mode == 'shared' && 'ON' || 'OFF' }}
+          DEBUG_FLAGS: ${{ runner.os == 'Windows' && '-O1 -Ob1 -Zc:inline' || '-g' }}
+        run: >
+          cmake -B build
+          -Dgtest_build_samples=ON
+          -Dgtest_build_tests=ON
+          -Dgmock_build_tests=ON
+          -DCMAKE_BUILD_TYPE="${BUILD_TYPE}"
+          -DCMAKE_C_FLAGS_DEBUG="${DEBUG_FLAGS}"
+          -DCMAKE_CXX_FLAGS_DEBUG="${DEBUG_FLAGS}"
+          -DCMAKE_EXE_LINKER_FLAGS_DEBUG=""
+          -DCMAKE_SHARED_LINKER_FLAGS_DEBUG=""
+          -DCMAKE_CXX_STANDARD=17
+          -DBUILD_SHARED_LIBS="${BUILD_SHARED}"
+          -DCMAKE_POLICY_DEFAULT_CMP0141=NEW
+          -DCMAKE_MSVC_DEBUG_INFORMATION_FORMAT=""
+          -DCMAKE_JOB_POOLS="link=$(nproc 2>/dev/null || sysctl -n hw.logicalcpu || echo 4)"
+          -DCMAKE_JOB_POOL_LINK=link
+
+      - name: Build
+        if: ${{ !inputs.install_test }}
+        run: cmake --build build
+
+      - name: Add DLL directory to PATH on Windows
+        if: ${{ runner.os == 'Windows' && matrix.link_mode == 'shared' }}
+        run: echo "${GITHUB_WORKSPACE}\\build\\bin" >> "$GITHUB_PATH"
+
+      - name: Run tests
+        if: ${{ !inputs.install_test }}
+        run: >
+          ctest --test-dir build
+          --repeat until-pass:3
+
+      - name: Stop reclient (RBE)
+        if: ${{ always() && runner.os == 'Linux' }}
+        run: bootstrap --shutdown
