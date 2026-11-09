@@ -396,62 +396,45 @@ class [[nodiscard]] FormatForComparison<ToPrint[N], OtherOperand> {
   }
 };
 
-// By default, print C string as pointers to be safe, as we don't know
-// whether they actually point to a NUL-terminated string.
-
-#define GTEST_IMPL_FORMAT_C_STRING_AS_POINTER_(CharType)                \
-  template <typename OtherOperand>                                      \
-  class FormatForComparison<CharType*, OtherOperand> {                  \
-   public:                                                              \
-    static ::std::string Format(CharType* value) {                      \
-      return ::testing::PrintToString(static_cast<const void*>(value)); \
-    }                                                                   \
+// Formats a C string operand. By default it's printed as a pointer, since we
+// don't know whether it points to a NUL-terminated string. But when the other
+// operand is string-like (implicitly convertible to a string_view, e.g. an STL
+// string or string_view, or a user-defined string reference type), the
+// comparison itself already treats the C string as NUL-terminated, so it's
+// equally safe to print it as a string. Pointers (e.g. another C string) are
+// also convertible to a string_view, but are compared by address, so they keep
+// printing as pointers.
+#define GTEST_IMPL_FORMAT_C_STRING_(CharType)                             \
+  template <typename OtherOperand>                                        \
+  class FormatForComparison<CharType*, OtherOperand> {                    \
+   public:                                                                \
+    static ::std::string Format(CharType* value) {                        \
+      if constexpr (::std::is_convertible_v<                              \
+                        const OtherOperand&,                              \
+                        ::std::basic_string_view<                         \
+                            ::std::remove_const_t<CharType>>> &&          \
+                    !::std::is_pointer_v<::std::decay_t<OtherOperand>>) { \
+        return ::testing::PrintToString(value);                           \
+      } else {                                                            \
+        return ::testing::PrintToString(static_cast<const void*>(value)); \
+      }                                                                   \
+    }                                                                     \
   }
 
-GTEST_IMPL_FORMAT_C_STRING_AS_POINTER_(char);
-GTEST_IMPL_FORMAT_C_STRING_AS_POINTER_(const char);
-GTEST_IMPL_FORMAT_C_STRING_AS_POINTER_(wchar_t);
-GTEST_IMPL_FORMAT_C_STRING_AS_POINTER_(const wchar_t);
+GTEST_IMPL_FORMAT_C_STRING_(char);
+GTEST_IMPL_FORMAT_C_STRING_(const char);
+GTEST_IMPL_FORMAT_C_STRING_(wchar_t);
+GTEST_IMPL_FORMAT_C_STRING_(const wchar_t);
 #ifdef __cpp_lib_char8_t
-GTEST_IMPL_FORMAT_C_STRING_AS_POINTER_(char8_t);
-GTEST_IMPL_FORMAT_C_STRING_AS_POINTER_(const char8_t);
+GTEST_IMPL_FORMAT_C_STRING_(char8_t);
+GTEST_IMPL_FORMAT_C_STRING_(const char8_t);
 #endif
-GTEST_IMPL_FORMAT_C_STRING_AS_POINTER_(char16_t);
-GTEST_IMPL_FORMAT_C_STRING_AS_POINTER_(const char16_t);
-GTEST_IMPL_FORMAT_C_STRING_AS_POINTER_(char32_t);
-GTEST_IMPL_FORMAT_C_STRING_AS_POINTER_(const char32_t);
+GTEST_IMPL_FORMAT_C_STRING_(char16_t);
+GTEST_IMPL_FORMAT_C_STRING_(const char16_t);
+GTEST_IMPL_FORMAT_C_STRING_(char32_t);
+GTEST_IMPL_FORMAT_C_STRING_(const char32_t);
 
-#undef GTEST_IMPL_FORMAT_C_STRING_AS_POINTER_
-
-// If a C string is compared with an STL string object, we know it's meant
-// to point to a NUL-terminated string, and thus can print it as a string.
-
-#define GTEST_IMPL_FORMAT_C_STRING_AS_STRING_(CharType, OtherStringType) \
-  template <>                                                            \
-  class FormatForComparison<CharType*, OtherStringType> {                \
-   public:                                                               \
-    static ::std::string Format(CharType* value) {                       \
-      return ::testing::PrintToString(value);                            \
-    }                                                                    \
-  }
-
-GTEST_IMPL_FORMAT_C_STRING_AS_STRING_(char, ::std::string);
-GTEST_IMPL_FORMAT_C_STRING_AS_STRING_(const char, ::std::string);
-#ifdef __cpp_lib_char8_t
-GTEST_IMPL_FORMAT_C_STRING_AS_STRING_(char8_t, ::std::u8string);
-GTEST_IMPL_FORMAT_C_STRING_AS_STRING_(const char8_t, ::std::u8string);
-#endif
-GTEST_IMPL_FORMAT_C_STRING_AS_STRING_(char16_t, ::std::u16string);
-GTEST_IMPL_FORMAT_C_STRING_AS_STRING_(const char16_t, ::std::u16string);
-GTEST_IMPL_FORMAT_C_STRING_AS_STRING_(char32_t, ::std::u32string);
-GTEST_IMPL_FORMAT_C_STRING_AS_STRING_(const char32_t, ::std::u32string);
-
-#if GTEST_HAS_STD_WSTRING
-GTEST_IMPL_FORMAT_C_STRING_AS_STRING_(wchar_t, ::std::wstring);
-GTEST_IMPL_FORMAT_C_STRING_AS_STRING_(const wchar_t, ::std::wstring);
-#endif
-
-#undef GTEST_IMPL_FORMAT_C_STRING_AS_STRING_
+#undef GTEST_IMPL_FORMAT_C_STRING_
 
 // Formats a comparison assertion (e.g. ASSERT_EQ, EXPECT_LT, and etc)
 // operand to be used in a failure message.  The type (but not value)

@@ -1596,6 +1596,74 @@ TEST(FormatForComparisonFailureMessageTest, WorksForWCharPointerVsStdWString) {
 }
 #endif
 
+struct CustomStringViewLike {
+  operator ::std::string_view() const {  // NOLINT(google-explicit-constructor)
+    return "hello";
+  }
+};
+
+TEST(FormatForComparisonFailureMessageTest, WorksForCharPointerVsStringView) {
+  const char* s = "hello \"world";
+  EXPECT_STREQ(
+      "\"hello \\\"world\"",  // The string content should be escaped.
+      FormatForComparisonFailureMessage(s, ::std::string_view()).c_str());
+
+  // char*
+  char str[] = "hi\1";
+  char* p = str;
+  EXPECT_STREQ(
+      "\"hi\\x1\"",  // The string content should be escaped.
+      FormatForComparisonFailureMessage(p, ::std::string_view()).c_str());
+
+  EXPECT_STREQ(
+      "\"hi\\x1\"",
+      FormatForComparisonFailureMessage(p, CustomStringViewLike()).c_str());
+}
+
+#if GTEST_HAS_STD_WSTRING
+struct CustomWStringViewLike {
+  operator ::std::wstring_view() const {  // NOLINT(google-explicit-constructor)
+    return L"hello";
+  }
+};
+
+TEST(FormatForComparisonFailureMessageTest, WorksForWCharPointerVsWStringView) {
+  const wchar_t* s = L"hi \"world";
+  EXPECT_STREQ(
+      "L\"hi \\\"world\"",  // The string content should be escaped.
+      FormatForComparisonFailureMessage(s, ::std::wstring_view()).c_str());
+
+  // wchar_t*
+  wchar_t str[] = L"hi\1";
+  wchar_t* p = str;
+  EXPECT_STREQ(
+      "L\"hi\\x1\"",  // The string content should be escaped.
+      FormatForComparisonFailureMessage(p, ::std::wstring_view()).c_str());
+
+  EXPECT_STREQ(
+      "L\"hi\\x1\"",
+      FormatForComparisonFailureMessage(p, CustomWStringViewLike()).c_str());
+}
+#endif
+
+TEST(FormatForComparisonFailureMessageTest,
+     WorksForChar16And32PointerVsStringView) {
+  const char16_t* s16 = u"hi";
+  EXPECT_STREQ(
+      "u\"hi\"",
+      FormatForComparisonFailureMessage(s16, ::std::u16string_view()).c_str());
+  const char32_t* s32 = U"hi";
+  EXPECT_STREQ(
+      "U\"hi\"",
+      FormatForComparisonFailureMessage(s32, ::std::u32string_view()).c_str());
+}
+
+TEST(FormatForComparisonFailureMessageTest, WorksForCharPointerVsCharPointer) {
+  const char* s = "hi";
+  // Compared by address, so printed as a pointer.
+  EXPECT_EQ(PrintPointer(s), FormatForComparisonFailureMessage(s, s));
+}
+
 // Tests formatting a char array when it's compared with a pointer or array.
 // In this case we want to print the array as a row pointer, as the comparison
 // is by pointer.
