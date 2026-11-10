@@ -1,0 +1,101 @@
+# Copyright 2026 Google Inc.
+# All Rights Reserved.
+#
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are
+# met:
+#
+#     * Redistributions of source code must retain the above copyright
+# notice, this list of conditions and the following disclaimer.
+#     * Redistributions in binary form must reproduce the above
+# copyright notice, this list of conditions and the following disclaimer
+# in the documentation and/or other materials provided with the
+# distribution.
+#     * Neither the name of Google Inc. nor the names of its
+# contributors may be used to endorse or promote products derived from
+# this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+# OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+common:ci --show_timestamps
+
+# Retry longer to avoid flakes when fetching external dependencies.
+common:ci --http_connector_attempts=10
+common:ci --http_timeout_scaling=2.0
+
+test:ci --keep_going
+test:ci --test_output=errors
+
+# Configure our Linux Docker toolchain setup.
+common:ci --extra_toolchains=@docker_toolchain//:all
+build:linux --cxxopt=-std=c++17 --host_cxxopt=-std=c++17
+build:linux --copt=-Wall
+build:linux --copt=-Werror
+build:linux --copt=-Wuninitialized
+build:linux --copt=-Wundef
+build:linux --features=external_include_paths
+build:linux --per_file_copt=external/.*@-w
+build:linux --host_per_file_copt=external/.*@-w
+
+# Configure our Windows MSVC setup.
+common:windows-msvc --enable_runfiles
+# Create runfiles after prefetching remote-cached inputs (bazelbuild/bazel#31426).
+build:windows-msvc --nobuild_runfile_links
+build:windows-msvc --cxxopt=/std:c++17 --host_cxxopt=/std:c++17
+build:windows-msvc --copt=/WX
+build:windows-msvc --per_file_copt=external/.*@/w,/O1
+build:windows-msvc --host_per_file_copt=external/.*@/w,/O1
+test:windows-msvc --test_tag_filters=-no_test_msvc2022
+
+# Configure our macOS Xcode setup.
+build:macos --cxxopt=-std=c++17 --host_cxxopt=-std=c++17
+build:macos --copt=-Wall
+build:macos --copt=-Werror
+build:macos --copt=-Wundef
+build:macos --features=external_include_paths
+build:macos --per_file_copt=external/.*@-w
+build:macos --host_per_file_copt=external/.*@-w
+
+build:gcc --config=linux --platforms=//ci:linux_gcc
+build:gcc-floor --config=gcc --copt=-Wno-error=pragmas
+build:libstdc++ --config=linux --platforms=//ci:linux_clang --conlyopt=-Wno-unused-command-line-argument --features=libstdc++
+
+# Remote build configuration for CI.
+build:remote-cache --remote_cache=https://storage.googleapis.com/gtest-bazel-remote-cache
+build:remote-cache --remote_download_minimal
+# Retry up for up to 15 minutes under heavy load (exponential backoff).
+build:remote-cache --remote_retries=20 --remote_retry_max_delay=60s
+# Use more parallel jobs for remote cache lookups and tests.
+build:remote-cache --jobs=HOST_CPUS*4
+
+# Apply Bazel 9.3+ settings (such as --remote_grpc_service_config and test
+# toolchain compatibility) when running on Bazel 9.3+.
+try-import-if-bazel-version >=9.3.0 %workspace%/ci/bazel9.bazelrc
+
+build:remote --define=EXECUTOR=remote
+build:remote --jobs=50
+build:remote --remote_download_minimal
+# Retry up for up to 15 minutes under heavy load (exponential backoff).
+build:remote --remote_retries=20 --remote_retry_max_delay=60s
+build:remote --extra_execution_platforms=//ci:rbe
+build:remote --host_platform=//ci:rbe
+build:remote --platforms=//ci:rbe
+build:remote --remote_cache=grpcs://us-east1-remotebuildexecution.googleapis.com
+build:remote --remote_executor=grpcs://us-east1-remotebuildexecution.googleapis.com
+build:remote --remote_instance_name=projects/google.com:absl-177019/instances/absl-ci-east
+
+build:remote-floor --config=remote
+build:remote-floor --extra_execution_platforms=//ci:rbe-floor
+build:remote-floor --host_platform=//ci:rbe-floor
+build:remote-floor --platforms=//ci:rbe-floor

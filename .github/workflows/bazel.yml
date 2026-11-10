@@ -1,0 +1,148 @@
+# Copyright 2026 Google Inc.
+# All Rights Reserved.
+#
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are
+# met:
+#
+#     * Redistributions of source code must retain the above copyright
+# notice, this list of conditions and the following disclaimer.
+#     * Redistributions in binary form must reproduce the above
+# copyright notice, this list of conditions and the following disclaimer
+# in the documentation and/or other materials provided with the
+# distribution.
+#     * Neither the name of Google Inc. nor the names of its
+# contributors may be used to endorse or promote products derived from
+# this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+# OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+name: Bazel Tests
+
+on:
+  workflow_call:
+    inputs:
+      os:
+        description: "GitHub Actions runner OS (e.g. ubuntu-24.04, macos-latest, windows-2022)"
+        required: true
+        type: string
+      toolchain:
+        description: "Bazel toolchain config (--config=<toolchain>)"
+        required: true
+        type: string
+      remote_config:
+        description: "Bazel remote config (--config=<remote_config>)"
+        required: false
+        default: "remote"
+        type: string
+      container_image:
+        description: "Docker container image to run in (empty string or 'none' for host execution)"
+        required: false
+        default: ""
+        type: string
+      bazel_version:
+        description: "Bazel version for Bazelisk (e.g. 9.x, 8.x)"
+        required: false
+        default: "9.x"
+        type: string
+      extra_bazel_args:
+        description: "Additional arguments passed to bazel test"
+        required: false
+        default: ""
+        type: string
+      stds:
+        description: "JSON array of C++ standards to test"
+        required: false
+        default: '["c++17", "c++20", "c++23"]'
+        type: string
+      compilation_mode:
+        description: "Bazel compilation mode (--compilation_mode=<mode>)"
+        required: false
+        default: "fastbuild"
+        type: string
+      absls:
+        description: "JSON array of absl flag values to test (0, 1)"
+        required: false
+        default: '[0, 1]'
+        type: string
+    secrets:
+      GAR_SERVICE_ACCOUNT:
+        description: "Google Cloud service account key JSON for Artifact Registry and remote cache/RBE"
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ${{ inputs.os }}
+    name: (${{ matrix.std }}, absl=${{ matrix.absl }})
+    container:
+      image: ${{ inputs.container_image != 'none' && inputs.container_image || '' }}
+      credentials:
+        # TODO(b/582433361): Switch to Workload Identity Federation to avoid the need for secrets.
+        username: _json_key
+        password: ${{ secrets.GAR_SERVICE_ACCOUNT }}
+    strategy:
+      fail-fast: false  # Don't cancel all jobs if one fails.
+      matrix:
+        std: ${{ fromJSON(inputs.stds) }}
+        absl: ${{ fromJSON(inputs.absls) }}
+    defaults:
+      run:
+        shell: bash
+    env:
+      MSYS2_ARG_CONV_EXCL: "*"
+      USE_BAZEL_VERSION: ${{ inputs.bazel_version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Setup continuous run
+        if: ${{ github.event_name == 'schedule' }}
+        # Force tests to run on scheduled runs.
+        run: echo "SCHEDULE_BAZEL_ARGS=--cache_test_results=no" >> "$GITHUB_ENV"
+
+      - name: Set up Bazel and caches
+        uses: bazel-contrib/setup-bazel@c5acdfb288317d0b5c0bbd7a396a3dc868bb0f86 # 0.19.0
+        with:
+          cache-save: true
+          bazelisk-cache: true
+          external-cache: true
+          repository-cache: true
+          google-credentials: ${{ secrets.GAR_SERVICE_ACCOUNT }}
+          bazelrc: common --config=${{ inputs.remote_config }} --config=ci
+
+      - name: Fetch all external dependencies
+        if: ${{ !contains(inputs.extra_bazel_args, '--enable_bzlmod=false') }}
+        run: bazel fetch //... --define=absl=1
+
+      - name: Run tests
+        env:
+          BAZEL_TOOLCHAIN: ${{ inputs.toolchain }}
+          CXXOPT_STD: ${{ startsWith(inputs.os, 'windows') && '/std:' || '-std=' }}${{ matrix.std }}
+          COMPILATION_MODE: ${{ inputs.compilation_mode }}
+          ABSL_ENABLED: ${{ matrix.absl }}
+          EXTRA_BAZEL_ARGS: ${{ inputs.extra_bazel_args }}
+        run: >
+          bazel test ...
+          "--config=${BAZEL_TOOLCHAIN}"
+          "--cxxopt=${CXXOPT_STD}"
+          "--host_cxxopt=${CXXOPT_STD}"
+          "--compilation_mode=${COMPILATION_MODE}"
+          "--define=absl=${ABSL_ENABLED}"
+          ${EXTRA_BAZEL_ARGS}
+          ${SCHEDULE_BAZEL_ARGS}

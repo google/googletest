@@ -1,0 +1,8 @@
+{
+  "methodConfig": [
+    {
+      "name": [{}],
+      "timeout": "60s"
+    }
+  ]
+}

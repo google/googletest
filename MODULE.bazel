@@ -41,7 +41,7 @@ module(
 
 bazel_dep(
     name = "abseil-cpp",
-    version = "20260526.0",
+    version = "20260817.0",
 )
 bazel_dep(
     name = "platforms",
@@ -78,3 +78,13 @@ python.toolchain(
 fuchsia_sdk = use_extension("//:fake_fuchsia_sdk.bzl", "fuchsia_sdk")
 fuchsia_sdk.create_fake()
 use_repo(fuchsia_sdk, "fuchsia_sdk")
+
+bazel_dep(
+    name = "docker_toolchain",
+    version = "0.1",
+    dev_dependency = True,
+)
+local_path_override(
+    module_name = "docker_toolchain",
+    path = "ci/docker_toolchain",
+)
