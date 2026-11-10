@@ -95,6 +95,32 @@ jobs:
       stds: ${{ matrix.config.stds || '["c++17", "c++20", "c++23"]' }}
       absls: ${{ matrix.config.absls || '[0, 1]' }}
 
+  cmake:
+    name: ${{ matrix.config.name }} CMake
+    strategy:
+      fail-fast: false  # Don't cancel all jobs if one fails.
+      matrix:
+        config:
+          - name: Linux GCC/libstdc++
+            os: ubuntu-24.04
+            compiler: gcc
+            container_image: gcr.io/google.com/absl-177019/oss-linux-latest@sha256:84505366948db3ea97c71d0aa384a920e73f6994bb4194d7f80ee77979fd9d58
+          - name: Linux Clang/libstdc++
+            os: ubuntu-24.04
+            compiler: clang
+            container_image: gcr.io/google.com/absl-177019/oss-linux-latest@sha256:84505366948db3ea97c71d0aa384a920e73f6994bb4194d7f80ee77979fd9d58
+          - name: macOS Xcode
+            os: macos-latest
+          - name: Windows MSVC 2022
+            os: windows-2022
+    uses: ./.github/workflows/cmake.yml
+    secrets:
+      GAR_SERVICE_ACCOUNT: ${{ secrets.GAR_SERVICE_ACCOUNT }}
+    with:
+      os: ${{ matrix.config.os }}
+      container_image: ${{ matrix.config.container_image || '' }}
+      compiler: ${{ matrix.config.compiler || 'gcc' }}
+
   windows:
     name: Windows MSVC 2022 Bazel
     uses: ./.github/workflows/bazel.yml
@@ -123,7 +149,7 @@ jobs:
   # Provide a single predictably-named job for copybara to look for
   all-blocking-tests:
     name: All Blocking Tests
-    needs: [linux, windows, macos]
+    needs: [linux, cmake, windows, macos]
     runs-on: ubuntu-24.04
     steps:
       - name: Check for cancellations
