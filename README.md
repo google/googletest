@@ -20,7 +20,11 @@ The 1.18.x branch
 
 We use Google's internal systems for continuous integration.
 
-#### Coming Soon
+#### Abseil Support
+
+The default CMake build does not require Abseil or RE2. To opt in to the
+integration, make both libraries available to CMake and configure GoogleTest
+with `-DGTEST_HAS_ABSL=ON`.
 
 *   We are planning to take a dependency on
     [Abseil](https://github.com/abseil/abseil-cpp).
