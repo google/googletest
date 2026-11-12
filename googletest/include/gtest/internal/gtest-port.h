@@ -676,7 +676,7 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 #if defined(GTEST_OS_WINDOWS_MOBILE) || defined(GTEST_OS_WINDOWS_PHONE) || \
     defined(GTEST_OS_WINDOWS_RT) || defined(GTEST_OS_WINDOWS_GAMES) ||     \
     defined(GTEST_OS_ESP8266) || defined(GTEST_OS_XTENSA) ||               \
-    defined(GTEST_OS_QURT) || !GTEST_HAS_FILE_SYSTEM
+    defined(GTEST_OS_QURT) || defined(__wasi__) || !GTEST_HAS_FILE_SYSTEM
 #define GTEST_HAS_STREAM_REDIRECTION 0
 #else
 #define GTEST_HAS_STREAM_REDIRECTION 1
