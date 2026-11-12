@@ -33,4 +33,4 @@
 # test toolchain resolution.
 build --@bazel_tools//tools/test:incompatible_use_default_test_toolchain=false
 
-build:remote --remote_grpc_service_config=ci/rbe_grpc_service_config.json
+build:remote-base --remote_grpc_service_config=ci/rbe_grpc_service_config.json
