@@ -2123,16 +2123,16 @@ class GTEST_API_ [[nodiscard]] ScopedTrace {
 //
 // The message argument can be anything streamable to std::ostream.
 //
-// In the implementation, we include the current line number as part
-// of the dummy variable name, thus allowing multiple SCOPED_TRACE()s
-// to appear in the same block - as long as they are on different
-// lines.
+// In the implementation, we generate a unique dummy variable name using
+// GTEST_UNIQUE_IDENTIFIER_, thus allowing multiple SCOPED_TRACE()s
+// to appear in the same block or on the same line without variable
+// redefinition or -Wshadow warnings.
 //
 // Assuming that each thread maintains its own stack of traces.
 // Therefore, a SCOPED_TRACE() would (correctly) only affect the
 // assertions in its own thread.
 #define SCOPED_TRACE(message)                                               \
-  const ::testing::ScopedTrace GTEST_CONCAT_TOKEN_(gtest_trace_, __LINE__)( \
+  const ::testing::ScopedTrace GTEST_UNIQUE_IDENTIFIER_(gtest_trace_)( \
       __FILE__, __LINE__, (message))
 
 // Compile-time assertion for type equality.

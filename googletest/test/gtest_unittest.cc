@@ -7794,3 +7794,9 @@ TEST(PatternGlobbingTest, MatchesFilterEdgeCases) {
   EXPECT_FALSE(testing::internal::UnitTestOptions::MatchesFilter("a", ""));
   EXPECT_TRUE(testing::internal::UnitTestOptions::MatchesFilter("", ""));
 }
+
+// Tests that multiple SCOPED_TRACE invocations on the same line compile
+// without variable redefinition or -Wshadow warnings (Issue #5143).
+TEST(ScopedTraceTest, CompilesMultipleTracesOnSameLine) {
+  SCOPED_TRACE("first"); SCOPED_TRACE("second");
+}
