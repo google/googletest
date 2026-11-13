@@ -666,6 +666,11 @@ for (int i = n; i > 0; i--) {
 }
 ```
 
+Notice that the loop counts down backwards from `n` to `1`. Since gMock searches
+expectations in reverse order of definition, the expectation defined last
+(where `i = 1`, returning 10) matches the first call, saturates, and retires,
+allowing the next call to match `i = 2`, and so forth.
+
 And, there's a better way to do it: in this case, we expect the calls to occur
 in a specific order, and we line up the actions to match the order. Since the
 order is important here, we should make it explicit using a sequence:
