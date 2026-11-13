@@ -474,9 +474,9 @@ NOTE: `ParseGUnitFlags()` is deprecated in favor of `InitGoogleTest()`.
 ## Known Limitations
 
 *   Google Test is designed to be thread-safe. The implementation is thread-safe
-    on systems where the `pthreads` library is available. It is currently
-    *unsafe* to use Google Test assertions from two threads concurrently on
-    other systems (e.g. Windows). In most tests this is not an issue as usually
-    the assertions are done in the main thread. If you want to help, you can
-    volunteer to implement the necessary synchronization primitives in
+    on systems where the `pthreads` library is available and on desktop
+    Windows. It is currently *unsafe* to use Google Test assertions from two
+    threads concurrently on other systems. In most tests this is not an issue as
+    usually the assertions are done in the main thread. If you want to help, you
+    can volunteer to implement the necessary synchronization primitives in
     `gtest-port.h` for your platform.
