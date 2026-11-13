@@ -2427,6 +2427,40 @@ exception is thrown. To achieve that, set the `GTEST_CATCH_EXCEPTIONS`
 environment variable to `0`, or use the `--gtest_catch_exceptions=0` flag when
 running the tests.
 
+#### Customizing Stack Traces in Failure Messages
+
+Failure messages include an OS stack trace. To change how the trace is collected,
+implement `testing::OsStackTraceGetterInterface`, which is declared in
+`gtest/gtest-os-stack-trace.h`, and install it with
+`UnitTest::set_os_stack_trace_getter()` before running the tests:
+
+```cpp
+#include "gtest/gtest.h"
+
+class MyStackTraceGetter : public testing::OsStackTraceGetterInterface {
+ public:
+  std::string CurrentStackTrace(int /*max_depth*/,
+                                int /*skip_count*/) override {
+    return "my stack trace\n";
+  }
+  void UponLeavingGTest() override {}
+};
+
+int main(int argc, char** argv) {
+  testing::InitGoogleTest(&argc, argv);
+  testing::UnitTest::GetInstance()->set_os_stack_trace_getter(
+      new MyStackTraceGetter);
+  return RUN_ALL_TESTS();
+}
+```
+
+`UnitTest` takes ownership of the getter. Passing `nullptr` restores the default
+getter.
+
+Google Test does not synchronize access to the getter. Only replace it from the
+main thread while no other thread can report a test failure, and never from
+inside the getter's own methods.
+
 ### Sanitizer Integration
 
 The
