@@ -301,6 +301,8 @@ void UnorderedElementsAreMatcherImplBase::DescribeToImpl(
     case UnorderedMatcherRequire::Subset:
       *os << "an injection from elements to requirements exists such that:\n";
       break;
+    default:
+      break;
   }
 
   const char* sep = "";
@@ -342,6 +344,8 @@ void UnorderedElementsAreMatcherImplBase::DescribeNegationToImpl(
       break;
     case UnorderedMatcherRequire::Subset:
       *os << "no injection from elements to requirements exists such that:\n";
+      break;
+    default:
       break;
   }
   const char* sep = "";
