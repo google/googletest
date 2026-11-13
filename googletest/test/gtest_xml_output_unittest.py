@@ -67,7 +67,7 @@ else:
   sys.argv.remove(NO_STACKTRACE_SUPPORT_FLAG)
 
 EXPECTED_NON_EMPTY_XML = """<?xml version="1.0" encoding="UTF-8"?>
-<testsuites tests="28" failures="5" disabled="2" errors="0" time="*" timestamp="*" name="AllTests">
+<testsuites tests="29" failures="5" disabled="2" errors="0" time="*" timestamp="*" name="AllTests">
   <properties>
     <property name="ad_hoc_property" value="42"/>
   </properties>
@@ -220,6 +220,13 @@ Expected equality of these values:
   </testsuite>
   <testsuite name="Single/TypeParameterizedTestSuite/1" tests="1" failures="0" disabled="0" skipped="0" errors="0" time="*" timestamp="*">
     <testcase name="HasTypeParamAttribute" file="gtest_xml_output_unittest_.cc" line="200" type_param="*" status="run" result="completed" time="*" timestamp="*" classname="Single/TypeParameterizedTestSuite/1" />
+  </testsuite>
+  <testsuite name="JsonPropertyKeyTest" tests="1" failures="0" disabled="0" skipped="0" errors="0" time="*" timestamp="*">
+    <testcase name="QuoteInKey" file="gtest_xml_output_unittest_.cc" line="209" status="run" result="completed" time="*" timestamp="*" classname="JsonPropertyKeyTest">
+      <properties>
+        <property name="key&quot;quoted" value="value"/>
+      </properties>
+    </testcase>
   </testsuite>
 </testsuites>""" % {
     'stack': STACK_TRACE_TEMPLATE,
