@@ -202,6 +202,11 @@ if (gmock_build_tests)
   ############################################################
   # Python tests.
 
+  # Python is found in googletest's directory scope, which does not propagate
+  # to this parent scope, and the imported Python3::Interpreter target used by
+  # py_test() is directory-scoped as well, so the search is repeated here.
+  find_package(Python3 COMPONENTS Interpreter QUIET)
+
   cxx_executable(gmock_leak_test_ test gmock_main)
   py_test(gmock_leak_test)
 
