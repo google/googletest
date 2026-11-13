@@ -260,6 +260,7 @@ if (gtest_build_tests)
 
   py_test(gtest_skip_check_output_test)
   py_test(gtest_skip_environment_check_output_test)
+  py_test(gtest_test_utils_test)
 
   cxx_executable_with_flags(
     googletest-catch-exceptions-no-ex-test_
