@@ -798,7 +798,16 @@ void PrintSmartPointer(const Ptr& ptr, std::ostream* os, int) {
 
 template <typename T, typename D>
 void PrintTo(const std::unique_ptr<T, D>& ptr, std::ostream* os) {
-  (PrintSmartPointer<T>)(ptr, os, 0);
+  using Pointer = typename std::unique_ptr<T, D>::pointer;
+  if constexpr (std::is_pointer_v<Pointer>) {
+    (PrintSmartPointer<T>)(ptr, os, 0);
+  } else if (ptr == nullptr) {
+    *os << "(nullptr)";
+  } else {
+    *os << "(ptr = ";
+    UniversalPrinter<Pointer>::Print(ptr.get(), os);
+    *os << ")";
+  }
 }
 
 template <typename T>
