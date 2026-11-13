@@ -1855,6 +1855,11 @@ For example:
     everything in test suite `FooTest` except `FooTest.Bar` and everything in
     test suite `BarTest` except `BarTest.Foo`.
 
+Use `--sourceFileFilter` to select tests by the source file that defines them.
+The pattern is matched against the recorded source path and supports `*` and
+`?` wildcards. It can be combined with `--gtest_filter`, for example
+`./foo_test --sourceFileFilter '*foo_test.cc' --gtest_filter='*Null*'`.
+
 #### Stop test execution upon first failure
 
 By default, a GoogleTest program runs all tests the user has defined. In some
