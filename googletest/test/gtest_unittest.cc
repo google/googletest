@@ -447,8 +447,9 @@ TEST(FormatTimeInMillisAsSecondsTest, FormatsNegativeNumber) {
 // for particular dates below was verified in Python using
 // datetime.datetime.fromutctimestamp(<timestamp>/1000).
 
-// FormatEpochTimeInMillisAsIso8601 depends on the local timezone, so we
-// have to set up a particular timezone to obtain predictable results.
+// FormatEpochTimeInMillisAsIso8601 emits the time in UTC (suffixed with 'Z'),
+// so its output is independent of the local timezone.  We still set a fixed
+// timezone here to confirm the result stays in UTC regardless of it.
 class FormatEpochTimeInMillisAsIso8601Test : public Test {
  public:
   // On Cygwin, GCC doesn't allow unqualified integer literals to exceed
@@ -471,6 +472,7 @@ class FormatEpochTimeInMillisAsIso8601Test : public Test {
     SetTimeZone("UTC+00");
   }
 
+ protected:
   void TearDown() override {
     SetTimeZone(saved_tz_ != nullptr ? saved_tz_->c_str() : nullptr);
     saved_tz_.reset();
@@ -513,27 +515,35 @@ class FormatEpochTimeInMillisAsIso8601Test : public Test {
 const TimeInMillis FormatEpochTimeInMillisAsIso8601Test::kMillisPerSec;
 
 TEST_F(FormatEpochTimeInMillisAsIso8601Test, PrintsTwoDigitSegments) {
-  EXPECT_EQ("2011-10-31T18:52:42.000",
+  EXPECT_EQ("2011-10-31T18:52:42.000Z",
             FormatEpochTimeInMillisAsIso8601(1320087162 * kMillisPerSec));
 }
 
 TEST_F(FormatEpochTimeInMillisAsIso8601Test, IncludesMillisecondsAfterDot) {
-  EXPECT_EQ("2011-10-31T18:52:42.234",
+  EXPECT_EQ("2011-10-31T18:52:42.234Z",
             FormatEpochTimeInMillisAsIso8601(1320087162 * kMillisPerSec + 234));
 }
 
 TEST_F(FormatEpochTimeInMillisAsIso8601Test, PrintsLeadingZeroes) {
-  EXPECT_EQ("2011-09-03T05:07:02.000",
+  EXPECT_EQ("2011-09-03T05:07:02.000Z",
             FormatEpochTimeInMillisAsIso8601(1315026422 * kMillisPerSec));
 }
 
 TEST_F(FormatEpochTimeInMillisAsIso8601Test, Prints24HourTime) {
-  EXPECT_EQ("2011-09-28T17:08:22.000",
+  EXPECT_EQ("2011-09-28T17:08:22.000Z",
             FormatEpochTimeInMillisAsIso8601(1317229702 * kMillisPerSec));
 }
 
 TEST_F(FormatEpochTimeInMillisAsIso8601Test, PrintsEpochStart) {
-  EXPECT_EQ("1970-01-01T00:00:00.000", FormatEpochTimeInMillisAsIso8601(0));
+  EXPECT_EQ("1970-01-01T00:00:00.000Z", FormatEpochTimeInMillisAsIso8601(0));
+}
+
+TEST_F(FormatEpochTimeInMillisAsIso8601Test, IsTimezoneIndependent) {
+  // The emitted instant is UTC, so it must not change with the local zone.
+  // POSIX TZ offsets are inverted, so "UTC+05" is five hours behind UTC.
+  SetTimeZone("UTC+05");
+  EXPECT_EQ("2011-10-31T18:52:42.000Z",
+            FormatEpochTimeInMillisAsIso8601(1320087162 * kMillisPerSec));
 }
 
 #endif  // __EMSCRIPTEN__

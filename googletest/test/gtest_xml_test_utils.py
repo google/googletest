@@ -214,7 +214,7 @@ class GTestXMLTestCase(gtest_test_utils.TestCase):
     if element.tagName in ('testsuites', 'testsuite', 'testcase'):
       timestamp = element.getAttributeNode('timestamp')
       timestamp.value = re.sub(
-          r'^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d\d\d$', '*', timestamp.value
+          r'^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d\d\dZ$', '*', timestamp.value
       )
     if element.tagName in ('testsuites', 'testsuite', 'testcase'):
       time = element.getAttributeNode('time')
