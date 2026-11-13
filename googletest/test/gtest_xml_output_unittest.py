@@ -67,7 +67,7 @@ else:
   sys.argv.remove(NO_STACKTRACE_SUPPORT_FLAG)
 
 EXPECTED_NON_EMPTY_XML = """<?xml version="1.0" encoding="UTF-8"?>
-<testsuites tests="28" failures="5" disabled="2" errors="0" time="*" timestamp="*" name="AllTests">
+<testsuites tests="30" failures="7" disabled="2" errors="0" time="*" timestamp="*" name="AllTests">
   <properties>
     <property name="ad_hoc_property" value="42"/>
   </properties>
@@ -182,7 +182,7 @@ It is good practice to tell why you skip a test.
        </properties>
      </testcase>
   </testsuite>
-  <testsuite name="SetupFailTest" tests="1" failures="0" disabled="0" skipped="1" errors="0" time="*" timestamp="*">
+  <testsuite name="SetupFailTest" tests="2" failures="1" disabled="0" skipped="1" errors="0" time="*" timestamp="*">
     <testcase name="NoopPassingTest" file="gtest_xml_output_unittest_.cc" line="172" status="run" result="skipped" time="*" timestamp="*" classname="SetupFailTest">
       <skipped message="gtest_xml_output_unittest_.cc:*&#x0A;"><![CDATA[gtest_xml_output_unittest_.cc:*
 ]]></skipped>
@@ -194,7 +194,7 @@ Expected equality of these values:
   2%(stack)s]]></failure>
     </testcase>
   </testsuite>
-  <testsuite name="TearDownFailTest" tests="1" failures="0" disabled="0" skipped="0" errors="0" time="*" timestamp="*">
+  <testsuite name="TearDownFailTest" tests="2" failures="1" disabled="0" skipped="0" errors="0" time="*" timestamp="*">
     <testcase name="NoopPassingTest" file="gtest_xml_output_unittest_.cc" line="179" status="run" result="completed" time="*" timestamp="*" classname="TearDownFailTest"/>
     <testcase name="" status="run" result="completed" classname="" time="*" timestamp="*">
       <failure message="gtest_xml_output_unittest_.cc:*&#x0A;Expected equality of these values:&#x0A;  1&#x0A;  2%(stack_entity)s" type=""><![CDATA[gtest_xml_output_unittest_.cc:*
@@ -264,7 +264,7 @@ EXPECTED_SHARDED_TEST_XML = """<?xml version="1.0" encoding="UTF-8"?>
 </testsuites>"""
 
 EXPECTED_NO_TEST_XML = """<?xml version="1.0" encoding="UTF-8"?>
-<testsuites tests="0" failures="0" disabled="0" errors="0" time="*"
+<testsuites tests="1" failures="1" disabled="0" errors="0" time="*"
             timestamp="*" name="AllTests">
   <testsuite name="NonTestSuiteFailure" tests="1" failures="1" disabled="0" skipped="0" errors="0" time="*" timestamp="*">
     <testcase name="" status="run" result="completed" time="*" timestamp="*" classname="">
