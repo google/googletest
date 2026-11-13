@@ -457,7 +457,7 @@ int main(int argc, char **argv) {
 The `testing::InitGoogleTest()` function parses the command line for GoogleTest
 flags, and removes all recognized flags. This allows the user to control a test
 program's behavior via various flags, which we'll cover in the
-[AdvancedGuide](advanced.md). You **must** call this function before calling
+[Advanced Guide](advanced.md). You **must** call this function before calling
 `RUN_ALL_TESTS()`, or the flags won't be properly initialized.
 
 On Windows, `InitGoogleTest()` also works with wide strings, so it can be used
