@@ -381,8 +381,8 @@ If a fatal failure happens the subsequent steps will be skipped.
 ## Writing the main() Function
 
 Most users should *not* need to write their own `main` function and instead link
-with `gtest_main` (as opposed to with `gtest`), which defines a suitable entry
-point. See the end of this section for details. The remainder of this section
+with `gtest_main` (which defines a suitable entry point) rather than linking only
+with `gtest`. See the end of this section for details. The remainder of this section
 should only apply when you need to do something custom before the tests run that
 cannot be expressed within the framework of fixtures and test suites.
 
@@ -467,6 +467,12 @@ But maybe you think that writing all those `main` functions is too much work? We
 agree with you completely, and that's why Google Test provides a basic
 implementation of main(). If it fits your needs, then just link your test with
 the `gtest_main` library and you are good to go.
+
+{: .callout .note}
+*Note:* In supported build systems such as CMake and Bazel, linking with
+`gtest_main` automatically includes `gtest` transitively. If you are linking
+manually (e.g., directly invoking `clang++` or `g++`), you will need to link
+both libraries: `-lgtest_main -lgtest`.
 
 {: .callout .note}
 NOTE: `ParseGUnitFlags()` is deprecated in favor of `InitGoogleTest()`.
