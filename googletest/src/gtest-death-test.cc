@@ -560,7 +560,7 @@ static ::std::string FormatDeathTestOutput(const ::std::string& output) {
 //             concluded: DIED, LIVED, THREW, or RETURNED.  The death test
 //             fails in the latter three cases.
 //   status:   The exit status of the child process. On *nix, it is in the
-//             in the format specified by wait(2). On Windows, this is the
+//             format specified by wait(2). On Windows, this is the
 //             value supplied to the ExitProcess() API or a numeric code
 //             of the exception that terminated the program.
 //   matcher_: A matcher that's expected to match the stderr output by the child
@@ -724,7 +724,7 @@ int WindowsDeathTest::Wait() {
 
   ReadAndInterpretStatusByte();
 
-  // Waits for the child process to exit if it haven't already. This
+  // Waits for the child process to exit if it hasn't already. This
   // returns immediately if the child has already exited, regardless of
   // whether previous calls to WaitForMultipleObjects synchronized on this
   // handle or not.
@@ -773,7 +773,7 @@ DeathTest::TestRole WindowsDeathTest::AssumeRole() {
       &handles_are_inheritable,
       TRUE,       // The event will automatically reset to non-signaled state.
       FALSE,      // The initial state is non-signalled.
-      nullptr));  // The even is unnamed.
+      nullptr));  // The event is unnamed.
   GTEST_DEATH_TEST_CHECK_(event_handle_.Get() != nullptr);
   const std::string filter_flag = std::string("--") + GTEST_FLAG_PREFIX_ +
                                   "filter=" + info->test_suite_name() + "." +
