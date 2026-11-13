@@ -131,10 +131,6 @@ if (gmock_build_tests)
   # 'make test' or ctest.
   enable_testing()
 
-  if (MINGW OR CYGWIN)
-    add_compile_options("-Wa,-mbig-obj")
-  endif()
-
   ############################################################
   # C++ tests built with standard compiler flags.
 
