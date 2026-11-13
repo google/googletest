@@ -1,0 +1,38 @@
+set(CPACK_PACKAGE_NAME "libgtest-dev")
+set(CPACK_PACKAGE_CONTACT "Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>")
+set(CPACK_PACKAGE_DESCRIPTION "Description: Google's framework for writing C++ tests
+ Google's framework for writing C++ tests on a variety of platforms. Based on
+ the xUnit architecture. Supports automatic test discovery, a rich set of
+ assertions, user-defined assertions, death tests, fatal and non-fatal failures,
+ value- and type-parameterized tests, various options for running the tests, and
+ XML test report generation.")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Google's framework for writing C++ tests")
+set(CPACK_PACKAGE_HOMEPAGE_URL "https://github.com/google/googletest")
+set(CPACK_STRIP_FILES false)
+set(CPACK_PACKAGE_ARCHITECTURE "amd64")
+if(${CMAKE_SYSTEM_PROCESSOR} STREQUAL "aarch64")
+    set(CPACK_PACKAGE_ARCHITECTURE "arm64")
+endif()
+
+set(CPACK_PACKAGE_VERSION "${GOOGLETEST_VERSION}")
+set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}_${CPACK_PACKAGE_VERSION}_${CPACK_PACKAGE_ARCHITECTURE}")
+
+# Copy over documentation (Debian, probably same for rpm and mac?)
+# install(DIRECTORY "${CMAKE_SOURCE_DIR}/LICENSES" DESTINATION "/usr/share/doc/libcapstone-dev")
+# install(FILES "${CMAKE_SOURCE_DIR}/ChangeLog" DESTINATION "/usr/share/doc/libcapstone-dev")
+# install(FILES "${CMAKE_SOURCE_DIR}/README.md" DESTINATION "/usr/share/doc/libcapstone-dev")
+
+# Set Debian-specific package variables
+set(CPACK_DEBIAN_PACKAGE_SOURCE "googletest")
+set(CPACK_DEBIAN_PACKAGE_ORIGINAL_MAINTAINER "Steve M. Robbins <smr@debian.org>")
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6 (>= 2.2.5)")
+set(CPACK_DEBIAN_PACKAGE_SECTION "universe/libdevel")
+set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
+set(CPACK_DEBIAN_PACKAGE_MULTIARCH "same")
+
+# RPM package settings
+set(CPACK_RPM_PACKAGE_GROUP "Development/Libraries")
+set(CPACK_RPM_PACKAGE_REQUIRES "libc6 >= 2.2.5")
+
+# Include CPack
+include(CPack)
