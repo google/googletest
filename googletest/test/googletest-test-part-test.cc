@@ -27,13 +27,19 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <string>
+
 #include "gtest/gtest-test-part.h"
 #include "gtest/gtest.h"
 
 using testing::Message;
 using testing::Test;
+using testing::TestEventListener;
 using testing::TestPartResult;
 using testing::TestPartResultArray;
+using testing::TestWithParam;
+using testing::UnitTest;
+using testing::Values;
 
 namespace {
 
@@ -216,5 +222,42 @@ TEST_F(TestPartResultArrayDeathTest, DiesWhenIndexIsOutOfBound) {
   EXPECT_DEATH_IF_SUPPORTED(results.GetTestPartResult(-1), "");
   EXPECT_DEATH_IF_SUPPORTED(results.GetTestPartResult(1), "");
 }
+
+struct TestPartResultTypeCase {
+  TestPartResult::Type type;
+  bool should_print;
+};
+
+class PrettyUnitTestResultPrinterTestPartResultTest
+    : public TestWithParam<TestPartResultTypeCase> {};
+
+TEST_P(PrettyUnitTestResultPrinterTestPartResultTest,
+       HandlesAllRelevantTestPartResultTypes) {
+  TestEventListener* const printer =
+      UnitTest::GetInstance()->listeners().default_result_printer();
+  ASSERT_NE(printer, nullptr);
+
+  const TestPartResult result(GetParam().type, "test_file.cc", 123,
+                              "expected error or skip message");
+
+  testing::internal::CaptureStdout();
+  printer->OnTestPartResult(result);
+  const std::string output = testing::internal::GetCapturedStdout();
+
+  if (GetParam().should_print) {
+    EXPECT_NE(output.find("expected error or skip message"), std::string::npos);
+  } else {
+    EXPECT_TRUE(output.empty());
+  }
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    AllTestPartResultTypes, PrettyUnitTestResultPrinterTestPartResultTest,
+    Values(TestPartResultTypeCase{TestPartResult::kSuccess, false},
+           TestPartResultTypeCase{TestPartResult::kNonFatalFailure, true},
+           TestPartResultTypeCase{TestPartResult::kFatalFailure, true},
+           TestPartResultTypeCase{TestPartResult::kSkip, true},
+           TestPartResultTypeCase{static_cast<TestPartResult::Type>(999),
+                                  true}));
 
 }  // namespace

@@ -3264,6 +3264,7 @@ static WORD GetColorAttribute(GTestColor color) {
       return FOREGROUND_GREEN;
     case GTestColor::kYellow:
       return FOREGROUND_RED | FOREGROUND_GREEN;
+    case GTestColor::kDefault:
     default:
       return 0;
   }
@@ -3312,6 +3313,7 @@ static const char* GetAnsiColorCode(GTestColor color) {
       return "2";
     case GTestColor::kYellow:
       return "3";
+    case GTestColor::kDefault:
     default:
       assert(false);
       return "9";
@@ -3568,6 +3570,9 @@ void PrettyUnitTestResultPrinter::OnTestPartResult(
     // If the test part succeeded, we don't need to do anything.
     case TestPartResult::kSuccess:
       return;
+    case TestPartResult::kNonFatalFailure:
+    case TestPartResult::kFatalFailure:
+    case TestPartResult::kSkip:
     default:
       // Print failure message from the assertion
       // (e.g. expected this and got that).
@@ -3786,6 +3791,9 @@ void BriefUnitTestResultPrinter::OnTestPartResult(
     // If the test part succeeded, we don't need to do anything.
     case TestPartResult::kSuccess:
       return;
+    case TestPartResult::kNonFatalFailure:
+    case TestPartResult::kFatalFailure:
+    case TestPartResult::kSkip:
     default:
       // Print failure message from the assertion
       // (e.g. expected this and got that).
