@@ -84,6 +84,9 @@
 #define GTEST_OS_GNU_HURD 1
 #elif defined(__GLIBC__) && defined(__FreeBSD_kernel__)
 #define GTEST_OS_GNU_KFREEBSD 1
+#elif defined(__ZEPHYR__)
+// Define it before linux as it could be built as a linux application
+#define GTEST_OS_ZEPHYR 1
 #elif defined __linux__
 #define GTEST_OS_LINUX 1
 #if defined __ANDROID__
