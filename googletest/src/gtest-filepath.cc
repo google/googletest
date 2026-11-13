@@ -336,7 +336,7 @@ bool FilePath::CreateDirectoriesRecursively() const {
     return false;
   }
 
-  if (pathname_.empty() || this->DirectoryExists()) {
+  if (pathname_.empty() || pathname_ == kCurrentDirectoryString || this->DirectoryExists()) {
     return true;
   }
 
