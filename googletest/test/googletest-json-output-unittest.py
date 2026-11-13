@@ -57,7 +57,7 @@ else:
   STACK_TRACE_TEMPLATE = '\n'
 
 EXPECTED_NON_EMPTY = {
-    'tests': 28,
+    'tests': 29,
     'failures': 5,
     'disabled': 2,
     'errors': 0,
@@ -576,6 +576,26 @@ EXPECTED_NON_EMPTY = {
                 'time': '*',
                 'timestamp': '*',
                 'classname': 'Single/TypeParameterizedTestSuite/1',
+            }],
+        },
+        {
+            'name': 'JsonPropertyKeyTest',
+            'tests': 1,
+            'failures': 0,
+            'disabled': 0,
+            'errors': 0,
+            'time': '*',
+            'timestamp': '*',
+            'testsuite': [{
+                'name': 'QuoteInKey',
+                'file': 'gtest_xml_output_unittest_.cc',
+                'line': 209,
+                'status': 'RUN',
+                'result': 'COMPLETED',
+                'time': '*',
+                'timestamp': '*',
+                'classname': 'JsonPropertyKeyTest',
+                'key"quoted': 'value',
             }],
         },
         {
