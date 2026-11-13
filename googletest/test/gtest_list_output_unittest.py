@@ -38,8 +38,10 @@ This script tests such functionality by invoking gtest_list_output_unittest_
  (a program written with Google Test) the command line flags.
 """
 
+import json
 import os
 import re
+import xml.etree.ElementTree
 from googletest.test import gtest_test_utils
 
 GTEST_LIST_TESTS_FLAG = '--gtest_list_tests'
@@ -242,7 +244,29 @@ class GTestListTestsOutputUnitTest(gtest_test_utils.TestCase):
     """
     self._TestOutput('json', EXPECTED_JSON)
 
-  def _GetOutput(self, out_format):
+  def testXmlWithFilter(self):
+    """Verifies XML output lists only the tests selected by the filter."""
+    output = self._GetOutput('xml', ['--gtest_filter=FooTest.*'])
+    root = xml.etree.ElementTree.fromstring(output)
+    self.assertEqual(2, int(root.attrib['tests']))
+    suites = root.findall('testsuite')
+    self.assertEqual(1, len(suites))
+    self.assertEqual('FooTest', suites[0].attrib['name'])
+    self.assertEqual(2, int(suites[0].attrib['tests']))
+    self.assertEqual(2, len(suites[0].findall('testcase')))
+
+  def testJSONWithFilter(self):
+    """Verifies JSON output lists only the tests selected by the filter."""
+    output = self._GetOutput('json', ['--gtest_filter=FooTest.*'])
+    data = json.loads(output)
+    self.assertEqual(2, data['tests'])
+    self.assertEqual(1, len(data['testsuites']))
+    suite = data['testsuites'][0]
+    self.assertEqual('FooTest', suite['name'])
+    self.assertEqual(2, suite['tests'])
+    self.assertEqual(2, len(suite['testsuite']))
+
+  def _GetOutput(self, out_format, extra_args=()):
     file_path = os.path.join(
         gtest_test_utils.GetTempDir(), 'test_out.' + out_format
     )
@@ -255,6 +279,7 @@ class GTestListTestsOutputUnitTest(gtest_test_utils.TestCase):
         '%s=%s:%s' % (GTEST_OUTPUT_FLAG, out_format, file_path),
         '--gtest_list_tests',
     ]
+    command.extend(extra_args)
     environ_copy = os.environ.copy()
     p = gtest_test_utils.Subprocess(
         command, env=environ_copy, working_dir=gtest_test_utils.GetTempDir()

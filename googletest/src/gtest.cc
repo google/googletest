@@ -4498,7 +4498,7 @@ void XmlUnitTestResultPrinter::PrintXmlTestsList(
 
   int total_tests = 0;
   for (auto test_suite : test_suites) {
-    total_tests += test_suite->total_test_count();
+    total_tests += test_suite->reportable_test_count();
   }
   OutputXmlAttribute(stream, kTestsuites, "tests",
                      StreamableToString(total_tests));
@@ -4506,7 +4506,8 @@ void XmlUnitTestResultPrinter::PrintXmlTestsList(
   *stream << ">\n";
 
   for (auto test_suite : test_suites) {
-    PrintXmlTestSuite(stream, *test_suite);
+    if (test_suite->reportable_test_count() > 0)
+      PrintXmlTestSuite(stream, *test_suite);
   }
   *stream << "</" << kTestsuites << ">\n";
 }
@@ -4989,18 +4990,22 @@ void JsonUnitTestResultPrinter::PrintJsonTestList(
   *stream << "{\n";
   int total_tests = 0;
   for (auto test_suite : test_suites) {
-    total_tests += test_suite->total_test_count();
+    total_tests += test_suite->reportable_test_count();
   }
   OutputJsonKey(stream, kTestsuites, "tests", total_tests, kIndent);
 
   OutputJsonKey(stream, kTestsuites, "name", "AllTests", kIndent);
   *stream << kIndent << "\"" << kTestsuites << "\": [\n";
 
-  for (size_t i = 0; i < test_suites.size(); ++i) {
-    if (i != 0) {
+  bool comma = false;
+  for (auto test_suite : test_suites) {
+    if (test_suite->reportable_test_count() == 0) continue;
+    if (comma) {
       *stream << ",\n";
+    } else {
+      comma = true;
     }
-    PrintJsonTestSuite(stream, *test_suites[i]);
+    PrintJsonTestSuite(stream, *test_suite);
   }
 
   *stream << "\n"
