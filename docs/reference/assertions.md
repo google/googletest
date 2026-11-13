@@ -222,8 +222,10 @@ Verifies that *`val1`*`>=`*`val2`*.
 The following assertions compare two **C strings**. To compare two `string`
 objects, use [`EXPECT_EQ`](#EXPECT_EQ) or [`EXPECT_NE`](#EXPECT_NE) instead.
 
-These assertions also accept wide C strings (`wchar_t*`). If a comparison of two
-wide strings fails, their values will be printed as UTF-8 narrow strings.
+`EXPECT_STREQ` and `EXPECT_STRNE` also accept wide C strings (`wchar_t*`).
+Case-insensitive variants (`EXPECT_STRCASEEQ` and `EXPECT_STRCASENE`) currently do not
+support wide C strings. If a comparison of two wide strings fails, their values will be
+printed as UTF-8 narrow strings.
 
 To compare a C string with `NULL`, use `EXPECT_EQ(`*`c_string`*`, nullptr)` or
 `EXPECT_NE(`*`c_string`*`, nullptr)`.
