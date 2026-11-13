@@ -3027,11 +3027,17 @@ TEST_P(ElementsAreTestP, CanExplainMismatchRightSize) {
   vector<int> v;
   v.push_back(2);
   v.push_back(1);
-  EXPECT_EQ(Explain(m, v), "whose element #0 (2) isn't equal to 1");
+  EXPECT_EQ(Explain(m, v),
+            "element mismatch at index 0:\n"
+            "  Actual   #0: 2\n"
+            "  Expected #0: is equal to 1");
 
   v[0] = 1;
   EXPECT_EQ(Explain(m, v),
-            "whose element #1 (1) is <= 5, which is 4 less than 5");
+            "element mismatch at index 1:\n"
+            "  Actual   #1: 1\n"
+            "  Expected #1: is > 5\n"
+            "  Detail: which is 4 less than 5");
 }
 
 TEST(ElementsAreTest, MatchesOneElementVector) {
