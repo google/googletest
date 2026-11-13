@@ -15,6 +15,8 @@ brevity, but you should do it in your own code.
 Mock classes are defined as normal classes, using the `MOCK_METHOD` macro to
 generate mocked methods. The macro gets 3 or 4 parameters:
 
+Note that a mocked method can have at most 31 arguments.
+
 ```cpp
 class MyMock {
  public:
