@@ -1245,6 +1245,10 @@ TEST(PrintStlContainerTest, StdSpan) {
   std::span<int> s = a;
 
   EXPECT_EQ("{ 3, 6, 5 }", Print(s));
+
+  // A span with a static extent must be printed element-wise as well.
+  std::span<int, 3> s_static_extent = a;
+  EXPECT_EQ("{ 3, 6, 5 }", Print(s_static_extent));
 #else
   GTEST_SKIP() << "Does not have std::span.";
 #endif  // GTEST_INTERNAL_HAS_STD_SPAN
