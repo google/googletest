@@ -44,7 +44,9 @@ class ContainerTest : public Test {};
 
 TYPED_TEST_SUITE_P(ContainerTest);
 
-TYPED_TEST_P(ContainerTest, CanBeDefaultConstructed) { TypeParam container; }
+TYPED_TEST_P(ContainerTest, CanBeDefaultConstructed) {
+  [[maybe_unused]] TypeParam container;
+}
 
 TYPED_TEST_P(ContainerTest, InitialSizeIsZero) {
   TypeParam container;
