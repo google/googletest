@@ -1764,6 +1764,53 @@ struct UnaryConstructorClass {
   int value;
 };
 
+TEST(ReturnNewTest, RejectsVoidResult) {
+  using ReturnNewAction = decltype(ReturnNew<int>(3));
+  static_assert(!std::is_convertible_v<ReturnNewAction, Action<void()>>, "");
+  static_assert(!std::is_convertible_v<ReturnNewAction, Action<void(int)>>, "");
+  static_assert(!std::is_convertible_v<ReturnNewAction, OnceAction<void()>>,
+                "");
+  static_assert(!std::is_convertible_v<ReturnNewAction, OnceAction<void(int)>>,
+                "");
+}
+
+TEST(ReturnNewTest, WorksWithOnceAction) {
+  const auto action = ReturnNew<UnaryConstructorClass>(17);
+  OnceAction<const UnaryConstructorClass*(int)> from_lvalue = action;
+  std::unique_ptr<const UnaryConstructorClass> first(
+      std::move(from_lvalue).Call(1));
+  EXPECT_EQ(17, first->value);
+
+  OnceAction<const UnaryConstructorClass*(int)> from_rvalue =
+      ReturnNew<UnaryConstructorClass>(19);
+  std::unique_ptr<const UnaryConstructorClass> second(
+      std::move(from_rvalue).Call(2));
+  EXPECT_EQ(19, second->value);
+}
+
+TEST(ReturnNewTest, OnceActionAcceptsMoveOnlyConstructorArgument) {
+  struct Constructed {
+    explicit Constructed(const std::unique_ptr<int>& p) : value(*p) {}
+    int value;
+  };
+  OnceAction<Constructed*()> action =
+      ReturnNew<Constructed>(std::make_unique<int>(23));
+  std::unique_ptr<Constructed> result(std::move(action).Call());
+  EXPECT_EQ(23, result->value);
+}
+
+TEST(ReturnNewTest, ResultCanBeExplicitlyIgnored) {
+  struct Constructed {
+    explicit Constructed(Constructed** created) { *created = this; }
+  };
+  Constructed* created = nullptr;
+  const Action<void(int)> action =
+      IgnoreResult(ReturnNew<Constructed>(&created));
+  action.Perform(std::make_tuple(1));
+  EXPECT_NE(nullptr, created);
+  delete created;
+}
+
 // Tests using ReturnNew() with a unary constructor.
 TEST(ReturnNewTest, Unary) {
   Action<UnaryConstructorClass*()> a = ReturnNew<UnaryConstructorClass>(4000);
