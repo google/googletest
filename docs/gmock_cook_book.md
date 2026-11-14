@@ -2895,8 +2895,13 @@ file. This way, even if you `#include` your mock class in N files, the compiler
 only needs to generate its constructor and destructor once, resulting in a much
 faster compilation.
 
+If your compilation times are still slow, you can also move the definitions of
+your mock methods into a `.cc` file by replacing uses of the `MOCK_METHOD`
+macro in the class body with `DECLARE_MOCK_METHOD`, and adding corresponding
+calls to `DEFINE_MOCK_METHOD` in your `.cc` file.
+
 Let's illustrate the idea using an example. Here's the definition of a mock
-class before applying this recipe:
+class before applying these recipes:
 
 ```cpp
 // File mock_foo.h.
@@ -2913,7 +2918,7 @@ class MockFoo : public Foo {
 };
 ```
 
-After the change, it would look like:
+After the changes, it would look like:
 
 ```cpp
 // File mock_foo.h.
@@ -2924,8 +2929,9 @@ class MockFoo : public Foo {
   MockFoo();
   virtual ~MockFoo();
 
-  MOCK_METHOD(int, DoThis, (), (override));
-  MOCK_METHOD(bool, DoThat, (const char* str), (override));
+  // These macros declare the mock methods but do not define them.
+  DECLARE_MOCK_METHOD(int, DoThis, (), (override));
+  DECLARE_MOCK_METHOD(bool, DoThat, (const char* str), (override));
   ... more mock methods ...
 };
 ```
@@ -2941,6 +2947,13 @@ and
 // variables used to implement the mock methods.
 MockFoo::MockFoo() {}
 MockFoo::~MockFoo() {}
+
+// These macros expand to the actual definitions of the mock methods.
+// For each DECLARE_MOCK_METHOD call in your class body, you need a
+// corresponding DEFINE_MOCK_METHOD call in your .cc file.
+DEFINE_MOCK_METHOD(MockFoo, int, DoThis, (), (override));
+DEFINE_MOCK_METHOD(MockFoo, bool, DoThat, (const char* str), (override));
+... more mock methods ...
 ```
 
 ### Forcing a Verification
