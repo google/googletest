@@ -78,7 +78,8 @@ typedef PrematureExitTest PrematureExitDeathTest;
 //     handling of the premature-exit file.
 TEST_F(PrematureExitDeathTest, FileExistsDuringExecutionOfDeathTest) {
   if (*premature_exit_file_path_ == '\0') {
-    return;
+    GTEST_SKIP() << "TEST_PREMATURE_EXIT_FILE is not set, so this test "
+                    "cannot verify anything.";
   }
 
   EXPECT_DEATH_IF_SUPPORTED(
@@ -98,7 +99,8 @@ TEST_F(PrematureExitDeathTest, FileExistsDuringExecutionOfDeathTest) {
 // normal (non-death) test.
 TEST_F(PrematureExitTest, PrematureExitFileExistsDuringTestExecution) {
   if (*premature_exit_file_path_ == '\0') {
-    return;
+    GTEST_SKIP() << "TEST_PREMATURE_EXIT_FILE is not set, so this test "
+                    "cannot verify anything.";
   }
 
   EXPECT_TRUE(PrematureExitFileExists())
