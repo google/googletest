@@ -1260,7 +1260,13 @@ static pid_t ExecDeathTestSpawnChild(char* const* argv, int close_fd) {
 #ifdef GTEST_OS_QNX
   // Obtains the current directory and sets it to be closed in the child
   // process.
+  // On QNX 8.0+, fchdir() requires the directory descriptor to be opened with
+  // O_DIRECTORY, otherwise it fails with ENOTDIR.
+#if defined(O_DIRECTORY)
+  const int cwd_fd = open(".", O_RDONLY | O_DIRECTORY);
+#else
   const int cwd_fd = open(".", O_RDONLY);
+#endif
   GTEST_DEATH_TEST_CHECK_(cwd_fd != -1);
   GTEST_DEATH_TEST_CHECK_SYSCALL_(fcntl(cwd_fd, F_SETFD, FD_CLOEXEC));
   // We need to execute the test program in the same environment where
