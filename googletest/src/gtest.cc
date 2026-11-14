@@ -4219,6 +4219,25 @@ static bool PortableLocaltime(time_t seconds, struct tm* out) {
 #endif
 }
 
+static bool PortableGmtime(time_t seconds, struct tm* out) {
+#if defined(_MSC_VER)
+  return gmtime_s(out, &seconds) == 0;
+#elif defined(__MINGW32__) || defined(__MINGW64__)
+  // MINGW <time.h> provides neither gmtime_r nor gmtime_s, but uses Windows'
+  // gmtime(), which has a thread-local tm buffer.
+  struct tm* tm_ptr = gmtime(&seconds);  // NOLINT
+  if (tm_ptr == nullptr) return false;
+  *out = *tm_ptr;
+  return true;
+#elif defined(__STDC_LIB_EXT1__)
+  // Uses gmtime_s when available as gmtime_r is only available from the C23
+  // standard.
+  return gmtime_s(&seconds, out) != nullptr;
+#else
+  return gmtime_r(&seconds, out) != nullptr;
+#endif
+}
+
 // Converts the given epoch time in milliseconds to a date string in the ISO
 // 8601 format, without the timezone information.
 std::string FormatEpochTimeInMillisAsIso8601(TimeInMillis ms) {
@@ -4670,12 +4689,11 @@ static std::string FormatTimeInMillisAsDuration(TimeInMillis ms) {
   return ss.str();
 }
 
-// Converts the given epoch time in milliseconds to a date string in the
-// RFC3339 format, without the timezone information.
+// Converts the given epoch time in milliseconds to a UTC date string in the
+// RFC3339 format.
 static std::string FormatEpochTimeInMillisAsRFC3339(TimeInMillis ms) {
   struct tm time_struct;
-  if (!PortableLocaltime(static_cast<time_t>(ms / 1000), &time_struct))
-    return "";
+  if (!PortableGmtime(static_cast<time_t>(ms / 1000), &time_struct)) return "";
   // YYYY-MM-DDThh:mm:ss
   return StreamableToString(time_struct.tm_year + 1900) + "-" +
          String::FormatIntWidth2(time_struct.tm_mon + 1) + "-" +
