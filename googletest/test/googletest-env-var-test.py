@@ -68,12 +68,15 @@ def GetFlag(flag):
   return gtest_test_utils.Subprocess(args, env=environ).output
 
 
-def TestFlag(flag, test_val, default_val):
+def TestFlag(flag, test_val, default_val, expected_val=None):
   """Verifies that the given flag is affected by the corresponding env var."""
+
+  if expected_val is None:
+    expected_val = test_val
 
   env_var = 'GTEST_' + flag.upper()
   SetEnvVar(env_var, test_val)
-  AssertEq(test_val, GetFlag(flag))
+  AssertEq(expected_val, GetFlag(flag))
   SetEnvVar(env_var, None)
   AssertEq(default_val, GetFlag(flag))
 
@@ -92,6 +95,9 @@ class GTestEnvVarTest(gtest_test_utils.TestCase):
     TestFlag('output', 'xml:tmp/foo.xml', '')
     TestFlag('brief', '1', '0')
     TestFlag('print_time', '0', '1')
+    TestFlag('print_test_filter', 'false', '1', '0')
+    TestFlag('print_test_shard_status', 'false', '1', '0')
+    TestFlag('print_test_shuffle_seed', 'false', '1', '0')
     TestFlag('repeat', '999', '1')
     TestFlag('throw_on_failure', '1', '0')
     TestFlag('death_test_style', 'threadsafe', 'fast')
