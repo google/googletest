@@ -828,7 +828,7 @@ class UnitTestFilter {
   explicit UnitTestFilter(const std::string& filter) {
     // By design "" filter matches "" string.
     std::vector<std::string> all_patterns;
-    SplitString(filter, ':', &all_patterns);
+    SplitStringUnescaped(filter, ':', &all_patterns);
     const auto exact_match_patterns_begin = std::partition(
         all_patterns.begin(), all_patterns.end(), &IsGlobPattern);
 
@@ -868,8 +868,10 @@ class PositiveAndNegativeUnitTestFilter {
   explicit PositiveAndNegativeUnitTestFilter(const std::string& filter) {
     std::vector<std::string> positive_and_negative_filters;
 
-    // NOTE: `SplitString` always returns a non-empty container.
-    SplitString(filter, '-', &positive_and_negative_filters);
+    // NOTE: `SplitStringUnescaped` always returns a non-empty container.
+    // Death-test filters escape literal '-' as "\-" so typed-test names with
+    // hyphens are not treated as a negative filter (#5105).
+    SplitStringUnescaped(filter, '-', &positive_and_negative_filters);
     const auto& positive_filter = positive_and_negative_filters.front();
 
     if (positive_and_negative_filters.size() > 1) {
@@ -1334,6 +1336,28 @@ void SplitString(const ::std::string& str, char delimiter,
   }
   dest->swap(parsed);
 }
+
+// Like SplitString, but treats "\<delimiter>" as a literal delimiter character
+// (backslash is consumed). Used for --gtest_filter parsing.
+static void SplitStringUnescaped(const ::std::string& str, char delimiter,
+                                 ::std::vector<std::string>* dest) {
+  dest->clear();
+  std::string current;
+  for (size_t i = 0; i < str.size(); ++i) {
+    if (str[i] == '\\' && i + 1 < str.size()) {
+      current.push_back(str[++i]);
+      continue;
+    }
+    if (str[i] == delimiter) {
+      dest->push_back(current);
+      current.clear();
+      continue;
+    }
+    current.push_back(str[i]);
+  }
+  dest->push_back(current);
+}
+
 
 }  // namespace internal
 
