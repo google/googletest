@@ -1,0 +1,6 @@
+name: googletest
+build:
+  cmake-ext: true
+  kconfig-ext: true
+  settings:
+    module_ext_root: .
