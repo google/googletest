@@ -2391,8 +2391,8 @@ void TestResult::RecordProperty(const std::string& xml_element,
 // The list of reserved attributes used in the <testsuites> element of XML
 // output.
 static const char* const kReservedTestSuitesAttributes[] = {
-    "disabled",    "errors", "failures", "name",
-    "random_seed", "tests",  "time",     "timestamp"};
+    "disabled", "errors",  "failures", "name",      "random_seed",
+    "skipped",  "tests",   "time",     "timestamp"};
 
 // The list of reserved attributes used in the <testsuite> element of XML
 // output.
@@ -4458,6 +4458,8 @@ void XmlUnitTestResultPrinter::PrintXmlUnitTest(std::ostream* stream,
   OutputXmlAttribute(
       stream, kTestsuites, "disabled",
       StreamableToString(unit_test.reportable_disabled_test_count()));
+  OutputXmlAttribute(stream, kTestsuites, "skipped",
+                     StreamableToString(unit_test.skipped_test_count()));
   OutputXmlAttribute(stream, kTestsuites, "errors", "0");
   OutputXmlAttribute(stream, kTestsuites, "time",
                      FormatTimeInMillisAsSeconds(unit_test.elapsed_time()));

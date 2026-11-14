@@ -67,7 +67,7 @@ else:
   sys.argv.remove(NO_STACKTRACE_SUPPORT_FLAG)
 
 EXPECTED_NON_EMPTY_XML = """<?xml version="1.0" encoding="UTF-8"?>
-<testsuites tests="28" failures="5" disabled="2" errors="0" time="*" timestamp="*" name="AllTests">
+<testsuites tests="28" failures="5" disabled="2" skipped="3" errors="0" time="*" timestamp="*" name="AllTests">
   <properties>
     <property name="ad_hoc_property" value="42"/>
   </properties>
@@ -227,7 +227,7 @@ Expected equality of these values:
 }
 
 EXPECTED_FILTERED_TEST_XML = """<?xml version="1.0" encoding="UTF-8"?>
-<testsuites tests="1" failures="0" disabled="0" errors="0" time="*" timestamp="*" name="AllTests">
+<testsuites tests="1" failures="0" disabled="0" skipped="0" errors="0" time="*" timestamp="*" name="AllTests">
   <properties>
     <property name="ad_hoc_property" value="42"/>
   </properties>
@@ -238,7 +238,7 @@ EXPECTED_FILTERED_TEST_XML = """<?xml version="1.0" encoding="UTF-8"?>
 </testsuites>"""
 
 EXPECTED_SHARDED_TEST_XML = """<?xml version="1.0" encoding="UTF-8"?>
-<testsuites tests="3" failures="0" disabled="0" errors="0" time="*" timestamp="*" name="AllTests">
+<testsuites tests="3" failures="0" disabled="0" skipped="0" errors="0" time="*" timestamp="*" name="AllTests">
   <properties>
     <property name="ad_hoc_property" value="42"/>
   </properties>
@@ -264,7 +264,7 @@ EXPECTED_SHARDED_TEST_XML = """<?xml version="1.0" encoding="UTF-8"?>
 </testsuites>"""
 
 EXPECTED_NO_TEST_XML = """<?xml version="1.0" encoding="UTF-8"?>
-<testsuites tests="0" failures="0" disabled="0" errors="0" time="*"
+<testsuites tests="0" failures="0" disabled="0" skipped="0" errors="0" time="*"
             timestamp="*" name="AllTests">
   <testsuite name="NonTestSuiteFailure" tests="1" failures="1" disabled="0" skipped="0" errors="0" time="*" timestamp="*">
     <testcase name="" status="run" result="completed" time="*" timestamp="*" classname="">
