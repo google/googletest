@@ -399,6 +399,17 @@ py_test(
     deps = [":gtest_test_utils"],
 )
 
+py_test(
+    name = "googletest-fail-if-no-test-selected-test",
+    size = "small",
+    srcs = ["googletest-fail-if-no-test-selected-test.py"],
+    data = [
+        ":googletest-fail-if-no-test-linked-test-with-disabled-test_",
+        ":googletest-fail-if-no-test-linked-test-with-enabled-test_",
+    ],
+    deps = [":gtest_test_utils"],
+)
+
 cc_binary(
     name = "googletest-shuffle-test_",
     srcs = ["googletest-shuffle-test_.cc"],
