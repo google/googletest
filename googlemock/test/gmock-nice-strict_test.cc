@@ -537,5 +537,51 @@ TEST(StrictMockTest, IsNaggy_IsNice_IsStrict) {
   EXPECT_TRUE(Mock::IsStrict(&strict_foo));
 }
 
+class MockFooDefaultNice {
+ public:
+  DEFAULT_TO_NICE();
+  MOCK_METHOD(void, DoThis, ());
+};
+
+class MockFooDefaultStrict {
+ public:
+  DEFAULT_TO_STRICT();
+  MOCK_METHOD(void, DoThis, ());
+};
+
+// DEFAULT_TO_NICE() makes a bare mock behave like NiceMock.
+TEST(DefaultToNiceTest, IsNice) {
+  MockFooDefaultNice mock;
+  EXPECT_CALL(mock, DoThis());
+  mock.DoThis();
+  EXPECT_TRUE(Mock::IsNice(&mock));
+  EXPECT_FALSE(Mock::IsStrict(&mock));
+  EXPECT_FALSE(Mock::IsNaggy(&mock));
+}
+
+#if GTEST_HAS_STREAM_REDIRECTION
+TEST(DefaultToNiceTest, NoWarningForUninterestingCall) {
+  MockFooDefaultNice mock;
+  CaptureStdout();
+  mock.DoThis();
+  EXPECT_EQ("", GetCapturedStdout());
+}
+#endif
+
+// DEFAULT_TO_STRICT() makes a bare mock behave like StrictMock.
+TEST(DefaultToStrictTest, IsStrict) {
+  MockFooDefaultStrict mock;
+  EXPECT_CALL(mock, DoThis());
+  mock.DoThis();
+  EXPECT_TRUE(Mock::IsStrict(&mock));
+  EXPECT_FALSE(Mock::IsNice(&mock));
+  EXPECT_FALSE(Mock::IsNaggy(&mock));
+}
+
+TEST(DefaultToStrictTest, UninterestingCallFails) {
+  MockFooDefaultStrict mock;
+  EXPECT_NONFATAL_FAILURE(mock.DoThis(), "Uninteresting mock function call");
+}
+
 }  // namespace gmock_nice_strict_test
 }  // namespace testing

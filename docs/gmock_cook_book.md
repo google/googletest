@@ -488,6 +488,56 @@ nice mocks (not yet the default) most of the time, use naggy mocks (the current
 default) when developing or debugging tests, and use strict mocks only as the
 last resort.
 
+### Requiring NiceMock or StrictMock {#RequireNiceOrStrict}
+
+Large projects often want to ban naggy (default) mocks because warnings are easy
+to miss and hard to interpret. gMock supports an opt-in compile definition that
+forces an explicit choice between nice and strict behavior
+([issue #4882](https://github.com/google/googletest/issues/4882)):
+
+```
+-DGOOGLEMOCK_REQUIRE_STRICT_OR_NICE=1
+```
+
+or equivalently:
+
+```
+-DGMOCK_FORCE_EXPLICIT_MOCK_KIND=1
+```
+
+With that define set in a translation unit:
+
+* `NiceMock<MockFoo>` and `StrictMock<MockFoo>` work as usual.
+* `NaggyMock<MockFoo>` fails to compile.
+* A bare `MockFoo` fails at the first `ON_CALL` / `EXPECT_CALL` or mock-method
+  call unless the mock class declares a default:
+
+```cpp
+class MockFoo : public Foo {
+ public:
+  DEFAULT_TO_STRICT();  // or DEFAULT_TO_NICE();
+
+  MOCK_METHOD(void, DoFoo, (), (override));
+};
+```
+
+`DEFAULT_TO_NICE()` / `DEFAULT_TO_STRICT()` also work without the define: they
+make a bare `MockFoo` behave like `NiceMock` / `StrictMock`.
+
+Upgrade path for existing codebases:
+
+```cpp
+#define TODO_CHOOSE_NICE_OR_STRICT() DEFAULT_TO_NICE()
+```
+
+Add `TODO_CHOOSE_NICE_OR_STRICT();` to every mock class, then enable
+`-DGOOGLEMOCK_REQUIRE_STRICT_OR_NICE=1`, then gradually replace the TODOs with
+real choices (or wrap instances in `NiceMock` / `StrictMock`).
+
+The define is header-only and does not change the gMock library ABI; only
+translation units compiled with it are affected. Subprojects can keep building
+without the define.
+
 ### Simplifying the Interface without Breaking Existing Code {#SimplerInterfaces}
 
 Sometimes a method has a long list of arguments that is mostly uninteresting.

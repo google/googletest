@@ -57,6 +57,26 @@
 #include "gmock/internal/custom/gmock-port.h"
 #include "gtest/internal/gtest-port.h"
 
+// When set to a non-zero value, gMock rejects naggy (default) mocks: each mock
+// must be wrapped in NiceMock/StrictMock, or the mock class must declare
+// DEFAULT_TO_NICE() / DEFAULT_TO_STRICT() (see gmock-nice-strict.h).
+// Enforcement is header-only and does not change the gMock library ABI; only
+// TUs compiled with the macro are affected. Issue #4882.
+//
+// Enable with either:
+//   -DGOOGLEMOCK_REQUIRE_STRICT_OR_NICE=1
+//   -DGMOCK_FORCE_EXPLICIT_MOCK_KIND=1
+#if !defined(GMOCK_INTERNAL_REQUIRE_STRICT_OR_NICE)
+#if (defined(GOOGLEMOCK_REQUIRE_STRICT_OR_NICE) && \
+     GOOGLEMOCK_REQUIRE_STRICT_OR_NICE) ||        \
+    (defined(GMOCK_FORCE_EXPLICIT_MOCK_KIND) &&   \
+     GMOCK_FORCE_EXPLICIT_MOCK_KIND)
+#define GMOCK_INTERNAL_REQUIRE_STRICT_OR_NICE 1
+#else
+#define GMOCK_INTERNAL_REQUIRE_STRICT_OR_NICE 0
+#endif
+#endif
+
 #if defined(GTEST_HAS_ABSL) && !defined(GTEST_NO_ABSL_FLAGS)
 #include "absl/flags/declare.h"
 #include "absl/flags/flag.h"
