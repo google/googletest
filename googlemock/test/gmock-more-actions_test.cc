@@ -720,6 +720,39 @@ TEST(SetArrayArgumentTest, SetsTheNthArrayWithIteratorArgument) {
   EXPECT_EQ(letters, s);
 }
 
+// Test SetArrayArgument<N>(first, last) with an array reference argument.
+TEST(SetArrayArgumentTest, SetsTheNthArrayWithArrayReference) {
+  using MyFunction = void(bool, int (&)[4]);
+  int numbers[] = {1, 2, 3};
+  Action<MyFunction> a = SetArrayArgument<1>(numbers, numbers + 3);
+
+  int n[4] = {};
+  a.Perform(std::forward_as_tuple(true, n));
+  EXPECT_EQ(1, n[0]);
+  EXPECT_EQ(2, n[1]);
+  EXPECT_EQ(3, n[2]);
+  EXPECT_EQ(0, n[3]);
+}
+
+class MockWithArrayReference {
+ public:
+  MOCK_METHOD(void, Foo, (int (&)[4]));
+};
+
+TEST(SetArrayArgumentTest, SetsArrayReferenceInMockMethod) {
+  MockWithArrayReference mock;
+  int numbers[] = {10, 20, 30, 40};
+  EXPECT_CALL(mock, Foo(testing::_))
+      .WillOnce(SetArrayArgument<0>(numbers, numbers + 4));
+
+  int n[4] = {};
+  mock.Foo(n);
+  EXPECT_EQ(10, n[0]);
+  EXPECT_EQ(20, n[1]);
+  EXPECT_EQ(30, n[2]);
+  EXPECT_EQ(40, n[3]);
+}
+
 TEST(ReturnPointeeTest, Works) {
   int n = 42;
   const Action<int()> a = ReturnPointee(&n);
