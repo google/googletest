@@ -161,3 +161,35 @@ jobs:
     # This workflow must run even if one or more of the dependent workflows
     # failed.
     if: always()
+
+  oss-exit-gate-release:
+    name: Publish GitHub Release via OSS Exit Gate
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Authenticate to Google Cloud (OSS Exit Gate)
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
+        with:
+          workload_identity_provider: 'projects/305452601764/locations/global/workloadIdentityPools/builders/providers/github'
+      - name: Stage release artifacts and upload manifest to OSS Exit Gate
+        env:
+          TAG_NAME: ${{ github.ref_name }}
+        run: |
+          VERSION="${TAG_NAME#v}"
+          ARCHIVE="googletest-${VERSION}.tar.gz"
+          git archive --format=tar.gz -o "$ARCHIVE" HEAD
+          gcloud artifacts generic upload \
+            --project=oss-exit-gate-prod \
+            --location=us \
+            --repository=googletest--githubreleases \
+            --package=googletest \
+            --version="$VERSION" \
+            --source="$ARCHIVE"
+          printf '{"package":"googletest","version":"%s"}\n' "$VERSION" > manifest.json
+          gcloud storage cp manifest.json "gs://oss-exit-gate-prod-googletest--githubreleases-manifests/googletest/${VERSION}/manifest.json"
