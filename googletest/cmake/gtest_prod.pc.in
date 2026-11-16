@@ -1,0 +1,7 @@
+includedir=@CMAKE_INSTALL_FULL_INCLUDEDIR@
+
+Name: gtest_prod
+Description: GoogleTest (header for production code)
+Version: @PROJECT_VERSION@
+URL: https://github.com/google/googletest
+Cflags: -I${includedir}
