@@ -556,7 +556,8 @@ auto ConvertGenerator(Gen&& gen, Func&& f) {
     return GTEST_EXPAND_(GTEST_GET_FIRST_(__VA_ARGS__, DUMMY_PARAM_));        \
   }                                                                           \
   static ::std::string gtest_##prefix##test_suite_name##_EvalGenerateName_(   \
-      const ::testing::TestParamInfo<test_suite_name::ParamType>& info) {     \
+      const ::testing::TestParamInfo<test_suite_name::ParamType>&             \
+          test_param_info) {                                                  \
     if (::testing::internal::AlwaysFalse()) {                                 \
       ::testing::internal::TestNotEmpty(GTEST_EXPAND_(GTEST_GET_SECOND_(      \
           __VA_ARGS__,                                                        \
@@ -569,7 +570,7 @@ auto ConvertGenerator(Gen&& gen, Func&& f) {
     return ((GTEST_EXPAND_(GTEST_GET_SECOND_(                                 \
         __VA_ARGS__,                                                          \
         ::testing::internal::DefaultParamName<test_suite_name::ParamType>,    \
-        DUMMY_PARAM_))))(info);                                               \
+        DUMMY_PARAM_))))(test_param_info);                                     \
   }                                                                           \
   [[maybe_unused]] static int gtest_##prefix##test_suite_name##_dummy_ =      \
       ::testing::UnitTest::GetInstance()                                      \
