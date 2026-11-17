@@ -210,6 +210,13 @@ function(cxx_executable_with_flags name cxx_flags libs)
   if (MSVC)
     # BigObj required for tests.
     set(cxx_flags "${cxx_flags} -bigobj")
+  elseif (MINGW OR CYGWIN)
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR
+        CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+      # MinGW and Cygwin use the GNU assembler, which has a 2^16 section limit.
+      # Large generated test executables exceed this limit, so raise it.
+      set(cxx_flags "${cxx_flags} -Wa,-mbig-obj")
+    endif()
   endif()
   if (cxx_flags)
     set_target_properties(${name}
