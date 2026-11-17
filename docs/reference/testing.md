@@ -124,8 +124,8 @@ custom function can be used for more control:
 INSTANTIATE_TEST_SUITE_P(
     MyInstantiation, MyTestSuite,
     testing::Values(...),
-    [](const testing::TestParamInfo<MyTestSuite::ParamType>& info) {
-      // Can use info.param here to generate the test suffix
+    [](const testing::TestParamInfo<MyTestSuite::ParamType>& param_info) {
+      // Can use param_info.param here to generate the test suffix
       std::string name = ...
       return name;
     });
@@ -1541,7 +1541,7 @@ for more information.
 `std::string testing::PrintToStringParamName(TestParamInfo<T>& info)`
 
 A built-in parameterized test name generator which returns the result of
-[`PrintToString`](#PrintToString) called on `info.param`. Does not work when the
+[`PrintToString`](#PrintToString) called on `param_info.param`. Does not work when the
 test parameter is a `std::string` or C string. See
 [Specifying Names for Value-Parameterized Test Parameters](../advanced.md#specifying-names-for-value-parameterized-test-parameters)
 for more information.

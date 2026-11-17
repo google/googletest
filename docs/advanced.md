@@ -1242,10 +1242,10 @@ INSTANTIATE_TEST_SUITE_P(
     testing::Combine(
         testing::Values(MyType::MY_FOO, MyType::MY_BAR),
         testing::Values("A", "B")),
-    [](const testing::TestParamInfo<MyTestSuite::ParamType>& info) {
+    [](const testing::TestParamInfo<MyTestSuite::ParamType>& param_info) {
       std::string name = absl::StrCat(
-          std::get<0>(info.param) == MyType::MY_FOO ? "Foo" : "Bar",
-          std::get<1>(info.param));
+          std::get<0>(param_info.param) == MyType::MY_FOO ? "Foo" : "Bar",
+          std::get<1>(param_info.param));
       absl::c_replace_if(name, [](char c) { return !std::isalnum(c); }, '_');
       return name;
     });
