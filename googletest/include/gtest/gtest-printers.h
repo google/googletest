@@ -151,8 +151,9 @@ struct IsStdSpan {
 };
 
 #if GTEST_INTERNAL_HAS_STD_SPAN
-template <typename E>
-struct IsStdSpan<std::span<E>> {
+// Covers spans of any extent, dynamic (the default) or static.
+template <typename E, size_t N>
+struct IsStdSpan<std::span<E, N>> {
   static constexpr bool value = true;
 };
 #endif  // GTEST_INTERNAL_HAS_STD_SPAN
