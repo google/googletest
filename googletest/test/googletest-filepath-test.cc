@@ -274,6 +274,18 @@ TEST(MakeFileNameTest, GenerateWhenNumberIsNotZeroAndDirIsEmpty) {
   EXPECT_EQ("bar_14.xml", actual.string());
 }
 
+TEST(MakeFileNameTest, GenerateWhenBaseNameEmpty) {
+  FilePath actual =
+      FilePath::MakeFileName(FilePath("foo"), FilePath(""), 0, "xml");
+  EXPECT_EQ("foo" GTEST_PATH_SEP_ "file.xml", actual.string());
+}
+
+TEST(MakeFileNameTest, GenerateWhenBaseNameEmptyNumberNonZero) {
+  FilePath actual =
+      FilePath::MakeFileName(FilePath("foo"), FilePath(""), 42, "xml");
+  EXPECT_EQ("foo" GTEST_PATH_SEP_ "file_42.xml", actual.string());
+}
+
 TEST(ConcatPathsTest, WorksWhenDirDoesNotEndWithPathSep) {
   FilePath actual = FilePath::ConcatPaths(FilePath("foo"), FilePath("bar.xml"));
   EXPECT_EQ("foo" GTEST_PATH_SEP_ "bar.xml", actual.string());
