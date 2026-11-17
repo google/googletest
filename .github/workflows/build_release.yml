@@ -1,0 +1,34 @@
+name: Build Source Release
+
+# Trigger whenever a release is created
+on:
+  release:
+    types:
+      - created
+
+jobs:
+  build:
+    name: build
+    runs-on: ubuntu-22.04
+    steps:
+    - name: clone the repository
+      uses: actions/checkout@v4
+
+    - name: Create the Debian and RPM package
+      run: |
+        cmake -B build  -DCMAKE_INSTALL_PREFIX=/usr
+        cmake --build build
+        cd build
+        cpack -G DEB
+        cpack -G RPM
+  
+    - name: Upload debian and rpm package to release
+      uses: softprops/action-gh-release@v2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.event.release.tag_name }}
+        files: |
+          ./build/*.deb
+          ./build/*.rpm
+  
