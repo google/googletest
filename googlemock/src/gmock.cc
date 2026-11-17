@@ -33,11 +33,40 @@
 
 #include "gmock/internal/gmock-port.h"
 
+namespace testing {
+namespace internal {
+
+// Returns the name of the environment variable corresponding to the
+// given flag. For example, FlagToEnvVar("foo") will return
+// "GMOCK_FOO".
+std::string FlagToEnvVar(const char* flag) {
+  const std::string full_flag = std::string(GMOCK_FLAG_PREFIX_) + flag;
+
+  std::string env_var;
+  for (size_t i = 0; i != full_flag.length(); i++) {
+    env_var += toupper(full_flag.c_str()[i]);
+  }
+
+  return env_var;
+}
+
+// Reads and returns the string environment variable corresponding to
+// the given flag; if it's not set, returns default_value.
+const char* StringFromGMockEnv(const char* flag, const char* default_value) {
+  const std::string env_var = FlagToEnvVar(flag);
+  const char* const value = posix::GetEnv(env_var.c_str());
+  return value == nullptr ? default_value : value;
+}
+
+} // namespace internal
+} // namespace testing
+
 GMOCK_DEFINE_bool_(catch_leaked_mocks, true,
                    "true if and only if Google Mock should report leaked "
                    "mock objects as failures.");
 
-GMOCK_DEFINE_string_(verbose, testing::internal::kWarningVerbosity,
+GMOCK_DEFINE_string_(verbose, testing::internal::StringFromGMockEnv("verbose",
+                     testing::internal::kWarningVerbosity),
                      "Controls how verbose Google Mock's output is."
                      "  Valid values:\n"
                      "  info    - prints all messages.\n"
