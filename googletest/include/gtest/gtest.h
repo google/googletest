@@ -65,6 +65,7 @@
 #include "gtest/gtest-death-test.h"  // IWYU pragma: export
 #include "gtest/gtest-matchers.h"  // IWYU pragma: export
 #include "gtest/gtest-message.h"  // IWYU pragma: export
+#include "gtest/gtest-os-stack-trace.h"  // IWYU pragma: export
 #include "gtest/gtest-param-test.h"  // IWYU pragma: export
 #include "gtest/gtest-printers.h"  // IWYU pragma: export
 #include "gtest/gtest-test-part.h"  // IWYU pragma: export
@@ -1233,6 +1234,19 @@ class GTEST_API_ [[nodiscard]] UnitTest {
   // Returns the list of event listeners that can be used to track events
   // inside Google Test.
   TestEventListeners& listeners();
+
+  // Sets the OS stack trace getter used to annotate test failures.  UnitTest
+  // takes ownership of the getter and deletes it when it is replaced.  Passing
+  // nullptr restores the default getter.
+  //
+  // Call this from the main thread, before RUN_ALL_TESTS() or between tests.
+  // Google Test does not synchronize access to the getter, so do not call this
+  // while another thread might report a test failure, or from within the
+  // getter's own methods.  Either can use a deleted getter.  Replacing the
+  // getter during a test is safe otherwise, but the new getter will not have
+  // seen UponLeavingGTest() until Google Test next calls user code, so its
+  // stack trace may not hide Google Test frames until then.
+  void set_os_stack_trace_getter(OsStackTraceGetterInterface* getter);
 
  private:
   // Registers and returns a global test environment.  When a test

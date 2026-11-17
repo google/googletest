@@ -402,35 +402,6 @@ class GTEST_API_ UnitTestOptions {
 GTEST_API_ FilePath GetCurrentExecutableName();
 #endif  // GTEST_HAS_FILE_SYSTEM
 
-// The role interface for getting the OS stack trace as a string.
-class OsStackTraceGetterInterface {
- public:
-  OsStackTraceGetterInterface() = default;
-  virtual ~OsStackTraceGetterInterface() = default;
-
-  // Returns the current OS stack trace as an std::string.  Parameters:
-  //
-  //   max_depth  - the maximum number of stack frames to be included
-  //                in the trace.
-  //   skip_count - the number of top frames to be skipped; doesn't count
-  //                against max_depth.
-  virtual std::string CurrentStackTrace(int max_depth, int skip_count) = 0;
-
-  // UponLeavingGTest() should be called immediately before Google Test calls
-  // user code. It saves some information about the current stack that
-  // CurrentStackTrace() will use to find and hide Google Test stack frames.
-  virtual void UponLeavingGTest() = 0;
-
-  // This string is inserted in place of stack frames that are part of
-  // Google Test's implementation.
-  static const char* const kElidedFramesMarker;
-
- private:
-  OsStackTraceGetterInterface(const OsStackTraceGetterInterface&) = delete;
-  OsStackTraceGetterInterface& operator=(const OsStackTraceGetterInterface&) =
-      delete;
-};
-
 // A working implementation of the OsStackTraceGetterInterface interface.
 class OsStackTraceGetter : public OsStackTraceGetterInterface {
  public:
