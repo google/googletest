@@ -384,8 +384,7 @@ TEST_F(TestForDeathTest, FastDeathTestInChangedDir) {
 }
 
 #ifdef GTEST_OS_LINUX
-void SigprofAction(int, siginfo_t*, void*) { /* no op */
-}
+void SigprofAction(int, siginfo_t*, void*) { /* no op */ }
 
 // Sets SIGPROF action and ITIMER_PROF timer (interval: 1ms).
 void SetSigprofActionAndTimer() {
@@ -1507,5 +1506,148 @@ TEST(ConditionalDeathMacrosSyntaxDeathTest, SwitchStatement) {
 // Tests that a test case whose name ends with "DeathTest" works fine
 // on Windows.
 TEST(NotADeathTest, Test) { SUCCEED(); }
+
+// --gtest_filter parsing used to split on '-' and then on ':'. Escapes have
+// to survive that order: a backslash consumed during the '-' scan must not
+// leave a ':' that the next scan treats as a pattern separator.
+TEST(FilterParsingTest, OrdinaryFiltersAreUnchanged) {
+  testing::internal::GTestFlagSaver flag_saver;
+
+  GTEST_FLAG_SET(filter, "Foo.A:Bar.B");
+  EXPECT_TRUE(
+      testing::internal::UnitTestOptions::FilterMatchesTest("Foo", "A"));
+  EXPECT_TRUE(
+      testing::internal::UnitTestOptions::FilterMatchesTest("Bar", "B"));
+  EXPECT_FALSE(
+      testing::internal::UnitTestOptions::FilterMatchesTest("Foo", "B"));
+
+  GTEST_FLAG_SET(filter, "Foo.*-Foo.Bad");
+  EXPECT_TRUE(
+      testing::internal::UnitTestOptions::FilterMatchesTest("Foo", "Good"));
+  EXPECT_FALSE(
+      testing::internal::UnitTestOptions::FilterMatchesTest("Foo", "Bad"));
+  EXPECT_FALSE(
+      testing::internal::UnitTestOptions::FilterMatchesTest("Bar", "Good"));
+
+  // The first '-' selects the negative filter. Later '-' characters stay in
+  // the negative pattern, as they did when the pieces were joined back
+  // together.
+  GTEST_FLAG_SET(filter, "*-Neg-Still.X");
+  EXPECT_TRUE(
+      testing::internal::UnitTestOptions::FilterMatchesTest("Foo", "Bar"));
+  EXPECT_FALSE(
+      testing::internal::UnitTestOptions::FilterMatchesTest("Neg-Still", "X"));
+
+  // An empty --gtest_filter matches only the empty name. Real tests are
+  // "suite.name", so none of them match. This is different from "-Foo", which
+  // means everything except Foo.
+  GTEST_FLAG_SET(filter, "");
+  EXPECT_FALSE(
+      testing::internal::UnitTestOptions::FilterMatchesTest("Foo", "Bar"));
+  GTEST_FLAG_SET(filter, "-Foo.Bar");
+  EXPECT_TRUE(
+      testing::internal::UnitTestOptions::FilterMatchesTest("Foo", "Baz"));
+  EXPECT_FALSE(
+      testing::internal::UnitTestOptions::FilterMatchesTest("Foo", "Bar"));
+}
+
+TEST(FilterParsingTest, EscapesSurviveBothDelimiters) {
+  testing::internal::GTestFlagSaver flag_saver;
+
+  // '\:' must still be one pattern after the '-' scan. A two-pass unescape
+  // turns this into "Suite/std::string.Test" and then splits on ':'.
+  GTEST_FLAG_SET(filter, "Suite/std\\:\\:string.Test");
+  EXPECT_TRUE(testing::internal::UnitTestOptions::FilterMatchesTest(
+      "Suite/std::string", "Test"));
+  EXPECT_FALSE(testing::internal::UnitTestOptions::FilterMatchesTest(
+      "Suite/std", "string"));
+
+  GTEST_FLAG_SET(filter, "Suite/has\\-hyphen.Test");
+  EXPECT_TRUE(testing::internal::UnitTestOptions::FilterMatchesTest(
+      "Suite/has-hyphen", "Test"));
+  EXPECT_FALSE(testing::internal::UnitTestOptions::FilterMatchesTest(
+      "Suite/has", "hyphen"));
+
+  // Colon and hyphen in the same name. Unescaping both during the '-' pass
+  // leaves a bare colon for the ':' pass.
+  GTEST_FLAG_SET(filter, "Suite/a\\:b\\-c.Test");
+  EXPECT_TRUE(testing::internal::UnitTestOptions::FilterMatchesTest(
+      "Suite/a:b-c", "Test"));
+
+  // A literal backslash is written as '\\' and must not swallow the next
+  // character, including an escaped colon.
+  GTEST_FLAG_SET(filter, "Suite/has\\\\slash.Test");
+  EXPECT_TRUE(testing::internal::UnitTestOptions::FilterMatchesTest(
+      "Suite/has\\slash", "Test"));
+
+  GTEST_FLAG_SET(filter, "Suite/a\\\\\\:b.Test");
+  EXPECT_TRUE(testing::internal::UnitTestOptions::FilterMatchesTest(
+      "Suite/a\\:b", "Test"));
+
+  // A backslash that is not an escape stays in the pattern.
+  GTEST_FLAG_SET(filter, "Suite\\Name.Test");
+  EXPECT_TRUE(testing::internal::UnitTestOptions::FilterMatchesTest(
+      "Suite\\Name", "Test"));
+}
+
+TEST(FilterParsingTest, MatchesFilterDoesNotInterpretEscapes) {
+  // MatchesFilter only splits on ':'. It must keep a backslash as a character
+  // so existing callers are unchanged.
+  EXPECT_TRUE(
+      testing::internal::UnitTestOptions::MatchesFilter("a\\-b", "a\\-b"));
+  EXPECT_FALSE(
+      testing::internal::UnitTestOptions::MatchesFilter("a-b", "a\\-b"));
+  EXPECT_TRUE(
+      testing::internal::UnitTestOptions::MatchesFilter("a\\", "a\\:b"));
+  EXPECT_FALSE(
+      testing::internal::UnitTestOptions::MatchesFilter("a:b", "a\\:b"));
+}
+
+// Threadsafe death tests (and every death test on Windows and Fuchsia)
+// re-execute the binary with --gtest_filter=<suite>.<name>. These names are
+// produced by a typed-test name generator, which is allowed to contain ':'
+// and '-'. Each test below forces the threadsafe style so the child really
+// is re-executed.
+struct PlainFilterName {};
+struct ColonFilterName {};
+struct HyphenFilterName {};
+struct ColonHyphenFilterName {};
+struct BackslashFilterName {};
+
+std::string DeathTestTypeName(PlainFilterName*) { return "int"; }
+std::string DeathTestTypeName(ColonFilterName*) { return "std::string"; }
+std::string DeathTestTypeName(HyphenFilterName*) { return "has-hyphen"; }
+std::string DeathTestTypeName(ColonHyphenFilterName*) { return "a:b-c"; }
+std::string DeathTestTypeName(BackslashFilterName*) { return "has\\slash"; }
+
+struct DeathTestFilterNames {
+  template <typename T>
+  static std::string GetName(int) {
+    return DeathTestTypeName(static_cast<T*>(nullptr));
+  }
+};
+
+template <typename T>
+class FilterCharDeathTest : public testing::Test {};
+
+using FilterCharTypes =
+    testing::Types<PlainFilterName, ColonFilterName, HyphenFilterName,
+                   ColonHyphenFilterName, BackslashFilterName>;
+TYPED_TEST_SUITE(FilterCharDeathTest, FilterCharTypes, DeathTestFilterNames);
+
+TYPED_TEST(FilterCharDeathTest, ExitsWithCode1) {
+  GTEST_FLAG_SET(death_test_style, "threadsafe");
+  // With the bug, the child matches no test and exits 0, so this fails.
+  EXPECT_EXIT(_Exit(1), testing::ExitedWithCode(1), "");
+}
+
+TYPED_TEST(FilterCharDeathTest, NonterminatingStatementFails) {
+  GTEST_FLAG_SET(death_test_style, "threadsafe");
+  // With the bug, the child never runs this statement and still exits 0, so
+  // EXPECT_EXIT(ExitedWithCode(0)) passes. It must be reported as a failure.
+  EXPECT_NONFATAL_FAILURE(
+      EXPECT_EXIT(fflush(stderr), testing::ExitedWithCode(0), ""),
+      "failed to die");
+}
 
 }  // namespace

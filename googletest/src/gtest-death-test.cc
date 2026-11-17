@@ -627,6 +627,29 @@ bool DeathTestImpl::Passed(bool status_ok) {
   return success;
 }
 
+// Escapes characters that --gtest_filter treats as syntax, so a death-test
+// child is told to run this exact test. ':' separates patterns and the first
+// unescaped '-' starts a negative filter. '\\' is escaped too, so a literal
+// backslash in a name survives the filter parser. The '.' between the suite
+// name and the test name is the real name separator and is not escaped.
+static std::string EscapeDeathTestFilterComponent(const std::string& text) {
+  std::string escaped;
+  escaped.reserve(text.size());
+  for (const char ch : text) {
+    if (ch == '\\' || ch == ':' || ch == '-') {
+      escaped.push_back('\\');
+    }
+    escaped.push_back(ch);
+  }
+  return escaped;
+}
+
+static std::string DeathTestChildFilterFlag(const TestInfo* info) {
+  return std::string("--") + GTEST_FLAG_PREFIX_ +
+         "filter=" + EscapeDeathTestFilterComponent(info->test_suite_name()) +
+         "." + EscapeDeathTestFilterComponent(info->name());
+}
+
 #ifndef GTEST_OS_WINDOWS
 // Note: The return value points into args, so the return value's lifetime is
 // bound to that of args.
@@ -775,9 +798,7 @@ DeathTest::TestRole WindowsDeathTest::AssumeRole() {
       FALSE,      // The initial state is non-signalled.
       nullptr));  // The even is unnamed.
   GTEST_DEATH_TEST_CHECK_(event_handle_.Get() != nullptr);
-  const std::string filter_flag = std::string("--") + GTEST_FLAG_PREFIX_ +
-                                  "filter=" + info->test_suite_name() + "." +
-                                  info->name();
+  const std::string filter_flag = DeathTestChildFilterFlag(info);
   const std::string internal_flag =
       std::string("--") + GTEST_FLAG_PREFIX_ +
       "internal_run_death_test=" + file_ + "|" + StreamableToString(line_) +
@@ -969,9 +990,7 @@ DeathTest::TestRole FuchsiaDeathTest::AssumeRole() {
   FlushInfoLog();
 
   // Build the child process command line.
-  const std::string filter_flag = std::string("--") + GTEST_FLAG_PREFIX_ +
-                                  "filter=" + info->test_suite_name() + "." +
-                                  info->name();
+  const std::string filter_flag = DeathTestChildFilterFlag(info);
   const std::string internal_flag = std::string("--") + GTEST_FLAG_PREFIX_ +
                                     kInternalRunDeathTestFlag + "=" + file_ +
                                     "|" + StreamableToString(line_) + "|" +
@@ -1369,9 +1388,7 @@ DeathTest::TestRole ExecDeathTest::AssumeRole() {
   // it be closed when the child process does an exec:
   GTEST_DEATH_TEST_CHECK_(fcntl(pipe_fd[1], F_SETFD, 0) != -1);
 
-  const std::string filter_flag = std::string("--") + GTEST_FLAG_PREFIX_ +
-                                  "filter=" + info->test_suite_name() + "." +
-                                  info->name();
+  const std::string filter_flag = DeathTestChildFilterFlag(info);
   const std::string internal_flag = std::string("--") + GTEST_FLAG_PREFIX_ +
                                     "internal_run_death_test=" + file_ + "|" +
                                     StreamableToString(line_) + "|" +

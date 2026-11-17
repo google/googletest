@@ -820,25 +820,76 @@ bool IsGlobPattern(const std::string& pattern) {
                      [](const char c) { return c == '?' || c == '*'; });
 }
 
+// Splits a --gtest_filter value into positive and negative patterns.
+//
+// ':' separates patterns. The first unescaped '-' starts the negative filter;
+// any later '-' is a literal character. That matches the historical behavior
+// of splitting on every '-' and then rejoining the negative pieces with '-'.
+//
+// '\\', '\:', and '\-' are escapes, and they are decoded here in one pass.
+// Death-test child filters need that so a test name can contain ':' or '-'.
+// Decoding during a '-' split and then splitting the result on ':' does not
+// work: the '-' pass consumes the backslash from '\:', and the ':' pass then
+// cuts the name apart (for example "std::string", or "a:b-c").
+//
+// Returns true when the filter has a negative part. An empty filter yields
+// one empty positive pattern, which matches only the empty string.
+bool ParseGoogleTestFilter(const std::string& filter,
+                           std::vector<std::string>* positive,
+                           std::vector<std::string>* negative) {
+  std::string current;
+  bool in_negative = false;
+  const auto append_pattern = [&]() {
+    if (in_negative) {
+      negative->push_back(current);
+    } else {
+      positive->push_back(current);
+    }
+    current.clear();
+  };
+
+  for (size_t i = 0; i < filter.size(); ++i) {
+    const char ch = filter[i];
+    if (ch == '\\' && i + 1 < filter.size()) {
+      const char next = filter[i + 1];
+      if (next == '\\' || next == ':' || next == '-') {
+        current.push_back(next);
+        ++i;
+        continue;
+      }
+    }
+    if (ch == ':') {
+      append_pattern();
+      continue;
+    }
+    if (ch == '-' && !in_negative) {
+      append_pattern();
+      in_negative = true;
+      continue;
+    }
+    current.push_back(ch);
+  }
+  append_pattern();
+  return in_negative;
+}
+
 class UnitTestFilter {
  public:
   UnitTestFilter() = default;
 
   // Constructs a filter from a string of patterns separated by `:`.
+  // This constructor does not interpret escapes. UnitTestOptions::MatchesFilter
+  // uses it. --gtest_filter parsing, which does interpret escapes, goes through
+  // ParseGoogleTestFilter and the vector constructor below.
   explicit UnitTestFilter(const std::string& filter) {
     // By design "" filter matches "" string.
     std::vector<std::string> all_patterns;
     SplitString(filter, ':', &all_patterns);
-    const auto exact_match_patterns_begin = std::partition(
-        all_patterns.begin(), all_patterns.end(), &IsGlobPattern);
+    SetPatterns(std::move(all_patterns));
+  }
 
-    glob_patterns_.reserve(static_cast<size_t>(
-        std::distance(all_patterns.begin(), exact_match_patterns_begin)));
-    std::move(all_patterns.begin(), exact_match_patterns_begin,
-              std::inserter(glob_patterns_, glob_patterns_.begin()));
-    std::move(
-        exact_match_patterns_begin, all_patterns.end(),
-        std::inserter(exact_match_patterns_, exact_match_patterns_.begin()));
+  explicit UnitTestFilter(std::vector<std::string> patterns) {
+    SetPatterns(std::move(patterns));
   }
 
   // Returns true if and only if name matches at least one of the patterns in
@@ -854,6 +905,19 @@ class UnitTestFilter {
   }
 
  private:
+  void SetPatterns(std::vector<std::string> all_patterns) {
+    const auto exact_match_patterns_begin = std::partition(
+        all_patterns.begin(), all_patterns.end(), &IsGlobPattern);
+
+    glob_patterns_.reserve(static_cast<size_t>(
+        std::distance(all_patterns.begin(), exact_match_patterns_begin)));
+    std::move(all_patterns.begin(), exact_match_patterns_begin,
+              std::inserter(glob_patterns_, glob_patterns_.begin()));
+    std::move(
+        exact_match_patterns_begin, all_patterns.end(),
+        std::inserter(exact_match_patterns_, exact_match_patterns_.begin()));
+  }
+
   std::vector<std::string> glob_patterns_;
   std::unordered_set<std::string> exact_match_patterns_;
 };
@@ -866,29 +930,20 @@ class PositiveAndNegativeUnitTestFilter {
   // filter will be assumed "*".
   // A filter is a list of patterns separated by ':'.
   explicit PositiveAndNegativeUnitTestFilter(const std::string& filter) {
-    std::vector<std::string> positive_and_negative_filters;
+    std::vector<std::string> positive_patterns;
+    std::vector<std::string> negative_patterns;
+    const bool has_negative =
+        ParseGoogleTestFilter(filter, &positive_patterns, &negative_patterns);
 
-    // NOTE: `SplitString` always returns a non-empty container.
-    SplitString(filter, '-', &positive_and_negative_filters);
-    const auto& positive_filter = positive_and_negative_filters.front();
-
-    if (positive_and_negative_filters.size() > 1) {
-      positive_filter_ = UnitTestFilter(
-          positive_filter.empty() ? kUniversalFilter : positive_filter);
-
-      // TODO(b/214626361): Fail on multiple '-' characters
-      // For the moment to preserve old behavior we concatenate the rest of the
-      // string parts with `-` as separator to generate the negative filter.
-      auto negative_filter_string = positive_and_negative_filters[1];
-      for (std::size_t i = 2; i < positive_and_negative_filters.size(); i++)
-        negative_filter_string =
-            negative_filter_string + '-' + positive_and_negative_filters[i];
-      negative_filter_ = UnitTestFilter(negative_filter_string);
-    } else {
-      // In case we don't have a negative filter and positive filter is ""
-      // we do not use kUniversalFilter by design as opposed to when we have a
-      // negative filter.
-      positive_filter_ = UnitTestFilter(positive_filter);
+    // "-Foo" has an empty positive side and means "everything except Foo".
+    // An empty filter with no '-' does not: it matches only the empty name.
+    if (has_negative && positive_patterns.size() == 1 &&
+        positive_patterns[0].empty()) {
+      positive_patterns[0] = kUniversalFilter;
+    }
+    positive_filter_ = UnitTestFilter(std::move(positive_patterns));
+    if (has_negative) {
+      negative_filter_ = UnitTestFilter(std::move(negative_patterns));
     }
   }
 
@@ -926,8 +981,6 @@ bool UnitTestOptions::MatchesFilter(const std::string& name_str,
 // suite name and the test name.
 bool UnitTestOptions::FilterMatchesTest(const std::string& test_suite_name,
                                         const std::string& test_name) {
-  // Split --gtest_filter at '-', if there is one, to separate into
-  // positive filter and negative filter portions
   return PositiveAndNegativeUnitTestFilter(GTEST_FLAG_GET(filter))
       .MatchesTest(test_suite_name, test_name);
 }
