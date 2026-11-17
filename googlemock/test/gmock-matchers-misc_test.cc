@@ -41,8 +41,8 @@
 #include <vector>
 
 #include "gmock/gmock.h"
-#include "test/gmock-matchers_test.h"
 #include "gtest/gtest.h"
+#include "test/gmock-matchers_test.h"
 
 // Silence warning C4244: 'initializing': conversion from 'int' to 'short',
 // possible loss of data and C4100, unreferenced local parameter
@@ -171,6 +171,17 @@ TEST(IsEmptyTest, WorksWithMoveOnly) {
   ContainerHelper helper;
   EXPECT_CALL(helper, Call(IsEmpty()));
   helper.Call({});
+}
+
+TEST(IsEmptyTest, WorksWithPseudoContainer) {
+  vector<int> container;
+  pseudo_container::PseudoContainer empty_container(container);
+
+  container.push_back(0);
+  pseudo_container::PseudoContainer not_empty_container(container);
+
+  EXPECT_THAT(empty_container, IsEmpty());
+  EXPECT_THAT(not_empty_container, Not(IsEmpty()));
 }
 
 TEST(IsTrueTest, IsTrueIsFalse) {
@@ -401,6 +412,19 @@ TEST(ContainerEqExtraTest, CopiesNativeArrayParameter) {
 
   a2[0][0] = "ha";
   EXPECT_THAT(a1, m);
+}
+
+TEST(ContainerEqExtraTest, WorksWithPseudoContainers) {
+  std::vector<int> a1 = {1, 2, 3};
+  std::vector<int> a2 = {1, 2, 3};
+  std::vector<int> b = {1, 2, 4};
+
+  pseudo_container::PseudoContainer pa1(a1);
+  pseudo_container::PseudoContainer pa2(a2);
+  pseudo_container::PseudoContainer pb(b);
+
+  EXPECT_THAT(pa1, ContainerEq(pa2));
+  EXPECT_THAT(pa1, Not(ContainerEq(pb)));
 }
 
 namespace {
@@ -1468,7 +1492,7 @@ TEST(ContainsTimes, ListMatchesWhenElementQuantityMatches) {
 
 TEST_P(ContainsTimesP, ExplainsMatchResultCorrectly) {
   const int a[2] = {1, 2};
-  Matcher<const int(&)[2]> m = Contains(2).Times(3);
+  Matcher<const int (&)[2]> m = Contains(2).Times(3);
   EXPECT_EQ(
       "whose element #1 matches but whose match quantity of 1 does not match",
       Explain(m, a));
