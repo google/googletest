@@ -729,6 +729,83 @@ TEST(ReturnPointeeTest, Works) {
   EXPECT_EQ(43, a.Perform(std::make_tuple()));
 }
 
+TEST(ReturnPointeeTest, RejectsVoidResult) {
+  using ReturnPointeeAction =
+      decltype(ReturnPointee(static_cast<int*>(nullptr)));
+  static_assert(!std::is_convertible_v<ReturnPointeeAction, Action<void()>>,
+                "");
+  static_assert(!std::is_convertible_v<ReturnPointeeAction, Action<void(int)>>,
+                "");
+  static_assert(!std::is_convertible_v<ReturnPointeeAction, OnceAction<void()>>,
+                "");
+  static_assert(
+      !std::is_convertible_v<ReturnPointeeAction, OnceAction<void(int)>>, "");
+}
+
+TEST(ReturnPointeeTest, ConvertsResultAndIgnoresArguments) {
+  int n = 42;
+  const auto action = ReturnPointee(&n);
+  const Action<long(int)> repeated = action;  // NOLINT
+  OnceAction<long(int)> once = action;        // NOLINT
+  n = 43;
+  EXPECT_EQ(43, repeated.Perform(std::make_tuple(1)));
+  EXPECT_EQ(43, std::move(once).Call(2));
+}
+
+TEST(ReturnPointeeTest, ReturnsReference) {
+  int n = 42;
+  const Action<int&()> repeated = ReturnPointee(&n);
+  OnceAction<const int&()> once = ReturnPointee(&n);
+  repeated.Perform(std::make_tuple()) = 43;
+  EXPECT_EQ(43, n);
+  EXPECT_EQ(&n, &std::move(once).Call());
+}
+
+TEST(ReturnPointeeTest, ReturnsNonMovableValue) {
+  struct Value {
+    explicit Value(int n) : n(n) {}
+    Value(const Value&) = delete;
+    Value(Value&&) = delete;
+    int n;
+  };
+  struct Pointer {
+    Value operator*() const { return Value(42); }
+  };
+
+  const auto action = ReturnPointee(Pointer{});
+  const Action<Value()> repeated = action;
+  OnceAction<Value()> from_lvalue = action;
+  OnceAction<Value()> from_rvalue = ReturnPointee(Pointer{});
+  EXPECT_EQ(42, repeated.Perform(std::make_tuple()).n);
+  EXPECT_EQ(42, std::move(from_lvalue).Call().n);
+  EXPECT_EQ(42, std::move(from_rvalue).Call().n);
+}
+
+TEST(ReturnPointeeTest, ResultCanBeExplicitlyIgnored) {
+  struct Pointer {
+    int* dereferences;
+    int operator*() const { return ++*dereferences; }
+  };
+  int dereferences = 0;
+  MockFunction<void(int)> mock;
+  EXPECT_CALL(mock, Call)
+      .WillOnce(IgnoreResult(ReturnPointee(Pointer{&dereferences})))
+      .WillRepeatedly(IgnoreResult(ReturnPointee(Pointer{&dereferences})));
+  mock.Call(1);
+  mock.Call(2);
+  mock.Call(3);
+  EXPECT_EQ(3, dereferences);
+}
+
+TEST(ReturnPointeeTest, WorksInDoAll) {
+  int n = 42;
+  int argument = 0;
+  const Action<int(int)> action =
+      DoAll(SaveArg<0>(&argument), ReturnPointee(&n));
+  EXPECT_EQ(42, action.Perform(std::make_tuple(7)));
+  EXPECT_EQ(7, argument);
+}
+
 // Tests InvokeArgument<N>(...).
 
 // Tests using InvokeArgument with a nullary function.
