@@ -457,6 +457,21 @@ TEST(...) {
   // is called.
 }
 ```
+The default behavior for mock objects in gMock is *naggy*. That is, if you use
+`MockFoo` directly (without wrapping it in `NiceMock` or `StrictMock`),
+uninteresting calls will be allowed but will generate warnings.
+
+You can also explicitly state this behavior using `NaggyMock`:
+
+```cpp
+using ::testing::NaggyMock;
+
+TEST(...) {
+  NaggyMock<MockFoo> mock_foo;
+  EXPECT_CALL(mock_foo, DoThis());
+  ... code that uses mock_foo ...
+}
+```
 
 {: .callout .note}
 NOTE: `NiceMock` and `StrictMock` only affects *uninteresting* calls (calls of
