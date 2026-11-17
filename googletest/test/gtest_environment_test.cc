@@ -63,6 +63,7 @@ class MyEnvironment : public testing::Environment {
       case FATAL_FAILURE:
         FAIL() << "Expected fatal failure in global set-up.";
         break;
+      case NO_FAILURE:
       default:
         break;
     }
@@ -172,6 +173,20 @@ void TestNoTestsSkipsSetUp() {
         "as the global set-up was not run.");
 }
 
+// Verifies that an unknown/future FailureType safely falls through to default
+// (generates no failure in set-up).
+void TestUnknownFailureType() {
+  MyEnvironment* const env = RegisterTestEnv();
+  Check(RunAllTests(env, static_cast<FailureType>(999)) != 0,
+        "RUN_ALL_TESTS() should return non-zero, as the global tear-down "
+        "should generate a failure.");
+  Check(test_was_run,
+        "The tests should run, as the unknown failure type should generate no "
+        "failure in set-up.");
+  Check(tear_down_was_run,
+        "The global tear-down should run, as the global set-up was run.");
+}
+
 }  // namespace
 
 int main(int argc, char** argv) {
@@ -180,6 +195,7 @@ int main(int argc, char** argv) {
   TestGlobalSetUp();
   TestTestsRun();
   TestNoTestsRunSetUpFailure();
+  TestUnknownFailureType();
   TestNoTestsSkipsSetUp();
 
   printf("PASS\n");
