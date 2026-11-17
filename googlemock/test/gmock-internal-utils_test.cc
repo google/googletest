@@ -726,6 +726,19 @@ TEST(Base64Unescape, InvalidString) {
   EXPECT_FALSE(Base64Unescape("(invalid)", &unescaped));
 }
 
+TEST(Base64Unescape, NonAsciiCharactersAreInvalid) {
+  std::string unescaped;
+  for (int c = 0x80; c <= 0xFF; ++c) {
+    const std::string escaped(4, static_cast<char>(c));
+    EXPECT_FALSE(Base64Unescape(escaped, &unescaped)) << "character " << c;
+    EXPECT_EQ("", unescaped);
+  }
+  EXPECT_FALSE(
+      Base64Unescape("SGVs\xC3\xA9"
+                     "bG8=",
+                     &unescaped));
+}
+
 TEST(Base64Unescape, ShortString) {
   std::string unescaped;
   EXPECT_TRUE(Base64Unescape("SGVsbG8gd29ybGQh", &unescaped));

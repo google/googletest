@@ -232,11 +232,11 @@ bool Base64Unescape(const std::string& encoded, std::string* decoded) {
   decoded->reserve(3 * (encoded_len / 4) + (encoded_len % 4));
   int bit_pos = 0;
   char dst = 0;
-  for (int src : encoded) {
+  for (unsigned char src : encoded) {
     if (std::isspace(src) || src == '=') {
       continue;
     }
-    char src_bin = kUnBase64[static_cast<size_t>(src)];
+    char src_bin = kUnBase64[src];
     if (src_bin >= 64) {
       decoded->clear();
       return false;
