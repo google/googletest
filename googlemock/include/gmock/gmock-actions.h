@@ -1769,8 +1769,9 @@ struct SetArrayArgumentAction {
   I2 last;
 
   template <typename... Args>
-  void operator()(const Args&... args) const {
-    auto value = std::get<k>(std::tie(args...));
+  void operator()(Args&&... args) const {
+    auto value =
+        std::get<k>(std::forward_as_tuple(std::forward<Args>(args)...));
     for (auto it = first; it != last; ++it, (void)++value) {
       *value = *it;
     }
