@@ -454,8 +454,8 @@ bool UnorderedElementsAreMatcherImplBase::FindPairing(
     if (listener->IsInterested()) {
       *listener
           << "where not all elements can be matched, and the closest match is "
-          << max_flow << " of " << matrix.RhsSize()
-          << " matchers with the pairings:\n";
+          << max_flow << " of " << matrix.LhsSize()
+          << " elements with the pairings:\n";
       LogElementMatcherPairVec(matches, listener->stream());
     }
     return false;
