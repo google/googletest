@@ -191,6 +191,14 @@ if (gtest_build_tests)
   # 'make test' or ctest.
   enable_testing()
 
+  add_test(
+    NAME googletest-cmake-output-directory-test
+    COMMAND ${CMAKE_COMMAND}
+      "-DGOOGLETEST_SOURCE_DIR=${gtest_SOURCE_DIR}"
+      "-DGOOGLETEST_BINARY_DIR=${gtest_BINARY_DIR}/cmake_output_directory_test"
+      "-DGOOGLETEST_VERSION=${GOOGLETEST_VERSION}"
+      -P "${gtest_SOURCE_DIR}/test/googletest-cmake-output-directory-test.cmake")
+
   ############################################################
   # C++ tests built with standard compiler flags.
 
