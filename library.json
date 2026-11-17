@@ -1,0 +1,51 @@
+{
+  "name": "googletest",
+  "keywords": "unit-testing, testing, tdd, testing-framework, gtest, gmock",
+  "description": "Google Testing and Mocking Framework",
+  "license": "BSD-3-Clause",
+  "homepage": "https://google.github.io/googletest/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/google/googletest.git"
+  },
+  "version": "1.13.0",
+  "frameworks": "*",
+  "platforms": [
+    "espressif32",
+    "espressif8266",
+    "native"
+  ],
+  "export": {
+    "include": [
+      "googlemock/include",
+      "googlemock/src",
+      "googletest/include",
+      "googletest/src",
+      "platformio-build.py"
+    ]
+  },
+  "headers": [
+    "gtest/gtest.h",
+    "gmock/gmock.h"
+  ],
+  "build": {
+    "flags": [
+      "-Igooglemock",
+      "-Igooglemock/include",
+      "-Igoogletest",
+      "-Igoogletest/include"
+    ],
+    "srcFilter": [
+      "-<*>",
+      "+<googletest/src/*.cc>",
+      "-<googletest/src/gtest-all.cc>",
+      "-<googletest/src/gtest_main.cc>",
+      "-<googletest/test/*>",
+      "+<googlemock/src/*.cc>",
+      "-<googlemock/src/gmock-all.cc>",
+      "-<googlemock/src/gmock_main.cc>",
+      "-<googlemock/test/*>"
+    ],
+    "extraScript": "platformio-build.py"
+  }
+}
