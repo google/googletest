@@ -497,6 +497,44 @@ test in the test suite `GoogleTestVerification`.
 `GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST` suppresses this failure for the
 given test suite.
 
+### GTEST_FLAG_GET {#GTEST_FLAG_GET}
+
+`GTEST_FLAG_GET(`*`flag_name`*`)`
+
+Gets the current value of the GoogleTest flag *`flag_name`*.
+
+The flag name must be specified without the `gtest_` prefix (e.g. `filter`,
+`color`, `repeat`). For example:
+
+```cpp
+if (GTEST_FLAG_GET(also_run_disabled_tests)) {
+  // ...
+}
+```
+
+This macro provides a portable way to access GoogleTest flags regardless of
+whether GoogleTest is built with Abseil flags support.
+
+### GTEST_FLAG_SET {#GTEST_FLAG_SET}
+
+`GTEST_FLAG_SET(`*`flag_name`*`, `*`value`*`)`
+
+Sets the value of the GoogleTest flag *`flag_name`* to *`value`*.
+
+The flag name must be specified without the `gtest_` prefix (e.g. `filter`,
+`color`, `death_test_style`). For example:
+
+```cpp
+GTEST_FLAG_SET(death_test_style, "threadsafe");
+GTEST_FLAG_SET(filter, "*Test*");
+```
+
+This macro provides a portable way to modify GoogleTest flags programmatically
+regardless of whether GoogleTest is built with Abseil flags support.
+
+See also [Death Test Styles](../advanced.md#death-test-styles) for an example of
+setting flags programmatically.
+
 ## Classes and types
 
 GoogleTest defines the following classes and types to help with writing tests.
@@ -1064,8 +1102,8 @@ Fired before any test activity starts.
 int iteration)`
 
 Fired before each iteration of tests starts. There may be more than one
-iteration if `GTEST_FLAG(repeat)` is set. `iteration` is the iteration index,
-starting from 0.
+iteration if `GTEST_FLAG_GET(repeat)` is set. `iteration` is the iteration
+index, starting from 0.
 
 ##### OnEnvironmentsSetUpStart {#TestEventListener::OnEnvironmentsSetUpStart}
 

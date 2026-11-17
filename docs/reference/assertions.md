@@ -532,9 +532,9 @@ The following assertions verify that a piece of code causes the process to
 terminate. For context, see [Death Tests](../advanced.md#death-tests).
 
 These assertions spawn a new process and execute the code under test in that
-process. How that happens depends on the platform and the variable
-`::testing::GTEST_FLAG(death_test_style)`, which is initialized from the
-command-line flag `--gtest_death_test_style`.
+process. How that happens depends on the platform and the flag
+[`GTEST_FLAG_GET(death_test_style)`](testing.md#GTEST_FLAG_GET), which is
+initialized from the command-line flag `--gtest_death_test_style`.
 
 *   On POSIX systems, `fork()` (or `clone()` on Linux) is used to spawn the
     child, after which:
