@@ -43,7 +43,9 @@
 #include <algorithm>
 #include <chrono>  // NOLINT
 #include <cmath>
+#ifndef GTEST_OS_ZEPHYR
 #include <csignal>  // NOLINT: raise(3) is used on some platforms
+#endif
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
