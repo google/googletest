@@ -1245,6 +1245,12 @@ TEST(PrintStlContainerTest, StdSpan) {
   std::span<int> s = a;
 
   EXPECT_EQ("{ 3, 6, 5 }", Print(s));
+
+  std::span<int, 3> s3 = a;
+  EXPECT_EQ("{ 3, 6, 5 }", Print(s3));
+
+  std::span<int, 0> s0;
+  EXPECT_EQ("{}", Print(s0));
 #else
   GTEST_SKIP() << "Does not have std::span.";
 #endif  // GTEST_INTERNAL_HAS_STD_SPAN
