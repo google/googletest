@@ -165,6 +165,9 @@ struct IsStdSpan<std::span<E>> {
 // the presence of const_iterator to avoid treating iterators as containers
 // because of iterator::iterator. Which means std::span satisfies the *intended*
 // condition of IsContainerTest.
+#ifndef GTEST_MAX_NUM_ELEMENTS_TO_PRINT
+#define GTEST_MAX_NUM_ELEMENTS_TO_PRINT 32
+#endif
 struct ContainerPrinter {
   template <typename T,
             typename = typename std::enable_if<
@@ -172,7 +175,8 @@ struct ContainerPrinter {
                  !IsRecursiveContainer<T>::value) ||
                 IsStdSpan<T>::value>::type>
   static void PrintValue(const T& container, std::ostream* os) {
-    const size_t kMaxCount = 32;  // The maximum number of elements to print.
+    const size_t kMaxCount =
+        static_cast<size_t>(GTEST_MAX_NUM_ELEMENTS_TO_PRINT);
     *os << '{';
     size_t count = 0;
     for (auto&& elem : container) {
