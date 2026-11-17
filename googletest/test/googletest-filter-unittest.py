@@ -48,6 +48,8 @@ try:
 except ImportError:
   pass
 import sys
+import tempfile
+import xml.etree.ElementTree as ET
 from googletest.test import gtest_test_utils
 
 # Constants.
@@ -165,6 +167,7 @@ ACTIVE_TESTS = (
     [
         'FooTest.Abc',
         'FooTest.Xyz',
+        'FileFilterTest.TestFromOtherFile',
         'BarTest.TestOne',
         'BarTest.TestTwo',
         'BarTest.TestThree',
@@ -315,6 +318,66 @@ class GTestFilterUnitTest(gtest_test_utils.TestCase):
 
     tests_run = RunAndExtractTestList(args)[0]
     self.AssertSetEqual(tests_run, tests_to_run)
+
+  def testSourceFileFilter(self):
+    with tempfile.NamedTemporaryFile(suffix='.xml', delete=False) as xml_file:
+      xml_path = xml_file.name
+    try:
+      RunAndReturnOutput([
+          '--gtest_filter=FileFilterTest.*',
+          '--gtest_output=xml:' + xml_path,
+      ])
+      testcase = ET.parse(xml_path).find('.//testcase')
+      self.assertIsNotNone(testcase)
+      source_path = testcase.get('file')
+    finally:
+      os.remove(xml_path)
+
+    tests_run = RunAndExtractTestList([
+        '--sourceFileFilter=' + source_path,
+        '--gtest_filter=FileFilterTest.*',
+    ])[0]
+    self.AssertSetEqual(tests_run, ['FileFilterTest.TestFromOtherFile'])
+
+    args = [
+        '--sourceFileFilter=*googletest-filter-unittest-extra_.c?',
+    ]
+    tests_run = RunAndExtractTestList(args)[0]
+    self.AssertSetEqual(tests_run, ['FileFilterTest.TestFromOtherFile'])
+
+    args = [
+        '--sourceFileFilter',
+        '*googletest-filter-unittest-extra_.cc',
+        '--gtest_filter=FileFilterTest.*',
+    ]
+    tests_run = RunAndExtractTestList(args)[0]
+    self.AssertSetEqual(tests_run, ['FileFilterTest.TestFromOtherFile'])
+
+    args = [
+        '--gtest_source_file_filter=*googletest-filter-unittest-extra_.cc',
+        '--gtest_filter=FileFilterTest.*',
+    ]
+    tests_run = RunAndExtractTestList(args)[0]
+    self.AssertSetEqual(tests_run, ['FileFilterTest.TestFromOtherFile'])
+
+    args = [
+        '--sourceFileFilter',
+        '*googletest-filter-unittest_.cc',
+        '--gtest_filter=FileFilterTest.*',
+    ]
+    tests_run = RunAndExtractTestList(args)[0]
+    self.AssertSetEqual(tests_run, [])
+
+    output = RunAndReturnOutput(['--sourceFileFilter=*no-such-file*'])
+    self.assertIn('source file filter "*no-such-file*"', output)
+
+    output = RunAndReturnOutput(['--sourceFileFilter'])
+    self.assertIn('--sourceFileFilter', output)
+
+    tests_run = RunAndExtractTestList(
+        ['--', '--sourceFileFilter=*googletest-filter-unittest-extra_.cc']
+    )[0]
+    self.AssertSetEqual(tests_run, ACTIVE_TESTS)
 
   def RunAndVerifyWithSharding(
       self,
@@ -592,6 +655,7 @@ class GTestFilterUnitTest(gtest_test_utils.TestCase):
         [
             'FooTest.Abc',
             'FooTest.Xyz',
+            'FileFilterTest.TestFromOtherFile',
             'BarTest.TestOne',
             'BarTest.TestTwo',
             'BarTest.TestThree',
@@ -606,6 +670,7 @@ class GTestFilterUnitTest(gtest_test_utils.TestCase):
         '*-FooTest.Abc:BazTest.*',
         [
             'FooTest.Xyz',
+            'FileFilterTest.TestFromOtherFile',
             'BarTest.TestOne',
             'BarTest.TestTwo',
             'BarTest.TestThree',
@@ -629,6 +694,7 @@ class GTestFilterUnitTest(gtest_test_utils.TestCase):
             'BarTest.TestOne',
             'BarTest.TestTwo',
             'BarTest.TestThree',
+            'FileFilterTest.TestFromOtherFile',
         ]
         + DEATH_TESTS
         + PARAM_TESTS,

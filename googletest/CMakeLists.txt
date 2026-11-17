@@ -280,7 +280,8 @@ if (gtest_build_tests)
   cxx_executable(googletest-env-var-test_ test gtest)
   py_test(googletest-env-var-test)
 
-  cxx_executable(googletest-filter-unittest_ test gtest)
+  cxx_executable(googletest-filter-unittest_ test gtest
+    test/googletest-filter-unittest-extra_.cc)
   py_test(googletest-filter-unittest)
 
   cxx_executable(gtest_help_test_ test gtest_main)
