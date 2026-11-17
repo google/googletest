@@ -1089,6 +1089,17 @@ TEST(IsEmptyTest, MatchesCString) {
   EXPECT_FALSE(m.Matches(nullptr));
 }
 
+TEST(IsEmptyTest, MatchesNonConstCString) {
+  const Matcher<char*> m = IsEmpty();
+  char a[] = "";
+  char b[] = "x";
+  EXPECT_TRUE(m.Matches(a));
+  EXPECT_FALSE(m.Matches(b));
+  EXPECT_FALSE(m.Matches(nullptr));
+  EXPECT_THAT(static_cast<char*>(a), IsEmpty());
+  EXPECT_THAT(static_cast<char*>(b), Not(IsEmpty()));
+}
+
 #if GTEST_HAS_STD_WSTRING
 TEST(IsEmptyTest, MatchesCWideString) {
   const Matcher<const wchar_t*> m = IsEmpty();
@@ -1097,6 +1108,17 @@ TEST(IsEmptyTest, MatchesCWideString) {
   EXPECT_TRUE(m.Matches(a));
   EXPECT_FALSE(m.Matches(b));
   EXPECT_FALSE(m.Matches(nullptr));
+}
+
+TEST(IsEmptyTest, MatchesNonConstCWideString) {
+  const Matcher<wchar_t*> m = IsEmpty();
+  wchar_t a[] = L"";
+  wchar_t b[] = L"x";
+  EXPECT_TRUE(m.Matches(a));
+  EXPECT_FALSE(m.Matches(b));
+  EXPECT_FALSE(m.Matches(nullptr));
+  EXPECT_THAT(static_cast<wchar_t*>(a), IsEmpty());
+  EXPECT_THAT(static_cast<wchar_t*>(b), Not(IsEmpty()));
 }
 #endif  // GTEST_HAS_STD_WSTRING
 
