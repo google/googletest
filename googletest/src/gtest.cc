@@ -4219,20 +4219,41 @@ static bool PortableLocaltime(time_t seconds, struct tm* out) {
 #endif
 }
 
+static bool PortableGmtime(time_t seconds, struct tm* out) {
+#if defined(_MSC_VER)
+  return gmtime_s(out, &seconds) == 0;
+#elif defined(__MINGW32__) || defined(__MINGW64__)
+  // MINGW <time.h> provides neither gmtime_r nor gmtime_s, but uses
+  // Windows' gmtime(), which has a thread-local tm buffer.
+  struct tm* tm_ptr = gmtime(&seconds);  // NOLINT
+  if (tm_ptr == nullptr) return false;
+  *out = *tm_ptr;
+  return true;
+#elif defined(__STDC_LIB_EXT1__)
+  // Uses gmtime_s when available as gmtime_r is only available from
+  // C23 standard.
+  return gmtime_s(&seconds, out) != nullptr;
+#else
+  return gmtime_r(&seconds, out) != nullptr;
+#endif
+}
+
 // Converts the given epoch time in milliseconds to a date string in the ISO
-// 8601 format, without the timezone information.
+// 8601 format, in Coordinated Universal Time (UTC), denoted by the trailing
+// 'Z'. Emitting an explicit instant (rather than an offset-less local time)
+// keeps the timestamp unambiguous for consumers that read the report in a
+// different time zone than the one the tests ran in.
 std::string FormatEpochTimeInMillisAsIso8601(TimeInMillis ms) {
   struct tm time_struct;
-  if (!PortableLocaltime(static_cast<time_t>(ms / 1000), &time_struct))
-    return "";
-  // YYYY-MM-DDThh:mm:ss.sss
+  if (!PortableGmtime(static_cast<time_t>(ms / 1000), &time_struct)) return "";
+  // YYYY-MM-DDThh:mm:ss.sssZ
   return StreamableToString(time_struct.tm_year + 1900) + "-" +
          String::FormatIntWidth2(time_struct.tm_mon + 1) + "-" +
          String::FormatIntWidth2(time_struct.tm_mday) + "T" +
          String::FormatIntWidth2(time_struct.tm_hour) + ":" +
          String::FormatIntWidth2(time_struct.tm_min) + ":" +
          String::FormatIntWidth2(time_struct.tm_sec) + "." +
-         String::FormatIntWidthN(static_cast<int>(ms % 1000), 3);
+         String::FormatIntWidthN(static_cast<int>(ms % 1000), 3) + "Z";
 }
 
 // Streams an XML CDATA section, escaping invalid CDATA sequences as needed.
@@ -4671,11 +4692,12 @@ static std::string FormatTimeInMillisAsDuration(TimeInMillis ms) {
 }
 
 // Converts the given epoch time in milliseconds to a date string in the
-// RFC3339 format, without the timezone information.
+// RFC3339 format, in Coordinated Universal Time (UTC), denoted by the trailing
+// 'Z'. The value is formatted in UTC so that the 'Z' suffix is accurate; a
+// local-time value with a 'Z' would misrepresent the instant.
 static std::string FormatEpochTimeInMillisAsRFC3339(TimeInMillis ms) {
   struct tm time_struct;
-  if (!PortableLocaltime(static_cast<time_t>(ms / 1000), &time_struct))
-    return "";
+  if (!PortableGmtime(static_cast<time_t>(ms / 1000), &time_struct)) return "";
   // YYYY-MM-DDThh:mm:ss
   return StreamableToString(time_struct.tm_year + 1900) + "-" +
          String::FormatIntWidth2(time_struct.tm_mon + 1) + "-" +
