@@ -54,6 +54,7 @@ using testing::internal::AlwaysTrue;
 #include <signal.h>
 #include <stdio.h>
 
+#include <locale>
 #include <string>
 #include <vector>
 
@@ -439,6 +440,22 @@ TEST_F(TestForDeathTest, ThreadSafeSigprofActionSet) {
 #endif  // GTEST_OS_LINUX
 
 // Repeats a representative sample of death tests in the "threadsafe" style:
+
+#ifdef GTEST_OS_WINDOWS
+class GroupEveryDigit : public std::numpunct<char> {
+ protected:
+  char do_thousands_sep() const override { return ','; }
+  std::string do_grouping() const override { return "\1"; }
+};
+
+TEST_F(TestForDeathTest, ThreadsafeDeathTestWithGroupedNumbers) {
+  GTEST_FLAG_SET(death_test_style, "threadsafe");
+  const std::locale previous = std::locale::global(
+      std::locale(std::locale::classic(), new GroupEveryDigit));
+  EXPECT_EXIT(_Exit(1), testing::ExitedWithCode(1), "");
+  std::locale::global(previous);
+}
+#endif  // GTEST_OS_WINDOWS
 
 TEST_F(TestForDeathTest, StaticMemberFunctionThreadsafeStyle) {
   GTEST_FLAG_SET(death_test_style, "threadsafe");

@@ -778,16 +778,17 @@ DeathTest::TestRole WindowsDeathTest::AssumeRole() {
   const std::string filter_flag = std::string("--") + GTEST_FLAG_PREFIX_ +
                                   "filter=" + info->test_suite_name() + "." +
                                   info->name();
+  // The child parses these fields as ungrouped decimal numbers.
   const std::string internal_flag =
       std::string("--") + GTEST_FLAG_PREFIX_ +
-      "internal_run_death_test=" + file_ + "|" + StreamableToString(line_) +
-      "|" + StreamableToString(death_test_index) + "|" +
-      StreamableToString(static_cast<unsigned int>(::GetCurrentProcessId())) +
+      "internal_run_death_test=" + file_ + "|" + std::to_string(line_) + "|" +
+      std::to_string(death_test_index) + "|" +
+      std::to_string(static_cast<unsigned int>(::GetCurrentProcessId())) + "|" +
       // size_t has the same width as pointers on both 32-bit and 64-bit
       // Windows platforms.
       // See https://msdn.microsoft.com/en-us/library/tcxf1dw6.aspx.
-      "|" + StreamableToString(reinterpret_cast<size_t>(write_handle)) + "|" +
-      StreamableToString(reinterpret_cast<size_t>(event_handle_.Get()));
+      std::to_string(reinterpret_cast<size_t>(write_handle)) + "|" +
+      std::to_string(reinterpret_cast<size_t>(event_handle_.Get()));
 
   char executable_path[_MAX_PATH + 1];  // NOLINT
   GTEST_DEATH_TEST_CHECK_(_MAX_PATH + 1 != ::GetModuleFileNameA(nullptr,
