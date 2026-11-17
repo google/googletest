@@ -1936,6 +1936,88 @@ TEST(UniversalPrintTest, SmartPointers) {
             PrintToString(std::shared_ptr<void>(p.get(), [](void*) {})));
 }
 
+class NullableHandle {
+ public:
+  NullableHandle() = default;
+  NullableHandle(std::nullptr_t) {}
+  explicit NullableHandle(int value) : value_(value) {}
+  explicit operator bool() const { return value_ != 0; }
+
+  friend bool operator==(NullableHandle lhs, NullableHandle rhs) {
+    return lhs.value_ == rhs.value_;
+  }
+  friend bool operator!=(NullableHandle lhs, NullableHandle rhs) {
+    return !(lhs == rhs);
+  }
+  friend void PrintTo(NullableHandle handle, std::ostream* os) {
+    *os << handle.value_;
+  }
+
+ private:
+  int value_ = 0;
+};
+
+struct HandleDeleter {
+  using pointer = NullableHandle;
+  void operator()(pointer) const {}
+};
+
+TEST(UniversalPrintTest, SmartPointerWithCustomPointer) {
+  EXPECT_EQ("(nullptr)", PrintToString(std::unique_ptr<int, HandleDeleter>()));
+  const std::unique_ptr<int, HandleDeleter> ptr(NullableHandle(7));
+  EXPECT_EQ("(ptr = 7)", PrintToString(ptr));
+}
+
+TEST(UniversalPrintTest, SmartPointerToVoidWithCustomPointer) {
+  EXPECT_EQ("(nullptr)", PrintToString(std::unique_ptr<void, HandleDeleter>()));
+  const std::unique_ptr<void, HandleDeleter> ptr(NullableHandle(7));
+  EXPECT_EQ("(ptr = 7)", PrintToString(ptr));
+}
+
+TEST(UniversalPrintTest, SmartPointerToArrayWithCustomPointer) {
+  EXPECT_EQ("(nullptr)",
+            PrintToString(std::unique_ptr<int[], HandleDeleter>()));
+  const std::unique_ptr<int[], HandleDeleter> ptr(NullableHandle(7));
+  EXPECT_EQ("(ptr = 7)", PrintToString(ptr));
+}
+
+TEST(UniversalPrintTest, SmartPointerToIncompleteTypeWithCustomPointer) {
+  struct Incomplete;
+  const std::unique_ptr<Incomplete, HandleDeleter> ptr(NullableHandle(7));
+  EXPECT_EQ("(ptr = 7)", PrintToString(ptr));
+}
+
+class UnprintableHandle {
+ public:
+  UnprintableHandle() = default;
+  UnprintableHandle(std::nullptr_t) {}
+  explicit UnprintableHandle(int value) : value_(value) {}
+  explicit operator bool() const { return value_ != 0; }
+
+  friend bool operator==(UnprintableHandle lhs, UnprintableHandle rhs) {
+    return lhs.value_ == rhs.value_;
+  }
+  friend bool operator!=(UnprintableHandle lhs, UnprintableHandle rhs) {
+    return !(lhs == rhs);
+  }
+
+ private:
+  int value_ = 0;
+};
+
+struct UnprintableHandleDeleter {
+  using pointer = UnprintableHandle;
+  void operator()(pointer) const {}
+};
+
+TEST(UniversalPrintTest, SmartPointerWithUnprintableCustomPointer) {
+  EXPECT_EQ("(nullptr)",
+            PrintToString(std::unique_ptr<int, UnprintableHandleDeleter>()));
+  const std::unique_ptr<int, UnprintableHandleDeleter> ptr(
+      UnprintableHandle(7));
+  EXPECT_EQ("(ptr = " + PrintToString(ptr.get()) + ")", PrintToString(ptr));
+}
+
 TEST(UniversalPrintTest, StringViewNonZeroTerminated) {
   // Craft a non-ASCII UTF-8 input (to trigger a special path in
   // `ConditionalPrintAsText`). Use array notation instead of the string
