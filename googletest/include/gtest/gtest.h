@@ -121,6 +121,15 @@ GTEST_DECLARE_bool_(brief);
 // test.
 GTEST_DECLARE_bool_(print_time);
 
+// This flag controls whether Google Test prints the test filter.
+GTEST_DECLARE_bool_(print_test_filter);
+
+// This flag controls whether Google Test prints the test shard status.
+GTEST_DECLARE_bool_(print_test_shard_status);
+
+// This flag controls whether Google Test prints the test shuffle seed.
+GTEST_DECLARE_bool_(print_test_shuffle_seed);
+
 // This flags control whether Google Test prints UTF8 characters as text.
 GTEST_DECLARE_bool_(print_utf8);
 

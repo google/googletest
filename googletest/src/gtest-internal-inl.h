@@ -155,6 +155,9 @@ class GTestFlagSaver {
     output_ = GTEST_FLAG_GET(output);
     brief_ = GTEST_FLAG_GET(brief);
     print_time_ = GTEST_FLAG_GET(print_time);
+    print_test_filter_ = GTEST_FLAG_GET(print_test_filter);
+    print_test_shard_status_ = GTEST_FLAG_GET(print_test_shard_status);
+    print_test_shuffle_seed_ = GTEST_FLAG_GET(print_test_shuffle_seed);
     print_utf8_ = GTEST_FLAG_GET(print_utf8);
     random_seed_ = GTEST_FLAG_GET(random_seed);
     repeat_ = GTEST_FLAG_GET(repeat);
@@ -181,6 +184,9 @@ class GTestFlagSaver {
     GTEST_FLAG_SET(output, output_);
     GTEST_FLAG_SET(brief, brief_);
     GTEST_FLAG_SET(print_time, print_time_);
+    GTEST_FLAG_SET(print_test_filter, print_test_filter_);
+    GTEST_FLAG_SET(print_test_shard_status, print_test_shard_status_);
+    GTEST_FLAG_SET(print_test_shuffle_seed, print_test_shuffle_seed_);
     GTEST_FLAG_SET(print_utf8, print_utf8_);
     GTEST_FLAG_SET(random_seed, random_seed_);
     GTEST_FLAG_SET(repeat, repeat_);
@@ -207,6 +213,9 @@ class GTestFlagSaver {
   std::string output_;
   bool brief_;
   bool print_time_;
+  bool print_test_filter_;
+  bool print_test_shard_status_;
+  bool print_test_shuffle_seed_;
   bool print_utf8_;
   int32_t random_seed_;
   int32_t repeat_;

@@ -101,6 +101,12 @@ HELP_REGEX = re.compile(
     + FLAG_PREFIX
     + r'print_time.*'
     + FLAG_PREFIX
+    + r'print_test_filter.*'
+    + FLAG_PREFIX
+    + r'print_test_shard_status.*'
+    + FLAG_PREFIX
+    + r'print_test_shuffle_seed.*'
+    + FLAG_PREFIX
     + r'print_utf8.*'
     + FLAG_PREFIX
     + r'output=.*'
