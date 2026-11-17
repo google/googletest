@@ -50,6 +50,12 @@ namespace internal {
 template <typename T>
 using identity_t = T;
 
+// A type tag used for matching overloaded function types. For simplicity,
+// for const/ref-qualified function types we apply the qualifiers to a second int
+// template argument rather than to the signature itself.
+template <typename UnqualifiedSignature, typename IntWithFunctionQualifiers>
+struct FunctionSignatureTag {};
+
 template <typename Pattern>
 struct ThisRefAdjuster {
   template <typename T>
@@ -116,10 +122,10 @@ using internal::FunctionMocker;
   GMOCK_INTERNAL_WARNING_POP()
 
 #define GMOCK_INTERNAL_MOCK_METHOD_ARG_1(...) \
-  GMOCK_INTERNAL_WRONG_ARITY(__VA_ARGS__)
+  GMOCK_INTERNAL_MOCK_METHOD_WRONG_ARITY(__VA_ARGS__)
 
 #define GMOCK_INTERNAL_MOCK_METHOD_ARG_2(...) \
-  GMOCK_INTERNAL_WRONG_ARITY(__VA_ARGS__)
+  GMOCK_INTERNAL_MOCK_METHOD_WRONG_ARITY(__VA_ARGS__)
 
 #define GMOCK_INTERNAL_MOCK_METHOD_ARG_3(_Ret, _MethodName, _Args) \
   GMOCK_INTERNAL_MOCK_METHOD_ARG_4(_Ret, _MethodName, _Args, ())
@@ -139,20 +145,118 @@ using internal::FunctionMocker;
       (GMOCK_INTERNAL_SIGNATURE(_Ret, _Args)))
 
 #define GMOCK_INTERNAL_MOCK_METHOD_ARG_5(...) \
-  GMOCK_INTERNAL_WRONG_ARITY(__VA_ARGS__)
+  GMOCK_INTERNAL_MOCK_METHOD_WRONG_ARITY(__VA_ARGS__)
 
 #define GMOCK_INTERNAL_MOCK_METHOD_ARG_6(...) \
-  GMOCK_INTERNAL_WRONG_ARITY(__VA_ARGS__)
+  GMOCK_INTERNAL_MOCK_METHOD_WRONG_ARITY(__VA_ARGS__)
 
 #define GMOCK_INTERNAL_MOCK_METHOD_ARG_7(...) \
-  GMOCK_INTERNAL_WRONG_ARITY(__VA_ARGS__)
+  GMOCK_INTERNAL_MOCK_METHOD_WRONG_ARITY(__VA_ARGS__)
 
-#define GMOCK_INTERNAL_WRONG_ARITY(...)                                      \
+#define GMOCK_INTERNAL_MOCK_METHOD_WRONG_ARITY(...)                          \
   static_assert(                                                             \
       false,                                                                 \
       "MOCK_METHOD must be called with 3 or 4 arguments. _Ret, "             \
       "_MethodName, _Args and optionally _Spec. _Args and _Spec must be "    \
       "enclosed in parentheses. If _Ret is a type with unprotected commas, " \
+      "it must also be enclosed in parentheses.")
+
+#define DECLARE_MOCK_METHOD(...)                                               \
+  GMOCK_INTERNAL_WARNING_PUSH()                                                \
+  GMOCK_INTERNAL_WARNING_CLANG(ignored, "-Wunused-member-function")            \
+  GMOCK_PP_VARIADIC_CALL(GMOCK_INTERNAL_DECLARE_MOCK_METHOD_ARG_, __VA_ARGS__) \
+  GMOCK_INTERNAL_WARNING_POP()
+
+#define GMOCK_INTERNAL_DECLARE_MOCK_METHOD_ARG_1(...) \
+  GMOCK_INTERNAL_DECLARE_MOCK_METHOD_WRONG_ARITY(__VA_ARGS__)
+
+#define GMOCK_INTERNAL_DECLARE_MOCK_METHOD_ARG_2(...) \
+  GMOCK_INTERNAL_DECLARE_MOCK_METHOD_WRONG_ARITY(__VA_ARGS__)
+
+#define GMOCK_INTERNAL_DECLARE_MOCK_METHOD_ARG_3(_Ret, _MethodName, _Args) \
+  GMOCK_INTERNAL_DECLARE_MOCK_METHOD_ARG_4(_Ret, _MethodName, _Args, ())
+
+#define GMOCK_INTERNAL_DECLARE_MOCK_METHOD_ARG_4(_Ret, _MethodName, _Args, \
+                                                 _Spec)                    \
+  GMOCK_INTERNAL_ASSERT_PARENTHESIS(_Args);                                \
+  GMOCK_INTERNAL_ASSERT_PARENTHESIS(_Spec);                                \
+  GMOCK_INTERNAL_ASSERT_VALID_SIGNATURE(                                   \
+      GMOCK_PP_NARG0 _Args, GMOCK_INTERNAL_SIGNATURE(_Ret, _Args));        \
+  GMOCK_INTERNAL_ASSERT_VALID_SPEC(_Spec)                                  \
+  GMOCK_INTERNAL_DECLARE_MOCK_METHOD_IMPL(                                 \
+      GMOCK_PP_NARG0 _Args, _MethodName, GMOCK_INTERNAL_HAS_CONST(_Spec),  \
+      GMOCK_INTERNAL_HAS_OVERRIDE(_Spec), GMOCK_INTERNAL_HAS_FINAL(_Spec), \
+      GMOCK_INTERNAL_GET_NOEXCEPT_SPEC(_Spec),                             \
+      GMOCK_INTERNAL_GET_CALLTYPE_SPEC(_Spec),                             \
+      GMOCK_INTERNAL_GET_REF_SPEC(_Spec),                                  \
+      (GMOCK_INTERNAL_SIGNATURE(_Ret, _Args)))
+
+#define GMOCK_INTERNAL_DECLARE_MOCK_METHOD_ARG_5(...) \
+  GMOCK_INTERNAL_DECLARE_MOCK_METHOD_WRONG_ARITY(__VA_ARGS__)
+
+#define GMOCK_INTERNAL_DECLARE_MOCK_METHOD_ARG_6(...) \
+  GMOCK_INTERNAL_DECLARE_MOCK_METHOD_WRONG_ARITY(__VA_ARGS__)
+
+#define GMOCK_INTERNAL_DECLARE_MOCK_METHOD_ARG_7(...) \
+  GMOCK_INTERNAL_DECLARE_MOCK_METHOD_WRONG_ARITY(__VA_ARGS__)
+
+#define GMOCK_INTERNAL_DECLARE_MOCK_METHOD_WRONG_ARITY(...)                  \
+  static_assert(                                                             \
+      false,                                                                 \
+      "DECLARE_MOCK_METHOD must be called with 3 or 4 arguments. _Ret, "     \
+      "_MethodName, _Args and optionally _Spec. _Args and _Spec must be "    \
+      "enclosed in parentheses. If _Ret is a type with unprotected commas, " \
+      "it must also be enclosed in parentheses.")
+
+#define DEFINE_MOCK_METHOD(...) \
+  GMOCK_PP_VARIADIC_CALL(GMOCK_INTERNAL_DEFINE_MOCK_METHOD_ARG_, __VA_ARGS__)
+
+#define GMOCK_INTERNAL_DEFINE_MOCK_METHOD_ARG_1(...) \
+  GMOCK_INTERNAL_DEFINE_MOCK_METHOD_WRONG_ARITY(__VA_ARGS__)
+
+#define GMOCK_INTERNAL_DEFINE_MOCK_METHOD_ARG_2(...) \
+  GMOCK_INTERNAL_DEFINE_MOCK_METHOD_WRONG_ARITY(__VA_ARGS__)
+
+#define GMOCK_INTERNAL_DEFINE_MOCK_METHOD_ARG_3(...) \
+  GMOCK_INTERNAL_DEFINE_MOCK_METHOD_WRONG_ARITY(__VA_ARGS__)
+
+#define GMOCK_INTERNAL_DEFINE_MOCK_METHOD_ARG_4(_MockClass, _Ret, _MethodName, \
+                                                _Args)                         \
+  GMOCK_INTERNAL_DEFINE_MOCK_METHOD_ARG_5(_MockClass, _Ret, _MethodName,       \
+                                          _Args, ())
+
+#define GMOCK_INTERNAL_DEFINE_MOCK_METHOD_ARG_5(_MockClass, _Ret, _MethodName, \
+                                                _Args, _Spec)                  \
+  GMOCK_INTERNAL_ASSERT_PARENTHESIS(_Args);                                    \
+  GMOCK_INTERNAL_ASSERT_PARENTHESIS(_Spec);                                    \
+  GMOCK_INTERNAL_ASSERT_VALID_SPEC(_Spec)                                      \
+  GMOCK_INTERNAL_DEFINE_MOCK_METHOD_IMPL(                                      \
+      GMOCK_PP_NARG0 _Args, _MockClass, _MethodName,                           \
+      GMOCK_INTERNAL_HAS_CONST(_Spec), GMOCK_INTERNAL_HAS_OVERRIDE(_Spec),     \
+      GMOCK_INTERNAL_HAS_FINAL(_Spec),                                         \
+      GMOCK_INTERNAL_GET_NOEXCEPT_SPEC(_Spec),                                 \
+      GMOCK_INTERNAL_GET_CALLTYPE_SPEC(_Spec),                                 \
+      GMOCK_INTERNAL_GET_REF_SPEC(_Spec),                                      \
+      (GMOCK_INTERNAL_SIGNATURE(_Ret, _Args)),                                 \
+      GMOCK_INTERNAL_ASSERT_VALID_SIGNATURE(                                   \
+          GMOCK_PP_NARG0 _Args, GMOCK_INTERNAL_SIGNATURE(_Ret, _Args)))
+
+#define GMOCK_INTERNAL_DEFINE_MOCK_METHOD_ARG_6(...) \
+  GMOCK_INTERNAL_DEFINE_MOCK_METHOD_WRONG_ARITY(__VA_ARGS__)
+
+#define GMOCK_INTERNAL_DEFINE_MOCK_METHOD_ARG_7(...) \
+  GMOCK_INTERNAL_DEFINE_MOCK_METHOD_WRONG_ARITY(__VA_ARGS__)
+
+#define GMOCK_INTERNAL_DEFINE_MOCK_METHOD_ARG_8(...) \
+  GMOCK_INTERNAL_DEFINE_MOCK_METHOD_WRONG_ARITY(__VA_ARGS__)
+
+#define GMOCK_INTERNAL_DEFINE_MOCK_METHOD_WRONG_ARITY(...)                    \
+  static_assert(                                                              \
+      false,                                                                  \
+      "DEFINE_MOCK_METHOD must be called with 4 or 5 arguments. _MockClass, " \
+      "_Ret, "                                                                \
+      "_MethodName, _Args and optionally _Spec. _Args and _Spec must be "     \
+      "enclosed in parentheses. If _Ret is a type with unprotected commas, "  \
       "it must also be enclosed in parentheses.")
 
 #define GMOCK_INTERNAL_ASSERT_PARENTHESIS(_Tuple) \
@@ -207,6 +311,73 @@ using internal::FunctionMocker;
   }                                                                            \
   mutable ::testing::FunctionMocker<GMOCK_PP_REMOVE_PARENS(_Signature)>        \
   GMOCK_MOCKER_(_N, _Constness, _MethodName)
+
+#define GMOCK_INTERNAL_DECLARE_MOCK_METHOD_IMPL(                               \
+    _N, _MethodName, _Constness, _Override, _Final, _NoexceptSpec, _CallType,  \
+    _RefSpec, _Signature)                                                      \
+  typename ::testing::internal::Function<GMOCK_PP_REMOVE_PARENS(               \
+      _Signature)>::Result GMOCK_INTERNAL_EXPAND(_CallType)                    \
+      _MethodName(GMOCK_PP_REPEAT(GMOCK_INTERNAL_PARAMETER, _Signature, _N))   \
+          GMOCK_PP_IF(_Constness, const, )                                     \
+              _RefSpec _NoexceptSpec GMOCK_PP_IF(_Override, override, )        \
+                  GMOCK_PP_IF(_Final, final, );                                \
+  ::testing::MockSpec<GMOCK_PP_REMOVE_PARENS(_Signature)> gmock_##_MethodName( \
+      GMOCK_PP_REPEAT(GMOCK_INTERNAL_MATCHER_PARAMETER, _Signature, _N))       \
+      GMOCK_PP_IF(_Constness, const, ) _RefSpec;                               \
+  ::testing::MockSpec<GMOCK_PP_REMOVE_PARENS(_Signature)> gmock_##_MethodName( \
+      const ::testing::internal::WithoutMatchers&,                             \
+      GMOCK_PP_IF(_Constness, const, )::testing::internal::Function<           \
+          GMOCK_PP_REMOVE_PARENS(_Signature)>*) const _RefSpec _NoexceptSpec;  \
+  ::testing::FunctionMocker<GMOCK_PP_REMOVE_PARENS(_Signature)>&               \
+      gmock_get_mocker_##_MethodName(                                          \
+          ::testing::internal::FunctionSignatureTag<                           \
+              GMOCK_PP_REMOVE_PARENS(_Signature),                              \
+              int GMOCK_PP_IF(_Constness, const, ) _RefSpec>) const {          \
+    return GMOCK_MOCKER_(_N, _Constness, _MethodName);                         \
+  }                                                                            \
+  mutable ::testing::FunctionMocker<GMOCK_PP_REMOVE_PARENS(_Signature)>        \
+  GMOCK_MOCKER_(_N, _Constness, _MethodName)
+
+#define GMOCK_INTERNAL_DEFINE_MOCK_METHOD_IMPL(                                \
+    _N, _MockClass, _MethodName, _Constness, _Override, _Final, _NoexceptSpec, \
+    _CallType, _RefSpec, _Signature, _InClassAssertions)                       \
+  auto GMOCK_INTERNAL_EXPAND(_CallType) _MockClass::_MethodName(               \
+      GMOCK_PP_REPEAT(GMOCK_INTERNAL_PARAMETER, _Signature, _N))               \
+      GMOCK_PP_IF(_Constness, const, ) _RefSpec _NoexceptSpec ->               \
+      typename ::testing::internal::Function<GMOCK_PP_REMOVE_PARENS(           \
+          _Signature)>::Result {                                               \
+    _InClassAssertions;                                                        \
+    auto& mocker = gmock_get_mocker_##_MethodName(                             \
+        ::testing::internal::FunctionSignatureTag<                             \
+            GMOCK_PP_REMOVE_PARENS(_Signature),                                \
+            int GMOCK_PP_IF(_Constness, const, ) _RefSpec>{});                 \
+    mocker.SetOwnerAndName(this, #_MethodName);                                \
+    return mocker.Invoke(                                                      \
+        GMOCK_PP_REPEAT(GMOCK_INTERNAL_FORWARD_ARG, _Signature, _N));          \
+  }                                                                            \
+  auto _MockClass::gmock_##_MethodName(                                        \
+      GMOCK_PP_REPEAT(GMOCK_INTERNAL_MATCHER_PARAMETER, _Signature, _N))       \
+      GMOCK_PP_IF(_Constness, const, )                                         \
+          _RefSpec->::testing::MockSpec<GMOCK_PP_REMOVE_PARENS(_Signature)> {  \
+    auto& mocker = gmock_get_mocker_##_MethodName(                             \
+        ::testing::internal::FunctionSignatureTag<                             \
+            GMOCK_PP_REMOVE_PARENS(_Signature),                                \
+            int GMOCK_PP_IF(_Constness, const, ) _RefSpec>{});                 \
+    mocker.RegisterOwner(this);                                                \
+    return mocker.With(                                                        \
+        GMOCK_PP_REPEAT(GMOCK_INTERNAL_MATCHER_ARGUMENT, , _N));               \
+  }                                                                            \
+  auto _MockClass::gmock_##_MethodName(                                        \
+      const ::testing::internal::WithoutMatchers&,                             \
+      GMOCK_PP_IF(_Constness, const, )::testing::internal::Function<           \
+          GMOCK_PP_REMOVE_PARENS(_Signature)>*) const _RefSpec _NoexceptSpec   \
+      ->::testing::MockSpec<GMOCK_PP_REMOVE_PARENS(_Signature)> {              \
+    return ::testing::internal::ThisRefAdjuster<GMOCK_PP_IF(                   \
+        _Constness, const, ) int _RefSpec>::Adjust(*this)                      \
+        .gmock_##_MethodName(GMOCK_PP_REPEAT(                                  \
+            GMOCK_INTERNAL_A_MATCHER_ARGUMENT, _Signature, _N));               \
+  }                                                                            \
+  static_assert(true, "no-op to require trailing semicolon")
 
 #define GMOCK_INTERNAL_EXPAND(...) __VA_ARGS__
 
@@ -512,6 +683,379 @@ using internal::FunctionMocker;
   GMOCK_INTERNAL_MOCK_METHOD_IMPL(                                        \
       args_num, Method, GMOCK_PP_NARG0(constness), 0, 0, , ct, ,          \
       (::testing::internal::identity_t<__VA_ARGS__>))
+
+#define DECLARE_MOCK_METHOD0(m, ...) \
+  GMOCK_INTERNAL_DECLARE_MOCK_METHODN(, , m, 0, __VA_ARGS__)
+#define DECLARE_MOCK_METHOD1(m, ...) \
+  GMOCK_INTERNAL_DECLARE_MOCK_METHODN(, , m, 1, __VA_ARGS__)
+#define DECLARE_MOCK_METHOD2(m, ...) \
+  GMOCK_INTERNAL_DECLARE_MOCK_METHODN(, , m, 2, __VA_ARGS__)
+#define DECLARE_MOCK_METHOD3(m, ...) \
+  GMOCK_INTERNAL_DECLARE_MOCK_METHODN(, , m, 3, __VA_ARGS__)
+#define DECLARE_MOCK_METHOD4(m, ...) \
+  GMOCK_INTERNAL_DECLARE_MOCK_METHODN(, , m, 4, __VA_ARGS__)
+#define DECLARE_MOCK_METHOD5(m, ...) \
+  GMOCK_INTERNAL_DECLARE_MOCK_METHODN(, , m, 5, __VA_ARGS__)
+#define DECLARE_MOCK_METHOD6(m, ...) \
+  GMOCK_INTERNAL_DECLARE_MOCK_METHODN(, , m, 6, __VA_ARGS__)
+#define DECLARE_MOCK_METHOD7(m, ...) \
+  GMOCK_INTERNAL_DECLARE_MOCK_METHODN(, , m, 7, __VA_ARGS__)
+#define DECLARE_MOCK_METHOD8(m, ...) \
+  GMOCK_INTERNAL_DECLARE_MOCK_METHODN(, , m, 8, __VA_ARGS__)
+#define DECLARE_MOCK_METHOD9(m, ...) \
+  GMOCK_INTERNAL_DECLARE_MOCK_METHODN(, , m, 9, __VA_ARGS__)
+#define DECLARE_MOCK_METHOD10(m, ...) \
+  GMOCK_INTERNAL_DECLARE_MOCK_METHODN(, , m, 10, __VA_ARGS__)
+
+#define DECLARE_MOCK_CONST_METHOD0(m, ...) \
+  GMOCK_INTERNAL_DECLARE_MOCK_METHODN(const, , m, 0, __VA_ARGS__)
+#define DECLARE_MOCK_CONST_METHOD1(m, ...) \
+  GMOCK_INTERNAL_DECLARE_MOCK_METHODN(const, , m, 1, __VA_ARGS__)
+#define DECLARE_MOCK_CONST_METHOD2(m, ...) \
+  GMOCK_INTERNAL_DECLARE_MOCK_METHODN(const, , m, 2, __VA_ARGS__)
+#define DECLARE_MOCK_CONST_METHOD3(m, ...) \
+  GMOCK_INTERNAL_DECLARE_MOCK_METHODN(const, , m, 3, __VA_ARGS__)
+#define DECLARE_MOCK_CONST_METHOD4(m, ...) \
+  GMOCK_INTERNAL_DECLARE_MOCK_METHODN(const, , m, 4, __VA_ARGS__)
+#define DECLARE_MOCK_CONST_METHOD5(m, ...) \
+  GMOCK_INTERNAL_DECLARE_MOCK_METHODN(const, , m, 5, __VA_ARGS__)
+#define DECLARE_MOCK_CONST_METHOD6(m, ...) \
+  GMOCK_INTERNAL_DECLARE_MOCK_METHODN(const, , m, 6, __VA_ARGS__)
+#define DECLARE_MOCK_CONST_METHOD7(m, ...) \
+  GMOCK_INTERNAL_DECLARE_MOCK_METHODN(const, , m, 7, __VA_ARGS__)
+#define DECLARE_MOCK_CONST_METHOD8(m, ...) \
+  GMOCK_INTERNAL_DECLARE_MOCK_METHODN(const, , m, 8, __VA_ARGS__)
+#define DECLARE_MOCK_CONST_METHOD9(m, ...) \
+  GMOCK_INTERNAL_DECLARE_MOCK_METHODN(const, , m, 9, __VA_ARGS__)
+#define DECLARE_MOCK_CONST_METHOD10(m, ...) \
+  GMOCK_INTERNAL_DECLARE_MOCK_METHODN(const, , m, 10, __VA_ARGS__)
+
+#define DECLARE_MOCK_METHOD0_T(m, ...) DECLARE_MOCK_METHOD0(m, __VA_ARGS__)
+#define DECLARE_MOCK_METHOD1_T(m, ...) DECLARE_MOCK_METHOD1(m, __VA_ARGS__)
+#define DECLARE_MOCK_METHOD2_T(m, ...) DECLARE_MOCK_METHOD2(m, __VA_ARGS__)
+#define DECLARE_MOCK_METHOD3_T(m, ...) DECLARE_MOCK_METHOD3(m, __VA_ARGS__)
+#define DECLARE_MOCK_METHOD4_T(m, ...) DECLARE_MOCK_METHOD4(m, __VA_ARGS__)
+#define DECLARE_MOCK_METHOD5_T(m, ...) DECLARE_MOCK_METHOD5(m, __VA_ARGS__)
+#define DECLARE_MOCK_METHOD6_T(m, ...) DECLARE_MOCK_METHOD6(m, __VA_ARGS__)
+#define DECLARE_MOCK_METHOD7_T(m, ...) DECLARE_MOCK_METHOD7(m, __VA_ARGS__)
+#define DECLARE_MOCK_METHOD8_T(m, ...) DECLARE_MOCK_METHOD8(m, __VA_ARGS__)
+#define DECLARE_MOCK_METHOD9_T(m, ...) DECLARE_MOCK_METHOD9(m, __VA_ARGS__)
+#define DECLARE_MOCK_METHOD10_T(m, ...) DECLARE_MOCK_METHOD10(m, __VA_ARGS__)
+
+#define DECLARE_MOCK_CONST_METHOD0_T(m, ...) \
+  DECLARE_MOCK_CONST_METHOD0(m, __VA_ARGS__)
+#define DECLARE_MOCK_CONST_METHOD1_T(m, ...) \
+  DECLARE_MOCK_CONST_METHOD1(m, __VA_ARGS__)
+#define DECLARE_MOCK_CONST_METHOD2_T(m, ...) \
+  DECLARE_MOCK_CONST_METHOD2(m, __VA_ARGS__)
+#define DECLARE_MOCK_CONST_METHOD3_T(m, ...) \
+  DECLARE_MOCK_CONST_METHOD3(m, __VA_ARGS__)
+#define DECLARE_MOCK_CONST_METHOD4_T(m, ...) \
+  DECLARE_MOCK_CONST_METHOD4(m, __VA_ARGS__)
+#define DECLARE_MOCK_CONST_METHOD5_T(m, ...) \
+  DECLARE_MOCK_CONST_METHOD5(m, __VA_ARGS__)
+#define DECLARE_MOCK_CONST_METHOD6_T(m, ...) \
+  DECLARE_MOCK_CONST_METHOD6(m, __VA_ARGS__)
+#define DECLARE_MOCK_CONST_METHOD7_T(m, ...) \
+  DECLARE_MOCK_CONST_METHOD7(m, __VA_ARGS__)
+#define DECLARE_MOCK_CONST_METHOD8_T(m, ...) \
+  DECLARE_MOCK_CONST_METHOD8(m, __VA_ARGS__)
+#define DECLARE_MOCK_CONST_METHOD9_T(m, ...) \
+  DECLARE_MOCK_CONST_METHOD9(m, __VA_ARGS__)
+#define DECLARE_MOCK_CONST_METHOD10_T(m, ...) \
+  DECLARE_MOCK_CONST_METHOD10(m, __VA_ARGS__)
+
+#define DECLARE_MOCK_METHOD0_WITH_CALLTYPE(ct, m, ...) \
+  GMOCK_INTERNAL_DECLARE_MOCK_METHODN(, ct, m, 0, __VA_ARGS__)
+#define DECLARE_MOCK_METHOD1_WITH_CALLTYPE(ct, m, ...) \
+  GMOCK_INTERNAL_DECLARE_MOCK_METHODN(, ct, m, 1, __VA_ARGS__)
+#define DECLARE_MOCK_METHOD2_WITH_CALLTYPE(ct, m, ...) \
+  GMOCK_INTERNAL_DECLARE_MOCK_METHODN(, ct, m, 2, __VA_ARGS__)
+#define DECLARE_MOCK_METHOD3_WITH_CALLTYPE(ct, m, ...) \
+  GMOCK_INTERNAL_DECLARE_MOCK_METHODN(, ct, m, 3, __VA_ARGS__)
+#define DECLARE_MOCK_METHOD4_WITH_CALLTYPE(ct, m, ...) \
+  GMOCK_INTERNAL_DECLARE_MOCK_METHODN(, ct, m, 4, __VA_ARGS__)
+#define DECLARE_MOCK_METHOD5_WITH_CALLTYPE(ct, m, ...) \
+  GMOCK_INTERNAL_DECLARE_MOCK_METHODN(, ct, m, 5, __VA_ARGS__)
+#define DECLARE_MOCK_METHOD6_WITH_CALLTYPE(ct, m, ...) \
+  GMOCK_INTERNAL_DECLARE_MOCK_METHODN(, ct, m, 6, __VA_ARGS__)
+#define DECLARE_MOCK_METHOD7_WITH_CALLTYPE(ct, m, ...) \
+  GMOCK_INTERNAL_DECLARE_MOCK_METHODN(, ct, m, 7, __VA_ARGS__)
+#define DECLARE_MOCK_METHOD8_WITH_CALLTYPE(ct, m, ...) \
+  GMOCK_INTERNAL_DECLARE_MOCK_METHODN(, ct, m, 8, __VA_ARGS__)
+#define DECLARE_MOCK_METHOD9_WITH_CALLTYPE(ct, m, ...) \
+  GMOCK_INTERNAL_DECLARE_MOCK_METHODN(, ct, m, 9, __VA_ARGS__)
+#define DECLARE_MOCK_METHOD10_WITH_CALLTYPE(ct, m, ...) \
+  GMOCK_INTERNAL_DECLARE_MOCK_METHODN(, ct, m, 10, __VA_ARGS__)
+
+#define DECLARE_MOCK_CONST_METHOD0_WITH_CALLTYPE(ct, m, ...) \
+  GMOCK_INTERNAL_DECLARE_MOCK_METHODN(const, ct, m, 0, __VA_ARGS__)
+#define DECLARE_MOCK_CONST_METHOD1_WITH_CALLTYPE(ct, m, ...) \
+  GMOCK_INTERNAL_DECLARE_MOCK_METHODN(const, ct, m, 1, __VA_ARGS__)
+#define DECLARE_MOCK_CONST_METHOD2_WITH_CALLTYPE(ct, m, ...) \
+  GMOCK_INTERNAL_DECLARE_MOCK_METHODN(const, ct, m, 2, __VA_ARGS__)
+#define DECLARE_MOCK_CONST_METHOD3_WITH_CALLTYPE(ct, m, ...) \
+  GMOCK_INTERNAL_DECLARE_MOCK_METHODN(const, ct, m, 3, __VA_ARGS__)
+#define DECLARE_MOCK_CONST_METHOD4_WITH_CALLTYPE(ct, m, ...) \
+  GMOCK_INTERNAL_DECLARE_MOCK_METHODN(const, ct, m, 4, __VA_ARGS__)
+#define DECLARE_MOCK_CONST_METHOD5_WITH_CALLTYPE(ct, m, ...) \
+  GMOCK_INTERNAL_DECLARE_MOCK_METHODN(const, ct, m, 5, __VA_ARGS__)
+#define DECLARE_MOCK_CONST_METHOD6_WITH_CALLTYPE(ct, m, ...) \
+  GMOCK_INTERNAL_DECLARE_MOCK_METHODN(const, ct, m, 6, __VA_ARGS__)
+#define DECLARE_MOCK_CONST_METHOD7_WITH_CALLTYPE(ct, m, ...) \
+  GMOCK_INTERNAL_DECLARE_MOCK_METHODN(const, ct, m, 7, __VA_ARGS__)
+#define DECLARE_MOCK_CONST_METHOD8_WITH_CALLTYPE(ct, m, ...) \
+  GMOCK_INTERNAL_DECLARE_MOCK_METHODN(const, ct, m, 8, __VA_ARGS__)
+#define DECLARE_MOCK_CONST_METHOD9_WITH_CALLTYPE(ct, m, ...) \
+  GMOCK_INTERNAL_DECLARE_MOCK_METHODN(const, ct, m, 9, __VA_ARGS__)
+#define DECLARE_MOCK_CONST_METHOD10_WITH_CALLTYPE(ct, m, ...) \
+  GMOCK_INTERNAL_DECLARE_MOCK_METHODN(const, ct, m, 10, __VA_ARGS__)
+
+#define DECLARE_MOCK_METHOD0_T_WITH_CALLTYPE(ct, m, ...) \
+  DECLARE_MOCK_METHOD0_WITH_CALLTYPE(ct, m, __VA_ARGS__)
+#define DECLARE_MOCK_METHOD1_T_WITH_CALLTYPE(ct, m, ...) \
+  DECLARE_MOCK_METHOD1_WITH_CALLTYPE(ct, m, __VA_ARGS__)
+#define DECLARE_MOCK_METHOD2_T_WITH_CALLTYPE(ct, m, ...) \
+  DECLARE_MOCK_METHOD2_WITH_CALLTYPE(ct, m, __VA_ARGS__)
+#define DECLARE_MOCK_METHOD3_T_WITH_CALLTYPE(ct, m, ...) \
+  DECLARE_MOCK_METHOD3_WITH_CALLTYPE(ct, m, __VA_ARGS__)
+#define DECLARE_MOCK_METHOD4_T_WITH_CALLTYPE(ct, m, ...) \
+  DECLARE_MOCK_METHOD4_WITH_CALLTYPE(ct, m, __VA_ARGS__)
+#define DECLARE_MOCK_METHOD5_T_WITH_CALLTYPE(ct, m, ...) \
+  DECLARE_MOCK_METHOD5_WITH_CALLTYPE(ct, m, __VA_ARGS__)
+#define DECLARE_MOCK_METHOD6_T_WITH_CALLTYPE(ct, m, ...) \
+  DECLARE_MOCK_METHOD6_WITH_CALLTYPE(ct, m, __VA_ARGS__)
+#define DECLARE_MOCK_METHOD7_T_WITH_CALLTYPE(ct, m, ...) \
+  DECLARE_MOCK_METHOD7_WITH_CALLTYPE(ct, m, __VA_ARGS__)
+#define DECLARE_MOCK_METHOD8_T_WITH_CALLTYPE(ct, m, ...) \
+  DECLARE_MOCK_METHOD8_WITH_CALLTYPE(ct, m, __VA_ARGS__)
+#define DECLARE_MOCK_METHOD9_T_WITH_CALLTYPE(ct, m, ...) \
+  DECLARE_MOCK_METHOD9_WITH_CALLTYPE(ct, m, __VA_ARGS__)
+#define DECLARE_MOCK_METHOD10_T_WITH_CALLTYPE(ct, m, ...) \
+  DECLARE_MOCK_METHOD10_WITH_CALLTYPE(ct, m, __VA_ARGS__)
+
+#define DECLARE_MOCK_CONST_METHOD0_T_WITH_CALLTYPE(ct, m, ...) \
+  DECLARE_MOCK_CONST_METHOD0_WITH_CALLTYPE(ct, m, __VA_ARGS__)
+#define DECLARE_MOCK_CONST_METHOD1_T_WITH_CALLTYPE(ct, m, ...) \
+  DECLARE_MOCK_CONST_METHOD1_WITH_CALLTYPE(ct, m, __VA_ARGS__)
+#define DECLARE_MOCK_CONST_METHOD2_T_WITH_CALLTYPE(ct, m, ...) \
+  DECLARE_MOCK_CONST_METHOD2_WITH_CALLTYPE(ct, m, __VA_ARGS__)
+#define DECLARE_MOCK_CONST_METHOD3_T_WITH_CALLTYPE(ct, m, ...) \
+  DECLARE_MOCK_CONST_METHOD3_WITH_CALLTYPE(ct, m, __VA_ARGS__)
+#define DECLARE_MOCK_CONST_METHOD4_T_WITH_CALLTYPE(ct, m, ...) \
+  DECLARE_MOCK_CONST_METHOD4_WITH_CALLTYPE(ct, m, __VA_ARGS__)
+#define DECLARE_MOCK_CONST_METHOD5_T_WITH_CALLTYPE(ct, m, ...) \
+  DECLARE_MOCK_CONST_METHOD5_WITH_CALLTYPE(ct, m, __VA_ARGS__)
+#define DECLARE_MOCK_CONST_METHOD6_T_WITH_CALLTYPE(ct, m, ...) \
+  DECLARE_MOCK_CONST_METHOD6_WITH_CALLTYPE(ct, m, __VA_ARGS__)
+#define DECLARE_MOCK_CONST_METHOD7_T_WITH_CALLTYPE(ct, m, ...) \
+  DECLARE_MOCK_CONST_METHOD7_WITH_CALLTYPE(ct, m, __VA_ARGS__)
+#define DECLARE_MOCK_CONST_METHOD8_T_WITH_CALLTYPE(ct, m, ...) \
+  DECLARE_MOCK_CONST_METHOD8_WITH_CALLTYPE(ct, m, __VA_ARGS__)
+#define DECLARE_MOCK_CONST_METHOD9_T_WITH_CALLTYPE(ct, m, ...) \
+  DECLARE_MOCK_CONST_METHOD9_WITH_CALLTYPE(ct, m, __VA_ARGS__)
+#define DECLARE_MOCK_CONST_METHOD10_T_WITH_CALLTYPE(ct, m, ...) \
+  DECLARE_MOCK_CONST_METHOD10_WITH_CALLTYPE(ct, m, __VA_ARGS__)
+
+#define GMOCK_INTERNAL_DECLARE_MOCK_METHODN(constness, ct, Method, args_num, \
+                                            ...)                             \
+  GMOCK_INTERNAL_ASSERT_VALID_SIGNATURE(                                     \
+      args_num, ::testing::internal::identity_t<__VA_ARGS__>);               \
+  GMOCK_INTERNAL_DECLARE_MOCK_METHOD_IMPL(                                   \
+      args_num, Method, GMOCK_PP_NARG0(constness), 0, 0, , ct, ,             \
+      (::testing::internal::identity_t<__VA_ARGS__>))
+
+#define DEFINE_MOCK_METHOD0(cls, m, ...) \
+  GMOCK_INTERNAL_DEFINE_MOCK_METHODN(, , cls, m, 0, __VA_ARGS__)
+#define DEFINE_MOCK_METHOD1(cls, m, ...) \
+  GMOCK_INTERNAL_DEFINE_MOCK_METHODN(, , cls, m, 1, __VA_ARGS__)
+#define DEFINE_MOCK_METHOD2(cls, m, ...) \
+  GMOCK_INTERNAL_DEFINE_MOCK_METHODN(, , cls, m, 2, __VA_ARGS__)
+#define DEFINE_MOCK_METHOD3(cls, m, ...) \
+  GMOCK_INTERNAL_DEFINE_MOCK_METHODN(, , cls, m, 3, __VA_ARGS__)
+#define DEFINE_MOCK_METHOD4(cls, m, ...) \
+  GMOCK_INTERNAL_DEFINE_MOCK_METHODN(, , cls, m, 4, __VA_ARGS__)
+#define DEFINE_MOCK_METHOD5(cls, m, ...) \
+  GMOCK_INTERNAL_DEFINE_MOCK_METHODN(, , cls, m, 5, __VA_ARGS__)
+#define DEFINE_MOCK_METHOD6(cls, m, ...) \
+  GMOCK_INTERNAL_DEFINE_MOCK_METHODN(, , cls, m, 6, __VA_ARGS__)
+#define DEFINE_MOCK_METHOD7(cls, m, ...) \
+  GMOCK_INTERNAL_DEFINE_MOCK_METHODN(, , cls, m, 7, __VA_ARGS__)
+#define DEFINE_MOCK_METHOD8(cls, m, ...) \
+  GMOCK_INTERNAL_DEFINE_MOCK_METHODN(, , cls, m, 8, __VA_ARGS__)
+#define DEFINE_MOCK_METHOD9(cls, m, ...) \
+  GMOCK_INTERNAL_DEFINE_MOCK_METHODN(, , cls, m, 9, __VA_ARGS__)
+#define DEFINE_MOCK_METHOD10(cls, m, ...) \
+  GMOCK_INTERNAL_DEFINE_MOCK_METHODN(, , cls, m, 10, __VA_ARGS__)
+
+#define DEFINE_MOCK_CONST_METHOD0(cls, m, ...) \
+  GMOCK_INTERNAL_DEFINE_MOCK_METHODN(const, , cls, m, 0, __VA_ARGS__)
+#define DEFINE_MOCK_CONST_METHOD1(cls, m, ...) \
+  GMOCK_INTERNAL_DEFINE_MOCK_METHODN(const, , cls, m, 1, __VA_ARGS__)
+#define DEFINE_MOCK_CONST_METHOD2(cls, m, ...) \
+  GMOCK_INTERNAL_DEFINE_MOCK_METHODN(const, , cls, m, 2, __VA_ARGS__)
+#define DEFINE_MOCK_CONST_METHOD3(cls, m, ...) \
+  GMOCK_INTERNAL_DEFINE_MOCK_METHODN(const, , cls, m, 3, __VA_ARGS__)
+#define DEFINE_MOCK_CONST_METHOD4(cls, m, ...) \
+  GMOCK_INTERNAL_DEFINE_MOCK_METHODN(const, , cls, m, 4, __VA_ARGS__)
+#define DEFINE_MOCK_CONST_METHOD5(cls, m, ...) \
+  GMOCK_INTERNAL_DEFINE_MOCK_METHODN(const, , cls, m, 5, __VA_ARGS__)
+#define DEFINE_MOCK_CONST_METHOD6(cls, m, ...) \
+  GMOCK_INTERNAL_DEFINE_MOCK_METHODN(const, , cls, m, 6, __VA_ARGS__)
+#define DEFINE_MOCK_CONST_METHOD7(cls, m, ...) \
+  GMOCK_INTERNAL_DEFINE_MOCK_METHODN(const, , cls, m, 7, __VA_ARGS__)
+#define DEFINE_MOCK_CONST_METHOD8(cls, m, ...) \
+  GMOCK_INTERNAL_DEFINE_MOCK_METHODN(const, , cls, m, 8, __VA_ARGS__)
+#define DEFINE_MOCK_CONST_METHOD9(cls, m, ...) \
+  GMOCK_INTERNAL_DEFINE_MOCK_METHODN(const, , cls, m, 9, __VA_ARGS__)
+#define DEFINE_MOCK_CONST_METHOD10(cls, m, ...) \
+  GMOCK_INTERNAL_DEFINE_MOCK_METHODN(const, , cls, m, 10, __VA_ARGS__)
+
+#define DEFINE_MOCK_METHOD0_T(cls, m, ...) \
+  DEFINE_MOCK_METHOD0(cls, m, __VA_ARGS__)
+#define DEFINE_MOCK_METHOD1_T(cls, m, ...) \
+  DEFINE_MOCK_METHOD1(cls, m, __VA_ARGS__)
+#define DEFINE_MOCK_METHOD2_T(cls, m, ...) \
+  DEFINE_MOCK_METHOD2(cls, m, __VA_ARGS__)
+#define DEFINE_MOCK_METHOD3_T(cls, m, ...) \
+  DEFINE_MOCK_METHOD3(cls, m, __VA_ARGS__)
+#define DEFINE_MOCK_METHOD4_T(cls, m, ...) \
+  DEFINE_MOCK_METHOD4(cls, m, __VA_ARGS__)
+#define DEFINE_MOCK_METHOD5_T(cls, m, ...) \
+  DEFINE_MOCK_METHOD5(cls, m, __VA_ARGS__)
+#define DEFINE_MOCK_METHOD6_T(cls, m, ...) \
+  DEFINE_MOCK_METHOD6(cls, m, __VA_ARGS__)
+#define DEFINE_MOCK_METHOD7_T(cls, m, ...) \
+  DEFINE_MOCK_METHOD7(cls, m, __VA_ARGS__)
+#define DEFINE_MOCK_METHOD8_T(cls, m, ...) \
+  DEFINE_MOCK_METHOD8(cls, m, __VA_ARGS__)
+#define DEFINE_MOCK_METHOD9_T(cls, m, ...) \
+  DEFINE_MOCK_METHOD9(cls, m, __VA_ARGS__)
+#define DEFINE_MOCK_METHOD10_T(cls, m, ...) \
+  DEFINE_MOCK_METHOD10(cls, m, __VA_ARGS__)
+
+#define DEFINE_MOCK_CONST_METHOD0_T(cls, m, ...) \
+  DEFINE_MOCK_CONST_METHOD0(cls, m, __VA_ARGS__)
+#define DEFINE_MOCK_CONST_METHOD1_T(cls, m, ...) \
+  DEFINE_MOCK_CONST_METHOD1(cls, m, __VA_ARGS__)
+#define DEFINE_MOCK_CONST_METHOD2_T(cls, m, ...) \
+  DEFINE_MOCK_CONST_METHOD2(cls, m, __VA_ARGS__)
+#define DEFINE_MOCK_CONST_METHOD3_T(cls, m, ...) \
+  DEFINE_MOCK_CONST_METHOD3(cls, m, __VA_ARGS__)
+#define DEFINE_MOCK_CONST_METHOD4_T(cls, m, ...) \
+  DEFINE_MOCK_CONST_METHOD4(cls, m, __VA_ARGS__)
+#define DEFINE_MOCK_CONST_METHOD5_T(cls, m, ...) \
+  DEFINE_MOCK_CONST_METHOD5(cls, m, __VA_ARGS__)
+#define DEFINE_MOCK_CONST_METHOD6_T(cls, m, ...) \
+  DEFINE_MOCK_CONST_METHOD6(cls, m, __VA_ARGS__)
+#define DEFINE_MOCK_CONST_METHOD7_T(cls, m, ...) \
+  DEFINE_MOCK_CONST_METHOD7(cls, m, __VA_ARGS__)
+#define DEFINE_MOCK_CONST_METHOD8_T(cls, m, ...) \
+  DEFINE_MOCK_CONST_METHOD8(cls, m, __VA_ARGS__)
+#define DEFINE_MOCK_CONST_METHOD9_T(cls, m, ...) \
+  DEFINE_MOCK_CONST_METHOD9(cls, m, __VA_ARGS__)
+#define DEFINE_MOCK_CONST_METHOD10_T(cls, m, ...) \
+  DEFINE_MOCK_CONST_METHOD10(cls, m, __VA_ARGS__)
+
+#define DEFINE_MOCK_METHOD0_WITH_CALLTYPE(ct, cls, m, ...) \
+  GMOCK_INTERNAL_DEFINE_MOCK_METHODN(, ct, cls, m, 0, __VA_ARGS__)
+#define DEFINE_MOCK_METHOD1_WITH_CALLTYPE(ct, cls, m, ...) \
+  GMOCK_INTERNAL_DEFINE_MOCK_METHODN(, ct, cls, m, 1, __VA_ARGS__)
+#define DEFINE_MOCK_METHOD2_WITH_CALLTYPE(ct, cls, m, ...) \
+  GMOCK_INTERNAL_DEFINE_MOCK_METHODN(, ct, cls, m, 2, __VA_ARGS__)
+#define DEFINE_MOCK_METHOD3_WITH_CALLTYPE(ct, cls, m, ...) \
+  GMOCK_INTERNAL_DEFINE_MOCK_METHODN(, ct, cls, m, 3, __VA_ARGS__)
+#define DEFINE_MOCK_METHOD4_WITH_CALLTYPE(ct, cls, m, ...) \
+  GMOCK_INTERNAL_DEFINE_MOCK_METHODN(, ct, cls, m, 4, __VA_ARGS__)
+#define DEFINE_MOCK_METHOD5_WITH_CALLTYPE(ct, cls, m, ...) \
+  GMOCK_INTERNAL_DEFINE_MOCK_METHODN(, ct, cls, m, 5, __VA_ARGS__)
+#define DEFINE_MOCK_METHOD6_WITH_CALLTYPE(ct, cls, m, ...) \
+  GMOCK_INTERNAL_DEFINE_MOCK_METHODN(, ct, cls, m, 6, __VA_ARGS__)
+#define DEFINE_MOCK_METHOD7_WITH_CALLTYPE(ct, cls, m, ...) \
+  GMOCK_INTERNAL_DEFINE_MOCK_METHODN(, ct, cls, m, 7, __VA_ARGS__)
+#define DEFINE_MOCK_METHOD8_WITH_CALLTYPE(ct, cls, m, ...) \
+  GMOCK_INTERNAL_DEFINE_MOCK_METHODN(, ct, cls, m, 8, __VA_ARGS__)
+#define DEFINE_MOCK_METHOD9_WITH_CALLTYPE(ct, cls, m, ...) \
+  GMOCK_INTERNAL_DEFINE_MOCK_METHODN(, ct, cls, m, 9, __VA_ARGS__)
+#define DEFINE_MOCK_METHOD10_WITH_CALLTYPE(ct, cls, m, ...) \
+  GMOCK_INTERNAL_DEFINE_MOCK_METHODN(, ct, cls, m, 10, __VA_ARGS__)
+
+#define DEFINE_MOCK_CONST_METHOD0_WITH_CALLTYPE(ct, cls, m, ...) \
+  GMOCK_INTERNAL_DEFINE_MOCK_METHODN(const, ct, cls, m, 0, __VA_ARGS__)
+#define DEFINE_MOCK_CONST_METHOD1_WITH_CALLTYPE(ct, cls, m, ...) \
+  GMOCK_INTERNAL_DEFINE_MOCK_METHODN(const, ct, cls, m, 1, __VA_ARGS__)
+#define DEFINE_MOCK_CONST_METHOD2_WITH_CALLTYPE(ct, cls, m, ...) \
+  GMOCK_INTERNAL_DEFINE_MOCK_METHODN(const, ct, cls, m, 2, __VA_ARGS__)
+#define DEFINE_MOCK_CONST_METHOD3_WITH_CALLTYPE(ct, cls, m, ...) \
+  GMOCK_INTERNAL_DEFINE_MOCK_METHODN(const, ct, cls, m, 3, __VA_ARGS__)
+#define DEFINE_MOCK_CONST_METHOD4_WITH_CALLTYPE(ct, cls, m, ...) \
+  GMOCK_INTERNAL_DEFINE_MOCK_METHODN(const, ct, cls, m, 4, __VA_ARGS__)
+#define DEFINE_MOCK_CONST_METHOD5_WITH_CALLTYPE(ct, cls, m, ...) \
+  GMOCK_INTERNAL_DEFINE_MOCK_METHODN(const, ct, cls, m, 5, __VA_ARGS__)
+#define DEFINE_MOCK_CONST_METHOD6_WITH_CALLTYPE(ct, cls, m, ...) \
+  GMOCK_INTERNAL_DEFINE_MOCK_METHODN(const, ct, cls, m, 6, __VA_ARGS__)
+#define DEFINE_MOCK_CONST_METHOD7_WITH_CALLTYPE(ct, cls, m, ...) \
+  GMOCK_INTERNAL_DEFINE_MOCK_METHODN(const, ct, cls, m, 7, __VA_ARGS__)
+#define DEFINE_MOCK_CONST_METHOD8_WITH_CALLTYPE(ct, cls, m, ...) \
+  GMOCK_INTERNAL_DEFINE_MOCK_METHODN(const, ct, cls, m, 8, __VA_ARGS__)
+#define DEFINE_MOCK_CONST_METHOD9_WITH_CALLTYPE(ct, cls, m, ...) \
+  GMOCK_INTERNAL_DEFINE_MOCK_METHODN(const, ct, cls, m, 9, __VA_ARGS__)
+#define DEFINE_MOCK_CONST_METHOD10_WITH_CALLTYPE(ct, cls, m, ...) \
+  GMOCK_INTERNAL_DEFINE_MOCK_METHODN(const, ct, cls, m, 10, __VA_ARGS__)
+
+#define DEFINE_MOCK_METHOD0_T_WITH_CALLTYPE(ct, cls, m, ...) \
+  DEFINE_MOCK_METHOD0_WITH_CALLTYPE(ct, cls, m, __VA_ARGS__)
+#define DEFINE_MOCK_METHOD1_T_WITH_CALLTYPE(ct, cls, m, ...) \
+  DEFINE_MOCK_METHOD1_WITH_CALLTYPE(ct, cls, m, __VA_ARGS__)
+#define DEFINE_MOCK_METHOD2_T_WITH_CALLTYPE(ct, cls, m, ...) \
+  DEFINE_MOCK_METHOD2_WITH_CALLTYPE(ct, cls, m, __VA_ARGS__)
+#define DEFINE_MOCK_METHOD3_T_WITH_CALLTYPE(ct, cls, m, ...) \
+  DEFINE_MOCK_METHOD3_WITH_CALLTYPE(ct, cls, m, __VA_ARGS__)
+#define DEFINE_MOCK_METHOD4_T_WITH_CALLTYPE(ct, cls, m, ...) \
+  DEFINE_MOCK_METHOD4_WITH_CALLTYPE(ct, cls, m, __VA_ARGS__)
+#define DEFINE_MOCK_METHOD5_T_WITH_CALLTYPE(ct, cls, m, ...) \
+  DEFINE_MOCK_METHOD5_WITH_CALLTYPE(ct, cls, m, __VA_ARGS__)
+#define DEFINE_MOCK_METHOD6_T_WITH_CALLTYPE(ct, cls, m, ...) \
+  DEFINE_MOCK_METHOD6_WITH_CALLTYPE(ct, cls, m, __VA_ARGS__)
+#define DEFINE_MOCK_METHOD7_T_WITH_CALLTYPE(ct, cls, m, ...) \
+  DEFINE_MOCK_METHOD7_WITH_CALLTYPE(ct, cls, m, __VA_ARGS__)
+#define DEFINE_MOCK_METHOD8_T_WITH_CALLTYPE(ct, cls, m, ...) \
+  DEFINE_MOCK_METHOD8_WITH_CALLTYPE(ct, cls, m, __VA_ARGS__)
+#define DEFINE_MOCK_METHOD9_T_WITH_CALLTYPE(ct, cls, m, ...) \
+  DEFINE_MOCK_METHOD9_WITH_CALLTYPE(ct, cls, m, __VA_ARGS__)
+#define DEFINE_MOCK_METHOD10_T_WITH_CALLTYPE(ct, cls, m, ...) \
+  DEFINE_MOCK_METHOD10_WITH_CALLTYPE(ct, cls, m, __VA_ARGS__)
+
+#define DEFINE_MOCK_CONST_METHOD0_T_WITH_CALLTYPE(ct, cls, m, ...) \
+  DEFINE_MOCK_CONST_METHOD0_WITH_CALLTYPE(ct, cls, m, __VA_ARGS__)
+#define DEFINE_MOCK_CONST_METHOD1_T_WITH_CALLTYPE(ct, cls, m, ...) \
+  DEFINE_MOCK_CONST_METHOD1_WITH_CALLTYPE(ct, cls, m, __VA_ARGS__)
+#define DEFINE_MOCK_CONST_METHOD2_T_WITH_CALLTYPE(ct, cls, m, ...) \
+  DEFINE_MOCK_CONST_METHOD2_WITH_CALLTYPE(ct, cls, m, __VA_ARGS__)
+#define DEFINE_MOCK_CONST_METHOD3_T_WITH_CALLTYPE(ct, cls, m, ...) \
+  DEFINE_MOCK_CONST_METHOD3_WITH_CALLTYPE(ct, cls, m, __VA_ARGS__)
+#define DEFINE_MOCK_CONST_METHOD4_T_WITH_CALLTYPE(ct, cls, m, ...) \
+  DEFINE_MOCK_CONST_METHOD4_WITH_CALLTYPE(ct, cls, m, __VA_ARGS__)
+#define DEFINE_MOCK_CONST_METHOD5_T_WITH_CALLTYPE(ct, cls, m, ...) \
+  DEFINE_MOCK_CONST_METHOD5_WITH_CALLTYPE(ct, cls, m, __VA_ARGS__)
+#define DEFINE_MOCK_CONST_METHOD6_T_WITH_CALLTYPE(ct, cls, m, ...) \
+  DEFINE_MOCK_CONST_METHOD6_WITH_CALLTYPE(ct, cls, m, __VA_ARGS__)
+#define DEFINE_MOCK_CONST_METHOD7_T_WITH_CALLTYPE(ct, cls, m, ...) \
+  DEFINE_MOCK_CONST_METHOD7_WITH_CALLTYPE(ct, cls, m, __VA_ARGS__)
+#define DEFINE_MOCK_CONST_METHOD8_T_WITH_CALLTYPE(ct, cls, m, ...) \
+  DEFINE_MOCK_CONST_METHOD8_WITH_CALLTYPE(ct, cls, m, __VA_ARGS__)
+#define DEFINE_MOCK_CONST_METHOD9_T_WITH_CALLTYPE(ct, cls, m, ...) \
+  DEFINE_MOCK_CONST_METHOD9_WITH_CALLTYPE(ct, cls, m, __VA_ARGS__)
+#define DEFINE_MOCK_CONST_METHOD10_T_WITH_CALLTYPE(ct, cls, m, ...) \
+  DEFINE_MOCK_CONST_METHOD10_WITH_CALLTYPE(ct, cls, m, __VA_ARGS__)
+
+#define GMOCK_INTERNAL_DEFINE_MOCK_METHODN(constness, ct, Class, Method, \
+                                           args_num, ...)                \
+  GMOCK_INTERNAL_DEFINE_MOCK_METHOD_IMPL(                                \
+      args_num, Class, Method, GMOCK_PP_NARG0(constness), 0, 0, , ct, ,  \
+      (::testing::internal::identity_t<__VA_ARGS__>),                    \
+      GMOCK_INTERNAL_ASSERT_VALID_SIGNATURE(                             \
+          args_num, ::testing::internal::identity_t<__VA_ARGS__>))
 
 #define GMOCK_MOCKER_(arity, constness, Method) \
   GTEST_CONCAT_TOKEN_(gmock##constness##arity##_##Method##_, __LINE__)
