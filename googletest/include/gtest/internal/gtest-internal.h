@@ -82,6 +82,15 @@
 #define GTEST_CONCAT_TOKEN_(foo, bar) GTEST_CONCAT_TOKEN_IMPL_(foo, bar)
 #define GTEST_CONCAT_TOKEN_IMPL_(foo, bar) foo##bar
 
+// Generates a unique identifier by appending __COUNTER__ (or __LINE__ if
+// __COUNTER__ is not supported).
+#if defined(__COUNTER__) || defined(_MSC_VER) || defined(__GNUC__) || \
+    defined(__clang__)
+#define GTEST_UNIQUE_IDENTIFIER_(name) GTEST_CONCAT_TOKEN_(name, __COUNTER__)
+#else
+#define GTEST_UNIQUE_IDENTIFIER_(name) GTEST_CONCAT_TOKEN_(name, __LINE__)
+#endif
+
 // Stringifies its argument.
 // Work around a bug in visual studio which doesn't accept code like this:
 //
