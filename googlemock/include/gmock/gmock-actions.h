@@ -849,7 +849,7 @@ class [[nodiscard]] Action<R(Args...)> {
 
 // The PolymorphicAction class template makes it easy to implement a
 // polymorphic action (i.e. an action that can be used in mock
-// functions of than one type, e.g. Return()).
+// functions of more than one type, e.g. Return()).
 //
 // To define a polymorphic action, a user first provides a COPYABLE
 // implementation class that has a Perform() method template:
