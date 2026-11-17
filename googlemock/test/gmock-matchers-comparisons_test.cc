@@ -586,7 +586,7 @@ namespace convertible_from_any {
 struct ConvertibleFromAny {
   ConvertibleFromAny(int a_value) : value(a_value) {}
   template <typename T>
-  ConvertibleFromAny(const T& /*a_value*/) : value(-1) {
+  [[maybe_unused]] ConvertibleFromAny(const T& /*a_value*/) : value(-1) {
     ADD_FAILURE() << "Conversion constructor called";
   }
   int value;
