@@ -38,10 +38,11 @@
 // uninteresting calls as errors.
 //
 // Currently a mock is naggy by default, so MockFoo and
-// NaggyMock<MockFoo> behave like the same.  However, we will soon
-// switch the default behavior of mocks to be nice, as that in general
-// leads to more maintainable tests.  When that happens, MockFoo will
-// stop behaving like NaggyMock<MockFoo> and start behaving like
+// NaggyMock<MockFoo> behave like the same.  The default can be
+// overridden at build time via the GMOCK_DEFAULT_MOCK_BEHAVIOR
+// CMake option, or at runtime via the --gmock_default_mock_behavior
+// flag.  If the default is set to NiceMock, MockFoo will stop
+// behaving like NaggyMock<MockFoo> and start behaving like
 // NiceMock<MockFoo>.
 //
 // NiceMock, NaggyMock, and StrictMock "inherit" the constructors of
