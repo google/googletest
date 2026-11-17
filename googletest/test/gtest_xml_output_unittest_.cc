@@ -203,6 +203,13 @@ typedef testing::Types<int, long> TypeParameterizedTestSuiteTypes;  // NOLINT
 INSTANTIATE_TYPED_TEST_SUITE_P(Single, TypeParameterizedTestSuite,
                                TypeParameterizedTestSuiteTypes);
 
+// Verifies that a RecordProperty key containing a character that needs
+// escaping in JSON output is escaped (see
+// https://github.com/google/googletest/issues/5124).
+TEST(JsonPropertyKeyTest, QuoteInKey) {
+  RecordProperty("key\"quoted", "value");
+}
+
 int main(int argc, char** argv) {
   InitGoogleTest(&argc, argv);
 
