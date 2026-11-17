@@ -1183,11 +1183,11 @@ TEST(ResultOfTest, WorksForNonCopyableArguments) {
   EXPECT_FALSE(matcher.Matches(std::unique_ptr<int>(new int(1))));
 }
 
-const int* ReferencingFunction(const int& n) { return &n; }
+const int* ReferencingFunction(const int n) { return &n; }
 
 struct ReferencingFunctor {
   typedef const int* result_type;
-  result_type operator()(const int& n) { return &n; }
+  result_type operator()(const int n) { return &n; }
 };
 
 TEST(ResultOfTest, WorksForReferencingCallables) {

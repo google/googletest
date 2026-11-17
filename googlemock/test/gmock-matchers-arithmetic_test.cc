@@ -1024,7 +1024,7 @@ const int foo = 0;
 
 // This predicate returns true if and only if the argument references foo and
 // has a zero value.
-bool ReferencesFooAndIsZero(const int& n) { return (&n == &foo) && (n == 0); }
+bool ReferencesFooAndIsZero(const int n) { return (&n == &foo) && (n == 0); }
 
 // Tests that Truly(predicate) matches what satisfies the given
 // predicate.
