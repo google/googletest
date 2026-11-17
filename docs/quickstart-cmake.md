@@ -107,6 +107,9 @@ add_executable(
   hello_test
   hello_test.cc
 )
+
+find_package(GTest REQUIRED)
+
 target_link_libraries(
   hello_test
   GTest::gtest_main
