@@ -208,6 +208,13 @@ if (gtest_build_tests)
   cxx_test(gtest_pred_impl_unittest gtest_main)
   cxx_test(gtest_premature_exit_test gtest
     test/gtest_premature_exit_test.cc)
+  # The premature-exit tests only verify anything when
+  # TEST_PREMATURE_EXIT_FILE points at a writable file (see #3942);
+  # without it they skip. Point it at a file in the build directory
+  # so the tests actually run under ctest.
+  set_tests_properties(gtest_premature_exit_test PROPERTIES
+    ENVIRONMENT
+    "TEST_PREMATURE_EXIT_FILE=${CMAKE_CURRENT_BINARY_DIR}/gtest_premature_exit_test.premature_exit")
   cxx_test(googletest-printers-test gtest_main)
   cxx_test(gtest_prod_test gtest_main
     test/production.cc)
