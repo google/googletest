@@ -168,7 +168,7 @@ It is good practice to tell why you skip a test.
   <testsuite name="NoFixtureTest" tests="3" failures="0" disabled="0" skipped="0" errors="0" time="*" timestamp="*">
      <testcase name="RecordProperty" file="gtest_xml_output_unittest_.cc" line="144" status="run" result="completed" time="*" timestamp="*" classname="NoFixtureTest">
        <properties>
-         <property name="key" value="1"/>
+         <property name="key&quot;quoted" value="1"/>
        </properties>
      </testcase>
      <testcase name="ExternalUtilityThatCallsRecordIntValuedProperty" file="gtest_xml_output_unittest_.cc" line="157" status="run" result="completed" time="*" timestamp="*" classname="NoFixtureTest">

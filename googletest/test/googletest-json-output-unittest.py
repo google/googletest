@@ -393,7 +393,7 @@ EXPECTED_NON_EMPTY = {
                     'time': '*',
                     'timestamp': '*',
                     'classname': 'NoFixtureTest',
-                    'key': '1',
+                    'key"quoted': '1',
                 },
                 {
                     'name': 'ExternalUtilityThatCallsRecordIntValuedProperty',
