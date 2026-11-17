@@ -3777,15 +3777,16 @@ class [[nodiscard]] ElementsAreMatcherImpl
           ++unmatched_it;
         }
 
-        // If the array is long or the elements' print-out is large, it may be
-        // hard for the user to find the mismatched element and its
-        // corresponding matcher description. Therefore we print the index, the
-        // value of the mismatched element, and the corresponding matcher
-        // description to ease debugging.
-        *listener << "whose element #" << exam_pos << " ("
-                  << PrintToString(*unmatched_it) << ") ";
-        matchers_[exam_pos].DescribeNegationTo(listener->stream());
-        PrintIfNotEmpty(explanations[exam_pos], listener->stream());
+        // Print structured LHS/RHS diff to make complex struct and array
+        // comparison failures readable for both humans and tools.
+        *listener << "element mismatch at index " << exam_pos << ":\n"
+                  << "  Actual   #" << exam_pos << ": "
+                  << PrintToString(*unmatched_it) << "\n"
+                  << "  Expected #" << exam_pos << ": ";
+        matchers_[exam_pos].DescribeTo(listener->stream());
+        if (!explanations[exam_pos].empty()) {
+          *listener << "\n  Detail: " << explanations[exam_pos];
+        }
       }
       return false;
     }
