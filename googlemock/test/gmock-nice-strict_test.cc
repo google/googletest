@@ -157,6 +157,26 @@ TEST(RawMockTest, WarningForUninterestingCall) {
   GMOCK_FLAG_SET(verbose, saved_flag);
 }
 
+// Tests that a raw mock generates no warnings for declared uninteresting calls.
+TEST(RawMockTest, NoWarningForDeclaredUninterestingCall) {
+  const std::string saved_flag = GMOCK_FLAG_GET(verbose);
+  GMOCK_FLAG_SET(verbose, "warning");
+
+  MockFoo raw_foo;
+
+  ON_CALL(raw_foo, DoThis()).WillByDefault(InvokeWithoutArgs([](){})).Uninteresting();
+  ON_CALL(raw_foo, DoThat(_)).WillByDefault(Return(1)).Uninteresting();
+
+  CaptureStdout();
+  raw_foo.DoThis();
+  raw_foo.DoThat(true);
+  EXPECT_THAT(GetCapturedStdout(),
+              Not(HasSubstr("Uninteresting mock function call")));
+
+  GMOCK_FLAG_SET(verbose, saved_flag);
+}
+
+
 // Tests that a raw mock generates warnings for uninteresting calls
 // that delete the mock object.
 TEST(RawMockTest, WarningForUninterestingCallAfterDeath) {
@@ -341,6 +361,26 @@ TEST(NaggyMockTest, WarningForUninterestingCall) {
 
   GMOCK_FLAG_SET(verbose, saved_flag);
 }
+
+// Tests that a raw mock generates no warnings for declared uninteresting calls.
+TEST(NaggyMockTest, NoWarningForDeclaredUninterestingCall) {
+  const std::string saved_flag = GMOCK_FLAG_GET(verbose);
+  GMOCK_FLAG_SET(verbose, "warning");
+
+  NaggyMock<MockFoo> naggy_foo;
+
+  ON_CALL(naggy_foo, DoThis()).WillByDefault(InvokeWithoutArgs([](){})).Uninteresting();
+  ON_CALL(naggy_foo, DoThat(_)).WillByDefault(Return(1)).Uninteresting();
+
+  CaptureStdout();
+  naggy_foo.DoThis();
+  naggy_foo.DoThat(true);
+  EXPECT_THAT(GetCapturedStdout(),
+              Not(HasSubstr("Uninteresting mock function call")));
+
+  GMOCK_FLAG_SET(verbose, saved_flag);
+}
+
 
 // Tests that a naggy mock generates a warning for an uninteresting call
 // that deletes the mock object.
