@@ -1389,13 +1389,13 @@ TEST(MatcherPnMacroTest, SimpleTypePromotion) {
 // Verifies the type of a MATCHER*.
 
 TEST(MatcherPnMacroTest, TypesAreCorrect) {
-  // EqualsSumOf() must be assignable to a EqualsSumOfMatcher variable.
+  // EqualsSumOf() must be assignable to an EqualsSumOfMatcher variable.
   EqualsSumOfMatcher a0 = EqualsSumOf();
 
-  // EqualsSumOf(1) must be assignable to a EqualsSumOfMatcherP variable.
+  // EqualsSumOf(1) must be assignable to an EqualsSumOfMatcherP variable.
   EqualsSumOfMatcherP<int> a1 = EqualsSumOf(1);
 
-  // EqualsSumOf(p1, ..., pk) must be assignable to a EqualsSumOfMatcherPk
+  // EqualsSumOf(p1, ..., pk) must be assignable to an EqualsSumOfMatcherPk
   // variable, and so on.
   EqualsSumOfMatcherP2<int, char> a2 = EqualsSumOf(1, '2');
   EqualsSumOfMatcherP3<int, int, char> a3 = EqualsSumOf(1, 2, '3');
