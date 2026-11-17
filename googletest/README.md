@@ -49,7 +49,7 @@ sudo make install    # Install in /usr/local/ by default
 ```
 
 If you use Windows and have Visual Studio installed, a `gtest.sln` file and
-several `.vcproj` files will be created. You can then build them using Visual
+several `.vcxproj` files will be created. You can then build them using Visual
 Studio.
 
 On Mac OS X with Xcode installed, a `.xcodeproj` file will be generated.

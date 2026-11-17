@@ -42,7 +42,7 @@ fi
 
 # Use Bazel Vendor mode to reduce reliance on external dependencies.
 # See https://bazel.build/external/vendor and the Dockerfile for
-# an explaination of how this works.
+# an explanation of how this works.
 if [[ ${KOKORO_GFILE_DIR:-} ]] && [[ -f "${KOKORO_GFILE_DIR}/distdir/googletest_vendor.tar.gz" ]]; then
   KOKORO_HOST_GFILE_DIR="${KOKORO_GFILE_DIR}"
   if [[ -n ${KOKORO_ROOT_DIR:-} ]] && [[ -n ${KOKORO_HOST_ROOT_DIR:-} ]]; then
