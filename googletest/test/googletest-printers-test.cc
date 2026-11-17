@@ -1886,7 +1886,7 @@ TEST(UniversalPrintTest, IncompleteType) {
 
 TEST(UniversalPrintTest, SmartPointers) {
   EXPECT_EQ("(nullptr)", PrintToString(std::unique_ptr<int>()));
-  std::unique_ptr<int> p(new int(17));
+  std::unique_ptr<int> p = std::make_unique<int>(17);
   EXPECT_EQ("(ptr = " + PrintPointer(p.get()) + ", value = 17)",
             PrintToString(p));
   std::unique_ptr<int[]> p2(new int[2]);
