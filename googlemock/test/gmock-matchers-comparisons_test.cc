@@ -617,7 +617,7 @@ TEST(MatcherCastTest, FromConvertibleFromAny) {
 #endif  // !defined _MSC_VER
 
 struct IntReferenceWrapper {
-  IntReferenceWrapper(const int& a_value) : value(&a_value) {}
+  IntReferenceWrapper(const int a_value) : value(&a_value) {}
   const int* value;
 };
 

@@ -80,7 +80,7 @@ bool Unary(int x) { return x < 0; }
 bool ByConstRef(const std::string& s) { return s == "Hi"; }
 
 const double g_double = 0;
-bool ReferencesGlobalDouble(const double& x) { return &x == &g_double; }
+bool ReferencesGlobalDouble(const double x) { return &x == &g_double; }
 
 struct UnaryFunctor {
   int operator()(bool x) { return x ? 1 : -1; }
