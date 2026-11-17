@@ -90,7 +90,7 @@ and their own tests from a git checkout, which has further requirements:
 
 *   [Python](https://www.python.org/) v3.6 or newer (for running some of the
     tests and re-generating certain source files from templates)
-*   [CMake](https://cmake.org/) v2.8.12 or newer
+*   [CMake](https://cmake.org/) v3.16 or newer
 
 ## Developing Google Test and Google Mock
 
