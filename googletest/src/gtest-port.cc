@@ -1157,9 +1157,9 @@ bool ParseInt32(const Message& src_text, const char* str, int32_t* value) {
   char* end = nullptr;
   const long long_value = strtol(str, &end, 10);  // NOLINT
 
-  // Has strtol() consumed all characters in the string?
-  if (*end != '\0') {
-    // No - an invalid character was encountered.
+  // Has strtol() consumed all characters in the string, and did it parse something?
+  if (*end != '\0' || end == str) {
+    // No - an invalid character was encountered or the string was empty.
     Message msg;
     msg << "WARNING: " << src_text
         << " is expected to be a 32-bit integer, but actually"
