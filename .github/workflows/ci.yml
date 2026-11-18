@@ -177,19 +177,51 @@ jobs:
         uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
         with:
           workload_identity_provider: 'projects/305452601764/locations/global/workloadIdentityPools/builders/providers/github'
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3.0.1
       - name: Stage release artifacts and upload manifest to OSS Exit Gate
         env:
           TAG_NAME: ${{ github.ref_name }}
+          RUN_ID: ${{ github.run_id }}
+          RUN_ATTEMPT: ${{ github.run_attempt }}
         run: |
+          set -euo pipefail
           VERSION="${TAG_NAME#v}"
           ARCHIVE="googletest-${VERSION}.tar.gz"
           git archive --format=tar.gz -o "$ARCHIVE" HEAD
+          if gcloud artifacts versions describe "${TAG_NAME}" \
+            --package="googletest" \
+            --project="oss-exit-gate-prod" \
+            --location="us" \
+            --repository="googletest--githubreleases" >/dev/null 2>&1; then
+            gcloud artifacts versions delete "${TAG_NAME}" \
+              --package="googletest" \
+              --project="oss-exit-gate-prod" \
+              --location="us" \
+              --repository="googletest--githubreleases" \
+              --quiet
+          fi
           gcloud artifacts generic upload \
-            --project=oss-exit-gate-prod \
-            --location=us \
-            --repository=googletest--githubreleases \
-            --package=googletest \
-            --version="$VERSION" \
+            --project="oss-exit-gate-prod" \
+            --location="us" \
+            --repository="googletest--githubreleases" \
+            --package="googletest" \
+            --version="${TAG_NAME}" \
             --source="$ARCHIVE"
-          printf '{"package":"googletest","version":"%s"}\n' "$VERSION" > manifest.json
-          gcloud storage cp manifest.json "gs://oss-exit-gate-prod-googletest--githubreleases-manifests/googletest/${VERSION}/manifest.json"
+          cat <<EOF > manifest.json
+          {
+            "publish_all": false,
+            "publishing_groups": [
+              {
+                "packages": [
+                  {
+                    "name": "googletest",
+                    "version": "${TAG_NAME}"
+                  }
+                ]
+              }
+            ]
+          }
+          EOF
+          gcloud storage cp manifest.json \
+            "gs://oss-exit-gate-prod-projects-bucket/googletest/githubreleases/manifests/manifest-${TAG_NAME}-${RUN_ID}-${RUN_ATTEMPT}.json"
