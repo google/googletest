@@ -1981,6 +1981,8 @@ TEST(UniversalTersePrintTupleFieldsToStringsTestWithStd, PrintsTersely) {
   EXPECT_EQ("\"a\"", result[1]);
 }
 
+// MSVC STL may provide <any> without std::any when RTTI is disabled (#4144).
+#ifdef __cpp_lib_any
 class PrintAnyTest : public ::testing::Test {
  protected:
   template <typename T>
@@ -2010,6 +2012,8 @@ TEST_F(PrintAnyTest, NonEmpty) {
   EXPECT_EQ("value of type " + ExpectedTypeName<std::string>(),
             PrintToString(any));
 }
+
+#endif  // __cpp_lib_any
 
 TEST(PrintOptionalTest, Basic) {
   EXPECT_EQ("(nullopt)", PrintToString(std::nullopt));
