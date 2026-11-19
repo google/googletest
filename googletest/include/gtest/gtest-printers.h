@@ -910,6 +910,8 @@ class [[nodiscard]] UniversalPrinter {
 template <typename T>
 class [[nodiscard]] UniversalPrinter<const T> : public UniversalPrinter<T> {};
 
+// MSVC STL may provide <any> without std::any when RTTI is disabled (#4144).
+#ifdef __cpp_lib_any
 // Printer for std::any
 template <>
 class [[nodiscard]] UniversalPrinter<std::any> {
@@ -932,6 +934,8 @@ class [[nodiscard]] UniversalPrinter<std::any> {
 #endif  // GTEST_HAS_RTTI
   }
 };
+
+#endif  // __cpp_lib_any
 
 // Printer for std::optional
 template <typename T>
