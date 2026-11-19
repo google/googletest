@@ -110,7 +110,6 @@ endif()
 set(gtest_build_include_dirs
   "${gtest_SOURCE_DIR}/include"
   "${gtest_SOURCE_DIR}")
-include_directories(${gtest_build_include_dirs})
 
 ########################################################################
 #
@@ -121,6 +120,7 @@ include_directories(${gtest_build_include_dirs})
 # are used for other targets, to ensure that gtest can be compiled by a user
 # aggressive about warnings.
 cxx_library(gtest "${cxx_strict}" src/gtest-all.cc)
+target_include_directories(gtest PRIVATE ${gtest_build_include_dirs})
 set_target_properties(gtest PROPERTIES VERSION ${GOOGLETEST_VERSION})
 if(GTEST_HAS_ABSL)
   target_compile_definitions(gtest PUBLIC GTEST_HAS_ABSL=1)
@@ -136,6 +136,7 @@ if(GTEST_HAS_ABSL)
   )
 endif()
 cxx_library(gtest_main "${cxx_strict}" src/gtest_main.cc)
+target_include_directories(gtest_main PRIVATE ${gtest_build_include_dirs})
 set_target_properties(gtest_main PROPERTIES VERSION ${GOOGLETEST_VERSION})
 string(REPLACE ";" "$<SEMICOLON>" dirs "${gtest_build_include_dirs}")
 target_include_directories(gtest SYSTEM INTERFACE
@@ -228,10 +229,22 @@ if (gtest_build_tests)
 
   cxx_library(gtest_no_exception "${cxx_no_exception}"
     src/gtest-all.cc)
+  target_include_directories(gtest_no_exception PRIVATE ${gtest_build_include_dirs})
+  target_include_directories(gtest_no_exception SYSTEM INTERFACE
+    "$<BUILD_INTERFACE:${dirs}>"
+    "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
   cxx_library(gtest_main_no_exception "${cxx_no_exception}"
     src/gtest-all.cc src/gtest_main.cc)
+  target_include_directories(gtest_main_no_exception PRIVATE ${gtest_build_include_dirs})
+  target_include_directories(gtest_main_no_exception SYSTEM INTERFACE
+    "$<BUILD_INTERFACE:${dirs}>"
+    "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
   cxx_library(gtest_main_no_rtti "${cxx_no_rtti}"
     src/gtest-all.cc src/gtest_main.cc)
+  target_include_directories(gtest_main_no_rtti PRIVATE ${gtest_build_include_dirs})
+  target_include_directories(gtest_main_no_rtti SYSTEM INTERFACE
+    "$<BUILD_INTERFACE:${dirs}>"
+    "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
 
   cxx_test_with_flags(gtest-death-test_ex_nocatch_test
     "${cxx_exception} -DGTEST_ENABLE_CATCH_EXCEPTIONS_=0"
@@ -245,6 +258,10 @@ if (gtest_build_tests)
 
   cxx_shared_library(gtest_dll "${cxx_default}"
     src/gtest-all.cc src/gtest_main.cc)
+  target_include_directories(gtest_dll PRIVATE ${gtest_build_include_dirs})
+  target_include_directories(gtest_dll SYSTEM INTERFACE
+    "$<BUILD_INTERFACE:${dirs}>"
+    "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
 
   cxx_executable_with_flags(gtest_dll_test_ "${cxx_default}"
     gtest_dll test/gtest_all_test.cc)
