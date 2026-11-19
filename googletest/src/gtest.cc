@@ -5949,6 +5949,16 @@ bool UnitTestImpl::RunAllTests() {
   // user didn't call InitGoogleTest.
   PostFlagParsingInit();
 
+#if defined(GTEST_IS_THREADSAFE) && defined(GTEST_OS_WINDOWS)
+  // On Windows, the first access to a ThreadLocal from a thread starts a
+  // watcher thread and waits for it to begin running. If that first access
+  // happens while thread creation is blocked (e.g. a test failure reported
+  // from a sanitizer callback such as __asan_on_error), the program hangs.
+  // Initialize this thread's test part result reporter up front so that
+  // reporting a failure later does not need to create a thread.
+  GetTestPartResultReporterForCurrentThread();
+#endif  // GTEST_IS_THREADSAFE && GTEST_OS_WINDOWS
+
   // Handle the case where the program has no tests linked.
   // Sometimes this is a programmer mistake, but sometimes it is intended.
   if (total_test_count() == 0) {
