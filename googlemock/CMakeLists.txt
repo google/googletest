@@ -72,7 +72,6 @@ set(gmock_build_include_dirs
   "${gmock_SOURCE_DIR}/include"
   "${gmock_SOURCE_DIR}"
   "${gtest_include_dirs}")
-include_directories(${gmock_build_include_dirs})
 
 ########################################################################
 #
@@ -101,6 +100,8 @@ else()
   target_link_libraries(gmock_main PUBLIC gmock)
   set_target_properties(gmock_main PROPERTIES VERSION ${GOOGLETEST_VERSION})
 endif()
+target_include_directories(gmock PRIVATE ${gmock_build_include_dirs})
+target_include_directories(gmock_main PRIVATE ${gmock_build_include_dirs})
 
 string(REPLACE ";" "$<SEMICOLON>" dirs "${gmock_build_include_dirs}")
 target_include_directories(gmock SYSTEM INTERFACE
@@ -179,6 +180,14 @@ if (gmock_build_tests)
     cxx_library(gmock_main_no_rtti "${cxx_no_rtti}" src/gmock_main.cc)
     target_link_libraries(gmock_main_no_rtti PUBLIC gmock)
   endif()
+  target_include_directories(gmock_main_no_exception PRIVATE ${gmock_build_include_dirs})
+  target_include_directories(gmock_main_no_exception SYSTEM INTERFACE
+    "$<BUILD_INTERFACE:${dirs}>"
+    "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
+  target_include_directories(gmock_main_no_rtti PRIVATE ${gmock_build_include_dirs})
+  target_include_directories(gmock_main_no_rtti SYSTEM INTERFACE
+    "$<BUILD_INTERFACE:${dirs}>"
+    "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
   cxx_test_with_flags(gmock-more-actions_no_exception_test "${cxx_no_exception}"
     gmock_main_no_exception test/gmock-more-actions_test.cc)
 
@@ -187,6 +196,10 @@ if (gmock_build_tests)
 
   cxx_shared_library(shared_gmock_main "${cxx_default}"
     "${gtest_dir}/src/gtest-all.cc" src/gmock-all.cc src/gmock_main.cc)
+  target_include_directories(shared_gmock_main PRIVATE ${gmock_build_include_dirs})
+  target_include_directories(shared_gmock_main SYSTEM INTERFACE
+    "$<BUILD_INTERFACE:${dirs}>"
+    "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
 
   # Tests that a binary can be built with Google Mock as a shared library. On
   # some system configurations, it may not possible to run the binary without
