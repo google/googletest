@@ -1821,6 +1821,12 @@ TEST(ParseInt32FlagTest, ParsesAndReturnsValidValue) {
   EXPECT_EQ(-789, value);
 }
 
+TEST(ParseInt32FlagTest, RejectsEmptyValue) {
+  int32_t value = 42;
+  EXPECT_FALSE(ParseFlag("--abc=", "abc", &value));
+  EXPECT_EQ(42, value);
+}
+
 // Tests that Int32FromEnvOrDie() parses the value of the var or
 // returns the correct default.
 // Environment variables are not supported on Windows CE.
