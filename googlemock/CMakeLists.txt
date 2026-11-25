@@ -103,10 +103,18 @@ else()
 endif()
 
 string(REPLACE ";" "$<SEMICOLON>" dirs "${gmock_build_include_dirs}")
-target_include_directories(gmock SYSTEM INTERFACE
+
+# GCC on AIX wraps -isystem headers in extern "C", which breaks C++ templates.
+if(CMAKE_SYSTEM_NAME STREQUAL "AIX")
+  set(gmock_include_system "")
+else()
+  set(gmock_include_system SYSTEM)
+endif()
+
+target_include_directories(gmock ${gmock_include_system} INTERFACE
   "$<BUILD_INTERFACE:${dirs}>"
   "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
-target_include_directories(gmock_main SYSTEM INTERFACE
+target_include_directories(gmock_main ${gmock_include_system} INTERFACE
   "$<BUILD_INTERFACE:${dirs}>"
   "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
 
