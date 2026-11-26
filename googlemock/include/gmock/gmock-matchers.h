@@ -4413,10 +4413,11 @@ class [[nodiscard]] VariantMatcher {
                        ::testing::MatchResultListener* listener) const {
     using std::get;
     if (!listener->IsInterested()) {
-      return holds_alternative<T>(value) && matcher_.Matches(get<T>(value));
+      return std::holds_alternative<T>(value) &&
+             matcher_.Matches(get<T>(value));
     }
 
-    if (!holds_alternative<T>(value)) {
+    if (!std::holds_alternative<T>(value)) {
       *listener << "whose value is not of type '" << GetTypeName() << "'";
       return false;
     }
@@ -4473,11 +4474,11 @@ class [[nodiscard]] AnyCastMatcher {
   bool MatchAndExplain(const AnyType& value,
                        ::testing::MatchResultListener* listener) const {
     if (!listener->IsInterested()) {
-      const T* ptr = any_cast<T>(&value);
+      const T* ptr = std::any_cast<T>(&value);
       return ptr != nullptr && matcher_.Matches(*ptr);
     }
 
-    const T* elem = any_cast<T>(&value);
+    const T* elem = std::any_cast<T>(&value);
     if (elem == nullptr) {
       *listener << "whose value is not of type '" << GetTypeName() << "'";
       return false;
